@@ -2108,7 +2108,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.25 }}>
+                                    style={{ flex: 0.16 }}>
                                     <Input value={accountNumber} onChange={Accountchange} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
@@ -2162,7 +2162,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.12, marginLeft: "1%" }}>
+                                    style={{ flex: 0.15, marginLeft: "1%" }}>
                                     <Select
 
                                         variant="filled"
@@ -2255,7 +2255,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             </div>
                         </Panel>
 
-                        <Panel header="ADSET LEVEL" key="2" forceRender>
+                        <Panel header="ADSET LEVEL" key="2" forceRender> 
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "17px" }}>
                                 <Form.Item
                                     name={["Adset", "AdsetName"]}
@@ -2426,7 +2426,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Tooltip>
                                 </Form.Item>
                                 {showBidAmount && (
-                                    <Form.Item
+                                    <Form.Item 
                                         name={["Adset", "bid_amount"]}
                                         label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                                         rules={[
@@ -2441,7 +2441,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         : Promise.reject(new Error("Please enter a valid float value!")),
                                             },
                                         ]}
-                                        style={{ flex: '1 1 150px' }}
+                                        style={{ flex: '1 1 140px',marginRight:'67%' }}
                                     >
                                         <InputNumber
                                             type="number"
@@ -2454,7 +2454,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     event.preventDefault();
                                                 }
                                             }}
-                                            style={{color: theme === "dark" ? "#fff" : "#000"}}
+                                            style={{color: theme === "dark" ? "#fff" : "#000",width:'140px'}}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>

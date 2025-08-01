@@ -87,6 +87,40 @@ const App = () => {
   const [selectedDraftToEdit, setSelecetedDraftToEdit] = useState({});
   const [multipleAdsetCampaignData, setMultipleAdsetCampaignData] = useState([]);
   const [activeTab, setActiveTab] = useState('1'); 
+  const [campaignStatusFilter, setCampaignStatusFilter] = useState('all');
+  const onStatusFilterChange = (key) => {
+    setCampaignStatusFilter(key);
+  };
+  
+  const getFilteredSingleCampaigns = () => {
+    return campaignData.filter(campaign => {
+      if (campaignStatusFilter === 'active') {
+        return campaign.Status === 'ACTIVE' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pause') {
+        return campaign.Status === 'PAUSED' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pending') {
+        return campaign.Approval === 'PENDING_APPROVAL';
+      }
+      return true;
+    });
+  };  
+
+  const getFilteredMultipleAdsetCampaigns = () => {
+    return multipleAdsetCampaignData.filter(campaign => {
+      if (campaignStatusFilter === 'active') {
+        return campaign.Status === 'ACTIVE' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pause') {
+        return campaign.Status === 'PAUSED' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pending') {
+        return campaign.Approval === 'PENDING_APPROVAL';
+      }
+      return true;
+    });
+  };
 
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   console.log(selectedKey, "selectedKeyselectedKeyselectedKey")
@@ -1145,9 +1179,9 @@ const App = () => {
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           {record.fbstatus === 'Live' ? (
-            <CheckCircleFilled style={{ color: 'green', fontSize: 16 }} />
+            <CheckCircleFilled style={{ color: '#91C25F', fontSize: 16 }} className='black-icon-active-1' />
           ) : (
-            <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
+            <CloseCircleFilled style={{ color: '#EC7117', fontSize: 16 }} className='black-icon-pause-1' />
           )}
           <Switch
             checked={record.Status === 'ACTIVE'}
@@ -1323,9 +1357,9 @@ const App = () => {
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           {record.fbstatus === 'Live' ? (
-            <CheckCircleFilled style={{ color: 'green', fontSize: 16 }} />
+            <CheckCircleFilled style={{ color: '#91C25F', fontSize: 16 }} className='black-icon-active-1' />
           ) : (
-            <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
+            <CloseCircleFilled style={{ color: '#EC7117', fontSize: 16 }}  className='black-icon-pause-1'/>
           )}
           <Tooltip title="Number of adsets">
             <div style={{backgroundColor:"#e6f7ff", color:'#1d39c4', borderRadius:"50%", width:"20px", height:'20px'}}>{record.adsetCount}</div>
@@ -1933,7 +1967,7 @@ const App = () => {
               className={theme === 'dark' ? 'custom-tooltip-dark' : 'custom-tooltip-light'}
             >
               <span>
-                <Button
+                {/* <Button
                   type="primary"
                   onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
                   disabled={draftsData.length === 5}
@@ -1950,12 +1984,12 @@ const App = () => {
                   className={theme === 'dark' ? 'dark-theme-btn' : 'light-theme-btn'}
                 >
                   Create draft
-                </Button>
+                </Button> */}
               </span>
             </Tooltip>
 
             {/* 🟣 Right: Dropdown Button (Separate from Create Draft Button) */}
-            <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
+            {/* <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
               <Button
                 style={{
                   backgroundColor: '#91C25F',
@@ -1968,7 +2002,7 @@ const App = () => {
                 }}
                 icon={<DownOutlined className="black-icon" />}
               />
-            </Dropdown>
+            </Dropdown> */}
           </Button.Group>
 
         }
@@ -2044,9 +2078,9 @@ const App = () => {
                     </div>
                     <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                       {option.status === "Active" ? (
-                        <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: '15px' }}className='black-icon-active-1' />
                       ) : (
-                        <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }} className='black-icon-pause-1'/>
                       )}
                     </span>
                   </div>
@@ -2198,7 +2232,7 @@ const App = () => {
                                     marginRight: '6px',
                                   }}
                                 ></span> */}
-                                All Campaigns
+                                All 
                               </span>
                             ),
                         },
@@ -2214,7 +2248,7 @@ const App = () => {
                                     marginRight: '6px',
                                     }}
                                 ></span>   */}
-                            Active Campaigns
+                            Active 
                         
                             </span> 
                         },
@@ -2229,7 +2263,7 @@ const App = () => {
                                 marginRight: '6px',
                                 }}
                             ></span> */}
-                            Paused Campaigns
+                            Paused 
                       
                             </span> 
                         },
@@ -2244,7 +2278,7 @@ const App = () => {
                               marginRight: '6px',
                               }}
                           ></span> */}
-                          Pending Campaigns
+                          Pending
                     
                           </span> 
                       },
@@ -2261,13 +2295,25 @@ const App = () => {
                     border: '1px solid #4CAF50',
                     color: theme === 'dark' ? '#95de64' : '#389e0d',
                     fontWeight: 500,
+                    width:'170px'
                     // marginRight: '3px'
                     }}
                 >
-                    <Space size={2}>
+                    {/* <Space size={2}>
                     <FilterOutlined />
                       Filters
                     <DownOutlined style={{ fontSize: 10 }} />
+                    </Space> */}
+                    <Space size={2}>
+                      <FilterOutlined />
+                      {campaignStatusFilter === 'all'
+                        ? 'All'
+                        : campaignStatusFilter === 'active'
+                        ? 'Active'
+                        : campaignStatusFilter === 'pause'
+                        ? 'Paused'
+                        : 'Pending'}
+                      <DownOutlined style={{ fontSize: 10 }} />
                     </Space>
                 </Button>
             </Dropdown>
@@ -2365,7 +2411,7 @@ const App = () => {
           }}
           className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
           columns={columns}
-          dataSource={campaignData.map((item, index) => ({
+          dataSource={getFilteredSingleCampaigns().map((item, index) => ({
             ...item,
             key: index,
           })).reverse()}
@@ -2425,7 +2471,7 @@ const App = () => {
           }}
           className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
           columns={columnsformultipleadsets}
-          dataSource={multipleAdsetCampaignData.map((item, index) => ({
+          dataSource={getFilteredMultipleAdsetCampaigns().map((item, index) => ({
             ...item,
             key: index,
           })).reverse()}

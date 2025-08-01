@@ -17,6 +17,7 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
     const [selectedItem, setSelectedItem] = useState(null);
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const token = localStorage.getItem("token");
+    const {theme} =useTokenContext();
 
     const isVideo = (filename) => {
         const videoExtensions = ['.mp4', '.mov', '.avi', '.webm'];
@@ -112,7 +113,7 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
         style={{
           width: '100%',
           borderRadius: 12,
-          background: '#fff',
+          backgroundColor: theme === 'dark' ? '#333' : '#fff',
           boxShadow: '0 1px 6px rgba(0, 0, 0, 0.05)',
           marginBottom: '12px',
         }}
@@ -142,12 +143,12 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
         </div>
   
         {/* Budget Line */}
-        <div style={{ fontSize: 13, color: '#555', marginTop: 4 }}>
+        <div style={{ fontSize: 13,color: theme === 'dark' ? '#ccc' : '#555', marginTop: 0 }}>
           Budget: ${(adset.Daily_amount) / 100 || 0} • {adset.addlevel?.length || 4} ads
         </div>
   
         {/* Status Badge */}
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 5 }}>
           <span
             style={{
               display: 'inline-block',
@@ -168,7 +169,7 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
   
         {/* Conditional Detail Section */}
         {expanded && adset.addlevel && (
-            <Row gutter={[16, 16]} style={{ marginTop: 16, display:'flex', flexWrap:"nowrap", overflow:"auto" }}>
+            <Row gutter={[16, 16]} style={{ marginTop: 10, display:'flex', flexWrap:"nowrap", overflow:"auto" }}>
                 {adset.addlevel.map((item, index) => (
                         // <div key={index} style={{display:'flex', width:"100%", marginTop:'10px', flexWrap:"wrap"}}>
                         <Col span={12}>
@@ -215,10 +216,10 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
                                         </div>
 
                                         <div style={{ flex: "1" }}>
-                                            <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                                            <div style={{ fontWeight: "bold", fontSize: "12px" }}>
                                                 {item?.AddName || 'Consumer finds'}
                                             </div>
-                                            <div style={{ fontSize: "12px", color: "#888" }}>
+                                            <div style={{ fontSize: "12px", color: "#888",marginTop:'-2px' }}>
                                                 {imagehash?.pageName ? (
                                                     <>
                                                     {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
@@ -233,12 +234,12 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
                                             <MoreOutlined style={{ fontSize: '16px', cursor: 'pointer' }} />
                                         </Tooltip>
                                     </div>
-                                    <div style={{ fontSize: "14px", color: theme === "dark" ? "white" : "#333", marginBottom: "10px" }}>
+                                    <div style={{ fontSize: "14px", color: theme === "dark" ? "white" : "#333",marginTop:'-8px' }}>
                                         {item?.message}
                                     </div>
                                 </div>
 
-                                <div style={{ width: '100%', height: '200px', marginBottom: "10px" }}>
+                                <div style={{ width: '100%', height: '200px', marginTop:'-5px' }}>
                                     {isVideo(item?.filename) ? (
                                         <video
                                             controls
@@ -261,20 +262,20 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
                                 </div>
 
                                 <div style={{ padding: '10px 16px' }}>
-                                    <div style={{ fontSize: "16px", fontWeight: "bold", color: theme === "dark" ? "white" : "#333" }}>
+                                    <div style={{ fontSize: "12px", fontWeight: "bold", color: theme === "dark" ? "white" : "#333" }}>
                                         {item?.headline}
                                     </div>
-                                    <div style={{ fontSize: "14px", color: theme === "dark" ? "white" : "#333", marginBottom: "10px" }}>
+                                    <div style={{ fontSize: "12px", color: theme === "dark" ? "white" : "#333", marginBottom: "5px" }}>
                                         {item?.Description}
                                     </div>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                        <div style={{ fontSize: "12px", color: "#888", marginBottom: "10px" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between",marginTop:'-5px' }}>
+                                        <div style={{ fontSize: "12px", color: "#888",  }}>
                                             {item?.Caption}
                                         </div>
                                         <button
                                             type="button"
                                             style={{
-                                                padding: "8px 12px",
+                                                padding: "6px 8px",
                                                 borderRadius: "20px",
                                                 backgroundColor: "#91C25F",
                                                 color: "#000",
@@ -291,13 +292,12 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
                                     </div>
 
                                     {/* Website URL */}
-                                    <div style={{ fontSize: "12px", color: "#888", wordWrap: "break-word", marginBottom: "10px" }}>
+                                    <div style={{ fontSize: "12px", color: "#888", wordWrap: "break-word", marginTop:'-5px' }}>
                                         <GlobalOutlined />{" "}
                                         <a href={item?.Website_URL} target="_blank" rel="noopener noreferrer" style={{ color: "blue" }}>
                                             {item?.Website_URL}
                                         </a>
                                     </div>
-
                                     {/* Like, Comment, Share */}
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => console.log('Liked:', item)}>
@@ -315,11 +315,11 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
                                     </div>
 
                                     {/* Approve/Reject, Edit/Delete */}
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: '100%' }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: '100%',marginTop:'-8px' }}>
 
                                         {/* Edit/Delete buttons (only if not Approved and email is not restricted) */}
                                         {item.status !== "Approved" && !restrictedEmails.includes(userdetails.email) && (
-                                            <Space style={{ display: "flex", justifyContent: "space-evenly" }}>
+                                            <Space style={{ display: "flex", justifyContent: "space-evenly",margin:'5px' }}>
                                                 <Button  className="dark-icon-button"  shape="circle" icon={<EditOutlined />} onClick={() => handleEditClick(item)} />
                                                 {/* {item.status !== "Rejected" && (
                                                     <Button shape="circle" icon={<DeleteOutlined />} onClick={() => handleDeleteClick(item)} />
@@ -330,8 +330,8 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
                                         {/* Approve/Reject buttons (only if the user is not a media buyer and the item is not approved or rejected) */}
                                         {(!isMediaBuyer && item.status !== "Approved" && item.status !== "Rejected") && (
                                             <div style={{ display: 'flex',justifyContent: "space-evenly", width: '100%' }}>
-                                                <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",margin:'18px'}} onClick={() => handleApprove(item)}>Approve</Button>
-                                                <Button type='primary' danger style={{ margin:'18px', borderColor: ' #ff6666' }} onClick={() => handleRejectClick(item)}>Reject</Button>
+                                                <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",margin:'20px',padding:'10px'}} onClick={() => handleApprove(item)}>Approve</Button>
+                                                <Button type='primary' danger style={{ margin:'20px', borderColor: ' #ff6666',padding:'10px' }} onClick={() => handleRejectClick(item)}>Reject</Button>
                                             </div>
                                         )}
 
@@ -576,7 +576,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network}) => {
 
     return (
         <>
-            <Row gutter={[16, 16]} style={{ display: "flex", flexWrap: "wrap", overflowX: "auto", padding:'10px', backgroundColor:"#E9E9E9" }}>
+            <Row gutter={[16, 16]} style={{ display: "flex", flexWrap: "wrap", overflowX: "auto", padding:'10px', backgroundColor: theme === 'dark' ? '#252525ff' : '#E9E9E9',}}>
             {viewCampaignData &&
     Object.entries(viewCampaignData)
       .filter(([key]) => key.startsWith('adsetlevel_'))
