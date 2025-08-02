@@ -3513,6 +3513,7 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   /* font-weight: 600; */
   background-color: #555 !important;
   border-radius: 8PX !important;
+  margin-bottom:  12px !important;
 }
  
 /* Expanded content area */
