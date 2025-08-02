@@ -159,7 +159,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
         <Drawer
             title={`View Campaign Details ----> ${viewCampaignData?.Account_Number} / ${viewCampaignData?.campaign_name}`} open={visible} // Changed from open to visible
             onClose={onClose}
-            width="100%"
+            width="95%"
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
             {rowData.Approval == "PENDING_APPROVAL" ?

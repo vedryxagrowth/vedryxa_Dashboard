@@ -10445,6 +10445,7 @@ const MyTablePage = () => {
                                  <Dropdown
                                  overlay={
                                     <Menu
+                                    className={theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light'}
                                     onClick={({ key }) => handleStatusFilterChange(key)} 
                                     items={[
                                         {

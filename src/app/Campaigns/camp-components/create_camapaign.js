@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useMemo } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, InputNumber, Breadcrumb, Popconfirm } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, PaperClipOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, PaperClipOutlined, DeleteOutlined, CopyOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -955,9 +955,9 @@ const AdsetComponent = ({
 
     return (
 
-        <Collapse accordion>
+        <Collapse accordion className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}>
             <Panel header={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className='adset-collapse-panel'>
                     <span style={{ color: theme === 'dark' ? '#fff' : '#000', alignContent: 'center' }}>{adset.AdsetPanelName}</span>
 
                     <div>
@@ -1390,7 +1390,7 @@ const AdsetComponent = ({
                                 type="number"
                                 placeholder="$"
                                 step="0.1"
-                                style={{color: theme === "dark" ? "#fff" : "#000"}}
+                                style={{ color: theme === "dark" ? "#fff" : "#000" }}
                                 onWheel={(e) => e.target.blur()}
                                 onKeyPress={(event) => {
                                     const charCode = event.charCode;
@@ -1412,7 +1412,7 @@ const AdsetComponent = ({
                         </Form.Item>
                     )}
                 </div>
-                <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                     <Form.Item
                         name={['adsets', index, "countries"]}
@@ -1428,24 +1428,24 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "US", label: "United States",title:"" },
-                                { value: "GB", label: "United Kingdom" ,title:""},
-                                { value: "AU", label: "Australia",title:"" },
-                                { value: "IN", label: "India",title:"" },
-                                { value: "AE", label: "United Arab Emirates",title:"" },
-                                { value: "CA", label: "Canada" ,title:""},
-                                { value: "DE", label: "Germany",title:"" },
-                                { value: "FR", label: "France" ,title:""},
-                                { value: "JP", label: "Japan",title:"" },
-                                { value: "CN", label: "China",title:"" },
-                                { value: "BR", label: "Brazil",title:"" },
-                                { value: "ZA", label: "South Africa",title:"" },
-                                { value: "RU", label: "Russia" ,title:""},
-                                { value: "IT", label: "Italy",title:"" },
-                                { value: "ES", label: "Spain",title:"" },
-                                { value: "SG", label: "Singapore",title:"" },
-                                { value: "NZ", label: "New Zealand",title:"" },
-                                { value: "MX", label: "Mexico" ,title:""}
+                                { value: "US", label: "United States", title: "" },
+                                { value: "GB", label: "United Kingdom", title: "" },
+                                { value: "AU", label: "Australia", title: "" },
+                                { value: "IN", label: "India", title: "" },
+                                { value: "AE", label: "United Arab Emirates", title: "" },
+                                { value: "CA", label: "Canada", title: "" },
+                                { value: "DE", label: "Germany", title: "" },
+                                { value: "FR", label: "France", title: "" },
+                                { value: "JP", label: "Japan", title: "" },
+                                { value: "CN", label: "China", title: "" },
+                                { value: "BR", label: "Brazil", title: "" },
+                                { value: "ZA", label: "South Africa", title: "" },
+                                { value: "RU", label: "Russia", title: "" },
+                                { value: "IT", label: "Italy", title: "" },
+                                { value: "ES", label: "Spain", title: "" },
+                                { value: "SG", label: "Singapore", title: "" },
+                                { value: "NZ", label: "New Zealand", title: "" },
+                                { value: "MX", label: "Mexico", title: "" }
                             ]}
                             // defaultValue={adset.countries || "US"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1466,10 +1466,10 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "18", label: "18",title:"" },
-                                { value: "25", label: "25" ,title:""},
-                                { value: "35", label: "35",title:"" },
-                                { value: "40", label: "40", disabled: true ,title:""},
+                                { value: "18", label: "18", title: "" },
+                                { value: "25", label: "25", title: "" },
+                                { value: "35", label: "35", title: "" },
+                                { value: "40", label: "40", disabled: true, title: "" },
                             ]}
                             // defaultValue={adset.Min_Age || "18"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1490,10 +1490,10 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "20", label: "20" ,title:""},
-                                { value: "30", label: "30",title:"" },
-                                { value: "65", label: "65+",title:"" },
-                                { value: "80", label: "80", disabled: true,title:"" },
+                                { value: "20", label: "20", title: "" },
+                                { value: "30", label: "30", title: "" },
+                                { value: "65", label: "65+", title: "" },
+                                { value: "80", label: "80", disabled: true, title: "" },
                             ]}
                             // defaultValue={adset.Max_Age || "65"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1514,9 +1514,9 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "0", label: "All" ,title:""},
-                                { value: "1", label: "Male",title:"" },
-                                { value: "2", label: "Female" ,title:""},
+                                { value: "0", label: "All", title: "" },
+                                { value: "1", label: "Male", title: "" },
+                                { value: "2", label: "Female", title: "" },
                             ]}
                             // defaultValue={"0"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1724,8 +1724,8 @@ const AdsetComponent = ({
                                             allowClear
                                             placeholder="Please select"
                                             options={[
-                                                { value: "mobile", label: "Mobile" ,title:""},
-                                                { value: "desktop", label: "Desktop" ,title:""}
+                                                { value: "mobile", label: "Mobile", title: "" },
+                                                { value: "desktop", label: "Desktop", title: "" }
                                             ]}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
@@ -5140,7 +5140,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     <span>Create a new campaign</span>
                 </div>
             }
-            width="100%"
+            width="95%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
@@ -5151,7 +5151,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     width: 160,
                     border: '1.5px solid #4caf50',
                     borderRadius: '8px',
-                    marginBottom:'7px'
+                    marginBottom: '7px',
+                    marginLeft: '2px',
                 }} onChange={onChangeDraft}
                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
@@ -5173,7 +5174,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     <Collapse accordion activeKey={activeKey} // Bind active key state
                         onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
                         <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
-                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5', color: theme === 'dark' ? '#fff' : '#000' }}>
                                 <Form.Item
                                     name="Account_Number"
                                     label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
@@ -5184,7 +5185,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         },
                                     ]}
                                     // style={{ width: 200, }}
-                                    style={{ flex: 0.25, }}
+                                    style={{ flex: 0.16, }}
                                 >
                                     <Input value={accountNumber} onChange={Accountchange} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
@@ -5220,12 +5221,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         // onChange={getpixelandpageid}
                                         variant="filled"
                                         options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads",title:"" },
-                                            { value: "OUTCOME_SALES", label: "Sales",title:"" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement",title:"" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness",title:"" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic",title:"" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion",title:"" }
+                                            { value: "OUTCOME_LEADS", label: "Leads", title: "" },
+                                            { value: "OUTCOME_SALES", label: "Sales", title: "" },
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement", title: "" },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness", title: "" },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion", title: "" }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -5241,7 +5242,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.12, marginLeft: "1%" }}
+                                    style={{ flex: 0.15, marginLeft: "1%" }}
                                 // style={{ width: 160, marginLeft: "1%" }}
                                 >
                                     <Select
@@ -5250,11 +5251,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         mode="multiple"
                                         allowClear
                                         options={[
-                                            { value: "HOUSING", label: "Housing",title:"" },
-                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit",title:"" },
-                                            { value: "EMPLOYMENT", label: "Employment",title:"" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics",title:"" },
-                                            { value: "NONE", label: "None",title:"" }
+                                            { value: "HOUSING", label: "Housing", title: "" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit", title: "" },
+                                            { value: "EMPLOYMENT", label: "Employment", title: "" },
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics", title: "" },
+                                            { value: "NONE", label: "None", title: "" }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -5276,10 +5277,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume",title:"" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap",title:"" },
-                                            { value: "COST_CAP", label: "Cost per Result Goal",title:"" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal",title:"" }
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume", title: "" },
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap", title: "" },
+                                            { value: "COST_CAP", label: "Cost per Result Goal", title: "" },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal", title: "" }
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -5468,8 +5469,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "ACTIVE", label: "ACTIVE" ,title:""},
-                                            { value: "PAUSED", label: "PAUSED",title:"" },
+                                            { value: "ACTIVE", label: "ACTIVE", title: "" },
+                                            { value: "PAUSED", label: "PAUSED", title: "" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
@@ -5580,7 +5581,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 </Button> */}
                                 <Button
                                     type="primary"
-                                    style={{ background: '#91c25f', minWidth: '200px', borderWidth: '0px' }}
+                                    style={{ background: '#91c25f', minWidth: '120px', borderWidth: '0px' }}
                                     onClick={async () => {
                                         try {
                                             const values = await form.validateFields(); // Validates all form fields
@@ -5636,13 +5637,25 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 </Button>
 
                                 <Popconfirm
-                                    title="Enter required fields"
+                                    icon={
+                                        <ExclamationCircleFilled
+                                            className="Exckamationicon"
+                                        />
+                                    }
+                                    title={<span style={{ color: theme === 'dark' ? '#FFFFFF' : '#333', fontWeight: 600 }}>
+                                        Enter required fields
+                                    </span>}
+                                    overlayInnerStyle={{
+                                        backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
+                                        color: theme === 'dark' ? '#fff' : '#333',
+                                    }}
                                     description={
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                             <div>
                                                 <Input
                                                     placeholder="Title"
                                                     value={popupInputs.input1}
+                                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                     onChange={(e) =>
                                                         setPopupInputs((prev) => ({
                                                             ...prev,
@@ -5662,6 +5675,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                 <Input
                                                     placeholder="Draft Name"
                                                     value={popupInputs.input2}
+                                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                     onChange={(e) =>
                                                         setPopupInputs((prev) => ({
                                                             ...prev,
@@ -5682,7 +5696,20 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     onOpenChange={setOpen}
                                     onConfirm={handleConfirm}
                                     onCancel={handleCancelPop}
-                                    okButtonProps={{ loading: confirmLoading }}
+                                    cancelButtonProps={{
+                                        style: {
+                                            backgroundColor: theme === 'dark' ? '#555' : ' transparent',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #4caf50',
+                                        }
+                                    }}
+                                    okButtonProps={{
+                                        loading: confirmLoading, style: {
+                                            backgroundColor: '#91C25F',
+                                            color: '#000',
+                                            border: 'none',
+                                        }
+                                    }}
                                 >
                                     <Button type="primary" style={{ background: '#91c25f', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }} onClick={() => setOpen(true)}>
                                         Draft
@@ -5746,7 +5773,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 >
   Draft
 </Button> */}
-                      </div>
+                            </div>
 
                             {/* Show validation messages beside button */}
                             {submitErrors.length > 0 && (

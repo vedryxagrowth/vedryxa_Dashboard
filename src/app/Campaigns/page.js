@@ -7,6 +7,7 @@ import CreateCampaignDrawer from './camp-components/create_camapaign';
 import CreateDraft from './camp-components/CreateDraft';
 import EditAllLevelDataDrawer from './camp-components/EditAllLevelData';
 import ViewDrawer from './camp-components/view-campaign';
+import EditMultipleAdsetCampaignDrawer from './camp-components/editMultipleAdsetCampaign';
 // import EditOnlyCampaignDrawer from './camp-components/EditCamp';
 import EditCampaignDrawer1 from './camp-components/EditCamp';
 import axios from 'axios';
@@ -87,6 +88,43 @@ const App = () => {
   const [selectedDraftToEdit, setSelecetedDraftToEdit] = useState({});
   const [multipleAdsetCampaignData, setMultipleAdsetCampaignData] = useState([]);
   const [activeTab, setActiveTab] = useState('1'); 
+  const [campaignStatusFilter, setCampaignStatusFilter] = useState('all');
+  const [selectedEditMultipleAdsetData,setSelectedEditMultipleAdsetData] = useState(null);
+  const [viewEditMultipleAdsetDataDrawerVisible, setViewEditMultipleAdsetDataDrawerVisible] = useState(false);
+  const [view, setView] = useState(false);
+  const onStatusFilterChange = (key) => {
+    setCampaignStatusFilter(key);
+  };
+  
+  const getFilteredSingleCampaigns = () => {
+    return campaignData.filter(campaign => {
+      if (campaignStatusFilter === 'active') {
+        return campaign.Status === 'ACTIVE' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pause') {
+        return campaign.Status === 'PAUSED' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pending') {
+        return campaign.Approval === 'PENDING_APPROVAL';
+      }
+      return true;
+    });
+  };  
+
+  const getFilteredMultipleAdsetCampaigns = () => {
+    return multipleAdsetCampaignData.filter(campaign => {
+      if (campaignStatusFilter === 'active') {
+        return campaign.Status === 'ACTIVE' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pause') {
+        return campaign.Status === 'PAUSED' && campaign.Approval === 'Approved';
+      }
+      if (campaignStatusFilter === 'pending') {
+        return campaign.Approval === 'PENDING_APPROVAL';
+      }
+      return true;
+    });
+  };
 
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   console.log(selectedKey, "selectedKeyselectedKeyselectedKey")
@@ -263,6 +301,7 @@ const App = () => {
     setdupDrawerVisible(false)
     setViewEditAllLevelDataDrawerVisible(false);
     setCreateNewDraft(false);
+    setViewEditMultipleAdsetDataDrawerVisible(false);
   };
 
   useEffect(() => {
@@ -1135,6 +1174,13 @@ const App = () => {
     "Newsbreak_DA": "Newsbreak_DomainActive"
   }
 
+  const handleEditClickMultipleAdsetData = (record, status) => {
+    // console.log(record, "viewdata campaign")
+    setSelectedEditMultipleAdsetData(record);
+    setViewEditMultipleAdsetDataDrawerVisible(true);
+    setView(status);
+  }
+
   const columns = [
     {
       title: 'Status',
@@ -1145,9 +1191,9 @@ const App = () => {
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           {record.fbstatus === 'Live' ? (
-            <CheckCircleFilled style={{ color: 'green', fontSize: 16 }} />
+            <CheckCircleFilled style={{ color: '#91C25F', fontSize: 16 }} className='black-icon-active-1' />
           ) : (
-            <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
+            <CloseCircleFilled style={{ color: '#EC7117', fontSize: 16 }} className='black-icon-pause-1' />
           )}
           <Switch
             checked={record.Status === 'ACTIVE'}
@@ -1323,9 +1369,9 @@ const App = () => {
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           {record.fbstatus === 'Live' ? (
-            <CheckCircleFilled style={{ color: 'green', fontSize: 16 }} />
+            <CheckCircleFilled style={{ color: '#91C25F', fontSize: 16 }} className='black-icon-active-1' />
           ) : (
-            <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
+            <CloseCircleFilled style={{ color: '#EC7117', fontSize: 16 }}  className='black-icon-pause-1'/>
           )}
           <Tooltip title="Number of adsets">
             <div style={{backgroundColor:"#e6f7ff", color:'#1d39c4', borderRadius:"50%", width:"20px", height:'20px'}}>{record.adsetCount}</div>
@@ -1379,14 +1425,14 @@ const App = () => {
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <Tooltip title="View details">
-            <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+            <Button icon={<EyeOutlined />} onClick={() => handleEditClickMultipleAdsetData(record, true)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
           </Tooltip>
           <Tooltip title="Edit campaign">
-            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+            <Button icon={<EditOutlined />} disabled={record.fbstatus === "Live"} onClick={() => handleEditClickMultipleAdsetData(record, false)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
             <Tooltip title="Clone campaign">
-              <Button icon={<CopyOutlined style={{ color: 'red' }} />} onClick={() => duplicatenewcampaign(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+              <Button icon={<CopyOutlined style={{ color: 'red' }} />} disabled={true} onClick={() => duplicatenewcampaign(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
             </Tooltip>
           )}
         </div>
@@ -1866,6 +1912,8 @@ const App = () => {
 
       <EditAllLevelDataDrawer visible={viewEditAllLevelDataDrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} selectedRow={selectedEditAllLevelData} />
 
+      <EditMultipleAdsetCampaignDrawer view={view} visible={viewEditMultipleAdsetDataDrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} selectedRow={selectedEditMultipleAdsetData} />
+
       <DuplicateCampaignDrawer visible={dupdrawerVisible} onClose={onCloseDrawer} selectedRow={duplicatenewcampaigns} changeRRefrst={changeRRefrst} network={selectedKey} />
 
       <CreateDraft visible={createNewDraft} onClose={onCloseDrawer} changeRRefrst={changeDraftRefresh} selectedDraftToEdit={selectedDraftToEdit} />
@@ -1933,7 +1981,7 @@ const App = () => {
               className={theme === 'dark' ? 'custom-tooltip-dark' : 'custom-tooltip-light'}
             >
               <span>
-                <Button
+                {/* <Button
                   type="primary"
                   onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
                   disabled={draftsData.length === 5}
@@ -1950,12 +1998,12 @@ const App = () => {
                   className={theme === 'dark' ? 'dark-theme-btn' : 'light-theme-btn'}
                 >
                   Create draft
-                </Button>
+                </Button> */}
               </span>
             </Tooltip>
 
             {/* 🟣 Right: Dropdown Button (Separate from Create Draft Button) */}
-            <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
+            {/* <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
               <Button
                 style={{
                   backgroundColor: '#91C25F',
@@ -1968,7 +2016,7 @@ const App = () => {
                 }}
                 icon={<DownOutlined className="black-icon" />}
               />
-            </Dropdown>
+            </Dropdown> */}
           </Button.Group>
 
         }
@@ -2044,9 +2092,9 @@ const App = () => {
                     </div>
                     <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                       {option.status === "Active" ? (
-                        <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: '15px' }}className='black-icon-active-1' />
                       ) : (
-                        <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }} className='black-icon-pause-1'/>
                       )}
                     </span>
                   </div>
@@ -2188,7 +2236,7 @@ const App = () => {
                         {
                             key: 'all',
                             label: (
-                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }} className="custom-menu-item">
                                 {/* <span
                                   style={{
                                     width: '6px',
@@ -2198,13 +2246,13 @@ const App = () => {
                                     marginRight: '6px',
                                   }}
                                 ></span> */}
-                                All Campaigns
+                                All 
                               </span>
                             ),
                         },
                         { 
                             key: 'active', 
-                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
+                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">  
                             {/* <span
                                     style={{
                                     width: '6px',
@@ -2214,12 +2262,12 @@ const App = () => {
                                     marginRight: '6px',
                                     }}
                                 ></span>   */}
-                            Active Campaigns
+                            Active 
                         
                             </span> 
                         },
                         { 
-                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
                               {/* <span
                                 style={{
                                 width: '6px',
@@ -2229,12 +2277,12 @@ const App = () => {
                                 marginRight: '6px',
                                 }}
                             ></span> */}
-                            Paused Campaigns
+                            Paused 
                       
                             </span> 
                         },
                         { 
-                          key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                          key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
                             {/* <span
                               style={{
                               width: '6px',
@@ -2244,7 +2292,7 @@ const App = () => {
                               marginRight: '6px',
                               }}
                           ></span> */}
-                          Pending Campaigns
+                          Pending
                     
                           </span> 
                       },
@@ -2261,13 +2309,25 @@ const App = () => {
                     border: '1px solid #4CAF50',
                     color: theme === 'dark' ? '#95de64' : '#389e0d',
                     fontWeight: 500,
+                    width:'170px'
                     // marginRight: '3px'
                     }}
                 >
-                    <Space size={2}>
+                    {/* <Space size={2}>
                     <FilterOutlined />
                       Filters
                     <DownOutlined style={{ fontSize: 10 }} />
+                    </Space> */}
+                    <Space size={2}>
+                      <FilterOutlined />
+                      {campaignStatusFilter === 'all'
+                        ? 'All'
+                        : campaignStatusFilter === 'active'
+                        ? 'Active'
+                        : campaignStatusFilter === 'pause'
+                        ? 'Paused'
+                        : 'Pending'}
+                      <DownOutlined style={{ fontSize: 10 }} />
                     </Space>
                 </Button>
             </Dropdown>
@@ -2365,7 +2425,7 @@ const App = () => {
           }}
           className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
           columns={columns}
-          dataSource={campaignData.map((item, index) => ({
+          dataSource={getFilteredSingleCampaigns().map((item, index) => ({
             ...item,
             key: index,
           })).reverse()}
@@ -2425,7 +2485,7 @@ const App = () => {
           }}
           className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
           columns={columnsformultipleadsets}
-          dataSource={multipleAdsetCampaignData.map((item, index) => ({
+          dataSource={getFilteredMultipleAdsetCampaigns().map((item, index) => ({
             ...item,
             key: index,
           })).reverse()}

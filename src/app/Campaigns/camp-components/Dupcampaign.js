@@ -1800,7 +1800,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.25 }}>
+                                    style={{ flex: 0.16 }}>
                                     <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                 </Form.Item>
                                 <Form.Item
@@ -1854,7 +1854,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.12, marginLeft: "1%" }}>
+                                    style={{ flex: 0.15, marginLeft: "1%" }}>
                                     <Select
 
                                         variant="filled"
@@ -2128,7 +2128,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     style={{ flex: '1 1 200px' }}
                                 >
                                     <Tooltip title={campaignLevelDailyBudget !== 0 ? "You have enabled daily budget in the Campaign Level" : ""}>
-                                        <Input
+                                        <InputNumber
                                             type="number"
                                             placeholder="$"
                                             value={adsetLevelDailyBudget}
@@ -2166,7 +2166,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                             : Promise.reject(new Error("Please enter a valid float value!")),
                                                 },
                                             ]}
-                                            style={{ flex: '1 1 150px' }}
+                                            style={{ flex: '1 1 150px',marginRight:'67%' }}
                                         >
                                             <InputNumber
                                                 type="number"
@@ -2180,7 +2180,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                         event.preventDefault();
                                                     }
                                                 }}
-                                                style={{color: theme === "dark" ? "white" : "#000"}}
+                                                style={{color: theme === "dark" ? "white" : "#000",width:'140px'}}
                                                 className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Form.Item>

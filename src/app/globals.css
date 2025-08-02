@@ -2963,15 +2963,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: white !important;
 }
 
-.custom-collapse-dark .custom-panel {
-  background-color: #1e1e1e !important; /* panel content background */
-  color: white !important;
-}
 
-.custom-collapse-dark .custom-panel .ant-collapse-header {
-  background-color: #333 !important; /* header background */
-  color: white !important;           /* header text */
-}
 
 /* Light mode styles */
 .custom-collapse-light .custom-panel {
@@ -2983,22 +2975,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   background-color: #f5f5f5 !important;
   color: #000 !important;
 }
-/* Dark theme panel content fix */
-.custom-collapse-dark .ant-collapse-content {
-  background-color: #333 !important; /* Matches your desired dark */
-  color: white !important;
-}
 
-.custom-collapse-dark .ant-collapse-content-box {
-  background-color: #333 !important;  /* This is the inner padding box */
-  color: white !important;
-}
-/* Dark theme header fix */
-.custom-collapse-dark .ant-collapse-header {
-  background-color: #333 !important;  /* Your intended dark header */
-  color: white !important;            /* Ensure header text is visible */
-  border-bottom: 1px solid #444;      /* Optional: border for separation */
-}
 
 
 /* Tag background and text for selected items in dark theme */
@@ -3444,4 +3421,123 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   line-height: 20px !important;
   font-size: 13px; /* optional: match row font */
   color: #fff !important; /* Change text color to white */
+}
+.custom-input-dark input {
+  color: #fff !important;
+  background-color: transparent !important;
+}
+
+.custom-input-light input {
+  color: #333 !important;
+  background-color: transparent !important;
+}
+.custom-input-dark input::placeholder {
+  color: #ccc !important;  
+}
+.custom-input-dark .ant-input-number-handler-wrap {
+  background-color: transparent; 
+}
+
+.Exckamationicon svg {
+  color: #EC7117 !important; 
+}
+/* Remove border, shadow, and radius for each panel */
+.custom-collapse-light .ant-collapse-item {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8PX !important;
+  margin-bottom: 12px !important; /* Adds gap between panels */
+  background-color: #f5f5f5 !important;
+}
+
+/* Remove the thin gray line between panels */
+.custom-collapse-light .ant-collapse-item::before {
+  display: none !important;
+}
+
+/* Remove border on expanded panel content */
+.custom-collapse-light .ant-collapse-content {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Collapse Header */
+.custom-collapse-light .ant-collapse-header {
+  background-color: #f5f5f5 !important;
+  border-radius: 8PX !important;
+  padding: 12px 16px !important;
+  /* font-weight: 600; */
+  color: #333;
+  border: none !important;
+  box-shadow: none !important;
+  margin-bottom:  12px !important; /* Adds gap between panels */;
+}
+
+/* Outer Collapse */
+.custom-collapse-light {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+/* Entire Collapse cleanup */
+.custom-collapse-dark {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+ 
+/* Remove gap artifacts */
+.custom-collapse-dark .ant-collapse-item {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  margin-bottom: 12px !important; /* optional gap */
+  background-color: transparent !important;
+  color: white !important;
+}
+ 
+/* Remove the gray border between panels */
+.custom-collapse-dark .ant-collapse-item::before {
+  display: none !important;
+}
+ 
+/* Collapse header styling */
+.custom-collapse-dark .ant-collapse-header {
+  /* background-color: #333 !important; */
+  color: white !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  /* font-weight: 600; */
+  background-color: #555 !important;
+  border-radius: 8PX !important;
+  margin-bottom:  12px !important;
+}
+ 
+/* Expanded content area */
+.custom-collapse-dark .ant-collapse-content {
+  background-color: transparent !important;
+  border: 1px #555 solid !important;
+  padding: 5px 5px 10px !important;
+ 
+}
+ 
+/* Inner box inside expanded panel */
+.custom-collapse-dark .ant-collapse-content-box {
+  background-color: transparent !important;
+  color: white !important;
+  padding: 0 !important;
+}
+
+.adset-collapse-panel .ant-collapse-header {
+  padding: 7px 16px !important;  /* reduce vertical padding */
+  /* min-height: 32px !important;   */
+  /* line-height: 1.5 !important; */
+}
+.dark-theme-dropdown .ant-dropdown-menu-item-selected {
+  background-color: #e6f7ff !important; /* light blue */
+  /* font-weight: 600; */
+  color: #000 !important;
 }
