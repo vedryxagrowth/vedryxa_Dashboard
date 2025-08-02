@@ -3471,6 +3471,7 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   color: #333;
   border: none !important;
   box-shadow: none !important;
+  margin-bottom:  12px !important; /* Adds gap between panels */;
 }
 
 /* Outer Collapse */
@@ -3527,4 +3528,15 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   background-color: transparent !important;
   color: white !important;
   padding: 0 !important;
+}
+
+.adset-collapse-panel .ant-collapse-header {
+  padding: 7px 16px !important;  /* reduce vertical padding */
+  /* min-height: 32px !important;   */
+  /* line-height: 1.5 !important; */
+}
+.dark-theme-dropdown .ant-dropdown-menu-item-selected {
+  background-color: #e6f7ff !important; /* light blue */
+  /* font-weight: 600; */
+  color: #000 !important;
 }

@@ -1,14 +1,15 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Tooltip, Button, Modal, Input, Space, Drawer, theme, Tag } from 'antd';
+import { Row, Col, Card, Tooltip, Button, Modal, Input, Space, Drawer, theme, Tag, Popconfirm } from 'antd';
 import { LikeOutlined, CommentOutlined, ShareAltOutlined, GlobalOutlined, MoreOutlined, CheckOutlined, CloseOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, MessageOutlined, CloseCircleOutlined, PlusOutlined, EyeOutlined, PlusSquareOutlined, MinusSquareOutlined } from "@ant-design/icons";
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 import Editads from './EditAds';
 import moment from 'moment-timezone';
 import Createnewads from './Createads';
+import AdsetComponent from './editMultipleAdset';
 
-const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, changeRRefrst, viewCampaignData }) => {
+const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, changeRRefrst, viewCampaignData, network }) => {
     const [expanded, setExpanded] = useState(false);
     const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -18,6 +19,9 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const token = localStorage.getItem("token");
     const {theme} =useTokenContext();
+    const [adsetDrawerOpen, setAdsetDrawerOpen] = useState(false);
+    const [adsetToEdit, setAdsetToEdit] = useState(null)
+    const [isViewAdset, setIsViewAdset] = useState(false); 
 
     const isVideo = (filename) => {
         const videoExtensions = ['.mp4', '.mov', '.avi', '.webm'];
@@ -74,6 +78,32 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
         setIsRejectModalVisible(false);
         setRejectionReason("");
     };
+
+    const removeAdset = async (adsetId, campaignIdentifier) => {
+        try {//https://www.testapi.adsgoat.in
+            const response = await axios.post(`https://www.testapi.adsgoat.in/api/newdeleteAdsets`,
+            {
+                adsetId: adsetId,
+                identifier: campaignIdentifier
+            }, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            if (response.status === 200) {
+                console.log('Adset deleted successfully');
+                changeRRefrst && changeRRefrst();
+            }
+        } catch (error) {
+            console.error("Error deleting adset:", error);
+        }
+    }
+
+    const editAdsetForCampaign = (adset, status) => {
+        setAdsetToEdit(adset); // Set the adset to be edited
+        setAdsetDrawerOpen(true)
+        setIsViewAdset(status); // Open the drawer for viewing or editing
+    }
 
     const handleConfirmReject = async () => {
         setLoading(true);
@@ -134,11 +164,31 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <Tooltip title="View">
-              <EyeOutlined style={{ color: '#888', cursor: 'pointer' }} />
+              <EyeOutlined onClick={()=>editAdsetForCampaign(adset, true)} style={{ color: '#888', cursor: 'pointer' }} />
             </Tooltip>
-            <Tooltip title="Edit">
-              <EditOutlined style={{ color: '#888', cursor: 'pointer' }} />
-            </Tooltip>
+            {approvedCount === 0 && !restrictedEmails.includes(userdetails.email) && (
+                <Tooltip title="Edit">
+                <EditOutlined onClick={()=>editAdsetForCampaign(adset, false)} style={{ color: '#888', cursor: 'pointer' }} />
+              </Tooltip>
+            )}
+            {approvedCount === 0 && !restrictedEmails.includes(userdetails.email) && (
+                <Popconfirm
+                    title="Are you sure to delete this Adset?"
+                    onConfirm={(e) => {
+                        e.stopPropagation(); // Prevent panel collapse
+                        removeAdset(adset.id, viewCampaignData.identifier); 
+                    }}
+                    okText="Yes"
+                    cancelText="No"
+                    style={{ float: 'right', marginLeft: '10px', cursor: 'pointer' }}
+                >
+                    <Button
+                        type="text"
+                        onClick={(e) => e.stopPropagation()} // Prevent panel collapse
+                        icon={<DeleteOutlined />}
+                    />
+                </Popconfirm>
+            )}
           </div>
         </div>
   
@@ -379,6 +429,10 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, cha
                     rows={4}
                 />
             </Modal>
+            {adsetToEdit && <AdsetComponent viewCampaignData={viewCampaignData} network={network} isViewAdset={isViewAdset} adset={adset} imagehash={imagehash} changeRRefrst={changeRRefrst} onClose={() => {
+                setAdsetDrawerOpen(false);   // Close the drawer
+                setAdsetToEdit(null);       // Reset the selected item to avoid showing old data
+            }} />}
             <Drawer
                 title="Edit ad"
                 width={"100%"}
@@ -582,7 +636,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network}) => {
       .filter(([key]) => key.startsWith('adsetlevel_'))
       .map(([key, adset], index) => (
         <Col key={key} span={12}>
-          <AdsetCard adset={adset} index={index} imagehash={imagehash} restrictedEmails={restrictedEmails} userdetails={userdetails} changeRRefrst={changeRRefrst} viewCampaignData={viewCampaignData} />
+          <AdsetCard adset={adset} index={index} imagehash={imagehash} restrictedEmails={restrictedEmails} userdetails={userdetails} changeRRefrst={changeRRefrst} viewCampaignData={viewCampaignData} network={network} />
         </Col>
       ))}
                 {/* {!restrictedEmails.includes(userdetails.email) && (

@@ -957,7 +957,7 @@ const AdsetComponent = ({
 
         <Collapse accordion className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}>
             <Panel header={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className='adset-collapse-panel'>
                     <span style={{ color: theme === 'dark' ? '#fff' : '#000', alignContent: 'center' }}>{adset.AdsetPanelName}</span>
 
                     <div>
@@ -5174,7 +5174,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     <Collapse accordion activeKey={activeKey} // Bind active key state
                         onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
                         <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
-                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5', color: theme === 'dark' ? '#fff' : '#000' }}>
                                 <Form.Item
                                     name="Account_Number"
                                     label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}

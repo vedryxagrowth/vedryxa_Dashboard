@@ -679,7 +679,7 @@ const AdsetComponent = ({
                 const token = localStorage.getItem("token");
                 // console.log("Campaign Data:", campaignData);
                 //https://www.testapi.adsgoat.in
-                const response = await fetch('http://localhost:4500/api/neweditAdset', {
+                const response = await fetch('https://www.testapi.adsgoat.in/api/neweditAdset', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1563,7 +1563,7 @@ const AdsetComponent = ({
                             </div> */}
 
                         </div>
-                    } key="open" forceRender >
+                    } key="open" forceRender className='adset-collapse-panel' >
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                             <Form.Item
                                 name="AdsetName"

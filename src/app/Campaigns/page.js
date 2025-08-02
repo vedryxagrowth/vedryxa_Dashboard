@@ -7,6 +7,7 @@ import CreateCampaignDrawer from './camp-components/create_camapaign';
 import CreateDraft from './camp-components/CreateDraft';
 import EditAllLevelDataDrawer from './camp-components/EditAllLevelData';
 import ViewDrawer from './camp-components/view-campaign';
+import EditMultipleAdsetCampaignDrawer from './camp-components/editMultipleAdsetCampaign';
 // import EditOnlyCampaignDrawer from './camp-components/EditCamp';
 import EditCampaignDrawer1 from './camp-components/EditCamp';
 import axios from 'axios';
@@ -88,6 +89,9 @@ const App = () => {
   const [multipleAdsetCampaignData, setMultipleAdsetCampaignData] = useState([]);
   const [activeTab, setActiveTab] = useState('1'); 
   const [campaignStatusFilter, setCampaignStatusFilter] = useState('all');
+  const [selectedEditMultipleAdsetData,setSelectedEditMultipleAdsetData] = useState(null);
+  const [viewEditMultipleAdsetDataDrawerVisible, setViewEditMultipleAdsetDataDrawerVisible] = useState(false);
+  const [view, setView] = useState(false);
   const onStatusFilterChange = (key) => {
     setCampaignStatusFilter(key);
   };
@@ -297,6 +301,7 @@ const App = () => {
     setdupDrawerVisible(false)
     setViewEditAllLevelDataDrawerVisible(false);
     setCreateNewDraft(false);
+    setViewEditMultipleAdsetDataDrawerVisible(false);
   };
 
   useEffect(() => {
@@ -1169,6 +1174,13 @@ const App = () => {
     "Newsbreak_DA": "Newsbreak_DomainActive"
   }
 
+  const handleEditClickMultipleAdsetData = (record, status) => {
+    // console.log(record, "viewdata campaign")
+    setSelectedEditMultipleAdsetData(record);
+    setViewEditMultipleAdsetDataDrawerVisible(true);
+    setView(status);
+  }
+
   const columns = [
     {
       title: 'Status',
@@ -1413,14 +1425,14 @@ const App = () => {
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <Tooltip title="View details">
-            <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+            <Button icon={<EyeOutlined />} onClick={() => handleEditClickMultipleAdsetData(record, true)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
           </Tooltip>
           <Tooltip title="Edit campaign">
-            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+            <Button icon={<EditOutlined />} disabled={record.fbstatus === "Live"} onClick={() => handleEditClickMultipleAdsetData(record, false)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
             <Tooltip title="Clone campaign">
-              <Button icon={<CopyOutlined style={{ color: 'red' }} />} onClick={() => duplicatenewcampaign(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+              <Button icon={<CopyOutlined style={{ color: 'red' }} />} disabled={true} onClick={() => duplicatenewcampaign(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
             </Tooltip>
           )}
         </div>
@@ -1900,6 +1912,8 @@ const App = () => {
 
       <EditAllLevelDataDrawer visible={viewEditAllLevelDataDrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} selectedRow={selectedEditAllLevelData} />
 
+      <EditMultipleAdsetCampaignDrawer view={view} visible={viewEditMultipleAdsetDataDrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} selectedRow={selectedEditMultipleAdsetData} />
+
       <DuplicateCampaignDrawer visible={dupdrawerVisible} onClose={onCloseDrawer} selectedRow={duplicatenewcampaigns} changeRRefrst={changeRRefrst} network={selectedKey} />
 
       <CreateDraft visible={createNewDraft} onClose={onCloseDrawer} changeRRefrst={changeDraftRefresh} selectedDraftToEdit={selectedDraftToEdit} />
@@ -2222,7 +2236,7 @@ const App = () => {
                         {
                             key: 'all',
                             label: (
-                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }} className="custom-menu-item">
                                 {/* <span
                                   style={{
                                     width: '6px',
@@ -2238,7 +2252,7 @@ const App = () => {
                         },
                         { 
                             key: 'active', 
-                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
+                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">  
                             {/* <span
                                     style={{
                                     width: '6px',
@@ -2253,7 +2267,7 @@ const App = () => {
                             </span> 
                         },
                         { 
-                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
                               {/* <span
                                 style={{
                                 width: '6px',
@@ -2268,7 +2282,7 @@ const App = () => {
                             </span> 
                         },
                         { 
-                          key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                          key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
                             {/* <span
                               style={{
                               width: '6px',
