@@ -88,6 +88,8 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
 
     const [apiStatus, setApiStatus ]= useState(false);
 
+    const [selectedAdset, setSelectedAdset] = useState([]);
+
     const fbCron = useRef('-');
     const revenueCron = useRef('-');
     const cronStatus = useRef('-');
@@ -105,6 +107,31 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
         );
     }
     ), [dailyData, inputValue,theme]);
+
+    // useEffect to show selected campaigns after clearing search
+    useEffect(() => {
+        const api = gridRef1.current?.api;
+        if (!api) return;
+      
+        if (inputValue.trim() === '' && selectedAdset.length > 0) {
+          const selectedIds = selectedAdset.map(item => item.adsetid);
+          const selectedOnly = dailyData.filter(item => selectedIds.includes(item.adsetid));
+      
+          // ✅ Replace rows
+          api.applyTransaction({ replace: true, data: selectedOnly });
+      
+          // ✅ Reselect those rows
+          setTimeout(() => {
+            api.forEachNode((node) => {
+              if (selectedIds.includes(node.data?.adsetid)) {
+                node.setSelected(true);
+              }
+            });
+          }, 0);
+        } else if (inputValue.trim() === '' && selectedAdset.length === 0) {
+          api.applyTransaction({ replace: true, data: dailyData });
+        }
+    }, [inputValue, selectedAdset, dailyData]);  
 
     useEffect(()=>{
         setDailyFixedFooter(
@@ -171,10 +198,22 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
         updateDetails();
     };
 
+    // const onSelectionChanged = (event) => {
+    //     const selectedNodes = event.api.getSelectedNodes();
+    //     const selectedData = selectedNodes.map(node => node.data);
+    //     console.log("Selected Adsets:", selectedData);
+    //     showAdsetLevel(selectedData);
+    // };
+
+    
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
         const selectedData = selectedNodes.map(node => node.data);
-        console.log("Selected Adsets:", selectedData);
+    
+        // Store selection persistently
+        setSelectedAdset(selectedData);
+    
+        // Keep your existing functionality
         showAdsetLevel(selectedData);
     };
 
@@ -650,7 +689,24 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
                         </div> */}
                         {relatedComment ? (
                             <Tooltip
-                                title={relatedComment || 'No comment available'}
+                                // title={relatedComment || 'No comment available'}
+                                title={
+                                    <div>
+                                      <div>{relatedComment || 'No comment available'}</div>
+                                      <div>
+                                        {editUserANdTime
+                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                                          : ""}
+                                      </div>
+                                    </div>
+                                }
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
                             >
                                 <MessageOutlined
                                 className={theme === "dark" ? "black-icon-comment" : 'Message'}
@@ -666,7 +722,16 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
                         )}
-                        <Tooltip title={tooltipText}>
+                        <Tooltip 
+                            title={tooltipText}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <CopyOutlined
                                 onClick={copyToClipboard}
                                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
@@ -679,7 +744,16 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
                         />
-                        <Tooltip title={valueWithCount}>
+                        <Tooltip 
+                            title={valueWithCount}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <span
                                 onClick={() => {
                                     const rowData = params.node.group
@@ -1392,8 +1466,8 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
                                         suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
                                         rowSelection="multiple" 
                                         pagination={true}
-                                        paginationPageSize={100}
-                                        paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                        paginationPageSize={200}
+                                        paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                                         groupDisplayType='multipleColumns'
                                         suppressAggFuncInHeader={true}
                                         groupSuppressBlankHeader={true}

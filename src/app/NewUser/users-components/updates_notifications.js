@@ -82,7 +82,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             formDataToSend.append('image', formData.image);
           }
 
-          const res = await fetch('/api/notifications/update', {
+          const res = await fetch('http://localhost:8000/api/notifications/update', {
             method: 'POST',
             body: formDataToSend
           });
@@ -186,13 +186,14 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
   return (
     <div className="upload-form-wrapper full-screen-wrapper">
       <div className="form-container">
-        <h1 className="form-title">Notification</h1>
+        <h1 style={{color: theme === 'dark' ? '#fff' : '#333'}} className="form-title">Notification</h1>
         <form onSubmit={handleSubmit} className="form">
           <div className="form-group">
             <label htmlFor="title">Title</label>
             <input
               type="text"
               id="title"
+              style={{color: theme === 'dark' ? '#fff' : '#333'}}
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="Enter your title"
@@ -205,6 +206,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             <textarea
               id="description"
               value={formData.description}
+              style={{color: theme === 'dark' ? '#fff' : '#333'}}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Enter your description"
             />
@@ -277,13 +279,14 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             {imagePreview && (
               <div className="image-preview-wrapper">
                 {formData.image?.type.startsWith('image/') ? (
-                  <img src={imagePreview} alt="Preview" className="image-preview" />
+                  <img style={{ maxHeight: '120px', objectFit: 'cover', cursor: 'pointer' }} src={imagePreview} alt="Preview" className="image-preview" />
                 ) : (
                   <video
                     controls
                     src={imagePreview}
                     className="image-preview"
-                    style={{ maxHeight: '200px', objectFit: 'cover' }}
+                    // style={{ maxHeight: '200px', objectFit: 'cover' }}
+                    style={{ maxHeight: '120px', objectFit: 'cover', cursor: 'pointer' }}
                   />
                 )}
                 <div className="image-info">

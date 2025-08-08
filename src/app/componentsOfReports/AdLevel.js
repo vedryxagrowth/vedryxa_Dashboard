@@ -266,6 +266,7 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                 const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
+                console.log("relatedComment:", relatedComment);
                 const valueWithCount = `${firstColumnValue}`;
                 // console.log(editUserANdTime);
 
@@ -692,7 +693,24 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                         )} */}
                         {relatedComment && (
                             <Tooltip
-                                title={relatedComment || 'No comment available'}
+                                // title={relatedComment || 'No comment available'}
+                                title={
+                                    <div>
+                                      <div>{relatedComment || 'No comment available'}</div>
+                                      <div>
+                                        {editUserANdTime
+                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                                          : ""}
+                                      </div>
+                                    </div>
+                                }
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
                             >
                                 <MessageOutlined
                                     className={theme === "dark" ? "black-icon-comment" : 'Message'}
@@ -709,7 +727,16 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                         {!relatedComment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
                         )}
-                        <Tooltip title={tooltipText}>
+                        <Tooltip 
+                            title={tooltipText}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <CopyOutlined
                                 onClick={copyToClipboard}
                                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
@@ -722,7 +749,16 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
                         />
-                        <Tooltip title={valueWithCount}>
+                        <Tooltip 
+                            title={valueWithCount}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <span
                                 // onClick={() => {
                                 //     const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -1738,8 +1774,8 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                     onCellClicked={onCellClickedLive}
                                     pagination={true}
-                                    paginationPageSize={100}
-                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                    paginationPageSize={200}
+                                    paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                                     suppressAggFuncInHeader={true}
                                     getMainMenuItems={getMainMenuItems}
 

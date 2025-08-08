@@ -3038,7 +3038,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   align-items: center;
   justify-content: center;
   background-color: var(--bg);
-  height: 100vh; /* This ensures it takes full screen height */
+  height: 125vh; /* This ensures it takes full screen height */
 }
 
 body.dark .upload-form-wrapper {
@@ -3536,8 +3536,32 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   /* min-height: 32px !important;   */
   /* line-height: 1.5 !important; */
 }
-.dark-theme-dropdown .ant-dropdown-menu-item-selected {
-  background-color: #e6f7ff !important; /* light blue */
-  /* font-weight: 600; */
-  color: #000 !important;
+
+
+
+/* Light Theme */
+.light-theme-dropdown .ant-dropdown-menu-item {
+  color: #000; /* All menu items in light theme */
 }
+
+.light-theme-dropdown .ant-dropdown-menu-item-selected {
+  background-color: #e6f7ff !important;
+  color: #000 !important; /* Selected stays black */
+}
+
+/* Dark Theme */
+.dark-theme-dropdown .ant-dropdown-menu-item {
+  color: #fff; /* All items white by default */
+}
+
+.dark-theme-dropdown .ant-dropdown-menu-item-selected {
+  background-color: #e6f7ff !important;
+  color: #000 !important; /* Selected one turns black */
+}
+
+/* .ant-dropdown-menu-item-selected {
+  background-color: #e6f7ff !important;
+  color: #000 !important;
+  font-weight: 600;
+  border-radius: 6px;
+} */

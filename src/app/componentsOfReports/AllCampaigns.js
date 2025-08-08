@@ -537,7 +537,17 @@ const AllCampaigns = ({campaignStatusFilter, handleChangeInput, handleBlur, onCl
                         </div>
                         {relatedComment ? (
                             <Tooltip
-                                title={relatedComment || 'No comment available'}
+                                // title={relatedComment || 'No comment available'}
+                                title={
+                                    <div>
+                                      <div>{relatedComment || 'No comment available'}</div>
+                                      <div>
+                                        {editUserANdTime
+                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                                          : ""}
+                                      </div>
+                                    </div>
+                                }
                             >
                             <MessageOutlined
                                 className={theme === "dark" ? "black-icon-comment" : 'Message'}
@@ -1316,7 +1326,8 @@ const AllCampaigns = ({campaignStatusFilter, handleChangeInput, handleBlur, onCl
                                             }}
 
                                             pagination={true} // Enable built-in pagination
-                                            paginationPageSize={100} // S
+                                            paginationPageSize={200} // S
+                                            paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                                             onSortChanged={(params) => {
                                                 const sortedData = [];
                                                 params.api.forEachNodeAfterFilterAndSort(node => {
