@@ -99,6 +99,8 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
 
     const oneTimeFetch = useRef(true);
 
+    const [selectedAdset, setSelectedAdset] = useState([]);
+
     const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
     const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
@@ -110,6 +112,32 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
         );
     }
     ) : [], [rowData, inputValue, theme]);
+
+    // useEffect to show selected campaigns after clearing search
+    useEffect(() => {
+        const api = gridRef.current?.api;
+        if (!api) return;
+      
+        if (inputValue.trim() === '' && selectedAdset.length > 0) {
+          const selectedIds = selectedAdset.map(item => item.adsetid);
+          const selectedOnly = rowData.filter(item => selectedIds.includes(item.adsetid));
+      
+          // ✅ Replace rows
+          api.applyTransaction({ replace: true, data: selectedOnly });
+      
+          // ✅ Reselect those rows
+          setTimeout(() => {
+            api.forEachNode((node) => {
+              if (selectedIds.includes(node.data?.adsetid)) {
+                node.setSelected(true);
+              }
+            });
+          }, 0);
+        } else if (inputValue.trim() === '' && selectedAdset.length === 0) {
+          api.applyTransaction({ replace: true, data: rowData });
+        }
+    }, [inputValue, selectedAdset, rowData]);  
+
     console.log(memorizedRowData, "memorizedRowData");
     console.log(rowData, "rowData");
 
@@ -268,6 +296,7 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                 const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
+                // console.log("Date:", relatedComment);
                 const valueWithCount = `${firstColumnValue}`;
                 // console.log(editUserANdTime);
 
@@ -665,7 +694,24 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                         )} */}
                         {relatedComment && (
                             <Tooltip
-                                title={relatedComment || 'No comment available'}
+                                // title={relatedComment || 'No comment available'} 
+                                title={
+                                    <div>
+                                      <div>{relatedComment || 'No comment available'}</div>
+                                      <div>
+                                        {editUserANdTime
+                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                                          : ""}
+                                      </div>
+                                    </div>
+                                  }
+                                  overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
                             >
                                 <MessageOutlined
                                     className={theme === "dark" ? "black-icon-comment" : 'Message'}
@@ -682,7 +728,16 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                         {!relatedComment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
-                        <Tooltip title={tooltipText}>
+                        <Tooltip 
+                            title={tooltipText}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <CopyOutlined
                                 onClick={copyToClipboard}
                                 style={{ cursor: 'pointer', marginLeft: '2px', color: "#1e1e1f", marginRight: '10px' }}
@@ -695,7 +750,16 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
                         />
-                        <Tooltip title={valueWithCount}>
+                        <Tooltip 
+                            title={valueWithCount}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <span
                                 onClick={() => {
                                     const rowData = params.node.group
@@ -1388,10 +1452,19 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
         return Array.from(map.values());
       };
 
+    // const onSelectionChanged = (event) => {
+    //     const selectedNodes = event.api.getSelectedNodes();
+    //     const selectedData = selectedNodes.map(node => node.data);
+    //     console.log("Selected Adsets:", selectedData);
+    //     showAdsetLevel(uniqueByAdsetId(selectedData));
+    // };
+
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
         const selectedData = selectedNodes.map(node => node.data);
-        console.log("Selected Adsets:", selectedData);
+        // Store selection persistently
+        setSelectedAdset(selectedData);
+        // Keep your existing functionality
         showAdsetLevel(uniqueByAdsetId(selectedData));
     };
 
@@ -1774,8 +1847,8 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                     onCellClicked={onCellClickedLive}
                                     pagination={true}
-                                    paginationPageSize={100}
-                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                    paginationPageSize={200}
+                                    paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                                     suppressAggFuncInHeader={true}
                                     getMainMenuItems={getMainMenuItems}
 

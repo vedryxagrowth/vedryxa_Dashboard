@@ -178,6 +178,11 @@ const MyTablePage = () => {
     //Active pause
     const [campaignStatusFilter, setCampaignStatusFilter] = useState('ALL');
 
+    const [accountChanged, setAccountChanged] = useState(false);
+    const [dateChanged, setDateChanged] = useState(false);
+    const [timezoneChanged, setTimezoneChanged] = useState(false);
+
+
     const handleStatusFilterChange = (key) => {
     if (key === 'active') {
         setCampaignStatusFilter('ACTIVE');
@@ -3671,9 +3676,10 @@ const MyTablePage = () => {
         cpm: {
             headerName: 'CPM',
             field: 'cpm',
+            filter: "agTextColumnFilter",
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Spend/Impressions)*1000', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -3684,6 +3690,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
+            filter: "agTextColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -4318,7 +4325,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -4335,7 +4343,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
             },
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -4634,8 +4643,9 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
+            filter: "agTextColumnFilter",
             minWidth: 90,
-            headerTooltip: '(Spend/Impressions)*1000', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -5023,7 +5033,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5040,7 +5051,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
             },
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5336,8 +5348,9 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
+            filter: "agTextColumnFilter",
             minWidth: 90,
-            headerTooltip: '(Spend/Impressions)*1000', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -5736,7 +5749,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5753,7 +5767,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
             },
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6050,8 +6065,9 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
+            filter: "agTextColumnFilter",
             minWidth: 90,
-            headerTooltip: '(Spend/Impressions)*1000', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -6063,6 +6079,7 @@ const MyTablePage = () => {
             field: 'filteration',
             width: 115,
             sortable: true,
+            filter: "agTextColumnFilter",
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
@@ -6655,7 +6672,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -6668,7 +6686,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -6685,7 +6704,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -6694,7 +6714,7 @@ const MyTablePage = () => {
             headerTooltip: 'Profit = Revenue - Spend',
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -6769,7 +6789,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -6784,7 +6804,7 @@ const MyTablePage = () => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: true,
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6858,8 +6878,9 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
+            filter: "agTextColumnFilter",
             minWidth: 90,
-            headerTooltip: '(Spend/Impressions)*1000', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -6870,6 +6891,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
+            filter: "agTextColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -7235,7 +7257,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -7248,7 +7271,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -7265,7 +7289,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
-            filter: "agNumberColumnFilter",
+            // filter: "agNumberColumnFilter",
+             filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -7274,7 +7299,7 @@ const MyTablePage = () => {
             headerTooltip: 'Profit = Revenue - Spend',
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -7349,7 +7374,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -7364,7 +7389,7 @@ const MyTablePage = () => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: true,
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7434,8 +7459,9 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
+            filter: "agTextColumnFilter",
             minWidth: 90,
-            headerTooltip: '(Spend/Impressions)*1000', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -7921,7 +7947,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -7936,7 +7962,7 @@ const MyTablePage = () => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: true,
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8004,8 +8030,9 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
+            filter: "agTextColumnFilter",
             minWidth: 90,
-            headerTooltip: '(Spend/Impressions)*1000', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -8016,6 +8043,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
+            filter: "agTextColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -8520,14 +8548,14 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
         },
         spend: {
-            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true,  filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
         revenue: {
-            headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+            headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true,  filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -8537,14 +8565,19 @@ const MyTablePage = () => {
             headerName: 'Profit', field: 'profit', minWidth: 105, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
-            }, sortable: true, headerTooltip: 'Profit = Revenue - Spend', filter: 'agNumberColumnFilter',
+            }, sortable: true, headerTooltip: 'Profit = Revenue - Spend',  filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerName: 'Margin', 
+            field: 'margin', 
+            valueGetter: getMargin, 
+            sortable: true, 
+            headerTooltip: '(Profit/Revenue)*100', 
+            filter: 'agTextColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -8611,7 +8644,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', minWidth: 80, field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: 'CPL = Spend / FBLeads' },
         ncpl: { headerName: 'NCPL', minWidth: 90, field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: 'NCPL = Spend / Conversions' },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -8626,7 +8659,7 @@ const MyTablePage = () => {
             headerTooltip: 'FMargin = (Profit / Spend) * 100',
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend',  filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8760,8 +8793,9 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
+            filter: "agTextColumnFilter",
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Profit/Revenue)*100',
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -9260,7 +9294,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', minWidth: 80, field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'CPL = Spend / FBLeads', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ncpl: { headerName: 'NCPL', minWidth: 90, field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'NCPL = Spend / Conversions', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -9275,7 +9309,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend',  filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -9462,8 +9496,6 @@ const MyTablePage = () => {
     const getColumnDefsAdLevelDaily = (order) => {
         return order?.map(colKey => columnDefsObjectAdLevelDaily[colKey]).filter(item => item);
     };
-
-
 
     const getColumnDefs3 = (order) => {
         // console.log(order);
@@ -9717,9 +9749,22 @@ const MyTablePage = () => {
 
     const onChangeTime = (value) => {
         setTime(value);
+        setTimezoneChanged(true);
     }
 
     const onClickButton = async () => {
+         // Clear search input if account was changed
+         if (accountChanged || dateChanged || timezoneChanged) {
+            setInputValue(''); // ✅ Clear search input
+            // Also clear AG Grid filter if you're using it
+            // gridRef.current?.api?.setQuickFilter?.('');
+          }
+        
+          // Reset change flags
+          setAccountChanged(false);
+          setDateChanged(false);
+          setTimezoneChanged(false);
+        
         localStorage.removeItem("storedData");
 
         const storedData = {
@@ -9811,7 +9856,9 @@ const MyTablePage = () => {
             const [start, end] = dates;
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
+            setDateChanged(true); 
         }
+        // setDateChanged(true); 
     };
 
     const [campaignComments, setCampaignComments] = useState([]);
@@ -9970,6 +10017,9 @@ const MyTablePage = () => {
         setAccountName(accountNameForAccount.accountName)
         setSelectedValue(value); // Update selected value
         onChangeSelect(value); // Call onChangeSelect function
+
+        // Mark that account was changed
+        setAccountChanged(true);
     };
 
     // Create option with conditional rendering of additional info
@@ -10419,6 +10469,7 @@ const MyTablePage = () => {
                                 //  prefix={<SearchOutlined />}
                                  onChange={handleChangeInput}
                                  onBlur={handleBlur}
+                                //  value={inputValue}
                                  allowClear
                                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                  style={{

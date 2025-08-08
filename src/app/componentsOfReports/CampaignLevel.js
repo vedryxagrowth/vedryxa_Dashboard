@@ -99,7 +99,10 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
 
     const oneTimeFetch = useRef(true);
 
+    const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+
     const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
+
     const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
@@ -110,6 +113,34 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
         );
     }
     ) : [], [rowData, inputValue, theme]);
+
+    // useEffect to show selected campaigns after clearing search
+    useEffect(() => {
+        const api = gridRef.current?.api;
+        if (!api) return;
+      
+        if (inputValue.trim() === '' && selectedCampaigns.length > 0) {
+          const selectedIds = selectedCampaigns.map(item => item.campaignid);
+          const selectedOnly = rowData.filter(item => selectedIds.includes(item.campaignid));
+      
+          // ✅ Replace rows
+          api.applyTransaction({ replace: true, data: selectedOnly });
+      
+          // ✅ Reselect those rows
+          setTimeout(() => {
+            api.forEachNode((node) => {
+              if (selectedIds.includes(node.data?.campaignid)) {
+                node.setSelected(true);
+              }
+            });
+          }, 0);
+        } else if (inputValue.trim() === '' && selectedCampaigns.length === 0) {
+          api.applyTransaction({ replace: true, data: rowData });
+        }
+    }, [inputValue, selectedCampaigns, rowData]);           
+  
+      
+
     console.log(memorizedColumnDef, "memorizedColumnDef");
     console.log(memorizedRowData, "memorizedRowData");
     console.log(rowData, "rowData");
@@ -628,7 +659,24 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                         )} */}
                         {relatedComment && (
                             <Tooltip
-                                title={relatedComment || 'No comment available'}
+                                // title={relatedComment || 'No comment available'}
+                                title={
+                                    <div>
+                                      <div>{relatedComment || 'No comment available'}</div>
+                                      <div>
+                                        {editUserANdTime
+                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                                          : "N/A"}
+                                      </div>
+                                    </div>
+                                }
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
                             >
                                 <MessageOutlined
                                     className={theme === "dark" ? "black-icon-comment" : 'Message'}
@@ -645,7 +693,16 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                         {!relatedComment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
-                        <Tooltip title={tooltipText}>
+                        <Tooltip 
+                            title={tooltipText}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <CopyOutlined
                                 onClick={copyToClipboard}
                                 style={{ cursor: 'pointer', marginLeft: '2px', color: "#1e1e1f", marginRight: '10px' }}
@@ -658,7 +715,16 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
                         />
-                        <Tooltip title={valueWithCount}>
+                        <Tooltip 
+                            title={valueWithCount}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <span
                                onClick={() => {
                                     const rowData = params.node.group
@@ -1323,12 +1389,24 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
         return Array.from(map.values());
       };
 
+    // const onSelectionChanged = (event) => {
+    //     const selectedNodes = event.api.getSelectedNodes();
+    //     const selectedData = selectedNodes.map(node => node.data);
+    //     console.log("Selected Campaigns:", selectedData);
+    //     showCampaignLevel(uniqueByCampaignId(selectedData));
+    // };
+
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
         const selectedData = selectedNodes.map(node => node.data);
-        console.log("Selected Campaigns:", selectedData);
+    
+        // Store selection persistently
+        setSelectedCampaigns(selectedData);
+    
+        // Keep your existing functionality
         showCampaignLevel(uniqueByCampaignId(selectedData));
     };
+    
 
     
     
@@ -1688,8 +1766,8 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                     onCellClicked={onCellClickedLive}
                                     pagination={true}
-                                    paginationPageSize={100}
-                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                    paginationPageSize={200}
+                                    paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                                     suppressAggFuncInHeader={true}
                                     getMainMenuItems={getMainMenuItems}
                                     groupSelectsChildren={true} // ✅ Selects all children when a group is selected

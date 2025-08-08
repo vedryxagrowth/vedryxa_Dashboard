@@ -2229,74 +2229,103 @@ const App = () => {
 
           <Col>
             <Dropdown
+                dropdownRender={(menu) => (
+                    <div className={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}>
+                      {menu}
+                    </div>
+                )}
                 overlay={
-                    <Menu
-                    onClick={({ key }) => onStatusFilterChange && onStatusFilterChange(key)} // <-- Add this line
-                    items={[
-                        {
-                            key: 'all',
-                            label: (
-                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }} className="custom-menu-item">
-                                {/* <span
-                                  style={{
-                                    width: '6px',
-                                    height: '6px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#122F6E',
-                                    marginRight: '6px',
-                                  }}
-                                ></span> */}
-                                All 
-                              </span>
-                            ),
-                        },
-                        { 
-                            key: 'active', 
-                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">  
-                            {/* <span
-                                    style={{
-                                    width: '6px',
-                                    height: '6px',
-                                    borderRadius: '50%',
-                                    backgroundColor: 'green',
-                                    marginRight: '6px',
-                                    }}
-                                ></span>   */}
-                            Active 
+                    // <Menu
+                    // onClick={({ key }) => {
+                    //   onStatusFilterChange && onStatusFilterChange(key);
+                    //   setCampaignStatusFilter(key);
+                    // }}// <-- Add this line
+                    // items={[
+                    //     {
+                    //         key: 'all',
+                    //         label: (
+                    //           <span 
+                    //             style={{ 
+                    //               fontSize: '13px', 
+                    //               display: 'flex', 
+                    //               alignItems: 'center',
+                    //               backgroundColor: campaignStatusFilter === 'all' ? '#e6f7ff' : 'transparent',
+                    //             }} 
+                    //             className="custom-menu-item"
+                    //           >
+                    //             {/* <span
+                    //               style={{
+                    //                 width: '6px',
+                    //                 height: '6px',
+                    //                 borderRadius: '50%',
+                    //                 backgroundColor: '#122F6E',
+                    //                 marginRight: '6px',
+                    //               }}
+                    //             ></span> */}
+                    //             All 
+                    //           </span>
+                    //         ),
+                    //     },
+                    //     { 
+                    //         key: 'active', 
+                    //         label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">  
+                    //         {/* <span
+                    //                 style={{
+                    //                 width: '6px',
+                    //                 height: '6px',
+                    //                 borderRadius: '50%',
+                    //                 backgroundColor: 'green',
+                    //                 marginRight: '6px',
+                    //                 }}
+                    //             ></span>   */}
+                    //         Active 
                         
-                            </span> 
-                        },
-                        { 
-                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
-                              {/* <span
-                                style={{
-                                width: '6px',
-                                height: '6px',
-                                borderRadius: '50%',
-                                backgroundColor: 'red',
-                                marginRight: '6px',
-                                }}
-                            ></span> */}
-                            Paused 
+                    //         </span> 
+                    //     },
+                    //     { 
+                    //         key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
+                    //           {/* <span
+                    //             style={{
+                    //             width: '6px',
+                    //             height: '6px',
+                    //             borderRadius: '50%',
+                    //             backgroundColor: 'red',
+                    //             marginRight: '6px',
+                    //             }}
+                    //         ></span> */}
+                    //         Paused 
                       
-                            </span> 
-                        },
-                        { 
-                          key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
-                            {/* <span
-                              style={{
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              backgroundColor: 'red',
-                              marginRight: '6px',
-                              }}
-                          ></span> */}
-                          Pending
+                    //         </span> 
+                    //     },
+                    //     { 
+                    //       key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
+                    //         {/* <span
+                    //           style={{
+                    //           width: '6px',
+                    //           height: '6px',
+                    //           borderRadius: '50%',
+                    //           backgroundColor: 'red',
+                    //           marginRight: '6px',
+                    //           }}
+                    //       ></span> */}
+                    //       Pending
                     
-                          </span> 
-                      },
-                    ]}
+                    //       </span> 
+                    //   },
+                    // ]}
+                    // />
+                    <Menu
+                      onClick={({ key }) => {
+                        onStatusFilterChange && onStatusFilterChange(key);
+                        setCampaignStatusFilter(key); // Ensure state updates
+                      }}
+                      selectedKeys={[campaignStatusFilter]} // ← this is key!
+                      items={[
+                        { key: 'all', label: 'All' },
+                        { key: 'active', label: 'Active' },
+                        { key: 'pause', label: 'Paused' },
+                        { key: 'pending', label: 'Pending' },
+                      ]}
                     />
                 }
                 trigger={['click']}
@@ -2309,7 +2338,7 @@ const App = () => {
                     border: '1px solid #4CAF50',
                     color: theme === 'dark' ? '#95de64' : '#389e0d',
                     fontWeight: 500,
-                    width:'170px'
+                    // width:'170px'
                     // marginRight: '3px'
                     }}
                 >
