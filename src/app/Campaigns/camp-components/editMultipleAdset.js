@@ -3101,7 +3101,7 @@ const AdsetComponent = ({
         //https://www.testapi.adsgoat.in
         const response = await fetch(
           //https://www.testapi.adsgoat.in
-          "http://localhost:4500/api/neweditAdset",
+          "https://www.testapi.adsgoat.in/api/neweditAdset",
           {
             method: "POST",
             headers: {
