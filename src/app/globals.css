@@ -3566,6 +3566,22 @@ select:focus,
 /* .ant-dropdown-menu-item-selected {
   background-color: #e6f7ff !important;
   color: #000 !important;
-  font-weight: 600;
-  border-radius: 6px; // testing
-} */
+}
+
+/* Adset level edit */
+/* In your CSS or styled-component */
+.upload-dark .ant-upload-list-item-name {
+  color: white; /* ✅ visible on dark background */
+}
+
+.upload-light .ant-upload-list-item-name {
+  color: black; /* ✅ visible on light background */
+}
+
+.ant-upload-list-item-done .ant-upload-list-item-name {
+  color: green;
+}
+
+.ant-upload-list-item-error .ant-upload-list-item-name {
+  color: red;
+}
