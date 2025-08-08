@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
 
 html,
 body {
@@ -7,9 +7,9 @@ body {
   scrollbar-width: none;
 }
 * {
-  font-family: 'Roboto';
-  src: url('/path/to/roboto-regular.woff2') format('woff2'),
-       url('/path/to/roboto-regular.woff') format('woff');
+  font-family: "Roboto";
+  src: url("/path/to/roboto-regular.woff2") format("woff2"),
+    url("/path/to/roboto-regular.woff") format("woff");
   /* font-weight: 400; */
   font-style: normal;
 }
@@ -39,7 +39,6 @@ a {
   /* background-color: #000000; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    
 }
 .ad-preview {
   margin: auto;
@@ -117,7 +116,6 @@ a {
   width: 100%;
   opacity: 0.8;
   font-size: 15px;
-
 }
 
 .ad-button button {
@@ -126,9 +124,9 @@ a {
   padding: 6px 12px;
   white-space: nowrap;
   cursor: pointer;
-  background-color: #91C25F;
+  background-color: #91c25f;
   border: 1px solid #4caf50;
-  margin-bottom:'5px';
+  margin-bottom: "5px";
 }
 .icons {
   display: flex;
@@ -144,9 +142,15 @@ a {
   column-gap: 5px;
 }
 @keyframes blinking {
-  0% { opacity: 1; }
-  50% { opacity: 0.2; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .blinking {
@@ -159,19 +163,22 @@ a {
   width: 10px; /* Adjust the width of the pagination points */
   height: 10px; /* Adjust the height of the pagination points */
   margin: 0 4px; /* Adjust the margin between pagination points */
-  background-color: rgb(12, 237, 12); /* Set the background color of the pagination points */
+  background-color: rgb(
+    12,
+    237,
+    12
+  ); /* Set the background color of the pagination points */
 }
 /*  */
 body {
   background-color: #f5f7fa;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   margin: 0;
   padding: 0;
 }
 .ant-card {
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
- 
 }
 .ant-card-bordered {
   border: none;
@@ -185,8 +192,7 @@ body {
   border-color: #4e4ed2;
 }
 
-
-.select-container{
+.select-container {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -203,20 +209,19 @@ body {
   flex: 1 1 200px; /* Flex-grow, flex-shrink, flex-basis */
   min-width: 150px; /* Minimum width of each Select element */
 }
-.select-account{
+.select-account {
   height: 40px;
   width: 200px;
-  
 }
-.date-class{
+.date-class {
   height: 40px;
   width: 150px;
 }
-.select-timezone{
+.select-timezone {
   height: 40px;
   width: 100px;
 }
-.submit-button{
+.submit-button {
   height: 32px;
   width: 120px;
   background-color: rgb(104, 106, 218);
@@ -224,23 +229,23 @@ body {
   border-radius: 8px;
   border: 0px solid;
 }
-.font-red{
+.font-red {
   color: rgba(245, 8, 8, 0.993);
 }
-.ag-container{
-  height:500px;
+.ag-container {
+  height: 500px;
   margin-bottom: 0px;
   padding-bottom: 0px;
   /* background-color: #bfbdb6; */
 }
-.ag-grid-Loader{
+.ag-grid-Loader {
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.daily-contaier{
+.daily-contaier {
   width: 100px;
   height: 30px;
   display: flex;
@@ -260,38 +265,37 @@ body {
 .blinking-circle-1 {
   width: 13px;
   height: 13px;
-  background-color:red;
+  background-color: red;
   border-radius: 50%;
   animation: blink 1s infinite;
 }
-.blinking-circle-3{
+.blinking-circle-3 {
   width: 13px;
   height: 13px;
-  background-color:rgb(18, 47, 110);
+  background-color: rgb(18, 47, 110);
   border-radius: 50%;
   animation: blink 1s infinite;
-
 }
 
-
 @keyframes blink {
-  0%, 100% {
-      opacity: 1;
+  0%,
+  100% {
+    opacity: 1;
   }
   50% {
-      opacity: 0;
+    opacity: 0;
   }
 }
 
 .ant-carousel .slick-dots li button {
   background-color: green; /* Change slider dot color */
-  }
+}
 
 .ant-carousel .slick-dots li.slick-active button {
   background-color: darkgreen; /* Change active slider dot color */
 }
 
-.export-button{
+.export-button {
   width: 100px;
   height: 30px;
   background-color: lightcoral;
@@ -301,13 +305,13 @@ body {
   font-weight: 600;
 }
 
-.select-element{
+.select-element {
   width: 200px;
   height: 30px;
 }
 
-@media (min-width:600px){
-  .select-element{
+@media (min-width: 600px) {
+  .select-element {
     width: 150px;
     height: 30px;
   }
@@ -337,10 +341,9 @@ body {
 .reports-container-content {
   width: 100%;
   height: 100%;
-  padding-right: 17px; 
+  padding-right: 17px;
   box-sizing: content-box;
 }
-
 
 /* Custom properties for easy theming */
 /* :root {
@@ -427,13 +430,12 @@ body {
   color: #000;
 }
 
-
 /* Specific styling for total footer if needed */
-.ag-theme-alpine .ag-row.ag-footer.ag-row-level-0 { /* Assuming level 0 is the total footer */
+.ag-theme-alpine .ag-row.ag-footer.ag-row-level-0 {
+  /* Assuming level 0 is the total footer */
   background-color: darkblue;
   color: white;
 }
-
 
 .custom-carousel .slick-dots {
   bottom: -30px; /* Position the dots at the bottom */
@@ -462,12 +464,12 @@ body {
 /* <<<<<<< HEAD */
 
 /*  New Css  */
-:where(.css-dev-only-do-not-override-f7vrd6).ant-menu-light .ant-menu-item-selected{
-  background-color: #91C25F !important;
-  
+:where(.css-dev-only-do-not-override-f7vrd6).ant-menu-light
+  .ant-menu-item-selected {
+  background-color: #91c25f !important;
 }
-:where(.css-f7vrd6).ant-menu-light .ant-menu-item-selected{
-  background-color: #91C25F !important;
+:where(.css-f7vrd6).ant-menu-light .ant-menu-item-selected {
+  background-color: #91c25f !important;
 }
 
 :where(.css-dev-only-do-not-override-f7vrd6).ant-btn-primary {
@@ -496,7 +498,11 @@ body.dark-mode .ag-header-container {
   --card-text-color: #fff;
 }
 /* Apply styles to the Ant Design Select component in dark mode */
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector {
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-select-outlined:not(
+    .ant-select-customize-input
+  )
+  .ant-select-selector {
   border: 1px solid #282628;
   background: #555555;
   color: #ffffff;
@@ -506,13 +512,23 @@ body.dark-mode .ant-select-selector {
   background: #555555 !important;
   color: #ffffff !important;
 }
-body.dark-mode :where(.css-f7vrd6).ant-table-wrapper .ant-table-tbody .ant-table-row >.ant-table-cell-row-hover {
+body.dark-mode
+  :where(.css-f7vrd6).ant-table-wrapper
+  .ant-table-tbody
+  .ant-table-row
+  > .ant-table-cell-row-hover {
   background: #282628 !important;
 }
-body.light-mode :where(.css-f7vrd6).ant-table-wrapper .ant-table-tbody .ant-table-row >.ant-table-cell-row-hover {
+body.light-mode
+  :where(.css-f7vrd6).ant-table-wrapper
+  .ant-table-tbody
+  .ant-table-row
+  > .ant-table-cell-row-hover {
   background: #fff !important;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper .ant-table-row-expand-icon {
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper
+  .ant-table-row-expand-icon {
   border: 1px solid #282628;
   background: #555555;
   color: #ffffff;
@@ -523,7 +539,8 @@ body.dark-mode .ant-table-row-expand-icon {
   color: #ffffff;
 }
 
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
   background: #555555;
   border: 1px solid #282628;
   color: aliceblue;
@@ -538,31 +555,40 @@ body.dark-mode .startview svg {
   color: gold !important;
 }
 body.dark-mode .Message svg {
-  color: #4CAF50 !important;
+  color: #4caf50 !important;
 }
 
-body.light-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
+body.light-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
   border: solid 1px #d9d9d9;
   background: #ffffff;
 }
-body.dark-mode .anticon svg{
-  color: #ffffff; 
+body.dark-mode .anticon svg {
+  color: #ffffff;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-drawer .ant-drawer-content{
-  color: #ffffff; 
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-drawer
+  .ant-drawer-content {
+  color: #ffffff;
   background-color: #282628;
 }
 body.dark-mode .ant-table-content .ant-table-cell {
-  color: #ffffff; 
+  color: #ffffff;
   background-color: #282628;
 }
 body.dark-mode .ant-table-content tr:hover {
-  background-color: #1b1b1b !important; 
+  background-color: #1b1b1b !important;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper .ant-table-tbody .ant-table-row >.ant-table-cell-row-hover {
-  background-color: #1b1b1b !important; 
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper
+  .ant-table-tbody
+  .ant-table-row
+  > .ant-table-cell-row-hover {
+  background-color: #1b1b1b !important;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-collapse .ant-collapse-content {
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-collapse
+  .ant-collapse-content {
   color: rgba(0, 0, 0, 0.88);
   background-color: #1b1b1b;
   border-top: 1px solid #d9d9d9;
@@ -573,12 +599,14 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-btn-default {
   color: #fff;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
 }
-body.light-mode .ant-table-content{
-  color: #282628; 
+body.light-mode .ant-table-content {
+  color: #282628;
   background-color: #ffffff;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result .ant-result-title{
-  color: #ffffff; 
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-result
+  .ant-result-title {
+  color: #ffffff;
 }
 body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-input-outlined {
   background: #555555;
@@ -586,21 +614,24 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-input-outlined {
   border-style: solid;
   border-color: #d9d9d9;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-form-item .ant-form-item-label >label{
-
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-form-item
+  .ant-form-item-label
+  > label {
   color: #c1c1c1;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper .ant-table-container {
+body.dark-mode
+  :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper
+  .ant-table-container {
   position: relative;
   background-color: #333333;
   color: #fff;
 }
-body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
- background-color: #3e3e3e;
+body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result {
+  background-color: #3e3e3e;
 }
 
-
-:where(.css-dev-only-do-not-override-f7vrd6).ant-result{
+:where(.css-dev-only-do-not-override-f7vrd6).ant-result {
   background-color: var(--card-bg-color);
   color: var(--card-text-color);
 }
@@ -625,7 +656,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 /* Dark mode styles */
 .dark-mode {
-  background-color: #37474F; /* gray-700 from Tailwind */
+  background-color: #37474f; /* gray-700 from Tailwind */
 }
 
 /* General icon styles */
@@ -652,7 +683,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 /* Light mode */
 .light-mode {
-  color: #000; 
+  color: #000;
   border: none;
 }
 
@@ -661,14 +692,15 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   color: #fff;
   border: none;
 }
-:where(.css-dev-only-do-not-override-f7vrd6).ant-select-filled:not(.ant-select-customize-input) .ant-select-selector {
+:where(.css-dev-only-do-not-override-f7vrd6).ant-select-filled:not(
+    .ant-select-customize-input
+  )
+  .ant-select-selector {
   background: rgb(255 255 255 / 4%);
   border: 1px solid transparent;
   color: #000;
   background-color: #fafdf4;
 }
-
-
 
 /* =======
 >>>>>>> master */
@@ -692,16 +724,13 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 
 /* Style for hovered/active options (light black color) */
-.custom-dropdown .ant-select-item-option-selected
- {
+.custom-dropdown .ant-select-item-option-selected {
   background-color: #d5e9f3 !important; /* Light black color */
   color: #333 !important;
-  
 }
 .custom-dropdown .ant-select-item-option-active {
   background-color: #646363 !important; /* Light black color */
   color: #fff !important;
-  
 }
 
 /* Scrollbar styling for the custom dropdown */
@@ -787,8 +816,8 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 
 .dark-theme-dropdown .ant-picker-presets ul > li:hover {
-  background-color: #646363 !important;  
-  color: #fff !important;              
+  background-color: #646363 !important;
+  color: #fff !important;
 }
 
 .checkbox-group-dark .ant-checkbox-wrapper {
@@ -816,7 +845,6 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .light-theme .ant-card-head-title {
   color: #333;
 }
-
 
 /* darkmode ant-modal */
 .dark-mode .ant-modal-content {
@@ -853,7 +881,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 
 .ag-header-cell[col-id="actions"] .ag-header-cell-menu-button {
-  display: none !important;  /* Hide the menu button */
+  display: none !important; /* Hide the menu button */
 }
 
 .dark-theme .ant-table {
@@ -869,7 +897,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 /* Table Header */
 .dark-theme .ant-table-thead > tr > th {
-  background-color: #4A5D3A !important; /* Your green shade */
+  background-color: #4a5d3a !important; /* Your green shade */
   color: white !important;
   border-color: #444;
 }
@@ -885,46 +913,45 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .dark-theme .ant-table-tbody > tr:hover > td {
   background-color: #3a3a3a !important;
 }
-.notifiview{
+.notifiview {
   position: absolute;
-    background-color: white;
-    z-index: 99999999;
-    padding: 10px 16px;
-    left: auto;
-    right: 60px;
-    top: 73px;
-    width: 300px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    height: 300px ;
-    overflow-y: scroll;
-    scrollbar-width: none;
-  
+  background-color: white;
+  z-index: 99999999;
+  padding: 10px 16px;
+  left: auto;
+  right: 60px;
+  top: 73px;
+  width: 300px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  height: 300px;
+  overflow-y: scroll;
+  scrollbar-width: none;
 }
-.Badge{
+.Badge {
   position: relative;
-    background-color: #EC7117;
-    padding: 2px 5px;
-    border-radius: 50%;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-    top: -17px;
-    left: auto;
-    right: 13px;
+  background-color: #ec7117;
+  padding: 2px 5px;
+  border-radius: 50%;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  top: -17px;
+  left: auto;
+  right: 13px;
 }
-.dark-mode .Badge{
+.dark-mode .Badge {
   color: black;
 }
 
 .ag-header {
-  background-color: #E5E9EF !important;
+  background-color: #e5e9ef !important;
 }
 .dark-mode .ag-header {
   background-color: #11111057 !important;
 }
 
-.dark-mode .notifiview{
+.dark-mode .notifiview {
   color: #fff;
   background-color: #333333;
 }
@@ -933,10 +960,9 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   color: #ffffff !important; /* Force the text color to black */
 }
 .dark-theme .ant-table-thead > tr > th {
-  color: #333333 !important;  /* Change the header text color to a dark color */
+  color: #333333 !important; /* Change the header text color to a dark color */
   background-color: #ffffff !important; /* Optionally set the background color to black */
 }
-
 
 .dark-result .ant-result-title {
   color: #ffffff; /* Title color in dark mode */
@@ -963,12 +989,12 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   color: #333333; /* Dark gray color for light theme */
 }
 .custom-tabs .ant-tabs-nav .ant-tabs-tab {
-  margin: 0;              /* Remove default margin between tabs */
-  padding: 0 15px;         /* Add slight padding for readability */
+  margin: 0; /* Remove default margin between tabs */
+  padding: 0 15px; /* Add slight padding for readability */
 }
 
 .custom-tabs .ant-tabs-nav {
-  gap: 5;                 /* Ensure no gap between tabs */
+  gap: 5; /* Ensure no gap between tabs */
 }
 .fabric-canvas-wrapper {
   position: absolute;
@@ -977,7 +1003,12 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   width: 100%;
   height: 100%;
   z-index: 9999; /* Ensure FabricCanvas appears above everything */
-  background: rgba(0, 0, 0, 0.5); /* Optional: Dark overlay to highlight the editor */
+  background: rgba(
+    0,
+    0,
+    0,
+    0.5
+  ); /* Optional: Dark overlay to highlight the editor */
 }
 
 .ag-pinned-row {
@@ -991,10 +1022,9 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ant-result-icon {
   margin-bottom: -30px !important; /* Adjust value as needed */
 }
-.ant-result-title{
+.ant-result-title {
   margin-bottom: -30px !important; /* Adjust value as needed */
 }
-
 
 .ag-root-wrapper {
   flex-grow: 1;
@@ -1017,9 +1047,9 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ant-picker-cell-in-range::before {
   background-color: transparent !important;
   border-radius: 0 !important;
-  content: '' !important;
+  content: "" !important;
 }
-   
+
 /* 2) Directly set the background for all in-range cells 
 (including start, end, and single-date selections). */
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-in-range,
@@ -1027,7 +1057,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-end,
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-selected {
   background-color: #dcf1fa !important; /* your highlight color */
-  color: #000 !important;              /* text color on top */
+  color: #000 !important; /* text color on top */
 }
 
 .ant-picker-cell-range-start .ant-picker-cell-inner {
@@ -1035,14 +1065,13 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   color: #000 !important;
   border: 1px solid #abcbf9;
 }
- 
+
 /* Change the background color of END date */
 .ant-picker-cell-range-end .ant-picker-cell-inner {
   background-color: #dcf1fa !important; /* your custom color */
   color: #000 !important;
   border: 1px solid #abcbf9;
 }
-
 
 .sticky-notes-container {
   display: flex;
@@ -1101,9 +1130,9 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   width: 200px;
   min-height: 160px;
   padding: 10px;
-  background: #FFD966;
+  background: #ffd966;
   border-radius: 10px;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -1127,7 +1156,8 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   object-fit: cover;
 }
 
-.close-btn, .delete-btn {
+.close-btn,
+.delete-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -1139,9 +1169,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   color: red;
 }
 
-
 /* Dark mode */
-
 
 /* .sticky-notes-container {
   display: flex;
@@ -1180,7 +1208,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   }
 }
 
-.toolbar-btn{
+.toolbar-btn {
   background-color: transparent;
   border: none;
 }
@@ -1196,7 +1224,7 @@ body.dark-mode .black-icon.anticon svg {
   color: #000000 !important;
 }
 body.dark-mode .black-icon-info.anticon svg {
-  color: #91C25F !important;
+  color: #91c25f !important;
 }
 body.dark-mode .black-icon-active.anticon svg {
   color: green !important;
@@ -1205,11 +1233,11 @@ body.dark-mode .black-icon-pause.anticon svg {
   color: orange !important;
 }
 body.dark-mode .black-icon-active-1.anticon svg {
-  color: #91C25F !important;
+  color: #91c25f !important;
 }
 
 body.dark-mode .black-icon-pause-1.anticon svg {
-  color: #EC7117 !important;
+  color: #ec7117 !important;
 }
 
 body.dark-mode .black-icon-comment.anticon svg {
@@ -1217,37 +1245,34 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-input-dark {
-  background-color: #333 !important;  /* Input background */
-  color: #fff !important;                /* Input text color */
+  background-color: #333 !important; /* Input background */
+  color: #fff !important; /* Input text color */
 }
 .custom-input-dark::placeholder {
-  color: #ccc !important;                /* Placeholder color */
+  color: #ccc !important; /* Placeholder color */
 }
 .custom-input-dark .ant-input::placeholder {
-  color: #fff !important;  /* White placeholder */
+  color: #fff !important; /* White placeholder */
 }
 
 @media (max-width: 500px) {
-  .custom-input-dark{
+  .custom-input-dark {
     width: 310px !important;
     /* margin-bottom: 10px; */
     /* margin-top: 10px; */
   }
-  .custom-input-light{
-    width: 310px !important; 
+  .custom-input-light {
+    width: 310px !important;
     /* margin-bottom: 10px; */
     /* margin-top: 10px; */
   }
 }
 .custom-input-dark:hover {
-  border-color: #4caf50 !important; 
- 
+  border-color: #4caf50 !important;
 }
 
-
 .custom-input-light:hover {
-  border-color: #4caf50 !important; 
- ;
+  border-color: #4caf50 !important;
 }
 
 .custom-input-light::placeholder {
@@ -1263,14 +1288,14 @@ body.dark-mode .black-icon-comment.anticon svg {
   outline: none !important;  
 } */
 .custom-input-light .ant-input:focus {
-  border-color:  #4caf50!important;
+  border-color: #4caf50 !important;
   box-shadow: none !important;
   outline: none !important;
 }
 
 /* Green text for active tab */
 .custom-tabs.dark-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #91C25F !important;
+  color: #91c25f !important;
 }
 
 .custom-tabs.light-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -1287,23 +1312,23 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Ink bar */
 .custom-tabs.dark-mode-tabs .ant-tabs-ink-bar {
-  background-color: #91C25F !important;
+  background-color: #91c25f !important;
   /* width: fit-content !important; */
 }
 .custom-tabs.light-mode-tabs .ant-tabs-ink-bar {
-  background-color: #91C25F !important;
+  background-color: #91c25f !important;
 }
 .custom-tabs.dark-mode-tabs .ant-tabs-nav::before {
   border-bottom: 1px solid transparent !important;
 }
 
 .top-tabs.dark-mode-tabs .ant-tabs-ink-bar {
-  background-color: #91C25F !important;
+  background-color: #91c25f !important;
   width: fit-content !important;
 }
 
 .top-tabs.light-mode-tabs .ant-tabs-ink-bar {
-  background-color: #91C25F !important;
+  background-color: #91c25f !important;
   width: fit-content !important;
 }
 
@@ -1345,7 +1370,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Table body rows */
 .dark-theme .ant-table-tbody > tr > td {
-  background-color: green!important;
+  background-color: green !important;
   color: white !important;
   border-color: green;
 }
@@ -1364,7 +1389,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.light-mode-pagination .ant-table-thead > tr > th {
-  background-color: #E5E9EF !important; /* Light green for light mode */
+  background-color: #e5e9ef !important; /* Light green for light mode */
   color: black !important;
   font-weight: normal !important;
   border-bottom: 1px solid #ccc;
@@ -1412,8 +1437,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item-active {
-  background-color: #91C25F;
-  border-color: #91C25F;
+  background-color: #91c25f;
+  border-color: #91c25f;
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item-active a {
@@ -1421,18 +1446,21 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item:hover {
-  border-color: #91C25F;
-  color: #91C25F;
+  border-color: #91c25f;
+  color: #91c25f;
 }
 
 .custom-dark-table.dark-mode-pagination .ant-table-tbody > tr > td {
-  background-color: #2a2a2a !important;  /* dark background */
-  color: white !important;              /* white text */
+  background-color: #2a2a2a !important; /* dark background */
+  color: white !important; /* white text */
   border-color: #444 !important;
 }
 
 /* Optional: zebra striping */
-.custom-dark-table.dark-mode-pagination .ant-table-tbody > tr:nth-child(even) > td {
+.custom-dark-table.dark-mode-pagination
+  .ant-table-tbody
+  > tr:nth-child(even)
+  > td {
   background-color: #2f2f2f !important;
 }
 
@@ -1452,8 +1480,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item-active {
-  background-color: #91C25F;
-  border-color: #91C25F;
+  background-color: #91c25f;
+  border-color: #91c25f;
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item-active a {
@@ -1461,8 +1489,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item:hover {
-  border-color: #91C25F;
-  color: #91C25F;
+  border-color: #91c25f;
+  color: #91c25f;
 }
 
 /* ========== ARROWS AND ELLIPSIS ========== */
@@ -1497,7 +1525,6 @@ body.dark-mode .black-icon-comment.anticon svg {
   background-color: #333 !important;
 }
 
-
 .custom-collapse.dark-mode-collapse .ant-collapse-content-box {
   background-color: #333;
   color: white;
@@ -1508,7 +1535,6 @@ body.dark-mode .black-icon-comment.anticon svg {
   background-color: #ffffff;
   color: black;
 }
-
 
 .custom-dropdown-menu.dark-menu {
   background-color: #333 !important;
@@ -1559,11 +1585,11 @@ body.dark-mode .black-icon-comment.anticon svg {
   scrollbar-width: thin;
 }
 
-.add-account-container{
-  width:'100%';
-  padding-left:"5px"
+.add-account-container {
+  width: "100%";
+  padding-left: "5px";
 }
-.add-account-container-input{
+.add-account-container-input {
   display: flex;
   margin-bottom: 5px;
   /* width:'150%'; */
@@ -1590,11 +1616,10 @@ body.dark-mode .black-icon-comment.anticon svg {
   border-radius: 8px;
 }
 
-
 .custom-confirm-dark .ant-btn-primary,
 .custom-confirm-light .ant-btn-primary {
-  background-color: #91C25F !important;
-  border-color: #91C25F !important;
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
   color: black !important;
   font-weight: 600;
 }
@@ -1604,8 +1629,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-confirm-light .ant-btn-primary:hover,
 .custom-confirm-dark .ant-btn-primary:focus,
 .custom-confirm-light .ant-btn-primary:focus {
-  background-color: #91C25F !important;
-  border-color: #91C25F !important;
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
   color: black !important;
 }
 
@@ -1617,8 +1642,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-confirm-dark .ant-btn-default:hover {
-  color: #91C25F !important;
-  border-color: #91C25F !important;
+  color: #91c25f !important;
+  border-color: #91c25f !important;
 }
 
 /* 🌓 Dark theme modal background + text */
@@ -1694,10 +1719,8 @@ body.dark-mode .black-icon-comment.anticon svg {
   border: 1px solid #666;
 }
 
-
-
 .dark-mode-pagination .ant-select-dropdown {
-  background-color: #1e1e1e !important;  /* Dark background */
+  background-color: #1e1e1e !important; /* Dark background */
   color: white !important;
 }
 
@@ -1711,7 +1734,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .dark-mode-pagination .ant-select-item-option-active,
 .dark-mode-pagination .ant-select-item-option-selected {
   background-color: #333 !important;
-  color: #91C25F !important; /* Optional highlight text color */
+  color: #91c25f !important; /* Optional highlight text color */
 }
 
 /* Search input inside dropdown (if any) */
@@ -1811,20 +1834,20 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 @media (max-width: 500px) {
-  .sider{
+  .sider {
     display: none;
   }
-  .navbar-2{
+  .navbar-2 {
     display: flex;
     align-items: center;
   }
-  .navbar-1{
+  .navbar-1 {
     display: none;
   }
-  .Mobile{
+  .Mobile {
     display: block;
   }
-  .Desktop{
+  .Desktop {
     display: none;
   }
 }
@@ -1836,40 +1859,37 @@ body.dark-mode .black-icon-comment.anticon svg {
     height: 100vh;
     transition: all 0.3s ease; /* Optional: smoother collapse/expand */
   }
-  .logo{
+  .logo {
     display: none;
   }
-  .navbar-1{
+  .navbar-1 {
     display: flex;
     align-items: center;
   }
-  .navbar-2{
+  .navbar-2 {
     display: none;
   }
-  .Mobile{
+  .Mobile {
     display: none;
   }
-  .Desktop{
+  .Desktop {
     display: block;
-    
   }
-  .mobile-navbar{
+  .mobile-navbar {
     display: none;
   }
 }
 
-
-
 /* Force checkbox checked background and border */
 .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #91C25F !important;
-  border-color: #91C25F !important;
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
 }
 
 /* Optional: keep border color on hover/focus */
 .ant-checkbox-wrapper:hover .ant-checkbox-inner,
 .ant-checkbox-input:focus + .ant-checkbox-inner {
-  border-color: #91C25F !important;
+  border-color: #91c25f !important;
 }
 
 /* Optional: adjust checkmark color (white for contrast) */
@@ -1900,10 +1920,6 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-input-dark input.ant-input::placeholder {
   color: lime !important;
 } */
-
-
-
-
 
 /* ---------------------------------- */
 /* 🌞 LIGHT THEME (default behavior) */
@@ -1936,7 +1952,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .light-theme-tabs .ant-tabs-tab-active {
   background-color: #fff;
-  box-shadow: 0px 2px 4px rgba(0,0,0,0.08);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.08);
   color: #52c41a !important;
   font-weight: bold;
 }
@@ -1961,7 +1977,9 @@ body.dark-mode .black-icon-comment.anticon svg {
   background-color: #fff !important; /* match active background */
 }
 
-.light-theme-tabs .ant-tabs-tab:not(.ant-tabs-tab-active):hover .ant-tabs-tab-btn {
+.light-theme-tabs
+  .ant-tabs-tab:not(.ant-tabs-tab-active):hover
+  .ant-tabs-tab-btn {
   color: black !important;
 }
 
@@ -1997,7 +2015,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .dark-theme-tabs .ant-tabs-tab-active {
   background-color: #242526;
-  box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
   color: #52c41a !important;
   font-weight: bold;
 }
@@ -2091,7 +2109,6 @@ body.dark-mode .black-icon-comment.anticon svg {
   flex-shrink: 0;
 }
 
-
 /* Compact Upload item - remove right padding/spacing */
 .ant-upload-list-item {
   display: inline-flex !important;
@@ -2164,33 +2181,33 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .zoom-90 {
-  zoom: 0.9;                  /* Chrome, Edge, Safari */
+  zoom: 0.9; /* Chrome, Edge, Safari */
   transform-origin: top left; /* Optional fallback */
   /* display: inline-block;      Prevent extra space */
 }
 
 .zoom-95 {
-  zoom: 0.98;                  /* Chrome, Edge, Safari */
+  zoom: 0.98; /* Chrome, Edge, Safari */
   transform-origin: top left; /* Optional fallback */
   /* display: inline-block;      Prevent extra space */
 }
-.showin-mobile{
+.showin-mobile {
   display: none;
 }
 
 @media (max-width: 500px) {
   .zoom-90 {
-    zoom: 0.6;                /* Adjust for smaller screens */
+    zoom: 0.6; /* Adjust for smaller screens */
   }
-  .zoom-revenue{
+  .zoom-revenue {
     transform: scale(0.9);
     /* transform-origin: top left; */
   }
-  .sider-bar{
+  .sider-bar {
     display: none;
   }
   .zoom-95 {
-    zoom: 0.82;                  /* Chrome, Edge, Safari */
+    zoom: 0.82; /* Chrome, Edge, Safari */
     transform-origin: top left; /* Optional fallback */
     /* display: inline-block;      Prevent extra space */
   }
@@ -2198,33 +2215,33 @@ body.dark-mode .black-icon-comment.anticon svg {
     margin-top: 70px !important;
     margin-bottom: 5px;
   }
-  .showin-mobile{
+  .showin-mobile {
     display: block;
     margin-top: 25px;
   }
 }
 
 @media (max-width: 500px) {
-  .sider{
+  .sider {
     display: none;
   }
-  .navbar-2{
+  .navbar-2 {
     display: flex;
     align-items: center;
   }
-  .navbar-1{
+  .navbar-1 {
     display: none;
   }
-  .Dashboard-Details-1{
+  .Dashboard-Details-1 {
     display: none;
   }
-  .Dashboard-Details-2{
+  .Dashboard-Details-2 {
     display: block;
   }
-  .Mobile{
+  .Mobile {
     display: block;
   }
-  .Desktop{
+  .Desktop {
     display: none;
   }
 }
@@ -2236,30 +2253,29 @@ body.dark-mode .black-icon-comment.anticon svg {
     height: 100vh;
     transition: all 0.3s ease; /* Optional: smoother collapse/expand */
   }
-  .logo{
+  .logo {
     display: none;
   }
-  .navbar-1{
+  .navbar-1 {
     display: flex;
     align-items: center;
   }
-  .navbar-2{
+  .navbar-2 {
     display: none;
   }
-  .Mobile{
+  .Mobile {
     display: none;
   }
-  .Desktop{
-    display: block;
-    
-  }
-  .mobile-navbar{
-    display: none;
-  }
-  .Dashboard-Details-1{
+  .Desktop {
     display: block;
   }
-  .Dashboard-Details-2{
+  .mobile-navbar {
+    display: none;
+  }
+  .Dashboard-Details-1 {
+    display: block;
+  }
+  .Dashboard-Details-2 {
     display: none;
   }
 }
@@ -2305,7 +2321,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Grid cells */
 .grid-cell {
-  background-color: #0E1E38;
+  background-color: #0e1e38;
   color: #fff;
   padding: 16px;
   text-align: center;
@@ -2341,9 +2357,6 @@ body.dark-mode .black-icon-comment.anticon svg {
   border-bottom: none;
 }
 
-
-
-
 @media (max-width: 500px) {
   .responsive-grid {
     position: relative;
@@ -2376,7 +2389,6 @@ body.dark-mode .black-icon-comment.anticon svg {
     z-index: 2; /* Make sure content is above lines */
   }
 }
-
 
 /* Root container: responsive width */
 .custom-single-month-picker {
@@ -2463,7 +2475,8 @@ body.dark-mode .black-icon-comment.anticon svg {
   font-weight: 500;
 }
 
-.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected::before {
+.dark-theme-dropdown.custom-single-month-picker
+  .ant-picker-cell-selected::before {
   background-color: #e6f7ff !important;
 }
 
@@ -2496,7 +2509,6 @@ body.dark-mode .black-icon-comment.anticon svg {
     box-sizing: border-box;
   }
 }
-
 
 /* 🔹 Shrink preset column width globally */
 .custom-single-month-picker .ant-picker-presets {
@@ -2698,20 +2710,20 @@ body.dark-mode .black-icon-comment.anticon svg {
   justify-content: space-between !important;
 }
 
-@media (max-width: 500px)  and (min-width: 321px) {
+@media (max-width: 500px) and (min-width: 321px) {
   .custom-single-month-picker .ant-picker-header {
     width: 80% !important;
     margin: 0 auto !important;
     justify-content: space-between !important;
   }
-  
+
   /* ✅ Shrink calendar date grid to 60% and center */
   .custom-single-month-picker .ant-picker-content {
     width: 80% !important;
     margin: 0 auto !important;
     table-layout: fixed !important;
   }
-  
+
   /* ✅ Shrink footer buttons to 60% and center */
   .custom-single-month-picker .ant-picker-footer {
     width: 80% !important;
@@ -2720,9 +2732,7 @@ body.dark-mode .black-icon-comment.anticon svg {
     display: flex !important;
     justify-content: space-between !important;
   }
-  
 }
-
 
 /* ✅ 1. Remove ALL flex spacing between preset and calendar */
 .custom-single-month-picker .ant-picker-panel-container {
@@ -2753,7 +2763,9 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* ✅ 4. (Optional) Ensure calendar fills space beside presets */
 .custom-single-month-picker .ant-picker-panel {
-  width: calc(100% - 90px) !important; /* adjust 90px to match your preset width */
+  width: calc(
+    100% - 90px
+  ) !important; /* adjust 90px to match your preset width */
 }
 /* ✅ Remove any spacing that causes a gap to the right of presets */
 .custom-single-month-picker .ant-picker-panel {
@@ -2777,7 +2789,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   border-right: 1px solid red;
 }
 .custom-single-month-picker .ant-picker-panel {
-  border-left: 1px solid #91C25F;
+  border-left: 1px solid #91c25f;
 }
 /* ✅ 1. Calendar HEADER: remove left spacing */
 .custom-single-month-picker .ant-picker-header {
@@ -2812,7 +2824,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-single-month-picker .ant-picker-header,
 .custom-single-month-picker .ant-picker-panel,
 .custom-single-month-picker .ant-picker-footer {
-  border-left: 1px solid #91C25F;
+  border-left: 1px solid #91c25f;
 }
 .dark-theme-dropdown.custom-single-month-picker .ant-picker-panel {
   background-color: #2e2e2e !important;
@@ -2838,73 +2850,76 @@ body.dark-mode .black-icon-comment.anticon svg {
   background-color: #2e2e2e !important;
 }
 /* 🌙 Make selected date background visible in dark theme */
-.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected::before {
+.dark-theme-dropdown.custom-single-month-picker
+  .ant-picker-cell-selected::before {
   background-color: #e6f7ff !important; /* or any highlight color you prefer */
   border-radius: 4px;
 }
 
 /* ✅ Ensure text inside selected date is readable */
-.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected .ant-picker-cell-inner {
+.dark-theme-dropdown.custom-single-month-picker
+  .ant-picker-cell-selected
+  .ant-picker-cell-inner {
   color: #000 !important; /* dark text on light highlight */
   font-weight: bold;
 }
 /* ✅ Selected date background (single date or start/end of range) */
-.dark-theme-dropdown.custom-single-month-picker 
+.dark-theme-dropdown.custom-single-month-picker
   .ant-picker-cell-selected::before,
-.dark-theme-dropdown.custom-single-month-picker 
+.dark-theme-dropdown.custom-single-month-picker
   .ant-picker-cell-range-start::before,
-.dark-theme-dropdown.custom-single-month-picker 
+.dark-theme-dropdown.custom-single-month-picker
   .ant-picker-cell-range-end::before {
   background-color: #e6f7ff !important; /* Or any visible color */
   border-radius: 4px;
 }
 
 /* ✅ Selected date text must contrast */
-.dark-theme-dropdown.custom-single-month-picker 
-  .ant-picker-cell-selected .ant-picker-cell-inner,
-.dark-theme-dropdown.custom-single-month-picker 
-  .ant-picker-cell-range-start .ant-picker-cell-inner,
-.dark-theme-dropdown.custom-single-month-picker 
-  .ant-picker-cell-range-end .ant-picker-cell-inner {
+.dark-theme-dropdown.custom-single-month-picker
+  .ant-picker-cell-selected
+  .ant-picker-cell-inner,
+.dark-theme-dropdown.custom-single-month-picker
+  .ant-picker-cell-range-start
+  .ant-picker-cell-inner,
+.dark-theme-dropdown.custom-single-month-picker
+  .ant-picker-cell-range-end
+  .ant-picker-cell-inner {
   color: #333 !important;
   background-color: #e6f7ff !important;
   font-weight: 600;
   border-radius: 0% !important; /* Remove rounded corners */
 }
-.custom-single-month-picker 
-  .ant-picker-cell-selected .ant-picker-cell-inner,
-.custom-single-month-picker 
-  .ant-picker-cell-range-start .ant-picker-cell-inner,
-.custom-single-month-picker 
-  .ant-picker-cell-range-end .ant-picker-cell-inner {
+.custom-single-month-picker .ant-picker-cell-selected .ant-picker-cell-inner,
+.custom-single-month-picker .ant-picker-cell-range-start .ant-picker-cell-inner,
+.custom-single-month-picker .ant-picker-cell-range-end .ant-picker-cell-inner {
   color: #333 !important;
   background-color: #e6f7ff !important;
   font-weight: 600;
   border-radius: 0% !important; /* Remove rounded corners */
   border: 0 !important; /* Remove any border */
 }
-.dark-theme-dropdown.custom-single-month-picker 
+.dark-theme-dropdown.custom-single-month-picker
   .ant-picker-cell-selected::before {
   background-color: red !important;
 }
 
 /* ✅ Remove unwanted default border around range-end date */
-.dark-theme-dropdown.custom-single-month-picker 
+.dark-theme-dropdown.custom-single-month-picker
   .ant-picker-cell-range-end::after {
   border: none !important;
   box-shadow: none !important;
 }
 
 /* ✅ Make start/end backgrounds match */
-.dark-theme-dropdown.custom-single-month-picker 
+.dark-theme-dropdown.custom-single-month-picker
   .ant-picker-cell-range-start::before,
-.dark-theme-dropdown.custom-single-month-picker 
+.dark-theme-dropdown.custom-single-month-picker
   .ant-picker-cell-range-end::before {
   background-color: #333 !important;
   border-radius: 4px !important;
 }
 
-.upload-container-11{
+.upload-container-11 {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
@@ -2918,14 +2933,14 @@ body.dark-mode .black-icon-comment.anticon svg {
   }
   .ag-grid-responsive {
     height: 200px !important; /* Adjust height for mobile */
-    overflow: auto !important; 
+    overflow: auto !important;
   }
   .upload-container-11 {
     display: flex;
     width: 100%;
     flex-wrap: wrap;
   }
-  .container{
+  .container {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -2943,27 +2958,25 @@ body.dark-mode .black-icon-comment.anticon svg {
 /* On hover — change only border and icon color */
 .dark-icon-button:hover {
   border-color: #4caf50 !important; /* green border */
-  color: #91C25F !important;        /* icon color */
+  color: #91c25f !important; /* icon color */
 }
 
 /* Optional: focus state for accessibility */
 .dark-icon-button:focus {
   border-color: #4caf50 !important;
-  color: #91C25F !important;
+  color: #91c25f !important;
 }
 
 .dark-icon-button:hover .anticon,
 .dark-icon-button:hover .anticon > svg {
-  color: #91C25F !important;
-  fill: #91C25F !important;
+  color: #91c25f !important;
+  fill: #91c25f !important;
 }
 
 /* Assuming your app has a class like .dark-theme on the root in dark mode */
 .custom-dark-mode .ant-upload-list-item-name {
   color: white !important;
 }
-
-
 
 /* Light mode styles */
 .custom-collapse-light .custom-panel {
@@ -2976,8 +2989,6 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: #000 !important;
 }
 
-
-
 /* Tag background and text for selected items in dark theme */
 .dark-theme-category .ant-select-selector {
   background-color: #444 !important; /* background of the full selector */
@@ -2986,8 +2997,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .dark-theme-category .ant-select-selection-item {
-  background-color: #333 !important;  /* tag background */
-  color: white !important;            
+  background-color: #333 !important; /* tag background */
+  color: white !important;
   border: none !important;
 }
 
@@ -2998,29 +3009,26 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-notification {
-  background-color: #1f1f1f !important;  /* Dark background */
-  color: #ffffff !important;            /* White text */
+  background-color: #1f1f1f !important; /* Dark background */
+  color: #ffffff !important; /* White text */
   border: 1px solid #333 !important;
 }
 
 .custom-dark-notification .ant-notification-notice-message,
 .custom-dark-notification .ant-notification-notice-description {
-  color: #ffffff !important;  /* Force white text for message/description */
+  color: #ffffff !important; /* Force white text for message/description */
 }
 
 .custom-light-notification {
-  background-color: #ffffff !important;  /* Dark background */
-  color: #1f1f1f !important;           
+  background-color: #ffffff !important; /* Dark background */
+  color: #1f1f1f !important;
   border: 1px solid #333 !important;
 }
 
 .custom-light-notification .ant-notification-notice-message,
 .custom-light-notification .ant-notification-notice-description {
-  color: #1f1f1f !important;  
+  color: #1f1f1f !important;
 }
-
-
-
 
 /*Updates notification styles*/
 .upload-form-wrapper {
@@ -3031,7 +3039,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   --input-bg: #ffffff;
   --input-border: #d1d5db;
   --placeholder: #9ca3af;
-  --button-bg: #91C25F;
+  --button-bg: #91c25f;
   --button-hover: #84cd3b;
 
   display: flex;
@@ -3049,7 +3057,7 @@ body.dark .upload-form-wrapper {
   --input-bg: #0e1012;
   --input-border: #475569;
   --placeholder: #94a3b8;
-  --button-bg: #91C25F;
+  --button-bg: #91c25f;
   --button-hover: #84cd3b;
 }
 
@@ -3063,7 +3071,7 @@ body.dark .upload-form-wrapper {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .upload-form-wrapper .form-title {
@@ -3140,8 +3148,6 @@ body.dark .upload-form-wrapper {
   background-color: var(--button-hover);
 }
 
-
-
 .custom-dropdown-dark {
   background-color: #0e1012 !important;
   color: #f9fafb !important;
@@ -3161,7 +3167,7 @@ body.dark .upload-form-wrapper {
   color: #f9fafb !important;
 }
 .custom-grid .ag-header-cell-label {
- font-weight: normal !important;
+  font-weight: normal !important;
 }
 
 .green-border-select.ant-select > .ant-select-selector {
@@ -3187,30 +3193,26 @@ body.dark .upload-form-wrapper {
 }
 
 .ant-modal .ant-btn-primary {
-  background-color: #91C25F !important;
-  border-color: #91C25F !important;
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
 }
 
-.delete-icon{
-  color:'red'
+.delete-icon {
+  color: "red";
 }
 .custom-dollar-icon svg {
   fill: #1890ff !important;
   margin-right: 5px;
- 
 }
 
 .custom-grid .ag-header-cell-label {
   font-weight: normal !important;
 }
 
-
 .ant-modal .ant-btn-primary {
-  background-color: #91C25F !important;
-  border-color: #91C25F !important;
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
 }
-
-
 
 .dark-confirm-modal .ant-modal-confirm-content {
   color: #ffffff;
@@ -3220,131 +3222,140 @@ body.dark .upload-form-wrapper {
   color: #ffffff !important;
 }
 
-
 /* LIGHT THEME – DEFAULT STATE */
 .checkbox-light .ant-checkbox-inner {
-  background-color: #e6f7ff !important;  /* White background */
-  border: 1px solid #91d5ff !important;  /* Blue border */
+  background-color: #e6f7ff !important; /* White background */
+  border: 1px solid #91d5ff !important; /* Blue border */
 }
 
 /* LIGHT THEME – CHECKED STATE */
 .checkbox-light .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #e6f7ff !important;  /* Light blue background */
-  border-color: #91d5ff !important;  /* Blue border */
+  background-color: #e6f7ff !important; /* Light blue background */
+  border-color: #91d5ff !important; /* Blue border */
 }
 
 /* LIGHT THEME – CHECKMARK */
 .checkbox-light .ant-checkbox-checked .ant-checkbox-inner::after {
-  border-color: #1d39c4 !important;  /* Blue tick color */
+  border-color: #1d39c4 !important; /* Blue tick color */
 }
 
 /* LIGHT THEME – HOVER EFFECT */
 .checkbox-light .ant-checkbox:hover .ant-checkbox-inner {
-  border-color: #91d5ff !important;  /* Blue border on hover */
-  background-color: #e6f7ff !important;  /* Light blue background on hover */
+  border-color: #91d5ff !important; /* Blue border on hover */
+  background-color: #e6f7ff !important; /* Light blue background on hover */
 }
 
 /* DARK THEME – DEFAULT STATE */
 .checkbox-dark .ant-checkbox-inner {
-  background-color: #e6f7ff !important;  /* Dark background */
-  border: 1px solid #91d5ff !important;  /* Blue border */
+  background-color: #e6f7ff !important; /* Dark background */
+  border: 1px solid #91d5ff !important; /* Blue border */
 }
 
 /* DARK THEME – CHECKED STATE */
 .checkbox-dark .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #e6f7ff !important;  /* Light blue background */
-  border-color: #91d5ff !important;  /* Blue border */
+  background-color: #e6f7ff !important; /* Light blue background */
+  border-color: #91d5ff !important; /* Blue border */
 }
 
 /* DARK THEME – CHECKMARK */
 .checkbox-dark .ant-checkbox-checked .ant-checkbox-inner::after {
-  border-color: #1d39c4 !important;  /* Blue tick color */
+  border-color: #1d39c4 !important; /* Blue tick color */
 }
 
 /* DARK THEME – HOVER EFFECT */
 .checkbox-dark .ant-checkbox:hover .ant-checkbox-inner {
-  border-color: #91d5ff !important;  /* Blue border on hover */
-  background-color: #e6f7ff !important;  /* Light blue background on hover */
+  border-color: #91d5ff !important; /* Blue border on hover */
+  background-color: #e6f7ff !important; /* Light blue background on hover */
 }
 
 /* FOR CHECKBOX GROUP (both light and dark themes) */
 .checkbox-group-light .ant-checkbox-inner,
 .checkbox-group-dark .ant-checkbox-inner {
-  background-color: #e6f7ff !important;  /* White background */
-  border: 1px solid #91d5ff !important;  /* Blue border */
+  background-color: #e6f7ff !important; /* White background */
+  border: 1px solid #91d5ff !important; /* Blue border */
 }
 
 /* CHECKBOX GROUP – CHECKED STATE */
 .checkbox-group-light .ant-checkbox-checked .ant-checkbox-inner,
 .checkbox-group-dark .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #e6f7ff !important;  /* Light blue background */
-  border-color: #91d5ff !important;  /* Blue border */
+  background-color: #e6f7ff !important; /* Light blue background */
+  border-color: #91d5ff !important; /* Blue border */
 }
 
 /* CHECKBOX GROUP – CHECKMARK */
 .checkbox-group-light .ant-checkbox-checked .ant-checkbox-inner::after,
 .checkbox-group-dark .ant-checkbox-checked .ant-checkbox-inner::after {
-  border-color: #1d39c4 !important;  /* Blue tick color */
+  border-color: #1d39c4 !important; /* Blue tick color */
 }
 
-
 /* Prevent blue color on hover/focus for Input */
-.custom-input-dark, .custom-input-light {
+.custom-input-dark,
+.custom-input-light {
   border: 1px solid #4caf50 !important; /* Retain your custom border color */
 }
 
-.custom-input-dark:focus, .custom-input-light:focus,
-.custom-input-dark:hover, .custom-input-light:hover {
+.custom-input-dark:focus,
+.custom-input-light:focus,
+.custom-input-dark:hover,
+.custom-input-light:hover {
   border-color: #4caf50 !important; /* Retain your custom border color */
   outline: none !important; /* Remove the default blue outline */
   box-shadow: none !important; /* Remove any box shadow caused by focus */
 }
 
 /* Prevent blue color on hover/focus for Select */
-.dark-theme, .light-theme {
-  border-color: #91C25F !important; /* Retain your custom border color */
+.dark-theme,
+.light-theme {
+  border-color: #91c25f !important; /* Retain your custom border color */
 }
 
-.dark-theme:focus, .light-theme:focus,
-.dark-theme:hover, .light-theme:hover {
-  border-color: #91C25F !important; /* Retain your custom border color */
+.dark-theme:focus,
+.light-theme:focus,
+.dark-theme:hover,
+.light-theme:hover {
+  border-color: #91c25f !important; /* Retain your custom border color */
   outline: none !important; /* Remove the default blue outline */
   box-shadow: none !important; /* Remove any box shadow caused by focus */
 }
 
 /* Target the input inside the Select to remove default focus ring */
-.ant-select-selector:focus, .ant-select-selector:hover {
-  border-color: #91C25F !important;
+.ant-select-selector:focus,
+.ant-select-selector:hover {
+  border-color: #91c25f !important;
   outline: none !important;
   box-shadow: none !important;
 }
 
 /* Ensuring dropdown border color stays the same */
 .custom-dropdown {
-  border-color: #91C25F !important;
+  border-color: #91c25f !important;
 }
 
 /* Optional: Remove the default focus ring on all elements globally */
-input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, .dark-theme:focus, .light-theme:focus {
+input:focus,
+select:focus,
+.custom-input-dark:focus,
+.custom-input-light:focus,
+.dark-theme:focus,
+.light-theme:focus {
   outline: none !important;
   box-shadow: none !important;
 }
 
-
 /* Ensure the table container is */
 .table-container {
   position: relative;
-  z-index: 1; 
+  z-index: 1;
   height: 92%;
 }
 
-.custom-dropdown                                        
+.custom-dropdown
   .ant-select-item-option-selected:not(.ant-select-item-option-disabled)
-  .ant-select-item-option-state svg {                  
-    color:#1d39c4  !important;                          
-    fill: #1d39c4  !important;
+  .ant-select-item-option-state
+  svg {
+  color: #1d39c4 !important;
+  fill: #1d39c4 !important;
 }
-
 
 /* Center header text while preserving icons */
 .ag-center-header .ag-header-cell-label {
@@ -3363,46 +3374,44 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   transition: top 0.1s ease, left 0.1s ease;
 }
 
-
 .dark-theme .copy-icon svg {
   color: #000 !important;
-   fill: #000 !important;
+  fill: #000 !important;
 }
 .dark-theme .copy-icon1 svg {
-  color: #EC7117 !important;
-   fill: #EC7117 !important;
+  color: #ec7117 !important;
+  fill: #ec7117 !important;
 }
 .light-theme .copy-icon1 svg {
-  color: #EC7117 !important;
-   fill: #EC7117 !important;
+  color: #ec7117 !important;
+  fill: #ec7117 !important;
 }
- 
-.light-theme .copy-icon  svg{
+
+.light-theme .copy-icon svg {
   color: #000 !important;
   fill: #000 !important;
 }
 /* Apply styles to AntD message only when inside .dark-message */
 .dark-message .ant-message-notice-content {
-  background-color: #333 !important;  
-  color: #fff !important;            
+  background-color: #333 !important;
+  color: #fff !important;
   border: 1px solid #ccc;
 }
- 
+
 .dark-message .ant-message-success .anticon svg {
   color: #91c25f !important;
   fill: #91c25f !important;
 }
 .dark-message1 .ant-message-notice-content {
-  background-color: #333 !important;  
-  color: #fff !important;            
+  background-color: #333 !important;
+  color: #fff !important;
   border: 1px solid #ccc;
 }
- 
-.dark-message1 .ant-message-success .anticon svg {
-  color: #EC7117 !important;
-  fill: #EC7117 !important;
-}
 
+.dark-message1 .ant-message-success .anticon svg {
+  color: #ec7117 !important;
+  fill: #ec7117 !important;
+}
 
 .custom-button:hover {
   color: #4caf50 !important; /* Change text color on hover */
@@ -3410,8 +3419,6 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 .custom-button1:hover {
   color: #fff !important; /* Change text color on hover  */
 }
-
-
 
 /* Reduce header height */
 .custom-dark-table thead > tr > th {
@@ -3432,20 +3439,20 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   background-color: transparent !important;
 }
 .custom-input-dark input::placeholder {
-  color: #ccc !important;  
+  color: #ccc !important;
 }
 .custom-input-dark .ant-input-number-handler-wrap {
-  background-color: transparent; 
+  background-color: transparent;
 }
 
 .Exckamationicon svg {
-  color: #EC7117 !important; 
+  color: #ec7117 !important;
 }
 /* Remove border, shadow, and radius for each panel */
 .custom-collapse-light .ant-collapse-item {
   border: none !important;
   box-shadow: none !important;
-  border-radius: 8PX !important;
+  border-radius: 8px !important;
   margin-bottom: 12px !important; /* Adds gap between panels */
   background-color: #f5f5f5 !important;
 }
@@ -3465,13 +3472,13 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 /* Collapse Header */
 .custom-collapse-light .ant-collapse-header {
   background-color: #f5f5f5 !important;
-  border-radius: 8PX !important;
+  border-radius: 8px !important;
   padding: 12px 16px !important;
   /* font-weight: 600; */
   color: #333;
   border: none !important;
   box-shadow: none !important;
-  margin-bottom:  12px !important; /* Adds gap between panels */;
+  margin-bottom: 12px !important; /* Adds gap between panels */
 }
 
 /* Outer Collapse */
@@ -3488,7 +3495,7 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   box-shadow: none !important;
   background: transparent !important;
 }
- 
+
 /* Remove gap artifacts */
 .custom-collapse-dark .ant-collapse-item {
   border: none !important;
@@ -3498,12 +3505,12 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   background-color: transparent !important;
   color: white !important;
 }
- 
+
 /* Remove the gray border between panels */
 .custom-collapse-dark .ant-collapse-item::before {
   display: none !important;
 }
- 
+
 /* Collapse header styling */
 .custom-collapse-dark .ant-collapse-header {
   /* background-color: #333 !important; */
@@ -3512,18 +3519,17 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   padding: 12px 16px !important;
   /* font-weight: 600; */
   background-color: #555 !important;
-  border-radius: 8PX !important;
-  margin-bottom:  12px !important;
+  border-radius: 8px !important;
+  margin-bottom: 12px !important;
 }
- 
+
 /* Expanded content area */
 .custom-collapse-dark .ant-collapse-content {
   background-color: transparent !important;
   border: 1px #555 solid !important;
   padding: 5px 5px 10px !important;
- 
 }
- 
+
 /* Inner box inside expanded panel */
 .custom-collapse-dark .ant-collapse-content-box {
   background-color: transparent !important;
@@ -3532,7 +3538,7 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 }
 
 .adset-collapse-panel .ant-collapse-header {
-  padding: 7px 16px !important;  /* reduce vertical padding */
+  padding: 7px 16px !important; /* reduce vertical padding */
   /* min-height: 32px !important;   */
   /* line-height: 1.5 !important; */
 }
@@ -3541,3 +3547,22 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   /* font-weight: 600; */
   color: #000 !important;
 }
+
+/* Adset level edit */
+/* In your CSS or styled-component */
+.upload-dark .ant-upload-list-item-name {
+  color: white; /* ✅ visible on dark background */
+}
+
+.upload-light .ant-upload-list-item-name {
+  color: black; /* ✅ visible on light background */
+}
+
+.ant-upload-list-item-done .ant-upload-list-item-name {
+  color: green;
+}
+
+.ant-upload-list-item-error .ant-upload-list-item-name {
+  color: red;
+}
+/* Adset level edit */
