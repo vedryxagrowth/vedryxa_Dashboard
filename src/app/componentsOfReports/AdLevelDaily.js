@@ -706,7 +706,24 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
                         </div> */}
                         {relatedComment ? (
                             <Tooltip
-                                title={relatedComment || 'No comment available'}
+                                // title={relatedComment || 'No comment available'}
+                                title={
+                                    <div>
+                                      <div>{relatedComment || 'No comment available'}</div>
+                                      <div>
+                                        {editUserANdTime
+                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                                          : ""}
+                                      </div>
+                                    </div>
+                                }
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
                             >
                                 <MessageOutlined
                                 className={theme === "dark" ? "black-icon-comment" : 'Message'}
@@ -722,7 +739,16 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
                         )}
-                        <Tooltip title={tooltipText}>
+                        <Tooltip 
+                            title={tooltipText}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <CopyOutlined
                                 onClick={copyToClipboard}
                                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
@@ -735,7 +761,16 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
                         />
-                        <Tooltip title={valueWithCount}>
+                        <Tooltip 
+                            title={valueWithCount}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <span
                                 // onClick={() => {
                                 //     const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -1589,8 +1624,8 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
                                         columnDefs={memorizedColumnDef1}
                                         onCellClicked={onCellClicked}
                                         pagination={true}
-                                        paginationPageSize={100}
-                                        paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                        paginationPageSize={200}
+                                        paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                                         groupDisplayType='multipleColumns'
                                         suppressAggFuncInHeader={true}
                                         groupSuppressBlankHeader={true}
