@@ -553,10 +553,10 @@ const mapped = (data) =>
     type: file?.filename?.endsWith(".jpg")
       ? "image/jpg"
       : file?.filename?.endsWith(".jpeg")
-      ? "image/jpeg"
-      : file?.filename.endsWith(".png")
-      ? "image/png"
-      : "video/",
+        ? "image/jpeg"
+        : file?.filename.endsWith(".png")
+          ? "image/png"
+          : "video/",
     url: file?.filename,
     Addid: file?.Addid || null,
   }));
@@ -614,10 +614,10 @@ const AddComponent = ({
         return prev.map((item, idx) =>
           item.id === viewSingleAd.id
             ? {
-                ...item,
-                Website_URL: text,
-                Caption: text.split("//")[1].split("/")[0],
-              }
+              ...item,
+              Website_URL: text,
+              Caption: text.split("//")[1].split("/")[0],
+            }
             : item
         );
       });
@@ -643,10 +643,10 @@ const AddComponent = ({
         return prev.map((item, idx) =>
           item.id === viewSingleAd.id
             ? {
-                ...item,
-                Website_URL: text,
-                Caption: text.split("/")[0],
-              }
+              ...item,
+              Website_URL: text,
+              Caption: text.split("/")[0],
+            }
             : item
         );
       });
@@ -790,10 +790,10 @@ const AddComponent = ({
         type: data[0]?.url?.endsWith(".jpg")
           ? "image/jpg"
           : data[0]?.url?.endsWith(".jpeg")
-          ? "image/jpeg"
-          : data[0]?.url?.endsWith(".png")
-          ? "image/png"
-          : "video/",
+            ? "image/jpeg"
+            : data[0]?.url?.endsWith(".png")
+              ? "image/png"
+              : "video/",
         url: data[0]?.url,
         adsetId,
       },
@@ -924,7 +924,7 @@ const AddComponent = ({
     console.log(typeof viewSingleAd.filename, "viewSingleAd.filename type");
     console.log(
       typeof viewSingleAd.filename === "object" &&
-        viewSingleAd.filename !== null
+      viewSingleAd.filename !== null
     );
     if (
       typeof viewSingleAd.filename === "object" &&
@@ -951,10 +951,10 @@ const AddComponent = ({
           type: viewSingleAd?.filename?.endsWith(".jpg")
             ? "image/jpg"
             : viewSingleAd?.filename?.endsWith(".jpeg")
-            ? "image/jpeg"
-            : viewSingleAd?.filename.endsWith(".png")
-            ? "image/png"
-            : "video/",
+              ? "image/jpeg"
+              : viewSingleAd?.filename.endsWith(".png")
+                ? "image/png"
+                : "video/",
           url: viewSingleAd?.filename,
         },
       ]);
@@ -966,10 +966,10 @@ const AddComponent = ({
           type: viewSingleAd?.filename?.endsWith(".jpg")
             ? "image/jpg"
             : viewSingleAd?.filename?.endsWith(".jpeg")
-            ? "image/jpeg"
-            : viewSingleAd?.filename.endsWith(".png")
-            ? "image/png"
-            : "video/",
+              ? "image/jpeg"
+              : viewSingleAd?.filename.endsWith(".png")
+                ? "image/png"
+                : "video/",
           url: viewSingleAd?.filename,
         },
       ]);
@@ -998,7 +998,7 @@ const AddComponent = ({
       layout="vertical"
       form={form}
       initialValues={initialValues}
-      //   style={{ maxWidth: 700, margin: "0 auto", padding: "1rem" }}
+    //   style={{ maxWidth: 700, margin: "0 auto", padding: "1rem" }}
     >
       <div
         style={{
@@ -1031,9 +1031,8 @@ const AddComponent = ({
                   }}
                   style={{ marginBottom: 16 }}
                   dropdownClassName={theme === "dark" && "custom-dropdown"}
-                  className={`${
-                    theme === "dark" ? "dark-theme" : "light-theme"
-                  } green-border-select`}
+                  className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                    } green-border-select`}
                 >
                   <Option value="upload">Upload</Option>
                   <Option value="creative">Creative library</Option>
@@ -1206,10 +1205,10 @@ const AddComponent = ({
                           prevArray.map((ad) =>
                             ad.id === viewSingleAd.id
                               ? {
-                                  ...ad,
-                                  filename: newFiles[0],
-                                  uid: newFiles[0].uid,
-                                }
+                                ...ad,
+                                filename: newFiles[0],
+                                uid: newFiles[0].uid,
+                              }
                               : ad
                           )
                         );
@@ -1625,7 +1624,7 @@ const AddComponent = ({
           <Form.Item
             name="AddName"
             initialValue={viewSingleAd.AddName || ""}
-            label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+            label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
             rules={[
               {
                 required: true,
@@ -1642,7 +1641,7 @@ const AddComponent = ({
             />
           </Form.Item>
           <Form.Item
-            label="Primary text"
+            //  label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
             name="message"
             rules={[
               {
@@ -1742,7 +1741,13 @@ const AddComponent = ({
                   }}
                 >
                   <span>Website_URL</span>
-                  <Tooltip title="This is a required field">
+                  <Tooltip title="This is a required field" overlayInnerStyle={{
+                    backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+                    color: theme === 'dark' ? '#ffffff' : '#000000',
+                    borderRadius: 6,
+                    padding: '6px 10px',
+                    fontSize: '14px',
+                  }}>
                     <QuestionCircleOutlined
                       style={{ marginLeft: 4, cursor: "pointer" }}
                     />
@@ -1810,9 +1815,8 @@ const AddComponent = ({
             footer={null}
             width="80%" // Set width of the modal
             bodyStyle={{ height: "50vh", overflowY: "auto" }}
-            className={`custom-modal ${
-              theme === "dark" ? "dark-theme-modal" : ""
-            }`}
+            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+              }`}
           >
             {getUrlBuilder}
           </Modal>
@@ -1832,182 +1836,74 @@ const AddComponent = ({
         <div style={{ flex: "30%" }}>
           {selectedFiles && selectedFiles.length > 0
             ? selectedFiles.map((file, i) => (
-                <Badge
-                  key={i}
-                  count={
-                    file?.url?.endsWith(".png") ||
+              <Badge
+                key={i}
+                count={
+                  file?.url?.endsWith(".png") ||
                     file?.url?.endsWith(".jpg") ||
                     file?.url?.endsWith(".jpeg") ||
                     file?.url?.endsWith(".mp4") ? null : (
-                      <EditOutlined
-                        style={{
-                          fontSize: "25px",
-                          color: "#fff",
-                        }}
-                        onClick={() => handleEditClick(file)}
-                      />
-                    )
-                  }
-                  style={{
-                    backgroundColor: "#52c41a",
-                    borderRadius: "50%",
-                    position: "absolute",
-                    top: "5px",
-                    right: "5px",
-                    zIndex: 10,
-                    cursor: "pointer",
-                  }}
-                  offset={[5, 5]}
-                >
-                  <div className="container-ad-preview">
-                    <div
-                      className="ad-preview"
+                    <EditOutlined
                       style={{
-                        width: "350px",
-                        backgroundColor: theme === "dark" ? "#4f4f4d" : "#fff",
+                        fontSize: "25px",
+                        color: "#fff",
                       }}
-                    >
-                      <div className="ad-heading">
-                        <div className="img">
-                          {file?.url?.endsWith(".png") ||
+                      onClick={() => handleEditClick(file)}
+                    />
+                  )
+                }
+                style={{
+                  backgroundColor: "#52c41a",
+                  borderRadius: "50%",
+                  position: "absolute",
+                  top: "5px",
+                  right: "5px",
+                  zIndex: 10,
+                  cursor: "pointer",
+                }}
+                offset={[5, 5]}
+              >
+                <div className="container-ad-preview">
+                  <div
+                    className="ad-preview"
+                    style={{
+                      width: "350px",
+                      backgroundColor: theme === "dark" ? "#4f4f4d" : "#fff",
+                    }}
+                  >
+                    <div className="ad-heading">
+                      <div className="img">
+                        {file?.url?.endsWith(".png") ||
                           file?.url?.endsWith(".jpg") ||
                           file?.url?.endsWith(".jpeg") ? (
-                            <img
-                              src={file?.url}
-                              alt="preview"
-                              width="40"
-                              height="40"
-                              style={{ objectFit: "cover" }}
-                            />
-                          ) : file?.url?.endsWith(".mp4") ? (
-                            <video
-                              src={file?.url}
-                              width="40"
-                              height="30"
-                              style={{ objectFit: "cover" }}
-                              muted
-                            />
-                          ) : file?.type?.startsWith("image/") ? (
-                            <img
-                              src={
-                                editedImages[file?.name]
-                                  ? editedImages[file?.name]
-                                  : file?.originFileObj
-                                  ? URL.createObjectURL(file.originFileObj)
-                                  : file?.url
-                              }
-                              alt="preview"
-                              width="40"
-                              height="40"
-                              style={{ objectFit: "cover" }}
-                            />
-                          ) : (
-                            <video
-                              src={
-                                file?.originFileObj
-                                  ? URL.createObjectURL(file.originFileObj)
-                                  : file?.url
-                              }
-                              width="40"
-                              height="30"
-                              style={{ objectFit: "cover" }}
-                              muted
-                            />
-                          )}
-                        </div>
-
-                        <div className="title">
-                          <div
-                            className="main"
-                            style={{
-                              wordWrap: "break-word",
-                              whiteSpace: "normal",
-                              color: theme === "dark" ? "white" : "#000",
-                            }}
-                          >
-                            {addName}
-                            <div className="sub">
-                              {imagehash?.pageName ? (
-                                <>
-                                  {imagehash.pageName}{" "}
-                                  <GlobalOutlined style={{ opacity: "0.6" }} />
-                                </>
-                              ) : (
-                                <GlobalOutlined style={{ opacity: "0.6" }} />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="close">
-                          <CloseOutlined style={{ fontSize: "20px" }} />
-                        </div>
-                        <div className="moreoptions">
-                          <MoreOutlined style={{ fontSize: "20px" }} />
-                        </div>
-                      </div>
-
-                      <div
-                        className="ad-desc"
-                        style={{
-                          wordWrap: "break-word",
-                          whiteSpace: "normal",
-                          color: theme === "dark" ? "white" : "#000",
-                        }}
-                      >
-                        {primaryText}
-                      </div>
-
-                      {/* <div className="ad-image"> */}
-                      <div
-                        className="ad-image"
-                        style={{
-                          width: "350px",
-                          height: "300px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {file?.url?.endsWith(".png") ||
-                        file?.url?.endsWith(".jpg") ||
-                        file?.url?.endsWith(".jpeg") ? (
                           <img
                             src={file?.url}
-                            alt="ad"
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "100%",
-                              objectFit: "contain",
-                            }}
+                            alt="preview"
+                            width="40"
+                            height="40"
+                            style={{ objectFit: "cover" }}
                           />
                         ) : file?.url?.endsWith(".mp4") ? (
                           <video
-                            controls
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "100%",
-                              objectFit: "contain",
-                            }}
-                          >
-                            <source src={file?.url} />
-                            Your browser does not support the video tag.
-                          </video>
+                            src={file?.url}
+                            width="40"
+                            height="30"
+                            style={{ objectFit: "cover" }}
+                            muted
+                          />
                         ) : file?.type?.startsWith("image/") ? (
                           <img
                             src={
                               editedImages[file?.name]
                                 ? editedImages[file?.name]
                                 : file?.originFileObj
-                                ? URL.createObjectURL(file.originFileObj)
-                                : file?.url
+                                  ? URL.createObjectURL(file.originFileObj)
+                                  : file?.url
                             }
-                            alt="ad"
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "100%",
-                              objectFit: "contain",
-                            }}
+                            alt="preview"
+                            width="40"
+                            height="40"
+                            style={{ objectFit: "cover" }}
                           />
                         ) : (
                           <video
@@ -2016,27 +1912,135 @@ const AddComponent = ({
                                 ? URL.createObjectURL(file.originFileObj)
                                 : file?.url
                             }
-                            controls
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "100%",
-                              objectFit: "contain",
-                            }}
-                          >
-                            <source
-                              src={
-                                file?.originFileObj
-                                  ? URL.createObjectURL(file.originFileObj)
-                                  : file?.url
-                              }
-                            />
-                            Your browser does not support the video tag.
-                          </video>
+                            width="40"
+                            height="30"
+                            style={{ objectFit: "cover" }}
+                            muted
+                          />
                         )}
                       </div>
-                      {/* </div> */}
 
-                      {/* <div
+                      <div className="title">
+                        <div
+                          className="main"
+                          style={{
+                            wordWrap: "break-word",
+                            whiteSpace: "normal",
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {addName}
+                          <div className="sub">
+                            {imagehash?.pageName ? (
+                              <>
+                                {imagehash.pageName}{" "}
+                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                              </>
+                            ) : (
+                              <GlobalOutlined style={{ opacity: "0.6" }} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="close">
+                        <CloseOutlined style={{ fontSize: "20px" }} />
+                      </div>
+                      <div className="moreoptions">
+                        <MoreOutlined style={{ fontSize: "20px" }} />
+                      </div>
+                    </div>
+
+                    <div
+                      className="ad-desc"
+                      style={{
+                        wordWrap: "break-word",
+                        whiteSpace: "normal",
+                        color: theme === "dark" ? "white" : "#000",
+                      }}
+                    >
+                      {primaryText}
+                    </div>
+
+                    {/* <div className="ad-image"> */}
+                    <div
+                      className="ad-image"
+                      style={{
+                        width: "350px",
+                        height: "300px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {file?.url?.endsWith(".png") ||
+                        file?.url?.endsWith(".jpg") ||
+                        file?.url?.endsWith(".jpeg") ? (
+                        <img
+                          src={file?.url}
+                          alt="ad"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      ) : file?.url?.endsWith(".mp4") ? (
+                        <video
+                          controls
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        >
+                          <source src={file?.url} />
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : file?.type?.startsWith("image/") ? (
+                        <img
+                          src={
+                            editedImages[file?.name]
+                              ? editedImages[file?.name]
+                              : file?.originFileObj
+                                ? URL.createObjectURL(file.originFileObj)
+                                : file?.url
+                          }
+                          alt="ad"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      ) : (
+                        <video
+                          src={
+                            file?.originFileObj
+                              ? URL.createObjectURL(file.originFileObj)
+                              : file?.url
+                          }
+                          controls
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        >
+                          <source
+                            src={
+                              file?.originFileObj
+                                ? URL.createObjectURL(file.originFileObj)
+                                : file?.url
+                            }
+                          />
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </div>
+                    {/* </div> */}
+
+                    {/* <div
                         className="ad-image"
                         style={{
                           width: "350px",
@@ -2107,93 +2111,93 @@ const AddComponent = ({
                         )}
                       </div> */}
 
-                      <div className="ad-cta">
-                        <div className="details">
-                          <div
-                            className="link"
-                            style={{
-                              color: theme === "dark" ? "white" : "#000",
-                            }}
-                          >
-                            {caption}
-                          </div>
-                          <div
-                            className="title"
-                            style={{
-                              color: theme === "dark" ? "white" : "#000",
-                            }}
-                          >
-                            {headline}
-                          </div>
-                          <div
-                            className="desc"
-                            style={{
-                              color: theme === "dark" ? "white" : "#000",
-                            }}
-                          >
-                            {description}
-                          </div>
+                    <div className="ad-cta">
+                      <div className="details">
+                        <div
+                          className="link"
+                          style={{
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {caption}
                         </div>
-                        <div className="ad-button">
-                          <button
-                            style={{
-                              backgroundColor: "#91C25F",
-                              color: "#000",
-                              borderColor: "#91C25F",
-                              borderWidth: "0px",
-                            }}
-                          >
-                            Learn More
-                          </button>
+                        <div
+                          className="title"
+                          style={{
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {headline}
+                        </div>
+                        <div
+                          className="desc"
+                          style={{
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {description}
                         </div>
                       </div>
+                      <div className="ad-button">
+                        <button
+                          style={{
+                            backgroundColor: "#91C25F",
+                            color: "#000",
+                            borderColor: "#91C25F",
+                            borderWidth: "0px",
+                          }}
+                        >
+                          Learn More
+                        </button>
+                      </div>
+                    </div>
 
-                      <a
-                        href={websiteURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <a
+                      href={websiteURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        wordWrap: "break-word",
+                        whiteSpace: "normal",
+                        color: "#0066cc",
+                        padding: "10px",
+                      }}
+                    >
+                      {websiteURL}
+                    </a>
+
+                    <div className="icons">
+                      <div
+                        className="like"
                         style={{
-                          wordWrap: "break-word",
-                          whiteSpace: "normal",
-                          color: "#0066cc",
-                          padding: "10px",
+                          color: theme === "dark" ? "white" : "#000",
                         }}
                       >
-                        {websiteURL}
-                      </a>
-
-                      <div className="icons">
-                        <div
-                          className="like"
-                          style={{
-                            color: theme === "dark" ? "white" : "#000",
-                          }}
-                        >
-                          <LikeOutlined style={{ fontSize: "20px" }} /> Like
-                        </div>
-                        <div
-                          className="comment"
-                          style={{
-                            color: theme === "dark" ? "white" : "#000",
-                          }}
-                        >
-                          <CommentOutlined style={{ fontSize: "20px" }} />{" "}
-                          Comment
-                        </div>
-                        <div
-                          className="share"
-                          style={{
-                            color: theme === "dark" ? "white" : "#000",
-                          }}
-                        >
-                          <ShareAltOutlined style={{ fontSize: "20px" }} />{" "}
-                          Share
-                        </div>
+                        <LikeOutlined style={{ fontSize: "20px" }} /> Like
+                      </div>
+                      <div
+                        className="comment"
+                        style={{
+                          color: theme === "dark" ? "white" : "#000",
+                        }}
+                      >
+                        <CommentOutlined style={{ fontSize: "20px" }} />{" "}
+                        Comment
+                      </div>
+                      <div
+                        className="share"
+                        style={{
+                          color: theme === "dark" ? "white" : "#000",
+                        }}
+                      >
+                        <ShareAltOutlined style={{ fontSize: "20px" }} />{" "}
+                        Share
                       </div>
                     </div>
                   </div>
-                </Badge>
-              ))
+                </div>
+              </Badge>
+            ))
             : null}
         </div>
         {openCreativesDrawer && (
@@ -2298,7 +2302,7 @@ const AdsetComponent = ({
   console.log(viewSingleAd, "viewSingleAd in adset component");
   console.log(
     viewSingleAd &&
-      console.log(viewSingleAd, "viewSingleAd ---- in adset component")
+    console.log(viewSingleAd, "viewSingleAd ---- in adset component")
   );
   console.log(addlevelData, "addlevelData in adset component");
   console.log(newAddLevelData, "newAddLevelData in adset component");
@@ -2850,9 +2854,9 @@ const AdsetComponent = ({
       adset.Adsetid &&
       adset.Daily_amount &&
       adset.Daily_amount !==
-        (formValues.DailyAdd_amount
-          ? parseFloat(formValues.DailyAdd_amount) * 100
-          : "")
+      (formValues.DailyAdd_amount
+        ? parseFloat(formValues.DailyAdd_amount) * 100
+        : "")
     ) {
       AdsetsData["Daily_amount"] = formValues.DailyAdd_amount
         ? parseFloat(formValues.DailyAdd_amount) * 100
@@ -3357,9 +3361,8 @@ const AdsetComponent = ({
             continue;
           }
 
-          const folderPath = `${network}/${imagehash.accountNumber}/${
-            formValues ? formValues.Name : "Drafts"
-          }`;
+          const folderPath = `${network}/${imagehash.accountNumber}/${formValues ? formValues.Name : "Drafts"
+            }`;
           await createS3Folder(folderPath);
           let fileBlob = null;
           let s3FileUrl = null;
@@ -3845,10 +3848,10 @@ const AdsetComponent = ({
       type: file?.url?.endsWith(".jpg")
         ? "image/jpg"
         : file?.url?.endsWith(".jpeg")
-        ? "image/jpeg"
-        : file?.url?.endsWith(".png")
-        ? "image/png"
-        : "video/",
+          ? "image/jpeg"
+          : file?.url?.endsWith(".png")
+            ? "image/png"
+            : "video/",
       url: file?.url,
       adsetId, // optional: keep if you want to identify source later
     }));
@@ -4071,16 +4074,22 @@ const AdsetComponent = ({
 
   return (
     <Spin spinning={loading}>
-      <Drawer
+      <Modal
         title={adset.AdsetName || `Edit Adset`}
-        width={"100%"}
-        onClose={closeDrawer}
+        className={` ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        onCancel={closeDrawer}
         visible={drawerVisible}
-        bodyStyle={{ paddingBottom: 80 }}
-        style={{
-          backgroundColor: theme === "dark" ? "#333" : "#fff",
-          color: theme === "dark" ? "#fff" : "#000",
+         width="85%"
+        footer={null}
+        centered
+        bodyStyle={{
+          height: '80vh',
+          overflowY: 'auto',
+          padding: 10,
+          backgroundColor: theme === 'dark' ? '#333' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
         }}
+        style={{ borderRadius: '12px' }}
       >
         <Form
           key={adset.id}
@@ -4244,9 +4253,8 @@ const AdsetComponent = ({
                     // onChange={(value) => handleFieldChange(index, "optimization_goal", value)}
                     // defaultValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 <Form.Item
@@ -4270,11 +4278,10 @@ const AdsetComponent = ({
                       { value: "VALUE", label: "Value" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
-                    // defaultValue={adset.billing_event || "IMPRESSIONS"}
-                    // onChange={(value) => handleFieldChange(index, "billing_event", value)}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
+                  // defaultValue={adset.billing_event || "IMPRESSIONS"}
+                  // onChange={(value) => handleFieldChange(index, "billing_event", value)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -4326,11 +4333,10 @@ const AdsetComponent = ({
                       { value: "phone_call", label: "Phone Call" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
-                    // defaultValue={adset.action_source || "website"}
-                    // onChange={(value) => handleFieldChange(index, "action_source", value)}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
+                  // defaultValue={adset.action_source || "website"}
+                  // onChange={(value) => handleFieldChange(index, "action_source", value)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -4354,11 +4360,10 @@ const AdsetComponent = ({
                       { value: "CONTACT", label: "Contact" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
-                    // defaultValue={adset.custom_event_type || "LEAD"}
-                    // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
+                  // defaultValue={adset.custom_event_type || "LEAD"}
+                  // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
                   />
                 </Form.Item>
                 {/* <Form.Item
@@ -4551,13 +4556,13 @@ const AdsetComponent = ({
 
                 <Form.Item
                   name="DailyAdd_amount"
-                  label={`Daily budget`}
-                  // rules={[
-                  //     {
-                  //         required: !(isCampaignBudgetActive || form.getFieldValue(['adsets', index, 'DailyAdd_amount']) > 0),
-                  //         message: `Please enter a valid number > 0 in Adset ${index + 1}`
-                  //     }
-                  // ]}
+                  label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                // rules={[
+                //     {
+                //         required: !(isCampaignBudgetActive || form.getFieldValue(['adsets', index, 'DailyAdd_amount']) > 0),
+                //         message: `Please enter a valid number > 0 in Adset ${index + 1}`
+                //     }
+                // ]}
                 >
                   <Tooltip
                   // title={isCampaignBudgetActive ? 'You have enabled daily budget in the Campaign Level' : ''}
@@ -4565,9 +4570,9 @@ const AdsetComponent = ({
                     <InputNumber
                       disabled={
                         adset.Daily_amount === "" ||
-                        adset.Daily_amount === null ||
-                        adset.Daily_amount === undefined ||
-                        adset.Daily_amount === 0
+                          adset.Daily_amount === null ||
+                          adset.Daily_amount === undefined ||
+                          adset.Daily_amount === 0
                           ? true
                           : false
                       }
@@ -4620,8 +4625,8 @@ const AdsetComponent = ({
                           value && !isNaN(value) && parseFloat(value) > 0
                             ? Promise.resolve()
                             : Promise.reject(
-                                new Error("Please enter a valid float value!")
-                              ),
+                              new Error("Please enter a valid float value!")
+                            ),
                       },
                     ]}
                     style={{ flex: "1 1 150px" }}
@@ -4703,9 +4708,8 @@ const AdsetComponent = ({
                     ]}
                     // defaultValue={adset.countries || "US"}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 <Form.Item
@@ -4729,9 +4733,8 @@ const AdsetComponent = ({
                     ]}
                     // defaultValue={adset.Min_Age || "18"}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 <Form.Item
@@ -4755,9 +4758,8 @@ const AdsetComponent = ({
                     ]}
                     // defaultValue={adset.Max_Age || "65"}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 <Form.Item
@@ -4780,9 +4782,8 @@ const AdsetComponent = ({
                     ]}
                     // defaultValue={"0"}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 <Form.Item
@@ -4804,10 +4805,9 @@ const AdsetComponent = ({
                         .includes(input.toLowerCase())
                     }
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
-                    // defaultValue={adset.Language || "English (US)"}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
+                  // defaultValue={adset.Language || "English (US)"}
                   >
                     {localesdata.map((option) => (
                       <Option key={option.key} value={option.key} title={null}>
@@ -4899,7 +4899,7 @@ const AdsetComponent = ({
                                 </>
                             )} */}
                 <Form.Item
-                  label="Placements"
+                   label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                   name="placements"
                   rules={[{ required: true, message: "Please select a mode!" }]}
                   initialValue={adset.placements || "Advance"}
@@ -4907,9 +4907,8 @@ const AdsetComponent = ({
                   <Select
                     placeholder="Select a mode"
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   >
                     <Option value="Advance" title={null}>
                       Advance
@@ -4960,9 +4959,8 @@ const AdsetComponent = ({
                             dropdownClassName={
                               theme === "dark" && "custom-dropdown"
                             }
-                            className={`${
-                              theme === "dark" ? "dark-theme" : "light-theme"
-                            } green-border-select`}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                              } green-border-select`}
                           >
                             {publisherOptions.map((option) => (
                               <Option key={option.value} value={option.value}>
@@ -4995,9 +4993,8 @@ const AdsetComponent = ({
                             dropdownClassName={
                               theme === "dark" && "custom-dropdown"
                             }
-                            className={`${
-                              theme === "dark" ? "dark-theme" : "light-theme"
-                            } green-border-select`}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                              } green-border-select`}
                           >
                             {Array.isArray(selectedPublishers) &&
                               selectedPublishers.length > 0 &&
@@ -5036,9 +5033,8 @@ const AdsetComponent = ({
                             dropdownClassName={
                               theme === "dark" && "custom-dropdown"
                             }
-                            className={`${
-                              theme === "dark" ? "dark-theme" : "light-theme"
-                            } green-border-select`}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                              } green-border-select`}
                           />
                         </Form.Item>
                       </div>
@@ -5157,11 +5153,10 @@ const AdsetComponent = ({
                                 dropdownClassName={
                                   theme === "dark" && "custom-dropdown"
                                 }
-                                className={`${
-                                  theme === "dark"
-                                    ? "dark-theme"
-                                    : "light-theme"
-                                } green-border-select`}
+                                className={`${theme === "dark"
+                                  ? "dark-theme"
+                                  : "light-theme"
+                                  } green-border-select`}
                               >
                                 <Option value="upload">Upload</Option>
                                 <Option value="creative">
@@ -5282,8 +5277,8 @@ const AdsetComponent = ({
                                             file.thumbUrl ||
                                             (file.originFileObj
                                               ? URL.createObjectURL(
-                                                  file.originFileObj
-                                                )
+                                                file.originFileObj
+                                              )
                                               : undefined),
                                         })
                                       );
@@ -5322,9 +5317,8 @@ const AdsetComponent = ({
                                         const mappedWithAddName =
                                           trulyNewFiles.map((item, i) => ({
                                             id: item.id,
-                                            AddName: `${addName}_${
-                                              nextAddNumber + i
-                                            }`,
+                                            AddName: `${addName}_${nextAddNumber + i
+                                              }`,
                                             filename: item,
                                             uid: item.uid,
                                             page_id:
@@ -5840,24 +5834,24 @@ const AdsetComponent = ({
                                               {file.type?.startsWith(
                                                 "image/"
                                               ) && (
-                                                <img
-                                                  src={
-                                                    file.originFileObj
-                                                      ? URL.createObjectURL(
+                                                  <img
+                                                    src={
+                                                      file.originFileObj
+                                                        ? URL.createObjectURL(
                                                           file.originFileObj
                                                         )
-                                                      : file.url
-                                                  }
-                                                  alt="preview"
-                                                  style={{
-                                                    width: 40,
-                                                    height: 40,
-                                                    objectFit: "cover",
-                                                    borderRadius: 4,
-                                                    marginLeft: 8,
-                                                  }}
-                                                />
-                                              )}
+                                                        : file.url
+                                                    }
+                                                    alt="preview"
+                                                    style={{
+                                                      width: 40,
+                                                      height: 40,
+                                                      objectFit: "cover",
+                                                      borderRadius: 4,
+                                                      marginLeft: 8,
+                                                    }}
+                                                  />
+                                                )}
                                               <span
                                                 style={{
                                                   maxWidth: 160,
@@ -5923,9 +5917,8 @@ const AdsetComponent = ({
                                                           filtered.map(
                                                             (item, index) => ({
                                                               ...item,
-                                                              AddName: `${addName}_${
-                                                                index + 1
-                                                              }`,
+                                                              AddName: `${addName}_${index + 1
+                                                                }`,
                                                             })
                                                           );
 
@@ -6000,7 +5993,7 @@ const AdsetComponent = ({
                           name="AddName"
                           initialValue={adset.AddName || ""}
                           label={
-                            <span style={{ color: "#B4B4B4" }}>Add name</span>
+                            <span style={{ color: "#B4B4B4" }}>Ad name</span>
                           }
                           rules={[
                             {
@@ -6028,7 +6021,7 @@ const AdsetComponent = ({
                           />
                         </Form.Item>
                         <Form.Item
-                          label="Primary text"
+                          label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                           name="message"
                           rules={[
                             {
@@ -6077,7 +6070,7 @@ const AdsetComponent = ({
                                             />
                                         </Form.Item> */}
                         <Form.Item
-                          label="Headline"
+                          label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                           name="headline"
                           rules={[
                             {
@@ -6109,7 +6102,7 @@ const AdsetComponent = ({
                         </Form.Item>
 
                         <Form.Item
-                          label="Description"
+                          label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                           name="Description"
                           rules={[
                             {
@@ -6157,8 +6150,14 @@ const AdsetComponent = ({
                                   paddingRight: "50px",
                                 }}
                               >
-                                <span>Website_URL</span>
-                                <Tooltip title="This is a required field">
+                                <span style={{ color: "#B4B4B4" }}>Website_URL</span>
+                                <Tooltip title="This is a required field" overlayInnerStyle={{
+                                  backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+                                  color: theme === 'dark' ? '#ffffff' : '#000000',
+                                  borderRadius: 6,
+                                  padding: '6px 10px',
+                                  fontSize: '14px',
+                                }}>
                                   <QuestionCircleOutlined
                                     style={{ marginLeft: 4, cursor: "pointer" }}
                                   />
@@ -6201,7 +6200,7 @@ const AdsetComponent = ({
                           />
                         </Form.Item>
                         <Form.Item
-                          label="Display Link"
+                          label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                           name="Caption"
                           rules={[
                             {
@@ -6246,9 +6245,8 @@ const AdsetComponent = ({
                           footer={null}
                           width="80%" // Set width of the modal
                           bodyStyle={{ height: "50vh", overflowY: "auto" }}
-                          className={`custom-modal ${
-                            theme === "dark" ? "dark-theme-modal" : ""
-                          }`}
+                          className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                            }`}
                         >
                           {getUrlBuilder}
                         </Modal>
@@ -6268,332 +6266,332 @@ const AdsetComponent = ({
                       <div style={{ flex: "30%" }}>
                         {selectedFiles && selectedFiles.length > 0
                           ? selectedFiles.map((file, i) => (
-                              <Badge
-                                key={i}
-                                count={
-                                  file?.url?.endsWith(".png") ||
+                            <Badge
+                              key={i}
+                              count={
+                                file?.url?.endsWith(".png") ||
                                   file?.url?.endsWith(".jpg") ||
                                   file?.url?.endsWith(".jpeg") ||
                                   file?.url?.endsWith(".mp4") ? null : (
-                                    <EditOutlined
-                                      style={{
-                                        fontSize: "25px",
-                                        color: "#fff",
-                                      }}
-                                      onClick={() => handleEditClick(file)}
-                                    />
-                                  )
-                                }
-                                style={{
-                                  backgroundColor: "#52c41a",
-                                  borderRadius: "50%",
-                                  position: "absolute",
-                                  top: "5px",
-                                  right: "5px",
-                                  zIndex: 10,
-                                  cursor: "pointer",
-                                }}
-                                offset={[5, 5]}
-                              >
-                                <div className="container-ad-preview">
-                                  <div
-                                    className="ad-preview"
+                                  <EditOutlined
                                     style={{
-                                      width: "350px",
-                                      backgroundColor:
-                                        theme === "dark" ? "#4f4f4d" : "#fff",
+                                      fontSize: "25px",
+                                      color: "#fff",
                                     }}
-                                  >
-                                    <div className="ad-heading">
-                                      <div className="img">
-                                        {file?.url?.endsWith(".png") ||
+                                    onClick={() => handleEditClick(file)}
+                                  />
+                                )
+                              }
+                              style={{
+                                backgroundColor: "#52c41a",
+                                borderRadius: "50%",
+                                position: "absolute",
+                                top: "5px",
+                                right: "5px",
+                                zIndex: 10,
+                                cursor: "pointer",
+                              }}
+                              offset={[5, 5]}
+                            >
+                              <div className="container-ad-preview">
+                                <div
+                                  className="ad-preview"
+                                  style={{
+                                    width: "350px",
+                                    backgroundColor:
+                                      theme === "dark" ? "#4f4f4d" : "#fff",
+                                  }}
+                                >
+                                  <div className="ad-heading">
+                                    <div className="img">
+                                      {file?.url?.endsWith(".png") ||
                                         file?.url?.endsWith(".jpg") ||
                                         file?.url?.endsWith(".jpeg") ? (
-                                          <img
-                                            src={file?.url}
-                                            alt="preview"
-                                            width="40"
-                                            height="40"
-                                            style={{ objectFit: "cover" }}
-                                          />
-                                        ) : file?.url?.endsWith(".mp4") ? (
-                                          <video
-                                            src={file?.url}
-                                            width="40"
-                                            height="30"
-                                            style={{ objectFit: "cover" }}
-                                            muted
-                                          />
-                                        ) : file?.type?.startsWith("image/") ? (
-                                          <img
-                                            src={
-                                              editedImages[file?.name]
-                                                ? editedImages[file?.name]
-                                                : file?.originFileObj
-                                                ? URL.createObjectURL(
-                                                    file.originFileObj
-                                                  )
-                                                : file?.url
-                                            }
-                                            alt="preview"
-                                            width="40"
-                                            height="40"
-                                            style={{ objectFit: "cover" }}
-                                          />
-                                        ) : (
-                                          <video
-                                            src={
-                                              file?.originFileObj
-                                                ? URL.createObjectURL(
-                                                    file.originFileObj
-                                                  )
-                                                : file?.url
-                                            }
-                                            width="40"
-                                            height="30"
-                                            style={{ objectFit: "cover" }}
-                                            muted
-                                          />
-                                        )}
-                                      </div>
-
-                                      <div className="title">
-                                        <div
-                                          className="main"
-                                          style={{
-                                            wordWrap: "break-word",
-                                            whiteSpace: "normal",
-                                            color:
-                                              theme === "dark"
-                                                ? "white"
-                                                : "#000",
-                                          }}
-                                        >
-                                          {addName}
-                                          <div className="sub">
-                                            {imagehash?.pageName ? (
-                                              <>
-                                                {imagehash.pageName}{" "}
-                                                <GlobalOutlined
-                                                  style={{ opacity: "0.6" }}
-                                                />
-                                              </>
-                                            ) : (
-                                              <GlobalOutlined
-                                                style={{ opacity: "0.6" }}
-                                              />
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <div className="close">
-                                        <CloseOutlined
-                                          style={{ fontSize: "20px" }}
-                                        />
-                                      </div>
-                                      <div className="moreoptions">
-                                        <MoreOutlined
-                                          style={{ fontSize: "20px" }}
-                                        />
-                                      </div>
-                                    </div>
-
-                                    <div
-                                      className="ad-desc"
-                                      style={{
-                                        wordWrap: "break-word",
-                                        whiteSpace: "normal",
-                                        color:
-                                          theme === "dark" ? "white" : "#000",
-                                      }}
-                                    >
-                                      {primaryText}
-                                    </div>
-
-                                    <div
-                                      className="ad-image"
-                                      style={{
-                                        width: "350px",
-                                        height: "300px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                      }}
-                                    >
-                                      {file?.url?.endsWith(".png") ||
-                                      file?.url?.endsWith(".jpg") ||
-                                      file?.url?.endsWith(".jpeg") ? (
                                         <img
                                           src={file?.url}
-                                          alt="ad"
-                                          style={{
-                                            maxWidth: "100%",
-                                            maxHeight: "100%",
-                                            objectFit: "contain",
-                                          }}
+                                          alt="preview"
+                                          width="40"
+                                          height="40"
+                                          style={{ objectFit: "cover" }}
                                         />
                                       ) : file?.url?.endsWith(".mp4") ? (
                                         <video
-                                          controls
-                                          style={{
-                                            maxWidth: "100%",
-                                            maxHeight: "100%",
-                                            objectFit: "contain",
-                                          }}
-                                        >
-                                          <source src={file?.url} />
-                                          Your browser does not support the
-                                          video tag.
-                                        </video>
+                                          src={file?.url}
+                                          width="40"
+                                          height="30"
+                                          style={{ objectFit: "cover" }}
+                                          muted
+                                        />
                                       ) : file?.type?.startsWith("image/") ? (
                                         <img
                                           src={
                                             editedImages[file?.name]
                                               ? editedImages[file?.name]
                                               : file?.originFileObj
-                                              ? URL.createObjectURL(
+                                                ? URL.createObjectURL(
                                                   file.originFileObj
                                                 )
-                                              : file?.url
+                                                : file?.url
                                           }
-                                          alt="ad"
-                                          style={{
-                                            maxWidth: "100%",
-                                            maxHeight: "100%",
-                                            objectFit: "contain",
-                                          }}
+                                          alt="preview"
+                                          width="40"
+                                          height="40"
+                                          style={{ objectFit: "cover" }}
                                         />
                                       ) : (
                                         <video
-                                          controls
-                                          style={{
-                                            maxWidth: "100%",
-                                            maxHeight: "100%",
-                                            objectFit: "contain",
-                                          }}
-                                        >
-                                          <source
-                                            src={
-                                              file?.originFileObj
-                                                ? URL.createObjectURL(
-                                                    file.originFileObj
-                                                  )
-                                                : file?.url
-                                            }
-                                          />
-                                          Your browser does not support the
-                                          video tag.
-                                        </video>
+                                          src={
+                                            file?.originFileObj
+                                              ? URL.createObjectURL(
+                                                file.originFileObj
+                                              )
+                                              : file?.url
+                                          }
+                                          width="40"
+                                          height="30"
+                                          style={{ objectFit: "cover" }}
+                                          muted
+                                        />
                                       )}
                                     </div>
 
-                                    <div className="ad-cta">
-                                      <div className="details">
-                                        <div
-                                          className="link"
-                                          style={{
-                                            color:
-                                              theme === "dark"
-                                                ? "white"
-                                                : "#000",
-                                          }}
-                                        >
-                                          {caption}
+                                    <div className="title">
+                                      <div
+                                        className="main"
+                                        style={{
+                                          wordWrap: "break-word",
+                                          whiteSpace: "normal",
+                                          color:
+                                            theme === "dark"
+                                              ? "white"
+                                              : "#000",
+                                        }}
+                                      >
+                                        {addName}
+                                        <div className="sub">
+                                          {imagehash?.pageName ? (
+                                            <>
+                                              {imagehash.pageName}{" "}
+                                              <GlobalOutlined
+                                                style={{ opacity: "0.6" }}
+                                              />
+                                            </>
+                                          ) : (
+                                            <GlobalOutlined
+                                              style={{ opacity: "0.6" }}
+                                            />
+                                          )}
                                         </div>
-                                        <div
-                                          className="title"
-                                          style={{
-                                            color:
-                                              theme === "dark"
-                                                ? "white"
-                                                : "#000",
-                                          }}
-                                        >
-                                          {headline}
-                                        </div>
-                                        <div
-                                          className="desc"
-                                          style={{
-                                            color:
-                                              theme === "dark"
-                                                ? "white"
-                                                : "#000",
-                                          }}
-                                        >
-                                          {description}
-                                        </div>
-                                      </div>
-                                      <div className="ad-button">
-                                        <button
-                                          style={{
-                                            backgroundColor: "#91C25F",
-                                            color: "#000",
-                                            borderColor: "#91C25F",
-                                            borderWidth: "0px",
-                                          }}
-                                        >
-                                          Learn More
-                                        </button>
                                       </div>
                                     </div>
 
-                                    <a
-                                      href={websiteURL}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
+                                    <div className="close">
+                                      <CloseOutlined
+                                        style={{ fontSize: "20px" }}
+                                      />
+                                    </div>
+                                    <div className="moreoptions">
+                                      <MoreOutlined
+                                        style={{ fontSize: "20px" }}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div
+                                    className="ad-desc"
+                                    style={{
+                                      wordWrap: "break-word",
+                                      whiteSpace: "normal",
+                                      color:
+                                        theme === "dark" ? "white" : "#000",
+                                    }}
+                                  >
+                                    {primaryText}
+                                  </div>
+
+                                  <div
+                                    className="ad-image"
+                                    style={{
+                                      width: "350px",
+                                      height: "300px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    {file?.url?.endsWith(".png") ||
+                                      file?.url?.endsWith(".jpg") ||
+                                      file?.url?.endsWith(".jpeg") ? (
+                                      <img
+                                        src={file?.url}
+                                        alt="ad"
+                                        style={{
+                                          maxWidth: "100%",
+                                          maxHeight: "100%",
+                                          objectFit: "contain",
+                                        }}
+                                      />
+                                    ) : file?.url?.endsWith(".mp4") ? (
+                                      <video
+                                        controls
+                                        style={{
+                                          maxWidth: "100%",
+                                          maxHeight: "100%",
+                                          objectFit: "contain",
+                                        }}
+                                      >
+                                        <source src={file?.url} />
+                                        Your browser does not support the
+                                        video tag.
+                                      </video>
+                                    ) : file?.type?.startsWith("image/") ? (
+                                      <img
+                                        src={
+                                          editedImages[file?.name]
+                                            ? editedImages[file?.name]
+                                            : file?.originFileObj
+                                              ? URL.createObjectURL(
+                                                file.originFileObj
+                                              )
+                                              : file?.url
+                                        }
+                                        alt="ad"
+                                        style={{
+                                          maxWidth: "100%",
+                                          maxHeight: "100%",
+                                          objectFit: "contain",
+                                        }}
+                                      />
+                                    ) : (
+                                      <video
+                                        controls
+                                        style={{
+                                          maxWidth: "100%",
+                                          maxHeight: "100%",
+                                          objectFit: "contain",
+                                        }}
+                                      >
+                                        <source
+                                          src={
+                                            file?.originFileObj
+                                              ? URL.createObjectURL(
+                                                file.originFileObj
+                                              )
+                                              : file?.url
+                                          }
+                                        />
+                                        Your browser does not support the
+                                        video tag.
+                                      </video>
+                                    )}
+                                  </div>
+
+                                  <div className="ad-cta">
+                                    <div className="details">
+                                      <div
+                                        className="link"
+                                        style={{
+                                          color:
+                                            theme === "dark"
+                                              ? "white"
+                                              : "#000",
+                                        }}
+                                      >
+                                        {caption}
+                                      </div>
+                                      <div
+                                        className="title"
+                                        style={{
+                                          color:
+                                            theme === "dark"
+                                              ? "white"
+                                              : "#000",
+                                        }}
+                                      >
+                                        {headline}
+                                      </div>
+                                      <div
+                                        className="desc"
+                                        style={{
+                                          color:
+                                            theme === "dark"
+                                              ? "white"
+                                              : "#000",
+                                        }}
+                                      >
+                                        {description}
+                                      </div>
+                                    </div>
+                                    <div className="ad-button">
+                                      <button
+                                        style={{
+                                          backgroundColor: "#91C25F",
+                                          color: "#000",
+                                          borderColor: "#91C25F",
+                                          borderWidth: "0px",
+                                        }}
+                                      >
+                                        Learn More
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <a
+                                    href={websiteURL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      wordWrap: "break-word",
+                                      whiteSpace: "normal",
+                                      color: "#0066cc",
+                                      padding: "10px",
+                                    }}
+                                  >
+                                    {websiteURL}
+                                  </a>
+
+                                  <div className="icons">
+                                    <div
+                                      className="like"
                                       style={{
-                                        wordWrap: "break-word",
-                                        whiteSpace: "normal",
-                                        color: "#0066cc",
-                                        padding: "10px",
+                                        color:
+                                          theme === "dark" ? "white" : "#000",
                                       }}
                                     >
-                                      {websiteURL}
-                                    </a>
-
-                                    <div className="icons">
-                                      <div
-                                        className="like"
-                                        style={{
-                                          color:
-                                            theme === "dark" ? "white" : "#000",
-                                        }}
-                                      >
-                                        <LikeOutlined
-                                          style={{ fontSize: "20px" }}
-                                        />{" "}
-                                        Like
-                                      </div>
-                                      <div
-                                        className="comment"
-                                        style={{
-                                          color:
-                                            theme === "dark" ? "white" : "#000",
-                                        }}
-                                      >
-                                        <CommentOutlined
-                                          style={{ fontSize: "20px" }}
-                                        />{" "}
-                                        Comment
-                                      </div>
-                                      <div
-                                        className="share"
-                                        style={{
-                                          color:
-                                            theme === "dark" ? "white" : "#000",
-                                        }}
-                                      >
-                                        <ShareAltOutlined
-                                          style={{ fontSize: "20px" }}
-                                        />{" "}
-                                        Share
-                                      </div>
+                                      <LikeOutlined
+                                        style={{ fontSize: "20px" }}
+                                      />{" "}
+                                      Like
+                                    </div>
+                                    <div
+                                      className="comment"
+                                      style={{
+                                        color:
+                                          theme === "dark" ? "white" : "#000",
+                                      }}
+                                    >
+                                      <CommentOutlined
+                                        style={{ fontSize: "20px" }}
+                                      />{" "}
+                                      Comment
+                                    </div>
+                                    <div
+                                      className="share"
+                                      style={{
+                                        color:
+                                          theme === "dark" ? "white" : "#000",
+                                      }}
+                                    >
+                                      <ShareAltOutlined
+                                        style={{ fontSize: "20px" }}
+                                      />{" "}
+                                      Share
                                     </div>
                                   </div>
                                 </div>
-                              </Badge>
-                            ))
+                              </div>
+                            </Badge>
+                          ))
                           : null}
                       </div>
                     </div>
@@ -6638,9 +6636,8 @@ const AdsetComponent = ({
                 footer={null}
                 width="80%" // Set width of the modal
                 bodyStyle={{ height: "50vh", overflowY: "auto" }}
-                className={`custom-modal ${
-                  theme === "dark" ? "dark-theme-modal" : ""
-                }`}
+                className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                  }`}
               >
                 {getUrlBuilder}
               </Modal>
@@ -6727,15 +6724,14 @@ const AdsetComponent = ({
               open={isModalVisible}
               onOk={handleOk}
               onCancel={() => setIsModalVisible(false)}
-              className={`custom-modal ${
-                theme === "dark" ? "dark-theme-modal" : ""
-              }`}
+              className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                }`}
             >
               <p>Are you sure you want to submit?</p>
             </Modal>
           )}
         </Form>
-      </Drawer>
+      </Modal>
     </Spin>
   );
 };

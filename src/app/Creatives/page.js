@@ -1700,7 +1700,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
-                                Create campaign
+                                New campaign
                                 {checkboxSelected.length > 0 && (
                                     <Badge
                                         style={{
