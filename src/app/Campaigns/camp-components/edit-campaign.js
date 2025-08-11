@@ -760,7 +760,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                     </div>
                                     <Form.Item
                                         name="AddName"
-                                        label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                                         rules={[
                                             {
                                                 required: true,

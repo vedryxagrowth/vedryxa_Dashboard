@@ -2073,12 +2073,23 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     console.log(levelWiseChanges, "levelWiseChanges");
 
     return (
-        <Drawer
+        <Modal
             title={`${DuplicatedampaignData ? DuplicatedampaignData.campaign_name : "Edit Campaign"}`}
-            width="95%"
+             className={` ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+
             open={visible}
-            onClose={handleDrawerClose}
-            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
+            onCancel={handleDrawerClose}
+            footer={null}
+            centered
+            width="85%"
+            bodyStyle={{
+                height: '80vh',
+                overflowY: 'auto',
+                padding: 10,
+                backgroundColor: theme === 'dark' ? '#333' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+            }}
+            style={{ borderRadius: '12px' }}
         >
             {loading ? (
                 <div
@@ -2255,7 +2266,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             </div>
                         </Panel>
 
-                        <Panel header="ADSET LEVEL" key="2" forceRender> 
+                        <Panel header="ADSET LEVEL" key="2" forceRender>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "17px" }}>
                                 <Form.Item
                                     name={["Adset", "AdsetName"]}
@@ -2328,7 +2339,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     initialValue={currentDate}
                                 >
                                     <DatePicker
-                                         className={`green-border-picker ${theme === 'dark' ? 'custom-datepicker-dark' : 'custom-datepicker-light'}`}
+                                        className={`green-border-picker ${theme === 'dark' ? 'custom-datepicker-dark' : 'custom-datepicker-light'}`}
                                         showTime
                                         disabled={true} dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
                                         //                                 onChange={(value, dateString) => {
@@ -2426,7 +2437,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Tooltip>
                                 </Form.Item>
                                 {showBidAmount && (
-                                    <Form.Item 
+                                    <Form.Item
                                         name={["Adset", "bid_amount"]}
                                         label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                                         rules={[
@@ -2441,7 +2452,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         : Promise.reject(new Error("Please enter a valid float value!")),
                                             },
                                         ]}
-                                        style={{ flex: '1 1 140px',marginRight:'67%' }}
+                                        style={{ flex: '1 1 140px', marginRight: '67%' }}
                                     >
                                         <InputNumber
                                             type="number"
@@ -2454,7 +2465,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     event.preventDefault();
                                                 }
                                             }}
-                                            style={{color: theme === "dark" ? "#fff" : "#000",width:'140px'}}
+                                            style={{ color: theme === "dark" ? "#fff" : "#000", width: '140px' }}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
@@ -3852,7 +3863,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} network={network} Account_Number={accountis} />
                 </Drawer>
             )}
-        </Drawer>
+        </Modal>
     );
 };
 

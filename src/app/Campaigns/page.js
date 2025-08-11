@@ -65,6 +65,7 @@ import moment from "moment-timezone";
 import dayjs from "dayjs";
 import { DatePicker } from "antd";
 import StickyBox from "react-sticky-box";
+import { FaClone, FaEye, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
 
@@ -95,7 +96,7 @@ const App = () => {
   if (userdetails?.role === "Revenue_Partner") {
     redirect("/Dashboard");
   }
-
+  const [hovered, setHovered] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationSize, setPaginationSize] = useState(10);
   const [searchInput, setSearchInput] = useState("");
@@ -304,8 +305,8 @@ const App = () => {
   //     setEditcamapaignDrawerVisible(true);
   // }
   const items = [
-    { key: "1", label: "Single", content: "Content for Live data" },
-    { key: "2", label: "Multiple", content: "Content for Daily data" },
+    { key: "1", label: "Old", content: "Content for Live data" },
+    { key: "2", label: "New", content: "Content for Daily data" },
   ];
 
   const handleCarouselChange = (index) => {
@@ -318,16 +319,17 @@ const App = () => {
       offsetBottom={20}
       style={{
         zIndex: 1,
-        padding: "0px",
-        marginLeft: "10px",
-        paddingLeft: "12px",
+        padding: "10px",
+        marginBottom: '5px',
+        marginLeft: "5px",
+        paddingLeft: "5px",
         borderRadius: 12,
-        backgroundColor: theme === "dark" ? "#1E1E1E" : "#e6e6e6",
-        padding: 1,
-        boxShadow:
-          theme === "dark"
-            ? "0 1px 3px rgba(0,0,0,0.6)"
-            : "0 1px 6px rgba(0,0,0,0.08)",
+        // backgroundColor: theme === "dark" ? "#1E1E1E" : "#e6e6e6",
+        padding: 3,
+        //   boxShadow:
+        //     theme === "dark"
+        //       ? "0 1px 3px rgba(0,0,0,0.6)"
+        //       : "0 1px 6px rgba(0,0,0,0.08)",
       }}
     >
       <Tabs
@@ -335,23 +337,36 @@ const App = () => {
         onChange={handleCarouselChange}
         items={items.map((item) => ({
           key: item.key,
-          label: item.label,
+          // label: item.label,
+          label: (
+            <Tooltip
+              title={item.key === '1' ? 'Campaigns Before 11-08-2025' : 'Campaigns After 11-08-2025'}
+              placement="top"
+              overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+                color: theme === 'dark' ? '#ffffff' : '#000000',
+                borderRadius: 6,
+                padding: '6px 10px',
+                fontSize: '14px',
+              }}
+            >
+              <span>{item.label}</span>
+            </Tooltip>
+          ),
         }))}
-        className={`custom-tabs ${
-          theme === "dark" ? "dark-mode-tabs" : "light-mode-tabs"
-        }`}
+        className={`left-pill-tabs ${theme === 'dark' ? 'pill-tabs-dark' : 'pill-tabs-light'}`}
         style={{
-          backgroundColor: "transparent",
-          padding: "0",
-          marginBottom: "0",
+          backgroundColor: 'transparent',
+          padding: '0',
+          marginBottom: '0',
         }}
         tabBarStyle={{
-          fontSize: "12px",
-          padding: "0",
-          height: "30px",
-          lineHeight: "30px",
-          marginBottom: "-1px",
-          borderBottom: "none",
+          fontSize: '12px',
+          padding: '0',
+          height: '30px',
+          lineHeight: '30px',
+          marginBottom: '-1px',
+          borderBottom: 'none',
         }}
       />
     </StickyBox>
@@ -475,13 +490,13 @@ const App = () => {
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
         ? allCampaigns.filter(
-            (campaign) => campaign.Account_Number === accountNumber
-          )
+          (campaign) => campaign.Account_Number === accountNumber
+        )
         : allCampaigns.filter((campaign) =>
-            userdetails?.adAccounts[selectedKey]?.includes(
-              campaign.Account_Number
-            )
-          );
+          userdetails?.adAccounts[selectedKey]?.includes(
+            campaign.Account_Number
+          )
+        );
 
       setcreatecamselectedacc(accountNumber);
 
@@ -525,13 +540,13 @@ const App = () => {
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
         ? allCampaigns.filter(
-            (campaign) => campaign.Account_Number === accountNumber
-          )
+          (campaign) => campaign.Account_Number === accountNumber
+        )
         : allCampaigns.filter((campaign) =>
-            userdetails?.adAccounts[selectedKey]?.includes(
-              campaign.Account_Number
-            )
-          );
+          userdetails?.adAccounts[selectedKey]?.includes(
+            campaign.Account_Number
+          )
+        );
 
       setcreatecamselectedacc(accountNumber);
 
@@ -575,20 +590,22 @@ const App = () => {
   const handleChange = (dates) => {
     if (dates && dates.length === 2) {
       const [start, end] = dates;
-      const formattedStart = start.format("YYYY-MM-DD");
-      const formattedEnd = end.format("YYYY-MM-DD");
+      // const formattedStart = start.format("YYYY-MM-DD");
+      // const formattedEnd = end.format("YYYY-MM-DD");
 
-      setStartDate(formattedStart);
-      setEndDate(formattedEnd);
+      // setStartDate(formattedStart);
+      // setEndDate(formattedEnd);
 
-      if (selectedValue) {
-        fetchData(selectedValue, formattedStart, formattedEnd);
-        fetchMultipleAdsetCampaigns(
-          selectedValue,
-          formattedStart,
-          formattedEnd
-        );
-      }
+      // if (selectedValue) {
+      //   fetchData(selectedValue, formattedStart, formattedEnd);
+      //   fetchMultipleAdsetCampaigns(
+      //     selectedValue,
+      //     formattedStart,
+      //     formattedEnd
+      //   );
+      // }
+      setStartDate(start.format('YYYY-MM-DD'));
+      setEndDate(end.format('YYYY-MM-DD'));
     }
   };
   // Handle key change
@@ -601,8 +618,16 @@ const App = () => {
   // Handle value change
   const handleValueChange = (value) => {
     setSelectedValue(value);
-    fetchData(value); // Fetch data based on selected value
-    fetchMultipleAdsetCampaigns(value); // Fetch multiple adset campaigns based on selected value
+    // fetchData(value); // Fetch data based on selected value
+    // fetchMultipleAdsetCampaigns(value); // Fetch multiple adset campaigns based on selected value
+  };
+  const handleApply = () => {
+    if (selectedValue && startDate && endDate) {
+      fetchData(selectedValue, startDate, endDate);
+      fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+    } else {
+      message.warning('Please select project, account and date range');
+    }
   };
 
   useEffect(() => {
@@ -928,8 +953,7 @@ const App = () => {
           } catch (fbError) {
             console.error("Error updating facebook status:", fbError);
             message.error(
-              `Error updating facebook status: ${
-                fbError.response?.data?.error?.message || fbError.message
+              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
               }`
             );
           }
@@ -1037,8 +1061,7 @@ const App = () => {
           } catch (fbError) {
             console.error("Error updating facebook status:", fbError);
             message.error(
-              `Error updating facebook status: ${
-                fbError.response?.data?.error?.message || fbError.message
+              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
               }`
             );
           }
@@ -1483,47 +1506,88 @@ const App = () => {
             gap: "8px",
           }}
         >
-          <Tooltip title="View details">
+          <Tooltip title="View details" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
             <Button
-              icon={<EyeOutlined />}
+              icon={<FaEye />}
               onClick={() => handleViewClick(record)}
               style={{
-                border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                 borderRadius: "6px",
+                border:'none',
                 padding: "4px 8px",
-                backgroundColor: theme === "dark" ? "#1e1e1e" : "#fff",
+                backgroundColor: theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
-          <Tooltip title="Edit campaign">
+          <Tooltip title="Edit campaign" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
             <Button
-              icon={<EditOutlined />}
+              icon={<FaPenToSquare />}
               onClick={() => handleEditClickAllLevelData(record)}
               style={{
-                border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                 borderRadius: "6px",
+                 border:'none',
                 padding: "4px 8px",
-                backgroundColor: theme === "dark" ? "#1e1e1e" : "#fff",
+                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
-            <Tooltip title="Clone campaign">
+            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
+              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+              color: theme === 'dark' ? '#ffffff' : '#000000',
+              borderRadius: 6,
+              padding: '6px 10px',
+              fontSize: '14px',
+            }}>
               <Button
-                icon={<CopyOutlined style={{ color: "red" }} />}
+                icon={<FaClone />}
                 onClick={() => duplicatenewcampaign(record)}
                 style={{
-                  border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                   borderRadius: "6px",
+                   border:'none',
                   padding: "4px 8px",
-                  backgroundColor: theme === "dark" ? "#1e1e1e" : "#fff",
+                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
                   color: theme === "dark" ? "#fff" : "#000",
                 }}
               />
             </Tooltip>
           )}
+          <Tooltip title="Delete campaign" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaTrashCan color="#EC7117" />}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                borderRadius: "6px",
+                 border:'none',
+                cursor: 'not-allowed',
+                padding: "4px 8px",
+                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
+            />
+          </Tooltip>
         </div>
       ),
     },
@@ -1578,7 +1642,7 @@ const App = () => {
             </Tooltip>
             <Tooltip title="Rejected">
               <span
-                style={{ color: "red", fontWeight: "bold", marginRight: 10 }}
+                style={{ color: "#EC7117", fontWeight: "bold", marginRight: 10 }}
               >
                 {record.rejectedCount}
               </span>
@@ -1586,7 +1650,7 @@ const App = () => {
             <Tooltip title="Pending">
               <span
                 className="blinking"
-                style={{ color: "orange", fontWeight: "bold" }}
+                style={{ color: "#EC7117", fontWeight: "bold" }}
               >
                 {record.pendingCount}
               </span>
@@ -1619,10 +1683,10 @@ const App = () => {
         let color = "black";
         let displayText = text;
         if (text === "PENDING_APPROVAL") {
-          color = "red";
+          color = "#EC7117";
           displayText = "Pending";
         } else if (text === "Approved") {
-          color = "green";
+          color = "#4caf50";
         }
         const approvedBy = record?.Approvedby || "N/A";
         return (
@@ -1667,9 +1731,8 @@ const App = () => {
                   open={isModalVisible}
                   onOk={handleOk}
                   onCancel={() => setIsModalVisible(false)}
-                  className={`custom-modal ${
-                    theme === "dark" ? "dark-theme-modal" : ""
-                  }`}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
                 >
                   <p>Are you sure you want to approve?</p>
                 </Modal>
@@ -1708,19 +1771,7 @@ const App = () => {
               className="black-icon-pause-1"
             />
           )}
-          <Tooltip title="Number of adsets">
-            <div
-              style={{
-                backgroundColor: "#e6f7ff",
-                color: "#1d39c4",
-                borderRadius: "50%",
-                width: "20px",
-                height: "20px",
-              }}
-            >
-              {record.adsetCount}
-            </div>
-          </Tooltip>
+         
           <Switch
             checked={record.Status === "ACTIVE"}
             onChange={(checked) =>
@@ -1783,49 +1834,112 @@ const App = () => {
             gap: "8px",
           }}
         >
-          <Tooltip title="View details">
+          <Tooltip title="View details" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
             <Button
-              icon={<EyeOutlined />}
+              icon={<FaEye />}
               onClick={() => handleEditClickMultipleAdsetData(record, true)}
               style={{
-                border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                border:'none',
                 borderRadius: "6px",
                 padding: "4px 8px",
-                backgroundColor: theme === "dark" ? "#1e1e1e" : "#fff",
+                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
-          <Tooltip title="Edit campaign">
+          <Tooltip title="Edit campaign" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
             <Button
-              icon={<EditOutlined />}
+              icon={<FaPenToSquare />}
               disabled={record.fbstatus === "Live"}
               onClick={() => handleEditClickMultipleAdsetData(record, false)}
               style={{
-                border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border:'none',
                 borderRadius: "6px",
                 padding: "4px 8px",
-                backgroundColor: theme === "dark" ? "#1e1e1e" : "#fff",
+           backgroundColor: theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
-            <Tooltip title="Clone campaign">
+            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
+              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+              color: theme === 'dark' ? '#ffffff' : '#000000',
+              borderRadius: 6,
+              padding: '6px 10px',
+              fontSize: '14px',
+            }}>
               <Button
-                icon={<CopyOutlined style={{ color: "red" }} />}
+                icon={<FaClone />}
                 disabled={true}
                 onClick={() => duplicatenewcampaign(record)}
                 style={{
-                  border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border:'none',
                   borderRadius: "6px",
                   padding: "4px 8px",
-                  backgroundColor: theme === "dark" ? "#1e1e1e" : "#fff",
+                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
                   color: theme === "dark" ? "#fff" : "#000",
                 }}
               />
             </Tooltip>
           )}
+          <Tooltip title="Delete campaign" 
+          overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaTrashCan color="#EC7117" />}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border:'none',
+                borderRadius: "6px",
+                cursor: 'not-allowed',
+                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
+
+            />
+          </Tooltip>
+           <Tooltip title="Number of adsets"
+            overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <div
+              style={{
+                backgroundColor: "#bce396ff",
+                color: "#000",
+                borderRadius: "60%",
+                width: "20px",
+                height: "20px",
+                textAlign:'center'
+              }}
+            >
+              {record.adsetCount}
+            </div>
+          </Tooltip>
         </div>
       ),
     },
@@ -1849,54 +1963,54 @@ const App = () => {
           )
         ),
     },
-    {
-      title: "Account number",
-      dataIndex: "Account_Number",
-      key: "Account_Number",
-      width: 160,
-      align: "center",
-      render: (text, record) => (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <div>{record.Account_Number}</div>
-          <div
-            style={{ display: "flex", justifyContent: "center", marginTop: 2 }}
-          >
-            <Tooltip title="Approved">
-              <span
-                style={{
-                  color: "#4caf50",
-                  fontWeight: "bold",
-                  marginRight: 10,
-                }}
-              >
-                {record.approvedCount}
-              </span>
-            </Tooltip>
-            <Tooltip title="Rejected">
-              <span
-                style={{ color: "red", fontWeight: "bold", marginRight: 10 }}
-              >
-                {record.rejectedCount}
-              </span>
-            </Tooltip>
-            <Tooltip title="Pending">
-              <span
-                className="blinking"
-                style={{ color: "orange", fontWeight: "bold" }}
-              >
-                {record.pendingCount}
-              </span>
-            </Tooltip>
-          </div>
-        </div>
-      ),
-    },
+    // {
+    //   title: "Account number",
+    //   dataIndex: "Account_Number",
+    //   key: "Account_Number",
+    //   width: 160,
+    //   align: "center",
+    //   render: (text, record) => (
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         flexDirection: "column",
+    //         alignItems: "center",
+    //       }}
+    //     >
+    //       <div>{record.Account_Number}</div>
+    //       <div
+    //         style={{ display: "flex", justifyContent: "center", marginTop: 2 }}
+    //       >
+    //         <Tooltip title="Approved">
+    //           <span
+    //             style={{
+    //               color: "#4caf50",
+    //               fontWeight: "bold",
+    //               marginRight: 10,
+    //             }}
+    //           >
+    //             {record.approvedCount}
+    //           </span>
+    //         </Tooltip>
+    //         <Tooltip title="Rejected">
+    //           <span
+    //             style={{ color: "red", fontWeight: "bold", marginRight: 10 }}
+    //           >
+    //             {record.rejectedCount}
+    //           </span>
+    //         </Tooltip>
+    //         <Tooltip title="Pending">
+    //           <span
+    //             className="blinking"
+    //             style={{ color: "orange", fontWeight: "bold" }}
+    //           >
+    //             {record.pendingCount}
+    //           </span>
+    //         </Tooltip>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
     {
       title: "Date",
       dataIndex: "createdDate",
@@ -1921,10 +2035,10 @@ const App = () => {
         let color = "black";
         let displayText = text;
         if (text === "PENDING_APPROVAL") {
-          color = "red";
+          color = "#EC7117";
           displayText = "Pending";
         } else if (text === "Approved") {
-          color = "green";
+          color = "#4caf50";
         }
         const approvedBy = record?.Approvedby || "N/A";
         return (
@@ -1969,9 +2083,8 @@ const App = () => {
                   open={isModalVisibleForAdsets}
                   onOk={handleOkForAdsets}
                   onCancel={() => setIsModalVisibleForAdsets(false)}
-                  className={`custom-modal ${
-                    theme === "dark" ? "dark-theme-modal" : ""
-                  }`}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
                 >
                   <p>Are you sure you want to approve?</p>
                 </Modal>
@@ -2246,10 +2359,28 @@ const App = () => {
   // const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
   //     return sum + (record.Daily_amount || 0);
   // }, 0) / 100;  // Assuming Daily_amount is in cents
-  const totalDailySpend =
-    campaignData.reduce((sum, record) => {
-      return sum + (record.Daily_amount || 0);
-    }, 0) / 100; // Assuming Daily_amount is in cents
+  // const totalDailySpend =
+  //   campaignData.reduce((sum, record) => {
+  //     return sum + (record.Daily_amount || 0);
+  //   }, 0) / 100; // Assuming Daily_amount is in cents
+ const totalDailySpend = (() => {
+    if (activeTab === "1") {
+      return (
+        getFilteredSingleCampaigns().reduce(
+          (sum, record) => sum + (record.Daily_amount || 0),
+          0
+        ) / 100
+      ).toFixed(2);
+    } else if (activeTab === "2") {
+      return (
+        getFilteredMultipleAdsetCampaigns().reduce(
+          (sum, record) => sum + (record.Daily_amount || 0),
+          0
+        ) / 100
+      ).toFixed(2);
+    }
+    return "0.00";
+  })();  
 
   const onClickDeleteDraft = (id) => {
     console.log(id, "draft id");
@@ -2419,208 +2550,106 @@ const App = () => {
       <Card
         style={{
           marginBottom: "10px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)", // subtle shadow
-          borderRadius: "10px",
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          borderRadius: '10px'
         }}
         headStyle={{
-          borderBottom: "none", // ❌ removes the bottom line
-          paddingBottom: 0, // Optional: tighter spacing
+          borderBottom: 'none',
+          paddingBottom: 0,
         }}
-        // title="Campaigns"
         title={
           <div>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: theme === "dark" ? "#fff" : "#1c1e21",
-                lineHeight: "30px",
-              }}
-            >
-              Campaigns
+            <div style={{
+              fontSize: 18,
+              fontWeight: 600,
+              color: theme === 'dark' ? '#fff' : '#1c1e21',
+              lineHeight: '30px'
+            }}>
+              Campaign Management
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: theme === "dark" ? "#b0b3b8" : "#65676b",
-              }}
-            >
+            <div style={{
+              fontSize: 12,
+              color: theme === 'dark' ? '#b0b3b8' : '#65676b'
+            }}>
               Create, manage, and optimize your advertising campaigns
             </div>
           </div>
         }
         size="small"
         extra={
-          <Button.Group style={{ marginTop: 10 }}>
-            {/* 🟢 Left: Create Draft */}
-            <Tooltip
-              title={
-                draftsData.length === 5
-                  ? "You have exceeded the draft limit of 5"
-                  : "Create a new draft"
-              }
-              placement="top"
-              open={draftsData.length === 5 ? undefined : false}
-              overlayStyle={{ backgroundColor: "#333", color: "#fff" }} // Tooltip styling
-              className={
-                theme === "dark"
-                  ? "custom-tooltip-dark"
-                  : "custom-tooltip-light"
-              }
-            >
-              <span>
-                {/* <Button
-                  type="primary"
-                  onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
-                  disabled={draftsData.length === 5}
-                  style={{
-                    backgroundColor: draftsData.length === 5 ? '#cccccc' : '#91C25F',
-                    color: draftsData.length === 5 ? '#7a7a7a' : '#000',
-                    borderColor: '#91C25F',
-                    borderWidth: "0px",
-                    // fontWeight: 'normal',
-                    boxShadow: draftsData.length === 5 ? 'none' : '0px 4px 10px rgba(0, 0, 0, 0.15)',
-                    transition: 'background-color 0.3s ease',
-                    marginRight: '3px', // Adds space between the buttons
-                  }}
-                  className={theme === 'dark' ? 'dark-theme-btn' : 'light-theme-btn'}
-                >
-                  Create draft
-                </Button> */}
-              </span>
-            </Tooltip>
-
-            {/* 🟣 Right: Dropdown Button (Separate from Create Draft Button) */}
-            {/* <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
-              <Button
-                style={{
-                  backgroundColor: '#91C25F',
-                  color: "#000",
-                  border: "none",
-                  borderRadius: '4px',
-                  padding: '5px 10px',
-                  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                  transition: 'background-color 0.3s ease'
-                }}
-                icon={<DownOutlined className="black-icon" />}
-              />
-            </Dropdown> */}
-          </Button.Group>
+          <Button
+            onClick={showDrawer}
+            icon={<PlusOutlined className="black-icon" />}
+            style={{
+              backgroundColor: '#91C25F',
+              color: '#000',
+              border: 'none',
+              border: '#4caf50'
+            }}
+          >
+            New Campaign
+          </Button>
         }
-        // style={{ backgroundColor:'blue'}}
       >
-        <Row align="middle" gutter={[16, 16]}>
-          <Col span={3}>
+        {/* Entire filter section in one single aligned row */}
+        <Row align="middle" justify="space-between" style={{ flexWrap: 'wrap', rowGap: '12px' }}>
+          <Col style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+
+            {/* 🔹 Select Project */}
             <Select
               showSearch
-              placeholder="Select Project"
-              style={{ width: "90%" }}
+              placeholder="Select Projects"
+              style={{ width: 140 }}
               onChange={handleKeyChange}
               value={selectedKey}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
             >
-              {options.map((option) => (
-                <Option key={option.value} value={option.value} title={null}>
-                  {option.label}{" "}
-                </Option>
+              {options.map(option => (
+                <Option key={option.value} value={option.value}>{option.label}</Option>
               ))}
             </Select>
-          </Col>
 
-          <Col span={4} style={{ marginLeft: "-25px" }}>
+            {/* 🔹 Select Account */}
             <Select
               showSearch
               placeholder="Select Accounts"
-              style={{ width: "90%" }}
+              style={{ width: 225 }}
               onChange={handleValueChange}
               disabled={!selectedKey}
               value={selectedValue}
               optionFilterProp="children"
-              filterOption={(input, option) =>
-                /^[0-9]*$/.test(input) &&
-                option?.value.toString().includes(input)
-              }
-              onDropdownVisibleChange={(open) => setIsOpen(open)} // Track dropdown visibility
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              filterOption={(input, option) => /^[0-9]*$/.test(input) && option?.value.toString().includes(input)}
+              onDropdownVisibleChange={(open) => setIsOpen(open)}
+              dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
             >
-              {valueOptions.map((option) => (
+              {valueOptions.map(option => (
                 <Select.Option key={option.value} value={option.value}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
-                      padding: "5px 0",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        maxWidth: "70%",
-                      }}
-                    >
-                      <p
-                        style={{
-                          margin: "0px",
-                          // fontWeight: 'bold',
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {option.label}
-                      </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '70%' }}>
+                      <p style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{option.label}</p>
                       {isOpen && (
-                        <p
-                          style={{
-                            margin: "0px",
-                            fontSize: "12px",
-                            color: "gray",
-                            overflow: "hidden",
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {option.accountName || ""}
+                        <p style={{ margin: 0, fontSize: 12, color: 'gray', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {option.accountName || ''}
                         </p>
                       )}
                     </div>
-                    <span style={{ marginLeft: "10px", flexShrink: 0 }}>
+                    <span>
                       {option.status === "Active" ? (
-                        <CheckCircleFilled
-                          style={{ color: "#91C25F", fontSize: "15px" }}
-                          className="black-icon-active-1"
-                        />
+                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
                       ) : (
-                        <CloseCircleFilled
-                          style={{ color: "#EC7117", fontSize: "15px" }}
-                          className="black-icon-pause-1"
-                        />
+                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
                       )}
                     </span>
                   </div>
                 </Select.Option>
               ))}
             </Select>
-          </Col>
 
-          <Col span={5} style={{ marginLeft: "-30px" }}>
+            {/* 🔹 Date Picker */}
             <ConfigProvider
-              theme={{
-                token: {
-                  colorPrimary: "#91C25F",
-                  colorTextLightSolid: "#000",
-                },
-              }}
+              theme={{ token: { colorPrimary: '#91C25F', colorTextLightSolid: '#000' } }}
             >
               <RangePicker
                 className="green-border-picker"
@@ -2628,26 +2657,43 @@ const App = () => {
                 onChange={handleChange}
                 disabledDate={disabledDate}
                 style={{
-                  width: "92%",
-                  backgroundColor: theme === "dark" ? "#555" : undefined,
-                  color: theme === "dark" ? "white" : undefined,
+                  width: 215,
+                  backgroundColor: theme === 'dark' ? '#555' : undefined,
+                  color: theme === 'dark' ? 'white' : undefined,
                 }}
-                // defaultValue={[dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]}
                 defaultValue={[dayjs(), dayjs()]}
-                // format="YYYY-MM-DD"
-                // style={{ width: '100%' }}
-                dropdownClassName={`${
-                  theme === "dark" ? "dark-theme-dropdown" : ""
-                }`}
+                dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
               />
             </ConfigProvider>
+
+            {/* 🔹 Apply Button */}
+            <Button
+              type='primary'
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+              onClick={handleApply}
+              style={{
+                backgroundColor: hovered ? '#91C25F' : 'transparent',
+                border: '1px solid #4CAF50',
+                borderRadius: '6px',
+                color: theme === 'dark' ? '#ffffff' : '#000000',
+                height: '32px',
+                padding: '0 16px',
+                transition: 'all 0.15s ease-in-out',
+              }}
+            >
+              Apply
+            </Button>
+
+            {/* 🔹 Search */}
+
+
+
           </Col>
-
-          {/* <Col span={3} style={{ marginLeft: '-28px' }}>
-
+          <Col style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+            {/* 🔹 Status Filter */}
             <Input
               placeholder="Search..."
-              // suffix={<SearchOutlined onClick={handleSearchSubmit} />}
               value={searchInput}
               onChange={handleSearchChange}
               onPressEnter={handleSearchSubmit}
@@ -2657,257 +2703,117 @@ const App = () => {
                 border: '1px solid #4caf50',
               }}
             />
-          </Col> */}
-          <Col style={{ marginLeft: "auto" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                gap: "12px",
-                flexWrap: "wrap",
-                // width: '100%',
-
-                // marginLeft:'3px'
-              }}
-            >
-              {!restrictedEmails.includes(userdetails.email) && (
-                <Button
-                  onClick={showDrawer}
-                  icon={<PlusOutlined className="black-icon" />}
-                  style={{
-                    backgroundColor: "#91C25F",
-                    color: "#000",
-                    border: "none",
-                    marginRight: "-5px",
-                    border: "#4caf50",
-                  }}
-                >
-                  Create campaign
-                </Button>
-              )}
-              {/* 
-              <Button
-                type="primary"
-                onClick={handleRefresh}
-                icon={<ReloadOutlined className="black-icon" />}
-                style={{
-                  backgroundColor: '#91C25F',
-                  color: '#000',
-                  border: 'none',
-                  marginRight: '-5px',
-                  border: '#4caf50'
-                }}
-              /> */}
-
-              <span
-                style={{
-                  backgroundColor: theme === "dark" ? "#e6f7ff" : "#e6f7ff",
-                  padding: "5px 14px",
-                  borderRadius: "8px",
-                  fontSize: "15px",
-                  fontWeight: "500",
-                  color: theme === "dark" ? "#1d39c4" : "#1d39c4",
-                  border: `1px solid ${
-                    theme === "dark" ? "#91d5ff" : "#91d5ff"
-                  }`,
-                  // marginRight: '-55px'
-                }}
-              >
-                Total daily spend: ${totalDailySpend.toFixed(2)}
-              </span>
-            </div>
-          </Col>
-        </Row>
-
-        <Row
-          justify="end"
-          align="middle"
-          gutter={[8, 0]}
-          style={{ marginTop: "5px" }}
-        >
-          <Col>
-            <Input
-              placeholder="Search..."
-              // suffix={<SearchOutlined onClick={handleSearchSubmit} />}
-              value={searchInput}
-              onChange={handleSearchChange}
-              onPressEnter={handleSearchSubmit}
-              className={
-                theme === "dark" ? "custom-input-dark" : "custom-input-light"
-              }
-              style={{
-                width: "170px",
-                border: "1px solid #4caf50",
-              }}
-            />
-          </Col>
-
-          <Col>
             <Dropdown
-              dropdownRender={(menu) => (
-                <div
-                  className={
-                    theme === "dark"
-                      ? "dark-theme-dropdown"
-                      : "light-theme-dropdown"
-                  }
-                >
-                  {menu}
-                </div>
-              )}
               overlay={
-                // <Menu
-                // onClick={({ key }) => {
-                //   onStatusFilterChange && onStatusFilterChange(key);
-                //   setCampaignStatusFilter(key);
-                // }}// <-- Add this line
-                // items={[
-                //     {
-                //         key: 'all',
-                //         label: (
-                //           <span
-                //             style={{
-                //               fontSize: '13px',
-                //               display: 'flex',
-                //               alignItems: 'center',
-                //               backgroundColor: campaignStatusFilter === 'all' ? '#E6F7FF' : 'transparent',
-                //             }}
-                //             className="custom-menu-item"
-                //           >
-                //             {/* <span
-                //               style={{
-                //                 width: '6px',
-                //                 height: '6px',
-                //                 borderRadius: '50%',
-                //                 backgroundColor: '#122F6E',
-                //                 marginRight: '6px',
-                //               }}
-                //             ></span> */}
-                //             All
-                //           </span>
-                //         ),
-                //     },
-                //     {
-                //         key: 'active',
-                //         label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
-                //         {/* <span
-                //                 style={{
-                //                 width: '6px',
-                //                 height: '6px',
-                //                 borderRadius: '50%',
-                //                 backgroundColor: 'green',
-                //                 marginRight: '6px',
-                //                 }}
-                //             ></span>   */}
-                //         Active
-                //         </span>
-                //     },
-                //     {
-                //         key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
-                //           {/* <span
-                //             style={{
-                //             width: '6px',
-                //             height: '6px',
-                //             borderRadius: '50%',
-                //             backgroundColor: 'red',
-                //             marginRight: '6px',
-                //             }}
-                //         ></span> */}
-                //         Paused
-                //         </span>
-                //     },
-                //     {
-                //       key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}} className="custom-menu-item">
-                //         {/* <span
-                //           style={{
-                //           width: '6px',
-                //           height: '6px',
-                //           borderRadius: '50%',
-                //           backgroundColor: 'red',
-                //           marginRight: '6px',
-                //           }}
-                //       ></span> */}
-                //       Pending
-                //       </span>
-                //   },
-                // ]}
-                // />
-                <Menu
-                  onClick={({ key }) => {
-                    onStatusFilterChange && onStatusFilterChange(key);
-                    setCampaignStatusFilter(key); // Ensure state updates
-                  }}
-                  selectedKeys={[campaignStatusFilter]} // ← this is key!
-                  items={[
-                    { key: "all", label: "All" },
-                    { key: "active", label: "Active" },
-                    { key: "pause", label: "Paused" },
-                    { key: "pending", label: "Pending" },
-                  ]}
-                />
+                <Menu onClick={({ key }) => onStatusFilterChange(key)} items={[
+                  {
+                    key: 'all', label: (
+                      <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                        <span
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            backgroundColor: '#122F6E',
+                            marginRight: '6px',
+                          }}
+                        ></span>
+                        All
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'active', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: 'green',
+                          marginRight: '6px',
+                        }}
+                      ></span>
+                      Active
+
+                    </span>
+                  },
+                  {
+                    key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: 'red',
+                          marginRight: '6px',
+                        }}
+                      ></span>
+                      Paused
+
+                    </span>
+                  },
+                  {
+                    key: 'pending', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: '#EC7117',
+                          marginRight: '6px',
+                        }}
+                      ></span>
+                      Pending
+
+                    </span>
+                  },
+                ]} />
               }
-              trigger={["click"]}
+              trigger={['click']}
             >
               <Button
-                type="default"
                 style={{
                   borderRadius: 8,
-                  background:
-                    theme === "dark" ? "rgba(82,196,26,0.12)" : "#F6FFED",
-                  border: "1px solid #4CAF50",
-                  color: theme === "dark" ? "#95DE64" : "#389E0D",
+                  background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                  border: '1px solid #4CAF50',
+                  color: theme === 'dark' ? '#95de64' : '#389e0d',
                   fontWeight: 500,
-                  // width:'170px'
-                  // marginRight: '3px'
+                  width: 100
                 }}
               >
-                {/* <Space size={2}>
-                    <FilterOutlined />
-                      Filters
-                    <DownOutlined style={{ fontSize: 10 }} />
-                    </Space> */}
                 <Space size={2}>
                   <FilterOutlined />
-                  {campaignStatusFilter === "all"
-                    ? "All"
-                    : campaignStatusFilter === "active"
-                    ? "Active"
-                    : campaignStatusFilter === "pause"
-                    ? "Paused"
-                    : "Pending"}
+                  {campaignStatusFilter.charAt(0).toUpperCase() + campaignStatusFilter.slice(1)}
                   <DownOutlined style={{ fontSize: 10 }} />
                 </Space>
               </Button>
             </Dropdown>
-          </Col>
 
-          <Col>
-            <div
+            {/* 🔹 Total Daily Spend */}
+            <span
               style={{
-                display: "flex",
-                // justifyContent: 'flex-end',
-                alignItems: "center",
-                gap: "10px",
-                flexWrap: "wrap",
-                width: "100%",
-
-                // marginLeft:'3px'
+                backgroundColor: 'transparent',
+                padding: '5px 14px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                color: theme === 'dark' ? '#fff' : '#000',
+                border: '1px solid #4caf50',
               }}
             >
-              <Button
-                type="primary"
-                onClick={handleRefresh}
-                icon={<ReloadOutlined className="black-icon" />}
-                style={{
-                  backgroundColor: "#91C25F",
-                  color: "#000",
-                  border: "none",
-                  // marginRight: '-5px',
-                  border: "#4caf50",
-                }}
-              />
-            </div>
+              Budget: ${totalDailySpend}
+            </span>
+
+            {/* 🔹 Refresh Button */}
+            <Button
+              type="primary"
+              onClick={handleRefresh}
+              icon={<ReloadOutlined className="black-icon" />}
+              style={{
+                backgroundColor: '#91C25F',
+                color: '#000',
+                border: 'none',
+              }}
+            />
           </Col>
         </Row>
       </Card>
@@ -2969,11 +2875,10 @@ const App = () => {
                   // minHeight: '100%',
                   tableLayout: "fixed",
                 }}
-                className={`custom-dark-table ${
-                  theme === "dark"
-                    ? "dark-mode-pagination"
-                    : "light-mode-pagination"
-                }`}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
                 columns={columns}
                 dataSource={getFilteredSingleCampaigns()
                   .map((item, index) => ({
@@ -3032,11 +2937,10 @@ const App = () => {
                   // minHeight: '100%',
                   tableLayout: "fixed",
                 }}
-                className={`custom-dark-table ${
-                  theme === "dark"
-                    ? "dark-mode-pagination"
-                    : "light-mode-pagination"
-                }`}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
                 columns={columnsformultipleadsets}
                 dataSource={getFilteredMultipleAdsetCampaigns()
                   .map((item, index) => ({

@@ -19,6 +19,7 @@ import {
   InputNumber,
   Breadcrumb,
   Popconfirm,
+  Alert,
 } from "antd";
 import {
   PlusOutlined,
@@ -52,6 +53,7 @@ import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
+import { FaTrashCan } from "react-icons/fa6";
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 
@@ -589,6 +591,9 @@ const AdsetComponent = ({
   const [creativeIndex, setCreativeIndex] = useState(null);
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
+
+
+
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -635,6 +640,8 @@ const AdsetComponent = ({
     // console.log(text, "text");
   };
 
+
+  
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
@@ -748,8 +755,8 @@ const AdsetComponent = ({
   const tooltipMsg = isCampaignBudgetActive
     ? "You have enabled daily budget in the campaign level"
     : isAnyAdsetBudgetSet
-    ? "You have enabled daily budget in the Adset Level"
-    : "";
+      ? "You have enabled daily budget in the Adset Level"
+      : "";
 
   //   const selectedFilesData = (data) => {
   //     const mappedFiles = data.map((file, i) => ({
@@ -899,10 +906,10 @@ const AdsetComponent = ({
       type: file?.url?.endsWith(".jpg")
         ? "image/jpg"
         : file?.url?.endsWith(".jpeg")
-        ? "image/jpeg"
-        : file?.url?.endsWith(".png")
-        ? "image/png"
-        : "video/",
+          ? "image/jpeg"
+          : file?.url?.endsWith(".png")
+            ? "image/png"
+            : "video/",
       url: file?.url,
     }));
 
@@ -1043,7 +1050,7 @@ const AdsetComponent = ({
                   <Button
                     type="text"
                     onClick={(e) => e.stopPropagation()} // Prevent panel collapse
-                    icon={<DeleteOutlined />}
+                    icon={<FaTrashCan color="#EC7117" />}
                   />
                 </Popconfirm>
               )}
@@ -1132,9 +1139,8 @@ const AdsetComponent = ({
               // onChange={(value) => handleFieldChange(index, "optimization_goal", value)}
               // defaultValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
             />
           </Form.Item>
           <Form.Item
@@ -1155,11 +1161,10 @@ const AdsetComponent = ({
                 { value: "VALUE", label: "Value" },
               ]}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
-              // defaultValue={adset.billing_event || "IMPRESSIONS"}
-              // onChange={(value) => handleFieldChange(index, "billing_event", value)}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.billing_event || "IMPRESSIONS"}
+            // onChange={(value) => handleFieldChange(index, "billing_event", value)}
             />
           </Form.Item>
           <Form.Item
@@ -1205,11 +1210,10 @@ const AdsetComponent = ({
                 { value: "phone_call", label: "Phone Call" },
               ]}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
-              // defaultValue={adset.action_source || "website"}
-              // onChange={(value) => handleFieldChange(index, "action_source", value)}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.action_source || "website"}
+            // onChange={(value) => handleFieldChange(index, "action_source", value)}
             />
           </Form.Item>
           <Form.Item
@@ -1232,11 +1236,10 @@ const AdsetComponent = ({
                 { value: "CONTACT", label: "Contact" },
               ]}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
-              // defaultValue={adset.custom_event_type || "LEAD"}
-              // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.custom_event_type || "LEAD"}
+            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
             />
           </Form.Item>
           {/* <Form.Item
@@ -1422,16 +1425,15 @@ const AdsetComponent = ({
 
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
-            label={`Daily budget`}
+            label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
             rules={[
               {
                 required: !(
                   isCampaignBudgetActive ||
                   form.getFieldValue(["adsets", index, "DailyAdd_amount"]) > 0
                 ),
-                message: `Please enter a valid number > 0 in Adset ${
-                  index + 1
-                }`,
+                message: `Please enter a valid number > 0 in Adset ${index + 1
+                  }`,
               },
             ]}
           >
@@ -1488,8 +1490,8 @@ const AdsetComponent = ({
                     value && !isNaN(value) && parseFloat(value) > 0
                       ? Promise.resolve()
                       : Promise.reject(
-                          new Error("Please enter a valid float value!")
-                        ),
+                        new Error("Please enter a valid float value!")
+                      ),
                 },
               ]}
               style={{ flex: "1 1 150px" }}
@@ -1566,9 +1568,8 @@ const AdsetComponent = ({
               ]}
               // defaultValue={adset.countries || "US"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
             />
           </Form.Item>
           <Form.Item
@@ -1592,9 +1593,8 @@ const AdsetComponent = ({
               ]}
               // defaultValue={adset.Min_Age || "18"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
             />
           </Form.Item>
           <Form.Item
@@ -1618,9 +1618,8 @@ const AdsetComponent = ({
               ]}
               // defaultValue={adset.Max_Age || "65"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
             />
           </Form.Item>
           <Form.Item
@@ -1643,9 +1642,8 @@ const AdsetComponent = ({
               ]}
               // defaultValue={"0"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
             />
           </Form.Item>
           <Form.Item
@@ -1663,10 +1661,9 @@ const AdsetComponent = ({
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
-              // defaultValue={adset.Language || "English (US)"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.Language || "English (US)"}
             >
               {localesdata.map((option) => (
                 <Option key={option.key} value={option.key} title={null}>
@@ -1758,7 +1755,7 @@ const AdsetComponent = ({
                         </>
                     )} */}
           <Form.Item
-            label="Placements"
+             label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
             name={["adsets", index, "placements"]}
             rules={[{ required: true, message: "Please select a mode!" }]}
             initialValue={adset.placements || "Advance"}
@@ -1766,10 +1763,9 @@ const AdsetComponent = ({
             <Select
               placeholder="Select a mode"
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
-              // defaultValue={adset.placements || "Advance"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.placements || "Advance"}
             >
               <Option value="Advance" title={null}>
                 Advance
@@ -1820,9 +1816,8 @@ const AdsetComponent = ({
                       onChange={handlePublisherChange}
                       value={selectedPublishers}
                       dropdownClassName={theme === "dark" && "custom-dropdown"}
-                      className={`${
-                        theme === "dark" ? "dark-theme" : "light-theme"
-                      } green-border-select`}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                        } green-border-select`}
                     >
                       {publisherOptions.map((option) => (
                         <Option
@@ -1852,9 +1847,8 @@ const AdsetComponent = ({
                       )} // ✅ fixed
                       onChange={handlePositionChange}
                       dropdownClassName={theme === "dark" && "custom-dropdown"}
-                      className={`${
-                        theme === "dark" ? "dark-theme" : "light-theme"
-                      } green-border-select`}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                        } green-border-select`}
                     >
                       {Array.isArray(selectedPublishers?.[adset.id]) &&
                         selectedPublishers[adset.id].length > 0 &&
@@ -1888,9 +1882,8 @@ const AdsetComponent = ({
                         { value: "desktop", label: "Desktop", title: "" },
                       ]}
                       dropdownClassName={theme === "dark" && "custom-dropdown"}
-                      className={`${
-                        theme === "dark" ? "dark-theme" : "light-theme"
-                      } green-border-select`}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                        } green-border-select`}
                     />
                   </Form.Item>
                 </div>
@@ -1968,9 +1961,8 @@ const AdsetComponent = ({
                         dropdownClassName={
                           theme === "dark" && "custom-dropdown"
                         }
-                        className={`${
-                          theme === "dark" ? "dark-theme" : "light-theme"
-                        } green-border-select`}
+                        className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                          } green-border-select`}
                       >
                         <Option value="upload">Upload</Option>
                         <Option value="creative">Creative library</Option>
@@ -2236,54 +2228,54 @@ const AdsetComponent = ({
 
                             {selectedFilesFromCreatives[adset.id]?.length >
                               0 && (
-                              <div style={{ marginTop: "10px" }}>
-                                {selectedFilesFromCreatives[adset.id].map(
-                                  (file, index) => (
-                                    <div
-                                      key={index}
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        marginBottom: 8,
-                                      }}
-                                    >
-                                      {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                      {/* <Tooltip title={file.name}> */}
-                                      {file.type?.startsWith("image/") && (
-                                        <img
-                                          src={
-                                            file.originFileObj
-                                              ? URL.createObjectURL(
-                                                  file.originFileObj
-                                                )
-                                              : file.url
-                                          }
-                                          alt="preview"
-                                          style={{
-                                            width: 40,
-                                            height: 40,
-                                            objectFit: "cover",
-                                            borderRadius: 4,
-                                            marginLeft: 8,
-                                          }}
-                                        />
-                                      )}
-                                      <span
+                                <div style={{ marginTop: "10px" }}>
+                                  {selectedFilesFromCreatives[adset.id].map(
+                                    (file, index) => (
+                                      <div
+                                        key={index}
                                         style={{
-                                          maxWidth: 160,
-                                          overflow: "hidden",
-                                          textOverflow: "ellipsis",
-                                          whiteSpace: "nowrap",
-                                          paddingLeft: 8,
-                                          color:
-                                            theme === "dark" ? "#fff" : "#000",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          marginBottom: 8,
                                         }}
                                       >
-                                        {file.name}
-                                      </span>
-                                      {/* </Tooltip> */}
+                                        {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                        {/* <Tooltip title={file.name}> */}
+                                        {file.type?.startsWith("image/") && (
+                                          <img
+                                            src={
+                                              file.originFileObj
+                                                ? URL.createObjectURL(
+                                                  file.originFileObj
+                                                )
+                                                : file.url
+                                            }
+                                            alt="preview"
+                                            style={{
+                                              width: 40,
+                                              height: 40,
+                                              objectFit: "cover",
+                                              borderRadius: 4,
+                                              marginLeft: 8,
+                                            }}
+                                          />
+                                        )}
+                                        <span
+                                          style={{
+                                            maxWidth: 160,
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                            paddingLeft: 8,
+                                            color:
+                                              theme === "dark" ? "#fff" : "#000",
+                                          }}
+                                        >
+                                          {file.name}
+                                        </span>
+                                        {/* </Tooltip> */}
 
-                                      {/* <DeleteOutlined
+                                        {/* <DeleteOutlined
                                                                     onClick={() => {
                                                                         const updated = selectedFilesFromCreatives[index].filter(
                                                                         (f) => f.uid !== file.uid
@@ -2297,60 +2289,60 @@ const AdsetComponent = ({
                                                                     }}
                                                                     style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
                                                                     /> */}
-                                      {!view && (
-                                        <DeleteOutlined
-                                          onClick={() => {
-                                            // Update selectedFilesFromCreatives for the current adset (index)
-                                            const updatedCreatives =
-                                              selectedFilesFromCreatives[
-                                                adset.id
-                                              ].filter(
-                                                (f) => f.uid !== file.uid
+                                        {!view && (
+                                          <DeleteOutlined
+                                            onClick={() => {
+                                              // Update selectedFilesFromCreatives for the current adset (index)
+                                              const updatedCreatives =
+                                                selectedFilesFromCreatives[
+                                                  adset.id
+                                                ].filter(
+                                                  (f) => f.uid !== file.uid
+                                                );
+                                              setSelectedFilesFromCreatives(
+                                                (prev) => {
+                                                  const updated = {
+                                                    ...prev,
+                                                    [adset.id]: updatedCreatives,
+                                                  }; // Update the adset.id specifically
+                                                  return updated;
+                                                }
                                               );
-                                            setSelectedFilesFromCreatives(
-                                              (prev) => {
+
+                                              // Update selectedFiles for the current adset (adset.id)
+                                              const updatedFiles = selectedFiles[
+                                                adset.id
+                                              ].filter((f) => f.uid !== file.uid);
+                                              setSelectedFiles((prev) => {
                                                 const updated = {
                                                   ...prev,
-                                                  [adset.id]: updatedCreatives,
-                                                }; // Update the adset.id specifically
+                                                  [adset.id]: updatedFiles,
+                                                }; // Update the index specifically
                                                 return updated;
-                                              }
-                                            );
+                                              });
 
-                                            // Update selectedFiles for the current adset (adset.id)
-                                            const updatedFiles = selectedFiles[
-                                              adset.id
-                                            ].filter((f) => f.uid !== file.uid);
-                                            setSelectedFiles((prev) => {
-                                              const updated = {
-                                                ...prev,
-                                                [adset.id]: updatedFiles,
-                                              }; // Update the index specifically
-                                              return updated;
-                                            });
+                                              // Update form values with the new MediaContent array
+                                              form.setFieldsValue({
+                                                MediaContent: updatedCreatives,
+                                              });
 
-                                            // Update form values with the new MediaContent array
-                                            form.setFieldsValue({
-                                              MediaContent: updatedCreatives,
-                                            });
-
-                                            // Trigger validation
-                                            form.validateFields([
-                                              "MediaContent",
-                                            ]);
-                                          }}
-                                          style={{
-                                            color: "red",
-                                            marginLeft: 12,
-                                            cursor: "pointer",
-                                          }}
-                                        />
-                                      )}
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            )}
+                                              // Trigger validation
+                                              form.validateFields([
+                                                "MediaContent",
+                                              ]);
+                                            }}
+                                            style={{
+                                              color: "red",
+                                              marginLeft: 12,
+                                              cursor: "pointer",
+                                            }}
+                                          />
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
                           </div>
                         )}
                       </div>
@@ -2382,7 +2374,7 @@ const AdsetComponent = ({
                 <Form.Item
                   name={["adsets", index, "AddName"]}
                   initialValue={campaignName}
-                  label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                  label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                   rules={[
                     {
                       required: true,
@@ -2401,7 +2393,7 @@ const AdsetComponent = ({
                   />
                 </Form.Item>
                 <Form.Item
-                  label="Primary text"
+                 label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                   name={["adsets", index, "message"]}
                   rules={[
                     {
@@ -2442,7 +2434,7 @@ const AdsetComponent = ({
                                     />
                                 </Form.Item> */}
                 <Form.Item
-                  label="Headline"
+                  label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                   name={["adsets", index, "headline"]}
                   rules={[
                     {
@@ -2466,7 +2458,7 @@ const AdsetComponent = ({
                 </Form.Item>
 
                 <Form.Item
-                  label="Description"
+                   label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                   name={["adsets", index, "Description"]}
                   rules={[
                     {
@@ -2506,7 +2498,7 @@ const AdsetComponent = ({
                           paddingRight: "50px",
                         }}
                       >
-                        <span>Website_URL</span>
+                       <span style={{ color: "#B4B4B4" }}>Website_URL</span>
                         <Tooltip title="This is a required field">
                           <QuestionCircleOutlined
                             style={{ marginLeft: 4, cursor: "pointer" }}
@@ -2542,7 +2534,7 @@ const AdsetComponent = ({
                   />
                 </Form.Item>
                 <Form.Item
-                  label="Display Link"
+                   label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                   name={["adsets", index, "Caption"]}
                   rules={[
                     {
@@ -2579,9 +2571,8 @@ const AdsetComponent = ({
                   footer={null}
                   width="80%" // Set width of the modal
                   bodyStyle={{ height: "50vh", overflowY: "auto" }}
-                  className={`custom-modal ${
-                    theme === "dark" ? "dark-theme-modal" : ""
-                  }`}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
                 >
                   {getUrlBuilder}
                 </Modal>
@@ -2601,301 +2592,301 @@ const AdsetComponent = ({
               <div style={{ flex: "30%" }}>
                 {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0
                   ? selectedFiles[adset.id].map((file, i) => (
-                      <Badge
-                        key={i}
-                        count={
-                          file?.url?.endsWith(".png") ||
+                    <Badge
+                      key={i}
+                      count={
+                        file?.url?.endsWith(".png") ||
                           file?.url?.endsWith(".jpg") ||
                           file?.url?.endsWith(".jpeg") ||
                           file?.url?.endsWith(".mp4") ? null : (
-                            <EditOutlined
-                              style={{ fontSize: "25px", color: "#fff" }}
-                              onClick={() => handleEditClick(file)}
-                            />
-                          )
-                        }
-                        style={{
-                          backgroundColor: "#52c41a",
-                          borderRadius: "50%",
-                          position: "absolute",
-                          top: "5px",
-                          right: "5px",
-                          zIndex: 10,
-                          cursor: "pointer",
-                        }}
-                        offset={[5, 5]}
-                      >
-                        <div className="container-ad-preview">
-                          <div
-                            className="ad-preview"
-                            style={{
-                              width: "350px",
-                              backgroundColor:
-                                theme === "dark" ? "#4f4f4d" : "#fff",
-                            }}
-                          >
-                            <div className="ad-heading">
-                              <div className="img">
-                                {file?.url?.endsWith(".png") ||
+                          <EditOutlined
+                            style={{ fontSize: "25px", color: "#fff" }}
+                            onClick={() => handleEditClick(file)}
+                          />
+                        )
+                      }
+                      style={{
+                        backgroundColor: "#52c41a",
+                        borderRadius: "50%",
+                        position: "absolute",
+                        top: "5px",
+                        right: "5px",
+                        zIndex: 10,
+                        cursor: "pointer",
+                      }}
+                      offset={[5, 5]}
+                    >
+                      <div className="container-ad-preview">
+                        <div
+                          className="ad-preview"
+                          style={{
+                            width: "350px",
+                            backgroundColor:
+                              theme === "dark" ? "#4f4f4d" : "#fff",
+                          }}
+                        >
+                          <div className="ad-heading">
+                            <div className="img">
+                              {file?.url?.endsWith(".png") ||
                                 file?.url?.endsWith(".jpg") ||
                                 file?.url?.endsWith(".jpeg") ? (
-                                  <img
-                                    src={file?.url}
-                                    alt="preview"
-                                    width="40"
-                                    height="40"
-                                    style={{ objectFit: "cover" }}
-                                  />
-                                ) : file?.url?.endsWith(".mp4") ? (
-                                  <video
-                                    src={file?.url}
-                                    width="40"
-                                    height="30"
-                                    style={{ objectFit: "cover" }}
-                                    muted
-                                  />
-                                ) : file?.type?.startsWith("image/") ? (
-                                  <img
-                                    src={
-                                      editedImages[file?.name]
-                                        ? editedImages[file?.name]
-                                        : file?.originFileObj
-                                        ? URL.createObjectURL(
-                                            file.originFileObj
-                                          )
-                                        : file?.url
-                                    }
-                                    alt="preview"
-                                    width="40"
-                                    height="40"
-                                    style={{ objectFit: "cover" }}
-                                  />
-                                ) : (
-                                  <video
-                                    src={
-                                      file?.originFileObj
-                                        ? URL.createObjectURL(
-                                            file.originFileObj
-                                          )
-                                        : file?.url
-                                    }
-                                    width="40"
-                                    height="30"
-                                    style={{ objectFit: "cover" }}
-                                    muted
-                                  />
-                                )}
-                              </div>
-
-                              <div className="title">
-                                <div
-                                  className="main"
-                                  style={{
-                                    wordWrap: "break-word",
-                                    whiteSpace: "normal",
-                                    color: theme === "dark" ? "white" : "#000",
-                                  }}
-                                >
-                                  {addName}
-                                  <div className="sub">
-                                    {imagehash?.pageName ? (
-                                      <>
-                                        {imagehash.pageName}{" "}
-                                        <GlobalOutlined
-                                          style={{ opacity: "0.6" }}
-                                        />
-                                      </>
-                                    ) : (
-                                      <GlobalOutlined
-                                        style={{ opacity: "0.6" }}
-                                      />
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="close">
-                                <CloseOutlined style={{ fontSize: "20px" }} />
-                              </div>
-                              <div className="moreoptions">
-                                <MoreOutlined style={{ fontSize: "20px" }} />
-                              </div>
-                            </div>
-
-                            <div
-                              className="ad-desc"
-                              style={{
-                                wordWrap: "break-word",
-                                whiteSpace: "normal",
-                                color: theme === "dark" ? "white" : "#000",
-                              }}
-                            >
-                              {primaryText}
-                            </div>
-
-                            <div
-                              className="ad-image"
-                              style={{
-                                width: "350px",
-                                height: "300px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              {file?.url?.endsWith(".png") ||
-                              file?.url?.endsWith(".jpg") ||
-                              file?.url?.endsWith(".jpeg") ? (
                                 <img
                                   src={file?.url}
-                                  alt="ad"
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
-                                  }}
+                                  alt="preview"
+                                  width="40"
+                                  height="40"
+                                  style={{ objectFit: "cover" }}
                                 />
                               ) : file?.url?.endsWith(".mp4") ? (
                                 <video
-                                  controls
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
-                                  }}
-                                >
-                                  <source src={file?.url} />
-                                  Your browser does not support the video tag.
-                                </video>
+                                  src={file?.url}
+                                  width="40"
+                                  height="30"
+                                  style={{ objectFit: "cover" }}
+                                  muted
+                                />
                               ) : file?.type?.startsWith("image/") ? (
                                 <img
                                   src={
                                     editedImages[file?.name]
                                       ? editedImages[file?.name]
                                       : file?.originFileObj
-                                      ? URL.createObjectURL(file.originFileObj)
-                                      : file?.url
+                                        ? URL.createObjectURL(
+                                          file.originFileObj
+                                        )
+                                        : file?.url
                                   }
-                                  alt="ad"
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
-                                  }}
+                                  alt="preview"
+                                  width="40"
+                                  height="40"
+                                  style={{ objectFit: "cover" }}
                                 />
                               ) : (
                                 <video
-                                  controls
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
-                                  }}
-                                >
-                                  <source
-                                    src={
-                                      file?.originFileObj
-                                        ? URL.createObjectURL(
-                                            file.originFileObj
-                                          )
-                                        : file?.url
-                                    }
-                                  />
-                                  Your browser does not support the video tag.
-                                </video>
+                                  src={
+                                    file?.originFileObj
+                                      ? URL.createObjectURL(
+                                        file.originFileObj
+                                      )
+                                      : file?.url
+                                  }
+                                  width="40"
+                                  height="30"
+                                  style={{ objectFit: "cover" }}
+                                  muted
+                                />
                               )}
                             </div>
 
-                            <div className="ad-cta">
-                              <div className="details">
-                                <div
-                                  className="link"
-                                  style={{
-                                    color: theme === "dark" ? "white" : "#000",
-                                  }}
-                                >
-                                  {caption}
+                            <div className="title">
+                              <div
+                                className="main"
+                                style={{
+                                  wordWrap: "break-word",
+                                  whiteSpace: "normal",
+                                  color: theme === "dark" ? "white" : "#000",
+                                }}
+                              >
+                                {addName}
+                                <div className="sub">
+                                  {imagehash?.pageName ? (
+                                    <>
+                                      {imagehash.pageName}{" "}
+                                      <GlobalOutlined
+                                        style={{ opacity: "0.6" }}
+                                      />
+                                    </>
+                                  ) : (
+                                    <GlobalOutlined
+                                      style={{ opacity: "0.6" }}
+                                    />
+                                  )}
                                 </div>
-                                <div
-                                  className="title"
-                                  style={{
-                                    color: theme === "dark" ? "white" : "#000",
-                                  }}
-                                >
-                                  {headline}
-                                </div>
-                                <div
-                                  className="desc"
-                                  style={{
-                                    color: theme === "dark" ? "white" : "#000",
-                                  }}
-                                >
-                                  {description}
-                                </div>
-                              </div>
-                              <div className="ad-button">
-                                <button
-                                  style={{
-                                    backgroundColor: "#91C25F",
-                                    color: "#000",
-                                    borderColor: "#91C25F",
-                                    borderWidth: "0px",
-                                  }}
-                                >
-                                  Learn More
-                                </button>
                               </div>
                             </div>
 
-                            <a
-                              href={websiteURL}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <div className="close">
+                              <CloseOutlined style={{ fontSize: "20px" }} />
+                            </div>
+                            <div className="moreoptions">
+                              <MoreOutlined style={{ fontSize: "20px" }} />
+                            </div>
+                          </div>
+
+                          <div
+                            className="ad-desc"
+                            style={{
+                              wordWrap: "break-word",
+                              whiteSpace: "normal",
+                              color: theme === "dark" ? "white" : "#000",
+                            }}
+                          >
+                            {primaryText}
+                          </div>
+
+                          <div
+                            className="ad-image"
+                            style={{
+                              width: "350px",
+                              height: "300px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {file?.url?.endsWith(".png") ||
+                              file?.url?.endsWith(".jpg") ||
+                              file?.url?.endsWith(".jpeg") ? (
+                              <img
+                                src={file?.url}
+                                alt="ad"
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                }}
+                              />
+                            ) : file?.url?.endsWith(".mp4") ? (
+                              <video
+                                controls
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                }}
+                              >
+                                <source src={file?.url} />
+                                Your browser does not support the video tag.
+                              </video>
+                            ) : file?.type?.startsWith("image/") ? (
+                              <img
+                                src={
+                                  editedImages[file?.name]
+                                    ? editedImages[file?.name]
+                                    : file?.originFileObj
+                                      ? URL.createObjectURL(file.originFileObj)
+                                      : file?.url
+                                }
+                                alt="ad"
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                }}
+                              />
+                            ) : (
+                              <video
+                                controls
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                }}
+                              >
+                                <source
+                                  src={
+                                    file?.originFileObj
+                                      ? URL.createObjectURL(
+                                        file.originFileObj
+                                      )
+                                      : file?.url
+                                  }
+                                />
+                                Your browser does not support the video tag.
+                              </video>
+                            )}
+                          </div>
+
+                          <div className="ad-cta">
+                            <div className="details">
+                              <div
+                                className="link"
+                                style={{
+                                  color: theme === "dark" ? "white" : "#000",
+                                }}
+                              >
+                                {caption}
+                              </div>
+                              <div
+                                className="title"
+                                style={{
+                                  color: theme === "dark" ? "white" : "#000",
+                                }}
+                              >
+                                {headline}
+                              </div>
+                              <div
+                                className="desc"
+                                style={{
+                                  color: theme === "dark" ? "white" : "#000",
+                                }}
+                              >
+                                {description}
+                              </div>
+                            </div>
+                            <div className="ad-button">
+                              <button
+                                style={{
+                                  backgroundColor: "#91C25F",
+                                  color: "#000",
+                                  borderColor: "#91C25F",
+                                  borderWidth: "0px",
+                                }}
+                              >
+                                Learn More
+                              </button>
+                            </div>
+                          </div>
+
+                          <a
+                            href={websiteURL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              wordWrap: "break-word",
+                              whiteSpace: "normal",
+                              color: "#0066cc",
+                              padding: "10px",
+                            }}
+                          >
+                            {websiteURL}
+                          </a>
+
+                          <div className="icons">
+                            <div
+                              className="like"
                               style={{
-                                wordWrap: "break-word",
-                                whiteSpace: "normal",
-                                color: "#0066cc",
-                                padding: "10px",
+                                color: theme === "dark" ? "white" : "#000",
                               }}
                             >
-                              {websiteURL}
-                            </a>
-
-                            <div className="icons">
-                              <div
-                                className="like"
-                                style={{
-                                  color: theme === "dark" ? "white" : "#000",
-                                }}
-                              >
-                                <LikeOutlined style={{ fontSize: "20px" }} />{" "}
-                                Like
-                              </div>
-                              <div
-                                className="comment"
-                                style={{
-                                  color: theme === "dark" ? "white" : "#000",
-                                }}
-                              >
-                                <CommentOutlined style={{ fontSize: "20px" }} />{" "}
-                                Comment
-                              </div>
-                              <div
-                                className="share"
-                                style={{
-                                  color: theme === "dark" ? "white" : "#000",
-                                }}
-                              >
-                                <ShareAltOutlined
-                                  style={{ fontSize: "20px" }}
-                                />{" "}
-                                Share
-                              </div>
+                              <LikeOutlined style={{ fontSize: "20px" }} />{" "}
+                              Like
+                            </div>
+                            <div
+                              className="comment"
+                              style={{
+                                color: theme === "dark" ? "white" : "#000",
+                              }}
+                            >
+                              <CommentOutlined style={{ fontSize: "20px" }} />{" "}
+                              Comment
+                            </div>
+                            <div
+                              className="share"
+                              style={{
+                                color: theme === "dark" ? "white" : "#000",
+                              }}
+                            >
+                              <ShareAltOutlined
+                                style={{ fontSize: "20px" }}
+                              />{" "}
+                              Share
                             </div>
                           </div>
                         </div>
-                      </Badge>
-                    ))
+                      </div>
+                    </Badge>
+                  ))
                   : null}
               </div>
             </div>
@@ -2939,9 +2930,8 @@ const AdsetComponent = ({
           footer={null}
           width="80%" // Set width of the modal
           bodyStyle={{ height: "50vh", overflowY: "auto" }}
-          className={`custom-modal ${
-            theme === "dark" ? "dark-theme-modal" : ""
-          }`}
+          className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+            }`}
         >
           {getUrlBuilder}
         </Modal>
@@ -3003,6 +2993,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [creativeIndex, setCreativeIndex] = useState(0);
   const selectedRef = useRef({});
   const newSelectedRef = useRef(null);
+  const { userdetails } = useTokenContext();
   const { theme } = useTokenContext();
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [adMediaData, setAdMediaData] = useState({});
@@ -3125,9 +3116,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   //     const anyAdsetFilled = adsets.some(adset => adset.DailyAdd_amount > 0);
   //     setIsAnyAdsetBudgetSet(anyAdsetFilled);
   // }, [adsets]);
-
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async (selectedRow) => {
       try {
         if (selectedRow) {
           const response = await axios.get(
@@ -3174,7 +3163,10 @@ const EditMultipleAdsetCampaignDrawer = ({
       }
     };
 
-    fetchData();
+  useEffect(() => {
+    
+
+    fetchData(selectedRow);
   }, [selectedRow]);
 
   useEffect(() => {
@@ -4359,9 +4351,8 @@ const EditMultipleAdsetCampaignDrawer = ({
             continue;
           }
 
-          const folderPath = `${network}/${imagehash.accountNumber}/${
-            formValues ? formValues.Name : "Drafts"
-          }`;
+          const folderPath = `${network}/${imagehash.accountNumber}/${formValues ? formValues.Name : "Drafts"
+            }`;
           await createS3Folder(folderPath);
           let fileBlob = null;
           let s3FileUrl = null;
@@ -4929,27 +4920,27 @@ const EditMultipleAdsetCampaignDrawer = ({
       const addLevelData =
         imageHashArray && imageHashArray.length > 0
           ? {
-              AddName: `${values.adsets[i].AddName}` || "",
-              // filename: media.filename,
-              // imag_hash: media.imag_hash,
-              Ads: imageHashArray.map((media) => media.filename),
-              page_id: values.page_id,
-              message: values.adsets[i].message,
-              headline: values.adsets[i].headline,
-              Description: values.adsets[i].Description,
-              Caption: values.adsets[i].Caption,
-              Website_URL: values.adsets[i].Website_URL,
-            }
+            AddName: `${values.adsets[i].AddName}` || "",
+            // filename: media.filename,
+            // imag_hash: media.imag_hash,
+            Ads: imageHashArray.map((media) => media.filename),
+            page_id: values.page_id,
+            message: values.adsets[i].message,
+            headline: values.adsets[i].headline,
+            Description: values.adsets[i].Description,
+            Caption: values.adsets[i].Caption,
+            Website_URL: values.adsets[i].Website_URL,
+          }
           : {
-              AddName: `${values.adsets[i].AddName}` || "",
-              Ads: [],
-              page_id: values.page_id || "",
-              message: values.adsets[i].message || "",
-              headline: values.adsets[i].headline || "",
-              Description: values.adsets[i].Description || "",
-              Caption: values.adsets[i].Caption || "",
-              Website_URL: values.adsets[i].Website_URL || "",
-            };
+            AddName: `${values.adsets[i].AddName}` || "",
+            Ads: [],
+            page_id: values.page_id || "",
+            message: values.adsets[i].message || "",
+            headline: values.adsets[i].headline || "",
+            Description: values.adsets[i].Description || "",
+            Caption: values.adsets[i].Caption || "",
+            Website_URL: values.adsets[i].Website_URL || "",
+          };
       console.log("Add Level Data:", addLevelData);
       AdsetsData[`adsetlevel_${i + 1}`] = {
         id: uuidv4(),
@@ -5448,10 +5439,10 @@ const EditMultipleAdsetCampaignDrawer = ({
       type: file?.url?.endsWith(".jpg")
         ? "image/jpg"
         : file?.url?.endsWith(".jpeg")
-        ? "image/jpeg"
-        : file?.url?.endsWith(".png")
-        ? "image/png"
-        : "video/",
+          ? "image/jpeg"
+          : file?.url?.endsWith(".png")
+            ? "image/png"
+            : "video/",
       url: file?.url,
     }));
 
@@ -5687,7 +5678,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
   //     checkFormCompletion();
   // };
-
+const [showApprovalModal, setShowApprovalModal] = useState(false);
   const setFormValuesFromDraft = (draft) => {
     if (!draft) return;
 
@@ -5775,10 +5766,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         type: file?.filename?.endsWith(".jpg")
           ? "image/jpg"
           : file?.filename?.endsWith(".jpeg")
-          ? "image/jpeg"
-          : file?.filename?.endsWith(".png")
-          ? "image/png"
-          : "video/",
+            ? "image/jpeg"
+            : file?.filename?.endsWith(".png")
+              ? "image/png"
+              : "video/",
         url: file?.filename,
       }));
 
@@ -5854,22 +5845,120 @@ const EditMultipleAdsetCampaignDrawer = ({
     setWebsiteURL("");
     setCaption("");
   };
+  const handleUpdateApprovalForAdsets = async (id, newApprovalValue) => {
+    try {
+      //https://www.testapi.adsgoat.in
+      const response = await fetch(
+        `https://www.testapi.adsgoat.in/api/newupdateApproval/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("token"),
+          },
+          body: JSON.stringify({
+            Approval: newApprovalValue, // New approval value
+            Approved: userdetails?.userName, // Username of the person who approved it
+            datetime: moment()
+              .tz("Asia/Kolkata")
+              .format("YYYY-MM-DD HH:mm [IST]"), // Current datetime in IST
+          }),
+        }
+      );
 
-  return (
-    <Drawer
-      title={
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <span>{selectedRow?.campaign_name}</span>
-        </div>
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        fetchData(selectedRow);
+
+        message.success("Approval confirmed");
+        // setIsModalVisible(false); // Close modal after updating
+        changeRRefrst();
+        // setTimeout(() => {
+        //     window.location.reload();
+        // }, 2000);
+      } else {
+        console.error("Failed to update approval");
+        // Handle failure
       }
-      width="100%"
+    } catch (error) {
+      console.error("Error updating approval:", error);
+      // Handle error
+    }
+  };
+  return (
+    <Modal
+      title={`View Campaign Details ----> ${selectedRow?.Account_Number} / ${selectedRow?.campaign_name}`}
+        // <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        //   {/* <span>{selectedRow?.campaign_name}</span> */}
+            
+        // </div>
+      
+       className={` ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       open={visible}
-      onClose={handleDrawerClose}
-      style={{
-        backgroundColor: theme === "dark" ? "#333" : "#fff",
-        color: theme === "dark" ? "#fff" : "#000",
+      onCancel={handleDrawerClose}
+      footer={null}
+      centered
+      width="85%"
+      bodyStyle={{
+        height: '80vh',
+        overflowY: 'auto',
+        padding: 10,
+        backgroundColor: theme === 'dark' ? '#333' : '#fff',
+        color: theme === 'dark' ? '#fff' : '#000',
       }}
+      style={{ borderRadius: '12px' }}
     >
+      {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div>
+            <Button
+              type="primary"
+              style={{
+                backgroundColor: '#91C25F',
+                color: '#000',
+                borderColor: '#91C25F',
+                borderWidth: 0,
+                marginBottom: '10px',
+                cursor: 'pointer',
+                marginLeft: '10px'
+              }}
+              onClick={() => setShowApprovalModal(true)}
+            >
+              Approve
+            </Button>
+          </div>
+          <div>
+            <Alert
+              message={fullCampaignData.Approval}
+              // description="This Camapaign"
+              type="info"
+              // showIcon
+              // banner
+              className="blinking"
+              style={{ textAlign: 'center', marginRight: '10px', backgroundColor: theme === 'dark' && '#444', color: theme === 'dark' && '#fff', marginBottom: '10px', }}
+            />
+          </div>
+        </div>
+      )}
+
+      <Modal
+        title="Confirm Approval"
+        open={showApprovalModal}
+        onOk={() => {
+          handleUpdateApprovalForAdsets(selectedRow.identifier,
+        "Approved")
+          setShowApprovalModal(false);
+        }}
+        onCancel={() => setShowApprovalModal(false)}
+        okText="Ok"
+        cancelText="Cancel"
+      >
+        <p>Are you sure you want to approve this campaign?</p>
+      </Modal>
+
+
+
       {/* <Select value={newSelectedRef.current} placeholder="Select draft"
                 style={{
                     width: 160,
@@ -5918,7 +6007,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               <div
                 style={{
                   display: "flex",
-                  backgroundColor: theme === "dark" ? "#333" : "#f5f5f5",
+                  // backgroundColor: theme === "dark" ? "#333" : "#f5f5f5",
                   color: theme === "dark" ? "#fff" : "#000",
                 }}
               >
@@ -5980,7 +6069,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                     },
                   ]}
                   style={{ flex: 0.15, marginLeft: "1%" }}
-                  // style={{ width: 170, marginLeft: "1%" }}
+                // style={{ width: 170, marginLeft: "1%" }}
                 >
                   <Select
                     // onChange={getpixelandpageid}
@@ -6006,9 +6095,8 @@ const EditMultipleAdsetCampaignDrawer = ({
                       },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 <Form.Item
@@ -6021,7 +6109,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                     },
                   ]}
                   style={{ flex: 0.12, marginLeft: "1%" }}
-                  // style={{ width: 160, marginLeft: "1%" }}
+                // style={{ width: 160, marginLeft: "1%" }}
                 >
                   <Select
                     variant="filled"
@@ -6043,9 +6131,8 @@ const EditMultipleAdsetCampaignDrawer = ({
                       { value: "NONE", label: "None", title: "" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme-category" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme-category" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 <Form.Item
@@ -6058,7 +6145,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                     },
                   ]}
                   style={{ flex: 0.2, marginLeft: "1%" }}
-                  // style={{ width: 170, marginLeft: "1%" }}
+                // style={{ width: 170, marginLeft: "1%" }}
                 >
                   <Select
                     variant="filled"
@@ -6086,9 +6173,8 @@ const EditMultipleAdsetCampaignDrawer = ({
                     ]}
                     onChange={handleBidStrategyChange}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
                 {/*pk*/}
@@ -6232,6 +6318,13 @@ const EditMultipleAdsetCampaignDrawer = ({
         </Form.Item>
       </Tooltip> */}
                 <Tooltip
+                 overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+                color: theme === 'dark' ? '#ffffff' : '#000000',
+                borderRadius: 6,
+                padding: '6px 10px',
+                fontSize: '14px',
+              }}
                   title={
                     isAnyAdsetBudgetSet
                       ? "You have enabled daily budget in the Adset Level"
@@ -6240,9 +6333,10 @@ const EditMultipleAdsetCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label="Daily budget"
+                   label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
                     rules={[
                       {
+                        
                         required: !(
                           isAnyAdsetBudgetSet || campaignLevelDailyBudget > 0
                         ),
@@ -6284,7 +6378,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                     },
                   ]}
                   style={{ flex: 0.1, marginLeft: "1%" }}
-                  // style={{ width: 160, marginLeft: "1%" }}
+                // style={{ width: 160, marginLeft: "1%" }}
                 >
                   <Select
                     variant="filled"
@@ -6293,9 +6387,8 @@ const EditMultipleAdsetCampaignDrawer = ({
                       { value: "PAUSED", label: "PAUSED", title: "" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
-                    className={`${
-                      theme === "dark" ? "dark-theme" : "light-theme"
-                    } green-border-select`}
+                    className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                      } green-border-select`}
                   />
                 </Form.Item>
               </div>
@@ -6366,6 +6459,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               // <ffff/>
             })}
           </Collapse>
+
           {/* <Form.Item label=" ">
                         {isFormComplete && (
                             <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
@@ -6653,9 +6747,8 @@ const EditMultipleAdsetCampaignDrawer = ({
             open={isModalVisible}
             onOk={handleOk}
             onCancel={handleCancel}
-            className={`custom-modal ${
-              theme === "dark" ? "dark-theme-modal" : ""
-            }`}
+            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+              }`}
           >
             <p>Are you sure you want to submit?</p>
           </Modal>
@@ -6680,7 +6773,8 @@ const EditMultipleAdsetCampaignDrawer = ({
           />
         </Drawer>
       )}
-    </Drawer>
+
+    </Modal>
   );
 };
 
