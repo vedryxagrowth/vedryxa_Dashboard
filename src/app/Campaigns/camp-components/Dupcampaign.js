@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, Skeleton } from 'antd';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, Skeleton, InputNumber } from 'antd';
 import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef, useEffect } from 'react';
@@ -22,79 +22,79 @@ const { Panel } = Collapse;
 const { Option } = Select;
 const { Step } = Steps;
 const publisherOptions = [
-    { label: 'Facebook', value: 'facebook' },
-    { label: 'Instagram', value: 'instagram' },
-    { label: 'Messenger', value: 'messenger' },
-    { label: 'Audience Network', value: 'audience_network' }
+    { label: 'Facebook', value: 'facebook', title: "" },
+    { label: 'Instagram', value: 'instagram', title: "" },
+    { label: 'Messenger', value: 'messenger', title: "" },
+    { label: 'Audience Network', value: 'audience_network', title: "" }
 ];
 const positionOptions = {
     facebook: [
-        { key: "feed", label: "Facebook Feed" },
-        { key: "marketplace", label: "Facebook Marketplace" },
-        { key: "video_feeds", label: "Facebook Video Feeds" },
-        { key: "instream_video", label: "Facebook In-Stream Videos" },
-        { key: "facebook_reels", label: "Facebook Reels" },
-        { key: "profile_feed-f", label: "Facebook Profile Feed" },
-        { key: "search", label: "Facebook Search" },
-        { key: "story_f", label: "Facebook Stories" },
-        { key: "right_hand_column", label: "Facebook Right Column" },
-        { key: "instant_article", label: "Facebook Instant Articles" },
-        { key: "biz_disco_feed", label: "Facebook Business Explore" } // Added Business Explore
+        { key: "feed", label: "Facebook Feed", title: "" },
+        { key: "marketplace", label: "Facebook Marketplace", title: "" },
+        { key: "video_feeds", label: "Facebook Video Feeds", title: "" },
+        { key: "instream_video", label: "Facebook In-Stream Videos", title: "" },
+        { key: "facebook_reels", label: "Facebook Reels", title: "" },
+        { key: "profile_feed-f", label: "Facebook Profile Feed", title: "" },
+        { key: "search", label: "Facebook Search", title: "" },
+        { key: "story_f", label: "Facebook Stories", title: "" },
+        { key: "right_hand_column", label: "Facebook Right Column", title: "" },
+        { key: "instant_article", label: "Facebook Instant Articles", title: "" },
+        { key: "biz_disco_feed", label: "Facebook Business Explore", title: "" } // Added Business Explore
     ],
     instagram: [
-        { key: "stream", label: "Instagram Stream" },
-        { key: "story_i", label: "Instagram Stories" },
-        { key: "explore", label: "Instagram Explore" },
-        { key: "explore_home", label: "Instagram Explore Home" },
-        { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed-i", label: "Instagram Profile Feed" },
-        { key: "ig_search", label: "Instagram Search" },
-        { key: "profile_reels", label: "Instagram Profile Reels" }
+        { key: "stream", label: "Instagram Stream", title: "" },
+        { key: "story_i", label: "Instagram Stories", title: "" },
+        { key: "explore", label: "Instagram Explore", title: "" },
+        { key: "explore_home", label: "Instagram Explore Home", title: "" },
+        { key: "reels", label: "Instagram Reels", title: "" },
+        { key: "profile_feed-i", label: "Instagram Profile Feed", title: "" },
+        { key: "ig_search", label: "Instagram Search", title: "" },
+        { key: "profile_reels", label: "Instagram Profile Reels", title: "" }
     ],
     messenger: [
-        { key: "messenger_home", label: "Messenger Home" },
-        { key: "story_m", label: "Messenger Stories" },
-        { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+        { key: "messenger_home", label: "Messenger Home", title: "" },
+        { key: "story_m", label: "Messenger Stories", title: "" },
+        { key: "sponsored_messages", label: "Messenger Sponsored Messages", title: "" },
         // { key: "messenger_inbox", label: "Messenger Inbox" }
     ],
     audience_network: [
-        { key: "classic", label: "Audience Network Classic" },
-        { key: "rewarded_video", label: "Audience Network Rewarded Video" },
+        { key: "classic", label: "Audience Network Classic", title: "" },
+        { key: "rewarded_video", label: "Audience Network Rewarded Video", title: "" },
         // { key: "instream_video", label: "Audience Network In-Stream Video" }
     ]
 };
 
 const allPositions = [
-    { key: "feed", label: "Facebook Feed" },
-    { key: "marketplace", label: "Facebook Marketplace" },
-    { key: "video_feeds", label: "Facebook Video Feeds" },
-    { key: "instream_video", label: "Facebook In-Stream Videos" },
-    { key: "facebook_reels", label: "Facebook Reels" },
-    { key: "profile_feed-f", label: "Facebook Profile Feed" },
-    { key: "search", label: "Facebook Search" },
-    { key: "story_f", label: "Facebook Stories" },
-    { key: "right_hand_column", label: "Facebook Right Column" },
-    { key: "instant_article", label: "Facebook Instant Articles" },
-    { key: "biz_disco_feed", label: "Facebook Business Explore" },
-  
-    { key: "stream", label: "Instagram Stream" },
-    { key: "story_i", label: "Instagram Stories" },
-    { key: "explore", label: "Instagram Explore" },
-    { key: "explore_home", label: "Instagram Explore Home" },
-    { key: "reels", label: "Instagram Reels" },
-    { key: "profile_feed-i", label: "Instagram Profile Feed" },
-    { key: "ig_search", label: "Instagram Search" },
-    { key: "profile_reels", label: "Instagram Profile Reels" },
-  
-    { key: "messenger_home", label: "Messenger Home" },
-    { key: "story_m", label: "Messenger Stories" },
-    { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-  
-    { key: "classic", label: "Audience Network Classic" },
-    { key: "rewarded_video", label: "Audience Network Rewarded Video" }
+    { key: "feed", label: "Facebook Feed", title: "" },
+    { key: "marketplace", label: "Facebook Marketplace", title: "" },
+    { key: "video_feeds", label: "Facebook Video Feeds", title: "" },
+    { key: "instream_video", label: "Facebook In-Stream Videos", title: "" },
+    { key: "facebook_reels", label: "Facebook Reels", title: "" },
+    { key: "profile_feed-f", label: "Facebook Profile Feed", title: "" },
+    { key: "search", label: "Facebook Search", title: "" },
+    { key: "story_f", label: "Facebook Stories", title: "" },
+    { key: "right_hand_column", label: "Facebook Right Column", title: "" },
+    { key: "instant_article", label: "Facebook Instant Articles", title: "" },
+    { key: "biz_disco_feed", label: "Facebook Business Explore", title: "" },
+
+    { key: "stream", label: "Instagram Stream", title: "" },
+    { key: "story_i", label: "Instagram Stories", title: "" },
+    { key: "explore", label: "Instagram Explore", title: "" },
+    { key: "explore_home", label: "Instagram Explore Home", title: "" },
+    { key: "reels", label: "Instagram Reels", title: "" },
+    { key: "profile_feed-i", label: "Instagram Profile Feed", title: "" },
+    { key: "ig_search", label: "Instagram Search", title: "" },
+    { key: "profile_reels", label: "Instagram Profile Reels", title: "" },
+
+    { key: "messenger_home", label: "Messenger Home", title: "" },
+    { key: "story_m", label: "Messenger Stories", title: "" },
+    { key: "sponsored_messages", label: "Messenger Sponsored Messages", title: "" },
+
+    { key: "classic", label: "Audience Network Classic", title: "" },
+    { key: "rewarded_video", label: "Audience Network Rewarded Video", title: "" }
 ];
-  
-  
+
+
 // const positionOptions = {
 //     facebook: [
 //         { key: "feed", label: "Facebook Feed" },
@@ -582,18 +582,18 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
     const selectedFilesData = (data) => {
         console.log("Selected Files Data:", data);
-        setSelectedFiles(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFiles(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
                 url: file?.url,
             })
         })]);
-        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
@@ -601,10 +601,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             })
         })]);
         setOpenCreativesDrawer(false);
-        
+
         if (data.length > 0) {
             const currentMediaContent = form.getFieldValue("MediaContent") || [];
-        
+
             const newFiles = data.map((file, index) => ({
                 uid: file.uid || `-${index + 1}`,
                 name: file?.name,
@@ -612,15 +612,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 type: file?.url?.endsWith(".jpg")
                     ? "image/jpg"
                     : file?.url?.endsWith(".jpeg")
-                    ? "image/jpeg"
-                    : file?.url?.endsWith(".png")
-                    ? "image/png"
-                    : "video/",
+                        ? "image/jpeg"
+                        : file?.url?.endsWith(".png")
+                            ? "image/png"
+                            : "video/",
                 url: file?.url,
             }));
-        
+
             const updatedMediaContent = [...currentMediaContent, ...newFiles];
-        
+
             form.setFieldsValue({ MediaContent: updatedMediaContent });
             form.validateFields(["MediaContent"]);
         }
@@ -659,41 +659,41 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
     const onChangeCampaignLevelDailyBudget = (event) => {
         const value = event.target.value;
-    
+
         // Allow empty input and prevent NaN issues
         if (value === "" || value === ".") {
             setCampaignLevelDailyBudget(value); // Allow typing "."
             return;
         }
-    
+
         // Convert to float and update state
         const floatValue = parseFloat(value);
         if (!isNaN(floatValue)) {
             setCampaignLevelDailyBudget(floatValue);
         }
-        
+
         form.setFieldsValue({ Daily_amount: floatValue }); // Update form state
-    
+
         // console.log("Updated Value:", floatValue);
     };
 
     const onChangeAdsetLevelDailyBudget = (event) => {
         const value = event.target.value;
-    
+
         // Allow empty input and prevent NaN issues
         if (value === "" || value === ".") {
             setAdsetLevelDailyBudget(value); // Allow typing "."
             return;
         }
-    
+
         // Convert to float and update state
         const floatValue = parseFloat(value);
         if (!isNaN(floatValue)) {
             setAdsetLevelDailyBudget(floatValue);
         }
-        
+
         form.setFieldsValue({ DailyAdd_amount: floatValue }); // Update form state
-    
+
         // console.log("Updated Value:", floatValue);
         // setAdsetLevelDailyBudget(parseFloat(event.target.value));
     }
@@ -737,18 +737,18 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setCampaignLevelDailyBudget((DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100);
             setDefaultURLBuilder(DuplicatedampaignData?.addlevel[0]?.Website_URL);
             DuplicatedampaignData?.adsetlevel?.placements === "manual" ? setIsManual("manual") : setIsManual(false);
-            setSelectedFiles(DuplicatedampaignData?.addlevel?.map((file, index)=>{
-                return({
-                    uid: `-${index+1}`,
+            setSelectedFiles(DuplicatedampaignData?.addlevel?.map((file, index) => {
+                return ({
+                    uid: `-${index + 1}`,
                     name: file?.filename,
                     status: 'done',
                     type: `${file?.filename?.endsWith(".jpg") || file?.filename?.endsWith(".png") ? file?.filename?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
                     url: file?.filename,
                 })
             }));
-            setSelectedFilesFromCreatives(DuplicatedampaignData?.addlevel?.map((file, index)=>{
-                return({
-                    uid: `-${index+1}`,
+            setSelectedFilesFromCreatives(DuplicatedampaignData?.addlevel?.map((file, index) => {
+                return ({
+                    uid: `-${index + 1}`,
                     name: file?.filename,
                     status: 'done',
                     type: `${file?.filename?.endsWith(".jpg") || file?.filename?.endsWith(".png") ? file?.filename?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
@@ -760,11 +760,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
             setCampaignName(`${DuplicatedampaignData?.camapaignlevel?.Name || ""}_Copy`);
 
-            
+
             // form.setFieldsValue({
             //     MediaContent: fileList, // Ensure the selected files are added to the form value
             //   });
-            
+
             // setCaption(DuplicatedampaignData?.addlevel[0]?.Caption);
             // setPrimaryText(DuplicatedampaignData?.addlevel[0]?.message);
             // setDescription(DuplicatedampaignData?.addlevel[0]?.Description);
@@ -810,9 +810,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
                 pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
                 page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
-                MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index)=>{
-                    return({
-                        uid: `-${index+1}`,
+                MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index) => {
+                    return ({
+                        uid: `-${index + 1}`,
                         name: file?.filename,
                         status: 'done',
                         url: file?.filename,
@@ -829,22 +829,22 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         // Check if all required fields are complete
         const checkFormCompletion = () => {
             const allValues = form.getFieldsValue(true);
-        
+
             // If manualStatus is false, we ignore 'publisher_platforms' and 'device_platforms'
             const fieldsToSkip = isManual === false ? ['publisher_platforms', 'device_platforms'] : [];
-        
+
             // Find the keys of the form items that are empty, except the ones to skip
             const emptyFields = Object.keys(allValues).filter(
                 key => !fieldsToSkip.includes(key) && (allValues[key] === undefined || allValues[key] === '')
             );
-        
+
             // Log the empty fields
             if (emptyFields.length > 0) {
                 console.log('Empty fields:', emptyFields);
             } else {
                 console.log('All fields are complete');
             }
-            
+
             // Check if all form fields are filled, considering the skipped fields
             const isComplete = emptyFields.length === 0;
             setIsFormComplete(isComplete);
@@ -867,8 +867,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         // console.log(values, "values");
         // console.log(options, "options");
         const formatted = options.map(opt => ({
-          value: opt.value,
-          label: opt.label || opt.children
+            value: opt.value,
+            label: opt.label || opt.children
         }));
         setSelectedPositions(formatted);
     };
@@ -974,7 +974,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const handleNameChange = async (e) => {
         const newName = e.target.value;
         setCampaignName(newName);
-        
+
 
         // console.log("Account Number:", accountNumber);
 
@@ -1052,7 +1052,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
         const uploadFilesSequentially = async (selectedFiles) => {
             const mediaHashArray = [];
-        
+
             for (const file of selectedFiles) {
                 try {
                     const fileType = file.type;
@@ -1060,7 +1060,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                         onError("Unsupported file type");
                         continue;
                     }
-        
+
                     if (file?.url) {
                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
@@ -1071,29 +1071,29 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     Authorization: localStorage.getItem("token"),
                                 },
                             });
-        
+
                             const uploadFile = await response.blob();
                             if (!(uploadFile instanceof Blob)) {
                                 console.error("The fetched file is not a Blob:", uploadFile);
                                 continue;
                             }
-        
+
                             formData.append("file", uploadFile, file.name);
                             // console.log(formData);
-        
+
                             let fbResponse;
-                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
+                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg")) {
                                 formData.append('file', uploadFile, file.name);
                                 formData.append('access_token', token);
                                 const fileName = file.name.split('/').pop();
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-                                
-        
+
+
                                 if (fbResponse.status === 200) {
                                     onSuccess("ok", response);
                                     mediaHashArray.push({
@@ -1111,11 +1111,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -1126,12 +1126,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
                                     // console.log(videoid);
                                     // console.log(uri);
-        
+
                                     onSuccess("ok", fbResponse);
                                     mediaHashArray.push({
                                         filename: file?.url,
@@ -1151,18 +1151,18 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             const fileId = `${uniqueId}_${file.name}`;
                             const editedImage = editedImages[file.name];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-        
+
                             console.log(file.originFileObj.name);
-        
+
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
                             } else {
                                 formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
                             }
-        
+
                             // console.log(formData);
                             let response, fbResponse;
-        
+
                             if (file.type.startsWith('image/')) {
                                 response = await axios.post(
                                     'https://www.testapi.adsgoat.in/upload',
@@ -1174,16 +1174,16 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         },
                                     }
                                 );
-        
+
                                 if (!response.data.imageUrl) {
                                     onError("Error: Image URL not returned from custom API");
                                     console.error("Image upload to custom API failed, imageUrl missing");
                                     continue;
                                 }
-        
+
                                 // console.log("Custom API response imageUrl:", response);
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                     formData,
@@ -1191,7 +1191,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                 );
 
                                 // console.log("Facebook API response:", fbResponse.data);
-        
+
                                 if (response.status === 200 && fbResponse.status === 200) {
                                     onSuccess("ok", response);
                                     mediaHashArray.push({
@@ -1213,25 +1213,25 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         },
                                     }
                                 );
-        
+
                                 if (response.status !== 200) {
                                     onError("error", response);
                                     console.error("Video upload to custom API failed");
                                     continue;
                                 }
-        
+
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/advideos`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -1242,10 +1242,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-        
+
                                     onSuccess("ok", fbResponse);
                                     mediaHashArray.push({
                                         filename: response.data.imageUrl,
@@ -1264,7 +1264,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     onError("error", error);
                 }
             }
-        
+
             // console.log("All media files uploaded successfully:", mediaHashArray);
             return mediaHashArray;
         };
@@ -1472,11 +1472,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         try {
             // Validate fields first
             await form.validateFields();
-    
+
             // Get all form fields, even empty ones (null or undefined)
-            const allValues = form.getFieldsValue(true); 
+            const allValues = form.getFieldsValue(true);
             let formData = { ...allValues }; // Use allValues instead of only validated values
-    
+
             if (isManual) {
                 // Only process selectedPlatforms if isManual is true
                 const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
@@ -1485,17 +1485,17 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     );
                     return acc;
                 }, {});
-    
+
                 formData = {
                     publisher_platforms: allValues.publisher_platforms,
                     ...selectedPlatforms,
                     ...allValues
                 };
             }
-    
+
             // console.log("All Form Values:", allValues); // Logs all fields
             console.log("Final Form Data:", formData); // Logs processed data
-    
+
             setFormValues(formData);
             setIsModalVisible(true);
         } catch (errorInfo) {
@@ -1624,7 +1624,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 addlevel: values.addlevel, // Use the addlevel array created in handleOk
             };
 
-            
+
             console.log(dataToSubmit);
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
@@ -1637,7 +1637,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
             if (response.ok) {
                 console.log('Form data submitted successfully');
-                isManual !== "manual" && setIsManual(false); 
+                isManual !== "manual" && setIsManual(false);
                 onClose(); // Close the drawer or perform any other action
                 message.success("Campaign was created");
                 // changeRRefrst();
@@ -1652,30 +1652,30 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
     };
 
-    const handleChange = (info) => { 
+    const handleChange = (info) => {
         console.log(info);
         setSelectedFiles(info.fileList.map(file => ({
-          ...file,
-          uid: file.uid || `-${Date.now()}`,  // Ensure there's a valid uid
+            ...file,
+            uid: file.uid || `-${Date.now()}`,  // Ensure there's a valid uid
         })));
         const checkFormCompletion = () => {
             const allValues = form.getFieldsValue(true);
-        
+
             // If manualStatus is false, we ignore 'publisher_platforms' and 'device_platforms'
             const fieldsToSkip = isManual === false ? ['publisher_platforms', 'device_platforms'] : [];
-        
+
             // Find the keys of the form items that are empty, except the ones to skip
             const emptyFields = Object.keys(allValues).filter(
                 key => !fieldsToSkip.includes(key) && (allValues[key] === undefined || allValues[key] === '')
             );
-        
+
             // Log the empty fields
             if (emptyFields.length > 0) {
                 console.log('Empty fields:', emptyFields);
             } else {
                 console.log('All fields are complete');
             }
-            
+
             // Check if all form fields are filled, considering the skipped fields
             const isComplete = emptyFields.length === 0;
             setIsFormComplete(isComplete);
@@ -1683,7 +1683,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
         // Trigger form completion check
         checkFormCompletion();
-      };
+    };
     useEffect(() => {
         // Update the Website_URL form field whenever websiteURL changes
         if (websiteURL) {
@@ -1754,7 +1754,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         setCampaignLevelDailyBudget(0);
         setAdsetLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
-        isManual !== "manual" && setIsManual(false); 
+        isManual !== "manual" && setIsManual(false);
         setSelectedPositions([]);
     };
 
@@ -1762,422 +1762,410 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     // console.log(DuplicatedampaignData);
     // console.log(initialValues)
 
-    {selectedFiles && selectedFiles.length > 0 ? (
-        selectedFiles.map((file, index) => (console.log(file?.name, index)))): null}
+    {
+        selectedFiles && selectedFiles.length > 0 ? (
+            selectedFiles.map((file, index) => (console.log(file?.name, index)))) : null
+    }
 
     return (
-        <Drawer
+        <Modal
             title={selectedRow?.campaign_name}
-            width="100%"
+            className={` ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             open={visible}
-            onClose={handleDrawerClose}
-            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
+            onCancel={handleDrawerClose}
+            footer={null}
+            centered
+            width="85%"
+            bodyStyle={{
+                height: '80vh',
+                overflowY: 'auto',
+                padding: 10,
+                backgroundColor: theme === 'dark' ? '#333' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+            }}
+            style={{ borderRadius: '12px' }}
         >
             {DuplicatedampaignData?.identifier === selectedRow?.identifier ? (
-                <Spin spinning={loading}>
-                    <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
-                        <Collapse accordion defaultActiveKey={['1']} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}>
-                            <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
-                                <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
-                                    <Form.Item
-                                        name="Account_Number"
-                                        label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: 0.2 }}>
-                                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Name"
-                                        label={<span style={{ color: "#B4B4B4" }}>Campaign name</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: 0.25 }}>
-                                        <Input onChange={handleNameChange}
-                                            style={{ width: "100%", marginLeft: "3%" }}
-                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Objectives"
-                                        label={<span style={{ color: "#B4B4B4" }}>Objectives</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
-                                        <Select onChange={getpixelandpageid}
-
-                                            variant="filled"
-                                            options={[
-                                                { value: "OUTCOME_LEADS", label: "Leads" },
-                                                { value: "OUTCOME_SALES", label: "Sales" },
-                                                { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                                { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                                { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                                { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
-
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Special_categories"
-                                        label={<span style={{ color: "#B4B4B4" }}>Categories</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
-                                        <Select
-
-                                            variant="filled"
-                                            mode="multiple"
-                                            allowClear
-                                            options={[
-                                                { value: "HOUSING", label: "Housing" },
-                                                { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
-                                                { value: "EMPLOYMENT", label: "Employment" },
-                                                { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                                { value: "NONE", label: "None" }
-
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Bid_strategy"
-                                        label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
-                                        <Select
-
-                                            variant="filled"
-                                            options={[
-                                                { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                                { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                                { value: "COST_CAP", label: "Cost Per Result Goal" },
-                                                { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
-                                            ]}
-                                            onChange={handleBidStrategyChange}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Daily_amount"
-                                        label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}
-                                    // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
-                                    >
-                                        <Tooltip title={adsetLevelDailyBudget !== 0 ? "You have enabled daily budget in the Adset Level" : ""}>
-                                            <Input
-                                                type="number"
-                                                placeholder="$"
-                                                value={campaignLevelDailyBudget}
-                                                onChange={onChangeCampaignLevelDailyBudget}
-                                                readOnly={adsetLevelDailyBudget !== 0 ? true : false}
-                                                step="0.01"
-                                                onWheel={(e) => e.target.blur()}
-                                                style={{
-                                                    backgroundColor: adsetLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
-                                                    borderRadius: '6px',
-                                                    borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
-                                                    fontSize: '14px',
-                                                    color: '#333',
-                                                    width: '200px',
-                                                    boxSizing: 'border-box'
-                                                }}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                            />
-                                        </Tooltip>
-                                    </Form.Item> {/*pk*/}
-                                    <Form.Item
-                                        name="Status"
-                                        label={<span style={{ color: "#B4B4B4" }}>Status</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
-                                        <Select
-                                            variant="filled"
-                                            options={[
-                                                { value: "ACTIVE", label: "ACTIVE" },
-                                                { value: "PAUSED", label: "PAUSE" },
-
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-
-                                </div>
-                            </Panel>
-                            <Panel header="ADSET LEVEL" key="2">
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-                                    <Form.Item
-                                        name="AdsetName"
-                                        initialValue={campaignName}
-                                        label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 200px' }}>
-                                        <Input
-                                            style={{ width: "100%" }}
-                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="optimization_goal"
-                                        label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px', marginLeft: "2%" }}>
-                                        <Select
-
-                                            variant="filled"
-                                            options={[
-                                                { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                                { value: "LINK_CLICKS", label: "Clicks" },
-                                                { value: "REACH", label: "Reach" },
-                                                { value: "VALUE", label: "Value" }
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="billing_event"
-                                        label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px' }}>
-                                        <Select
-
-                                            variant="filled"
-                                            options={[
-                                                { value: "IMPRESSIONS", label: "Impressions" },
-                                                { value: "VALUE", label: "Value" }
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="DatePicker"
-                                        label={<span style={{ color: "#B4B4B4" }}>Start time</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: 'Please input!',
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px' }}
-                                        initialValue={currentDate}
-
-                                    >
-                                        <DatePicker showTime dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}/>
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="action_source"
-                                        label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px' }}>
-                                        <Select
-
-                                            variant="filled"
-                                            options={[
-                                                { value: "website", label: "Website" },
-                                                { value: "email", label: "Email" },
-                                                { value: "app", label: "App" },
-                                                { value: "phone_call", label: "Phone Call" }
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="custom_event_type"
-                                        label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px' }}>
-                                        <Select
-
-                                            variant="filled"
-                                            options={[
-                                                { value: "LEAD", label: "Lead" },
-                                                { value: "PURCHASE", label: "Purchase" },
-                                                { value: "SEARCH", label: "Search" },
-                                                { value: "CONTACT", label: "Contact" },
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    {/* <Form.Item
-                                        name="pixel_id"
-                                        initialValue={pixelids}
-                                        label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 200px' }}>
-                                        <Input
-                                            style={{ width: "100%" }}
-                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                        />
-                                    </Form.Item> */}
-                                    <Form.Item
-                                        name="pixel_id"
-                                        initialValue={
-                                            typeof imagehash?.pixelID === 'object'
-                                            ? imagehash.pixelID.Universal
-                                            : imagehash?.pixelID
-                                        }
-                                        label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
-                                        rules={[
-                                            {
+                (loading ? (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '300px',
+                        }}
+                    >
+                        <Spin size="large" />
+                        <div style={{ marginTop: 10, fontSize: 16, color: theme === 'dark' ? '#fff' : '#555' }}>Loading...</div>
+                    </div>
+                ) : (<Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
+                    <Collapse accordion defaultActiveKey={['1']} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}>
+                        <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
+                                <Form.Item
+                                    name="Account_Number"
+                                    label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
+                                    rules={[
+                                        {
                                             required: true,
                                             message: "Please select an option!",
-                                            },
+                                        },
+                                    ]}
+                                    style={{ flex: 0.16 }}>
+                                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Name"
+                                    label={<span style={{ color: "#B4B4B4" }}>Campaign name</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: 0.25, marginLeft: "1%" }}>
+                                    <Input onChange={handleNameChange}
+                                        style={{ width: "100%", }}
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Objectives"
+                                    label={<span style={{ color: "#B4B4B4" }}>Objectives</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: 0.15, marginLeft: "1%" }}>
+                                    <Select onChange={getpixelandpageid}
+
+                                        variant="filled"
+                                        options={[
+                                            { value: "OUTCOME_LEADS", label: "Leads", title: "" },
+                                            { value: "OUTCOME_SALES", label: "Sales", title: "" },
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement", title: "" },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness", title: "" },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion", title: "" }
+
                                         ]}
-                                        style={{ flex: '1 1 200px' }}
-                                        >
-                                        {typeof imagehash?.pixelID === 'object' ? (
-                                            <Select
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Special_categories"
+                                    label={<span style={{ color: "#B4B4B4" }}>Categories</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: 0.15, marginLeft: "1%" }}>
+                                    <Select
+
+                                        variant="filled"
+                                        mode="multiple"
+                                        allowClear
+                                        options={[
+                                            { value: "HOUSING", label: "Housing", title: "" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit", title: "" },
+                                            { value: "EMPLOYMENT", label: "Employment", title: "" },
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics", title: "" },
+                                            { value: "NONE", label: "None", title: "" }
+
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme-category' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Bid_strategy"
+                                    label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: 0.2, marginLeft: "1%" }}>
+                                    <Select
+
+                                        variant="filled"
+                                        options={[
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume", title: "" },
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap", title: "" },
+                                            { value: "COST_CAP", label: "Cost Per Result Goal", title: "" },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal", title: "" }
+                                        ]}
+                                        onChange={handleBidStrategyChange}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Daily_amount"
+                                    label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                                    style={{ marginLeft: "1%" }}
+                                // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
+                                >
+                                    <Tooltip title={adsetLevelDailyBudget !== 0 ? "You have enabled daily budget in the Adset Level" : ""}>
+                                        <InputNumber
+                                            type="number"
+                                            placeholder="$"
+                                            value={campaignLevelDailyBudget}
+                                            onChange={onChangeCampaignLevelDailyBudget}
+                                            readOnly={adsetLevelDailyBudget !== 0 ? true : false}
+                                            step="0.01"
+                                            onWheel={(e) => e.target.blur()}
+                                            style={{
+                                                backgroundColor: adsetLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
+                                                borderRadius: '6px',
+                                                borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
+                                                fontSize: '14px',
+                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                // width: '200px',
+                                                flex: 0.2,
+                                                boxSizing: 'border-box'
+                                            }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    </Tooltip>
+                                </Form.Item> {/*pk*/}
+                                <Form.Item
+                                    name="Status"
+                                    label={<span style={{ color: "#B4B4B4" }}>Status</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: 0.1, marginLeft: "1%" }}>
+                                    <Select
+                                        variant="filled"
+                                        options={[
+                                            { value: "ACTIVE", label: "ACTIVE", title: "" },
+                                            { value: "PAUSED", label: "PAUSE", title: "" },
+
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+
+                            </div>
+                        </Panel>
+                        <Panel header="ADSET LEVEL" key="2">
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                                <Form.Item
+                                    name="AdsetName"
+                                    initialValue={campaignName}
+                                    label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 200px' }}>
+                                    <Input
+                                        style={{ width: "100%" }}
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="optimization_goal"
+                                    label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 120px', }}>
+                                    <Select
+
+                                        variant="filled"
+                                        options={[
+                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions", title: "" },
+                                            { value: "LINK_CLICKS", label: "Clicks", title: "" },
+                                            { value: "REACH", label: "Reach", title: "" },
+                                            { value: "VALUE", label: "Value", title: "" }
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="billing_event"
+                                    label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 120px' }}>
+                                    <Select
+
+                                        variant="filled"
+                                        options={[
+                                            { value: "IMPRESSIONS", label: "Impressions", title: "" },
+                                            { value: "VALUE", label: "Value", title: "" }
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="DatePicker"
+                                    label={<span style={{ color: "#B4B4B4" }}>Start time</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: 'Please input!',
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 150px', color: theme === 'dark' ? '#fff' : '#000', }}
+                                    initialValue={currentDate}
+
+                                >
+                                    <DatePicker className={`green-border-picker ${theme === 'dark' ? 'custom-datepicker-dark' : 'custom-datepicker-light'}`} showTime dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''} />
+                                </Form.Item>
+                                <Form.Item
+                                    name="action_source"
+                                    label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 120px' }}>
+                                    <Select
+
+                                        variant="filled"
+                                        options={[
+                                            { value: "website", label: "Website", title: "" },
+                                            { value: "email", label: "Email", title: "" },
+                                            { value: "app", label: "App", title: "" },
+                                            { value: "phone_call", label: "Phone Call", title: "" }
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="custom_event_type"
+                                    label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 120px' }}>
+                                    <Select
+
+                                        variant="filled"
+                                        options={[
+                                            { value: "LEAD", label: "Lead", title: "" },
+                                            { value: "PURCHASE", label: "Purchase", title: "" },
+                                            { value: "SEARCH", label: "Search", title: "" },
+                                            { value: "CONTACT", label: "Contact", title: "" },
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                {/* <Form.Item
+                                    name="pixel_id"
+                                    initialValue={pixelids}
+                                    label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 200px' }}>
+                                    <Input
+                                        style={{ width: "100%" }}
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    />
+                                </Form.Item> */}
+                                <Form.Item
+                                    name="pixel_id"
+                                    initialValue={
+                                        typeof imagehash?.pixelID === 'object'
+                                            ? imagehash.pixelID.Universal
+                                            : imagehash?.pixelID
+                                    }
+                                    label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 150px' }}
+                                >
+                                    {typeof imagehash?.pixelID === 'object' ? (
+                                        <Select
                                             defaultValue={imagehash?.pixelID?.Universal}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                            >
+                                        >
                                             {Object.entries(imagehash.pixelID).map(([label, value]) => (
-                                                <Select.Option key={value} value={value}>
-                                                {`${label} - ${value}`}
+                                                <Select.Option key={value} value={value} title={null}>
+                                                    {`${label} - ${value}`}
                                                 </Select.Option>
                                             ))}
-                                            </Select>
-                                        ) : (
-                                            <Input
+                                        </Select>
+                                    ) : (
+                                        <Input
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                            />
-                                        )}
-                                    </Form.Item>
-                                    {/*pk*/}
-                                    <Form.Item
-                                        name="DailyAdd_amount" // Make sure this name matches the field you want to capture
-                                        label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                        style={{ flex: '1 1 200px' }}
-                                    >
-                                        <Tooltip title={campaignLevelDailyBudget !== 0 ? "You have enabled daily budget in the Campaign Level" : ""}>
-                                            <Input
-                                                type="number"
-                                                placeholder="$"
-                                                value={adsetLevelDailyBudget}
-                                                onWheel={(e) => e.target.blur()}
-                                                onChange={onChangeAdsetLevelDailyBudget}
-                                                readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
-                                                step="0.01"
-                                                style={{
-                                                    backgroundColor: campaignLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
-                                                    borderRadius: '6px',
-                                                    borderColor: campaignLevelDailyBudget !== 0 ? 'transparent' : undefined,
-                                                    fontSize: '14px',
-                                                    color: '#333',
-                                                    width: '200px',
-                                                    boxSizing: 'border-box'
-                                                }}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                            />
-                                        </Tooltip>
-                                    </Form.Item>
-                                    {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
-                                        DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP" || showBidAmount) && (
-                                            <Form.Item
-                                                name="bid_amount"
-                                                label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
-                                                rules={[
-                                                    {
-                                                        required: true,
-                                                        message: "Please enter a bid amount!",
-                                                    },
-                                                    {
-                                                        validator: (_, value) =>
-                                                            value && !isNaN(value) && parseFloat(value) > 0
-                                                                ? Promise.resolve()
-                                                                : Promise.reject(new Error("Please enter a valid float value!")),
-                                                    },
-                                                ]}
-                                                style={{ flex: '1 1 150px' }}
-                                            >
-                                                <Input
-                                                    type="number"
-                                                    placeholder="$"
-                                                    onWheel={(e) => e.target.blur()}
-                                                    onKeyPress={(event) => {
-                                                        const charCode = event.charCode;
-                                                        const charStr = String.fromCharCode(charCode);
-                                                        const regex = /^[0-9]*\.?[0-9]*$/;
-                                                        if (!regex.test(charStr)) {
-                                                            event.preventDefault();
-                                                        }
-                                                    }}
-                                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                                />
-                                            </Form.Item>
-                                        )}
-
-                                    {/* {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
-                                        DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP"
-                                    ) ? (
+                                        />
+                                    )}
+                                </Form.Item>
+                                {/*pk*/}
+                                <Form.Item
+                                    name="DailyAdd_amount" // Make sure this name matches the field you want to capture
+                                    label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                                    style={{ flex: '1 1 200px' }}
+                                >
+                                    <Tooltip title={campaignLevelDailyBudget !== 0 ? "You have enabled daily budget in the Campaign Level" : ""}>
+                                        <InputNumber
+                                            type="number"
+                                            placeholder="$"
+                                            value={adsetLevelDailyBudget}
+                                            onWheel={(e) => e.target.blur()}
+                                            onChange={onChangeAdsetLevelDailyBudget}
+                                            readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
+                                            step="0.01"
+                                            style={{
+                                                backgroundColor: campaignLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
+                                                borderRadius: '6px',
+                                                borderColor: campaignLevelDailyBudget !== 0 ? 'transparent' : undefined,
+                                                fontSize: '14px',
+                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                width: '200px',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    </Tooltip>
+                                </Form.Item>
+                                {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
+                                    DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP" || showBidAmount) && (
                                         <Form.Item
                                             name="bid_amount"
-                                            label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
+                                            label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                                             rules={[
                                                 {
                                                     required: true,
@@ -2190,11 +2178,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                             : Promise.reject(new Error("Please enter a valid float value!")),
                                                 },
                                             ]}
-                                            style={{ flex: 0.1, marginLeft: "2%" }}
+                                            style={{ flex: '1 1 150px', marginRight: '67%' }}
                                         >
-                                            <Input
+                                            <InputNumber
                                                 type="number"
                                                 placeholder="$"
+                                                onWheel={(e) => e.target.blur()}
                                                 onKeyPress={(event) => {
                                                     const charCode = event.charCode;
                                                     const charStr = String.fromCharCode(charCode);
@@ -2203,9 +2192,16 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                         event.preventDefault();
                                                     }
                                                 }}
+                                                style={{ color: theme === "dark" ? "white" : "#000", width: '140px' }}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Form.Item>
-                                    ) : (showBidAmount && (<Form.Item
+                                    )}
+
+                                {/* {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
+                                    DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP"
+                                ) ? (
+                                    <Form.Item
                                         name="bid_amount"
                                         label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
                                         rules={[
@@ -2234,856 +2230,886 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 }
                                             }}
                                         />
-                                    </Form.Item>))} */}
-
-
-                                </div>
-                                <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: "16px"  }}>
-                                    <Form.Item
-                                        name="countries"
-                                        label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px' }}>
-                                        <Select
-                                            variant="filled"
-
-                                            options={[
-                                                { value: "US", label: "United States" },
-                                                { value: "GB", label: "United Kingdom" },
-                                                { value: "AU", label: "Australia" },
-                                                { value: "IN", label: "India" },
-                                                { value: "AE", label: "United Arab Emirates" },
-                                                { value: "CA", label: "Canada" },
-                                                { value: "DE", label: "Germany" },
-                                                { value: "FR", label: "France" },
-                                                { value: "JP", label: "Japan" },
-                                                { value: "CN", label: "China" },
-                                                { value: "BR", label: "Brazil" },
-                                                { value: "ZA", label: "South Africa" },
-                                                { value: "RU", label: "Russia" },
-                                                { value: "IT", label: "Italy" },
-                                                { value: "ES", label: "Spain" },
-                                                { value: "SG", label: "Singapore" },
-                                                { value: "NZ", label: "New Zealand" },
-                                                { value: "MX", label: "Mexico" }
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
                                     </Form.Item>
-                                    <Form.Item
-                                        name="Min_Age"
-                                        label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
+                                ) : (showBidAmount && (<Form.Item
+                                    name="bid_amount"
+                                    label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please enter a bid amount!",
+                                        },
+                                        {
+                                            validator: (_, value) =>
+                                                value && !isNaN(value) && parseFloat(value) > 0
+                                                    ? Promise.resolve()
+                                                    : Promise.reject(new Error("Please enter a valid float value!")),
+                                        },
+                                    ]}
+                                    style={{ flex: 0.1, marginLeft: "2%" }}
+                                >
+                                    <Input
+                                        type="number"
+                                        placeholder="$"
+                                        onKeyPress={(event) => {
+                                            const charCode = event.charCode;
+                                            const charStr = String.fromCharCode(charCode);
+                                            const regex = /^[0-9]*\.?[0-9]*$/;
+                                            if (!regex.test(charStr)) {
+                                                event.preventDefault();
+                                            }
+                                        }}
+                                    />
+                                </Form.Item>))} */}
+
+
+                            </div>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                                <Form.Item
+                                    name="countries"
+                                    label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 140px' }}>
+                                    <Select
+                                        variant="filled"
+
+                                        options={[
+                                            { value: "US", label: "United States", title: "" },
+                                            { value: "GB", label: "United Kingdom", title: "" },
+                                            { value: "AU", label: "Australia", title: "" },
+                                            { value: "IN", label: "India", title: "" },
+                                            { value: "AE", label: "United Arab Emirates", title: "" },
+                                            { value: "CA", label: "Canada", title: "" },
+                                            { value: "DE", label: "Germany", title: "" },
+                                            { value: "FR", label: "France", title: "" },
+                                            { value: "JP", label: "Japan", title: "" },
+                                            { value: "CN", label: "China", title: "" },
+                                            { value: "BR", label: "Brazil", title: "" },
+                                            { value: "ZA", label: "South Africa", title: "" },
+                                            { value: "RU", label: "Russia", title: "" },
+                                            { value: "IT", label: "Italy", title: "" },
+                                            { value: "ES", label: "Spain", title: "" },
+                                            { value: "SG", label: "Singapore", title: "" },
+                                            { value: "NZ", label: "New Zealand", title: "" },
+                                            { value: "MX", label: "Mexico", title: "" }
                                         ]}
-                                        style={{ flex: '1 1 150px' }}>
-                                        <Select
-                                            variant="filled"
-                                            options={[
-                                                { value: "18", label: "18" },
-                                                { value: "25", label: "25" },
-                                                { value: "35", label: "35" },
-                                                { value: "40", label: "40", disabled: true },
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Max_Age"
-                                        label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Min_Age"
+                                    label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 150px' }}>
+                                    <Select
+                                        variant="filled"
+                                        options={[
+                                            { value: "18", label: "18", title: "" },
+                                            { value: "25", label: "25", title: "" },
+                                            { value: "35", label: "35", title: "" },
+                                            { value: "40", label: "40", disabled: true, title: "" },
                                         ]}
-                                        style={{ flex: '1 1 150px' }}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Max_Age"
+                                    label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 150px' }}
+                                >
+                                    <Select
+                                        variant="filled"
+                                        options={[
+                                            { value: "20", label: "20", title: "" },
+                                            { value: "30", label: "30", title: "" },
+                                            { value: "65", label: "65+", title: "" },
+                                            { value: "80", label: "80", disabled: true, title: "" },
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Gender"
+                                    label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 150px' }}
+                                >
+                                    <Select
+                                        variant="filled"
+                                        options={[
+                                            { value: "0", label: "All", title: "" },
+                                            { value: "1", label: "Male", title: "" },
+                                            { value: "2", label: "Female", title: "" },
+                                        ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Language"
+                                    label={<span style={{ color: "#B4B4B4" }}>Language</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 150px' }}>
+                                    <Select
+                                        showSearch
+                                        mode="multiple" // or "tags" if you want to allow selecting multiple options
+                                        value={DuplicatedampaignData?.adsetlevel?.locales}
+                                        placeholder="Select language"
+                                        optionFilterProp="children"
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     >
-                                        <Select
-                                            variant="filled"
-                                            options={[
-                                                { value: "20", label: "20" },
-                                                { value: "30", label: "30" },
-                                                { value: "65", label: "65+" },
-                                                { value: "80", label: "80", disabled: true },
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Gender"
-                                        label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px' }}
-                                        >
-                                        <Select
-                                            variant="filled"
-                                            options={[
-                                                { value: "0", label: "All" },
-                                                { value: "1", label: "Male" },
-                                                { value: "2", label: "Female" },
-                                            ]}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="Language"
-                                        label={<span style={{ color: "#B4B4B4" }}>Language</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: '1 1 150px' }}>
-                                        <Select
-                                            showSearch
-                                            mode="multiple" // or "tags" if you want to allow selecting multiple options
-                                            value={DuplicatedampaignData?.adsetlevel?.locales}
-                                            placeholder="Select language"
-                                            optionFilterProp="children"
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        >
-                                            {localesdata.map(option => (
-                                                <Option key={option.key} value={option.key}>
-                                                    {option.name}
-                                                </Option>
-                                            ))}
-                                        </Select>
+                                        {localesdata.map(option => (
+                                            <Option key={option.key} value={option.key} title={null}>
+                                                {option.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
 
-                                    </Form.Item>
-                                    <Form.Item
-                                        label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
-                                        name="placements"
-                                        rules={[{ required: true, message: 'Please select a mode!' }]}
-                                    >
-                                        <Select placeholder="Select a mode" onChange={handleModeChange}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
-                                            <Option value="Advance">Advance</Option>
-                                            <Option value="manual">Manual</Option>
+                                </Form.Item>
+                                <Form.Item
+                                    label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
+                                    name="placements"
+                                    rules={[{ required: true, message: 'Please select a mode!' }]}
+                                >
+                                    <Select placeholder="Select a mode" onChange={handleModeChange}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}>
+                                        <Option value="Advance" title={null}>Advance</Option>
+                                        <Option value="manual" title={null}>Manual</Option>
 
-                                        </Select>
-                                    </Form.Item>
-                                    {isManual && (
-                                        <>
-                                            <Form.Item
-                                                name="publisher_platforms"
-                                                label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-                                                rules={[{ required: true, message: "Please select an option!" }]}
-                                                // style={{ marginRight: "10px" }}
-                                                style={{ flex: '1 1 300px' }}
-                                            >
-
-                                                <Select
-                                                    mode="multiple"
-                                                    placeholder="Select Platforms"
-                                                    onChange={handlePublisherChange}
-                                                    value={selectedPublishers}
-                                                    style={{ width: 300 }}
-                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                                >
-                                                    {publisherOptions.map(option => (
-                                                        <Option key={option.value} value={option.value}>
-                                                            {option.label}
-                                                        </Option>
-                                                    ))}
-                                                </Select>
-                                            </Form.Item>
-
-                                            <Form.Item
-                                                name="positions"
-                                                label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-                                                rules={[{ required: true, message: "Please select an option!" }]}
-                                                style={{ flex: '1 1 400px' }}
-                                            // style={{ marginRight: "10px" }}
-                                            >
-                                                <Select
-                                                    mode="multiple"
-                                                    placeholder="Select Positions"
-                                                    value={selectedPositions.map(pos => pos.value)}
-                                                    onChange={handlePositionChange}
-                                                    style={{ width: 400 }}
-                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                                >
-                                                    {selectedPublishers && selectedPublishers.length > 0 ? (
-                                                        getPositionOptions()?.map(position => (
-                                                            <Option key={`${position.key}_${position.label}`} value={position.key}>
-                                                                {position.label}
-                                                            </Option>
-                                                        ))
-                                                    ) : (
-                                                        <Option value="">Empty</Option>
-                                                    )}
-
-                                                </Select>
-                                            </Form.Item>
-                                            <Form.Item
-                                                name="device_platforms"
-                                                label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-                                                rules={[
-                                                    {
-                                                        required: true,
-                                                        message: "Please select an option!",
-                                                    },
-                                                ]}
-                                                style={{ flex: '1 1 200px' }}>
-                                                <Select
-                                                    mode="multiple"
-                                                    variant="filled"
-                                                    allowClear
-                                                    style={{ width: 200 }}
-                                                    placeholder="Please select"
-                                                    options={[
-                                                        { value: "mobile", label: "Mobile" },
-                                                        { value: "desktop", label: "Desktop" }
-                                                    ]}
-                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                                />
-                                            </Form.Item>
-                                        </>
-                                    )}
-                                    {/* <Form.Item
-                                        name="publisher_platforms"
-                                        label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-                                        rules={[{ required: true, message: "Please select an option!" }]}
-                                        // style={{ marginRight: "10px" }}
-                                        style={{ flex: 0.18, marginLeft: "2%" }}
-                                    >
-
-                                        <Select
-                                            mode="multiple"
-                                            placeholder="Select Publishers"
-                                            onChange={handlePublisherChange}
-                                            value={selectedPublishers}
-                                            style={{ width: 300 }}
-                                        >
-                                            {publisherOptions.map(option => (
-                                                <Option key={option.value} value={option.value}>
-                                                    {option.label}
-                                                </Option>
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-
-                                    <Form.Item
-                                        name="positions"
-                                        label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-                                        rules={[{ required: true, message: "Please select an option!" }]}
-                                        style={{ flex: 0.18, marginLeft: "2%" }}
-                                    // style={{ marginRight: "10px" }}
-                                    >
-                                        <Select
-                                            mode="multiple"
-                                            placeholder="Select Positions"
-                                            value={selectedPositions}
-                                            onChange={handlePositionChange}
-                                            style={{ width: 400 }}
-                                        >
-                                            {selectedPublishers && selectedPublishers.length > 0 ? (
-                                                getPositionOptions().map(position => (
-                                                    <Option key={`${position.key}_${position.label}`} value={position.key}>
-                                                        {position.label}
-                                                    </Option>
-                                                ))
-                                            ) : (
-                                                <Option value="">Empty</Option>
-                                            )}
-
-                                        </Select>
-                                    </Form.Item>
-                                    <Form.Item
-                                        name="device_platforms"
-                                        label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
-                                        style={{ flex: 0.18, marginLeft: "2%" }}>
-                                        <Select
-                                            mode="multiple"
-                                            variant="filled"
-                                            allowClear
-                                            style={{ width: 200 }}
-                                            placeholder="Please select"
-                                            options={[
-                                                { value: "mobile", label: "Mobile" },
-                                                { value: "desktop", label: "Desktop" }
-                                            ]}
-                                        />
-                                    </Form.Item> */}
-                                </div>
-                            </Panel>
-                            <Panel header="AD LEVEL" key="3">
-                                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                    <div style={{ flex: "70%", marginRight: "5%" }}>
-                                        <div style={{ display: 'flex', gap: '16px' }}>
-                                            {/* <Form.Item
-                                                name="MediaContent"
-                                                label={<span style={{ color: "#B4B4B4" }}>Upload</span>}
-                                                rules={[
-                                                    {
-                                                        validator: (_, value) => {
-                                                            // Check if no files are selected after removal
-                                                            if (selectedFiles.length === 0) {
-                                                                return Promise.reject(new Error('Please select Upload!'));
-                                                            }
-                                                            return Promise.resolve();
-                                                        },
-                                                    },
-                                                ]}
-                                                style={{ flex: 1 }}
-                                            >
-                                                <Upload
-                                                    beforeUpload={handleBeforeUpload}
-                                                    onChange={handleChange}
-                                                    multiple // Add this line to enable multiple file selection
-                                                    maxCount={10} // Adjust the max count as needed
-                                                    accept="image/*, video/*"
-                                                    fileList={selectedFiles}
-                                                    onRemove={(file) => {
-                                                        setSelectedFiles((prevFiles) =>
-                                                            prevFiles.filter((item) => item.uid !== file.uid)
-                                                        );
-                                                    }}
-                                                >
-                                                    <Button icon={<UploadOutlined />}>Select Files</Button>
-                                                </Upload>
-
-                                            </Form.Item> */}
-                                            <div style={{display:'flex', flexDirection:'column'}}>
-                                                <Form.Item
-                                                    label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
-                                                    style={{ flex: 1 }}
-                                                    >
-                                                    <Select
-                                                        defaultValue="creative"
-                                                        onChange={(value) => {
-                                                        setSelectedOption(value);
-                                                        form.validateFields(["MediaContent"]); // Revalidate when switching source
-                                                        }}
-                                                        style={{ marginBottom: 16 }}
-                                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                                    >
-                                                        <Option value="upload">Upload</Option>
-                                                        <Option value="creative">Creative library</Option>
-                                                    </Select>
-                                                    </Form.Item>
-
-                                                    <Form.Item
-                                                    name="MediaContent"
-                                                    rules={[
-                                                        {
-                                                        validator: async () => {
-                                                            if (
-                                                            (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
-                                                            (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
-                                                            ) {
-                                                            throw new Error("Please select Upload!");
-                                                            }
-                                                            return Promise.resolve();
-                                                        },
-                                                        },
-                                                    ]}
-                                                    >
-                                                        <div>
-                                                            {/* Upload UI */}
-                                                            <div className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
-                                                                <Upload
-                                                                    beforeUpload={() => false}
-                                                                    onChange={(info) => {
-                                                                    const newFiles = info.fileList.map((file) => ({
-                                                                        ...file,
-                                                                        uid: file.uid || `-${Date.now()}`,
-                                                                        source: "media",
-                                                                        thumbUrl:
-                                                                        file.thumbUrl ||
-                                                                        (file.originFileObj
-                                                                            ? URL.createObjectURL(file.originFileObj)
-                                                                            : undefined),
-                                                                    }));
-
-                                                                    setSelectedFiles((prev) => {
-                                                                        const existingUids = new Set(prev.map((f) => f.uid));
-                                                                        const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                                        const updated = [...prev, ...filteredNewFiles];
-                                                                        form.setFieldsValue({ MediaContent: updated });
-                                                                        form.validateFields(["MediaContent"]);
-                                                                        return updated;
-                                                                    });
-
-                                                                    setSelectedFilesFromMedia((prev) => {
-                                                                        const existingUids = new Set(prev.map((f) => f.uid));
-                                                                        const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                                        const updated = [...prev, ...filteredNewFiles];
-                                                                        form.setFieldsValue({ MediaContent: updated });
-                                                                        form.validateFields(["MediaContent"]);
-                                                                        return updated;
-                                                                    });
-                                                                    }}
-                                                                    onRemove={(fileToRemove) => {
-                                                                    setSelectedFilesFromMedia((prev) => {
-                                                                        const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                                        form.setFieldsValue({ MediaContent: updated });
-                                                                        form.validateFields(["MediaContent"]);
-                                                                        return updated;
-                                                                    });
-
-                                                                    setSelectedFiles((prev) => {
-                                                                        const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                                        form.setFieldsValue({ MediaContent: updated });
-                                                                        form.validateFields(["MediaContent"]);
-                                                                        return updated;
-                                                                    });
-
-                                                                    return true;
-                                                                    }}
-                                                                    multiple
-                                                                    maxCount={10}
-                                                                    fileList={selectedFilesFromMedia}
-                                                                    listType="picture"
-                                                                    accept="image/*, video/*"
-                                                                >
-                                                                    <Button icon={<UploadOutlined />}  className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select files</Button>
-                                                                </Upload>
-                                                            </div>
-
-                                                            {/* Creative Library UI */}
-                                                            {selectedOption === "creative" && (
-                                                            <div>
-                                                                <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}  className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
-                                                                Select files
-                                                                </Button>
-
-                                                                {selectedFilesFromCreatives?.length > 0 && (
-                                                                <div style={{ marginTop: "10px" }}>
-                                                                    {selectedFilesFromCreatives.map((file, index) => (
-                                                                    <div
-                                                                        key={index}
-                                                                        style={{
-                                                                        display: "flex",
-                                                                        alignItems: "center",
-                                                                        marginBottom: 8,
-                                                                        }}
-                                                                    >
-                                                                        {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                                                        {/* <Tooltip title={file.name}> */}
-                                                                        {file.type?.startsWith("image/") && (
-                                                                            <img
-                                                                                src={
-                                                                                file.originFileObj
-                                                                                    ? URL.createObjectURL(file.originFileObj)
-                                                                                    : file.url
-                                                                                }
-                                                                                alt="preview"
-                                                                                style={{
-                                                                                width: 40,
-                                                                                height: 40,
-                                                                                objectFit: "cover",
-                                                                                borderRadius: 4,
-                                                                                marginLeft: 8,
-                                                                                }}
-                                                                            />
-                                                                        )}
-                                                                        <span
-                                                                            style={{
-                                                                            maxWidth: 160,
-                                                                            overflow: "hidden",
-                                                                            textOverflow: "ellipsis",
-                                                                            whiteSpace: "nowrap",
-                                                                            paddingLeft: 8,
-                                                                            color: theme === 'dark' ? '#fff' : '#000',
-                                                                            }}
-
-                                                                        >
-                                                                            {file.name}
-                                                                        </span>
-                                                                        {/* </Tooltip> */}
-
-                                                                        
-
-                                                                        <DeleteOutlined
-                                                                        onClick={() => {
-                                                                            const updated = selectedFilesFromCreatives.filter(
-                                                                            (f) => f.uid !== file.uid
-                                                                            );
-                                                                            setSelectedFilesFromCreatives(updated);
-                                                                            setSelectedFiles((prev) =>
-                                                                            prev.filter((f) => f.uid !== file.uid)
-                                                                            );
-                                                                            form.setFieldsValue({ MediaContent: updated });
-                                                                            form.validateFields(["MediaContent"]);
-                                                                        }}
-                                                                        style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-                                                                        />
-                                                                    </div>
-                                                                    ))}
-                                                                </div>
-                                                                )}
-                                                            </div>
-                                                            )}
-                                                        </div>
-                                                </Form.Item>
-                                            </div>
-                                            <Form.Item
-                                                name="page_id"
-                                                initialValue={pageid}
-                                                label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
-                                                rules={[
-                                                    {
-                                                        required: true,
-                                                        message: "Please select an option!",
-                                                    },
-                                                ]}
-                                                style={{ flex: 3, marginLeft: "1%" }}
-                                            >
-                                                <Input style={{ width: "45%" }}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
-                                            </Form.Item>
-                                        </div>
+                                    </Select>
+                                </Form.Item>
+                                {isManual && (
+                                    <>
                                         <Form.Item
-                                            name="AddName"
-                                            initialValue={campaignName}
-                                            label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
+                                            name="publisher_platforms"
+                                            label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                                            rules={[{ required: true, message: "Please select an option!" }]}
+                                            // style={{ marginRight: "10px" }}
+                                            style={{ flex: '1 1 210px' }}
+                                        >
+
+                                            <Select
+                                                mode="multiple"
+                                                placeholder="Select Platforms"
+                                                onChange={handlePublisherChange}
+                                                value={selectedPublishers}
+                                                style={{ width: 300 }}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                            >
+                                                {publisherOptions.map(option => (
+                                                    <Option key={option.value} value={option.value} title={null}>
+                                                        {option.label}
+                                                    </Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            name="positions"
+                                            label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                                            rules={[{ required: true, message: "Please select an option!" }]}
+                                            style={{ flex: '1 1 215px' }}
+                                        // style={{ marginRight: "10px" }}
+                                        >
+                                            <Select
+                                                mode="multiple"
+                                                placeholder="Select Positions"
+                                                value={selectedPositions.map(pos => pos.value)}
+                                                onChange={handlePositionChange}
+                                                // style={{ width: 400 }}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                            >
+                                                {selectedPublishers && selectedPublishers.length > 0 ? (
+                                                    getPositionOptions()?.map(position => (
+                                                        <Option key={`${position.key}_${position.label}`} value={position.key} title={null}>
+                                                            {position.label}
+                                                        </Option>
+                                                    ))
+                                                ) : (
+                                                    <Option value="">Empty</Option>
+                                                )}
+
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="device_platforms"
+                                            label={<span style={{ color: "#B4B4B4" }}>Device</span>}
                                             rules={[
                                                 {
                                                     required: true,
                                                     message: "Please select an option!",
                                                 },
                                             ]}
-                                        >
-                                            <Input
-                                                style={{ width: "60%" }}
-                                                onChange={(e) => setAddName(e.target.value)}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                            style={{ flex: '1 1 215px' }}>
+                                            <Select
+                                                mode="multiple"
+                                                variant="filled"
+                                                allowClear
+                                                style={{ width: 200 }}
+                                                placeholder="Please select"
+                                                options={[
+                                                    { value: "mobile", label: "Mobile", title: "" },
+                                                    { value: "desktop", label: "Desktop", title: "" }
+                                                ]}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                             />
                                         </Form.Item>
-                                        <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
-                                            name="message"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please enter a message!",
-                                                },
-                                            ]}
-                                            required
-                                            tooltip="This is a required field">
-                                            <TextArea
-                                                placeholder="Primary text"
-                                                autoSize={{ minRows: 2, maxRows: 10 }}
-                                                onChange={(e) => setPrimaryText(e.target.value)}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    </>
+                                )}
+                                {/* <Form.Item
+                                    name="publisher_platforms"
+                                    label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                                    rules={[{ required: true, message: "Please select an option!" }]}
+                                    // style={{ marginRight: "10px" }}
+                                    style={{ flex: 0.18, marginLeft: "2%" }}
+                                >
 
-                                            />
-                                        </Form.Item>
+                                    <Select
+                                        mode="multiple"
+                                        placeholder="Select Publishers"
+                                        onChange={handlePublisherChange}
+                                        value={selectedPublishers}
+                                        style={{ width: 300 }}
+                                    >
+                                        {publisherOptions.map(option => (
+                                            <Option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+
+                                <Form.Item
+                                    name="positions"
+                                    label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                                    rules={[{ required: true, message: "Please select an option!" }]}
+                                    style={{ flex: 0.18, marginLeft: "2%" }}
+                                // style={{ marginRight: "10px" }}
+                                >
+                                    <Select
+                                        mode="multiple"
+                                        placeholder="Select Positions"
+                                        value={selectedPositions}
+                                        onChange={handlePositionChange}
+                                        style={{ width: 400 }}
+                                    >
+                                        {selectedPublishers && selectedPublishers.length > 0 ? (
+                                            getPositionOptions().map(position => (
+                                                <Option key={`${position.key}_${position.label}`} value={position.key}>
+                                                    {position.label}
+                                                </Option>
+                                            ))
+                                        ) : (
+                                            <Option value="">Empty</Option>
+                                        )}
+
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item
+                                    name="device_platforms"
+                                    label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: 0.18, marginLeft: "2%" }}>
+                                    <Select
+                                        mode="multiple"
+                                        variant="filled"
+                                        allowClear
+                                        style={{ width: 200 }}
+                                        placeholder="Please select"
+                                        options={[
+                                            { value: "mobile", label: "Mobile" },
+                                            { value: "desktop", label: "Desktop" }
+                                        ]}
+                                    />
+                                </Form.Item> */}
+                            </div>
+                        </Panel>
+                        <Panel header="AD LEVEL" key="3">
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div style={{ flex: "70%", marginRight: "5%" }}>
+                                    <div style={{ display: 'flex', gap: '16px' }}>
                                         {/* <Form.Item
-                                            label="Caption"
-                                            name="Caption"
+                                            name="MediaContent"
+                                            label={<span style={{ color: "#B4B4B4" }}>Upload</span>}
                                             rules={[
                                                 {
-                                                    required: true,
-                                                    message: "Please enter a Caption!",
+                                                    validator: (_, value) => {
+                                                        // Check if no files are selected after removal
+                                                        if (selectedFiles.length === 0) {
+                                                            return Promise.reject(new Error('Please select Upload!'));
+                                                        }
+                                                        return Promise.resolve();
+                                                    },
                                                 },
                                             ]}
-                                            required
-                                            tooltip="This is a required field">
-                                            <TextArea
-                                                placeholder="Caption"
-                                                autoSize={{ minRows: 2, maxRows: 10 }}
-                                                onChange={(e) => setCaption(e.target.value)}
-                                            />
-                                        </Form.Item> */}
-
-                                        <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
-                                            name="headline"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please enter a Name!",
-                                                },
-                                            ]}
-                                            required
-                                            tooltip="This is a required field">
-                                            <TextArea
-                                                placeholder="Headline"
-                                                autoSize={{ minRows: 2, maxRows: 10 }}
-                                                onChange={(e) => setHeadline(e.target.value)}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                            />
-                                        </Form.Item>
-
-                                        <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Description</span>}
-                                            name="Description"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please enter a Description!",
-                                                },
-                                            ]}
-                                            required
-                                            tooltip="This is a required field">
-                                            <TextArea
-                                                placeholder="Description"
-                                                autoSize={{ minRows: 2, maxRows: 10 }}
-                                                onChange={(e) => setDescription(e.target.value)}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                            />
-                                        </Form.Item>
-
-                                        {/* <Form.Item
-                                            label="Website_URL"
-                                            name="Website_URL"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please select Website_URL!",
-                                                },
-                                            ]}
-                                            required
-                                            tooltip="This is a required field"
+                                            style={{ flex: 1 }}
                                         >
-                                            <TextArea
-                                                placeholder="Website_URL"
-                                                autoSize={{ minRows: 5, maxRows: 15 }}
-                                                onChange={(e) => setWebsiteURL(e.target.value)}
+                                            <Upload
+                                                beforeUpload={handleBeforeUpload}
+                                                onChange={handleChange}
+                                                multiple // Add this line to enable multiple file selection
+                                                maxCount={10} // Adjust the max count as needed
+                                                accept="image/*, video/*"
+                                                fileList={selectedFiles}
+                                                onRemove={(file) => {
+                                                    setSelectedFiles((prevFiles) =>
+                                                        prevFiles.filter((item) => item.uid !== file.uid)
+                                                    );
+                                                }}
+                                            >
+                                                <Button icon={<UploadOutlined />}>Select Files</Button>
+                                            </Upload>
 
-                                            />
                                         </Form.Item> */}
-                                        <Form.Item
-                                            label={
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                                        <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                                                        <Tooltip title="This is a required field">
-                                                            <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
-                                                        </Tooltip>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <Form.Item
+                                                label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
+                                                style={{ flex: 1 }}
+                                            >
+                                                <Select
+                                                    defaultValue="creative"
+                                                    onChange={(value) => {
+                                                        setSelectedOption(value);
+                                                        form.validateFields(["MediaContent"]); // Revalidate when switching source
+                                                    }}
+                                                    style={{ marginBottom: 16 }}
+                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                                >
+                                                    <Option value="upload">Upload</Option>
+                                                    <Option value="creative">Creative library</Option>
+                                                </Select>
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="MediaContent"
+                                                rules={[
+                                                    {
+                                                        validator: async () => {
+                                                            if (
+                                                                (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
+                                                                (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
+                                                            ) {
+                                                                throw new Error("Please select Upload!");
+                                                            }
+                                                            return Promise.resolve();
+                                                        },
+                                                    },
+                                                ]}
+                                            >
+                                                <div>
+                                                    {/* Upload UI */}
+                                                    <div className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                        <Upload
+                                                            beforeUpload={() => false}
+                                                            onChange={(info) => {
+                                                                const newFiles = info.fileList.map((file) => ({
+                                                                    ...file,
+                                                                    uid: file.uid || `-${Date.now()}`,
+                                                                    source: "media",
+                                                                    thumbUrl:
+                                                                        file.thumbUrl ||
+                                                                        (file.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : undefined),
+                                                                }));
+
+                                                                setSelectedFiles((prev) => {
+                                                                    const existingUids = new Set(prev.map((f) => f.uid));
+                                                                    const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                    const updated = [...prev, ...filteredNewFiles];
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
+
+                                                                setSelectedFilesFromMedia((prev) => {
+                                                                    const existingUids = new Set(prev.map((f) => f.uid));
+                                                                    const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                    const updated = [...prev, ...filteredNewFiles];
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
+                                                            }}
+                                                            onRemove={(fileToRemove) => {
+                                                                setSelectedFilesFromMedia((prev) => {
+                                                                    const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
+
+                                                                setSelectedFiles((prev) => {
+                                                                    const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
+
+                                                                return true;
+                                                            }}
+                                                            multiple
+                                                            maxCount={10}
+                                                            fileList={selectedFilesFromMedia}
+                                                            listType="picture"
+                                                            accept="image/*, video/*"
+                                                        >
+                                                            <Button icon={<UploadOutlined />} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>Select files</Button>
+                                                        </Upload>
                                                     </div>
-                                                    <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
-                                                </div>
-                                            }
-                                            labelCol={{ style: { width: '100%' } }}  // Makes the label full width
-                                            wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
-                                            name="Website_URL"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please select Website_URL!",
-                                                },
-                                            ]}
-                                            required
-                                        >
-                                            <TextArea
-                                                placeholder="Website_URL"
-                                                autoSize={{ minRows: 5, maxRows: 15 }}
-                                                value={websiteURL}
-                                                onChange={(e) => setWebsiteURL(e.target.value)}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
-                                            />
-                                        </Form.Item>
+                                                    {/* Creative Library UI */}
+                                                    {selectedOption === "creative" && (
+                                                        <div>
+                                                            <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>
+                                                                Select files
+                                                            </Button>
+
+                                                            {selectedFilesFromCreatives?.length > 0 && (
+                                                                <div style={{ marginTop: "10px" }}>
+                                                                    {selectedFilesFromCreatives.map((file, index) => (
+                                                                        <div
+                                                                            key={index}
+                                                                            style={{
+                                                                                display: "flex",
+                                                                                alignItems: "center",
+                                                                                marginBottom: 8,
+                                                                            }}
+                                                                        >
+                                                                            {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                                                            {/* <Tooltip title={file.name}> */}
+                                                                            {file.type?.startsWith("image/") && (
+                                                                                <img
+                                                                                    src={
+                                                                                        file.originFileObj
+                                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                                            : file.url
+                                                                                    }
+                                                                                    alt="preview"
+                                                                                    style={{
+                                                                                        width: 40,
+                                                                                        height: 40,
+                                                                                        objectFit: "cover",
+                                                                                        borderRadius: 4,
+                                                                                        marginLeft: 8,
+                                                                                    }}
+                                                                                />
+                                                                            )}
+                                                                            <span
+                                                                                style={{
+                                                                                    maxWidth: 160,
+                                                                                    overflow: "hidden",
+                                                                                    textOverflow: "ellipsis",
+                                                                                    whiteSpace: "nowrap",
+                                                                                    paddingLeft: 8,
+                                                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                                                }}
+
+                                                                            >
+                                                                                {file.name}
+                                                                            </span>
+                                                                            {/* </Tooltip> */}
+
+
+
+                                                                            <DeleteOutlined
+                                                                                onClick={() => {
+                                                                                    const updated = selectedFilesFromCreatives.filter(
+                                                                                        (f) => f.uid !== file.uid
+                                                                                    );
+                                                                                    setSelectedFilesFromCreatives(updated);
+                                                                                    setSelectedFiles((prev) =>
+                                                                                        prev.filter((f) => f.uid !== file.uid)
+                                                                                    );
+                                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                                    form.validateFields(["MediaContent"]);
+                                                                                }}
+                                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                            />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </Form.Item>
+                                        </div>
                                         <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
-                                            name="Caption"
+                                            name="page_id"
+                                            initialValue={pageid}
+                                            label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                                             rules={[
                                                 {
                                                     required: true,
-                                                    message: "Please enter a Display Link!",
+                                                    message: "Please select an option!",
                                                 },
                                             ]}
-                                            required
-                                            tooltip="This is a required field">
-                                            <TextArea
-                                                placeholder="Display Link"
-                                                autoSize={{ minRows: 2, maxRows: 10 }}
-                                                onChange={(e) => setCaption(e.target.value)}
-                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                            />
-                                        </Form.Item>
-                                        <Modal
-                                            title="URL Builder"
-                                            visible={isModalVisibleForURLBuilder}
-                                            onCancel={handleCancelForURLBuilder}
-                                            // footer={[
-                                            //     <Button key="cancel" onClick={handleCancel}>
-                                            //         Cancel
-                                            //     </Button>,
-                                            //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
-                                            //         Submit
-                                            //     </Button>
-                                            // ]}
-                                            footer={null}
-                                            width="80%" // Set width of the modal
-                                            bodyStyle={{ height: '50vh', overflowY: 'auto' }}
-                                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                            style={{ flex: 3, marginLeft: "1%" }}
                                         >
-                                            {getUrlBuilder(network)}
-                                        </Modal>
-                                        {/* <Form.Item
-                                        label="URL Parameters"
-                                        name="urlParameters"
+                                            <Input style={{ width: "23%" }}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                        </Form.Item>
+                                    </div>
+                                    <Form.Item
+                                        name="AddName"
+                                        initialValue={campaignName}
+                                        label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                    >
+                                        <Input
+                                            style={{ width: "60%" }}
+                                            onChange={(e) => setAddName(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
+                                        name="message"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter a message!",
+                                            },
+                                        ]}
+                                        required
+                                        tooltip="This is a required field">
+                                        <TextArea
+                                            placeholder="Primary text"
+                                            autoSize={{ minRows: 2, maxRows: 10 }}
+                                            onChange={(e) => setPrimaryText(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+
+                                        />
+                                    </Form.Item>
+                                    {/* <Form.Item
+                                        label="Caption"
+                                        name="Caption"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter a Caption!",
+                                            },
+                                        ]}
+                                        required
+                                        tooltip="This is a required field">
+                                        <TextArea
+                                            placeholder="Caption"
+                                            autoSize={{ minRows: 2, maxRows: 10 }}
+                                            onChange={(e) => setCaption(e.target.value)}
+                                        />
+                                    </Form.Item> */}
+
+                                    <Form.Item
+                                        label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
+                                        name="headline"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter a Name!",
+                                            },
+                                        ]}
+                                        required
+                                        tooltip="This is a required field">
+                                        <TextArea
+                                            placeholder="Headline"
+                                            autoSize={{ minRows: 2, maxRows: 10 }}
+                                            onChange={(e) => setHeadline(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        label={<span style={{ color: "#B4B4B4" }}>Description</span>}
+                                        name="Description"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter a Description!",
+                                            },
+                                        ]}
+                                        required
+                                        tooltip="This is a required field">
+                                        <TextArea
+                                            placeholder="Description"
+                                            autoSize={{ minRows: 2, maxRows: 10 }}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    </Form.Item>
+
+                                    {/* <Form.Item
+                                        label="Website_URL"
+                                        name="Website_URL"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select Website_URL!",
+                                            },
+                                        ]}
+                                        required
                                         tooltip="This is a required field"
                                     >
                                         <TextArea
-                                            placeholder="URL Parameters"
+                                            placeholder="Website_URL"
                                             autoSize={{ minRows: 5, maxRows: 15 }}
+                                            onChange={(e) => setWebsiteURL(e.target.value)}
+
                                         />
                                     </Form.Item> */}
-                                    </div>
+                                    <Form.Item
+                                        label={
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
+                                                    <span style={{ color: "#B4B4B4" }}>Website_URL</span>
+                                                    <Tooltip title="This is a required field">
+                                                        <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
+                                                    </Tooltip>
+                                                </div>
+                                                <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
+                                            </div>
+                                        }
+                                        labelCol={{ style: { width: '100%' } }}  // Makes the label full width
+                                        wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
+                                        name="Website_URL"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select Website_URL!",
+                                            },
+                                        ]}
+                                        required
+                                    >
+                                        <TextArea
+                                            placeholder="Website_URL"
+                                            autoSize={{ minRows: 5, maxRows: 15 }}
+                                            value={websiteURL}
+                                            onChange={(e) => setWebsiteURL(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
-                                    <div style={{ flex: "30%" }}>
-                                        {selectedFiles && selectedFiles.length > 0 ? (
-                                            selectedFiles.map((file, index) => (
-                                                <Badge
-                                                    count={
-                                                        (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) ? 
-                                                        null:
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
+                                        name="Caption"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter a Display Link!",
+                                            },
+                                        ]}
+                                        required
+                                        tooltip="This is a required field">
+                                        <TextArea
+                                            placeholder="Display Link"
+                                            autoSize={{ minRows: 2, maxRows: 10 }}
+                                            onChange={(e) => setCaption(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    </Form.Item>
+                                    <Modal
+                                        title="URL Builder"
+                                        visible={isModalVisibleForURLBuilder}
+                                        onCancel={handleCancelForURLBuilder}
+                                        // footer={[
+                                        //     <Button key="cancel" onClick={handleCancel}>
+                                        //         Cancel
+                                        //     </Button>,
+                                        //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
+                                        //         Submit
+                                        //     </Button>
+                                        // ]}
+                                        footer={null}
+                                        width="80%" // Set width of the modal
+                                        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                    >
+                                        {getUrlBuilder(network)}
+                                    </Modal>
+                                    {/* <Form.Item
+                                    label="URL Parameters"
+                                    name="urlParameters"
+                                    tooltip="This is a required field"
+                                >
+                                    <TextArea
+                                        placeholder="URL Parameters"
+                                        autoSize={{ minRows: 5, maxRows: 15 }}
+                                    />
+                                </Form.Item> */}
+                                </div>
+
+                                <div style={{ flex: "30%" }}>
+                                    {selectedFiles && selectedFiles.length > 0 ? (
+                                        selectedFiles.map((file, index) => (
+                                            <Badge
+                                                count={
+                                                    (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) ?
+                                                        null :
                                                         <EditOutlined
                                                             style={{ fontSize: '25px', color: '#fff' }}
                                                             onClick={() => handleEditClick(file)} // Edit icon click handler
                                                         />
-                                                    }
-                                                    style={{
-                                                        backgroundColor: '#52c41a',
-                                                        borderRadius: '50%',
-                                                        position: 'absolute',
-                                                        top: '5px',
-                                                        right: '5px',
-                                                        zIndex: 10,
-                                                        cursor: 'pointer',
-                                                    }}
-                                                    offset={[5, 5]}
-                                                    key={index}
-                                                >
-                                                    <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
-                                                            <div className="ad-heading">
-                                                                <div className="img">
-                                                                    {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
-                                                                        <img
-                                                                            src={file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="40"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                        />
-                                                                    ) : file?.url?.endsWith('.mp4') ? (
-                                                                        <video
-                                                                            src={file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="30"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
-                                                                        />
-                                                                    ) : 
+                                                }
+                                                style={{
+                                                    backgroundColor: '#52c41a',
+                                                    borderRadius: '50%',
+                                                    position: 'absolute',
+                                                    top: '5px',
+                                                    right: '5px',
+                                                    zIndex: 10,
+                                                    cursor: 'pointer',
+                                                }}
+                                                offset={[5, 5]}
+                                                key={index}
+                                            >
+                                                <div key={index} className="container-ad-preview">
+                                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
+                                                        <div className="ad-heading">
+                                                            <div className="img">
+                                                                {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
+                                                                {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
+                                                                    <img
+                                                                        src={file?.url}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="40"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                    />
+                                                                ) : file?.url?.endsWith('.mp4') ? (
+                                                                    <video
+                                                                        src={file?.url}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="30"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                        muted // Muted to prevent sound on preview
+                                                                    />
+                                                                ) :
                                                                     file?.type?.startsWith('image/') ? (
                                                                         <img
-                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name] : file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
                                                                             alt="page id"
                                                                             width="40"
                                                                             height="40"
                                                                             style={{ objectFit: 'cover' }}
-                                                                        />
-                                                                    ) 
-                                                                    : 
-                                                                    (
-                                                                        <video
-                                                                            src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="30"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
                                                                         />
                                                                     )
+                                                                        :
+                                                                        (
+                                                                            <video
+                                                                                src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                                alt="page id"
+                                                                                width="40"
+                                                                                height="30"
+                                                                                style={{ objectFit: 'cover' }}
+                                                                                muted // Muted to prevent sound on preview
+                                                                            />
+                                                                        )
                                                                     // null
-                                                                    }
+                                                                }
 
-                                                                    
-                                                                </div>
 
-                                                                <div className="title">
-                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
-                                                                        {addName}
-                                                                        {/* </div>                                                            <div className="sub">
-                                                                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
-                                                                        <div className="sub">
-                                                                            {imagehash?.pageName ? (
-                                                                                <>
-                                                                                    {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                                </>
-                                                                            ) : (
-                                                                                <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                            )}
-                                                                        </div>
+                                                            </div>
+
+                                                            <div className="title">
+                                                                <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" && "white" }}>
+                                                                    {addName}
+                                                                    {/* </div>                                                            <div className="sub">
+                                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
+                                                                    <div className="sub">
+                                                                        {imagehash?.pageName ? (
+                                                                            <>
+                                                                                {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                            </>
+                                                                        ) : (
+                                                                            <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                        )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="close">
-                                                                    <CloseOutlined style={{ fontSize: "20px" }} />
-                                                                </div>
-                                                                <div className="moreoptions">
-                                                                    <MoreOutlined style={{ fontSize: "20px" }} />
-                                                                </div>
                                                             </div>
-                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
-                                                                {primaryText}
+                                                            <div className="close">
+                                                                <CloseOutlined style={{ fontSize: "20px" }} />
                                                             </div>
-                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
-                                                                        <img
-                                                                            src={file?.url}
-                                                                            alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        />
-                                                                    ) : file?.url?.endsWith('.mp4') ? (
-                                                                        <video
-                                                                        controls
+                                                            <div className="moreoptions">
+                                                                <MoreOutlined style={{ fontSize: "20px" }} />
+                                                            </div>
+                                                        </div>
+                                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" && "white" }}>
+                                                            {primaryText}
+                                                        </div>
+                                                        <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
+                                                                <img
+                                                                    src={file?.url}
+                                                                    alt="ad content"
+                                                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                />
+                                                            ) : file?.url?.endsWith('.mp4') ? (
+                                                                <video
+                                                                    controls
+                                                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                >
+                                                                    <source src={file?.url} />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            )
+                                                                :
+                                                                file?.type?.startsWith('image/') ? (
+                                                                    <img
+                                                                        src={editedImages[file?.name] ? editedImages[file?.name] : file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
+                                                                        alt="ad content"
                                                                         // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        >
-                                                                            <source src={file?.url} />
-                                                                            Your browser does not support the video tag.
-                                                                        </video>
-                                                                    ) 
-                                                                    :
-                                                                    file?.type?.startsWith('image/') ? (
-                                                                        <img
-                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
-                                                                            alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        />
-                                                                    ) : 
+                                                                    />
+                                                                ) :
                                                                     (
                                                                         <video
                                                                             controls
@@ -3094,150 +3120,150 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                             Your browser does not support the video tag.
                                                                         </video>
                                                                     )
-                                                                    // null
-                                                                    }
-                                                            </div>
+                                                                // null
+                                                            }
+                                                        </div>
 
-                                                            <div className="ad-cta">
-                                                                <div className="details">
-                                                                    <div className="link" style={{color : theme === "dark" && "white"}}>{caption}</div>
-                                                                    <div className="title" style={{color : theme === "dark" && "white"}}>{headline}</div>
-                                                                    <div className="desc" style={{color : theme === "dark" && "white"}}>{description}</div>
-                                                                </div>
-                                                                <div className="ad-button">
-                                                                    <button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
-                                                                </div>
+                                                        <div className="ad-cta">
+                                                            <div className="details">
+                                                                <div className="link" style={{ color: theme === "dark" && "white" }}>{caption}</div>
+                                                                <div className="title" style={{ color: theme === "dark" && "white" }}>{headline}</div>
+                                                                <div className="desc" style={{ color: theme === "dark" && "white" }}>{description}</div>
                                                             </div>
-                                                            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-                                                                {websiteURL}
-                                                            </a>                                                <div className="icons">
-                                                                <div className="like" style={{color : theme === "dark" && "white"}}>
-                                                                    <LikeOutlined style={{ fontSize: "20px" }} />
-                                                                    Like
-                                                                </div>
-                                                                <div className="comment" style={{color : theme === "dark" && "white"}}>
-                                                                    <CommentOutlined style={{ fontSize: "20px" }} />
-                                                                    Comment
-                                                                </div>
-                                                                <div className="share" style={{color : theme === "dark" && "white"}}>
-                                                                    <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                                    Share
-                                                                </div>
+                                                            <div className="ad-button">
+                                                                <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>Learn More</button>
+                                                            </div>
+                                                        </div>
+                                                        <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                            {websiteURL}
+                                                        </a>                                                <div className="icons">
+                                                            <div className="like" style={{ color: theme === "dark" && "white" }}>
+                                                                <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                Like
+                                                            </div>
+                                                            <div className="comment" style={{ color: theme === "dark" && "white" }}>
+                                                                <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                Comment
+                                                            </div>
+                                                            <div className="share" style={{ color: theme === "dark" && "white" }}>
+                                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                Share
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </Badge>
+                                                </div>
+                                            </Badge>
 
-                                            ))
-                                        ) : (
-                                            // <div className="container-ad-preview">
-                                            //     <div className="ad-preview">
-                                            //         <div className="ad-heading">
-                                            //             <div className="filename">
-                                            //                 <img
-                                            //                     src={initialValues?.filename}
-                                            //                     alt="page id"
-                                            //                     width="40"
-                                            //                     height="40"
-                                            //                 />
-                                            //             </div>
-                                            //             <div className="title">
-                                            //                 <div className="main">{"Facebook Page"}</div>
-                                            //                 <div className="sub">
-                                            //                     Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
-                                            //                 </div>
-                                            //             </div>
-                                            //             <div className="close">
-                                            //                 <CloseOutlined style={{ fontSize: "20px" }} />
-                                            //             </div>
-                                            //             <div className="moreoptions">
-                                            //                 <MoreOutlined style={{ fontSize: "20px" }} />
-                                            //             </div>
-                                            //         </div>
-                                            //         <div className="ad-desc">{"adMessage"}</div>
-                                            //         <div className="ad-image">
-                                            //             <img
-                                            //                 src={initialValues?.filename}
-                                            //                 alt="ad content"
-                                            //             />
-                                            //         </div>
-                                            //         <div className="ad-cta">
-                                            //             <div className="details">
-                                            //                 <div className="link">{"adCaption"}</div>
-                                            //                 <div className="title">{"adName"}</div>
-                                            //                 <div className="desc">{"adDesc"}</div>
-                                            //             </div>
-                                            //             <div className="ad-button">
-                                            //                 <button type="button">Learn More</button>
-                                            //             </div>
-                                            //         </div>
-                                            //         <div className="icons">
-                                            //             <div className="like">
-                                            //                 <LikeOutlined style={{ fontSize: "20px" }} />
-                                            //                 Like
-                                            //             </div>
-                                            //             <div className="comment">
-                                            //                 <CommentOutlined style={{ fontSize: "20px" }} />
-                                            //                 Comment
-                                            //             </div>
-                                            //             <div className="share">
-                                            //                 <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                            //                 Share
-                                            //             </div>
-                                            //         </div>
-                                            //     </div>
-                                            // </div>
-                                            null
-                                        )}
-                                    </div>
+                                        ))
+                                    ) : (
+                                        // <div className="container-ad-preview">
+                                        //     <div className="ad-preview">
+                                        //         <div className="ad-heading">
+                                        //             <div className="filename">
+                                        //                 <img
+                                        //                     src={initialValues?.filename}
+                                        //                     alt="page id"
+                                        //                     width="40"
+                                        //                     height="40"
+                                        //                 />
+                                        //             </div>
+                                        //             <div className="title">
+                                        //                 <div className="main">{"Facebook Page"}</div>
+                                        //                 <div className="sub">
+                                        //                     Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                        //                 </div>
+                                        //             </div>
+                                        //             <div className="close">
+                                        //                 <CloseOutlined style={{ fontSize: "20px" }} />
+                                        //             </div>
+                                        //             <div className="moreoptions">
+                                        //                 <MoreOutlined style={{ fontSize: "20px" }} />
+                                        //             </div>
+                                        //         </div>
+                                        //         <div className="ad-desc">{"adMessage"}</div>
+                                        //         <div className="ad-image">
+                                        //             <img
+                                        //                 src={initialValues?.filename}
+                                        //                 alt="ad content"
+                                        //             />
+                                        //         </div>
+                                        //         <div className="ad-cta">
+                                        //             <div className="details">
+                                        //                 <div className="link">{"adCaption"}</div>
+                                        //                 <div className="title">{"adName"}</div>
+                                        //                 <div className="desc">{"adDesc"}</div>
+                                        //             </div>
+                                        //             <div className="ad-button">
+                                        //                 <button type="button">Learn More</button>
+                                        //             </div>
+                                        //         </div>
+                                        //         <div className="icons">
+                                        //             <div className="like">
+                                        //                 <LikeOutlined style={{ fontSize: "20px" }} />
+                                        //                 Like
+                                        //             </div>
+                                        //             <div className="comment">
+                                        //                 <CommentOutlined style={{ fontSize: "20px" }} />
+                                        //                 Comment
+                                        //             </div>
+                                        //             <div className="share">
+                                        //                 <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                        //                 Share
+                                        //             </div>
+                                        //         </div>
+                                        //     </div>
+                                        // </div>
+                                        null
+                                    )}
                                 </div>
+                            </div>
 
 
-                            </Panel>
-                        </Collapse>
-                        <Form.Item label=" ">
+                        </Panel>
+                    </Collapse>
+                    <Form.Item label=" ">
                         {/* {isFormComplete && ( */}
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
-                                style={{ background: '#21c55d', minWidth: '200px', borderWidth:'0px' }}
+                                style={{ background: '#91C25F', minWidth: '200px', borderWidth: '0px', border: '1px solid #4caf50' }}
                                 onClick={async () => {
-                                try {
-                                    const values = await form.validateFields(); // Validates all form fields
+                                    try {
+                                        const values = await form.validateFields(); // Validates all form fields
 
-                                    // Clear existing validation errors
-                                    
+                                        // Clear existing validation errors
 
-                                    if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
-                                    isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
-                                        // Throw a validation error manually in the same format as AntD expects
-                                        throw {
-                                          errorFields: [
-                                            {
-                                              name: ['Daily_amount'], // This should match your Form.Item name path
-                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
-                                            },
-                                          ],
-                                        };
+
+                                        if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
+                                            isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
+                                            // Throw a validation error manually in the same format as AntD expects
+                                            throw {
+                                                errorFields: [
+                                                    {
+                                                        name: ['Daily_amount'], // This should match your Form.Item name path
+                                                        errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                                    },
+                                                ],
+                                            };
+                                        }
+
+                                        setSubmitErrors([]);
+
+                                        // Optionally trigger your existing logic
+                                        onFinish(values); // If you want to reuse your existing logic
+
+                                        // Show confirmation modal
+                                        setIsModalVisible(true);
+
+                                        // Save values if needed
+                                        setFormValues(values);
+                                    } catch (err) {
+                                        const allErrors = err?.errorFields?.map((field) => ({
+                                            name: field.name?.[0],       // field name
+                                            message: field.errors?.[0],  // validation message
+                                        }));
+                                        setSubmitErrors(allErrors);
                                     }
-
-                                    setSubmitErrors([]);
-
-                                    // Optionally trigger your existing logic
-                                    onFinish(values); // If you want to reuse your existing logic
-
-                                    // Show confirmation modal
-                                    setIsModalVisible(true);
-
-                                    // Save values if needed
-                                    setFormValues(values);
-                                } catch (err) {
-                                    const allErrors = err?.errorFields?.map((field) => ({
-                                    name: field.name?.[0],       // field name
-                                    message: field.errors?.[0],  // validation message
-                                    }));
-                                    setSubmitErrors(allErrors);
-                                }
                                 }}
                             >
                                 Submit
@@ -3246,34 +3272,33 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             {/* Show validation messages beside button */}
                             {submitErrors.length > 0 && (
                                 <div style={{ color: "red", marginTop: 8 }}>
-                                {submitErrors.map((err, index) => (
-                                    <div key={index}>
-                                    <strong>{err.name}:</strong> {err.message}
-                                    </div>
-                                ))}
+                                    {submitErrors.map((err, index) => (
+                                        <div key={index}>
+                                            <strong>{err.name}:</strong> {err.message}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-                            </div>
+                        </div>
                         {/* )} */}
                     </Form.Item>
-                        {isImgEditorShown && currentFile && (
-                            <FabricCanvas
-                                fileId={currentFile.name} // Pass a unique identifier
-                                initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
-                                closeCanvasModal={closeCanvasModal}
-                                onSaveEditedImage={handleSaveEditedImage}
-                            />
-                        )}
-                        <Modal
-                            title="Confirmation"
-                            open={isModalVisible}
-                            onOk={handleOk}
-                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                            onCancel={handleCancel}>
-                            <p>Are you sure you want to submit?</p>
-                        </Modal>
-                    </Form>
-                </Spin>
+                    {isImgEditorShown && currentFile && (
+                        <FabricCanvas
+                            fileId={currentFile.name} // Pass a unique identifier
+                            initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
+                            closeCanvasModal={closeCanvasModal}
+                            onSaveEditedImage={handleSaveEditedImage}
+                        />
+                    )}
+                    <Modal
+                        title="Confirmation"
+                        open={isModalVisible}
+                        onOk={handleOk}
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                        onCancel={handleCancel}>
+                        <p>Are you sure you want to submit?</p>
+                    </Modal>
+                </Form>))
             ) : (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                     {/* <Spin size="large" /> */}
@@ -3297,7 +3322,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} network={network} Account_Number={selectedRow?.Account_Number} />
                 </Drawer>
             )}
-        </Drawer>
+        </Modal>
     );
 };
 

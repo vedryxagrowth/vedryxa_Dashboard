@@ -57,7 +57,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
+const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
     // console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -210,6 +210,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                 const firstColumnValue = params.node.key;  // campaign name
                 // const campaignName = params.node.key;
                 const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+                const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
 
                 let campaignid, adsetid, adid;
 
@@ -252,7 +253,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                 };
 
                 const getCommentForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === adName);
                     return relatedComment ? relatedComment.comment : null;
                 };
 
@@ -265,6 +266,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                 const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
+                console.log("relatedComment:", relatedComment);
                 const valueWithCount = `${firstColumnValue}`;
                 // console.log(editUserANdTime);
 
@@ -691,7 +693,24 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                         )} */}
                         {relatedComment && (
                             <Tooltip
-                                title={relatedComment || 'No comment available'}
+                                // title={relatedComment || 'No comment available'}
+                                title={
+                                    <div>
+                                      <div>{relatedComment || 'No comment available'}</div>
+                                      <div>
+                                        {editUserANdTime
+                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                                          : ""}
+                                      </div>
+                                    </div>
+                                }
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
                             >
                                 <MessageOutlined
                                     className={theme === "dark" ? "black-icon-comment" : 'Message'}
@@ -708,7 +727,16 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                         {!relatedComment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
                         )}
-                        <Tooltip title={tooltipText}>
+                        <Tooltip 
+                            title={tooltipText}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <CopyOutlined
                                 onClick={copyToClipboard}
                                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
@@ -721,7 +749,16 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
                         />
-                        <Tooltip title={valueWithCount}>
+                        <Tooltip 
+                            title={valueWithCount}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',   
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}
+                        >
                             <span
                                 // onClick={() => {
                                 //     const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -815,6 +852,45 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
             .map(item => parseInt(item.updatedHour.split(":")[0], 10));
         return hours.length > 0 ? Math.max(...hours) : null;
     }
+
+    const adStatusMap = useMemo(() => {
+        const map = new Map();
+      
+        campaignComments.forEach(doc => {
+          if (!doc?.campaignid) return;
+      
+          const processAdset = (adset) => {
+            if (!adset?.adset_id) return;
+      
+            const adLevelList = Array.isArray(doc.AdLevel)
+              ? doc.AdLevel
+              : doc.AdLevel && typeof doc.AdLevel === 'object'
+                ? [doc.AdLevel]
+                : [];
+      
+            adLevelList.forEach(ad => {
+              if (!ad?.ad_id || ad.adset_id !== adset.adset_id) return;
+              const key = `${doc.campaignid}_${ad.adset_id}_${ad.ad_id}`;
+              map.set(key, (ad.status || '').toUpperCase());
+            });
+          };
+      
+          if (Array.isArray(doc.AdsetLevel)) {
+            doc.AdsetLevel.forEach(processAdset);
+          } else if (doc.AdsetLevel && typeof doc.AdsetLevel === 'object') {
+            processAdset(doc.AdsetLevel);
+          }
+        });
+      
+        return map;
+    }, [campaignComments]);
+      
+
+    const getAdStatus = (campaignId, adsetId, adId) => {
+        const key = `${campaignId}_${adsetId}_${adId}`;
+        return adStatusMap.get(key); // returns "ACTIVE" | "PAUSED" | undefined
+    }; 
+
     const functionCall1 = async () => {
        try{
         // console.log(newRevenuePratner);
@@ -924,30 +1000,68 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                 maxHour.current = findMaxHour(mainData);
                 maxNetworkHour.current = getMaxHour(mainData);
             }
+
+            const filteredByStatus =
+            !campaignStatusFilter || campaignStatusFilter.toUpperCase() === 'ALL'
+              ? filteredData
+              : filteredData.filter(item => {
+                  const raw = getAdStatus(item.campaignid, item.adsetid, item.adid);
+                  const status = (raw || 'ACTIVE').toUpperCase();
+                  return status === campaignStatusFilter.toUpperCase();
+                });
+          
+            setRowData(filteredByStatus); // or setAdLevelData if you use a different state
+          
+
             setLiveFixedFooter([
                 {
                     campaignName: 'Total',
                     actions: "",
-                    spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
-                    revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
-                    profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
-                    margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-                    rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
-                    cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
-                    ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
-                    fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
-                    conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
-                    fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-                    roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-                    cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
-                    cpclinkclicks: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length).toFixed(2)),
-                    fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
-                    fblinkclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
-                    impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                    ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                    spend: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                    revenue: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                    profit: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                    margin: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredByStatus?.length).toFixed(2)),
+                    cpl: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredByStatus?.length).toFixed(2)),
+                    ncpl: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredByStatus?.length).toFixed(2)),
+                    fbleads: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                    conversions: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                    fmargin: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    roi: parseFloat(((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    cpc: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredByStatus?.length).toFixed(2)),
+                    cpclinkclicks: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredByStatus?.length).toFixed(2)),
+                    fbclicks: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    fblinkclicks: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
+                    impressions: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                    ctr: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
             ]);
-            setRowData(filteredData);
+
+            // setLiveFixedFooter([
+            //     {
+            //         campaignName: 'Total',
+            //         actions: "",
+            //         spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+            //         revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+            //         profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+            //         margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+            //         rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
+            //         cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
+            //         ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
+            //         fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+            //         conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+            //         fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            //         roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            //         cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
+            //         cpclinkclicks: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length).toFixed(2)),
+            //         fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            //         fblinkclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
+            //         impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            //         ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+            //     }
+            // ]);
+            // setRowData(filteredData);
+
             console.log(filteredData, "filteredData");
             newRowData.current = filteredData;
             fetchData.status === 200 && console.log("Success") ;
@@ -1203,6 +1317,10 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
             // oneTimeFetch.current = false;
         // }
     }, [selectedAdsets, selectedCampaigns]);
+
+      useEffect(() => {
+        functionCall1();
+    }, [campaignStatusFilter, campaignComments]);
 
     useEffect(() => {
         if (refreshpage === "Refresh13") {
@@ -1656,8 +1774,8 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                     onCellClicked={onCellClickedLive}
                                     pagination={true}
-                                    paginationPageSize={100}
-                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                    paginationPageSize={200}
+                                    paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                                     suppressAggFuncInHeader={true}
                                     getMainMenuItems={getMainMenuItems}
 

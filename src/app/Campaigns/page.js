@@ -1,46 +1,102 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider, Skeleton } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined, DeleteOutlined, DownOutlined, DollarOutlined } from "@ant-design/icons";
-import CreateCampaignDrawer from './camp-components/create_camapaign';
-import CreateDraft from './camp-components/CreateDraft';
-import EditAllLevelDataDrawer from './camp-components/EditAllLevelData';
-import ViewDrawer from './camp-components/view-campaign';
+"use client";
+import React, { useState, useEffect } from "react";
+import {
+  FilterOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
+} from "@ant-design/icons";
+import {
+  Table,
+  Tag,
+  Button,
+  Col,
+  Card,
+  Drawer,
+  Dropdown,
+  Flex,
+  Input,
+  Row,
+  Select,
+  Spin,
+  Menu,
+  Space,
+  Modal,
+  message,
+  Switch,
+  Tooltip,
+  ConfigProvider,
+  Skeleton,
+  Tabs,
+} from "antd";
+import {
+  EditOutlined,
+  EyeOutlined,
+  SearchOutlined,
+  CloseOutlined,
+  SwapRightOutlined,
+  PlusOutlined,
+  CopyOutlined,
+  ExclamationCircleFilled,
+  ReloadOutlined,
+  LinkOutlined,
+  InfoCircleOutlined,
+  DeleteOutlined,
+  DownOutlined,
+  DollarOutlined,
+} from "@ant-design/icons";
+import CreateCampaignDrawer from "./camp-components/create_camapaign";
+import CreateDraft from "./camp-components/CreateDraft";
+import EditAllLevelDataDrawer from "./camp-components/EditAllLevelData";
+import ViewDrawer from "./camp-components/view-campaign";
+import EditMultipleAdsetCampaignDrawer from "./camp-components/editMultipleAdsetCampaign";
 // import EditOnlyCampaignDrawer from './camp-components/EditCamp';
-import EditCampaignDrawer1 from './camp-components/EditCamp';
-import axios from 'axios';
-import EditCampaignDrawer from './camp-components/edit-campaign';
-import { useTokenContext } from '../components/parent';
-import Adsets from './camp-components/Adsets';
-import Editcampaign from './camp-components/EditCampaign';
-import Editcam from './camp-components/EditCampaign';
-import DuplicateCampaignDrawer from './camp-components/Dupcampaign';
-import { redirect } from 'next/navigation';
-import ExpandedRowContent from './camp-components/expandcreatives';
-import moment from 'moment-timezone';
-import dayjs from 'dayjs';
-import { DatePicker } from 'antd';
+import EditCampaignDrawer1 from "./camp-components/EditCamp";
+import axios from "axios";
+import EditCampaignDrawer from "./camp-components/edit-campaign";
+import { useTokenContext } from "../components/parent";
+import Adsets from "./camp-components/Adsets";
+import Editcampaign from "./camp-components/EditCampaign";
+import Editcam from "./camp-components/EditCampaign";
+import DuplicateCampaignDrawer from "./camp-components/Dupcampaign";
+import { redirect } from "next/navigation";
+import ExpandedRowContent from "./camp-components/expandcreatives";
+import ExpandedAdsetsContent from "./camp-components/expandcreativesformultipleadsets";
+import moment from "moment-timezone";
+import dayjs from "dayjs";
+import { DatePicker } from "antd";
+import StickyBox from "react-sticky-box";
+import { FaClone, FaEye, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
 
 const App = () => {
   const { userdetails } = useTokenContext();
-  console.log("useTokenContext", userdetails)
+  console.log("useTokenContext", userdetails);
 
   if (!userdetails?.adAccounts) {
-    return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      {/* <Flex align="center" gap="middle">
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {/* <Flex align="center" gap="middle">
                 <Spin size="large" />
             </Flex> */}
-      <div style={{ padding: '24px' }}>
-        <Skeleton active paragraph={{ rows: 20 }} />
+        <div style={{ padding: "24px" }}>
+          <Skeleton active paragraph={{ rows: 20 }} />
+        </div>
       </div>
-    </div>;
+    );
   }
   if (userdetails?.role === "Revenue_Partner") {
     redirect("/Dashboard");
   }
-
+  const [hovered, setHovered] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationSize, setPaginationSize] = useState(10);
   const [searchInput, setSearchInput] = useState("");
@@ -52,21 +108,26 @@ const App = () => {
   const [campaignData, setCampaignData] = useState([]);
   const [viewDrawerVisible, setViewDrawerVisible] = useState(false);
   const [editOnlyDrawerVisible, setEditOnlyDrawerVisible] = useState(false);
-  const [viewEditAllLevelDataDrawerVisible, setViewEditAllLevelDataDrawerVisible] = useState(false);
+  const [
+    viewEditAllLevelDataDrawerVisible,
+    setViewEditAllLevelDataDrawerVisible,
+  ] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [selectedOnlyEditData, setSelectedOnlyEditData] = useState(null);
-  const [selectedEditAllLevelData, setSelectedEditAllLevelData] = useState(null);
+  const [selectedEditAllLevelData, setSelectedEditAllLevelData] =
+    useState(null);
   const [viewEditDrawerVisible, setViewEditDrawerVisible] = useState(false);
   const [selectedEditRowData, setSelectedEditRowData] = useState(null);
-  const [EditcamapaignDrawerVisible, setEditcamapaignDrawerVisible] = useState(false);
+  const [EditcamapaignDrawerVisible, setEditcamapaignDrawerVisible] =
+    useState(false);
   const [selectedEditCampaign, setselectedEditCampaign] = useState(null);
   const [loading, setLoading] = useState(false);
   const [draftsLoading, setDraftsLoading] = useState(true);
   const [draftsData, setDraftsData] = useState([]);
   const [adsetsdrawerVisible, setadsetsDrawerVisible] = useState(false);
-  const [adsetcampaigndata, setadsetcampaigndata] = useState(null)
-  const [duplicatenewcampaigns, setduplicatenewcampaigns] = useState(null)
-  const [refrst, setRefrst] = useState(false)
+  const [adsetcampaigndata, setadsetcampaigndata] = useState(null);
+  const [duplicatenewcampaigns, setduplicatenewcampaigns] = useState(null);
+  const [refrst, setRefrst] = useState(false);
   const [options, setOptions] = useState([]);
   const [createcamselectedacc, setcreatecamselectedacc] = useState("");
   const [selectedKey, setSelectedKey] = useState(null);
@@ -75,17 +136,62 @@ const App = () => {
   const [error, setError] = useState(false);
   const { theme } = useTokenContext();
   const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
-  const yesterday = dayjs().subtract(0, 'day').format('YYYY-MM-DD');
+  const yesterday = dayjs().subtract(0, "day").format("YYYY-MM-DD");
   const [startDate, setStartDate] = useState(yesterday);
   const [endDate, setEndDate] = useState(yesterday);
-  const [selected, setSelected] = useState('Choose Option');
+  const [selected, setSelected] = useState("Choose Option");
   const [deleteDraftId, setDeleteDraftId] = useState("");
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedDraftToEdit, setSelecetedDraftToEdit] = useState({});
+  const [multipleAdsetCampaignData, setMultipleAdsetCampaignData] = useState(
+    []
+  );
+  const [activeTab, setActiveTab] = useState("1");
+  const [campaignStatusFilter, setCampaignStatusFilter] = useState("all");
+  const [selectedEditMultipleAdsetData, setSelectedEditMultipleAdsetData] =
+    useState(null);
+  const [
+    viewEditMultipleAdsetDataDrawerVisible,
+    setViewEditMultipleAdsetDataDrawerVisible,
+  ] = useState(false);
+  const [view, setView] = useState(false);
+  const onStatusFilterChange = (key) => {
+    setCampaignStatusFilter(key);
+  };
 
-  const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-  console.log(selectedKey, "selectedKeyselectedKeyselectedKey")
+  const getFilteredSingleCampaigns = () => {
+    return campaignData.filter((campaign) => {
+      if (campaignStatusFilter === "active") {
+        return campaign.Status === "ACTIVE" && campaign.Approval === "Approved";
+      }
+      if (campaignStatusFilter === "pause") {
+        return campaign.Status === "PAUSED" && campaign.Approval === "Approved";
+      }
+      if (campaignStatusFilter === "pending") {
+        return campaign.Approval === "PENDING_APPROVAL";
+      }
+      return true;
+    });
+  };
 
+  const getFilteredMultipleAdsetCampaigns = () => {
+    return multipleAdsetCampaignData.filter((campaign) => {
+      if (campaignStatusFilter === "active") {
+        return campaign.Status === "ACTIVE" && campaign.Approval === "Approved";
+      }
+      if (campaignStatusFilter === "pause") {
+        return campaign.Status === "PAUSED" && campaign.Approval === "Approved";
+      }
+      if (campaignStatusFilter === "pending") {
+        return campaign.Approval === "PENDING_APPROVAL";
+      }
+      return true;
+    });
+  };
+
+  const gridThemeClass =
+    theme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine";
+  console.log(selectedKey, "selectedKeyselectedKeyselectedKey");
 
   // const [selectedAccount, setSelectedAccount] = useState('All');
   const restrictedEmails = [
@@ -98,69 +204,75 @@ const App = () => {
 
   const rangePresets = [
     {
-      label: 'ALL',
-      value: [dayjs().startOf('year'), dayjs()],
+      label: "ALL",
+      value: [dayjs().startOf("year"), dayjs()],
     },
     {
-      label: 'Today',
+      label: "Today",
       value: [dayjs(), dayjs()],
     },
     {
-      label: 'Yesterday',
-      value: [dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')],
+      label: "Yesterday",
+      value: [dayjs().subtract(1, "day"), dayjs().subtract(1, "day")],
     },
     {
-      label: 'Last 7 Days',
-      value: [dayjs().subtract(7, 'day'), dayjs()],
+      label: "Last 7 Days",
+      value: [dayjs().subtract(7, "day"), dayjs()],
     },
     {
-      label: 'Last 14 Days',
-      value: [dayjs().subtract(14, 'day'), dayjs()],
+      label: "Last 14 Days",
+      value: [dayjs().subtract(14, "day"), dayjs()],
     },
     {
-      label: 'Last 30 Days',
-      value: [dayjs().subtract(30, 'day'), dayjs()],
+      label: "Last 30 Days",
+      value: [dayjs().subtract(30, "day"), dayjs()],
     },
     {
-      label: 'Last 60 Days',
-      value: [dayjs().subtract(60, 'day'), dayjs()],
+      label: "Last 60 Days",
+      value: [dayjs().subtract(60, "day"), dayjs()],
     },
     {
-      label: 'Last 90 Days',
-      value: [dayjs().subtract(90, 'day'), dayjs()],
+      label: "Last 90 Days",
+      value: [dayjs().subtract(90, "day"), dayjs()],
     },
     {
-      label: 'This Month',
-      value: [dayjs().startOf('month'), dayjs()],
+      label: "This Month",
+      value: [dayjs().startOf("month"), dayjs()],
     },
     {
-      label: 'Last Month',
-      value: [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')],
+      label: "Last Month",
+      value: [
+        dayjs().subtract(1, "month").startOf("month"),
+        dayjs().subtract(1, "month").endOf("month"),
+      ],
     },
   ];
 
   // Function to disable future dates
   const disabledDate = (current) => {
-    return current && current > dayjs().endOf('day');
+    return current && current > dayjs().endOf("day");
   };
 
-
+  const handleTabChange = (key) => {
+    // console.log("Switched to Tab:", key); // Debugging log
+    setActiveTab(key);
+  };
 
   // Function to handle click on campaign name
   const handleCampaignNameClick = (record) => {
-    setadsetcampaigndata(record)
-    console.log(record, "adsets data")
+    setadsetcampaigndata(record);
+    console.log(record, "adsets data");
     setadsetsDrawerVisible(true);
   };
 
   const changeRRefrst = () => {
     // alert("hey rerendering")
-    setRefrst((els) => !els)
-  }
+    setRefrst((els) => !els);
+  };
 
   const changeDraftRefresh = () => {
     setDraftsLoading(true);
-  }
+  };
 
   // console.log("localStorage", localStorage.getItem("token"))
   // var token = localStorage.getItem("token");
@@ -172,7 +284,7 @@ const App = () => {
   };
 
   const handleEditOnlyClick = (record) => {
-    console.log(record, "viewdata campaign")
+    console.log(record, "viewdata campaign");
     setSelectedOnlyEditData(record);
     setEditOnlyDrawerVisible(true);
   };
@@ -181,7 +293,7 @@ const App = () => {
     // console.log(record, "viewdata campaign")
     setSelectedEditAllLevelData(record);
     setViewEditAllLevelDataDrawerVisible(true);
-  }
+  };
   // const handleEditClick = (record) => {
   //     console.log(record, "Editdata")
   //     setSelectedEditRowData(record);
@@ -192,7 +304,73 @@ const App = () => {
   //     setselectedEditCampaign(record);
   //     setEditcamapaignDrawerVisible(true);
   // }
+  const items = [
+    { key: "1", label: "Old", content: "Content for Live data" },
+    { key: "2", label: "New", content: "Content for Daily data" },
+  ];
 
+  const handleCarouselChange = (index) => {
+    setActiveTab(index);
+  };
+
+  const renderCarouselNav = () => (
+    <StickyBox
+      offsetTop={64}
+      offsetBottom={20}
+      style={{
+        zIndex: 1,
+        padding: "10px",
+        marginBottom: '5px',
+        marginLeft: "5px",
+        paddingLeft: "5px",
+        borderRadius: 12,
+        // backgroundColor: theme === "dark" ? "#1E1E1E" : "#e6e6e6",
+        padding: 3,
+        //   boxShadow:
+        //     theme === "dark"
+        //       ? "0 1px 3px rgba(0,0,0,0.6)"
+        //       : "0 1px 6px rgba(0,0,0,0.08)",
+      }}
+    >
+      <Tabs
+        activeKey={activeTab}
+        onChange={handleCarouselChange}
+        items={items.map((item) => ({
+          key: item.key,
+          // label: item.label,
+          label: (
+            <Tooltip
+              title={item.key === '1' ? 'Campaigns Before 11-08-2025' : 'Campaigns After 11-08-2025'}
+              placement="top"
+              overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+                color: theme === 'dark' ? '#ffffff' : '#000000',
+                borderRadius: 6,
+                padding: '6px 10px',
+                fontSize: '14px',
+              }}
+            >
+              <span>{item.label}</span>
+            </Tooltip>
+          ),
+        }))}
+        className={`left-pill-tabs ${theme === 'dark' ? 'pill-tabs-dark' : 'pill-tabs-light'}`}
+        style={{
+          backgroundColor: 'transparent',
+          padding: '0',
+          marginBottom: '0',
+        }}
+        tabBarStyle={{
+          fontSize: '12px',
+          padding: '0',
+          height: '30px',
+          lineHeight: '30px',
+          marginBottom: '-1px',
+          borderBottom: 'none',
+        }}
+      />
+    </StickyBox>
+  );
 
   const showDrawer = () => {
     setDrawerVisible(true);
@@ -201,23 +379,26 @@ const App = () => {
   const showCreateNewDraftDrawer = () => {
     setCreateNewDraft(true);
     setSelecetedDraftToEdit({}); // Reset selected draft to edit
-  }
+  };
 
   const onCloseDrawer = () => {
     setDrawerVisible(false);
     setadsetsDrawerVisible(false);
-    setEditcamapaignDrawerVisible(false)
-    setdupDrawerVisible(false)
+    setEditcamapaignDrawerVisible(false);
+    setdupDrawerVisible(false);
     setViewEditAllLevelDataDrawerVisible(false);
     setCreateNewDraft(false);
+    setViewEditMultipleAdsetDataDrawerVisible(false);
   };
 
   useEffect(() => {
     if (userdetails?.adAccounts) {
-      const adAccountOptions = Object.keys(userdetails?.adAccounts).map(key => ({
-        value: key,
-        label: key
-      }));
+      const adAccountOptions = Object.keys(userdetails?.adAccounts).map(
+        (key) => ({
+          value: key,
+          label: key,
+        })
+      );
       setOptions(adAccountOptions);
     }
   }, []);
@@ -237,13 +418,15 @@ const App = () => {
   useEffect(() => {
     if (selectedKey && userdetails?.adAccounts) {
       // Mapping over the accounts based on the selected key
-      const accountNumbers = userdetails.adAccounts[selectedKey]?.map(account => ({
-        value: account.accountNumber,  // Set value as accountNumber
-        label: account.accountNumber,  // Set label as accountNumber
-        accountName: account.accountName,     // Include accountName for conditional rendering
-        status: account.status
-      }));
-      setValueOptions(accountNumbers);  // Update valueOptions with account numbers
+      const accountNumbers = userdetails.adAccounts[selectedKey]?.map(
+        (account) => ({
+          value: account.accountNumber, // Set value as accountNumber
+          label: account.accountNumber, // Set label as accountNumber
+          accountName: account.accountName, // Include accountName for conditional rendering
+          status: account.status,
+        })
+      );
+      setValueOptions(accountNumbers); // Update valueOptions with account numbers
     } else {
       setValueOptions([]);
     }
@@ -276,13 +459,19 @@ const App = () => {
   //         setLoading(false);
   //     }
   // };
-  const fetchData = async (accountNumber = null, start = startDate, end = endDate, search = "") => {
+  const fetchData = async (
+    accountNumber = null,
+    start = startDate,
+    end = endDate,
+    search = ""
+  ) => {
     setLoading(true);
     setError(null);
     try {
       // Construct URL with optional startDate and endDate
       //https://www.testapi.adsgoat.in
       let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+
       if (start && end) {
         url += `&startDate=${start}&endDate=${end}`;
       }
@@ -293,17 +482,23 @@ const App = () => {
 
       const response = await axios.get(url, {
         headers: {
-          'Authorization': localStorage.getItem("token"),
-        }
+          Authorization: localStorage.getItem("token"),
+        },
       });
       const allCampaigns = response?.data;
 
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
-        ? allCampaigns.filter(campaign => campaign.Account_Number === accountNumber)
-        : allCampaigns.filter(campaign => userdetails?.adAccounts[selectedKey]?.includes(campaign.Account_Number));
+        ? allCampaigns.filter(
+          (campaign) => campaign.Account_Number === accountNumber
+        )
+        : allCampaigns.filter((campaign) =>
+          userdetails?.adAccounts[selectedKey]?.includes(
+            campaign.Account_Number
+          )
+        );
 
-      setcreatecamselectedacc(accountNumber)
+      setcreatecamselectedacc(accountNumber);
 
       setCampaignData(filteredCampaignData);
     } catch (error) {
@@ -314,17 +509,69 @@ const App = () => {
     }
   };
 
-  const fetchDrafts = async () => {
+  const fetchMultipleAdsetCampaigns = async (
+    accountNumber = null,
+    start = startDate,
+    end = endDate,
+    search = ""
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Construct URL with optional startDate and endDate
+      //https://www.testapi.adsgoat.in
+      // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      let url = `https://www.testapi.adsgoat.in/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      if (start && end) {
+        url += `&startDate=${start}&endDate=${end}`;
+      }
+      if (search) {
+        url += `&searchInput=${search}`; // Append search input if provided
+      }
+      console.log("Fetching data from URL:", url);
 
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      });
+      const allCampaigns = response?.data;
+
+      // Filter campaigns based on selected value && accountNumber !== 'All'
+      const filteredCampaignData = accountNumber
+        ? allCampaigns.filter(
+          (campaign) => campaign.Account_Number === accountNumber
+        )
+        : allCampaigns.filter((campaign) =>
+          userdetails?.adAccounts[selectedKey]?.includes(
+            campaign.Account_Number
+          )
+        );
+
+      setcreatecamselectedacc(accountNumber);
+
+      setMultipleAdsetCampaignData(filteredCampaignData);
+    } catch (error) {
+      console.error("Error fetching campaign data:", error);
+      setError("Failed to fetch campaign data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDrafts = async () => {
     setDraftsLoading(true);
     // setError(null);
     try {
       //https://www.testapi.adsgoat.in
-      const response = await axios.get(`https://www.testapi.adsgoat.in/api/drafts?email=${userdetails?.email}`, {
-        headers: {
-          'Authorization': localStorage.getItem("token"),
+      const response = await axios.get(
+        `https://www.testapi.adsgoat.in/api/drafts?email=${userdetails?.email}`,
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
         }
-      });
+      );
       const allDrafts = response?.data;
 
       // Filter drafts based on selected value && accountNumber !== 'All'
@@ -337,21 +584,28 @@ const App = () => {
     } finally {
       setDraftsLoading(false);
     }
-  }
+  };
 
   // Handle date range change
   const handleChange = (dates) => {
     if (dates && dates.length === 2) {
       const [start, end] = dates;
-      const formattedStart = start.format('YYYY-MM-DD');
-      const formattedEnd = end.format('YYYY-MM-DD');
+      // const formattedStart = start.format("YYYY-MM-DD");
+      // const formattedEnd = end.format("YYYY-MM-DD");
 
-      setStartDate(formattedStart);
-      setEndDate(formattedEnd);
+      // setStartDate(formattedStart);
+      // setEndDate(formattedEnd);
 
-      if (selectedValue) {
-        fetchData(selectedValue, formattedStart, formattedEnd);
-      }
+      // if (selectedValue) {
+      //   fetchData(selectedValue, formattedStart, formattedEnd);
+      //   fetchMultipleAdsetCampaigns(
+      //     selectedValue,
+      //     formattedStart,
+      //     formattedEnd
+      //   );
+      // }
+      setStartDate(start.format('YYYY-MM-DD'));
+      setEndDate(end.format('YYYY-MM-DD'));
     }
   };
   // Handle key change
@@ -364,7 +618,16 @@ const App = () => {
   // Handle value change
   const handleValueChange = (value) => {
     setSelectedValue(value);
-    fetchData(value); // Fetch data based on selected value
+    // fetchData(value); // Fetch data based on selected value
+    // fetchMultipleAdsetCampaigns(value); // Fetch multiple adset campaigns based on selected value
+  };
+  const handleApply = () => {
+    if (selectedValue && startDate && endDate) {
+      fetchData(selectedValue, startDate, endDate);
+      fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+    } else {
+      message.warning('Please select project, account and date range');
+    }
   };
 
   useEffect(() => {
@@ -372,6 +635,13 @@ const App = () => {
       fetchData(selectedValue);
     }
   }, [refrst, selectedValue]);
+
+  useEffect(() => {
+    if (selectedValue) {
+      fetchMultipleAdsetCampaigns(selectedValue);
+    }
+  }, [refrst, selectedValue]);
+
   useEffect(() => {
     if (draftsLoading) {
       fetchDrafts();
@@ -380,6 +650,7 @@ const App = () => {
   const handleRefresh = () => {
     if (selectedValue) {
       fetchData(selectedValue);
+      fetchMultipleAdsetCampaigns(selectedValue);
     } // This will re-fetch the data or update the component
   };
   useEffect(() => {
@@ -394,9 +665,9 @@ const App = () => {
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -410,7 +681,13 @@ const App = () => {
     console.log("Search Input:", searchValue);
     if (!searchValue) {
       setSendInputToApi("");
-      fetchData(selectedValue, startDate, endDate, searchValue)
+      fetchData(selectedValue, startDate, endDate, searchValue);
+      fetchMultipleAdsetCampaigns(
+        selectedValue,
+        startDate,
+        endDate,
+        searchValue
+      );
       console.log("Search Input is empty, resetting filtered data");
     }
     // const filtered = campaignData.filter((item) =>
@@ -423,35 +700,44 @@ const App = () => {
   const handleSearchSubmit = () => {
     setSendInputToApi(searchInput);
     fetchData(selectedValue, startDate, endDate, searchInput); // Fetch data with search input
+    fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate, searchInput); // Fetch multiple adset campaigns with search input
     console.log("Search Input:", searchInput);
     console.log("Selected Input:", searchInput.length);
-  }
-
+  };
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [useaproval, setuseraproval] = useState(null)
+  const [useaproval, setuseraproval] = useState(null);
+  const [isModalVisibleForAdsets, setIsModalVisibleForAdsets] = useState(false);
+  const [useaprovalForAdsets, setuseraprovalForAdsets] = useState(null);
 
   const handleUpdateApproval = async (id, newApprovalValue) => {
     try {
-      const response = await fetch(`https://www.testapi.adsgoat.in/api/updateApproval/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem("token"),
-        },
-        body: JSON.stringify({
-          Approval: newApprovalValue,   // New approval value
-          Approved: userdetails?.userName,  // Username of the person who approved it
-          datetime: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm [IST]') // Current datetime in IST
-        }),
-      });
+      const response = await fetch(
+        `https://www.testapi.adsgoat.in/api/updateApproval/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("token"),
+          },
+          body: JSON.stringify({
+            Approval: newApprovalValue, // New approval value
+            Approved: userdetails?.userName, // Username of the person who approved it
+            datetime: moment()
+              .tz("Asia/Kolkata")
+              .format("YYYY-MM-DD HH:mm [IST]"), // Current datetime in IST
+          }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        setCampaignData(prevData =>
-          prevData.map(record =>
-            record.identifier === id ? { ...record, Approval: newApprovalValue } : record
+        setCampaignData((prevData) =>
+          prevData.map((record) =>
+            record.identifier === id
+              ? { ...record, Approval: newApprovalValue }
+              : record
           )
         );
 
@@ -462,53 +748,128 @@ const App = () => {
         //     window.location.reload();
         // }, 2000);
       } else {
-        console.error('Failed to update approval');
+        console.error("Failed to update approval");
         // Handle failure
       }
     } catch (error) {
-      console.error('Error updating approval:', error);
+      console.error("Error updating approval:", error);
+      // Handle error
+    }
+  };
+
+  const handleUpdateApprovalForAdsets = async (id, newApprovalValue) => {
+    try {
+      //https://www.testapi.adsgoat.in
+      const response = await fetch(
+        `https://www.testapi.adsgoat.in/api/newupdateApproval/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("token"),
+          },
+          body: JSON.stringify({
+            Approval: newApprovalValue, // New approval value
+            Approved: userdetails?.userName, // Username of the person who approved it
+            datetime: moment()
+              .tz("Asia/Kolkata")
+              .format("YYYY-MM-DD HH:mm [IST]"), // Current datetime in IST
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setCampaignData((prevData) =>
+          prevData.map((record) =>
+            record.identifier === id
+              ? { ...record, Approval: newApprovalValue }
+              : record
+          )
+        );
+
+        message.success("Approval confirmed");
+        setIsModalVisible(false); // Close modal after updating
+        changeRRefrst();
+        // setTimeout(() => {
+        //     window.location.reload();
+        // }, 2000);
+      } else {
+        console.error("Failed to update approval");
+        // Handle failure
+      }
+    } catch (error) {
+      console.error("Error updating approval:", error);
       // Handle error
     }
   };
 
   const handleApproval = (record) => {
-    console.log(record, "record")
-    setuseraproval(record)
+    console.log(record, "record");
+    setuseraproval(record);
     setIsModalVisible(true);
   };
 
-  const handleOk = async () => {
+  const handleApprovalforAdsets = (record) => {
+    console.log(record, "record");
+    setuseraprovalForAdsets(record);
+    setIsModalVisibleForAdsets(true);
+  };
 
+  const handleOk = async () => {
     try {
       // Call the handleUpdateApproval function with the appropriate parameters
       await handleUpdateApproval(useaproval.identifier, "Approved");
       // Log the message to the console
-      console.log('Approval confirmed');
+      console.log("Approval confirmed");
       // Close the modal
       setIsModalVisible(false);
     } catch (error) {
-      console.error('Error updating approval:', error);
+      console.error("Error updating approval:", error);
+      // Handle error
+    }
+  };
+
+  const handleOkForAdsets = async () => {
+    try {
+      // Call the handleUpdateApproval function with the appropriate parameters
+      await handleUpdateApprovalForAdsets(
+        useaprovalForAdsets.identifier,
+        "Approved"
+      );
+      // Log the message to the console
+      console.log("Approval confirmed");
+      // Close the modal
+      setIsModalVisibleForAdsets(false);
+    } catch (error) {
+      console.error("Error updating approval:", error);
       // Handle error
     }
   };
 
   const handleOkDeleteDraft = async () => {
     try {
-      const response = await axios.delete(`https://www.testapi.adsgoat.in/api/drafts/${encodeURIComponent(userdetails.email)}/${deleteDraftId}`, {
-        headers: {
-          'Authorization': localStorage.getItem("token"),
+      const response = await axios.delete(
+        `https://www.testapi.adsgoat.in/api/drafts/${encodeURIComponent(
+          userdetails.email
+        )}/${deleteDraftId}`,
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
         }
-      });
+      );
       if (response.status === 200) {
         message.success("Draft deleted successfully");
         setDeleteModalVisible(false);
         changeDraftRefresh();
       }
     } catch (error) {
-      console.error('Error deleting draft:', error);
+      console.error("Error deleting draft:", error);
       message.error("Failed to delete draft");
     }
-  }
+  };
 
   const handleCancel = () => {
     setIsModalVisible(false);
@@ -516,97 +877,225 @@ const App = () => {
   const onToggleStatus = async (record, checked) => {
     try {
       const token = localStorage.getItem("token");
-      console.log('Token:', token);
+      console.log("Token:", token);
 
       // Update status on your backend
-      const backendResponse = await fetch(`https://www.testapi.adsgoat.in/api/status/${record?.identifier}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token,
-        },
-        body: JSON.stringify({ Status: checked ? 'ACTIVE' : 'PAUSED' }),
-      });
+      const backendResponse = await fetch(
+        `https://www.testapi.adsgoat.in/api/status/${record?.identifier}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify({ Status: checked ? "ACTIVE" : "PAUSED" }),
+        }
+      );
 
       const responseData = await backendResponse.json();
-      setCampaignData(prevCampaigns =>
-        prevCampaigns.map(campaign =>
+      setCampaignData((prevCampaigns) =>
+        prevCampaigns.map((campaign) =>
           campaign.identifier === record.identifier
-            ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+            ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
             : campaign
         )
       );
-      console.log('Backend response status:', backendResponse.status);
-      console.log('Backend response data:', responseData);
+      console.log("Backend response status:", backendResponse.status);
+      console.log("Backend response data:", responseData);
 
       if (backendResponse.ok) {
         // If campaignId is available, update the Facebook campaign status
         if (record.campaignid) {
-
           try {
             const fbResponse = await axios.post(
               `https://graph.facebook.com/v22.0/${record.campaignid}`,
               null,
               {
                 params: {
-                  status: checked ? 'ACTIVE' : 'PAUSED',
+                  status: checked ? "ACTIVE" : "PAUSED",
                   access_token: record.access_token,
                 },
                 headers: {
-                  'Content-Type': 'application/json',
-                }
+                  "Content-Type": "application/json",
+                },
               }
             );
 
-            console.log('Facebook API response:', fbResponse.data);
+            console.log("Facebook API response:", fbResponse.data);
 
             if (fbResponse.status === 200) {
               if (fbResponse.data?.success === true) {
-                var mains = "Launched"
+                var mains = "Launched";
               } else {
-                var mains = "PAUSE"
+                var mains = "PAUSE";
               }
-              message.success(`Campaign ${checked ? 'Launched' : 'Paused'} Successfully`);
+              message.success(
+                `Campaign ${checked ? "Launched" : "Paused"} Successfully`
+              );
 
               // Update the state to reflect the change in UI
-              setCampaignData(prevCampaigns =>
-                prevCampaigns.map(campaign =>
+              setCampaignData((prevCampaigns) =>
+                prevCampaigns.map((campaign) =>
                   campaign.identifier === record.identifier
-                    ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+                    ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
                     : campaign
                 )
               );
             } else {
-              console.error('Failed to update facebook status:', fbResponse.data);
-              message.error(`Failed to update facebook status: ${fbResponse.data.error.message}`);
+              console.error(
+                "Failed to update facebook status:",
+                fbResponse.data
+              );
+              message.error(
+                `Failed to update facebook status: ${fbResponse.data.error.message}`
+              );
             }
           } catch (fbError) {
-            console.error('Error updating facebook status:', fbError);
-            message.error(`Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message}`);
+            console.error("Error updating facebook status:", fbError);
+            message.error(
+              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
+              }`
+            );
           }
         } else {
           // If no campaignId is available, only update the backend
           message.success("Campaign launched successfully");
 
           // Update the state to reflect the change in UI
-          setCampaignData(prevCampaigns =>
-            prevCampaigns.map(campaign =>
+          setCampaignData((prevCampaigns) =>
+            prevCampaigns.map((campaign) =>
               campaign.identifier === record.identifier
-                ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+                ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
                 : campaign
             )
           );
         }
       } else {
-        console.error('Failed to update backend status:', responseData);
-        message.error(`Failed to update status: ${responseData.message || 'Unknown error'}`);
+        console.error("Failed to update backend status:", responseData);
+        message.error(
+          `Failed to update status: ${responseData.message || "Unknown error"}`
+        );
       }
     } catch (error) {
-      console.error('Error updating status:', error);
+      console.error("Error updating status:", error);
       message.error("Error updating status");
     }
   };
-  const EditableField = ({ value, record, dataIndex, updateTableRow, changeRRefrst }) => {
+
+  const onToggleStatusForMultipleAdsets = async (record, checked) => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token:", token);
+
+      // Update status on your backend https://www.testapi.adsgoat.in
+      const backendResponse = await fetch(
+        `https://www.testapi.adsgoat.in/api/newstatus/${record?.identifier}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify({ Status: checked ? "ACTIVE" : "PAUSED" }),
+        }
+      );
+
+      const responseData = await backendResponse.json();
+      setMultipleAdsetCampaignData((prevCampaigns) =>
+        prevCampaigns.map((campaign) =>
+          campaign.identifier === record.identifier
+            ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
+            : campaign
+        )
+      );
+      console.log("Backend response status:", backendResponse.status);
+      console.log("Backend response data:", responseData);
+
+      if (backendResponse.ok) {
+        // If campaignId is available, update the Facebook campaign status
+        if (record.campaignid) {
+          try {
+            const fbResponse = await axios.post(
+              `https://graph.facebook.com/v22.0/${record.campaignid}`,
+              null,
+              {
+                params: {
+                  status: checked ? "ACTIVE" : "PAUSED",
+                  access_token: record.access_token,
+                },
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            console.log("Facebook API response:", fbResponse.data);
+
+            if (fbResponse.status === 200) {
+              if (fbResponse.data?.success === true) {
+                var mains = "Launched";
+              } else {
+                var mains = "PAUSE";
+              }
+              message.success(
+                `Campaign ${checked ? "Launched" : "Paused"} Successfully`
+              );
+
+              // Update the state to reflect the change in UI
+              setCampaignData((prevCampaigns) =>
+                prevCampaigns.map((campaign) =>
+                  campaign.identifier === record.identifier
+                    ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
+                    : campaign
+                )
+              );
+            } else {
+              console.error(
+                "Failed to update facebook status:",
+                fbResponse.data
+              );
+              message.error(
+                `Failed to update facebook status: ${fbResponse.data.error.message}`
+              );
+            }
+          } catch (fbError) {
+            console.error("Error updating facebook status:", fbError);
+            message.error(
+              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
+              }`
+            );
+          }
+        } else {
+          // If no campaignId is available, only update the backend
+          message.success("Campaign launched successfully");
+
+          // Update the state to reflect the change in UI
+          setCampaignData((prevCampaigns) =>
+            prevCampaigns.map((campaign) =>
+              campaign.identifier === record.identifier
+                ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
+                : campaign
+            )
+          );
+        }
+      } else {
+        console.error("Failed to update backend status:", responseData);
+        message.error(
+          `Failed to update status: ${responseData.message || "Unknown error"}`
+        );
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      message.error("Error updating status");
+    }
+  };
+  const EditableFieldForMultpleAdsets = ({
+    value,
+    record,
+    dataIndex,
+    updateTableRow,
+    changeRRefrst,
+  }) => {
     const [editing, setEditing] = useState(false);
     const [inputValue, setInputValue] = useState(value);
 
@@ -623,15 +1112,18 @@ const App = () => {
         try {
           const budgets = inputValue * 100; // Convert input value to the required format (cents)
 
-          // Step 1: Update the daily budget in your backend
-          const response = await fetch(`https://www.testapi.adsgoat.in/api/dailyBudget/${record?.identifier}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': localStorage.getItem("token"),
-            },
-            body: JSON.stringify({ Daily_amount: budgets }),
-          });
+          // Step 1: Update the daily budget in your backend https://www.testapi.adsgoat.in
+          const response = await fetch(
+            `https://www.testapi.adsgoat.in/api/newdailyBudget/${record?.identifier}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: localStorage.getItem("token"),
+              },
+              body: JSON.stringify({ Daily_amount: budgets }),
+            }
+          );
 
           if (response.ok) {
             console.log("Daily amount updated successfully in backend");
@@ -648,14 +1140,16 @@ const App = () => {
                       access_token: record.access_token,
                     },
                     headers: {
-                      'Content-Type': 'application/json',
-                    }
+                      "Content-Type": "application/json",
+                    },
                   }
                 );
 
                 if (fbResponse.status === 200) {
                   console.log("Daily budget updated successfully on Facebook");
-                  message.success("Daily amount updated successfully on both backend and Facebook");
+                  message.success(
+                    "Daily amount updated successfully on both backend and Facebook"
+                  );
 
                   // Update the table row data with the new daily amount
                   updateTableRow({ ...record, Daily_amount: budgets });
@@ -667,7 +1161,10 @@ const App = () => {
                   // message.error(`Failed to update daily amount on Facebook: ${fbResponse.data.error.message}`);
                 }
               } catch (fbError) {
-                console.error("Error updating daily amount on Facebook:", fbError);
+                console.error(
+                  "Error updating daily amount on Facebook:",
+                  fbError
+                );
                 // message.error(`Error updating daily amount on Facebook: ${fbError.response?.data?.error?.message || fbError.message}`);
               }
             } else {
@@ -702,26 +1199,171 @@ const App = () => {
             onPressEnter={handleSave}
             onBlur={handleSave}
             autoFocus
-            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+            className={
+              theme === "dark" ? "custom-input-dark" : "custom-input-light"
+            }
           />
         ) : (
-          value !== 0 && value !== '' && (
-            <div onClick={handleEdit} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          value !== 0 &&
+          value !== "" && (
+            <div
+              onClick={handleEdit}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <DollarOutlined className="custom-dollar-icon" />
-              <span style={{ color: '#1890ff' }}>{value}</span>
-              <p style={{ marginLeft: "5px" }}>Daily</p>
+              <span style={{ color: "#1890ff" }}>{value}</span>
+              <span style={{ marginLeft: "5px" }}>Daily</span>
               {/* <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} /> */}
             </div>
           )
         )}
       </div>
+    );
+  };
 
+  const EditableField = ({
+    value,
+    record,
+    dataIndex,
+    updateTableRow,
+    changeRRefrst,
+  }) => {
+    const [editing, setEditing] = useState(false);
+    const [inputValue, setInputValue] = useState(value);
+
+    const handleInputChange = (e) => {
+      setInputValue(e.target.value);
+    };
+
+    const handleEdit = () => {
+      setEditing(true);
+    };
+
+    const handleSave = async () => {
+      if (record && inputValue) {
+        try {
+          const budgets = inputValue * 100; // Convert input value to the required format (cents)
+
+          // Step 1: Update the daily budget in your backend
+          const response = await fetch(
+            `https://www.testapi.adsgoat.in/api/dailyBudget/${record?.identifier}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: localStorage.getItem("token"),
+              },
+              body: JSON.stringify({ Daily_amount: budgets }),
+            }
+          );
+
+          if (response.ok) {
+            console.log("Daily amount updated successfully in backend");
+
+            // Step 2: If campaignId is available, update the budget on Facebook
+            if (record.campaignid) {
+              try {
+                const fbResponse = await axios.post(
+                  `https://graph.facebook.com/v22.0/${record.campaignid}`,
+                  null,
+                  {
+                    params: {
+                      daily_budget: budgets,
+                      access_token: record.access_token,
+                    },
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  }
+                );
+
+                if (fbResponse.status === 200) {
+                  console.log("Daily budget updated successfully on Facebook");
+                  message.success(
+                    "Daily amount updated successfully on both backend and Facebook"
+                  );
+
+                  // Update the table row data with the new daily amount
+                  updateTableRow({ ...record, Daily_amount: budgets });
+
+                  // Trigger a refresh or any other necessary updates
+                  changeRRefrst();
+                } else {
+                  console.error("Failed to update daily amount on Facebook");
+                  // message.error(`Failed to update daily amount on Facebook: ${fbResponse.data.error.message}`);
+                }
+              } catch (fbError) {
+                console.error(
+                  "Error updating daily amount on Facebook:",
+                  fbError
+                );
+                // message.error(`Error updating daily amount on Facebook: ${fbError.response?.data?.error?.message || fbError.message}`);
+              }
+            } else {
+              // If no campaignId, just update the backend
+              message.success("Daily amount updated successfully");
+
+              // Update the table row data with the new daily amount
+              updateTableRow({ ...record, Daily_amount: budgets });
+
+              // Trigger a refresh or any other necessary updates
+              changeRRefrst();
+            }
+          } else {
+            console.error("Failed to update daily amount in backend");
+            message.error("Failed to update daily amount in backend");
+          }
+        } catch (error) {
+          console.error("Error updating daily amount:", error);
+          message.error("Error updating daily amount");
+        }
+      }
+
+      setEditing(false);
+    };
+
+    return (
+      <div>
+        {editing ? (
+          <Input
+            value={inputValue}
+            onChange={handleInputChange}
+            onPressEnter={handleSave}
+            onBlur={handleSave}
+            autoFocus
+            className={
+              theme === "dark" ? "custom-input-dark" : "custom-input-light"
+            }
+          />
+        ) : (
+          value !== 0 &&
+          value !== "" && (
+            <div
+              onClick={handleEdit}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <DollarOutlined className="custom-dollar-icon" />
+              <span style={{ color: "#1890ff" }}>{value}</span>
+              <span style={{ marginLeft: "5px" }}>Daily</span>
+              {/* <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} /> */}
+            </div>
+          )
+        )}
+      </div>
     );
   };
 
   const updateTablebudget = (updatedRecord) => {
-    setCampaignData(prevCampaigns =>
-      prevCampaigns.map(campaign =>
+    setCampaignData((prevCampaigns) =>
+      prevCampaigns.map((campaign) =>
         campaign.identifier === updatedRecord.identifier
           ? { ...campaign, Daily_amount: updatedRecord.Daily_amount }
           : campaign
@@ -729,69 +1371,119 @@ const App = () => {
     );
   };
 
+  const updateTablebudgetforAdsests = (updatedRecord) => {
+    setMultipleAdsetCampaignData((prevCampaigns) =>
+      prevCampaigns.map((campaign) =>
+        campaign.identifier === updatedRecord.identifier
+          ? { ...campaign, Daily_amount: updatedRecord.Daily_amount }
+          : campaign
+      )
+    );
+  };
 
   const duplicatenewcampaign = (record) => {
-    console.log(record, "duplicate camapaign")
+    console.log(record, "duplicate camapaign");
     setDrawerVisible(true);
-    setdupDrawerVisible(true)
-    setduplicatenewcampaigns(record)
-
-  }
+    setdupDrawerVisible(true);
+    setduplicatenewcampaigns(record);
+  };
   const newtworkCollections = {
-    "FB_Mnet": "Facebook_Mnet",
-    "FB_MnetBing": "Facebook_MnetBing",
-    "FB_Enki": "Facebook_Enki",
-    "FB_System1": 'Facebook_System1',
-    "FB_Rsoc": 'Facebook_Rsoc',
-    "FB_Tonic": 'Facebook_Tonic',
-    "FB_DomainActive": "Facebook_DomainActive",
-    "FB_Bodies": "Facebook_Bodies",
-    "FB_Bodies1": "Facebook_Bodies1",
-    "Newsbreak_DA": "Newsbreak_DomainActive"
-  }
+    FB_Mnet: "Facebook_Mnet",
+    FB_MnetBing: "Facebook_MnetBing",
+    FB_Enki: "Facebook_Enki",
+    FB_System1: "Facebook_System1",
+    FB_Rsoc: "Facebook_Rsoc",
+    FB_Tonic: "Facebook_Tonic",
+    FB_DomainActive: "Facebook_DomainActive",
+    FB_Bodies: "Facebook_Bodies",
+    FB_Bodies1: "Facebook_Bodies1",
+    Newsbreak_DA: "Newsbreak_DomainActive",
+  };
+
+  const handleEditClickMultipleAdsetData = (record, status) => {
+    // console.log(record, "viewdata campaign")
+    setSelectedEditMultipleAdsetData(record);
+    setViewEditMultipleAdsetDataDrawerVisible(true);
+    setView(status);
+  };
 
   const columns = [
     {
-      title: 'Status',
-      dataIndex: 'fbstatus',
-      key: 'fbstatus',
+      title: "Status",
+      dataIndex: "fbstatus",
+      key: "fbstatus",
       width: 120,
-      align: 'center',
+      align: "center",
       render: (text, record) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-          {record.fbstatus === 'Live' ? (
-            <CheckCircleFilled style={{ color: 'green', fontSize: 16 }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+          }}
+        >
+          {record.fbstatus === "Live" ? (
+            <CheckCircleFilled
+              style={{ color: "#91C25F", fontSize: 16 }}
+              className="black-icon-active-1"
+            />
           ) : (
-            <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
+            <CloseCircleFilled
+              style={{ color: "#EC7117", fontSize: 16 }}
+              className="black-icon-pause-1"
+            />
           )}
           <Switch
-            checked={record.Status === 'ACTIVE'}
+            checked={record.Status === "ACTIVE"}
             onChange={(checked) => onToggleStatus(record, checked)}
             checkedChildren="✓"
             unCheckedChildren="✗"
             size="default"
-            style={{ backgroundColor: record.Status === 'ACTIVE' ? '#91C25F' : undefined, minWidth: 40, height: 22 }}
+            style={{
+              backgroundColor:
+                record.Status === "ACTIVE" ? "#91C25F" : undefined,
+              minWidth: 40,
+              height: 22,
+            }}
           />
         </div>
       ),
     },
     {
-      title: 'Campaign name',
-      dataIndex: 'campaign_name',
-      key: 'campaign_name',
+      title: "Campaign name",
+      dataIndex: "campaign_name",
+      key: "campaign_name",
       width: 320,
-      align: 'center',
+      align: "center",
       render: (text, record) => (
-        <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <div
+          style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+        >
           <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
           {record.reports && (
-            <span style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: theme === 'dark' ? '#333' : 'white', marginLeft: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                backgroundColor: theme === "dark" ? "#333" : "white",
+                marginLeft: 6,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Tooltip title="View Report">
                 <LinkOutlined
-                  style={{ color: 'blue', fontSize: 14 }}
+                  style={{ color: "blue", fontSize: 14 }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(`/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`, '_blank', 'noopener,noreferrer');
+                    window.open(
+                      `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
+                      "_blank",
+                      "noopener,noreferrer"
+                    );
                   }}
                 />
               </Tooltip>
@@ -801,105 +1493,231 @@ const App = () => {
       ),
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       width: 180,
-      align: 'center',
+      align: "center",
       render: (text, record) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          <Tooltip title="View details">
-            <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          }}
+        >
+          <Tooltip title="View details" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaEye />}
+              onClick={() => handleViewClick(record)}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                borderRadius: "6px",
+                border:'none',
+                padding: "4px 8px",
+                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
+            />
           </Tooltip>
-          <Tooltip title="Edit campaign">
-            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+          <Tooltip title="Edit campaign" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaPenToSquare />}
+              onClick={() => handleEditClickAllLevelData(record)}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                borderRadius: "6px",
+                 border:'none',
+                padding: "4px 8px",
+                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
+            />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
-            <Tooltip title="Clone campaign">
-              <Button icon={<CopyOutlined style={{ color: 'red' }} />} onClick={() => duplicatenewcampaign(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
+              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+              color: theme === 'dark' ? '#ffffff' : '#000000',
+              borderRadius: 6,
+              padding: '6px 10px',
+              fontSize: '14px',
+            }}>
+              <Button
+                icon={<FaClone />}
+                onClick={() => duplicatenewcampaign(record)}
+                style={{
+                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  borderRadius: "6px",
+                   border:'none',
+                  padding: "4px 8px",
+                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                  color: theme === "dark" ? "#fff" : "#000",
+                }}
+              />
             </Tooltip>
           )}
+          <Tooltip title="Delete campaign" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaTrashCan color="#EC7117" />}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                borderRadius: "6px",
+                 border:'none',
+                cursor: 'not-allowed',
+                padding: "4px 8px",
+                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
+            />
+          </Tooltip>
         </div>
       ),
     },
     {
-      title: 'Budget',
-      dataIndex: 'Daily_amount',
-      key: 'Daily_amount',
+      title: "Budget",
+      dataIndex: "Daily_amount",
+      key: "Daily_amount",
       width: 100,
-      align: 'center',
-      render: (Daily_amount, record) => loading ? <Spin /> : record?.Daily_amount !== undefined && (<EditableField value={record.Daily_amount / 100} record={record} dataIndex="Daily_amount" updateTableRow={updateTablebudget} />),
+      align: "center",
+      render: (Daily_amount, record) =>
+        loading ? (
+          <Spin />
+        ) : (
+          record?.Daily_amount !== undefined && (
+            <EditableField
+              value={record.Daily_amount / 100}
+              record={record}
+              dataIndex="Daily_amount"
+              updateTableRow={updateTablebudget}
+            />
+          )
+        ),
     },
     {
-      title: 'Account number',
-      dataIndex: 'Account_Number',
-      key: 'Account_Number',
+      title: "Account number",
+      dataIndex: "Account_Number",
+      key: "Account_Number",
       width: 160,
-      align: 'center',
+      align: "center",
       render: (text, record) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <div>{record.Account_Number}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
-            <Tooltip title="Approved"><span style={{ color: '#4caf50', fontWeight: 'bold', marginRight: 10 }}>{record.approvedCount}</span></Tooltip>
-            <Tooltip title="Rejected"><span style={{ color: 'red', fontWeight: 'bold', marginRight: 10 }}>{record.rejectedCount}</span></Tooltip>
-            <Tooltip title="Pending"><span className="blinking" style={{ color: 'orange', fontWeight: 'bold' }}>{record.pendingCount}</span></Tooltip>
+          <div
+            style={{ display: "flex", justifyContent: "center", marginTop: 2 }}
+          >
+            <Tooltip title="Approved">
+              <span
+                style={{
+                  color: "#4caf50",
+                  fontWeight: "bold",
+                  marginRight: 10,
+                }}
+              >
+                {record.approvedCount}
+              </span>
+            </Tooltip>
+            <Tooltip title="Rejected">
+              <span
+                style={{ color: "#EC7117", fontWeight: "bold", marginRight: 10 }}
+              >
+                {record.rejectedCount}
+              </span>
+            </Tooltip>
+            <Tooltip title="Pending">
+              <span
+                className="blinking"
+                style={{ color: "#EC7117", fontWeight: "bold" }}
+              >
+                {record.pendingCount}
+              </span>
+            </Tooltip>
           </div>
         </div>
       ),
     },
     {
-      title: 'Date',
-      dataIndex: 'createdDate',
-      key: 'createdDate',
+      title: "Date",
+      dataIndex: "createdDate",
+      key: "createdDate",
       width: 100,
-      align: 'center',
+      align: "center",
     },
     {
-      title: 'Created by',
-      dataIndex: 'createdby',
-      key: 'createdby',
+      title: "Created by",
+      dataIndex: "createdby",
+      key: "createdby",
       width: 100,
-      align: 'center',
+      align: "center",
     },
     {
-      title: 'Approved',
-      dataIndex: 'Approval',
-      key: 'Approval',
+      title: "Approved",
+      dataIndex: "Approval",
+      key: "Approval",
       width: 100,
-      align: 'center',
+      align: "center",
       render: (text, record) => {
-        let color = 'black';
+        let color = "black";
         let displayText = text;
-        if (text === 'PENDING_APPROVAL') {
-          color = 'red';
-          displayText = 'Pending';
-        } else if (text === 'Approved') {
-          color = 'green';
+        if (text === "PENDING_APPROVAL") {
+          color = "#EC7117";
+          displayText = "Pending";
+        } else if (text === "Approved") {
+          color = "#4caf50";
         }
-        const approvedBy = record?.Approvedby || 'N/A';
+        const approvedBy = record?.Approvedby || "N/A";
         return (
           <div>
             <span style={{ color }}>{displayText}</span>
-            {text === 'Approved' && <><br /><small style={{ color: 'gray' }}>{approvedBy}</small></>}
+            {text === "Approved" && (
+              <>
+                <br />
+                <small style={{ color: "gray" }}>{approvedBy}</small>
+              </>
+            )}
           </div>
         );
       },
     },
     {
-      title: 'Permission',
-      dataIndex: 'Approval',
-      key: 'permission',
+      title: "Permission",
+      dataIndex: "Approval",
+      key: "permission",
       width: 120,
-      align: 'center',
+      align: "center",
       render: (text, record) => (
         <>
-          {record.Approval === 'PENDING_APPROVAL' && (
+          {record.Approval === "PENDING_APPROVAL" && (
             <>
               <Button
                 style={{
-                  backgroundColor: '#91C25F',
+                  backgroundColor: "#91C25F",
                   color: "#000",
-                  borderColor: '#91C25F',
-                  borderWidth: "0px"
+                  borderColor: "#91C25F",
+                  borderWidth: "0px",
                 }}
                 onClick={() => handleApproval(record)} // This sets useaproval and opens modal
               >
@@ -913,7 +1731,8 @@ const App = () => {
                   open={isModalVisible}
                   onOk={handleOk}
                   onCancel={() => setIsModalVisible(false)}
-                  className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
                 >
                   <p>Are you sure you want to approve?</p>
                 </Modal>
@@ -921,15 +1740,361 @@ const App = () => {
             </>
           )}
         </>
-      )
-    }
-
-
-
+      ),
+    },
   ];
 
+  const columnsformultipleadsets = [
+    {
+      title: "Status",
+      dataIndex: "fbstatus",
+      key: "fbstatus",
+      width: 120,
+      align: "center",
+      render: (text, record) => (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+          }}
+        >
+          {record.fbstatus === "Live" ? (
+            <CheckCircleFilled
+              style={{ color: "#91C25F", fontSize: 16 }}
+              className="black-icon-active-1"
+            />
+          ) : (
+            <CloseCircleFilled
+              style={{ color: "#EC7117", fontSize: 16 }}
+              className="black-icon-pause-1"
+            />
+          )}
+         
+          <Switch
+            checked={record.Status === "ACTIVE"}
+            onChange={(checked) =>
+              onToggleStatusForMultipleAdsets(record, checked)
+            }
+            checkedChildren="✓"
+            unCheckedChildren="✗"
+            size="default"
+            style={{
+              backgroundColor:
+                record.Status === "ACTIVE" ? "#91C25F" : undefined,
+              minWidth: 40,
+              height: 22,
+            }}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Campaign name",
+      dataIndex: "campaign_name",
+      key: "campaign_name",
+      width: 320,
+      align: "center",
+      // render: (text, record) => (
+      //   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+      //     <span>{text}({record.adsetCount})</span>
+      //   </div>
+      // )
+      // render: (text, record) => (
+      //   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+      //     <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
+      //     {record.reports && (
+      //       <span style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: theme === 'dark' ? '#333' : 'white', marginLeft: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      //         <Tooltip title="View Report">
+      //           <LinkOutlined
+      //             style={{ color: 'blue', fontSize: 14 }}
+      //             onClick={(e) => {
+      //               e.stopPropagation();
+      //               window.open(`/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`, '_blank', 'noopener,noreferrer');
+      //             }}
+      //           />
+      //         </Tooltip>
+      //       </span>
+      //     )}
+      //   </div>
+      // ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 180,
+      align: "center",
+      render: (text, record) => (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          }}
+        >
+          <Tooltip title="View details" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaEye />}
+              onClick={() => handleEditClickMultipleAdsetData(record, true)}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                border:'none',
+                borderRadius: "6px",
+                padding: "4px 8px",
+                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Edit campaign" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaPenToSquare />}
+              disabled={record.fbstatus === "Live"}
+              onClick={() => handleEditClickMultipleAdsetData(record, false)}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border:'none',
+                borderRadius: "6px",
+                padding: "4px 8px",
+           backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
+            />
+          </Tooltip>
+          {!restrictedEmails.includes(userdetails.email) && (
+            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
+              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+              color: theme === 'dark' ? '#ffffff' : '#000000',
+              borderRadius: 6,
+              padding: '6px 10px',
+              fontSize: '14px',
+            }}>
+              <Button
+                icon={<FaClone />}
+                disabled={true}
+                onClick={() => duplicatenewcampaign(record)}
+                style={{
+                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border:'none',
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                  color: theme === "dark" ? "#fff" : "#000",
+                }}
+              />
+            </Tooltip>
+          )}
+          <Tooltip title="Delete campaign" 
+          overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <Button
+              icon={<FaTrashCan color="#EC7117" />}
+              style={{
+                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border:'none',
+                borderRadius: "6px",
+                cursor: 'not-allowed',
+                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                color: theme === "dark" ? "#fff" : "#000",
+              }}
 
+            />
+          </Tooltip>
+           <Tooltip title="Number of adsets"
+            overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
+            <div
+              style={{
+                backgroundColor: "#bce396ff",
+                color: "#000",
+                borderRadius: "60%",
+                width: "20px",
+                height: "20px",
+                textAlign:'center'
+              }}
+            >
+              {record.adsetCount}
+            </div>
+          </Tooltip>
+        </div>
+      ),
+    },
+    {
+      title: "Budget",
+      dataIndex: "Daily_amount",
+      key: "Daily_amount",
+      width: 100,
+      align: "center",
+      render: (Daily_amount, record) =>
+        loading ? (
+          <Spin />
+        ) : (
+          record?.Daily_amount !== undefined && (
+            <EditableFieldForMultpleAdsets
+              value={record.Daily_amount / 100}
+              record={record}
+              dataIndex="Daily_amount"
+              updateTableRow={updateTablebudgetforAdsests}
+            />
+          )
+        ),
+    },
+    // {
+    //   title: "Account number",
+    //   dataIndex: "Account_Number",
+    //   key: "Account_Number",
+    //   width: 160,
+    //   align: "center",
+    //   render: (text, record) => (
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         flexDirection: "column",
+    //         alignItems: "center",
+    //       }}
+    //     >
+    //       <div>{record.Account_Number}</div>
+    //       <div
+    //         style={{ display: "flex", justifyContent: "center", marginTop: 2 }}
+    //       >
+    //         <Tooltip title="Approved">
+    //           <span
+    //             style={{
+    //               color: "#4caf50",
+    //               fontWeight: "bold",
+    //               marginRight: 10,
+    //             }}
+    //           >
+    //             {record.approvedCount}
+    //           </span>
+    //         </Tooltip>
+    //         <Tooltip title="Rejected">
+    //           <span
+    //             style={{ color: "red", fontWeight: "bold", marginRight: 10 }}
+    //           >
+    //             {record.rejectedCount}
+    //           </span>
+    //         </Tooltip>
+    //         <Tooltip title="Pending">
+    //           <span
+    //             className="blinking"
+    //             style={{ color: "orange", fontWeight: "bold" }}
+    //           >
+    //             {record.pendingCount}
+    //           </span>
+    //         </Tooltip>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
+    {
+      title: "Date",
+      dataIndex: "createdDate",
+      key: "createdDate",
+      width: 100,
+      align: "center",
+    },
+    {
+      title: "Created by",
+      dataIndex: "createdby",
+      key: "createdby",
+      width: 100,
+      align: "center",
+    },
+    {
+      title: "Approved",
+      dataIndex: "Approval",
+      key: "Approval",
+      width: 100,
+      align: "center",
+      render: (text, record) => {
+        let color = "black";
+        let displayText = text;
+        if (text === "PENDING_APPROVAL") {
+          color = "#EC7117";
+          displayText = "Pending";
+        } else if (text === "Approved") {
+          color = "#4caf50";
+        }
+        const approvedBy = record?.Approvedby || "N/A";
+        return (
+          <div>
+            <span style={{ color }}>{displayText}</span>
+            {text === "Approved" && (
+              <>
+                <br />
+                <small style={{ color: "gray" }}>{approvedBy}</small>
+              </>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Permission",
+      dataIndex: "Approval",
+      key: "permission",
+      width: 120,
+      align: "center",
+      render: (text, record) => (
+        <>
+          {record.Approval === "PENDING_APPROVAL" && (
+            <>
+              <Button
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  borderColor: "#91C25F",
+                  borderWidth: "0px",
+                }}
+                onClick={() => handleApprovalforAdsets(record)} // This sets useaproval and opens modal
+              >
+                Approve
+              </Button>
 
+              {/* Show Modal only for selected record */}
+              {useaprovalForAdsets?.identifier === record.identifier && (
+                <Modal
+                  title="Confirm approval"
+                  open={isModalVisibleForAdsets}
+                  onOk={handleOkForAdsets}
+                  onCancel={() => setIsModalVisibleForAdsets(false)}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
+                >
+                  <p>Are you sure you want to approve?</p>
+                </Modal>
+              )}
+            </>
+          )}
+        </>
+      ),
+    },
+  ];
 
   //     const columns = [
 
@@ -1123,7 +2288,7 @@ const App = () => {
   //               );
   //             },
   //           }
-  // ,          
+  // ,
   //         {
   //             title: '',
   //             dataIndex: 'Action',
@@ -1148,7 +2313,7 @@ const App = () => {
   //                     return (
   //                         <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
   //                             <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
-  //                             <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{marginLeft:'10px'}}></Button> 
+  //                             <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{marginLeft:'10px'}}></Button>
   //                             {(record.adlevel_error || record.campaignlevel_error || record.adsetlevel_error) && (
   //                                 <Tooltip title={errorDisplay(record.campaignlevel_error,record.adsetlevel_error,record.adlevel_error)}>
   //                                     <InfoCircleOutlined style={{marginLeft:'10px', color:"red", fontSize:'15px'}}/>
@@ -1156,12 +2321,12 @@ const App = () => {
   //                             ) }
   //                         </div>
   //                     )
-  //                 } 
+  //                 }
   //                 // console.log('Record Status:', record?.fbstatus);
   //                 // if (record.fbstatus === 'Live'){
   //                 //     console.log('Record in Action column:', record);
   //                 //     return (
-  //                 //         <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+  //                 //         <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button>
   //                 //     )
   //                 // }
 
@@ -1169,8 +2334,8 @@ const App = () => {
   //                     <Space size="middle">
   //                         <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
   //                         {record.fbstatus !== 'Live' && (
-  //                             // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
-  //                             <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
+  //                             // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button>
+  //                             <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button>
   //                         )}
   //                         {record.Approval === 'PENDING_APPROVAL' && (
   //                             <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleApproval(record)}>Approve</Button>
@@ -1194,20 +2359,39 @@ const App = () => {
   // const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
   //     return sum + (record.Daily_amount || 0);
   // }, 0) / 100;  // Assuming Daily_amount is in cents
-  const totalDailySpend = (campaignData).reduce((sum, record) => {
-    return sum + (record.Daily_amount || 0);
-  }, 0) / 100;  // Assuming Daily_amount is in cents
+  // const totalDailySpend =
+  //   campaignData.reduce((sum, record) => {
+  //     return sum + (record.Daily_amount || 0);
+  //   }, 0) / 100; // Assuming Daily_amount is in cents
+ const totalDailySpend = (() => {
+    if (activeTab === "1") {
+      return (
+        getFilteredSingleCampaigns().reduce(
+          (sum, record) => sum + (record.Daily_amount || 0),
+          0
+        ) / 100
+      ).toFixed(2);
+    } else if (activeTab === "2") {
+      return (
+        getFilteredMultipleAdsetCampaigns().reduce(
+          (sum, record) => sum + (record.Daily_amount || 0),
+          0
+        ) / 100
+      ).toFixed(2);
+    }
+    return "0.00";
+  })();  
 
   const onClickDeleteDraft = (id) => {
-    console.log(id, "draft id")
+    console.log(id, "draft id");
     setDeleteModalVisible(true);
     setDeleteDraftId(id);
-  }
+  };
 
   const onClickEditDraft = (id) => {
-    setCreateNewDraft(true)
+    setCreateNewDraft(true);
     // setSelecetedDraftToEdit(draftsData.find(draft => draft.id === id));
-  }
+  };
 
   // const draftDropdownMenu = (
   //     <Menu
@@ -1235,27 +2419,33 @@ const App = () => {
       items={draftsData.map((draft) => ({
         key: draft.Draft_Name,
         label: (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '10px',
-            borderBottom: '1px solid #f0f0f0',
-            backgroundColor: theme === 'dark' ? '#2f2f2f' : '#fff',
-            color: theme === 'dark' ? '#fff' : '#333',
-            borderRadius: '4px',
-          }}>
-            <span style={{
-              // fontWeight: 'bold',
-              fontSize: '14px',
-              color: theme === 'dark' ? '#fff' : '#333',
-            }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "10px",
+              borderBottom: "1px solid #f0f0f0",
+              backgroundColor: theme === "dark" ? "#2f2f2f" : "#fff",
+              color: theme === "dark" ? "#fff" : "#333",
+              borderRadius: "4px",
+            }}
+          >
+            <span
+              style={{
+                // fontWeight: 'bold',
+                fontSize: "14px",
+                color: theme === "dark" ? "#fff" : "#333",
+              }}
+            >
               {draft.Draft_Name}
             </span>
-            <span style={{
-              display: 'flex',
-              alignItems: 'center',
-            }}>
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               <Tooltip title="Edit">
                 <EditOutlined
                   onClick={() => {
@@ -1264,10 +2454,10 @@ const App = () => {
                   }}
                   style={{
                     marginRight: 10,
-                    color: theme === 'dark' ? '#fff' : '#007bff',
-                    fontSize: '16px',
-                    cursor: 'pointer',
-                    transition: 'color 0.3s ease',
+                    color: theme === "dark" ? "#fff" : "#007bff",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    transition: "color 0.3s ease",
                   }}
                 />
               </Tooltip>
@@ -1275,10 +2465,10 @@ const App = () => {
                 <DeleteOutlined
                   onClick={() => onClickDeleteDraft(draft.id)}
                   style={{
-                    color: theme === 'dark' ? '#fff' : '#ff4d4f',
-                    fontSize: '16px',
-                    cursor: 'pointer',
-                    transition: 'color 0.3s ease',
+                    color: theme === "dark" ? "#fff" : "#ff4d4f",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    transition: "color 0.3s ease",
                   }}
                 />
               </Tooltip>
@@ -1291,13 +2481,48 @@ const App = () => {
   );
   return (
     <div>
-      <CreateCampaignDrawer visible={cdrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} draftsData={draftsData} />
+      <CreateCampaignDrawer
+        visible={cdrawerVisible}
+        accountis={createcamselectedacc}
+        onClose={onCloseDrawer}
+        changeRRefrst={changeRRefrst}
+        network={selectedKey}
+        draftsData={draftsData}
+      />
 
-      <EditAllLevelDataDrawer visible={viewEditAllLevelDataDrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} selectedRow={selectedEditAllLevelData} />
+      <EditAllLevelDataDrawer
+        visible={viewEditAllLevelDataDrawerVisible}
+        accountis={createcamselectedacc}
+        onClose={onCloseDrawer}
+        changeRRefrst={changeRRefrst}
+        network={selectedKey}
+        selectedRow={selectedEditAllLevelData}
+      />
 
-      <DuplicateCampaignDrawer visible={dupdrawerVisible} onClose={onCloseDrawer} selectedRow={duplicatenewcampaigns} changeRRefrst={changeRRefrst} network={selectedKey} />
+      <EditMultipleAdsetCampaignDrawer
+        view={view}
+        visible={viewEditMultipleAdsetDataDrawerVisible}
+        accountis={createcamselectedacc}
+        onClose={onCloseDrawer}
+        changeRRefrst={changeRRefrst}
+        network={selectedKey}
+        selectedRow={selectedEditMultipleAdsetData}
+      />
 
-      <CreateDraft visible={createNewDraft} onClose={onCloseDrawer} changeRRefrst={changeDraftRefresh} selectedDraftToEdit={selectedDraftToEdit} />
+      <DuplicateCampaignDrawer
+        visible={dupdrawerVisible}
+        onClose={onCloseDrawer}
+        selectedRow={duplicatenewcampaigns}
+        changeRRefrst={changeRRefrst}
+        network={selectedKey}
+      />
+
+      <CreateDraft
+        visible={createNewDraft}
+        onClose={onCloseDrawer}
+        changeRRefrst={changeDraftRefresh}
+        selectedDraftToEdit={selectedDraftToEdit}
+      />
 
       <ViewDrawer
         rowData={selectedRowData}
@@ -1322,15 +2547,16 @@ const App = () => {
                 visible={EditcamapaignDrawerVisible}
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
-      <Card style={{
-        marginBottom: "10px", boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', // subtle shadow
-        borderRadius: '10px'
-      }}
-        headStyle={{
-          borderBottom: 'none', // ❌ removes the bottom line
-          paddingBottom: 0, // Optional: tighter spacing
+      <Card
+        style={{
+          marginBottom: "10px",
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          borderRadius: '10px'
         }}
-        // title="Campaigns" 
+        headStyle={{
+          borderBottom: 'none',
+          paddingBottom: 0,
+        }}
         title={
           <div>
             <div style={{
@@ -1339,7 +2565,7 @@ const App = () => {
               color: theme === 'dark' ? '#fff' : '#1c1e21',
               lineHeight: '30px'
             }}>
-              Campaigns
+              Campaign Management
             </div>
             <div style={{
               fontSize: 12,
@@ -1348,173 +2574,126 @@ const App = () => {
               Create, manage, and optimize your advertising campaigns
             </div>
           </div>
-        } size="small"
-        extra={
-
-          <Button.Group style={{ marginTop: 10 }}>
-            {/* 🟢 Left: Create Draft */}
-            <Tooltip
-              title={draftsData.length === 5 ? "You have exceeded the draft limit of 5" : "Create a new draft"}
-              placement="top"
-              open={draftsData.length === 5 ? undefined : false}
-              overlayStyle={{ backgroundColor: "#333", color: "#fff" }}  // Tooltip styling
-              className={theme === 'dark' ? 'custom-tooltip-dark' : 'custom-tooltip-light'}
-            >
-              <span>
-                <Button
-                  type="primary"
-                  onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
-                  disabled={draftsData.length === 5}
-                  style={{
-                    backgroundColor: draftsData.length === 5 ? '#cccccc' : '#91C25F',
-                    color: draftsData.length === 5 ? '#7a7a7a' : '#000',
-                    borderColor: '#91C25F',
-                    borderWidth: "0px",
-                    // fontWeight: 'normal',
-                    boxShadow: draftsData.length === 5 ? 'none' : '0px 4px 10px rgba(0, 0, 0, 0.15)',
-                    transition: 'background-color 0.3s ease',
-                    marginRight: '3px', // Adds space between the buttons
-                  }}
-                  className={theme === 'dark' ? 'dark-theme-btn' : 'light-theme-btn'}
-                >
-                  Create draft
-                </Button>
-              </span>
-            </Tooltip>
-
-            {/* 🟣 Right: Dropdown Button (Separate from Create Draft Button) */}
-            <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
-              <Button
-                style={{
-                  backgroundColor: '#91C25F',
-                  color: "#000",
-                  border: "none",
-                  borderRadius: '4px',
-                  padding: '5px 10px',
-                  boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                  transition: 'background-color 0.3s ease'
-                }}
-                icon={<DownOutlined className="black-icon" />}
-              />
-            </Dropdown>
-          </Button.Group>
-
         }
-      // style={{ backgroundColor:'blue'}}
+        size="small"
+        extra={
+          <Button
+            onClick={showDrawer}
+            icon={<PlusOutlined className="black-icon" />}
+            style={{
+              backgroundColor: '#91C25F',
+              color: '#000',
+              border: 'none',
+              border: '#4caf50'
+            }}
+          >
+            New Campaign
+          </Button>
+        }
       >
-        <Row justify="start" align="middle" gutter={[16, 16]}>
-          <Col span={3}>
+        {/* Entire filter section in one single aligned row */}
+        <Row align="middle" justify="space-between" style={{ flexWrap: 'wrap', rowGap: '12px' }}>
+          <Col style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+
+            {/* 🔹 Select Project */}
             <Select
               showSearch
-              placeholder="Select Project"
-              style={{ width: '90%' }}
+              placeholder="Select Projects"
+              style={{ width: 140 }}
               onChange={handleKeyChange}
               value={selectedKey}
               dropdownClassName={theme === 'dark' && "custom-dropdown"}
               className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
             >
               {options.map(option => (
-                <Option key={option.value} value={option.value} title={null}>{option.label} </Option>
+                <Option key={option.value} value={option.value}>{option.label}</Option>
               ))}
             </Select>
-          </Col>
 
-          <Col span={4} style={{ marginLeft: '-25px' }}>
+            {/* 🔹 Select Account */}
             <Select
               showSearch
               placeholder="Select Accounts"
-              style={{ width: '90%' }}
+              style={{ width: 225 }}
               onChange={handleValueChange}
               disabled={!selectedKey}
               value={selectedValue}
               optionFilterProp="children"
               filterOption={(input, option) => /^[0-9]*$/.test(input) && option?.value.toString().includes(input)}
-              onDropdownVisibleChange={(open) => setIsOpen(open)} // Track dropdown visibility
+              onDropdownVisibleChange={(open) => setIsOpen(open)}
               dropdownClassName={theme === 'dark' && "custom-dropdown"}
               className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
             >
               {valueOptions.map(option => (
                 <Select.Option key={option.value} value={option.value}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    width: '100%',
-                    padding: '5px 0',
-                    overflow: 'hidden',
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      maxWidth: '70%'
-                    }}>
-                      <p style={{
-                        margin: '0px',
-                        // fontWeight: 'bold',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis'
-                      }}>
-                        {option.label}
-                      </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '70%' }}>
+                      <p style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{option.label}</p>
                       {isOpen && (
-                        <p style={{
-                          margin: '0px',
-                          fontSize: '12px',
-                          color: 'gray',
-                          overflow: 'hidden',
-                          whiteSpace: 'nowrap',
-                          textOverflow: 'ellipsis'
-                        }}>
+                        <p style={{ margin: 0, fontSize: 12, color: 'gray', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {option.accountName || ''}
                         </p>
                       )}
                     </div>
-                    <span style={{ marginLeft: '10px', flexShrink: 0 }}>
+                    <span>
                       {option.status === "Active" ? (
-                        <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
                       ) : (
-                        <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
                       )}
                     </span>
                   </div>
                 </Select.Option>
               ))}
             </Select>
-          </Col>
 
-          <Col span={5} style={{ marginLeft: '-30px' }}>
+            {/* 🔹 Date Picker */}
             <ConfigProvider
-              theme={{
-                token: {
-                  colorPrimary: '#91C25F',
-                  colorTextLightSolid: '#000',
-                },
-              }}>
+              theme={{ token: { colorPrimary: '#91C25F', colorTextLightSolid: '#000' } }}
+            >
               <RangePicker
                 className="green-border-picker"
                 presets={rangePresets}
                 onChange={handleChange}
                 disabledDate={disabledDate}
                 style={{
-                  width: '92%',
+                  width: 215,
                   backgroundColor: theme === 'dark' ? '#555' : undefined,
                   color: theme === 'dark' ? 'white' : undefined,
                 }}
-                // defaultValue={[dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]}
                 defaultValue={[dayjs(), dayjs()]}
-                // format="YYYY-MM-DD"
-                // style={{ width: '100%' }}
                 dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
               />
             </ConfigProvider>
+
+            {/* 🔹 Apply Button */}
+            <Button
+              type='primary'
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+              onClick={handleApply}
+              style={{
+                backgroundColor: hovered ? '#91C25F' : 'transparent',
+                border: '1px solid #4CAF50',
+                borderRadius: '6px',
+                color: theme === 'dark' ? '#ffffff' : '#000000',
+                height: '32px',
+                padding: '0 16px',
+                transition: 'all 0.15s ease-in-out',
+              }}
+            >
+              Apply
+            </Button>
+
+            {/* 🔹 Search */}
+
+
+
           </Col>
-
-          <Col span={3} style={{ marginLeft: '-28px' }}>
-
+          <Col style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+            {/* 🔹 Status Filter */}
             <Input
               placeholder="Search..."
-              // suffix={<SearchOutlined onClick={handleSearchSubmit} />}
               value={searchInput}
               onChange={handleSearchChange}
               onPressEnter={handleSearchSubmit}
@@ -1524,75 +2703,129 @@ const App = () => {
                 border: '1px solid #4caf50',
               }}
             />
-          </Col>
-          <Col span={9} style={{ marginRight: '-30px' }} >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                gap: '12px',
-                flexWrap: 'wrap',
-                width: '100%',
+            <Dropdown
+              overlay={
+                <Menu onClick={({ key }) => onStatusFilterChange(key)} items={[
+                  {
+                    key: 'all', label: (
+                      <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                        <span
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            backgroundColor: '#122F6E',
+                            marginRight: '6px',
+                          }}
+                        ></span>
+                        All
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'active', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: 'green',
+                          marginRight: '6px',
+                        }}
+                      ></span>
+                      Active
 
-                // marginLeft:'3px'
-              }}
+                    </span>
+                  },
+                  {
+                    key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: 'red',
+                          marginRight: '6px',
+                        }}
+                      ></span>
+                      Paused
+
+                    </span>
+                  },
+                  {
+                    key: 'pending', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: '#EC7117',
+                          marginRight: '6px',
+                        }}
+                      ></span>
+                      Pending
+
+                    </span>
+                  },
+                ]} />
+              }
+              trigger={['click']}
             >
-              {!restrictedEmails.includes(userdetails.email) && (
-                <Button
-                  onClick={showDrawer}
-                  icon={<PlusOutlined className="black-icon" />}
-                  style={{
-                    backgroundColor: '#91C25F',
-                    color: '#000',
-                    border: 'none',
-                    marginRight: '-5px',
-                    border: '#4caf50'
-                  }}
-                >
-                  Create campaign
-                </Button>
-              )}
-
               <Button
-                type="primary"
-                onClick={handleRefresh}
-                icon={<ReloadOutlined className="black-icon" />}
                 style={{
-                  backgroundColor: '#91C25F',
-                  color: '#000',
-                  border: 'none',
-                  marginRight: '-5px',
-                  border: '#4caf50'
-                }}
-              />
-
-              <span
-                style={{
-                  backgroundColor: theme === 'dark' ? '#e6f7ff' : '#e6f7ff',
-                  padding: '5px 14px',
-                  borderRadius: '8px',
-                  fontSize: '15px',
-                  fontWeight:'500',
-                  color: theme === 'dark' ? '#1d39c4' : '#1d39c4',
-                  border: `1px solid ${theme === 'dark' ? '#91d5ff' : '#91d5ff'}`,
-                  marginRight: '-55px'
-
+                  borderRadius: 8,
+                  background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                  border: '1px solid #4CAF50',
+                  color: theme === 'dark' ? '#95de64' : '#389e0d',
+                  fontWeight: 500,
+                  width: 100
                 }}
               >
-                Total daily spend: ${totalDailySpend.toFixed(2)}
-              </span>
+                <Space size={2}>
+                  <FilterOutlined />
+                  {campaignStatusFilter.charAt(0).toUpperCase() + campaignStatusFilter.slice(1)}
+                  <DownOutlined style={{ fontSize: 10 }} />
+                </Space>
+              </Button>
+            </Dropdown>
 
-            </div>
+            {/* 🔹 Total Daily Spend */}
+            <span
+              style={{
+                backgroundColor: 'transparent',
+                padding: '5px 14px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                color: theme === 'dark' ? '#fff' : '#000',
+                border: '1px solid #4caf50',
+              }}
+            >
+              Budget: ${totalDailySpend}
+            </span>
+
+            {/* 🔹 Refresh Button */}
+            <Button
+              type="primary"
+              onClick={handleRefresh}
+              icon={<ReloadOutlined className="black-icon" />}
+              style={{
+                backgroundColor: '#91C25F',
+                color: '#000',
+                border: 'none',
+              }}
+            />
           </Col>
-
-
         </Row>
       </Card>
 
+      <div>{renderCarouselNav()}</div>
 
       {loading ? (
-        <Skeleton active paragraph={{ rows: 12 }} style={{ marginTop: '10px' }} />
+        <Skeleton
+          active
+          paragraph={{ rows: 12 }}
+          style={{ marginTop: "10px" }}
+        />
       ) : (
         // <Table
         //     style={{
@@ -1624,81 +2857,165 @@ const App = () => {
         //     }}
 
         // />
-        <Table
-          style={{
-            width: '100%',
-            height: 'calc(100vh - 300px)',
-            // minHeight: '100%',
-            tableLayout: 'fixed',
+        // <div>
+        //   <div>
 
-
-          }}
-          className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
-          columns={columns}
-          dataSource={campaignData.map((item, index) => ({
-            ...item,
-            key: index,
-          })).reverse()}
-          pagination={{ pageSize: paginationSize }}
-          scroll={{
-            x: 'auto',
-            y: 'calc(63vh)',
-          }}
-          expandable={{
-            expandedRowRender: (record) => (
-              <ExpandedRowContent
-                record={record}
-                changeRRefrst={changeRRefrst}
-                network={selectedKey}
+        //   </div>
+        <div>
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            renderTabBar={() => <></>}
+          >
+            <Tabs.TabPane key="1">
+              <Table
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 300px)",
+                  // minHeight: '100%',
+                  tableLayout: "fixed",
+                }}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
+                columns={columns}
+                dataSource={getFilteredSingleCampaigns()
+                  .map((item, index) => ({
+                    ...item,
+                    key: index,
+                  }))
+                  .reverse()}
+                pagination={{ pageSize: paginationSize }}
+                scroll={{
+                  x: "auto",
+                  y: "calc(63vh)",
+                }}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <ExpandedRowContent
+                      record={record}
+                      changeRRefrst={changeRRefrst}
+                      network={selectedKey}
+                    />
+                  ),
+                  rowExpandable: (record) => !!record,
+                }}
+                rowClassName={() => "custom-row"}
+                rowKey="key"
+                components={{
+                  body: {
+                    row: (props) => (
+                      <tr
+                        {...props}
+                        style={{
+                          ...props.style,
+                          height: "32px",
+                        }}
+                      />
+                    ),
+                    cell: (props) => (
+                      <td
+                        {...props}
+                        style={{
+                          ...props.style,
+                          paddingTop: "6px",
+                          paddingBottom: "6px",
+                          fontSize: "13px",
+                        }}
+                      />
+                    ),
+                  },
+                }}
               />
-            ),
-            rowExpandable: (record) => !!record,
-          }}
-          rowClassName={() => 'custom-row'}
-          rowKey="key"
-          components={{
-            body: {
-              row: (props) => (
-                <tr
-                  {...props}
-                  style={{
-                    ...props.style,
-                    height: '32px',
-                  }}
-                />
-              ),
-              cell: (props) => (
-                <td
-                  {...props}
-                  style={{
-                    ...props.style,
-                    paddingTop: '6px',
-                    paddingBottom: '6px',
-                    fontSize: '13px',
-                  }}
-                />
-              ),
-            },
-          }}
-        />
-
-
+            </Tabs.TabPane>
+            <Tabs.TabPane key="2">
+              <Table
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 300px)",
+                  // minHeight: '100%',
+                  tableLayout: "fixed",
+                }}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
+                columns={columnsformultipleadsets}
+                dataSource={getFilteredMultipleAdsetCampaigns()
+                  .map((item, index) => ({
+                    ...item,
+                    key: index,
+                  }))
+                  .reverse()}
+                pagination={{ pageSize: paginationSize }}
+                scroll={{
+                  x: "auto",
+                  y: "calc(63vh)",
+                }}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <ExpandedAdsetsContent
+                      record={record}
+                      changeRRefrst={changeRRefrst}
+                      network={selectedKey}
+                    />
+                  ),
+                  rowExpandable: (record) => !!record,
+                }}
+                rowClassName={() => "custom-row"}
+                rowKey="key"
+                components={{
+                  body: {
+                    row: (props) => (
+                      <tr
+                        {...props}
+                        style={{
+                          ...props.style,
+                          height: "32px",
+                        }}
+                      />
+                    ),
+                    cell: (props) => (
+                      <td
+                        {...props}
+                        style={{
+                          ...props.style,
+                          paddingTop: "6px",
+                          paddingBottom: "6px",
+                          fontSize: "13px",
+                        }}
+                      />
+                    ),
+                  },
+                }}
+              />
+            </Tabs.TabPane>
+          </Tabs>
+        </div>
+        // </div>
       )}
-
 
       {!restrictedEmails.includes(userdetails.email) && (
         <Drawer
-          title={adsetcampaigndata?.campaign_name || ''}
+          title={adsetcampaigndata?.campaign_name || ""}
           placement="right"
           onClose={onCloseDrawer}
           open={adsetsdrawerVisible}
           width="100%" // Adjust width as needed
-          style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
+          style={{
+            backgroundColor: theme === "dark" ? "#333" : "#fff",
+            color: theme === "dark" ? "#fff" : "#000",
+          }}
         >
-          <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} />
+          <Adsets
+            selectedRow={adsetcampaigndata}
+            onClose={onCloseDrawer}
+            changeRRefrst={changeRRefrst}
+            network={selectedKey}
+          />
         </Drawer>
       )}
-
 
       {/* <Drawer
                 title={adsetcampaigndata?.campaign_name || ''}
@@ -1714,15 +3031,11 @@ const App = () => {
         visible={deleteModalVisible}
         onOk={handleOkDeleteDraft}
         onCancel={() => setDeleteModalVisible(false)}
-        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
       >
         <p>Are you sure you want to delete this draft</p>
       </Modal>
-
     </div>
-
-  )
-
+  );
 };
 export default App;
-

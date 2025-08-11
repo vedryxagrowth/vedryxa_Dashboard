@@ -28,7 +28,8 @@ const revenuePartnerNames = {
     "ENKI": "FB_Enki",
     "System1": "FB_System1",
     "Domain_Active": "Newsbreak_DA",
-    "Sedo": "FB_Sedo"
+    "Sedo": "FB_Sedo",
+    "Tonic_Rsoc": "FB_TonicRsoc"
 };
 
 
@@ -44,7 +45,8 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo"
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_TonicRsoc": "Facebook_TonicRsoc"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -1053,9 +1055,12 @@ const Dashboard = () => {
         [defaultCategory]: transformedData[defaultCategory], // Default all items in the first category
     });
 
-    const [chartData, setChartData] = useState({ dates: [], newDates: [], spend: [], revenue: [], profit: [], margin: [] });
+    const [chartData, setChartData] = useState({ 
+        dates: [], newDates: [], spend: [], revenue: [], profit: [], margin: [], ncpl: [], ctr: [], cpc: [], conversions: [], leads: [],
+    });
 
-    const [chartDataByDate, setChartDataByDate] = useState({ datesByDate: [], spendByDate: [], revenueByDate: [], profitByDate: [], marginByDate: [] });
+    const [chartDataByDate, setChartDataByDate] = useState({ datesByDate: [], spendByDate: [], revenueByDate: [], profitByDate: [], marginByDate: [], ncplByDate: [], ctrByDate: [], cpcByDate: [], conversionsByDate: [], leadsByDate: [], 
+    });
 
     const [rowData, setRowData] = useState([]);
     const [top5Campaigns, setTop5Campaigns] = useState([]);
@@ -1081,26 +1086,43 @@ const Dashboard = () => {
 
     const chartRef = useRef();
     const [hidden, setHidden] = useState([
-        'Spend',
-        'Revenue',
-        'RPC',
-        'CPL',
-        'Margin',
+        'Spend', 'Revenue', 'RPC', 'CPL', 'Margin',
+        'NCPL', 'CTR', 'CPC', 'Conversions', 'Leads', // <-- Add new
     ]);
 
     const chartByDateRef = useRef(); // ✅ separate ref for second chart
     const [hiddenByDate, setHiddenByDate] = useState([
         'Spend', 'Revenue', 'RPC', 'CPL', 'Margin',
+        'NCPL', 'CTR', 'CPC', 'Conversions', 'Leads', // <-- Add new
     ]); // ✅ only Profit shown initially
 
+    // const colorMaps = {
+    //     Spend: 'rgba(44, 144, 192, 1)',
+    //     Revenue: 'rgba(99, 200, 99, 1)',
+    //     RPC: 'rgba(255, 99, 132, 1)',
+    //     CPL: 'rgba(255, 159, 64, 1)',
+    //     Profit: 'rgba(255, 206, 86, 1)',
+    //     Margin: 'rgba(153, 102, 255, 1)',
+    //     NCPL: 'rgba(255, 105, 180, 1)',     // New
+    //     CTR: 'rgba(255, 165, 0, 1)',        // New
+    //     CPC: 'rgba(30, 144, 255, 1)',       // New
+    //     Conversions: 'rgba(75, 0, 130, 1)', // New
+    //     Leads: 'rgba(128, 0, 0, 1)',        // New
+
+    // };
+
     const colorMaps = {
-        Spend: 'rgba(44, 144, 192, 1)',
-        Revenue: 'rgba(99, 200, 99, 1)',
-        RPC: 'rgba(255, 99, 132, 1)',
-        CPL: 'rgba(255, 159, 64, 1)',
-        Profit: 'rgba(255, 206, 86, 1)',
-        Margin: 'rgba(153, 102, 255, 1)',
-    };
+        Revenue: '#00C853',       // Green
+        Profit: '#26A69A',        // Teal
+        Spend: '#3F51B5',         // Indigo (Amount Spent)
+        Leads: '#FFC107',         // Amber
+        Conversions: '#673AB7',   // Deep Purple
+        NCPL: '#AED581',          // Light Green
+        CPL: '#FF9800',           // Orange
+        CTR: '#2196F3',           // Blue
+        CPC: '#F44336',           // Red
+        RPC: '#00ACC1',           // Cyan
+    };    
 
     const toggle = (label) => {
         const chart = chartRef.current;
@@ -1830,6 +1852,8 @@ const Dashboard = () => {
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0, //new
+                        impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
@@ -1840,6 +1864,8 @@ const Dashboard = () => {
                     entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                     entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                    entry.fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0; // new
+                    entry.impressions += obj.impressions ? parseInt(obj.impressions) : 0; // new
                 }
 
                 return acc;
@@ -1868,10 +1894,22 @@ const Dashboard = () => {
         const profitByDate = sortedDataByDate.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
         const rpcByDate = sortedDataByDate.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
         const cplByDate = sortedDataByDate.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
-
         const marginByDate = sortedDataByDate.map(d => d.estimated_revenue !== 0 ? Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
-        setChartDataByDate({ datesByDate, spendByDate, revenueByDate, profitByDate, marginByDate, rpcByDate, cplByDate });
+        const ncplByDate = sortedDataByDate.map(d =>
+            !isNaN(d.spend / d.conversions) ? Math.round((d.spend / d.conversions) * 100) / 100 : 0
+        );
+        const ctrByDate = sortedDataByDate.map(d =>
+            d.impressions > 0 ? Math.round((d.fbClicks / d.impressions) * 10000) / 100 : 0
+        );
+        const cpcByDate = sortedDataByDate.map(d =>
+            !isNaN(d.cpc) ? Math.round(d.cpc * 100) / 100 : 0
+        );
+        const conversionsByDate = sortedDataByDate.map(d => d.conversions || 0);
+        const leadsByDate = sortedDataByDate.map(d => d.fbLeads || 0);
+
+        setChartDataByDate({ datesByDate, spendByDate, revenueByDate, profitByDate, marginByDate, rpcByDate, cplByDate, ncplByDate, ctrByDate, cpcByDate, conversionsByDate, leadsByDate, 
+        });
 
         console.log(groupedData);
 
@@ -1978,12 +2016,16 @@ const Dashboard = () => {
         const profit = sortedData.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
         const rpc = sortedData.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
         const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
-
         const margin = sortedData.map(d => d.estimated_revenue !== 0 ? Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
+        const ncpl = sortedData.map(d => !isNaN(d.ncpl) ? Math.round(d.ncpl * 100) / 100 : 0);
+        const ctr = sortedData.map(d => !isNaN(d.ctr) ? Math.round(d.ctr * 100) / 100 : 0);
+        const cpc = sortedData.map(d => !isNaN(d.cpc) ? Math.round(d.cpc * 100) / 100 : 0);
+        const conversions = sortedData.map(d => d.conversions || 0);
+        const leads = sortedData.map(d => d.fbLeads || 0);
         // console.log(revenue);
 
-        setChartData({ dates, newDates, spend, revenue, profit, margin, rpc, cpl });
+        setChartData({ dates, newDates, spend, revenue, profit, margin, rpc, cpl, ncpl, ctr, cpc, conversions, leads });
         console.log(responseData.length);
         setSkeletonLoading(false);
     }, 1500);;
@@ -3513,12 +3555,14 @@ const Dashboard = () => {
                                                     renderExtraFooter={() => (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
                                                             <Button
+                                                                className='custom-button'
                                                                 style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
                                                                 onClick={onClickCloseButton} // Close the picker
                                                             >
                                                                 Close
                                                             </Button>
                                                             <Button
+                                                                className='custom-button1'
                                                                 style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
@@ -3685,12 +3729,14 @@ const Dashboard = () => {
                                                     renderExtraFooter={() => (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
                                                             <Button
+                                                                className='custom-button'
                                                                 style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
                                                                 onClick={onClickCloseButton} // Close the picker
                                                             >
                                                                 Close
                                                             </Button>
                                                             <Button
+                                                                className='custom-button1'
                                                                 style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
@@ -3744,8 +3790,8 @@ const Dashboard = () => {
                                         }}
                                     >
                                         {[
-                                            { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
-                                            { title: 'Profit', value: profit1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
+                                            { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#00C853', dot: '#00C853' },
+                                            { title: 'Profit', value: profit1.current, prefix: '$', color: '#26A69A', dot: '#26A69A' },
                                             { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE' },
                                             { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117' },
                                             { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE' },
@@ -3826,12 +3872,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#A3F254',
+                                                                    backgroundColor: '#00C853',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
+                                                            <span style={{ color: '#00C853', fontWeight: 600 }}>Revenue</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? revenue1.current : 0}
@@ -3851,12 +3897,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#EC7117',
+                                                                    backgroundColor: '#26A69A',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
+                                                            <span style={{ color: '#26A69A', fontWeight: 600 }}>Profit</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? profit1.current : 0}
@@ -3875,12 +3921,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#5C58EE',
+                                                                    backgroundColor: '#3F51B5',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Amount Spent</span>
+                                                            <span style={{ color: '#3F51B5', fontWeight: 600 }}>Amount Spent</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? spend1.current : 0}
@@ -3899,12 +3945,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#EC7117',
+                                                                    backgroundColor: '#FFC107',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
+                                                            <span style={{ color: '#FFC107', fontWeight: 600 }}>Leads</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? leads1.current : 0}
@@ -3922,12 +3968,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#5C58EE',
+                                                                    backgroundColor: '#673AB7',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
+                                                            <span style={{ color: '#673AB7', fontWeight: 600 }}>Conversions</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? conversions1.current : 0}
@@ -3947,12 +3993,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#A3F254',
+                                                                    backgroundColor: '#AED581',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
+                                                            <span style={{ color: '#AED581', fontWeight: 600 }}>NCPL</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? ncpl1.current : 0}
@@ -3970,12 +4016,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#EC7117',
+                                                                    backgroundColor: '#FF9800',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
+                                                            <span style={{ color: '#FF9800', fontWeight: 600 }}>CPL</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current : 0 : 0}
@@ -3993,12 +4039,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#5C58EE',
+                                                                    backgroundColor: '#2196F3',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
+                                                            <span style={{ color: '#2196F3', fontWeight: 600 }}>CTR</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? ctr1.current : 0}
@@ -4016,12 +4062,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#EC7117',
+                                                                    backgroundColor: '#F44336',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
+                                                            <span style={{ color: '#F44336', fontWeight: 600 }}>CPC</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? cpc1.current : 0}
@@ -4039,12 +4085,12 @@ const Dashboard = () => {
                                                                     display: 'inline-block',
                                                                     height: '12px',
                                                                     width: '12px',
-                                                                    backgroundColor: '#5C58EE',
+                                                                    backgroundColor: '#00ACC1',
                                                                     borderRadius: '50%',
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
+                                                            <span style={{ color: '#00ACC1', fontWeight: 600 }}>RPC</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? rpc1.current : 0}
@@ -4343,8 +4389,8 @@ const Dashboard = () => {
                                         type="default"
                                         icon={<BarChartOutlined />}
                                         onClick={() => setShowGraphs(!showGraphs)}
-                                        onMouseEnter={() => setHovered(true)}
-                                        onMouseLeave={() => setHovered(false)}
+                                        // onMouseEnter={() => setHovered(true)}
+                                        // onMouseLeave={() => setHovered(false)}
                                         style={{
                                             border: '2px solid #4CAF50',
                                             color: showGraphs || hovered ? 'green' : theme === 'dark' ? '#f9fafb' : '#1f2937',
@@ -4472,6 +4518,12 @@ const Dashboard = () => {
                                                             paddingBottom: '4px',
                                                             fontSize: '13px',
                                                         },
+                                                    }}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false,
+                                                        enableRangeSelection: true,
                                                     }}
 
                                                     autoGroupColumnDef={autoGroupColumnDefOverAllReport}

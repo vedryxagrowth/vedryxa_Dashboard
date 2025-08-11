@@ -342,7 +342,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                     {(!isMediaBuyer && item.status !== "Approved" && item.status !== "Rejected") && (
                                         <div style={{ display: 'flex',justifyContent: "space-evenly", width: '100%' }}>
                                             <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",margin:'18px'}} onClick={() => handleApprove(item)}>Approve</Button>
-                                            <Button type='primary' danger style={{ margin:'18px', borderColor: ' #ff6666' }} onClick={() => handleRejectClick(item)}>Reject</Button>
+                                            <Button type='primary' danger style={{ margin:'18px', borderColor: ' #ff6666',backgroundColor:'#EC7117',backgroundColor:'#EC7117' }} onClick={() => handleRejectClick(item)}>Reject</Button>
                                         </div>
                                     )}
 

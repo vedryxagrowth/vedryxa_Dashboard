@@ -1,5 +1,5 @@
 // Topbar.js
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
 import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer, Menu } from "antd";
@@ -16,7 +16,7 @@ import {
   BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined, CalculatorOutlined,
   DoubleRightOutlined,
   DoubleLeftOutlined,
-  BellOutlined,
+  BellOutlined, SoundOutlined, AudioMutedOutlined
 } from '@ant-design/icons';
 import {
   HomeOutlined,
@@ -45,6 +45,7 @@ import { SlNotebook } from "react-icons/sl";
 import { LuNotebook } from "react-icons/lu";
 import { TfiWorld } from "react-icons/tfi";
 import { CloseOutlined } from '@ant-design/icons';
+import { FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 
 
 import { message, Popconfirm } from 'antd';
@@ -54,7 +55,7 @@ import { useGlobalLoading } from "../layout";
 
 const socket = io("https://prodapis.adsgoat.in");
 
-// const socket = io("http://localhost:8000");
+// const socket = io("https://prodapis.adsgoat.in");
 
 // const socket = io("https://prodapis.adsgoat.in", {
 //   transports: ["websocket"], // Forces websocket
@@ -116,6 +117,50 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   }
   const [showAll, setShowAll] = useState(false);
 
+  const [isMuted, setIsMuted] = useState(false);
+
+  // Fetch mute state from DB on mount
+  useEffect(() => {
+    const fetchNotificationSound = async () => {
+      try {
+        const response = await axios.get(`https://prodapis.adsgoat.in/getNotificationSound`, {
+          params: { email: userdetails?.email },
+        });
+
+        setIsMuted(response.data.notificationSound === 'true');
+      } catch (error) {
+        console.error('Failed to load notification sound setting:', error);
+      }
+    };
+
+    if (userdetails?.email) {
+      fetchNotificationSound();
+    }
+  }, [userdetails?.email]);
+ 
+  // Toggle mute
+  const toggleMute = async (e) => {
+    e.stopPropagation();
+    const newMuteState = !isMuted;
+    setIsMuted(newMuteState);
+
+    try {
+      await axios.put('https://prodapis.adsgoat.in/updateNotificationSound', {
+        email: userdetails?.email,
+        isMuted: newMuteState,
+      });
+    } catch (error) {
+      console.error('Failed to update sound setting:', error);
+    }
+  };
+
+  const isMutedRef = useRef(isMuted);
+
+  // Keep the ref updated with the latest value
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
   // const items = [
   //   { label: 'Connections', count: 3, color: 'orange' },
   //   { label: 'Reports', count: 3, color: 'purple' },
@@ -130,25 +175,48 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   // ];
 
   const onClickNotificationView = async (item, key, email) => {
-    const notificationData = await apiClient.put('/Notifications/Viewed', { email, key, item }, {
+    const notificationData = await apiClient.put('https://prodapis.adsgoat.in/Notifications/Viewed', { email, key, item }, {
       headers: {
         Authorization: localStorage.getItem('token'),
         accept: 'application/json',
       }
     })
   }
+
+  // const handleClearAll = async (e) => {
+  //   e.stopPropagation();
+  //   for (const [key, items] of Object.entries(notifications)) {
+  //     for (const item of items) {
+  //       await onClickNotificationView(item, key, userdetails?.email);
+  //     }
+  //   }
+  //   const cleared = {};
+  //   Object.keys(notifications).forEach((key) => {
+  //     cleared[key] = [];
+  //   });
+  //   setNotifications(cleared);
+  // };
+
   const handleClearAll = async (e) => {
     e.stopPropagation();
-    for (const [key, items] of Object.entries(notifications)) {
-      for (const item of items) {
-        await onClickNotificationView(item, key, userdetails?.email);
-      }
+  
+    try {
+      await apiClient.put('https://prodapis.adsgoat.in/Notifications/ViewedAll', {
+        email: userdetails?.email
+      }, {
+        headers: {
+          Authorization: localStorage.getItem('token'),
+          accept: 'application/json',
+        }
+      });
+  
+      // ✅ Re-fetch updated notifications from DB
+      const freshNotifications = await fetchNotifications();
+      prevNotificationsRef.current = freshNotifications?.notifications || {};
+      setNotifications(freshNotifications?.notifications || {});
+    } catch (err) {
+      console.error("❌ Failed to mark all as seen:", err);
     }
-    const cleared = {};
-    Object.keys(notifications).forEach((key) => {
-      cleared[key] = [];
-    });
-    setNotifications(cleared);
   };
 
 
@@ -173,6 +241,9 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       <Menu.Item>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ color: darkMode ? '#fff' : '#000' }}>Notifications</span>
+          <span onClick={toggleMute} style={{ display: 'flex', alignItems: 'center' }}>
+            {isMuted ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
+          </span> 
           {/* <strong style={{ color: darkMode ? '#fff' : '#000' }}>{Object.values(notifications)
             .filter(Array.isArray)
             .flat().length} NEW
@@ -260,42 +331,49 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 }}
               >
                 {label}
-                <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#000' : '#fff',border:'#EC7117' }} />
+                <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#000' : '#fff', border: '#EC7117' }} />
               </div>
 
+              {/* {expandedIndex === index &&
+                notifications[label]?.map((item, subIdx) => ( */}
               {expandedIndex === index &&
-                notifications[label]?.map((item, subIdx) => (
-                  <div
-                    key={`sub-${index}-${subIdx}`}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      padding: '12px 16px',
-                      marginBottom: '10px',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      color: darkMode ? '#fff' : '#444',
-                      minHeight: '80px',
-                    }}
-                  >
+                [...notifications[label]]
+                  .sort((a, b) =>
+                    moment(b.date, 'DD-MM-YYYY hh:mm A').valueOf() -
+                    moment(a.date, 'DD-MM-YYYY hh:mm A').valueOf()
+                  )
+                  .map((item, subIdx) => (
+                    <div
+                      key={`sub-${index}-${subIdx}`}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        padding: '12px 16px',
+                        marginBottom: '10px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: darkMode ? '#fff' : '#444',
+                        minHeight: '80px',
+                      }}
+                    >
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', fontSize: '12px', }}>
-                      <span style={{ fontSize: '12px' }}>{item.date}</span>
-                      <CloseOutlined
-                        style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '12px' }}
-                        onClick={(e) => {
-                          onClickNotificationView(item, label, userdetails?.email);
-                          e.stopPropagation();
-                          const updated = { ...notifications };
-                          updated[label] = updated[label].filter((_, i) => i !== subIdx);
-                          setNotifications(updated);
-                        }}
-                      />
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', fontSize: '12px', }}>
+                        <span style={{ fontSize: '12px' }}>{item.date}</span>
+                        <CloseOutlined
+                          style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '12px' }}
+                          onClick={(e) => {
+                            onClickNotificationView(item, label, userdetails?.email);
+                            e.stopPropagation();
+                            const updated = { ...notifications };
+                            updated[label] = updated[label].filter((_, i) => i !== subIdx);
+                            setNotifications(updated);
+                          }}
+                        />
 
-                    </div>
+                      </div>
 
-                    {/* <span>{item.message}</span> */}
-                    {/* <Popconfirm
+                      {/* <span>{item.message}</span> */}
+                      {/* <Popconfirm
             title="Delete Notification"
             description="Are you sure to delete this task?"
             onConfirm={confirm}
@@ -305,19 +383,20 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           >
             <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={()=> {console.log(item, label)}} />
           </Popconfirm> */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
 
-                      <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.title}</div>
-                          <div style={{ fontSize: '14px', color: '#333' }}>{item.message}</div>
-                          {/* {item.imageUrl?.includes('.mp4') ? (
+                        <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ fontWeight: 'bold', fontSize: '16px', color: darkMode ? '#fff' : '#333' }}>{item.title}</div>
+
+                            <div style={{ fontSize: '14px', color: darkMode ? '#fff' : '#333' }}>{item.message}</div>
+                            {/* {item.imageUrl?.includes('.mp4') ? (
                             <video
                               controls
                               src={item.imageUrl}
@@ -330,41 +409,41 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                               style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
                             />
                           )} */}
-                          {item.imageUrl && ( // check if imageUrl exists before rendering
-                            item.imageUrl.includes('.mp4') ? (
-                              <video
-                                controls
-                                src={item.imageUrl}
-                                style={{
-                                  width: '100%',
-                                  height: '200px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                }}
-                              />
-                            ) : (
-                              <img
-                                src={item.imageUrl}
-                                alt="Notification"
-                                style={{
-                                  width: '100%',
-                                  height: '200px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                }}
-                              />
-                            )
-                          )}
-                        </div>
+                            {item.imageUrl && ( // check if imageUrl exists before rendering
+                              item.imageUrl.includes('.mp4') ? (
+                                <video
+                                  controls
+                                  src={item.imageUrl}
+                                  style={{
+                                    width: '100%',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    borderRadius: '8px',
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={item.imageUrl}
+                                  alt="Notification"
+                                  style={{
+                                    width: '100%',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    borderRadius: '8px',
+                                  }}
+                                />
+                              )
+                            )}
+                          </div>
 
-                        <Divider
-                          style={{
-                            margin: '3px 0',
-                            borderColor: darkMode ? '#808080' : '#ccc',
-                          }}
-                        />
-                      </div>
-                      {/* <Eye
+                          <Divider
+                            style={{
+                              margin: '3px 0',
+                              borderColor: darkMode ? '#808080' : '#ccc',
+                            }}
+                          />
+                        </div>
+                        {/* <Eye
                         style={{
                           fontSize: '14px',
                           cursor: 'pointer',
@@ -375,15 +454,15 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                           onClickNotificationView(item, label, userdetails?.email);
                         }}
                       /> */}
+                      </div>
                     </div>
-                  </div>
 
-                  /* <span>{item.date}</span>
-                  <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={() => { onClickNotificationView(item, label, userdetails?.email) }} />
-                </div> */
+                    /* <span>{item.date}</span>
+                    <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={() => { onClickNotificationView(item, label, userdetails?.email) }} />
+                  </div> */
 
 
-                ))}
+                  ))}
             </div>
           ))}
         </div>
@@ -862,10 +941,14 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   const showAllAntdNotificationsSequentially = (notifications) => {
     notifications.forEach((notif, index) => {
       setTimeout(() => {
-        playNotificationSound(); // if needed
+        // ✅ use current mute state
+        if (!isMutedRef.current) {
+          playNotificationSound();
+        }
+  
         api.open({
           key: `notify-${index}`,
-          message: notif._category, // 👈 category as title
+          message: notif._category,
           description: notif.message,
           placement: "topRight",
           duration: 5,
@@ -876,6 +959,25 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       }, index * 500);
     });
   };
+  
+
+  // const showAllAntdNotificationsSequentially = (notifications) => {
+  //   notifications.forEach((notif, index) => {
+  //     setTimeout(() => {
+  //       playNotificationSound(); // if needed
+  //       api.open({
+  //         key: `notify-${index}`,
+  //         message: notif._category, // 👈 category as title
+  //         description: notif.message,
+  //         placement: "topRight",
+  //         duration: 5,
+  //         pauseOnHover: true,
+  //         showProgress: true,
+  //         className: themeForNotifications.current === "dark" ? "custom-dark-notification" : "",
+  //       });
+  //     }, index * 500);
+  //   });
+  // };
 
   const playNotificationSound = () => {
     const audio = new Audio(soundFile); // Create an audio object with the sound file
@@ -950,7 +1052,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   // fetchNotifications always returns array
   const fetchNotifications = async () => {
     try {
-      const res = await apiClient.get(`/notifications/${session.user.email}`);
+      const res = await apiClient.get(`https://prodapis.adsgoat.in/notifications/${session.user.email}`);
       setNotifications(res.data); // Update state with fetched notifications
       onComplete();
       return res.data || {};
@@ -2062,7 +2164,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 </Form.Item>
 
                 <div style={{ textAlign: 'right', marginBottom: '15px' }}>
-                  <a style={{ color: '#4CAF50', fontSize: '12px',cursor: 'text', }}>
+                  <a style={{ color: '#4CAF50', fontSize: '12px', cursor: 'text', }}>
                     Forgot password?
                   </a>
                 </div>
@@ -2076,12 +2178,12 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                       borderColor: '#4CAF50',
                       height: '36px',
                       fontWeight: 'bold',
-                    //  cursor: 'not-allowed',
-                      transition: 'none', 
-                      pointerEvents: 'none', 
-                      
+                      //  cursor: 'not-allowed',
+                      transition: 'none',
+                      pointerEvents: 'none',
+
                     }}
-                   
+
                   >
                     Sign In
                   </Button>

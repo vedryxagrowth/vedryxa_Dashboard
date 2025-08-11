@@ -59,34 +59,77 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const handleMultipleFileUpload = async (files, userdetails) => {
-    if (!files.length || !userdetails?.userName) {
+  // const handleMultipleFileUpload = async (files, userdetails) => {
+  //   if (!files.length || !userdetails?.userName) {
+  //     message.error("No files or user details!");
+  //     return [];
+  //   }
+  //   const uploadDate = moment().format("YYYY-MM-DD");
+  //   const uploadedUrls = [];
+  //   for (const file of files) {
+  //     const extension = file.name.split(".").pop();
+  //     const uniqueFilename = `${uuidv4()}.${extension}`;
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("uploadDate", uploadDate);
+  //     formData.append("filename", uniqueFilename);
+  //     try {
+  //       const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+  //         headers: { Authorization: localStorage.getItem("token") },
+  //       });
+  //       const imageUrl = response.data?.imageUrl;
+  //       if (imageUrl) uploadedUrls.push(imageUrl);
+  //       else message.error(`No URL returned for ${file.name}`);
+  //     } catch (error) {
+  //       console.error(`Upload failed for ${file.name}:`, error.response?.data || error.message);
+  //       message.error(`Failed to upload ${file.name}`);
+  //     }
+  //   }
+  //   return uploadedUrls;
+  // };
+  
+const handleMultipleFileUpload = async (files, userdetails) => {
+    if (!files?.length || !userdetails?.userName) {
       message.error("No files or user details!");
       return [];
     }
+
     const uploadDate = moment().format("YYYY-MM-DD");
     const uploadedUrls = [];
+
     for (const file of files) {
       const extension = file.name.split(".").pop();
       const uniqueFilename = `${uuidv4()}.${extension}`;
+      const finalKey = `StickyNotes/${userdetails.userName}/${uniqueFilename}`; 
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("uploadDate", uploadDate);
-      formData.append("filename", uniqueFilename);
+      formData.append("filename", finalKey);
+      formData.append("uploadDate", uploadDate); 
+
       try {
         const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
-          headers: { Authorization: localStorage.getItem("token") },
+          headers: {
+            Authorization: localStorage.getItem("token"),
+            username: userdetails.userName, 
+          },
         });
+
         const imageUrl = response.data?.imageUrl;
-        if (imageUrl) uploadedUrls.push(imageUrl);
-        else message.error(`No URL returned for ${file.name}`);
+        if (imageUrl) {
+          uploadedUrls.push(imageUrl);
+        } else {
+          message.error(`No URL returned for ${file.name}`);
+        }
       } catch (error) {
         console.error(`Upload failed for ${file.name}:`, error.response?.data || error.message);
         message.error(`Failed to upload ${file.name}`);
       }
     }
+
     return uploadedUrls;
   };
+
 
   const saveToDB = (updated) => {
     setNotes(updated);
@@ -120,17 +163,37 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     saveToDB(updated);
   };
 
+  // const updateImage = async (id, files) => {
+
+  //   const uploadedUrls = await handleMultipleFileUpload(files, userdetails);
+  //   if (!uploadedUrls.length) return;
+  //   if (openNote?.id === id) {
+  //     setOpenNote({ ...openNote, images: [...(openNote.images || []), ...uploadedUrls] });
+  //   }
+  //   const updated = notes.map(n =>
+  //     n.id === id ? { ...n, images: [...(n.images || []), ...uploadedUrls] } : n
+  //   );
+  //   saveToDB(updated);
+  // };
   const updateImage = async (id, files) => {
     const uploadedUrls = await handleMultipleFileUpload(files, userdetails);
+
     if (!uploadedUrls.length) return;
+
     if (openNote?.id === id) {
-      setOpenNote({ ...openNote, images: [...(openNote.images || []), ...uploadedUrls] });
+      setOpenNote(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...uploadedUrls],
+      }));
     }
+
     const updated = notes.map(n =>
       n.id === id ? { ...n, images: [...(n.images || []), ...uploadedUrls] } : n
     );
+
     saveToDB(updated);
   };
+
 
   const deleteImage = (noteId, imgIndex) => {
     if (openNote?.id === noteId) {
@@ -163,11 +226,19 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
+      message.open({
+        type: 'success',
+        content: 'Content copied to clipboard!',
+        className: theme === 'dark' ? 'dark-message' : '',
+      });
       console.log('Text copied to clipboard');
-      message.success("Content copied to clipboard!");
     }).catch(err => {
       console.error('Failed to copy text: ', err);
-      message.error("Failed to copy content.");
+      message.open({
+        type: 'error',
+        content: `Failed to copy content: ${err.message || 'Clipboard error'}`,
+        className: theme === 'dark' ? 'dark-message1' : '',
+      });
     });
   };
 
@@ -372,34 +443,26 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
         //     </div>
         //   </div>
         // </Draggable>
-        <Draggable defaultPosition={{ x: -840, y: 2 }}>
-          <div
-            style={{
-              position: "absolute",
-              top: 50,
-              left: 50,
-              width: "350px",
-              height: "340px",
-              backgroundColor: openNote.color,
-              borderRadius: "8px",
-              boxShadow: "0 1px 5px rgba(0,0,0,0.2)",
-              zIndex: 9998,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            {/* Header */}
+        <Draggable defaultPosition={{ x: -800, y: 50 }} cancel=".no-drag">
+          <div style={{
+            position: "absolute",
+            backgroundColor: openNote.color,
+            width: "350px",
+            height: "340px",
+            borderRadius: "8px",
+            boxShadow: "0 1px 5px rgba(0,0,0,0.2)",
+            zIndex: 9998,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden", // outer box should not scroll
+          }}>
+            {/* Note Header */}
             <div style={{
-              flexShrink: 0,
-              padding: "10px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderBottom: "1px solid rgba(0,0,0,0.1)"
+              display: "flex", justifyContent: "space-between",
+              alignItems: "center", padding: "10px", borderBottom: "1px solid rgba(0,0,0,0.1)", position: "relative"
             }}>
               <span style={{ fontSize: "12px", color: "#555" }}>{openNote.timestamp}</span>
-              <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <div>
                   <Button onClick={(e) => {
                     e.stopPropagation();
@@ -412,39 +475,66 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
                       fontSize: "14px",
                       marginLeft: '10px'
                     }}>
-                      < CopyOutlined style={{ color: theme === 'dark' ? '#000' : '#000'}}/>
-                    </Button>
+                    <div className={`icon-wrapper ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
+                      <CopyOutlined className="copy-icon" />
+                    </div>
+ 
+                  </Button>
                 </div>
                 <div
-                  style={{ cursor: "pointer", fontSize: "18px", color: "#333", marginRight: '10px' }}
+                  className="floating-color-btn"
+                  style={{ cursor: "pointer", fontSize: "18px", color: '#333' }}
                   onClick={(e) => {
                     e.stopPropagation();
                     setColorMenuVisible(!colorMenuVisible);
                   }}
-                >
-                  ⋯
-                </div>
-                <button onClick={closeCurrentNote} style={{ border: "none", background: "none", cursor: "pointer", fontSize: "16px",color:'#333' }}>✖</button>
+                >⋯</div>
+                <button onClick={closeCurrentNote} style={{
+                  background: "none", border: "none", cursor: "pointer", fontSize: "16px",color:'#000'
+                }}>✖</button>
               </div>
+ 
+              {colorMenuVisible && (
+                <div className="floating-color-menu" style={{
+                  position: "absolute", top: "38px", right: "35px",
+                  background: "#fff", border: "1px solid #ccc", borderRadius: "6px",
+                  display: "flex", gap: "4px", padding: "6px", zIndex: 9999
+                }}>
+                  {colorOptions.map((clr, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        updateColor(openNote.id, clr);
+                        setColorMenuVisible(false);
+                      }}
+                      style={{
+                        width: "20px", height: "20px", borderRadius: "4px",
+                        backgroundColor: clr,
+                        border: clr === openNote.color ? "2px solid black" : "1px solid #ccc",
+                        cursor: "pointer"
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-
-            {/* Scrollable body */}
-            <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "10px",
-              }}
-            >
+ 
+            {/* Note Body */}
+            <div style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "10px",
+            }}>
               <textarea
+                className="no-drag"
                 ref={textAreaRef}
                 value={openNote.text}
                 onChange={(e) => updateText(openNote.id, e.target.value)}
+                placeholder="Take a note..."
                 onInput={(e) => {
                   e.target.style.height = "auto";
                   e.target.style.height = `${e.target.scrollHeight}px`;
                 }}
-                placeholder="Take a note..."
                 style={{
                   width: "100%",
                   background: "transparent",
@@ -453,21 +543,18 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
                   resize: "none",
                   fontSize: "14px",
                   color: "#000",
-                  overflow: "hidden",
+                  overflow: "hidden", // ⬅️ Important: disables inner scroll
                 }}
               />
-
               {openNote.images?.map((imgSrc, idx) => (
-                <div key={idx} style={{ position: "relative", marginTop: "6px" }}>
+                <div key={idx} style={{ position: "relative", marginBottom: "6px" }}>
                   <img
                     src={imgSrc}
+                    alt={`note-img-${idx}`}
                     onClick={() => setSelectedImage(imgSrc)}
                     style={{
-                      width: "100%",
-                      maxHeight: "80px",
-                      objectFit: "cover",
-                      borderRadius: "4px",
-                      cursor: "pointer"
+                      width: "100%", maxHeight: "80px", objectFit: "cover",
+                      borderRadius: "4px", cursor: "pointer"
                     }}
                   />
                   <button
@@ -482,39 +569,37 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
                 </div>
               ))}
             </div>
-
-            {/* Footer */}
-            <div
-              style={{
-                flexShrink: 0,
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                padding: "10px",
-                borderTop: "1px solid rgba(0,0,0,0.1)",
-                gap: "10px"
-              }}
-            >
-              <label style={{ cursor: "pointer" }} title="Insert image">
-                <PictureOutlined />
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  style={{ display: "none" }}
-                  onChange={(e) => updateImage(openNote.id, e.target.files)}
-                />
+ 
+            {/* Note Footer */}
+            <div style={{
+              display: "flex", justifyContent: "flex-end", alignItems: "center",
+              padding: "10px", borderTop: "1px solid rgba(0,0,0,0.1)"
+            }}>
+              <label title="Insert image" style={{ background: "none", border: "none", cursor: "pointer" }}>
+ 
+                <div className={`icon-wrapper ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
+                  <PictureOutlined className="copy-icon" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    style={{ display: "none" }}
+                    onChange={(e) => updateImage(openNote.id, e.target.files)}
+                  />
+                </div>
               </label>
               <button
-                onClick={() => deleteNote(openNote.id)}
+                title="Delete Note"
                 style={{
-                  background: "none",
-                  border: "none",
-                  color: "red",
-                  cursor: "pointer",
+                  background: "none", border: "none", cursor: "pointer",
+                  color: "red", marginLeft: "10px"
+ 
                 }}
+                onClick={() => deleteNote(openNote.id)}
               >
-                <DeleteOutlined />
+                <div className={`icon-wrapper ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
+                  <DeleteOutlined className="copy-icon1" />
+                </div>
               </button>
             </div>
           </div>

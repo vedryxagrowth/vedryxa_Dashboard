@@ -733,6 +733,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
         // }
 
     };
+    
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
         params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });

@@ -1217,15 +1217,52 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         setSelectedImages([]);
         selectedImagesRef.current = [];
     };
-    const [isHoveredEdit, setIsHoveredEdit] = useState(false); 
-    const [isHoveredRename, setIsHoveredRename] = useState(false); 
-    const [isHoveredDuplicate, setIsHoveredDuplicate] = useState(false); 
-    const [isHoveredCopy, setIsHoveredCopy] = useState(false); 
-    const [isHoveredCut, setIsHoveredCut] = useState(false); 
-    const [isHoveredDelete, setIsHoveredDelete] = useState(false); 
-   const [isHoveredRestore, setIsHoveredRestore] = useState(false);
+    const [isHoveredEdit, setIsHoveredEdit] = useState(false);
+    const [isHoveredRename, setIsHoveredRename] = useState(false);
+    const [isHoveredDuplicate, setIsHoveredDuplicate] = useState(false);
+    const [isHoveredCopy, setIsHoveredCopy] = useState(false);
+    const [isHoveredCut, setIsHoveredCut] = useState(false);
+    const [isHoveredDelete, setIsHoveredDelete] = useState(false);
+    const [isHoveredRestore, setIsHoveredRestore] = useState(false);
 
-
+  const getMenuPosRightOfTarget = (event) => {
+        const gapX = 12; // used only for right-side spacing
+        const gapY = 8;
+    
+        const targetRect = event.currentTarget.getBoundingClientRect();
+        const menuWidth = 180;
+        const menuHeight = 160;
+    
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+    
+        let x, y;
+    
+        // Determine if there's space to the right
+        const fitsRight = targetRect.right + menuWidth + gapX <= vw;
+        const fitsBelow = targetRect.bottom + gapY + menuHeight <= vh;
+    
+        // If it fits on the right, add small gap
+        if (fitsRight) {
+            x = targetRect.right + gapX;
+        } else {
+            // If not, stick the menu directly against the left of the file — no gap
+            x = targetRect.left - menuWidth + 200;
+        }
+    
+        // Vertical logic (with small gap always below)
+        if (fitsBelow) {
+            y = targetRect.bottom + gapY;
+        } else {
+            y = targetRect.top - menuHeight;
+        }
+    
+        // Final clamp to viewport
+        x = Math.max(0, Math.min(x, vw - menuWidth));
+        y = Math.max(0, Math.min(y, vh - menuHeight));
+    
+        return { x, y };
+    };
 
     return (
         <div
@@ -1476,19 +1513,19 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             onChange={handleKeyChange}
                             value={selectedKey}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            
+
                         >
                             {options.length > 0 ? (
                                 options.map(option => (
-                                    <Option key={option.value} value={option.value}   title={null}>
+                                    <Option key={option.value} value={option.value} title={null}>
                                         {option.label}
-                                        
+
                                     </Option>
                                 ))
                             ) : (
                                 <Option disabled></Option>
                             )}
-                         
+
                         </Select>
                     </Col>
 
@@ -1548,7 +1585,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 {option.status === "Active" ? (
                                                     <CheckCircleFilled style={{ color: '#91C25F', fontSize: '15px' }} className='black-icon-active-1' />
                                                 ) : (
-                                                    <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }}className='black-icon-pause-1' />
+                                                    <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }} className='black-icon-pause-1' />
                                                 )}
                                             </span>
                                         </div>
@@ -1582,7 +1619,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         </ConfigProvider>
                     </Col>
 
-                    <Col>
+                    {/* <Col>
                         <Button
                             onClick={showDrawer}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1619,6 +1656,70 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                 </Badge>
                             )}
                         </Button>
+                    </Col> */}
+                    <Col>
+                        {fromCampaigns === true ? (
+
+                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border: 'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#91C25F', color: theme === 'dark' ? 'black' : undefined }}>
+                                Submit
+                                {checkboxSelected.length > 0 && (
+                                    <Badge
+                                        style={{
+                                            color: 'red',
+                                            position: 'absolute', // 🔹 Keeps it from affecting button width
+                                            top: '-5px',
+                                            right: '-5px',
+                                            fontSize: '12px',
+                                            padding: '2px 6px',
+                                            borderRadius: '50%' // 🔹 Makes it circular }}
+                                        }}
+                                        className="Badge"
+                                        variant="destructive"
+                                    >
+                                        {checkboxSelected.length}
+                                    </Badge>
+                                )}
+                            </Button>
+                        ) :
+                            <Button
+                                onClick={showDrawer}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                icon={<PlusOutlined style={{
+                                    color: theme === 'dark' ? '#ffffff' : 'black',
+                                }} />}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    border: '1px solid #4caf50',
+                                    maxWidth: '160px',
+                                    backgroundColor: 'transparent',
+                                    color: theme === 'dark' ? '#ffffff' : 'black',
+                                    transition: 'background 0.3s',
+                                    marginLeft: '0px'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                New campaign
+                                {checkboxSelected.length > 0 && (
+                                    <Badge
+                                        style={{
+                                            color: 'red',
+                                            position: 'absolute',
+                                            top: '-5px',
+                                            right: '-5px',
+                                            fontSize: '12px',
+                                            padding: '2px 6px',
+                                            borderRadius: '50%'
+                                        }}
+                                        className="Badge"
+                                        variant="destructive"
+                                    >
+                                        {checkboxSelected.length}
+                                    </Badge>
+                                )}
+                            </Button>
+                        }
                     </Col>
                 </Row>
 
@@ -1769,19 +1870,37 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         e.dataTransfer.setData("drag-item-name", image.name);
                                     }}
                                     onDragEnd={() => setDraggableUid(null)}
+                                    // onContextMenu={(e) => {
+                                    //     e.preventDefault();
+                                    //     e.stopPropagation();
+                                    //     const isMultiSelected = selectedImages.length > 1 && selectedImages.some(img => img.uid === image.uid);
+                                    //     setContextMenu({
+                                    //         visible: true,
+                                    //         x: e.clientX,
+                                    //         y: e.clientY,
+                                    //         target: image,
+                                    //         isFolder: image.isFolder,
+                                    //         selectedList: isMultiSelected ? selectedImages : null,
+                                    //     });
+                                    // }}
                                     onContextMenu={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
+
                                         const isMultiSelected = selectedImages.length > 1 && selectedImages.some(img => img.uid === image.uid);
+
+                                        const pos = getMenuPosRightOfTarget(e);
+
                                         setContextMenu({
                                             visible: true,
-                                            x: e.clientX,
-                                            y: e.clientY,
+                                            x: pos.x,
+                                            y: pos.y,
                                             target: image,
                                             isFolder: image.isFolder,
                                             selectedList: isMultiSelected ? selectedImages : null,
                                         });
                                     }}
+
                                     style={{
                                         position: 'relative',
                                         marginLeft: '0px',
@@ -2204,20 +2323,32 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     <div
                         className="custom-context-menu"
                         ref={menuRef}
+                        // style={{
+                        //     position: 'fixed',
+                        //     top: (contextMenu.y + menuHeight > window.innerHeight
+                        //         ? contextMenu.y - menuHeight
+                        //         : contextMenu.y),
+                        //     left: contextMenu.x,
+                        //     background: theme === 'dark' ? '#000' : '#fff',
+                        //     boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                        //     zIndex: 9999,
+                        //     borderRadius: '6px',
+                        //     padding: '4px 0',
+                        //     fontWeight: 500,
+                        //     cursor: 'pointer',
+                        //     minWidth: '160px'
+                        // }}
                         style={{
                             position: 'fixed',
-                            top: (contextMenu.y + menuHeight > window.innerHeight
-                                ? contextMenu.y - menuHeight
-                                : contextMenu.y),
-                            left: contextMenu.x,
-                            background: theme === 'dark' ? '#000' : '#fff',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                            top: `${contextMenu.y}px`,
+                            left: `${contextMenu.x}px`,
                             zIndex: 9999,
+                            width: '180px',
+                            background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                             borderRadius: '6px',
-                            padding: '4px 0',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            minWidth: '160px'
+                            padding: '8px 0'
                         }}
                         onMouseLeave={() => setContextMenu({ ...contextMenu, visible: false })}
                     >
@@ -2328,7 +2459,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     style={{
                                         padding: '8px 12px',
                                         color: 'red',
-                                        backgroundColor: isHoveredDelete ? '#e6f7ff' : 'transparent', 
+                                        backgroundColor: isHoveredDelete ? '#e6f7ff' : 'transparent',
                                         cursor: 'pointer',
                                     }}
                                     onClick={async () => {
@@ -2352,7 +2483,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         }
                                         setContextMenu({ ...contextMenu, visible: false });
                                     }}
-                                    onMouseEnter={() => setIsHoveredDelete(true)} 
+                                    onMouseEnter={() => setIsHoveredDelete(true)}
                                     onMouseLeave={() => setIsHoveredDelete(false)}
                                 >
                                     ❌ Delete Permanently
@@ -2363,9 +2494,9 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     style={{
                                         padding: '8px 12px',
                                         backgroundColor: isHoveredRestore ? '#e6f7ff' : 'transparent',
-                                        color: isHoveredRestore ? '#333' : 'inherit', 
+                                        color: isHoveredRestore ? '#333' : 'inherit',
                                         cursor: 'pointer',
-                                        
+
                                     }}
                                     onClick={async () => {
                                         const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
@@ -2397,7 +2528,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                         setContextMenu({ ...contextMenu, visible: false });
                                     }}
-                                    onMouseEnter={() => setIsHoveredRestore(true)} 
+                                    onMouseEnter={() => setIsHoveredRestore(true)}
                                     onMouseLeave={() => setIsHoveredRestore(false)}
                                 >
                                     🔁 Restore
@@ -2557,18 +2688,18 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             <div
                                                 style={{
                                                     padding: '8px 12px',
-                                                    backgroundColor: isHoveredEdit ? '#e6f7ff' : 'transparent', 
-                                                    color: isHoveredEdit ? '#333' : 'inherit', 
+                                                    backgroundColor: isHoveredEdit ? '#e6f7ff' : 'transparent',
+                                                    color: isHoveredEdit ? '#333' : 'inherit',
                                                     cursor: 'pointer',
-                                                   
+
                                                 }}
                                                 onClick={() => {
                                                     handleEditFile(contextMenu.target);
                                                     setSelectedImages([]);
                                                     setContextMenu({ ...contextMenu, visible: false });
                                                 }}
-                                                onMouseEnter={() => setIsHoveredEdit(true)} 
-                                                onMouseLeave={() => setIsHoveredEdit(false)} 
+                                                onMouseEnter={() => setIsHoveredEdit(true)}
+                                                onMouseLeave={() => setIsHoveredEdit(false)}
                                             >
                                                 <MdEdit style={{ fontSize: '16px', marginRight: '8px' }} />
                                                 Edit
@@ -2578,10 +2709,10 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             <div
                                                 style={{
                                                     padding: '8px 12px',
-                                                    backgroundColor: isHoveredRename ? '#e6f7ff' : 'transparent', 
-                                                    color: isHoveredRename ? '#333' : 'inherit', 
+                                                    backgroundColor: isHoveredRename ? '#e6f7ff' : 'transparent',
+                                                    color: isHoveredRename ? '#333' : 'inherit',
                                                     cursor: 'pointer',
-                                                    
+
                                                 }}
                                                 onClick={() => {
                                                     setEditingUid(contextMenu.target.uid);
@@ -2589,8 +2720,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                     setSelectedImages([]);
                                                     setContextMenu({ ...contextMenu, visible: false });
                                                 }}
-                                                onMouseEnter={() => setIsHoveredRename(true)} 
-                                                onMouseLeave={() => setIsHoveredRename(false)} 
+                                                onMouseEnter={() => setIsHoveredRename(true)}
+                                                onMouseLeave={() => setIsHoveredRename(false)}
                                             >
                                                 <MdDriveFileRenameOutline style={{ fontSize: '16px', marginRight: '8px' }} />
                                                 Rename
@@ -2600,18 +2731,18 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             <div
                                                 style={{
                                                     padding: '8px 12px',
-                                                    backgroundColor: isHoveredDuplicate ? '#e6f7ff' : 'transparent', 
-                                                    color: isHoveredDuplicate ? '#333' : 'inherit', 
+                                                    backgroundColor: isHoveredDuplicate ? '#e6f7ff' : 'transparent',
+                                                    color: isHoveredDuplicate ? '#333' : 'inherit',
                                                     cursor: 'pointer',
-        
+
                                                 }}
                                                 onClick={() => {
                                                     handleCloneFile(contextMenu.target);
                                                     setSelectedImages([]);
                                                     setContextMenu({ ...contextMenu, visible: false });
                                                 }}
-                                                onMouseEnter={() => setIsHoveredDuplicate(true)} 
-                                                onMouseLeave={() => setIsHoveredDuplicate(false)} 
+                                                onMouseEnter={() => setIsHoveredDuplicate(true)}
+                                                onMouseLeave={() => setIsHoveredDuplicate(false)}
                                             >
                                                 <HiOutlineDuplicate style={{ fontSize: '16px', marginRight: '8px' }} />
                                                 Duplicate
@@ -2622,16 +2753,16 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 style={{
                                                     padding: '8px 12px',
                                                     color: 'red',
-                                                    backgroundColor: isHoveredDelete ? '#e6f7ff' : 'transparent', 
+                                                    backgroundColor: isHoveredDelete ? '#e6f7ff' : 'transparent',
                                                     cursor: 'pointer',
-                                            
+
                                                 }}
                                                 onClick={() => {
                                                     showDeleteModal(contextMenu.target);
                                                     setSelectedImages([]);
                                                     setContextMenu({ ...contextMenu, visible: false });
                                                 }}
-                                                onMouseEnter={() => setIsHoveredDelete(true)} 
+                                                onMouseEnter={() => setIsHoveredDelete(true)}
                                                 onMouseLeave={() => setIsHoveredDelete(false)}
                                             >
                                                 🗑️ Move to Bin
@@ -2641,18 +2772,18 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             <div
                                                 style={{
                                                     padding: '8px 12px',
-                                                    backgroundColor: isHoveredCopy ? '#e6f7ff' : 'transparent', 
-                                                    color: isHoveredCopy ? '#333' : 'inherit', 
+                                                    backgroundColor: isHoveredCopy ? '#e6f7ff' : 'transparent',
+                                                    color: isHoveredCopy ? '#333' : 'inherit',
                                                     cursor: 'pointer',
-                                                    
+
                                                 }}
                                                 onClick={() => {
                                                     setClipboardFile([{ ...contextMenu.target, action: 'copy', isFolder: false }]);
                                                     setSelectedImages([]);
                                                     setContextMenu({ ...contextMenu, visible: false });
                                                 }}
-                                                onMouseEnter={() => setIsHoveredCopy(true)} 
-                                                onMouseLeave={() => setIsHoveredCopy(false)} 
+                                                onMouseEnter={() => setIsHoveredCopy(true)}
+                                                onMouseLeave={() => setIsHoveredCopy(false)}
                                             >
                                                 <CopyOutlined style={{ marginRight: 8 }} />
                                                 Copy
@@ -2662,10 +2793,10 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             <div
                                                 style={{
                                                     padding: '8px 12px',
-                                                    backgroundColor: isHoveredCut ? '#e6f7ff' : 'transparent', 
-                                                    color: isHoveredCut ? '#333' : 'inherit', 
+                                                    backgroundColor: isHoveredCut ? '#e6f7ff' : 'transparent',
+                                                    color: isHoveredCut ? '#333' : 'inherit',
                                                     cursor: 'pointer',
-                                                    
+
                                                 }}
                                                 onClick={() => {
                                                     setClipboardFile([{ ...contextMenu.target, action: 'cut', isFolder: false }]);
@@ -2673,8 +2804,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                     setSelectedImages([]);
                                                     setContextMenu({ ...contextMenu, visible: false });
                                                 }}
-                                                onMouseEnter={() => setIsHoveredCut(true)} 
-                                                onMouseLeave={() => setIsHoveredCut(false)} 
+                                                onMouseEnter={() => setIsHoveredCut(true)}
+                                                onMouseLeave={() => setIsHoveredCut(false)}
                                             >
                                                 ✂️ Cut
                                             </div>
