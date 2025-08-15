@@ -915,6 +915,41 @@ const AdsetCard = ({
             )
             // </div>
           })}
+          {!restrictedEmails.includes(userdetails.email) && (
+                <Col span={12} style={{ flex: "0 0 auto" }}>
+                  <Card
+                    bordered={false}
+                    style={{
+                      maxWidth: '280px',
+                      height: '100%',
+                      minHeight: '300px', // matches height with other ad cards
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      backgroundColor: theme === "dark" ? "#333" : '#f5f5f5',
+                      cursor: "pointer"
+                    }}
+                  >
+                    <Button
+                      onClick={createnewads} 
+                      type="primary"
+                      icon={<PlusOutlined className="black-icon" />}
+                      style={{
+                        backgroundColor:'#91C25F',
+                        color: "#000",
+                        borderColor: '#91C25F',
+                        borderWidth: "0px",
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      New ad
+                    </Button>
+                  </Card>
+                </Col>
+            )}
         </Row>
       )}
       <Modal
@@ -1241,41 +1276,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
                   />
                 </Col>
               ))}
-              {!restrictedEmails.includes(userdetails.email) && (
-                    <Col span={12} style={{ flex: "0 0 auto" }}>
-                      <Card
-                        bordered={false}
-                        style={{
-                          maxWidth: '280px',
-                          height: '100%',
-                          minHeight: '300px', // matches height with other ad cards
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                          backgroundColor: theme === "dark" ? "#333" : '#f5f5f5',
-                          cursor: "pointer"
-                        }}
-                      >
-                        <Button
-                          onClick={createnewads} 
-                          type="primary"
-                          icon={<PlusOutlined className="black-icon" />}
-                          style={{
-                            backgroundColor:'#91C25F',
-                            color: "#000",
-                            borderColor: '#91C25F',
-                            borderWidth: "0px",
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                          }}
-                        >
-                          New ad
-                        </Button>
-                      </Card>
-                    </Col>
-              )}
+             
         </Row>
       </div>
       {/* <div style={{ display: "flex", justifyContent: "space-between" }}>
