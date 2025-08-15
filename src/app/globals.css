@@ -2978,8 +2978,6 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: white !important;
 }
 
-
-
 /* Tag background and text for selected items in dark theme */
 .dark-theme-category .ant-select-selector {
   background-color: #444 !important; /* background of the full selector */
@@ -3405,10 +3403,10 @@ select:focus,
 }
 
 .custom-button:hover {
-  color: #4caf50 !important; 
+  color: #4caf50 !important;
 }
 .custom-button1:hover {
-  color: #fff !important; 
+  color: #fff !important;
 }
 
 /* Reduce header height */
@@ -3417,8 +3415,8 @@ select:focus,
   padding-bottom: 6px !important;
   height: 50px !important;
   line-height: 20px !important;
-  font-size: 13px; 
-  color: #fff !important; 
+  font-size: 13px;
+  color: #fff !important;
 }
 .custom-input-dark input {
   color: #fff !important;
@@ -3466,22 +3464,21 @@ select:focus,
   color: #222 !important;
   border: none !important;
   padding: 12px 16px !important;
-  background-color: #f6fbf7 !important;  /* light header */
+  background-color: #f6fbf7 !important; /* light header */
   border-radius: 8px !important;
   margin-bottom: 12px !important;
 }
 
-
 .custom-collapse-light .ant-collapse-content {
   background-color: transparent !important;
-  border: 1px solid #e5e7eb !important; 
+  border: 1px solid #e5e7eb !important;
   padding: 5px 5px 10px !important;
-  border-radius: 8px !important; 
+  border-radius: 8px !important;
 }
 
 /* Inner box inside expanded panel */
 .custom-collapse-light .ant-collapse-content-box {
-  background-color: transparent !important; 
+  background-color: transparent !important;
   color: #000 !important;
   padding: 0 !important;
 }
@@ -3615,13 +3612,11 @@ select:focus,
 /* Active tab */
 .left-pill-tabs .ant-tabs-tab-active {
   background-color: #ffffff;
-  
-  
 }
 
 /* Active tab text */
 .left-pill-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #4CAF50 !important;
+  color: #4caf50 !important;
   font-weight: 500;
   padding: 10px;
 }
@@ -3639,14 +3634,13 @@ select:focus,
 
 /* 🔥 Dark mode support */
 .pill-tabs-dark .ant-tabs-nav-list {
-  background-color: #1E1E1E;
+  background-color: #1e1e1e;
 }
 
 .pill-tabs-dark .ant-tabs-tab {
   color: #fff;
 }
-
 .pill-tabs-dark .ant-tabs-tab-active {
   background-color: #555;
-  color: #4CAF50 !important;
+  color: #4caf50 !important;
 }
