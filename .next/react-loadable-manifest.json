@@ -83,6 +83,14 @@
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
+  "app\\Campaigns\\camp-components\\newAdsets.js -> ./Fabricanvas": {
+    "id": 170,
+    "files": [
+      "static/chunks/225-9f1be4e1a6c8bfc5.js",
+      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/170.59cd91d73477d862.js"
+    ]
+  },
   "app\\Creatives\\components\\text.js -> ../../Campaigns/camp-components/Fabricanvas": {
     "id": 170,
     "files": [

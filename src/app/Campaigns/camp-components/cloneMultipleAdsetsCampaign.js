@@ -6717,9 +6717,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
     }
   }, [accountNumber, visible]);
 
-  useEffect(() => {
-    fetchDraftDeatils();
-  }, [refreshDraft]);
+//   useEffect(() => {
+//     fetchDraftDeatils();
+//   }, [refreshDraft]);
 
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
@@ -7428,6 +7428,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
           ]);
           isManual !== "manual" && setIsManual(false);
           newSelectedRef.current = null; // Reset the newSelectedRef
+          changeRRefrst()
         } else {
           console.error("Failed to submit form data");
         }
