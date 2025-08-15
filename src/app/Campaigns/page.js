@@ -2261,7 +2261,7 @@ const App = () => {
                 okText="Yes"
                 cancelText="No"
                 disabled={record.fbstatus !== "No-Live"}
-  		okButtonProps={{
+                okButtonProps={{
                   style: { backgroundColor: "#28a745", color: "#fff" }
                 }}
               >
@@ -2306,7 +2306,7 @@ const App = () => {
         )
        
       },
-    }, 
+    },  
     {
       title: "Budget",
       dataIndex: "Daily_amount",
