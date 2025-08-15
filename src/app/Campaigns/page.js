@@ -1429,6 +1429,158 @@ const App = () => {
     setViewCloneMultipleAdsetDataDrawerVisible(true);
   };
 
+  // Safely stringify any error (string / object)
+  const normalizeError = (err) => {
+    if (!err) return '';
+    if (typeof err === 'string') return err;
+    if (typeof err?.message === 'string') return err.message;
+    try {
+      // Short, single-line JSON
+      const s = JSON.stringify(err);
+      return s?.length > 200 ? s.slice(0, 200) + '…' : s;
+    } catch {
+      return String(err);
+    }
+  };
+
+  // Build tooltip JSX for a record
+  const renderErrorTooltip = (record, theme = 'light') => {
+    const campaignErr = record?.campaignlevel_error;
+    const adsetErrs = Array.isArray(record?.adsetErrors) ? record.adsetErrors : [];
+    const adErrsFlat = Array.isArray(record?.adErrors) ? record.adErrors : [];
+    const adErrsVerbose = Array.isArray(record?.adErrorsByAdset) ? record.adErrorsByAdset : [];
+  
+    const hasCampaign = !!campaignErr;
+    const hasAdset = adsetErrs.length > 0;
+    const hasAd = adErrsVerbose.length > 0 || adErrsFlat.length > 0;
+    const hasAny = hasCampaign || hasAdset || hasAd;
+  
+    if (!hasAny) {
+      return <span style={{ color: theme === 'dark' ? '#ddd' : '#333' }}>No errors found</span>;
+    }
+  
+    return (
+      <div style={{ maxWidth: 420 }}>
+        {hasCampaign && (
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Campaign level</div>
+            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.3 }}>
+              {normalizeError(campaignErr)}
+            </div>
+          </div>
+        )}
+  
+        {hasAdset && (
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+        Adset level <span style={{ opacity: 0.7 }}>({adsetErrs.length})</span>
+      </div>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Adset level</div>
+            <div style={{ display: 'grid', gap: 6 }}>
+              {adsetErrs.slice(0, 6).map((it, i) => (
+                <div key={`${it?.key || i}`} style={{ lineHeight: 1.3 }}>
+                  <span style={{ fontWeight: 500 }}>
+                    {it?.name || it?.key || `adset_${i+1}`}:
+                  </span>{' '}
+                  <span>{normalizeError(it?.error)}</span>
+                </div>
+              ))}
+              {adsetErrs.length > 6 && (
+                <div style={{ opacity: 0.8 }}>…and {adsetErrs.length - 6} more adset errors</div>
+              )}
+            </div>
+          </div>
+        )}
+  
+        {hasAd && (
+          <div>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Ad level</div>
+            <div style={{ display: 'grid', gap: 6 }}>
+              {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat)
+                .slice(0, 6)
+                .map((it, i) => (
+                  <div key={`${it?.adsetKey || it?.index || i}`} style={{ lineHeight: 1.3 }}>
+                    {/* If we have verbose rows, show "Adset → Ad" */}
+                    {adErrsVerbose.length ? (
+                      <>
+                        <span style={{ fontWeight: 600 }}>
+                          {resolveAdsetName(record, it.adsetKey, it.adsetName)}
+                        </span>
+                        <span> → </span>
+                        <span style={{ fontWeight: 500 }}>{it.adName}</span>
+                        <span>: </span>
+                        <span>{normalizeError(it.error)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ fontWeight: 500 }}>
+                          {it?.name ?? `ad${(it?.index ?? i) + 1}`}
+                        </span>
+                        <span>: </span>
+                        <span>{normalizeError(it?.error)}</span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length > 6 && (
+                <div style={{ opacity: 0.8 }}>…and {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length - 6} more ad errors</div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Turn "adsetlevel_1" into a friendly label if no proper name is found
+  const resolveAdsetName = (record, adsetKey, nameCandidate) => {
+    const isKeyLike = (s) => typeof s === 'string' && /^adsetlevel[_-]?\d+$/i.test(s);
+
+    // 1) if candidate is a real name (not a key), use it
+    if (nameCandidate && !isKeyLike(nameCandidate)) return nameCandidate;
+
+    // 2) try from adsetErrors (already enriched on the backend)
+    const fromErr = (Array.isArray(record?.adsetErrors) ? record.adsetErrors : [])
+      .find(e => e.key === adsetKey)?.name;
+    if (fromErr && !isKeyLike(fromErr)) return fromErr;
+
+    // 3) try from adsetNameMap
+    const fromMap = record?.adsetNameMap?.[adsetKey];
+    if (fromMap && !isKeyLike(fromMap)) return fromMap;
+
+    // 4) fallback: humanize the key
+    if (adsetKey) {
+      const m = String(adsetKey).match(/(\d+)$/);
+      return m ? `Adset ${m[1]}` : String(adsetKey);
+    }
+    return 'Adset';
+  };
+
+  const handleDeleteCampaign = async (identifier) => {
+    try {
+      // setDeletingId(identifier);
+      console.log("identifier:", identifier);
+  
+      await axios.delete(
+        `http://localhost:8000/api/campaigns/${identifier}`,
+        // { headers: { Authorization: token } } // include if you use auth
+      );
+
+      changeRRefrst && changeRRefrst();
+  
+      message.success("Campaign deleted");
+      
+  
+    } catch (err)  {
+      console.error("Delete campaign error:", {
+        status: err?.response?.status,
+        data: err?.response?.data,
+        msg: err?.message,
+      });
+      message.error(err?.response?.data?.message || err?.message || "Failed to delete campaign");
+    }
+  };
+
   const columns = [
     {
       title: "Status",
@@ -1863,13 +2015,157 @@ const App = () => {
       //   </div>
       // ),
     },
+    // {
+    //   title: "Actions",
+    //   key: "actions",
+    //   width: 180,
+    //   align: "center",
+    //   render: (text, record) => (
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         alignItems: "center",
+    //         justifyContent: "center",
+    //         gap: "8px",
+    //       }}
+    //     >
+    //       <Tooltip
+    //         title="View details"
+    //         overlayInnerStyle={{
+    //           backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+    //           color: theme === "dark" ? "#ffffff" : "#000000",
+    //           borderRadius: 6,
+    //           padding: "6px 10px",
+    //           fontSize: "14px",
+    //         }}
+    //       >
+    //         <Button
+    //           icon={<FaEye />}
+    //           onClick={() => handleEditClickMultipleAdsetData(record, true)}
+    //           style={{
+    //             // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+    //             border: "none",
+    //             borderRadius: "6px",
+    //             padding: "4px 8px",
+    //             backgroundColor:
+    //               theme === "dark" ? "transparent" : "transparent",
+    //             color: theme === "dark" ? "#fff" : "#000",
+    //           }}
+    //         />
+    //       </Tooltip>
+    //       <Tooltip
+    //         title="Edit campaign"
+    //         overlayInnerStyle={{
+    //           backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+    //           color: theme === "dark" ? "#ffffff" : "#000000",
+    //           borderRadius: 6,
+    //           padding: "6px 10px",
+    //           fontSize: "14px",
+    //         }}
+    //       >
+    //         <Button
+    //           icon={<FaPenToSquare />}
+    //           // disabled={record.fbstatus === "Live"}
+    //           onClick={() => handleEditClickMultipleAdsetData(record, false)}
+    //           style={{
+    //             // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+    //             border: "none",
+    //             borderRadius: "6px",
+    //             padding: "4px 8px",
+    //             backgroundColor:
+    //               theme === "dark" ? "transparent" : "transparent",
+    //             color: theme === "dark" ? "#fff" : "#000",
+    //           }}
+    //         />
+    //       </Tooltip>
+    //       {!restrictedEmails.includes(userdetails.email) && (
+    //         <Tooltip
+    //           title="Duplicate campaign"
+    //           overlayInnerStyle={{
+    //             backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+    //             color: theme === "dark" ? "#ffffff" : "#000000",
+    //             borderRadius: 6,
+    //             padding: "6px 10px",
+    //             fontSize: "14px",
+    //           }}
+    //         >
+    //           <Button
+    //             icon={<FaClone />}
+    //             onClick={() => handleCloneClickMultipleAdsetData(record)}
+    //             style={{
+    //               // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+    //               border: "none",
+    //               borderRadius: "6px",
+    //               padding: "4px 8px",
+    //               backgroundColor:
+    //                 theme === "dark" ? "transparent" : "transparent",
+    //               color: theme === "dark" ? "#fff" : "#000",
+    //             }}
+    //           />
+    //         </Tooltip>
+    //       )}
+    //       <Tooltip
+    //         title="Delete campaign"
+    //         overlayInnerStyle={{
+    //           backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+    //           color: theme === "dark" ? "#ffffff" : "#000000",
+    //           borderRadius: 6,
+    //           padding: "6px 10px",
+    //           fontSize: "14px",
+    //         }}
+    //       >
+    //         <Button
+    //           icon={<FaTrashCan color="#EC7117" />}
+    //           style={{
+    //             // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+    //             border: "none",
+    //             borderRadius: "6px",
+    //             cursor: "not-allowed",
+    //             backgroundColor:
+    //               theme === "dark" ? "transparent" : "transparent",
+    //             color: theme === "dark" ? "#fff" : "#000",
+    //           }}
+    //         />
+    //       </Tooltip>
+    //       <Tooltip
+    //         title="Number of adsets"
+    //         overlayInnerStyle={{
+    //           backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+    //           color: theme === "dark" ? "#ffffff" : "#000000",
+    //           borderRadius: 6,
+    //           padding: "6px 10px",
+    //           fontSize: "14px",
+    //         }}
+    //       >
+    //         <div
+    //           style={{
+    //             backgroundColor: "#bce396ff",
+    //             color: "#000",
+    //             borderRadius: "60%",
+    //             width: "20px",
+    //             height: "20px",
+    //             textAlign: "center",
+    //           }}
+    //         >
+    //           {record.adsetCount}
+    //         </div>
+    //       </Tooltip>
+    //     </div>
+    //   ),
+    // },
     {
       title: "Actions",
       key: "actions",
       width: 180,
       align: "center",
-      render: (text, record) => (
-        <div
+      render: (text, record) => {
+        const hasAnyError =
+        !!record?.campaignlevel_error ||
+        (Array.isArray(record?.adsetErrors) && record.adsetErrors.length > 0) ||
+        (Array.isArray(record?.adErrors) && record.adErrors.length > 0);
+        
+        return(
+          <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -1877,58 +2173,79 @@ const App = () => {
             gap: "8px",
           }}
         >
-          <Tooltip
-            title="View details"
-            overlayInnerStyle={{
-              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-              color: theme === "dark" ? "#ffffff" : "#000000",
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: "14px",
-            }}
-          >
+          <Tooltip title="View details" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
             <Button
               icon={<FaEye />}
               onClick={() => handleEditClickMultipleAdsetData(record, true)}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                border: "none",
+                border:'none',
                 borderRadius: "6px",
                 padding: "4px 8px",
-                backgroundColor:
-                  theme === "dark" ? "transparent" : "transparent",
+                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
-          <Tooltip
-            title="Edit campaign"
-            overlayInnerStyle={{
-              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-              color: theme === "dark" ? "#ffffff" : "#000000",
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: "14px",
-            }}
-          >
+          <Tooltip title="Edit campaign" overlayInnerStyle={{
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
             <Button
               icon={<FaPenToSquare />}
-              // disabled={record.fbstatus === "Live"}
+              disabled={record.fbstatus === "Live"}
               onClick={() => handleEditClickMultipleAdsetData(record, false)}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                border: "none",
+                  border:'none',
                 borderRadius: "6px",
                 padding: "4px 8px",
-                backgroundColor:
-                  theme === "dark" ? "transparent" : "transparent",
+           backgroundColor: theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
+            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
+              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+              color: theme === 'dark' ? '#ffffff' : '#000000',
+              borderRadius: 6,
+              padding: '6px 10px',
+              fontSize: '14px',
+            }}>
+              <Button
+                icon={<FaClone />}
+                disabled={true}
+                onClick={() => duplicatenewcampaign(record)}
+                style={{
+                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border:'none',
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                  color: theme === "dark" ? "#fff" : "#000",
+                }}
+              />
+            </Tooltip>
+          )}
+
+         {/* {record.fbstatus === "No-Live" && ( */}
             <Tooltip
-              title="Duplicate campaign"
+              // title="Delete campaign"
+              title={
+                record.fbstatus === "No-Live"
+                  ? "Delete campaign"
+                  : "Status must be 'No-Live' to delete'"
+              }
               overlayInnerStyle={{
                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                 color: theme === "dark" ? "#ffffff" : "#000000",
@@ -1937,70 +2254,58 @@ const App = () => {
                 fontSize: "14px",
               }}
             >
-              <Button
-                icon={<FaClone />}
-                onClick={() => handleCloneClickMultipleAdsetData(record)}
-                style={{
-                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "4px 8px",
-                  backgroundColor:
-                    theme === "dark" ? "transparent" : "transparent",
-                  color: theme === "dark" ? "#fff" : "#000",
+              <Popconfirm
+                title="Are you sure you want to delete this campaign?"
+                onConfirm={() => handleDeleteCampaign(record.identifier)}
+                okText="Yes"
+                cancelText="No"
+                disabled={record.fbstatus !== "No-Live"}
+  		okButtonProps={{
+                  style: { backgroundColor: "#28a745", color: "#fff" }
                 }}
-              />
+              >
+                <Button
+                  icon={<FaTrashCan color="#EC7117" />}
+                  disabled={record.fbstatus !== "No-Live"}
+                  style={{
+                    border: "none",
+                    borderRadius: "6px",
+                    backgroundColor: "transparent",
+                    color: theme === "dark" ? "#fff" : "#000",
+                  }}
+                />
+              </Popconfirm>
             </Tooltip>
-          )}
-          <Tooltip
-            title="Delete campaign"
+          {/* )} */}
+
+           <Tooltip 
+            title={renderErrorTooltip(record, theme)}
             overlayInnerStyle={{
-              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-              color: theme === "dark" ? "#ffffff" : "#000000",
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: "14px",
-            }}
-          >
-            <Button
-              icon={<FaTrashCan color="#EC7117" />}
-              style={{
-                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                border: "none",
-                borderRadius: "6px",
-                cursor: "not-allowed",
-                backgroundColor:
-                  theme === "dark" ? "transparent" : "transparent",
-                color: theme === "dark" ? "#fff" : "#000",
-              }}
-            />
-          </Tooltip>
-          <Tooltip
-            title="Number of adsets"
-            overlayInnerStyle={{
-              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-              color: theme === "dark" ? "#ffffff" : "#000000",
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: "14px",
-            }}
-          >
+            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: '14px',
+          }}>
             <div
               style={{
-                backgroundColor: "#bce396ff",
+                // backgroundColor: "#bce396ff",
+                backgroundColor: hasAnyError ? "#EC7117" : "#91C25F",
                 color: "#000",
                 borderRadius: "60%",
                 width: "20px",
                 height: "20px",
-                textAlign: "center",
+                textAlign:'center'
               }}
             >
               {record.adsetCount}
             </div>
           </Tooltip>
         </div>
-      ),
-    },
+        )
+       
+      },
+    }, 
     {
       title: "Budget",
       dataIndex: "Daily_amount",
