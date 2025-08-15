@@ -35,6 +35,7 @@ import {
   DeleteOutlined,
   CopyOutlined,
   ExclamationCircleFilled,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -53,7 +54,8 @@ import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
-import { FaTrashCan } from "react-icons/fa6";
+import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import { Category } from "@mui/icons-material";
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 
@@ -1419,7 +1421,7 @@ const AdsetComponent = ({
 
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
-             label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+            label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
             rules={[
               {
                 required: !(
@@ -1749,7 +1751,7 @@ const AdsetComponent = ({
                         </>
                     )} */}
           <Form.Item
-  label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
+            label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
             name={["adsets", index, "placements"]}
             rules={[{ required: true, message: "Please select a mode!" }]}
             initialValue={adset.placements || "Advance"}
@@ -1887,10 +1889,10 @@ const AdsetComponent = ({
           {/* </div> */}
         </div>
         <Collapse defaultActiveKey={["open"]} expandIconPosition="start" className={
-              theme === "dark"
-                ? "custom-collapse-dark"
-                : "custom-collapse-light"
-            }>
+          theme === "dark"
+            ? "custom-collapse-dark"
+            : "custom-collapse-light"
+        }>
           <Panel
             key="open"
             forceRender
@@ -2399,8 +2401,8 @@ const AdsetComponent = ({
                     placeholder="Primary text"
                     autoSize={{ minRows: 2, maxRows: 10 }}
                     onChange={(e) => setPrimaryText(e.target.value)}
-                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                    
+                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+
                   />
                 </Form.Item>
                 {/* <Form.Item
@@ -2422,7 +2424,7 @@ const AdsetComponent = ({
                                     />
                                 </Form.Item> */}
                 <Form.Item
-                   label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
+                  label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                   name={["adsets", index, "headline"]}
                   rules={[
                     {
@@ -2446,7 +2448,7 @@ const AdsetComponent = ({
                 </Form.Item>
 
                 <Form.Item
-                   label={<span style={{ color: "#B4B4B4" }}>Description</span>}
+                  label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                   name={["adsets", index, "Description"]}
                   rules={[
                     {
@@ -2522,7 +2524,7 @@ const AdsetComponent = ({
                   />
                 </Form.Item>
                 <Form.Item
-                   label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
+                  label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                   name={["adsets", index, "Caption"]}
                   rules={[
                     {
@@ -2989,10 +2991,201 @@ const CreateCampaignDrawer = ({
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [draftsData, setDraftsData] = useState([]);
-  const [popupInputs, setPopupInputs] = useState({ input1: "", input2: "" });
+  const [popupInputs, setPopupInputs] = useState({ input1: "", input2: "", reportCat: "" });
   const [errors, setErrors] = useState({ input1: "", input2: "" });
   const [refreshDraft, setRefreshDraft] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState(null); // category object
+  const [editedName, setEditedName] = useState("");
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ visible: false, id: null });
+  const [deleting, setDeleting] = useState(false);
+  const [isEditingDraft, setIsEditingDraft] = useState(false);
+  const [reportCategories, setReportCategories] = useState([]);
+  const [newReportCategory, setNewReportCategory] = useState("");
+  const [rEditModalVisible, setREditModalVisible] = useState(false);
+  const [rDeleteModalVisible, setRDeleteModalVisible] = useState(false);
+  const [rCurrentCategory, setRCurrentCategory] = useState(null);
+  const [rEditedName, setREditedName] = useState("");
+
+  const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
+  const { confirm } = Modal
+
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
+
+  const categoryOptions = useMemo(() => {
+    if (!Array.isArray(draftsData)) return [];
+
+    const unique = [...new Set(draftsData.map(d => d.Category).filter(Boolean))];
+
+    return [
+      { value: "ALL", label: "All" },
+      ...unique.map(c => ({ value: c, label: c })),
+    ];
+  }, [draftsData]);
+
+  const filteredDrafts = useMemo(() => {
+    if (!Array.isArray(draftsData)) return [];
+
+    return draftsData.filter((draft) => {
+      const matchesSearch = searchText
+        ? draft.Draft_Name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        draft.Category?.toLowerCase().includes(searchText.toLowerCase())
+        : true;
+
+      const matchesCategory =
+        selectedCategory && selectedCategory !== "ALL"
+          ? draft.Category === selectedCategory
+          : true;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [draftsData, searchText, selectedCategory]);
+
+
+  useEffect(() => {
+    if (!account) return;
+    (async () => {
+      const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}`, {
+        headers: { Authorization: token }
+      });
+      const json = await resp.json();
+      if (json.ok) {
+        setCategories(json.categories);
+      }
+    })();
+  }, [account, token]);
+
+  const addCategory = async () => {
+    const name = newCategory.trim();
+    if (!name || !account) return;
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: token },
+      body: JSON.stringify({ accountNumber: account, name })
+    });
+    const json = await resp.json();
+    if (resp.ok && json.ok) {
+      setCategories(prev => [...prev, json.category]);
+      setPopupInputs(s => ({ ...s, input1: json.category.name }));
+      setNewCategory("");
+      setErrors(e => ({ ...e, input1: "" }));
+      message.success("Category added");
+    } else {
+      message.error(json.message || "Add failed");
+    }
+  };
+
+  const deleteCategory = async (catId) => {
+    if (!catId || !account) return;
+    const deleted = categories.find(c => c.categoryId === catId);
+    const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}/${catId}`, {
+      method: "DELETE",
+      headers: { Authorization: token }
+    });
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setCategories(prev => prev.filter(c => c.categoryId !== catId));
+      if (deleted?.name) {
+        setPopupInputs(s => ({ ...s, input1: s.input1 === deleted.name ? "" : s.input1 }));
+      }
+      message.success("Category deleted");
+    } else {
+      message.error(json.message || "Delete failed");
+    }
+  };
+
+  const renameCategory = async (catId, newName) => {
+    const clean = newName?.trim();
+    if (!catId || !clean || !account) return;
+    const oldName = categories.find(c => c.categoryId === catId)?.name;
+    const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}/${catId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: token },
+      body: JSON.stringify({ name: clean })
+    });
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setCategories(prev => prev.map(c => c.categoryId === catId ? { ...c, name: clean } : c));
+      setPopupInputs(s => ({ ...s, input1: s.input1 === oldName ? clean : s.input1 }));
+      message.success("Category renamed");
+    } else {
+      message.error(json.message || "Rename failed");
+    }
+  };
+
+  useEffect(() => {
+    if (!account) return;
+    (async () => {
+      const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}`, {
+        headers: { Authorization: token }
+      });
+      const json = await resp.json().catch(() => ({}));
+      if (resp.ok && json.ok) setReportCategories(json.categories);
+    })();
+  }, [account, token]);
+  const addReportCategory = async () => {
+    const name = newReportCategory.trim();
+    if (!name || !account) return;
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/reportcategory", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: token },
+      body: JSON.stringify({ accountNumber: account, name })
+    });
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setReportCategories(prev => [...prev, json.category]);
+      setPopupInputs(s => ({ ...s, reportCat: json.category.name }));
+      setNewReportCategory("");
+      message.success("Report category added");
+    } else {
+      message.error(json.message || "Add failed");
+    }
+  };
+
+  const renameReportCategory = async (catId, newName) => {
+    const clean = newName?.trim();
+    if (!catId || !clean || !account) return;
+    const oldName = reportCategories.find(c => c.categoryId === catId)?.name;
+    const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}/${catId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: token },
+      body: JSON.stringify({ name: clean })
+    });
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setReportCategories(prev => prev.map(c => c.categoryId === catId ? { ...c, name: clean } : c));
+      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === oldName ? clean : s.reportCat }));
+      message.success("Report category renamed");
+    } else {
+      message.error(json.message || "Rename failed");
+    }
+  };
+
+  const deleteReportCategory = async (catId) => {
+    if (!catId || !account) return;
+    const deleted = reportCategories.find(c => c.categoryId === catId);
+    const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}/${catId}`, {
+      method: "DELETE",
+      headers: { Authorization: token }
+    });
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setReportCategories(prev => prev.filter(c => c.categoryId !== catId));
+      if (deleted?.name) {
+        setPopupInputs(s => ({ ...s, reportCat: s.reportCat === deleted.name ? "" : s.reportCat }));
+      }
+      message.success("Report category deleted");
+    } else {
+      message.error(json.message || "Delete failed");
+    }
+  };
+
 
   // const handleConfirm = async() => {
   //   const newErrors = {
@@ -3024,75 +3217,138 @@ const CreateCampaignDrawer = ({
   //   });
   // };
 
+  // const handleConfirm = async () => {
+  //   const newErrors = {
+  //     input1: popupInputs.input1.trim() ? "" : "First input is required",
+  //     input2: popupInputs.input2.trim() ? "" : "Second input is required",
+  //   };
+
+  //   setErrors(newErrors);
+
+  //   const hasErrors = Object.values(newErrors).some((msg) => msg !== "");
+  //   if (hasErrors) {
+  //     return Promise.reject(); // keep Popconfirm open
+  //   }
+
+  //   setConfirmLoading(true);
+
+  //   try {
+  //     const allValues = form.getFieldsValue(true);
+
+  //     const draftData = await MultipleAdsetsDraftFetching(allValues);
+  //     const totalDraftData = {
+  //       id: uuidv4(),
+  //       Title: popupInputs.input1,
+  //       Draft_Name: popupInputs.input2,
+  //       ...draftData,
+  //     };
+  //     //   console.log(totalDraftData, "totalDraftData in handleConfirm");
+
+  //     const response = await fetch(
+  //       "https://www.testapi.adsgoat.in/api/submitDraftData",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: token,
+  //         },
+  //         body: JSON.stringify({
+  //           draftData: totalDraftData,
+  //           email: session?.user?.email,
+  //           userName: session?.user?.name,
+  //         }),
+  //       }
+  //     );
+  //     if (response.status === 200 || response.status === 201) {
+  //       setRefreshDraft((prev) => !prev);
+  //     }
+  //     console.log("Draft data submitted successfully:", response);
+
+  //     // Close only after successful fetch and processing
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         setConfirmLoading(false);
+  //         setOpen(false); // 👈 Close here after everything is done
+  //         setPopupInputs({ input1: "", input2: "" });
+  //         setErrors({ input1: "", input2: "" });
+  //         resolve(); // must resolve to properly finish Popconfirm
+  //       }, 500);
+  //     });
+  //   } catch (err) {
+  //     console.error("❌ Error during MultipleAdsetsDraftFetching:", err);
+  //     setConfirmLoading(false);
+  //     return Promise.reject(); // keep Popconfirm open
+  //   }
+  // };
+
   const handleConfirm = async () => {
     const newErrors = {
-      input1: popupInputs.input1.trim() ? "" : "First input is required",
-      input2: popupInputs.input2.trim() ? "" : "Second input is required",
+      input1: popupInputs.input1.trim() ? "" : "Category is required",
+      input2: popupInputs.input2.trim() ? "" : "Template name is required",
     };
-
     setErrors(newErrors);
 
     const hasErrors = Object.values(newErrors).some((msg) => msg !== "");
     if (hasErrors) {
-      return Promise.reject(); // keep Popconfirm open
+      message?.error?.("Please fill the required fields");
+      return;
     }
 
     setConfirmLoading(true);
 
     try {
       const allValues = form.getFieldsValue(true);
-
       const draftData = await MultipleAdsetsDraftFetching(allValues);
+
       const totalDraftData = {
-        id: uuidv4(),
-        Title: popupInputs.input1,
+        // id: uuidv4(),
+        Category: popupInputs.input1,
         Draft_Name: popupInputs.input2,
         ...draftData,
       };
-      //   console.log(totalDraftData, "totalDraftData in handleConfirm");
 
-      const response = await fetch(
-        "https://www.testapi.adsgoat.in/api/submitDraftData",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-          body: JSON.stringify({
-            draftData: totalDraftData,
-            email: session?.user?.email,
-            userName: session?.user?.name,
-          }),
-        }
-      );
-      if (response.status === 200 || response.status === 201) {
-        setRefreshDraft((prev) => !prev);
-      }
-      console.log("Draft data submitted successfully:", response);
-
-      // Close only after successful fetch and processing
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          setConfirmLoading(false);
-          setOpen(false); // 👈 Close here after everything is done
-          setPopupInputs({ input1: "", input2: "" });
-          setErrors({ input1: "", input2: "" });
-          resolve(); // must resolve to properly finish Popconfirm
-        }, 500);
+      const resp = await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token, // if your middleware expects Bearer
+        },
+        body: JSON.stringify({
+          accountNumber,
+          draftData: totalDraftData,
+          email: session?.user?.email,
+          userName: session?.user?.name,
+        }),
       });
-    } catch (err) {
-      console.error("❌ Error during MultipleAdsetsDraftFetching:", err);
+
+      // ✅ ensure non-2xx throws with a message
+      if (!resp.ok) {
+        const errJson = await resp.json().catch(() => ({}));
+        throw new Error(errJson.message || `Request failed: ${resp.status}`);
+      }
+      await fetchDraftDetails();
+      setRefreshDraft((prev) => !prev);
+
+      // Resolve cleanly so Popconfirm closes without warnings
+      await new Promise((r) => setTimeout(r, 500));
       setConfirmLoading(false);
-      return Promise.reject(); // keep Popconfirm open
+      setOpen(false);
+      setPopupInputs({ input1: "", input2: "" });
+      setErrors({ input1: "", input2: "" });
+      return;
+    } catch (err) {
+      console.error("❌ Draft save error:", err);
+      setConfirmLoading(false);
+      throw err instanceof Error ? err : new Error(String(err || "Unknown error"));
     }
   };
 
-  const handleCancelPop = () => {
-    setOpen(false);
-    setPopupInputs({ input1: "", input2: "" });
-    setErrors({ input1: "", input2: "" });
-  };
+
+  // const handleCancelPop = () => {
+  //   setOpen(false);
+  //   setPopupInputs({ input1: "", input2: "" });
+  //   setErrors({ input1: "", input2: "" });
+  // };
 
   // Track if any adset has a budget set
   // useEffect(() => {
@@ -3866,42 +4122,207 @@ const CreateCampaignDrawer = ({
     }
   };
 
-  const fetchDraftDeatils = async () => {
+  // const fetchDraftDeatils = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:4500/api/getDraftData?accountNumber=${accountNumber}`,
+  //       {
+  //         headers: {
+  //           Authorization: token,
+  //         },
+  //       }
+  //     );
+  //     // console.log("account data", ...response?.data);
+  //     console.log("Draft data fetched successfully:", response.data);
+  //     // console.log((Array.isArray(response?.data?.Drafts && response?.data?.Drafts.length > 0) ? response?.data?.Drafts : []));
+  //     // setDraftsData(
+  //     //   Array.isArray(response?.data?.Drafts) &&
+  //     //     response?.data?.Drafts.length > 0
+  //     //     ? response?.data?.Drafts
+  //     //     : []
+  //     // );
+  //     setDraftsData(
+  //       Array.isArray(response?.data?.drafts) && response?.data?.drafts.length > 0
+  //         ? response?.data?.drafts
+  //         : []
+  //     );
+  //     // setimagehash(...response?.data)
+  //   } catch (error) {
+  //     console.error("Error fetching campaign data:", error);
+  //     // Handle error
+  //   }
+  // };
+
+  const fetchDraftDetails = async () => {
+    if (!account) return;
     try {
-      const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/getDraftData?email=${session?.user?.email}`,
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
-      // console.log("account data", ...response?.data);
-      console.log("Draft data fetched successfully:", response.data);
-      // console.log((Array.isArray(response?.data?.Drafts && response?.data?.Drafts.length > 0) ? response?.data?.Drafts : []));
-      setDraftsData(
-        Array.isArray(response?.data?.Drafts) &&
-          response?.data?.Drafts.length > 0
-          ? response?.data?.Drafts
-          : []
-      );
-      // setimagehash(...response?.data)
-    } catch (error) {
-      console.error("Error fetching campaign data:", error);
-      // Handle error
+      const res = await axios.get("https://www.testapi.adsgoat.in/api/getDraftData", {
+        params: { accountNumber: account },
+        headers: { Authorization: token },
+        validateStatus: () => true,
+      });
+
+      if (res.status === 200 && res.data?.ok) {
+        setDraftsData(Array.isArray(res.data.drafts) ? res.data.drafts : []);
+      } else if (res.status === 404) {
+        setDraftsData([]);
+      } else {
+        message.error(res.data?.message || `Failed to load drafts (${res.status})`);
+      }
+    } catch (err) {
+      console.error("fetchDraftDetails error:", err);
+      message.error("Error fetching drafts");
     }
   };
 
+  const deleteDraft = async (draftId) => {
+    if (!draftId) {
+      message.error("Draft ID is missing");
+      return;
+    }
+
+    try {
+      const response = await fetch("https://www.testapi.adsgoat.in/api/deleteDraft", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({
+          accountNumber: account,
+          draftId: draftId
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        message.success("Draft deleted successfully");
+        await fetchDraftDetails();
+      } else {
+        message.error(data.message || "Failed to delete draft");
+      }
+    } catch (error) {
+      console.error("Error deleting draft:", error);
+      message.error("An error occurred while deleting");
+    }
+  };
+
+  const handleDelete = (draftId) => {
+    setDeleteModal({ visible: true, id: draftId });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      setDeleting(true);
+      await deleteDraft(deleteModal.id);
+    } finally {
+      setDeleting(false);
+      setDeleteModal({ visible: false, id: null });
+    }
+  };
+
+  const onCancelDelete = () => {
+    setDeleteModal({ visible: false, id: null });
+  };
+  const handleEditDraft = (draft) => {
+    onChangeDraft(draft.draftId);
+    setIsTemplatesModalOpen(false);
+    selectedRef.current = {
+      Draft_Name: draft.Draft_Name,
+      Draft_Id: draft.draftId,
+    };
+    setPopupInputs({ input1: draft.Category || "", input2: draft.Draft_Name || "" });
+
+
+    setIsEditingDraft(true);
+  };
+  const handleSaveEditedDraft = async () => {
+    if (!selectedRef.current?.Draft_Id) {
+      message.error("No draft selected to edit");
+      return;
+    }
+
+    try {
+      setConfirmLoading(true);
+      const allValues = form.getFieldsValue(true);
+      const draftData = await MultipleAdsetsDraftFetching(allValues);
+
+      const totalDraftData = {
+        Category: popupInputs.input1,
+        Draft_Name: popupInputs.input2,
+        ...draftData,
+      };
+
+
+      const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({
+          accountNumber: account,
+          draftId: selectedRef.current.Draft_Id,
+          payload: totalDraftData,
+        }),
+      });
+
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(json.message || `Update failed (${resp.status})`);
+
+      message.success("Draft updated successfully");
+
+      await postDraftSaveCleanup();
+
+    } catch (err) {
+      console.error("Save draft (edit) error:", err);
+      message.error(err?.message || "Failed to update draft");
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const postDraftSaveCleanup = async () => {
+
+    await fetchDraftDetails();
+    setIsEditingDraft(false);
+    selectedRef.current = null;
+    newSelectedRef.current = "";
+    setPopupInputs({ input1: "", input2: "" });
+    form.resetFields();
+    setAdsets([{ id: uuidv4(), AdsetPanelName: "Adset 1", DailyAdd_amount: 0 }]);
+    setSelectedFiles({});
+    setSelectedFilesFromCreatives({});
+    setSelectedFilesFromMedia?.({});
+    setSelectedPositions({});
+    setSelectedPublishers({});
+    setIsManual?.(false);
+    setCampaignLevelDailyBudget(0);
+    setAdsetLevelDailyBudget?.(0);
+    setIsCampaignBudgetActive?.(false);
+    setShowBidAmount?.(false);
+    setWebsiteURL?.("");
+    setPrimaryText?.("");
+    setCaption?.("");
+    setHeadline?.("");
+    setDescription?.("");
+    setIsFormComplete?.(false);
+    setSubmitErrors([]);
+    setActiveKey("1");
+    setIsTemplatesModalOpen(false);
+    setOpenCreativesDrawer(false);
+    setIsModalVisible(false);
+  };
   useEffect(() => {
-    if (accountNumber && visible) {
+    if (account && visible) {
       fetchAccountDetails();
     }
-  }, [accountNumber, visible]);
+  }, [account, visible]);
 
   useEffect(() => {
-    fetchDraftDeatils();
-  }, [refreshDraft]);
-
+    setDraftsData([]);
+    if (account) {
+      fetchDraftDetails();
+    }
+  }, [account]);
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
     const newName = e.target.value;
@@ -4572,8 +4993,14 @@ const CreateCampaignDrawer = ({
     // console.log(selectedPositions, "selectedPositions");
 
     // abcd
-    const campaignData = await MultipleAdsestsFetching(formValues);
+    const selectedCategory = (popupInputs?.reportCat || "").trim();
+    if (!selectedCategory) {
+      message.error("Category is required");
+      return;
+    }
 
+    const campaignData = await MultipleAdsestsFetching(formValues);
+    campaignData.Category = selectedCategory;
     try {
       if (campaignData) {
         // console.log("Campaign Data:", campaignData);
@@ -5235,6 +5662,15 @@ const CreateCampaignDrawer = ({
     setSelectedFilesFromMedia({}); // Clear selected files from media
     setSelectedFiles({}); // Clear all selected files
     setShowBidAmount(false); // Reset showBidAmount state
+
+
+    // 4) Clear draft/template-related UI
+    selectedRef.current = null;
+    newSelectedRef.current = null;
+    setPopupInputs({ input1: "", input2: "" });   // clear Category + Template Name
+    setSubmitErrors([]);
+    setErrors?.({ input1: "", input2: "" });      // if you keep field errors in state
+    setIsEditingDraft?.(false);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -5731,22 +6167,43 @@ const CreateCampaignDrawer = ({
     checkFormCompletion();
   };
 
+  // const onChangeDraft = (value) => {
+  //   // const draft = draftsData.find((draft) => draft.id === value);
+  //   const draft = draftsData.find((draft) => draft.draftId === value);
+  //   console.log("Selected Draft:", value);
+  //   console.log(
+  //     "Drafts Data:",
+  //     draftsData.find((draft) => draft.id === value)
+  //   );
+  //   setFormValuesFromDraft(draftsData.find((draft) => draft.id === value));
+  //   selectedRef.current = {
+  //     Draft_Name: draft?.Draft_Name,
+  //     Draft_Id: draft?.id,
+  //   };
+  //   newSelectedRef.current = draft?.Draft_Name;
+  //   setWebsiteURL("");
+  //   setCaption("");
+  // };
   const onChangeDraft = (value) => {
-    const draft = draftsData.find((draft) => draft.id === value);
-    console.log("Selected Draft:", value);
-    console.log(
-      "Drafts Data:",
-      draftsData.find((draft) => draft.id === value)
-    );
-    setFormValuesFromDraft(draftsData.find((draft) => draft.id === value));
+    const draft = draftsData.find(d => d.draftId === value);
+    if (!draft) return;
+
+    console.log("Selected Draft:", draft);
+
+    // Use draft directly (no .data)
+    setFormValuesFromDraft(draft);
+
     selectedRef.current = {
-      Draft_Name: draft?.Draft_Name,
-      Draft_Id: draft?.id,
+      Draft_Name: draft.Draft_Name,
+      Draft_Id: draft.draftId,
     };
-    newSelectedRef.current = draft?.Draft_Name;
+
+    newSelectedRef.current = draft.Draft_Name;
+
     setWebsiteURL("");
     setCaption("");
   };
+
 
   return (
     <Modal
@@ -5755,7 +6212,8 @@ const CreateCampaignDrawer = ({
           <span>Create a new campaign</span>
         </div>
       }
-      className={` ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+      className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+      dropdownClassName={theme === "dark" && "custom-dropdown"}
       open={visible}
       onCancel={handleDrawerClose}
       footer={null}
@@ -5770,7 +6228,230 @@ const CreateCampaignDrawer = ({
       }}
       style={{ borderRadius: '12px' }}
     >
-      <Select
+      <Button
+        type="primary"
+        style={{
+          border: "1.5px solid #4caf50",
+          borderRadius: "8px",
+          marginBottom: "7px",
+          marginLeft: "2px",
+        }}
+        onClick={() => setIsTemplatesModalOpen(true)}
+      >
+        Campaign Templates
+      </Button>
+      <Modal
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+          }`}
+        title="Campaign Templates"
+        open={isTemplatesModalOpen}
+        onCancel={() => setIsTemplatesModalOpen(false)}
+        footer={null}
+        width={900}
+
+      >
+        {/* Search + Filter */}
+        <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+          <Input
+            placeholder="Search by category or template name"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ flex: 1 }}
+            className={
+              theme === "dark"
+                ? "custom-input-dark"
+                : "custom-input-light"
+            }
+          />
+
+          <Select
+            placeholder="Filter by Category"
+            value={selectedCategory || "ALL"}
+            onChange={(value) => setSelectedCategory(value)}
+            style={{ width: 200 }}
+            options={categoryOptions}
+            dropdownClassName={theme === "dark" && "custom-dropdown"}
+            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+              } green-border-select`}
+          />
+        </div>
+
+        {/* Cards */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", // side-by-side, responsive
+            gap: 16,
+            alignItems: "stretch",
+            width: "100%",
+
+          }}
+        >
+          {filteredDrafts.map((draft) => {
+            const cents = draft?.camapaignlevel?.Daily_amount ?? 0; // if you store cents
+            const budget = (cents / 100).toLocaleString(undefined, {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 2,
+            });
+
+            return (
+              <div
+                key={draft.draftId}
+                style={{
+                  border: "1px solid #ddd",
+                  borderRadius: "10px",
+                  padding: "10px",
+                  background: "#fff",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  position: "relative",
+                  backgroundColor: theme === "dark" ? "#383737ff" : " ",
+                  minWidth: 0, // important for ellipsis in grid children
+                }}
+              >
+                {/* Header row */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                  }}
+                >
+                  <p
+                    title={draft.Draft_Name}
+                    style={{
+                      margin: 0,
+                      flex: 1,
+                      minWidth: 0,
+                      fontSize: '14px',
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      lineHeight: 1.25,
+                      fontWeight: 500,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {draft.Draft_Name}
+                  </p>
+
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <FaPenToSquare
+                      onClick={() => handleEditDraft(draft)}
+                      style={{ fontSize: 14, cursor: "pointer" }}
+                      title="Edit"
+                    />
+                    <FaTrashCan
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(draft.draftId);
+                      }}
+                      style={{ fontSize: 14, color: "#EC7117", cursor: "pointer" }}
+                      title="Delete"
+                    />
+                  </div>
+                </div>
+
+                {/* Details grid: label left, value right with ellipsis */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "auto 1fr",
+                    rowGap: 6,
+                    columnGap: 12,
+                    fontSize: '12px',
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <span style={{ color: "#B4B4B4" }}>Category</span>
+                  <span
+                    title={draft?.Category ?? "-"}
+                    style={{
+                      textAlign: "right",
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {draft?.Category ?? "-"}
+                  </span>
+
+                  <span style={{ color: "#B4B4B4" }}>Objective</span>
+                  <span
+                    title={draft?.camapaignlevel?.Objectives ?? "-"}
+                    style={{
+                      textAlign: "right",
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {draft?.camapaignlevel?.Objectives ?? "-"}
+                  </span>
+
+                  <span style={{ color: "#B4B4B4" }}>Budget</span>
+                  <span
+                    style={{
+                      textAlign: "right",
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    ${budget}/day
+                  </span>
+                </div>
+
+                <Button
+                  type="primary"
+                  style={{ marginTop: "auto" }}
+                  onClick={() => {
+                    onChangeDraft(draft.draftId);
+                    setIsTemplatesModalOpen(false);
+                  }}
+                >
+                  Use This Template
+                </Button>
+              </div>
+            );
+          })}
+
+          {filteredDrafts.length === 0 && (
+            <p style={{ textAlign: "center", gridColumn: "1/-1", color: "#999" }}>
+              No templates found
+            </p>
+          )}
+        </div>
+
+      </Modal>
+      <Modal
+        title={
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            Are you sure you want to delete this draft?
+          </span>
+        }
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+        visible={deleteModal.visible}         // v4
+        onOk={onConfirmDelete}
+        onCancel={onCancelDelete}
+        confirmLoading={deleting}
+        okText="Yes, Delete"
+        okType="primary"
+        okButtonProps={{ danger: true }}
+        cancelText="Cancel"
+      >
+        <p>This action cannot be undone.</p>
+      </Modal>
+
+      {/* <Select
         value={newSelectedRef.current}
         placeholder="Select draft"
         style={{
@@ -5784,19 +6465,17 @@ const CreateCampaignDrawer = ({
         dropdownClassName={theme === "dark" && "custom-dropdown"}
         className={theme === "dark" ? "dark-theme" : "light-theme"}
       >
-        {/* {draftsData.map((draft) => (
-                            <Select.Option value={draft.id}>{draft.Draft_Name}</Select.Option>
-                        ))} */}
+        
         {Array.isArray(draftsData) &&
           draftsData.map((draft) => (
-            <Select.Option key={draft.id} value={draft.id}>
+           
+            <Select.Option key={draft.draftId} value={draft.draftId}>
               {draft.Draft_Name}
             </Select.Option>
           ))}
 
-        {/* <Select.Option value="creative">Creative</Select.Option>
-                        <Select.Option value="video">Video</Select.Option> */}
-      </Select>
+       
+      </Select> */}
 
       <Spin spinning={loading}>
         <Form
@@ -6147,7 +6826,7 @@ const CreateCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                   label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                    label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
                     rules={[
                       {
                         required: !(
@@ -6336,74 +7015,406 @@ const CreateCampaignDrawer = ({
 >
   Submit
 </Button> */}
-                <Button
-                  type="primary"
-                  style={{
-                    background: "#91c25f",
-                    minWidth: "120px",
-                    borderWidth: "0px",
+
+
+                {/* Inline input boxes */}
+
+
+
+
+                <Modal
+                  title="Edit Report Category"
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
+                  open={rEditModalVisible}
+                  onOk={async () => {
+                    if (rEditedName.trim() && rCurrentCategory) {
+                      await renameReportCategory(rCurrentCategory.categoryId, rEditedName.trim());
+                      setREditModalVisible(false);
+                      setREditedName("");
+                      setRCurrentCategory(null);
+                    }
                   }}
-                  onClick={async () => {
-                    try {
-                      const values = await form.validateFields(); // Validates all form fields
+                  onCancel={() => {
+                    setREditModalVisible(false);
+                    setREditedName("");
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Save"
+                  okButtonProps={theme === "dark" ? { style: { backgroundColor: "#91c25f", borderColor: "#4caf50" } } : {}}
+                >
+                  <Input
+                    value={rEditedName}
+                    onChange={(e) => setREditedName(e.target.value)}
+                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                  />
+                </Modal>
 
-                      // Check if campaign-level and adset-level budgets are both zero
-                      const campaignLevelDailyBudget = values.Daily_amount;
-                      const isCampaignBudgetActive =
-                        parseFloat(campaignLevelDailyBudget) > 0;
+                <Modal
+                  title="Delete Report Category"
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
+                  open={rDeleteModalVisible}
+                  onOk={async () => {
+                    if (rCurrentCategory) {
+                      await deleteReportCategory(rCurrentCategory.categoryId);
+                      setRDeleteModalVisible(false);
+                      setRCurrentCategory(null);
+                    }
+                  }}
+                  onCancel={() => {
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Delete"
+                  okButtonProps={{ danger: true, type: "primary" }}
+                >
+                  <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
+                </Modal>
 
-                      // Check if any adset has a budget
-                      const isAnyAdsetBudgetSet = values.adsets.some(
-                        (adset) => parseFloat(adset.DailyAdd_amount) > 0
-                      );
 
-                      // If Campaign Budget is not set, check Adsets
-                      if (!isCampaignBudgetActive) {
-                        const isAllAdsetsFilled = values.adsets.every(
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginTop: 8, }}>
+                  <div>
+                    <Select
+                      placeholder="Select report category"
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                        } green-border-select`}
+                      value={popupInputs.reportCat || undefined}
+                      optionLabelProp="value"
+                      onChange={(val) => setPopupInputs(s => ({ ...s, reportCat: val }))}
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.name || "").toLowerCase().includes(input.toLowerCase())
+                      }
+                      options={reportCategories.map(c => ({
+                        value: c.name,
+                        name: c.name,
+                        id: c.categoryId,
+
+                        label: (
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 8
+
+                          }}>
+
+                            <span style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              maxWidth: 200
+                            }}>
+                              {c.name}
+                            </span>
+                            <span style={{ display: "flex", gap: 10 }}>
+                              <FaPenToSquare
+                                style={{ fontSize: 12 }}
+                                title="Edit"
+                                onClick={(e) => {
+                                  e.preventDefault(); e.stopPropagation();
+                                  setRCurrentCategory(c);
+                                  setREditedName(c.name);
+                                  setREditModalVisible(true);
+                                }}
+                              />
+                              <FaTrashCan
+                                style={{ fontSize: 12, color: "#EC7117" }}
+                                title="Delete"
+                                onClick={(e) => {
+                                  e.preventDefault(); e.stopPropagation();
+                                  setRCurrentCategory(c);
+                                  setRDeleteModalVisible(true);
+                                }}
+                              />
+                            </span>
+                          </div>
+                        )
+                      }))}
+
+                      style={{ minWidth: 240 }}
+                      dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                      dropdownRender={(menu) => (
+                        <div>
+                          {menu}
+                          <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
+                            <Input
+                              size="small"
+                              placeholder="New report category"
+                              value={newReportCategory}
+                              onChange={(e) => setNewReportCategory(e.target.value)}
+                              onPressEnter={addReportCategory}
+                              className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                            />
+                            <Button
+                              size="small"
+                              type="primary"
+                              icon={<PlusOutlined />}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={addReportCategory}
+                              style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <Select
+                      placeholder="Select draft category"
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                      dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                      value={popupInputs.input1 || undefined}
+                      onChange={(val) => {
+                        setPopupInputs((s) => ({ ...s, input1: val }));
+                        if (errors.input1) setErrors((e) => ({ ...e, input1: "" }));
+                      }}
+                      showSearch
+                      optionLabelProp="value"
+                      filterOption={(input, option) =>
+                        (option?.name || "").toLowerCase().includes(input.toLowerCase())
+                      }
+                      options={categories.map((c) => ({
+                        value: c.name,
+                        name: c.name,
+                        id: c.categoryId,
+                        label: (
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                            <span
+                              style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}
+                              title={c.name}
+                            >
+                              {c.name}
+                            </span>
+                            <span style={{ display: "flex", gap: 10 }}>
+                              <FaPenToSquare
+                                style={{ fontSize: 12, cursor: "pointer" }}
+                                title="Edit"
+                                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                onClick={(e) => {
+                                  e.preventDefault(); e.stopPropagation();
+                                  setCurrentCategory(c);
+                                  setEditedName(c.name);
+                                  setEditModalVisible(true);
+                                }}
+                              />
+                              <FaTrashCan
+                                style={{ fontSize: 12, color: "#EC7117", cursor: "pointer" }}
+                                title="Delete"
+                                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                onClick={(e) => {
+                                  e.preventDefault(); e.stopPropagation();
+                                  setCurrentCategory(c);
+                                  setDeleteModalVisible(true);
+                                }}
+                              />
+                            </span>
+                          </div>
+                        ),
+                        
+                      }))}
+                      dropdownRender={(menu) => (
+                      <div>
+                        {menu}
+                        <div
+                          style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}
+                          
+                        >
+                          <Input
+                            size="small"
+                            placeholder="New category"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                            onPressEnter={(e) => { e.preventDefault(); addCategory(); }}
+                            className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                          />
+                          <Button
+                            size="small"
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
+                            style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    />
+
+                    {errors.input1 && <div style={{ color: "red", fontSize: 12 }}>{errors.input1}</div>}
+                    
+
+
+                  </div>
+                  <Modal
+                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                      }`}
+                    title="Edit Category"
+                    visible={editModalVisible}
+                    onOk={async () => {
+                      if (editedName.trim() && currentCategory) {
+                        await renameCategory(currentCategory.categoryId, editedName.trim());
+                        setEditModalVisible(false);
+                        setEditedName("");
+                        setCurrentCategory(null);
+                      }
+                    }}
+                    onCancel={() => {
+                      setEditModalVisible(false);
+                      setEditedName("");
+                      setCurrentCategory(null);
+                    }}
+                    okText="Save"
+                  >
+                    <Input
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+
+                    />
+                  </Modal>
+                  <Modal
+                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                      }`}
+                    title="Delete Category"
+                    visible={deleteModalVisible}
+                    onOk={async () => {
+                      if (currentCategory) {
+                        await deleteCategory(currentCategory.categoryId);
+                        setDeleteModalVisible(false);
+                        setCurrentCategory(null);
+                      }
+                    }}
+                    onCancel={() => {
+                      setDeleteModalVisible(false);
+                      setCurrentCategory(null);
+                    }}
+                    okText="Delete"
+                    okButtonProps={{ danger: true }}
+                  >
+                    <p>Are you sure you want to delete the category "{currentCategory?.name}"?</p>
+                  </Modal>
+
+                  <div>
+                    <Input
+                      placeholder="Template Name"
+                      value={popupInputs.input2}
+                      onChange={(e) => setPopupInputs((s) => ({ ...s, input2: e.target.value }))}
+                      status={errors.input2 ? "error" : ""}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                    {errors.input2 && <div style={{ color: "red", fontSize: 12 }}>{errors.input2}</div>}
+                  </div>
+
+
+                </div>
+
+
+                <div style={{ display: 'flex', marginTop: '10px' }}>
+                  <Button
+                    type="primary"
+                    style={{
+                      background: "#91c25f",
+                      minWidth: "120px",
+                      borderWidth: "0px",
+                    }}
+                    onClick={async () => {
+                      const cat = (popupInputs?.reportCat || "").trim();
+                      if (!cat) {
+                        message.error("Category is required");
+                        return;
+                      }
+
+                      try {
+                        const values = await form.validateFields(); // Validates all form fields
+
+                        // Check if campaign-level and adset-level budgets are both zero
+                        const campaignLevelDailyBudget = values.Daily_amount;
+                        const isCampaignBudgetActive =
+                          parseFloat(campaignLevelDailyBudget) > 0;
+
+                        // Check if any adset has a budget
+                        const isAnyAdsetBudgetSet = values.adsets.some(
                           (adset) => parseFloat(adset.DailyAdd_amount) > 0
                         );
 
-                        if (!isAllAdsetsFilled) {
-                          throw {
-                            errorFields: [
-                              {
-                                name: ["Daily_amount"], // The field where error occurs
-                                errors: [
-                                  "Daily budget cannot be zero on both Adset and Campaign levels",
-                                ], // The error message
-                              },
-                            ],
-                          };
+                        // If Campaign Budget is not set, check Adsets
+                        if (!isCampaignBudgetActive) {
+                          const isAllAdsetsFilled = values.adsets.every(
+                            (adset) => parseFloat(adset.DailyAdd_amount) > 0
+                          );
+
+                          if (!isAllAdsetsFilled) {
+                            throw {
+                              errorFields: [
+                                {
+                                  name: ["Daily_amount"], // The field where error occurs
+                                  errors: [
+                                    "Daily budget cannot be zero on both Adset and Campaign levels",
+                                  ], // The error message
+                                },
+                              ],
+                            };
+                          }
                         }
+
+                        // Clear any previous errors
+                        setSubmitErrors([]);
+                        console.log("Form values:", values); // Log form values to verify
+
+                        // Call the onFinish logic, passing in the values
+                        onFinish(values); // Trigger the existing logic for form submission
+
+                        // Optionally trigger confirmation modal (as per your logic)
+                        setIsModalVisible(true);
+
+                        // Save values if needed
+                        setFormValues(values);
+                        setIsCreateCampaignorDraft("createcampaign");
+                      } catch (err) {
+                        // Catch any validation errors thrown by form.validateFields
+                        const allErrors = err?.errorFields?.map((field) => ({
+                          name: field.name?.[0], // field name
+                          message: field.errors?.[0], // validation message
+                        }));
+                        setSubmitErrors(allErrors); // Capture and show validation errors
                       }
+                    }}
+                  >
+                    Submit
+                  </Button>
+                  {isEditingDraft ? (
+                    <Button
+                      type="primary"
+                      loading={confirmLoading}
+                      style={{ background: "#91c25f", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
+                      onClick={handleSaveEditedDraft}
+                    >
+                      Save
+                    </Button>
+                  ) : (
+                    <Button
+                      type="primary"
+                      loading={confirmLoading}
+                      style={{ background: "#91c25f", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
+                      onClick={handleConfirm} // your existing "create new draft" handler
+                    >
+                      Save Template
+                    </Button>
+                  )}
+                </div>
 
-                      // Clear any previous errors
-                      setSubmitErrors([]);
-                      console.log("Form values:", values); // Log form values to verify
 
-                      // Call the onFinish logic, passing in the values
-                      onFinish(values); // Trigger the existing logic for form submission
-
-                      // Optionally trigger confirmation modal (as per your logic)
-                      setIsModalVisible(true);
-
-                      // Save values if needed
-                      setFormValues(values);
-                      setIsCreateCampaignorDraft("createcampaign");
-                    } catch (err) {
-                      // Catch any validation errors thrown by form.validateFields
-                      const allErrors = err?.errorFields?.map((field) => ({
-                        name: field.name?.[0], // field name
-                        message: field.errors?.[0], // validation message
-                      }));
-                      setSubmitErrors(allErrors); // Capture and show validation errors
-                    }
-                  }}
-                >
-                  Submit
-                </Button>
-
-                <Popconfirm
+                {/* <Popconfirm
                   icon={<ExclamationCircleFilled className="Exckamationicon" />}
                   title={
                     <span
@@ -6509,7 +7520,7 @@ const CreateCampaignDrawer = ({
                   >
                     Draft
                   </Button>
-                </Popconfirm>
+                </Popconfirm> */}
 
                 {/* <Button
   type="primary"
