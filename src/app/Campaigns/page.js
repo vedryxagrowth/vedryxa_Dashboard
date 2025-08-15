@@ -1432,75 +1432,91 @@ const App = () => {
 
   // Safely stringify any error (string / object)
   const normalizeError = (err) => {
-    if (!err) return '';
-    if (typeof err === 'string') return err;
-    if (typeof err?.message === 'string') return err.message;
+    if (!err) return "";
+    if (typeof err === "string") return err;
+    if (typeof err?.message === "string") return err.message;
     try {
       // Short, single-line JSON
       const s = JSON.stringify(err);
-      return s?.length > 200 ? s.slice(0, 200) + '…' : s;
+      return s?.length > 200 ? s.slice(0, 200) + "…" : s;
     } catch {
       return String(err);
     }
   };
 
   // Build tooltip JSX for a record
-  const renderErrorTooltip = (record, theme = 'light') => {
+  const renderErrorTooltip = (record, theme = "light") => {
     const campaignErr = record?.campaignlevel_error;
-    const adsetErrs = Array.isArray(record?.adsetErrors) ? record.adsetErrors : [];
+    const adsetErrs = Array.isArray(record?.adsetErrors)
+      ? record.adsetErrors
+      : [];
     const adErrsFlat = Array.isArray(record?.adErrors) ? record.adErrors : [];
-    const adErrsVerbose = Array.isArray(record?.adErrorsByAdset) ? record.adErrorsByAdset : [];
-  
+    const adErrsVerbose = Array.isArray(record?.adErrorsByAdset)
+      ? record.adErrorsByAdset
+      : [];
+
     const hasCampaign = !!campaignErr;
     const hasAdset = adsetErrs.length > 0;
     const hasAd = adErrsVerbose.length > 0 || adErrsFlat.length > 0;
     const hasAny = hasCampaign || hasAdset || hasAd;
-  
+
     if (!hasAny) {
-      return <span style={{ color: theme === 'dark' ? '#ddd' : '#333' }}>No errors found</span>;
+      return (
+        <span style={{ color: theme === "dark" ? "#ddd" : "#333" }}>
+          No errors found
+        </span>
+      );
     }
-  
+
     return (
       <div style={{ maxWidth: 420 }}>
         {hasCampaign && (
           <div style={{ marginBottom: 8 }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Campaign level</div>
-            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.3 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+              Campaign level
+            </div>
+            <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.3 }}>
               {normalizeError(campaignErr)}
             </div>
           </div>
         )}
-  
+
         {hasAdset && (
           <div style={{ marginBottom: 8 }}>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>
-        Adset level <span style={{ opacity: 0.7 }}>({adsetErrs.length})</span>
-      </div>
+              Adset level{" "}
+              <span style={{ opacity: 0.7 }}>({adsetErrs.length})</span>
+            </div>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Adset level</div>
-            <div style={{ display: 'grid', gap: 6 }}>
+            <div style={{ display: "grid", gap: 6 }}>
               {adsetErrs.slice(0, 6).map((it, i) => (
                 <div key={`${it?.key || i}`} style={{ lineHeight: 1.3 }}>
                   <span style={{ fontWeight: 500 }}>
-                    {it?.name || it?.key || `adset_${i+1}`}:
-                  </span>{' '}
+                    {it?.name || it?.key || `adset_${i + 1}`}:
+                  </span>{" "}
                   <span>{normalizeError(it?.error)}</span>
                 </div>
               ))}
               {adsetErrs.length > 6 && (
-                <div style={{ opacity: 0.8 }}>…and {adsetErrs.length - 6} more adset errors</div>
+                <div style={{ opacity: 0.8 }}>
+                  …and {adsetErrs.length - 6} more adset errors
+                </div>
               )}
             </div>
           </div>
         )}
-  
+
         {hasAd && (
           <div>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Ad level</div>
-            <div style={{ display: 'grid', gap: 6 }}>
+            <div style={{ display: "grid", gap: 6 }}>
               {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat)
                 .slice(0, 6)
                 .map((it, i) => (
-                  <div key={`${it?.adsetKey || it?.index || i}`} style={{ lineHeight: 1.3 }}>
+                  <div
+                    key={`${it?.adsetKey || it?.index || i}`}
+                    style={{ lineHeight: 1.3 }}
+                  >
                     {/* If we have verbose rows, show "Adset → Ad" */}
                     {adErrsVerbose.length ? (
                       <>
@@ -1523,8 +1539,14 @@ const App = () => {
                     )}
                   </div>
                 ))}
-              {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length > 6 && (
-                <div style={{ opacity: 0.8 }}>…and {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length - 6} more ad errors</div>
+              {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length >
+                6 && (
+                <div style={{ opacity: 0.8 }}>
+                  …and{" "}
+                  {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length -
+                    6}{" "}
+                  more ad errors
+                </div>
               )}
             </div>
           </div>
@@ -1535,14 +1557,16 @@ const App = () => {
 
   // Turn "adsetlevel_1" into a friendly label if no proper name is found
   const resolveAdsetName = (record, adsetKey, nameCandidate) => {
-    const isKeyLike = (s) => typeof s === 'string' && /^adsetlevel[_-]?\d+$/i.test(s);
+    const isKeyLike = (s) =>
+      typeof s === "string" && /^adsetlevel[_-]?\d+$/i.test(s);
 
     // 1) if candidate is a real name (not a key), use it
     if (nameCandidate && !isKeyLike(nameCandidate)) return nameCandidate;
 
     // 2) try from adsetErrors (already enriched on the backend)
-    const fromErr = (Array.isArray(record?.adsetErrors) ? record.adsetErrors : [])
-      .find(e => e.key === adsetKey)?.name;
+    const fromErr = (
+      Array.isArray(record?.adsetErrors) ? record.adsetErrors : []
+    ).find((e) => e.key === adsetKey)?.name;
     if (fromErr && !isKeyLike(fromErr)) return fromErr;
 
     // 3) try from adsetNameMap
@@ -1554,31 +1578,33 @@ const App = () => {
       const m = String(adsetKey).match(/(\d+)$/);
       return m ? `Adset ${m[1]}` : String(adsetKey);
     }
-    return 'Adset';
+    return "Adset";
   };
 
   const handleDeleteCampaign = async (identifier) => {
     try {
       // setDeletingId(identifier);
       console.log("identifier:", identifier);
-  
+
       await axios.delete(
-        `https://www.testapi.adsgoat.in/api/campaigns/${identifier}`,
+        `https://www.testapi.adsgoat.in/api/campaigns/${identifier}`
         // { headers: { Authorization: token } } // include if you use auth
       );
 
       changeRRefrst && changeRRefrst();
-  
+
       message.success("Campaign deleted");
-      
-  
-    } catch (err)  {
+    } catch (err) {
       console.error("Delete campaign error:", {
         status: err?.response?.status,
         data: err?.response?.data,
         msg: err?.message,
       });
-      message.error(err?.response?.data?.message || err?.message || "Failed to delete campaign");
+      message.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to delete campaign"
+      );
     }
   };
 
@@ -2161,85 +2187,98 @@ const App = () => {
       align: "center",
       render: (text, record) => {
         const hasAnyError =
-        !!record?.campaignlevel_error ||
-        (Array.isArray(record?.adsetErrors) && record.adsetErrors.length > 0) ||
-        (Array.isArray(record?.adErrors) && record.adErrors.length > 0);
-        
-        return(
+          !!record?.campaignlevel_error ||
+          (Array.isArray(record?.adsetErrors) &&
+            record.adsetErrors.length > 0) ||
+          (Array.isArray(record?.adErrors) && record.adErrors.length > 0);
+
+        return (
           <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
-        >
-          <Tooltip title="View details" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
-            <Button
-              icon={<FaEye />}
-              onClick={() => handleEditClickMultipleAdsetData(record, true)}
-              style={{
-                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                border:'none',
-                borderRadius: "6px",
-                padding: "4px 8px",
-                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
-                color: theme === "dark" ? "#fff" : "#000",
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+            }}
+          >
+            <Tooltip
+              title="View details"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
               }}
-            />
-          </Tooltip>
-          <Tooltip title="Edit campaign" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
-            <Button
-              icon={<FaPenToSquare />}
-              disabled={record.fbstatus === "Live"}
-              onClick={() => handleEditClickMultipleAdsetData(record, false)}
-              style={{
-                // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                  border:'none',
-                borderRadius: "6px",
-                padding: "4px 8px",
-           backgroundColor: theme === "dark" ? "transparent" : "transparent",
-                color: theme === "dark" ? "#fff" : "#000",
-              }}
-            />
-          </Tooltip>
-          {!restrictedEmails.includes(userdetails.email) && (
-            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
-              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-              color: theme === 'dark' ? '#ffffff' : '#000000',
-              borderRadius: 6,
-              padding: '6px 10px',
-              fontSize: '14px',
-            }}>
+            >
               <Button
-                icon={<FaClone />}
-                disabled={true}
-                onClick={() => duplicatenewcampaign(record)}
+                icon={<FaEye />}
+                onClick={() => handleEditClickMultipleAdsetData(record, true)}
                 style={{
                   // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                  border:'none',
+                  border: "none",
                   borderRadius: "6px",
                   padding: "4px 8px",
-                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                  backgroundColor:
+                    theme === "dark" ? "transparent" : "transparent",
                   color: theme === "dark" ? "#fff" : "#000",
                 }}
               />
             </Tooltip>
-          )}
+            <Tooltip
+              title="Edit campaign"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
+            >
+              <Button
+                icon={<FaPenToSquare />}
+                // disabled={record.fbstatus === "Live"}
+                onClick={() => handleEditClickMultipleAdsetData(record, false)}
+                style={{
+                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                  backgroundColor:
+                    theme === "dark" ? "transparent" : "transparent",
+                  color: theme === "dark" ? "#fff" : "#000",
+                }}
+              />
+            </Tooltip>
+            {!restrictedEmails.includes(userdetails.email) && (
+              <Tooltip
+                title="Duplicate campaign"
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: "14px",
+                }}
+              >
+                <Button
+                  icon={<FaClone />}
+                  // disabled={true}
+                  onClick={() => handleCloneClickMultipleAdsetData(record)}
+                  style={{
+                    // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "4px 8px",
+                    backgroundColor:
+                      theme === "dark" ? "transparent" : "transparent",
+                    color: theme === "dark" ? "#fff" : "#000",
+                  }}
+                />
+              </Tooltip>
+            )}
 
-         {/* {record.fbstatus === "No-Live" && ( */}
+            {/* {record.fbstatus === "No-Live" && ( */}
             <Tooltip
               // title="Delete campaign"
               title={
@@ -2266,17 +2305,21 @@ const App = () => {
                 cancelText="No"
                 disabled={record.fbstatus !== "No-Live"}
                 okButtonProps={{
-                  style: { backgroundColor: "#91C25F", color: "#fff" }
+                  style: { backgroundColor: "#91C25F", color: "#fff" },
                 }}
                 cancelButtonProps={{
-                  style: { backgroundColor: theme === 'dark' ? "#000" : '#fff', color: theme === 'dark' ? "#fff" : '#333', border: "none" }
+                  style: {
+                    backgroundColor: theme === "dark" ? "#000" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#333",
+                    border: "none",
+                  },
                 }}
-                style={{ color: theme === 'dark' ? '#fff' : '#333',}}
+                style={{ color: theme === "dark" ? "#fff" : "#333" }}
                 overlayInnerStyle={{
                   backgroundColor: theme === "dark" ? "#1f1f1f" : "#fff",
-                  color: theme === 'dark' ? '#fff' : '#333',
+                  color: theme === "dark" ? "#fff" : "#333",
                   borderRadius: 8,
-                  padding: "10px 16px"
+                  padding: "10px 16px",
                 }}
               >
                 <Button
@@ -2291,36 +2334,36 @@ const App = () => {
                 />
               </Popconfirm>
             </Tooltip>
-          {/* )} */}
+            {/* )} */}
 
-           <Tooltip 
-            title={renderErrorTooltip(record, theme)}
-            overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
-            <div
-              style={{
-                // backgroundColor: "#bce396ff",
-                backgroundColor: hasAnyError ? "#EC7117" : "#91C25F",
-                color: "#000",
-                borderRadius: "60%",
-                width: "20px",
-                height: "20px",
-                textAlign:'center'
+            <Tooltip
+              title={renderErrorTooltip(record, theme)}
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
               }}
             >
-              {record.adsetCount}
-            </div>
-          </Tooltip>
-        </div>
-        )
-       
+              <div
+                style={{
+                  // backgroundColor: "#bce396ff",
+                  backgroundColor: hasAnyError ? "#EC7117" : "#91C25F",
+                  color: "#000",
+                  borderRadius: "60%",
+                  width: "20px",
+                  height: "20px",
+                  textAlign: "center",
+                }}
+              >
+                {record.adsetCount}
+              </div>
+            </Tooltip>
+          </div>
+        );
       },
-    },  
+    },
     {
       title: "Budget",
       dataIndex: "Daily_amount",
