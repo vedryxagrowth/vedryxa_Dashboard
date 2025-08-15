@@ -49,6 +49,7 @@ import CreateDraft from "./camp-components/CreateDraft";
 import EditAllLevelDataDrawer from "./camp-components/EditAllLevelData";
 import ViewDrawer from "./camp-components/view-campaign";
 import EditMultipleAdsetCampaignDrawer from "./camp-components/editMultipleAdsetCampaign";
+import CloneMultipleAdsetCampaignDrawer from "./camp-components/cloneMultipleAdsetsCampaign";
 // import EditOnlyCampaignDrawer from './camp-components/EditCamp';
 import EditCampaignDrawer1 from "./camp-components/EditCamp";
 import axios from "axios";
@@ -150,9 +151,15 @@ const App = () => {
   const [campaignStatusFilter, setCampaignStatusFilter] = useState("all");
   const [selectedEditMultipleAdsetData, setSelectedEditMultipleAdsetData] =
     useState(null);
+  const [selectedCloneMultipleAdsetData, setSelectedCloneMultipleAdsetData] =
+    useState(null);
   const [
     viewEditMultipleAdsetDataDrawerVisible,
     setViewEditMultipleAdsetDataDrawerVisible,
+  ] = useState(false);
+  const [
+    viewCloneMultipleAdsetDataDrawerVisible,
+    setViewCloneMultipleAdsetDataDrawerVisible,
   ] = useState(false);
   const [view, setView] = useState(false);
   const onStatusFilterChange = (key) => {
@@ -320,7 +327,7 @@ const App = () => {
       style={{
         zIndex: 1,
         padding: "10px",
-        marginBottom: '5px',
+        marginBottom: "5px",
         marginLeft: "5px",
         paddingLeft: "5px",
         borderRadius: 12,
@@ -340,33 +347,39 @@ const App = () => {
           // label: item.label,
           label: (
             <Tooltip
-              title={item.key === '1' ? 'Campaigns Before 11-08-2025' : 'Campaigns After 11-08-2025'}
+              title={
+                item.key === "1"
+                  ? "Campaigns Before 11-08-2025"
+                  : "Campaigns After 11-08-2025"
+              }
               placement="top"
               overlayInnerStyle={{
-                backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-                color: theme === 'dark' ? '#ffffff' : '#000000',
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
                 borderRadius: 6,
-                padding: '6px 10px',
-                fontSize: '14px',
+                padding: "6px 10px",
+                fontSize: "14px",
               }}
             >
               <span>{item.label}</span>
             </Tooltip>
           ),
         }))}
-        className={`left-pill-tabs ${theme === 'dark' ? 'pill-tabs-dark' : 'pill-tabs-light'}`}
+        className={`left-pill-tabs ${
+          theme === "dark" ? "pill-tabs-dark" : "pill-tabs-light"
+        }`}
         style={{
-          backgroundColor: 'transparent',
-          padding: '0',
-          marginBottom: '0',
+          backgroundColor: "transparent",
+          padding: "0",
+          marginBottom: "0",
         }}
         tabBarStyle={{
-          fontSize: '12px',
-          padding: '0',
-          height: '30px',
-          lineHeight: '30px',
-          marginBottom: '-1px',
-          borderBottom: 'none',
+          fontSize: "12px",
+          padding: "0",
+          height: "30px",
+          lineHeight: "30px",
+          marginBottom: "-1px",
+          borderBottom: "none",
         }}
       />
     </StickyBox>
@@ -389,6 +402,7 @@ const App = () => {
     setViewEditAllLevelDataDrawerVisible(false);
     setCreateNewDraft(false);
     setViewEditMultipleAdsetDataDrawerVisible(false);
+    setViewCloneMultipleAdsetDataDrawerVisible(false);
   };
 
   useEffect(() => {
@@ -490,13 +504,13 @@ const App = () => {
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
         ? allCampaigns.filter(
-          (campaign) => campaign.Account_Number === accountNumber
-        )
-        : allCampaigns.filter((campaign) =>
-          userdetails?.adAccounts[selectedKey]?.includes(
-            campaign.Account_Number
+            (campaign) => campaign.Account_Number === accountNumber
           )
-        );
+        : allCampaigns.filter((campaign) =>
+            userdetails?.adAccounts[selectedKey]?.includes(
+              campaign.Account_Number
+            )
+          );
 
       setcreatecamselectedacc(accountNumber);
 
@@ -540,13 +554,13 @@ const App = () => {
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
         ? allCampaigns.filter(
-          (campaign) => campaign.Account_Number === accountNumber
-        )
-        : allCampaigns.filter((campaign) =>
-          userdetails?.adAccounts[selectedKey]?.includes(
-            campaign.Account_Number
+            (campaign) => campaign.Account_Number === accountNumber
           )
-        );
+        : allCampaigns.filter((campaign) =>
+            userdetails?.adAccounts[selectedKey]?.includes(
+              campaign.Account_Number
+            )
+          );
 
       setcreatecamselectedacc(accountNumber);
 
@@ -604,8 +618,8 @@ const App = () => {
       //     formattedEnd
       //   );
       // }
-      setStartDate(start.format('YYYY-MM-DD'));
-      setEndDate(end.format('YYYY-MM-DD'));
+      setStartDate(start.format("YYYY-MM-DD"));
+      setEndDate(end.format("YYYY-MM-DD"));
     }
   };
   // Handle key change
@@ -626,7 +640,7 @@ const App = () => {
       fetchData(selectedValue, startDate, endDate);
       fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
     } else {
-      message.warning('Please select project, account and date range');
+      message.warning("Please select project, account and date range");
     }
   };
 
@@ -953,7 +967,8 @@ const App = () => {
           } catch (fbError) {
             console.error("Error updating facebook status:", fbError);
             message.error(
-              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
+              `Error updating facebook status: ${
+                fbError.response?.data?.error?.message || fbError.message
               }`
             );
           }
@@ -1061,7 +1076,8 @@ const App = () => {
           } catch (fbError) {
             console.error("Error updating facebook status:", fbError);
             message.error(
-              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
+              `Error updating facebook status: ${
+                fbError.response?.data?.error?.message || fbError.message
               }`
             );
           }
@@ -1407,6 +1423,12 @@ const App = () => {
     setView(status);
   };
 
+  const handleCloneClickMultipleAdsetData = (record, status) => {
+    // console.log(record, "viewdata campaign")
+    setSelectedCloneMultipleAdsetData(record);
+    setViewCloneMultipleAdsetDataDrawerVisible(true);
+  };
+
   const columns = [
     {
       title: "Status",
@@ -1506,84 +1528,100 @@ const App = () => {
             gap: "8px",
           }}
         >
-          <Tooltip title="View details" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
+          <Tooltip
+            title="View details"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <Button
               icon={<FaEye />}
               onClick={() => handleViewClick(record)}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                 borderRadius: "6px",
-                border:'none',
+                border: "none",
                 padding: "4px 8px",
-                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                backgroundColor:
+                  theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
-          <Tooltip title="Edit campaign" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
+          <Tooltip
+            title="Edit campaign"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <Button
               icon={<FaPenToSquare />}
               onClick={() => handleEditClickAllLevelData(record)}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                 borderRadius: "6px",
-                 border:'none',
+                border: "none",
                 padding: "4px 8px",
-                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                backgroundColor:
+                  theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
-            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
-              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-              color: theme === 'dark' ? '#ffffff' : '#000000',
-              borderRadius: 6,
-              padding: '6px 10px',
-              fontSize: '14px',
-            }}>
+            <Tooltip
+              title="Duplicate campaign"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
+            >
               <Button
                 icon={<FaClone />}
                 onClick={() => duplicatenewcampaign(record)}
                 style={{
                   // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                   borderRadius: "6px",
-                   border:'none',
+                  border: "none",
                   padding: "4px 8px",
-                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                  backgroundColor:
+                    theme === "dark" ? "transparent" : "transparent",
                   color: theme === "dark" ? "#fff" : "#000",
                 }}
               />
             </Tooltip>
           )}
-          <Tooltip title="Delete campaign" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
+          <Tooltip
+            title="Delete campaign"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <Button
               icon={<FaTrashCan color="#EC7117" />}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                 borderRadius: "6px",
-                 border:'none',
-                cursor: 'not-allowed',
+                border: "none",
+                cursor: "not-allowed",
                 padding: "4px 8px",
-                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                backgroundColor:
+                  theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
@@ -1642,7 +1680,11 @@ const App = () => {
             </Tooltip>
             <Tooltip title="Rejected">
               <span
-                style={{ color: "#EC7117", fontWeight: "bold", marginRight: 10 }}
+                style={{
+                  color: "#EC7117",
+                  fontWeight: "bold",
+                  marginRight: 10,
+                }}
               >
                 {record.rejectedCount}
               </span>
@@ -1731,8 +1773,9 @@ const App = () => {
                   open={isModalVisible}
                   onOk={handleOk}
                   onCancel={() => setIsModalVisible(false)}
-                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                    }`}
+                  className={`custom-modal ${
+                    theme === "dark" ? "dark-theme-modal" : ""
+                  }`}
                 >
                   <p>Are you sure you want to approve?</p>
                 </Modal>
@@ -1771,7 +1814,7 @@ const App = () => {
               className="black-icon-pause-1"
             />
           )}
-         
+
           <Switch
             checked={record.Status === "ACTIVE"}
             onChange={(checked) =>
@@ -1834,99 +1877,114 @@ const App = () => {
             gap: "8px",
           }}
         >
-          <Tooltip title="View details" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
+          <Tooltip
+            title="View details"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <Button
               icon={<FaEye />}
               onClick={() => handleEditClickMultipleAdsetData(record, true)}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                border:'none',
+                border: "none",
                 borderRadius: "6px",
                 padding: "4px 8px",
-                 backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                backgroundColor:
+                  theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
-          <Tooltip title="Edit campaign" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
+          <Tooltip
+            title="Edit campaign"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <Button
               icon={<FaPenToSquare />}
-              disabled={record.fbstatus === "Live"}
+              // disabled={record.fbstatus === "Live"}
               onClick={() => handleEditClickMultipleAdsetData(record, false)}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                  border:'none',
+                border: "none",
                 borderRadius: "6px",
                 padding: "4px 8px",
-           backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                backgroundColor:
+                  theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             />
           </Tooltip>
           {!restrictedEmails.includes(userdetails.email) && (
-            <Tooltip title="Duplicate campaign" overlayInnerStyle={{
-              backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-              color: theme === 'dark' ? '#ffffff' : '#000000',
-              borderRadius: 6,
-              padding: '6px 10px',
-              fontSize: '14px',
-            }}>
+            <Tooltip
+              title="Duplicate campaign"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
+            >
               <Button
                 icon={<FaClone />}
-                disabled={true}
-                onClick={() => duplicatenewcampaign(record)}
+                onClick={() => handleCloneClickMultipleAdsetData(record)}
                 style={{
                   // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                  border:'none',
+                  border: "none",
                   borderRadius: "6px",
                   padding: "4px 8px",
-                   backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                  backgroundColor:
+                    theme === "dark" ? "transparent" : "transparent",
                   color: theme === "dark" ? "#fff" : "#000",
                 }}
               />
             </Tooltip>
           )}
-          <Tooltip title="Delete campaign" 
-          overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
+          <Tooltip
+            title="Delete campaign"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <Button
               icon={<FaTrashCan color="#EC7117" />}
               style={{
                 // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
-                  border:'none',
+                border: "none",
                 borderRadius: "6px",
-                cursor: 'not-allowed',
-                backgroundColor: theme === "dark" ? "transparent" : "transparent",
+                cursor: "not-allowed",
+                backgroundColor:
+                  theme === "dark" ? "transparent" : "transparent",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
-
             />
           </Tooltip>
-           <Tooltip title="Number of adsets"
+          <Tooltip
+            title="Number of adsets"
             overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px',
-          }}>
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <div
               style={{
                 backgroundColor: "#bce396ff",
@@ -1934,7 +1992,7 @@ const App = () => {
                 borderRadius: "60%",
                 width: "20px",
                 height: "20px",
-                textAlign:'center'
+                textAlign: "center",
               }}
             >
               {record.adsetCount}
@@ -2083,8 +2141,9 @@ const App = () => {
                   open={isModalVisibleForAdsets}
                   onOk={handleOkForAdsets}
                   onCancel={() => setIsModalVisibleForAdsets(false)}
-                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                    }`}
+                  className={`custom-modal ${
+                    theme === "dark" ? "dark-theme-modal" : ""
+                  }`}
                 >
                   <p>Are you sure you want to approve?</p>
                 </Modal>
@@ -2363,7 +2422,7 @@ const App = () => {
   //   campaignData.reduce((sum, record) => {
   //     return sum + (record.Daily_amount || 0);
   //   }, 0) / 100; // Assuming Daily_amount is in cents
- const totalDailySpend = (() => {
+  const totalDailySpend = (() => {
     if (activeTab === "1") {
       return (
         getFilteredSingleCampaigns().reduce(
@@ -2380,7 +2439,7 @@ const App = () => {
       ).toFixed(2);
     }
     return "0.00";
-  })();  
+  })();
 
   const onClickDeleteDraft = (id) => {
     console.log(id, "draft id");
@@ -2508,6 +2567,14 @@ const App = () => {
         network={selectedKey}
         selectedRow={selectedEditMultipleAdsetData}
       />
+      <CloneMultipleAdsetCampaignDrawer
+        visible={viewCloneMultipleAdsetDataDrawerVisible}
+        accountis={createcamselectedacc}
+        onClose={onCloseDrawer}
+        changeRRefrst={changeRRefrst}
+        network={selectedKey}
+        selectedRow={selectedCloneMultipleAdsetData}
+      />
 
       <DuplicateCampaignDrawer
         visible={dupdrawerVisible}
@@ -2550,27 +2617,31 @@ const App = () => {
       <Card
         style={{
           marginBottom: "10px",
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          borderRadius: '10px'
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          borderRadius: "10px",
         }}
         headStyle={{
-          borderBottom: 'none',
+          borderBottom: "none",
           paddingBottom: 0,
         }}
         title={
           <div>
-            <div style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: theme === 'dark' ? '#fff' : '#1c1e21',
-              lineHeight: '30px'
-            }}>
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 600,
+                color: theme === "dark" ? "#fff" : "#1c1e21",
+                lineHeight: "30px",
+              }}
+            >
               Campaign Management
             </div>
-            <div style={{
-              fontSize: 12,
-              color: theme === 'dark' ? '#b0b3b8' : '#65676b'
-            }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: theme === "dark" ? "#b0b3b8" : "#65676b",
+              }}
+            >
               Create, manage, and optimize your advertising campaigns
             </div>
           </div>
@@ -2581,10 +2652,10 @@ const App = () => {
             onClick={showDrawer}
             icon={<PlusOutlined className="black-icon" />}
             style={{
-              backgroundColor: '#91C25F',
-              color: '#000',
-              border: 'none',
-              border: '#4caf50'
+              backgroundColor: "#91C25F",
+              color: "#000",
+              border: "none",
+              border: "#4caf50",
             }}
           >
             New Campaign
@@ -2592,9 +2663,19 @@ const App = () => {
         }
       >
         {/* Entire filter section in one single aligned row */}
-        <Row align="middle" justify="space-between" style={{ flexWrap: 'wrap', rowGap: '12px' }}>
-          <Col style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
-
+        <Row
+          align="middle"
+          justify="space-between"
+          style={{ flexWrap: "wrap", rowGap: "12px" }}
+        >
+          <Col
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "5px",
+              alignItems: "center",
+            }}
+          >
             {/* 🔹 Select Project */}
             <Select
               showSearch
@@ -2602,11 +2683,15 @@ const App = () => {
               style={{ width: 140 }}
               onChange={handleKeyChange}
               value={selectedKey}
-              dropdownClassName={theme === 'dark' && "custom-dropdown"}
-              className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${
+                theme === "dark" ? "dark-theme" : "light-theme"
+              } green-border-select`}
             >
-              {options.map(option => (
-                <Option key={option.value} value={option.value}>{option.label}</Option>
+              {options.map((option) => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
               ))}
             </Select>
 
@@ -2619,27 +2704,67 @@ const App = () => {
               disabled={!selectedKey}
               value={selectedValue}
               optionFilterProp="children"
-              filterOption={(input, option) => /^[0-9]*$/.test(input) && option?.value.toString().includes(input)}
+              filterOption={(input, option) =>
+                /^[0-9]*$/.test(input) &&
+                option?.value.toString().includes(input)
+              }
               onDropdownVisibleChange={(open) => setIsOpen(open)}
-              dropdownClassName={theme === 'dark' && "custom-dropdown"}
-              className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${
+                theme === "dark" ? "dark-theme" : "light-theme"
+              } green-border-select`}
             >
-              {valueOptions.map(option => (
+              {valueOptions.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '70%' }}>
-                      <p style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{option.label}</p>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        maxWidth: "70%",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: 0,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {option.label}
+                      </p>
                       {isOpen && (
-                        <p style={{ margin: 0, fontSize: 12, color: 'gray', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {option.accountName || ''}
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 12,
+                            color: "gray",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {option.accountName || ""}
                         </p>
                       )}
                     </div>
                     <span>
                       {option.status === "Active" ? (
-                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                        <CheckCircleFilled
+                          style={{ color: "#91C25F", fontSize: 15 }}
+                        />
                       ) : (
-                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
+                        <CloseCircleFilled
+                          style={{ color: "#EC7117", fontSize: 15 }}
+                        />
                       )}
                     </span>
                   </div>
@@ -2649,7 +2774,9 @@ const App = () => {
 
             {/* 🔹 Date Picker */}
             <ConfigProvider
-              theme={{ token: { colorPrimary: '#91C25F', colorTextLightSolid: '#000' } }}
+              theme={{
+                token: { colorPrimary: "#91C25F", colorTextLightSolid: "#000" },
+              }}
             >
               <RangePicker
                 className="green-border-picker"
@@ -2658,132 +2785,176 @@ const App = () => {
                 disabledDate={disabledDate}
                 style={{
                   width: 215,
-                  backgroundColor: theme === 'dark' ? '#555' : undefined,
-                  color: theme === 'dark' ? 'white' : undefined,
+                  backgroundColor: theme === "dark" ? "#555" : undefined,
+                  color: theme === "dark" ? "white" : undefined,
                 }}
                 defaultValue={[dayjs(), dayjs()]}
-                dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                dropdownClassName={`${
+                  theme === "dark" ? "dark-theme-dropdown" : ""
+                }`}
               />
             </ConfigProvider>
 
             {/* 🔹 Apply Button */}
             <Button
-              type='primary'
+              type="primary"
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
               onClick={handleApply}
               style={{
-                backgroundColor: hovered ? '#91C25F' : 'transparent',
-                border: '1px solid #4CAF50',
-                borderRadius: '6px',
-                color: theme === 'dark' ? '#ffffff' : '#000000',
-                height: '32px',
-                padding: '0 16px',
-                transition: 'all 0.15s ease-in-out',
+                backgroundColor: hovered ? "#91C25F" : "transparent",
+                border: "1px solid #4CAF50",
+                borderRadius: "6px",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                height: "32px",
+                padding: "0 16px",
+                transition: "all 0.15s ease-in-out",
               }}
             >
               Apply
             </Button>
 
             {/* 🔹 Search */}
-
-
-
           </Col>
-          <Col style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+          <Col
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "5px",
+              alignItems: "center",
+            }}
+          >
             {/* 🔹 Status Filter */}
             <Input
               placeholder="Search..."
               value={searchInput}
               onChange={handleSearchChange}
               onPressEnter={handleSearchSubmit}
-              className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+              className={
+                theme === "dark" ? "custom-input-dark" : "custom-input-light"
+              }
               style={{
-                width: '170px',
-                border: '1px solid #4caf50',
+                width: "170px",
+                border: "1px solid #4caf50",
               }}
             />
             <Dropdown
               overlay={
-                <Menu onClick={({ key }) => onStatusFilterChange(key)} items={[
-                  {
-                    key: 'all', label: (
-                      <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                <Menu
+                  onClick={({ key }) => onStatusFilterChange(key)}
+                  items={[
+                    {
+                      key: "all",
+                      label: (
                         <span
                           style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            backgroundColor: '#122F6E',
-                            marginRight: '6px',
+                            fontSize: "13px",
+                            display: "flex",
+                            alignItems: "center",
                           }}
-                        ></span>
-                        All
-                      </span>
-                    ),
-                  },
-                  {
-                    key: 'active', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          backgroundColor: 'green',
-                          marginRight: '6px',
-                        }}
-                      ></span>
-                      Active
-
-                    </span>
-                  },
-                  {
-                    key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          backgroundColor: 'red',
-                          marginRight: '6px',
-                        }}
-                      ></span>
-                      Paused
-
-                    </span>
-                  },
-                  {
-                    key: 'pending', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          backgroundColor: '#EC7117',
-                          marginRight: '6px',
-                        }}
-                      ></span>
-                      Pending
-
-                    </span>
-                  },
-                ]} />
+                        >
+                          <span
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "#122F6E",
+                              marginRight: "6px",
+                            }}
+                          ></span>
+                          All
+                        </span>
+                      ),
+                    },
+                    {
+                      key: "active",
+                      label: (
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "green",
+                              marginRight: "6px",
+                            }}
+                          ></span>
+                          Active
+                        </span>
+                      ),
+                    },
+                    {
+                      key: "pause",
+                      label: (
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "red",
+                              marginRight: "6px",
+                            }}
+                          ></span>
+                          Paused
+                        </span>
+                      ),
+                    },
+                    {
+                      key: "pending",
+                      label: (
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "#EC7117",
+                              marginRight: "6px",
+                            }}
+                          ></span>
+                          Pending
+                        </span>
+                      ),
+                    },
+                  ]}
+                />
               }
-              trigger={['click']}
+              trigger={["click"]}
             >
               <Button
                 style={{
                   borderRadius: 8,
-                  background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                  border: '1px solid #4CAF50',
-                  color: theme === 'dark' ? '#95de64' : '#389e0d',
+                  background:
+                    theme === "dark" ? "rgba(82,196,26,0.12)" : "#f6ffed",
+                  border: "1px solid #4CAF50",
+                  color: theme === "dark" ? "#95de64" : "#389e0d",
                   fontWeight: 500,
-                  width: 100
+                  width: 100,
                 }}
               >
                 <Space size={2}>
                   <FilterOutlined />
-                  {campaignStatusFilter.charAt(0).toUpperCase() + campaignStatusFilter.slice(1)}
+                  {campaignStatusFilter.charAt(0).toUpperCase() +
+                    campaignStatusFilter.slice(1)}
                   <DownOutlined style={{ fontSize: 10 }} />
                 </Space>
               </Button>
@@ -2792,12 +2963,12 @@ const App = () => {
             {/* 🔹 Total Daily Spend */}
             <span
               style={{
-                backgroundColor: 'transparent',
-                padding: '5px 14px',
-                borderRadius: '8px',
-                fontSize: '14px',
-                color: theme === 'dark' ? '#fff' : '#000',
-                border: '1px solid #4caf50',
+                backgroundColor: "transparent",
+                padding: "5px 14px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: theme === "dark" ? "#fff" : "#000",
+                border: "1px solid #4caf50",
               }}
             >
               Budget: ${totalDailySpend}
@@ -2809,9 +2980,9 @@ const App = () => {
               onClick={handleRefresh}
               icon={<ReloadOutlined className="black-icon" />}
               style={{
-                backgroundColor: '#91C25F',
-                color: '#000',
-                border: 'none',
+                backgroundColor: "#91C25F",
+                color: "#000",
+                border: "none",
               }}
             />
           </Col>
@@ -2875,10 +3046,11 @@ const App = () => {
                   // minHeight: '100%',
                   tableLayout: "fixed",
                 }}
-                className={`custom-dark-table ${theme === "dark"
-                  ? "dark-mode-pagination"
-                  : "light-mode-pagination"
-                  }`}
+                className={`custom-dark-table ${
+                  theme === "dark"
+                    ? "dark-mode-pagination"
+                    : "light-mode-pagination"
+                }`}
                 columns={columns}
                 dataSource={getFilteredSingleCampaigns()
                   .map((item, index) => ({
@@ -2937,10 +3109,11 @@ const App = () => {
                   // minHeight: '100%',
                   tableLayout: "fixed",
                 }}
-                className={`custom-dark-table ${theme === "dark"
-                  ? "dark-mode-pagination"
-                  : "light-mode-pagination"
-                  }`}
+                className={`custom-dark-table ${
+                  theme === "dark"
+                    ? "dark-mode-pagination"
+                    : "light-mode-pagination"
+                }`}
                 columns={columnsformultipleadsets}
                 dataSource={getFilteredMultipleAdsetCampaigns()
                   .map((item, index) => ({
