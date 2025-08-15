@@ -27,6 +27,7 @@ import {
   ConfigProvider,
   Skeleton,
   Tabs,
+  Popconfirm,
 } from "antd";
 import {
   EditOutlined,
@@ -1562,7 +1563,7 @@ const App = () => {
       console.log("identifier:", identifier);
   
       await axios.delete(
-        `http://localhost:8000/api/campaigns/${identifier}`,
+        `http://localhost:4500/api/campaigns/${identifier}`,
         // { headers: { Authorization: token } } // include if you use auth
       );
 
