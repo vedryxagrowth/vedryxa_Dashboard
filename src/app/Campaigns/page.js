@@ -1563,7 +1563,7 @@ const App = () => {
       console.log("identifier:", identifier);
   
       await axios.delete(
-        `http://localhost:4500/api/campaigns/${identifier}`,
+        `https://www.testapi.adsgoat.in/api/campaigns/${identifier}`,
         // { headers: { Authorization: token } } // include if you use auth
       );
 
@@ -2256,13 +2256,27 @@ const App = () => {
               }}
             >
               <Popconfirm
-                title="Are you sure you want to delete this campaign?"
+                title={
+                  <span style={{ color: theme === "dark" ? "#fff" : "#333" }}>
+                    Are you sure you want to delete this campaign?
+                  </span>
+                }
                 onConfirm={() => handleDeleteCampaign(record.identifier)}
                 okText="Yes"
                 cancelText="No"
                 disabled={record.fbstatus !== "No-Live"}
                 okButtonProps={{
-                  style: { backgroundColor: "#28a745", color: "#fff" }
+                  style: { backgroundColor: "#91C25F", color: "#fff" }
+                }}
+                cancelButtonProps={{
+                  style: { backgroundColor: theme === 'dark' ? "#000" : '#fff', color: theme === 'dark' ? "#fff" : '#333', border: "none" }
+                }}
+                style={{ color: theme === 'dark' ? '#fff' : '#333',}}
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#1f1f1f" : "#fff",
+                  color: theme === 'dark' ? '#fff' : '#333',
+                  borderRadius: 8,
+                  padding: "10px 16px"
                 }}
               >
                 <Button

@@ -10,6 +10,7 @@ import {
   Input,
   Space,
   Drawer,
+  message,
   theme,
   Tag,
   Popconfirm,
@@ -104,7 +105,7 @@ const AdsetCard = ({
     
       try {
         await axios.post(
-          "http://localhost:4500/api/toggleAdsetStatus",
+          "https://www.testapi.adsgoat.in/api/toggleAdsetStatus",
           {
             // backend should accept these fields:
             campaignRef: campaignIdentifier,   // prefer UUID identifier
@@ -143,7 +144,7 @@ const AdsetCard = ({
   
     try {
       await axios.post(
-        "http://localhost:4500/api/toggleAdStatus",
+        "https://www.testapi.adsgoat.in/api/toggleAdStatus",
         { campaignRef: campaignIdentifier, adsetKey, adIdentifier, newStatus },
         { headers: { Authorization: token } }
       );

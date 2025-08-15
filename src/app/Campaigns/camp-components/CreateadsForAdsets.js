@@ -699,7 +699,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
       //https://www.testapi.adsgoat.in
       const response = await fetch(
-        `http://localhost:4500/api/create-ad/${data.identifier}`,
+        `https://www.testapi.adsgoat.in/api/create-ad/${data.identifier}`,
         {
           method: "PUT",
           headers: {
