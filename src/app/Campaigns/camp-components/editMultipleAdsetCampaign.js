@@ -6700,9 +6700,9 @@ const EditMultipleAdsetCampaignDrawer = ({
     }
   }, [accountNumber, visible]);
 
-  useEffect(() => {
-    fetchDraftDeatils();
-  }, [refreshDraft]);
+  //   useEffect(() => {
+  //     fetchDraftDeatils();
+  //   }, [refreshDraft]);
 
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
