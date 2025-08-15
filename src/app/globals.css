@@ -3640,7 +3640,6 @@ select:focus,
 .pill-tabs-dark .ant-tabs-tab {
   color: #fff;
 }
-/* active */
 .pill-tabs-dark .ant-tabs-tab-active {
   background-color: #555;
   color: #4caf50 !important;
