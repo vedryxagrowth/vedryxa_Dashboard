@@ -71,6 +71,8 @@ const AdsetCard = ({
 
   const [tick, setTick] = useState(false);
 
+  const adsetKey = adset?.adsetKey || `adsetlevel_${index + 1}`;
+
   const [isActive, setIsActive] = useState(
     String(adset?.Status ?? adset?.status ?? "PAUSED").toUpperCase() === "ACTIVE"
   );
@@ -946,6 +948,30 @@ const AdsetCard = ({
         />
       )}
       <Drawer
+        title="Create ads"
+        placement="right"
+        // closable={false}
+        onClose={onCloseDrawer}
+        open={newadsDrawerVisible}
+        width="100%" // Adjust width as needed
+        style={{
+          backgroundColor: theme === "dark" ? "#333" : "#fff",
+          color: theme === "dark" ? "#fff" : "#000",
+        }}
+      >
+        <Createnewads
+          index={index}
+          data={viewCampaignData}
+          visible={newadsDrawerVisible}
+          onClose={onCloseDrawer}
+          rerenders={changeRRefrst}
+          // adsData={viewCampaignData?.addlevel}
+          adsData={viewCampaignData?.[adsetKey]?.addlevel || []}  // 👈 Fix here
+          adsetKey={adsetKey} 
+          network={network}
+        />
+      </Drawer>
+      <Drawer
         title="Edit ad"
         width={"100%"}
         onClose={() => {
@@ -1282,30 +1308,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
           accountis={viewCampaignData?.Account_Number}
         />
       </Drawer>
-      <Drawer
-          title="Create ads"
-          placement="right"
-          // closable={false}
-          onClose={onCloseDrawer}
-          open={newadsDrawerVisible}
-          width="100%" // Adjust width as needed
-          style={{
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
-            color: theme === "dark" ? "#fff" : "#000",
-          }}
-        >
-          <Createnewads
-            index={index}
-            data={viewCampaignData}
-            visible={newadsDrawerVisible}
-            onClose={onCloseDrawer}
-            rerenders={changeRRefrst}
-            // adsData={viewCampaignData?.addlevel}
-            adsData={viewCampaignData?.[adsetKey]?.addlevel || []}  // 👈 Fix here
-            adsetKey={adsetKey} 
-            network={network}
-          />
-        </Drawer>
+   
       <Drawer
         title="Edit ad"
         width={"100%"}
