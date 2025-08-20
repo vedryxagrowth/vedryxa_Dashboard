@@ -135,7 +135,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 },
                             ]}
                             required
-                            tooltip="This is a required field"
+                            // tooltip="This is a required field"
                         >
                             <TextArea
                                 placeholder="Primary text"
@@ -155,7 +155,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 },
                             ]}
                             required
-                            tooltip="This is a required field"
+                            // tooltip="This is a required field"
                         >
                             <TextArea
                                 placeholder="Headline"
@@ -175,7 +175,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 },
                             ]}
                             required
-                            tooltip="This is a required field"
+                            // tooltip="This is a required field"
                         >
                             <TextArea
                                 placeholder="Description"
@@ -194,7 +194,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 },
                             ]}
                             required
-                            tooltip="This is a required field"
+                            // tooltip="This is a required field"
                         >
                             <TextArea
                                 placeholder="Caption"
@@ -213,7 +213,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 },
                             ]}
                             required
-                            tooltip="This is a required field"
+                            // tooltip="This is a required field"
                         >
                             <TextArea
                                 placeholder="Website_URL"
@@ -225,7 +225,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                         <Form.Item
                             label={<span style={{ color: "#B4B4B4" }}>URL parameters</span>}
                             name="urlParameters"
-                            tooltip="This is a required field"
+                            // tooltip="This is a required field"
                         >
                             <TextArea
                                 placeholder="URL Parameters"

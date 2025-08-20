@@ -381,7 +381,7 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                       );
                   
                       if (response.status === 200 || response.status === 201) {
-                        functionCallForCommnets(newaccount);
+                        // functionCallForCommnets(newaccount);
                         console.log(" Status updated on Facebook:", response.data.status, "Adset ID:", response.data.adset_id);
                       } else {
                         console.warn(" Backend returned unexpected status:", response.status);

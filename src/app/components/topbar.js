@@ -105,6 +105,12 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   const [modalPosition, setModalPosition] = useState({ top: 0, right: 0 }); // Modal position
   const [selectedNotification, setSelectedNotification] = useState(null); // For the notification to be displayed in modal
   const [isViewNotificationModalVisible, setIsViewNotificationModalVisible] = useState(false); // View notification moda
+  // inside your notifications component
+  const [previewUrl, setPreviewUrl] = useState(null);   // store clicked image url
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);  // control modal
+
+
+
 
   const [loading, setLoading] = useState(false);
   // console.log(userdetails);
@@ -137,7 +143,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       fetchNotificationSound();
     }
   }, [userdetails?.email]);
- 
+
   // Toggle mute
   const toggleMute = async (e) => {
     e.stopPropagation();
@@ -199,7 +205,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
   const handleClearAll = async (e) => {
     e.stopPropagation();
-  
+
     try {
       await apiClient.put('https://prodapis.adsgoat.in/Notifications/ViewedAll', {
         email: userdetails?.email
@@ -209,7 +215,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           accept: 'application/json',
         }
       });
-  
+
       // ✅ Re-fetch updated notifications from DB
       const freshNotifications = await fetchNotifications();
       prevNotificationsRef.current = freshNotifications?.notifications || {};
@@ -243,7 +249,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           <span style={{ color: darkMode ? '#fff' : '#000' }}>Notifications</span>
           <span onClick={toggleMute} style={{ display: 'flex', alignItems: 'center' }}>
             {isMuted ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
-          </span> 
+          </span>
           {/* <strong style={{ color: darkMode ? '#fff' : '#000' }}>{Object.values(notifications)
             .filter(Array.isArray)
             .flat().length} NEW
@@ -420,6 +426,11 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                                     objectFit: 'cover',
                                     borderRadius: '8px',
                                   }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();   // 🔑 stop menu from closing
+                                    setPreviewUrl(item.imageUrl);
+                                    setIsPreviewVisible(true);
+                                  }}
                                 />
                               ) : (
                                 <img
@@ -430,6 +441,11 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                                     height: '200px',
                                     objectFit: 'cover',
                                     borderRadius: '8px',
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();   // 🔑 stop menu from closing
+                                    setPreviewUrl(item.imageUrl);
+                                    setIsPreviewVisible(true);
                                   }}
                                 />
                               )
@@ -532,8 +548,54 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           </Button>
         </div>
       </Menu.Item>
+     <Modal
+  open={isPreviewVisible}
+  footer={null}
+  onCancel={() => setIsPreviewVisible(false)}
+  centered
+  width="100%"
+  zIndex={3000}
+  getContainer={document.body}
+  bodyStyle={{
+    margin: 0,
+    padding: 0,
+    overflow: "hidden", 
+  }}
+  style={{
+    maxWidth: "80vw",  
+   
+  }}
+>
+  {previewUrl?.includes(".mp4") ? (
+    <video
+      src={previewUrl}
+      controls
+      style={{
+        width: "100%",
+        height: "80vh",   
+        objectFit: "contain",
+        borderRadius: 8,
+      }}
+    />
+  ) : (
+    <img
+      src={previewUrl}
+      alt="Preview"
+      style={{
+        width: "100%",
+        height: "90vh",  
+        objectFit: "contain",
+        borderRadius: 8,
+      }}
+    />
+  )}
+</Modal>
+
+
     </Menu>
   );
+
+
 
   // Handle viewing and removing the notification after modal closes
   const handleViewNotification = async (notification) => {
@@ -945,7 +1007,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         if (!isMutedRef.current) {
           playNotificationSound();
         }
-  
+
         api.open({
           key: `notify-${index}`,
           message: notif._category,
@@ -959,7 +1021,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       }, index * 500);
     });
   };
-  
+
 
   // const showAllAntdNotificationsSequentially = (notifications) => {
   //   notifications.forEach((notif, index) => {

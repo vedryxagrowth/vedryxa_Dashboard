@@ -346,7 +346,7 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                       );
                   
                       if (response.status === 200 || response.status === 201) {
-                        functionCallForCampaigns(newaccount);
+                        // functionCallForCampaigns(newaccount);
                         console.log(" Status updated on Facebook:", response.data.status, "Campaign ID:", response.data.campaign_id);
                       } else {
                         console.warn(" Backend returned unexpected status:", response.status);

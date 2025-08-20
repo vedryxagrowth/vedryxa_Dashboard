@@ -1244,6 +1244,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: #f5582c !important;
 }
 
+
 .custom-input-dark {
   background-color: #333 !important; /* Input background */
   color: #fff !important; /* Input text color */
@@ -3391,6 +3392,7 @@ select:focus,
   color: #91c25f !important;
   fill: #91c25f !important;
 }
+
 .dark-message1 .ant-message-notice-content {
   background-color: #333 !important;
   color: #fff !important;
