@@ -1060,7 +1060,8 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                   },
                 ]}
                 required
-                tooltip="This is a required field">
+                // tooltip="This is a required field"
+                >
                 <TextArea
                   placeholder="Primary text"
                   autoSize={{ minRows: 2, maxRows: 10 }}
@@ -1081,7 +1082,8 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                   },
                 ]}
                 required
-                tooltip="This is a required field">
+                // tooltip="This is a required field"
+                >
                 <TextArea
                   placeholder="Headline"
                   autoSize={{ minRows: 2, maxRows: 10 }}
@@ -1100,7 +1102,8 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                   },
                 ]}
                 required
-                tooltip="This is a required field">
+                // tooltip="This is a required field"
+                >
                 <TextArea
                   placeholder="Description"
                   autoSize={{ minRows: 2, maxRows: 10 }}
@@ -1113,9 +1116,9 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
                         <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                        <Tooltip title="This is a required field">
+                        {/* <Tooltip title="This is a required field">
                           <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
-                        </Tooltip>
+                        </Tooltip> */}
                     </div>
                     <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
                   </div>
@@ -1149,7 +1152,8 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                   },
                 ]}
                 required
-                tooltip="This is a required field">
+                // tooltip="This is a required field"
+                >
                 <TextArea
                   placeholder="Display Link"
                   autoSize={{ minRows: 2, maxRows: 10 }}

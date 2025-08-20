@@ -184,23 +184,23 @@ const MyTablePage = () => {
 
 
     const handleStatusFilterChange = (key) => {
-    if (key === 'active') {
-        setCampaignStatusFilter('ACTIVE');
-    } else if (key === 'pause') {
-        setCampaignStatusFilter('PAUSED');
-    } else if (key === 'all') {
-        setCampaignStatusFilter('ALL');
-    }
+        if (key === 'active') {
+            setCampaignStatusFilter('ACTIVE');
+        } else if (key === 'pause') {
+            setCampaignStatusFilter('PAUSED');
+        } else if (key === 'all') {
+            setCampaignStatusFilter('ALL');
+        }
     };
 
     const campaignStatusLabel = useMemo(() => {
         switch ((campaignStatusFilter || 'ALL').toUpperCase()) {
-          case 'ACTIVE':
-            return 'Active';
-          case 'PAUSED':
-            return 'Paused';
-          default:
-            return 'All';
+            case 'ACTIVE':
+                return 'Active';
+            case 'PAUSED':
+                return 'Paused';
+            default:
+                return 'All';
         }
     }, [campaignStatusFilter]);
 
@@ -6804,7 +6804,7 @@ const MyTablePage = () => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7290,7 +7290,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             // filter: "agNumberColumnFilter",
-             filter: "agTextColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -7389,7 +7389,7 @@ const MyTablePage = () => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7962,7 +7962,7 @@ const MyTablePage = () => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8548,14 +8548,14 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
         },
         spend: {
-            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true,  filter: "agTextColumnFilter",
+            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true, filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
         revenue: {
-            headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true,  filter: "agTextColumnFilter",
+            headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true, filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -8565,18 +8565,18 @@ const MyTablePage = () => {
             headerName: 'Profit', field: 'profit', minWidth: 105, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
-            }, sortable: true, headerTooltip: 'Profit = Revenue - Spend',  filter: "agTextColumnFilter",
+            }, sortable: true, headerTooltip: 'Profit = Revenue - Spend', filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
         margin: {
-            headerName: 'Margin', 
-            field: 'margin', 
-            valueGetter: getMargin, 
-            sortable: true, 
-            headerTooltip: '(Profit/Revenue)*100', 
+            headerName: 'Margin',
+            field: 'margin',
+            valueGetter: getMargin,
+            sortable: true,
+            headerTooltip: '(Profit/Revenue)*100',
             filter: 'agTextColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
@@ -8659,7 +8659,7 @@ const MyTablePage = () => {
             headerTooltip: 'FMargin = (Profit / Spend) * 100',
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8717,15 +8717,15 @@ const MyTablePage = () => {
                 <span>{adId}</span>
                 <Tooltip title={tooltipText}
                 >
-                    <div className ={`${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
+                    <div className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
                         <CopyOutlined
-                        className="copy-icon"
-                        onClick={handleCopy}
-                        style={{
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                        }}
-                    />
+                            className="copy-icon"
+                            onClick={handleCopy}
+                            style={{
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                            }}
+                        />
                     </div>
                 </Tooltip>
             </div>
@@ -9309,7 +9309,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -9753,18 +9753,18 @@ const MyTablePage = () => {
     }
 
     const onClickButton = async () => {
-         // Clear search input if account was changed
-         if (accountChanged || dateChanged || timezoneChanged) {
+        // Clear search input if account was changed
+        if (accountChanged || dateChanged || timezoneChanged) {
             setInputValue(''); // ✅ Clear search input
             // Also clear AG Grid filter if you're using it
             // gridRef.current?.api?.setQuickFilter?.('');
-          }
-        
-          // Reset change flags
-          setAccountChanged(false);
-          setDateChanged(false);
-          setTimezoneChanged(false);
-        
+        }
+
+        // Reset change flags
+        setAccountChanged(false);
+        setDateChanged(false);
+        setTimezoneChanged(false);
+
         localStorage.removeItem("storedData");
 
         const storedData = {
@@ -9856,7 +9856,7 @@ const MyTablePage = () => {
             const [start, end] = dates;
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
-            setDateChanged(true); 
+            setDateChanged(true);
         }
         // setDateChanged(true); 
     };
@@ -10311,113 +10311,140 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space> */}
-            <Space direction="horizontal" style={{ width: '100%', flexWrap: 'wrap', gap: '8px' }}>
-                <Select
-                    showSearch
-                    onChange={onChangeSelectRevenue}
-                    placeholder="Select Network"
-                    defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
-                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                    style={{
-                        width: '160px',
-                        backgroundColor: theme === 'dark' ? '#333' : undefined,
-                        color: theme === 'dark' ? '#fff' : undefined,
-                        border: '1px solid #4CAF50',
-                        borderRadius: '6px'
-                    }}
-                    optionFilterProp="label"
-                    options={networks.map(item => ({ value: item, label: item, title: '' }))}
-                    title=''
-                />
-
-                {/* Account Selector */}
-                <Select
-                    showSearch
-                    onChange={handleChange1}
-                    placeholder="Select Account"
-                    value={accountNumberToPass ?? selectedValue}
-                    defaultValue={
-                        accountNumberFromDashboard ??
-                        storedData?.account ??
-                        networksData[0]?.accountNumber
-                    }
-                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                    style={{
-                        width: '230px',
-                        whiteSpace: 'nowrap',
-                        color: theme === 'dark' ? 'white' : undefined,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        border: '1px solid #4CAF50',
-                        borderRadius: '6px',
-                    }}
-                    optionFilterProp="value"
-                    options={accountsAccess.map(createOption)}
-                    onDropdownVisibleChange={handleDropdownVisibleChange}
-                />
-
-                {/* Date Range */}
-                <ConfigProvider
-                    locale={locale}
-                    theme={{
-                        token: {
-                            colorPrimary: '#91C25F',
-                            colorTextLightSolid: '#000',
-                        },
-                    }}
-                >
-                    <RangePicker
-                        presets={rangePresets}
-                        onChange={handleChange}
-                        disabledDate={disabledDate}
-                        defaultValue={defaultDates}
-                        format="YYYY-MM-DD"
+            <div style={{
+                display: "flex",
+                justifyContent: "space-between", 
+                alignItems: "center",
+                padding: "8px 0",
+                flexWrap: "wrap", 
+                gap: "12px"
+            }}>
+                <Space direction="horizontal" style={{ width: '100%', flex: 1, gap: '8px' }}>
+                    <Select
+                        showSearch
+                        onChange={onChangeSelectRevenue}
+                        placeholder="Select Network"
+                        defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
+                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
                         style={{
-                            width: '240px',
-                            backgroundColor: theme === 'dark' ? '#555' : undefined,
-                            color: theme === 'dark' ? 'white' : undefined,
+                            width: '160px',
+                            backgroundColor: theme === 'dark' ? '#333' : undefined,
+                            color: theme === 'dark' ? '#fff' : undefined,
                             border: '1px solid #4CAF50',
                             borderRadius: '6px'
                         }}
-                        dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+                        optionFilterProp="label"
+                        options={networks.map(item => ({ value: item, label: item, title: '' }))}
+                        title=''
                     />
-                </ConfigProvider>
 
-                {/* Timezone Selector */}
-                <Select
-                    showSearch
-                    onChange={onChangeTime}
-                    placeholder="Timezone"
-                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                    style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
-                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                    optionFilterProp="label"
-                    value={time}
-                    options={timezones.map(item => ({ value: item, label: item }))}
-                    title=''
-                />
+                    {/* Account Selector */}
+                    <Select
+                        showSearch
+                        onChange={handleChange1}
+                        placeholder="Select Account"
+                        value={accountNumberToPass ?? selectedValue}
+                        defaultValue={
+                            accountNumberFromDashboard ??
+                            storedData?.account ??
+                            networksData[0]?.accountNumber
+                        }
+                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        style={{
+                            width: '230px',
+                            whiteSpace: 'nowrap',
+                            color: theme === 'dark' ? 'white' : undefined,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            border: '1px solid #4CAF50',
+                            borderRadius: '6px',
+                        }}
+                        optionFilterProp="value"
+                        options={accountsAccess.map(createOption)}
+                        onDropdownVisibleChange={handleDropdownVisibleChange}
+                    />
 
-                {/* Apply Button */}
-                <Button
-                    type='primary'
-                    onClick={onClickButton}
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}
-                    style={{
-                        backgroundColor: hovered ? '#91C25F' : 'transparent',
-                        border: '1px solid #4CAF50',
-                        borderRadius: '6px',
-                        color: theme === 'dark' ? '#ffffff' : '#000000',
-                        // fontWeight: '600',
-                        padding: '0 16px',
-                        height: '32px',
-                        transition: 'all 0.15s ease-in-out',
-                    }}
-                >
-                    Apply
-                </Button>
-            </Space>
+                    {/* Date Range */}
+                    <ConfigProvider
+                        locale={locale}
+                        theme={{
+                            token: {
+                                colorPrimary: '#91C25F',
+                                colorTextLightSolid: '#000',
+                            },
+                        }}
+                    >
+                        <RangePicker
+                            presets={rangePresets}
+                            onChange={handleChange}
+                            disabledDate={disabledDate}
+                            defaultValue={defaultDates}
+                            format="YYYY-MM-DD"
+                            style={{
+                                width: '240px',
+                                backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                color: theme === 'dark' ? 'white' : undefined,
+                                border: '1px solid #4CAF50',
+                                borderRadius: '6px'
+                            }}
+                            dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+                        />
+                    </ConfigProvider>
+
+                    {/* Timezone Selector */}
+                    <Select
+                        showSearch
+                        onChange={onChangeTime}
+                        placeholder="Timezone"
+                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        optionFilterProp="label"
+                        value={time}
+                        options={timezones.map(item => ({ value: item, label: item }))}
+                        title=''
+                    />
+
+                    {/* Apply Button */}
+                    <Button
+                        type='primary'
+                        onClick={onClickButton}
+                        onMouseEnter={() => setHovered(true)}
+                        onMouseLeave={() => setHovered(false)}
+                        style={{
+                            backgroundColor: hovered ? '#91C25F' : 'transparent',
+                            border: '1px solid #4CAF50',
+                            borderRadius: '6px',
+                            color: theme === 'dark' ? '#ffffff' : '#000000',
+                            // fontWeight: '600',
+                            padding: '0 16px',
+                            height: '32px',
+                            transition: 'all 0.15s ease-in-out',
+                        }}
+                    >
+                        Apply
+                    </Button>
+                </Space>
+              
+                <div style={{ textAlign: "right", marginRight: '15px' }}>
+                    <h3 style={{
+                        margin: 0,
+                        fontSize: '20px',
+                        fontWeight: 600,
+                        color: theme === 'dark' ? '#fff' : '#4b5563'  
+                    }}>
+                        Strategic Reports Center
+                    </h3>
+                    <p style={{
+                        margin: 0,
+                        fontSize: '13px',
+                        color: theme === 'dark' ? '#cbd5e1' : '#6b7280'  
+                    }}>
+                        Deep insights for strategic decisions
+                    </p>
+                </div>
+            </div>
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
@@ -10461,29 +10488,29 @@ const MyTablePage = () => {
                                 </Tooltip>
                             </Col>
                     </div> */}
-                   {activeTab === '3' && (
-                         <Col>
-                         <Space size={2} style={{marginRight: '10px'}}> 
-                             <Input
-                                 placeholder="Search..."
-                                //  prefix={<SearchOutlined />}
-                                 onChange={handleChangeInput}
-                                 onBlur={handleBlur}
-                                //  value={inputValue}
-                                 allowClear
-                                 className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                 style={{
-                                     borderRadius: 8,
-                                     border: '1px solid #4CAF50',
-                                     // background: theme === 'dark' ? '#2a2a2a' : '#fff',
-                                     // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
-                                     color: theme === 'dark' ? '#fff' : '#000',
-                                     fontWeight: 500,
-                                     width: 170,
-                                     marginRight: '5px'
-                                 }}
-                             />   
-                            {/* <Tooltip 
+                    {activeTab === '3' && (
+                        <Col>
+                            <Space size={2} style={{ marginRight: '10px' }}>
+                                <Input
+                                    placeholder="Search..."
+                                    //  prefix={<SearchOutlined />}
+                                    onChange={handleChangeInput}
+                                    onBlur={handleBlur}
+                                    //  value={inputValue}
+                                    allowClear
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    style={{
+                                        borderRadius: 8,
+                                        border: '1px solid #4CAF50',
+                                        // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                                        // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        fontWeight: 500,
+                                        width: 170,
+                                        marginRight: '5px'
+                                    }}
+                                />
+                                {/* <Tooltip 
                                 title={`🍳 This feature is cooking—almost ready to serve 😜`}
                                 overlayInnerStyle={{
                                     backgroundColor: theme === 'dark' ? '#111' : '#fff',
@@ -10493,157 +10520,157 @@ const MyTablePage = () => {
                                     // fontWeight: 500,
                                 }}
                             > */}
-                                 <Dropdown
-                                 overlay={
-                                    <Menu
-                                    className={theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light'}
-                                    onClick={({ key }) => handleStatusFilterChange(key)} 
-                                    items={[
-                                        {
-                                            key: 'all',
-                                            label: (
-                                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                  style={{
-                                                    width: '6px',
-                                                    height: '6px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: '#122F6E',
-                                                    marginRight: '6px',
-                                                  }}
-                                                ></span>
-                                                All
-                                              </span>
-                                            ),
-                                        },
-                                        { 
-                                            key: 'active', 
-                                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
-                                            <span
-                                                    style={{
-                                                    width: '6px',
-                                                    height: '6px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: 'green',
-                                                    marginRight: '6px',
-                                                    }}
-                                                ></span>  
-                                            Active
-                                        
-                                            </span> 
-                                        },
-                                        { 
-                                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
-                                              <span
-                                                style={{
-                                                width: '6px',
-                                                height: '6px',
-                                                borderRadius: '50%',
-                                                backgroundColor: 'red',
-                                                marginRight: '6px',
-                                                }}
-                                            ></span>
-                                            Paused
-                                      
-                                            </span> 
-                                        },
-                                    ]}
-                                    />
-                                 }
-                                 trigger={['click']}
-                             >
-                                 <Button
-                                     type="default"
-                                     style={{
-                                     borderRadius: 8,
-                                     background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                                     border: '1px solid #4CAF50',
-                                     color: theme === 'dark' ? '#95de64' : '#389e0d',
-                                     fontWeight: 500,
-                                     marginRight: '5px'
-                                     }}
-                                 >
-                                     <Space size={2}>
-                                     <FilterOutlined />
-                                     {campaignStatusLabel}
-                                     <DownOutlined style={{ fontSize: 10 }} />
-                                     </Space>
-                                 </Button>
-                             </Dropdown>
-                            {/* </Tooltip>         */}
-                            
-                 
-                             <Tooltip 
-                                title={`🍳 This feature is cooking—almost ready to serve 😜`}
-                                overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',   
-                                    borderRadius: 6,
-                                    // fontWeight: 500,
-                                }}
-                             >
-                                 <Button
-                                     type="default"
-                                     icon={<FaRobot style={{ fontSize: 20 }} />}
-                                     disabled
-                                     style={{
-                                     borderRadius: 8,
-                                     background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-                                     border: '1px solid #4CAF50',
-                                     color: theme === 'dark' ? '#52c41a' : '#389e0d',
-                                     fontWeight: 500,
-                                     cursor: 'not-allowed',
-                                     marginRight: '5px'
-                                     }}
-                                 >
-                                     AI Assistant
-                                 </Button>
-                             </Tooltip>
- 
-                             <Tooltip 
-                                title={`🍳 This feature is cooking—almost ready to serve 😜`}
-                                overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',   
-                                    borderRadius: 6,
-                                    // fontWeight: 500,
-                                }}
-                            >
-                                 <Button
-                                     type="default"
-                                     icon={<SettingOutlined />}
-                                     disabled
-                                     style={{
-                                     borderRadius: 8,
-                                     background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
-                                     border: '1px solid #91d5ff',
-                                     color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
-                                     fontWeight: 500,
-                                     cursor: 'not-allowed',
-                                     marginRight: '5px'
-                                     }}
-                                 >
-                                     Rules
-                                 </Button>
-                             </Tooltip>
- 
-                             {/* <Tooltip title="Click to Refresh Tables"> */}
-                                 <Button
-                                         type="primary"
-                                         style={{
-                                         backgroundColor: '#91C25F',
-                                         border: 'solid 0px',
-                                         color: 'black',
-                                         height:'30px'
-                                     }}
-                                     icon={<ReloadOutlined  className="black-icon" />}
-                                     onClick={onClickRefresh}
-                                 />               
-                             {/* </Tooltip> */}
-                         </Space>
-                     </Col>
+                                <Dropdown
+                                    overlay={
+                                        <Menu
+                                            className={theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light'}
+                                            onClick={({ key }) => handleStatusFilterChange(key)}
+                                            items={[
+                                                {
+                                                    key: 'all',
+                                                    label: (
+                                                        <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    width: '6px',
+                                                                    height: '6px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: '#122F6E',
+                                                                    marginRight: '6px',
+                                                                }}
+                                                            ></span>
+                                                            All
+                                                        </span>
+                                                    ),
+                                                },
+                                                {
+                                                    key: 'active',
+                                                    label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                        <span
+                                                            style={{
+                                                                width: '6px',
+                                                                height: '6px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: 'green',
+                                                                marginRight: '6px',
+                                                            }}
+                                                        ></span>
+                                                        Active
+
+                                                    </span>
+                                                },
+                                                {
+                                                    key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                        <span
+                                                            style={{
+                                                                width: '6px',
+                                                                height: '6px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: 'red',
+                                                                marginRight: '6px',
+                                                            }}
+                                                        ></span>
+                                                        Paused
+
+                                                    </span>
+                                                },
+                                            ]}
+                                        />
+                                    }
+                                    trigger={['click']}
+                                >
+                                    <Button
+                                        type="default"
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#95de64' : '#389e0d',
+                                            fontWeight: 500,
+                                            marginRight: '5px'
+                                        }}
+                                    >
+                                        <Space size={2}>
+                                            <FilterOutlined />
+                                            {campaignStatusLabel}
+                                            <DownOutlined style={{ fontSize: 10 }} />
+                                        </Space>
+                                    </Button>
+                                </Dropdown>
+                                {/* </Tooltip>         */}
+
+
+                                <Tooltip
+                                    title={`🍳 This feature is cooking—almost ready to serve 😜`}
+                                    overlayInnerStyle={{
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        border: '1px solid #ccc',
+                                        borderRadius: 6,
+                                        // fontWeight: 500,
+                                    }}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                                        disabled
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                                            fontWeight: 500,
+                                            cursor: 'not-allowed',
+                                            marginRight: '5px'
+                                        }}
+                                    >
+                                        AI Assistant
+                                    </Button>
+                                </Tooltip>
+
+                                <Tooltip
+                                    title={`🍳 This feature is cooking—almost ready to serve 😜`}
+                                    overlayInnerStyle={{
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        border: '1px solid #ccc',
+                                        borderRadius: 6,
+                                        // fontWeight: 500,
+                                    }}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<SettingOutlined />}
+                                        disabled
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                                            border: '1px solid #91d5ff',
+                                            color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                                            fontWeight: 500,
+                                            cursor: 'not-allowed',
+                                            marginRight: '5px'
+                                        }}
+                                    >
+                                        Rules
+                                    </Button>
+                                </Tooltip>
+
+                                {/* <Tooltip title="Click to Refresh Tables"> */}
+                                <Button
+                                    type="primary"
+                                    style={{
+                                        backgroundColor: '#91C25F',
+                                        border: 'solid 0px',
+                                        color: 'black',
+                                        height: '30px'
+                                    }}
+                                    icon={<ReloadOutlined className="black-icon" />}
+                                    onClick={onClickRefresh}
+                                />
+                                {/* </Tooltip> */}
+                            </Space>
+                        </Col>
                     )}
                 </Row>
             </div>

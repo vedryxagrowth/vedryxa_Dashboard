@@ -3391,6 +3391,7 @@ select:focus,
   color: #91c25f !important;
   fill: #91c25f !important;
 }
+
 .dark-message1 .ant-message-notice-content {
   background-color: #333 !important;
   color: #fff !important;
@@ -3640,6 +3641,7 @@ select:focus,
 .pill-tabs-dark .ant-tabs-tab {
   color: #fff;
 }
+/* campaign edits  for multiple adset*/
 .pill-tabs-dark .ant-tabs-tab-active {
   background-color: #555;
   color: #4caf50 !important;

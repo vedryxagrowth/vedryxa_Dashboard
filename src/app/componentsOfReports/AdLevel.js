@@ -378,7 +378,7 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                       );
                   
                       if (response.status === 200 || response.status === 201) {
-                        functionCallForCommnets(newaccount);
+                        // functionCallForCommnets(newaccount);
                         console.log(" Status updated on Facebook:", response.data.status, "Ad ID:", response.data.ad_id);
                       } else {
                         console.warn(" Backend returned unexpected status:", response.status);

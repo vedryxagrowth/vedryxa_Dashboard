@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   FilterOutlined,
   CheckCircleFilled,
@@ -366,9 +366,8 @@ const App = () => {
             </Tooltip>
           ),
         }))}
-        className={`left-pill-tabs ${
-          theme === "dark" ? "pill-tabs-dark" : "pill-tabs-light"
-        }`}
+        className={`left-pill-tabs ${theme === "dark" ? "pill-tabs-dark" : "pill-tabs-light"
+          }`}
         style={{
           backgroundColor: "transparent",
           padding: "0",
@@ -505,13 +504,13 @@ const App = () => {
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
         ? allCampaigns.filter(
-            (campaign) => campaign.Account_Number === accountNumber
-          )
+          (campaign) => campaign.Account_Number === accountNumber
+        )
         : allCampaigns.filter((campaign) =>
-            userdetails?.adAccounts[selectedKey]?.includes(
-              campaign.Account_Number
-            )
-          );
+          userdetails?.adAccounts[selectedKey]?.includes(
+            campaign.Account_Number
+          )
+        );
 
       setcreatecamselectedacc(accountNumber);
 
@@ -555,13 +554,13 @@ const App = () => {
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
         ? allCampaigns.filter(
-            (campaign) => campaign.Account_Number === accountNumber
-          )
+          (campaign) => campaign.Account_Number === accountNumber
+        )
         : allCampaigns.filter((campaign) =>
-            userdetails?.adAccounts[selectedKey]?.includes(
-              campaign.Account_Number
-            )
-          );
+          userdetails?.adAccounts[selectedKey]?.includes(
+            campaign.Account_Number
+          )
+        );
 
       setcreatecamselectedacc(accountNumber);
 
@@ -623,39 +622,84 @@ const App = () => {
       setEndDate(end.format("YYYY-MM-DD"));
     }
   };
-  // Handle key change
-  const handleKeyChange = (key) => {
-    setSelectedKey(key);
-    setSelectedValue(null); // Reset value selection
-    // Update value options based on selected key
-  };
+  
+const allowFetchOnSelectRef = useRef(false); 
+
+const handleKeyChange = (key) => {
+  setSelectedKey(key);
+  setSelectedValue(null);
+};
+
+const handleValueChange = (value) => {
+  setSelectedValue(value);
+  allowFetchOnSelectRef.current = false; 
+};
+
+const handleApply = () => {
+  if (selectedValue && startDate && endDate) {
+    
+    fetchData(selectedValue, startDate, endDate);
+    fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+    
+    allowFetchOnSelectRef.current = true;
+  } else {
+    message.warning("Please select project, account and date range");
+  }
+};
+
+useEffect(() => {
+  if (!selectedValue || !startDate || !endDate) return;
+  fetchData(selectedValue, startDate, endDate);
+}, [refrst]); 
+
+useEffect(() => {
+  if (!selectedValue || !startDate || !endDate) return;
+  if (!allowFetchOnSelectRef.current) return;
+  fetchData(selectedValue, startDate, endDate);
+ 
+  allowFetchOnSelectRef.current = false;
+}, [selectedValue]); 
+
+useEffect(() => {
+  if (!selectedValue || !startDate || !endDate) return;
+  if (!allowFetchOnSelectRef.current) return;
+  fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+  allowFetchOnSelectRef.current = false;
+}, [selectedValue]);
+useEffect(() => {
+  if (!selectedValue || !startDate || !endDate) return;
+  fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+}, [refrst]);
 
   // Handle value change
-  const handleValueChange = (value) => {
-    setSelectedValue(value);
-    // fetchData(value); // Fetch data based on selected value
-    // fetchMultipleAdsetCampaigns(value); // Fetch multiple adset campaigns based on selected value
-  };
-  const handleApply = () => {
-    if (selectedValue && startDate && endDate) {
-      fetchData(selectedValue, startDate, endDate);
-      fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
-    } else {
-      message.warning("Please select project, account and date range");
-    }
-  };
+  // const handleValueChange = (value) => {
+  //   setSelectedValue(value);
+  //   // fetchData(value); // Fetch data based on selected value
+  //   // fetchMultipleAdsetCampaigns(value); // Fetch multiple adset campaigns based on selected value
+  // };
+  // const handleApply = () => {
+  //   if (selectedValue && startDate && endDate) {
+  //     fetchData(selectedValue, startDate, endDate);
+  //     fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+  //   } else {
+  //     message.warning({
+  //       content: "Please select project, account and date range",
+  //       className: theme === "dark" ? "dark-message" : ""
+  //     });
+  //   }
+  // };
 
-  useEffect(() => {
-    if (selectedValue) {
-      fetchData(selectedValue);
-    }
-  }, [refrst, selectedValue]);
+  // useEffect(() => {
+  //   if (selectedValue) {
+  //     fetchData(selectedValue);
+  //   }
+  // }, [refrst, selectedValue]);
 
-  useEffect(() => {
-    if (selectedValue) {
-      fetchMultipleAdsetCampaigns(selectedValue);
-    }
-  }, [refrst, selectedValue]);
+  // useEffect(() => {
+  //   if (selectedValue) {
+  //     fetchMultipleAdsetCampaigns(selectedValue);
+  //   }
+  // }, [refrst, selectedValue]);
 
   useEffect(() => {
     if (draftsLoading) {
@@ -756,7 +800,12 @@ const App = () => {
           )
         );
 
-        message.success("Approval confirmed");
+        message.open({
+          type: 'success',
+          content: "Approval confirmed",
+          className: theme === 'dark' ? 'dark-message' : '',
+        });
+
         setIsModalVisible(false); // Close modal after updating
         changeRRefrst();
         // setTimeout(() => {
@@ -804,7 +853,11 @@ const App = () => {
           )
         );
 
-        message.success("Approval confirmed");
+        message.open({
+          type: 'success',
+          content: "Approval confirmed",
+          className: theme === 'dark' ? 'dark-message' : '',
+        });
         setIsModalVisible(false); // Close modal after updating
         changeRRefrst();
         // setTimeout(() => {
@@ -944,9 +997,11 @@ const App = () => {
               } else {
                 var mains = "PAUSE";
               }
-              message.success(
-                `Campaign ${checked ? "Launched" : "Paused"} Successfully`
-              );
+              message.open({
+                type: 'success',
+                content: `Campaign ${checked ? "Launched" : "Paused"} Successfully`,
+                className: theme === 'dark' ? 'dark-message' : '',
+              });
 
               // Update the state to reflect the change in UI
               setCampaignData((prevCampaigns) =>
@@ -968,15 +1023,17 @@ const App = () => {
           } catch (fbError) {
             console.error("Error updating facebook status:", fbError);
             message.error(
-              `Error updating facebook status: ${
-                fbError.response?.data?.error?.message || fbError.message
+              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
               }`
             );
           }
         } else {
           // If no campaignId is available, only update the backend
-          message.success("Campaign launched successfully");
-
+          message.open({
+            type: 'success',
+            content: "Campaign launched successfully",
+            className: theme === 'dark' ? 'dark-message' : '',
+          });
           // Update the state to reflect the change in UI
           setCampaignData((prevCampaigns) =>
             prevCampaigns.map((campaign) =>
@@ -1053,9 +1110,11 @@ const App = () => {
               } else {
                 var mains = "PAUSE";
               }
-              message.success(
-                `Campaign ${checked ? "Launched" : "Paused"} Successfully`
-              );
+              message.open({
+                type: 'success',
+                content: `Campaign ${checked ? "Launched" : "Paused"} Successfully`,
+                className: theme === 'dark' ? 'dark-message' : '',
+              });
 
               // Update the state to reflect the change in UI
               setCampaignData((prevCampaigns) =>
@@ -1077,14 +1136,17 @@ const App = () => {
           } catch (fbError) {
             console.error("Error updating facebook status:", fbError);
             message.error(
-              `Error updating facebook status: ${
-                fbError.response?.data?.error?.message || fbError.message
+              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
               }`
             );
           }
         } else {
           // If no campaignId is available, only update the backend
-          message.success("Campaign launched successfully");
+          message.open({
+            type: 'success',
+            content: "Campaign launched successfully",
+            className: theme === 'dark' ? 'dark-message' : '',
+          });
 
           // Update the state to reflect the change in UI
           setCampaignData((prevCampaigns) =>
@@ -1164,9 +1226,11 @@ const App = () => {
 
                 if (fbResponse.status === 200) {
                   console.log("Daily budget updated successfully on Facebook");
-                  message.success(
-                    "Daily amount updated successfully on both backend and Facebook"
-                  );
+                  message.open({
+                    type: 'success',
+                    content: "Daily amount updated successfully on both backend and Facebook",
+                    className: theme === 'dark' ? 'dark-message' : '',
+                  });
 
                   // Update the table row data with the new daily amount
                   updateTableRow({ ...record, Daily_amount: budgets });
@@ -1186,7 +1250,11 @@ const App = () => {
               }
             } else {
               // If no campaignId, just update the backend
-              message.success("Daily amount updated successfully");
+              message.open({
+                type: 'success',
+                content: "Daily amount updated successfully ",
+                className: theme === 'dark' ? 'dark-message' : '',
+              })
 
               // Update the table row data with the new daily amount
               updateTableRow({ ...record, Daily_amount: budgets });
@@ -1300,10 +1368,11 @@ const App = () => {
 
                 if (fbResponse.status === 200) {
                   console.log("Daily budget updated successfully on Facebook");
-                  message.success(
-                    "Daily amount updated successfully on both backend and Facebook"
-                  );
-
+                  message.open({
+                    type: 'success',
+                    content: "Daily amount updated successfully on both backend and Facebook",
+                    className: theme === 'dark' ? 'dark-message' : '',
+                  })
                   // Update the table row data with the new daily amount
                   updateTableRow({ ...record, Daily_amount: budgets });
 
@@ -1322,7 +1391,11 @@ const App = () => {
               }
             } else {
               // If no campaignId, just update the backend
-              message.success("Daily amount updated successfully");
+              message.open({
+                type: 'success',
+                content: "Daily amount updated successfully",
+                className: theme === 'dark' ? 'dark-message' : '',
+              })
 
               // Update the table row data with the new daily amount
               updateTableRow({ ...record, Daily_amount: budgets });
@@ -1541,13 +1614,13 @@ const App = () => {
                 ))}
               {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length >
                 6 && (
-                <div style={{ opacity: 0.8 }}>
-                  …and{" "}
-                  {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length -
-                    6}{" "}
-                  more ad errors
-                </div>
-              )}
+                  <div style={{ opacity: 0.8 }}>
+                    …and{" "}
+                    {(adErrsVerbose.length ? adErrsVerbose : adErrsFlat).length -
+                      6}{" "}
+                    more ad errors
+                  </div>
+                )}
             </div>
           </div>
         )}
@@ -1593,7 +1666,11 @@ const App = () => {
 
       changeRRefrst && changeRRefrst();
 
-      message.success("Campaign deleted");
+       message.open({
+                type: 'success',
+                content: "Campaign deleted",
+                className: theme === 'dark' ? 'dark-message' : '',
+       })
     } catch (err) {
       console.error("Delete campaign error:", {
         status: err?.response?.status,
@@ -1602,8 +1679,8 @@ const App = () => {
       });
       message.error(
         err?.response?.data?.message ||
-          err?.message ||
-          "Failed to delete campaign"
+        err?.message ||
+        "Failed to delete campaign"
       );
     }
   };
@@ -1952,9 +2029,8 @@ const App = () => {
                   open={isModalVisible}
                   onOk={handleOk}
                   onCancel={() => setIsModalVisible(false)}
-                  className={`custom-modal ${
-                    theme === "dark" ? "dark-theme-modal" : ""
-                  }`}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
                 >
                   <p>Are you sure you want to approve?</p>
                 </Modal>
@@ -2504,9 +2580,8 @@ const App = () => {
                   open={isModalVisibleForAdsets}
                   onOk={handleOkForAdsets}
                   onCancel={() => setIsModalVisibleForAdsets(false)}
-                  className={`custom-modal ${
-                    theme === "dark" ? "dark-theme-modal" : ""
-                  }`}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
                 >
                   <p>Are you sure you want to approve?</p>
                 </Modal>
@@ -3047,9 +3122,8 @@ const App = () => {
               onChange={handleKeyChange}
               value={selectedKey}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
             >
               {options.map((option) => (
                 <Option key={option.value} value={option.value}>
@@ -3073,9 +3147,8 @@ const App = () => {
               }
               onDropdownVisibleChange={(open) => setIsOpen(open)}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${
-                theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
             >
               {valueOptions.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
@@ -3123,10 +3196,12 @@ const App = () => {
                       {option.status === "Active" ? (
                         <CheckCircleFilled
                           style={{ color: "#91C25F", fontSize: 15 }}
+                          className='black-icon-active-1'
                         />
                       ) : (
                         <CloseCircleFilled
                           style={{ color: "#EC7117", fontSize: 15 }}
+                          className='black-icon-pause-1'
                         />
                       )}
                     </span>
@@ -3152,9 +3227,8 @@ const App = () => {
                   color: theme === "dark" ? "white" : undefined,
                 }}
                 defaultValue={[dayjs(), dayjs()]}
-                dropdownClassName={`${
-                  theme === "dark" ? "dark-theme-dropdown" : ""
-                }`}
+                dropdownClassName={`${theme === "dark" ? "dark-theme-dropdown" : ""
+                  }`}
               />
             </ConfigProvider>
 
@@ -3409,11 +3483,10 @@ const App = () => {
                   // minHeight: '100%',
                   tableLayout: "fixed",
                 }}
-                className={`custom-dark-table ${
-                  theme === "dark"
-                    ? "dark-mode-pagination"
-                    : "light-mode-pagination"
-                }`}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
                 columns={columns}
                 dataSource={getFilteredSingleCampaigns()
                   .map((item, index) => ({
@@ -3472,11 +3545,10 @@ const App = () => {
                   // minHeight: '100%',
                   tableLayout: "fixed",
                 }}
-                className={`custom-dark-table ${
-                  theme === "dark"
-                    ? "dark-mode-pagination"
-                    : "light-mode-pagination"
-                }`}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
                 columns={columnsformultipleadsets}
                 dataSource={getFilteredMultipleAdsetCampaigns()
                   .map((item, index) => ({

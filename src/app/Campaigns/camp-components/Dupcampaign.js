@@ -1449,7 +1449,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     // Proceed with posting data, including the addLevelData
                     await postData({ ...formValues, addlevel: addLevelData });
                     changeRRefrst();
-                    message.success("Campaign created successfully");
+                    message.open({
+                        type: 'success',
+                        content: "Campaign created successfully",
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    })
                 } else {
                     message.error("Failed to upload one or more files. Campaign creation aborted.");
                 }
@@ -1639,7 +1643,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 console.log('Form data submitted successfully');
                 isManual !== "manual" && setIsManual(false);
                 onClose(); // Close the drawer or perform any other action
-                message.success("Campaign was created");
+                 message.open({
+                        type: 'success',
+                        content: "Campaign was created",
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    })
                 // changeRRefrst();
             } else {
                 console.error('Failed to submit form data');
@@ -2819,7 +2827,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Primary text"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
@@ -2856,7 +2865,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Headline"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
@@ -2875,7 +2885,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Description"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
@@ -2908,9 +2919,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
                                                     <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                                                    <Tooltip title="This is a required field">
+                                                    {/* <Tooltip title="This is a required field">
                                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
-                                                    </Tooltip>
+                                                    </Tooltip> */}
                                                 </div>
                                                 <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
                                             </div>
@@ -2945,7 +2956,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Display Link"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
