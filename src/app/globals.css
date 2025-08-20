@@ -3641,7 +3641,7 @@ select:focus,
 .pill-tabs-dark .ant-tabs-tab {
   color: #fff;
 }
-/* campaign edits */
+/* campaign edits  for multiple adset*/
 .pill-tabs-dark .ant-tabs-tab-active {
   background-color: #555;
   color: #4caf50 !important;
