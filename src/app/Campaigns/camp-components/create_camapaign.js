@@ -4309,7 +4309,7 @@ const CreateCampaignDrawer = ({
     newSelectedRef.current = "";
     setPopupInputs({ input1: "", input2: "" });
     form.resetFields();
-    setAdsets([{ id: uuidv4(), AdsetPanelName: "Adset 1", DailyAdd_amount: 0 }]);
+    setAdsets([{ id: uuidv4(), AdsetPanelName: "ADSET 1", DailyAdd_amount: 0 }]);
     setSelectedFiles({});
     setSelectedFilesFromCreatives({});
     setSelectedFilesFromMedia?.({});
@@ -4352,6 +4352,16 @@ const CreateCampaignDrawer = ({
   }, [account]);
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
+    if(adsets.length === 1){
+      form.setFieldsValue({
+        adsets: {
+          [0]: {
+            AdsetName: e.target.value,
+            AddName: e.target.value,
+          }
+        }
+      });
+    }
     const newName = e.target.value;
     setCampaignName(newName);
   };
@@ -5059,7 +5069,7 @@ const CreateCampaignDrawer = ({
           onClose();
           setSelectedPositions({});
           setAdsets([
-            { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1", AdsetName: "", AddName: "" },
+            { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1", AdsetName: "", AddName: "" },
           ]);
           isManual !== "manual" && setIsManual(false);
           newSelectedRef.current = null; // Reset the newSelectedRef
@@ -5071,8 +5081,7 @@ const CreateCampaignDrawer = ({
           setAdsetLevelDailyBudget(0);
           setIsCampaignBudgetActive(false);
           setIsAnyAdsetBudgetSet(false);
-
-
+          setShowBidAmount(false);
         } else {
           console.error("Failed to submit form data");
         }
@@ -5693,7 +5702,7 @@ const CreateCampaignDrawer = ({
     setAdsetLevelDailyBudget(0);
     // setCampaignLevelDailyBudget(0);
     setAdsets([
-      { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
+      { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
     ]);
     onClose(); // Call onClose handler to close the drawer
     setActiveKey(["1"]);
@@ -6083,7 +6092,7 @@ const CreateCampaignDrawer = ({
     setAdsets(
       adsetObjects.map((adsetObj, index) => ({
         id: adsetObj.id ?? uuidv4(),
-        AdsetPanelName: `Adset ${index + 1}`,
+        AdsetPanelName: `ADSET ${index + 1}`,
         DailyAdd_amount: adsetObj.Daily_amount
           ? adsetObj.Daily_amount / 100
           : 0,
@@ -6093,7 +6102,7 @@ const CreateCampaignDrawer = ({
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
       id: adsetObj.id ?? uuidv4(),
-      AdsetPanelName: `Adset ${index + 1}`,
+      AdsetPanelName: `ADSET ${index + 1}`,
       AdsetName: adsetObj.AdsetName,
       DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
       optimization_goal: adsetObj.optimization_goal,
@@ -6721,7 +6730,7 @@ const CreateCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
-                {/*pk*/}
+                {/*1234*/}
                 {/* <Form.Item
                                     name="Daily_amount"
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
