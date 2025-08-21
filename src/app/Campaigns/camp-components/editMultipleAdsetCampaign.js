@@ -7432,7 +7432,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               "Content-Type": "application/json",
               Authorization: token,
             },
-            body: JSON.stringify({ ...campaignData, re_launch: true }),
+            body: JSON.stringify({ ...campaignData, ...(fullCampaignData?.campaignid ? { re_launch: true } : {}) }),
           }
         );
 
@@ -7533,10 +7533,11 @@ const EditMultipleAdsetCampaignDrawer = ({
     let number = 1;
     let AllAdsetsData = {};
     AllAdsetsData["identifier"] = fullCampaignData.identifier;
-    AllAdsetsData["campaign_name"] = fullCampaignData.campaign_name;
+    AllAdsetsData["campaign_name"] = values?.Name;
     AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
     AllAdsetsData["Approval"] = fullCampaignData.Approval;
     AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus;
+    AllAdsetsData["Category"] = fullCampaignData.Category;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
       AllAdsetsData["camapaignlevel"]["campaignid"] =
