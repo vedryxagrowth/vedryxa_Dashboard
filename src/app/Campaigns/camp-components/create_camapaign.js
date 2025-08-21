@@ -1087,7 +1087,7 @@ const AdsetComponent = ({
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
           <Form.Item
             name={["adsets", index, "AdsetName"]}
-            initialValue={campaignName}
+            // initialValue={campaignName}
             label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
             rules={[
               {
@@ -1647,7 +1647,7 @@ const AdsetComponent = ({
             label={<span style={{ color: "#B4B4B4" }}>Language</span>}
             rules={[{ required: true, message: "Please select an option!" }]}
             style={{ flex: "1 1 150px" }}
-            initialValue={adset.Language || "English (US)"}
+            initialValue={adset.Language || [6]}
           >
             <Select
               mode="multiple"
@@ -1908,7 +1908,7 @@ const AdsetComponent = ({
                 <span>AD LEVEL</span>
                 {(selectedFiles[index] || []).length > 0 && (
                   <div onClick={(e) => e.stopPropagation()}>
-                    <Breadcrumb separator="/">
+                    <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
                       {selectedFiles[index].map((_, i) => (
                         <Breadcrumb.Item key={i}>
                           <span
@@ -1920,15 +1920,27 @@ const AdsetComponent = ({
                               }));
                             }}
                             style={{
-                              fontWeight:
-                                activeMediaIndex[index] === i
-                                  ? "900"
-                                  : "normal",
+                              fontWeight: activeMediaIndex[index] === i ? "500" : "normal",
                               color:
                                 activeMediaIndex[index] === i
                                   ? "#91C25F"
-                                  : "#888",
+                                  : theme === "dark"
+                                    ? "#fff"
+                                    : "#333",
                               cursor: "pointer",
+                              backgroundColor:
+                                activeMediaIndex[index] === i
+                                  ? theme === "dark"
+                                    ? "rgba(145,194,95,0.2)"
+                                    : "rgba(145,194,95,0.15)"
+                                  : "transparent",
+                              border:
+                                activeMediaIndex[index] === i
+                                  ? "1px solid #4caf50"
+                                  : "2px solid transparent",
+                              borderRadius: "6px",
+                              padding: "1px 5px",
+                              transition: "all 0.2s ease-in-out",
                             }}
                           >
                             {i + 1}
@@ -2366,7 +2378,7 @@ const AdsetComponent = ({
                 </div>
                 <Form.Item
                   name={["adsets", index, "AddName"]}
-                  initialValue={campaignName}
+                  // initialValue={campaignName}
                   label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                   rules={[
                     {
@@ -2395,13 +2407,14 @@ const AdsetComponent = ({
                     },
                   ]}
                   required
-                  tooltip="This is a required field"
+                // tooltip="This is a required field"
                 >
                   <TextArea
                     placeholder="Primary text"
                     autoSize={{ minRows: 2, maxRows: 10 }}
                     onChange={(e) => setPrimaryText(e.target.value)}
-                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+
 
                   />
                 </Form.Item>
@@ -2433,7 +2446,7 @@ const AdsetComponent = ({
                     },
                   ]}
                   required
-                  tooltip="This is a required field"
+                // tooltip="This is a required field"
                 >
                   <TextArea
                     placeholder="Headline"
@@ -2458,7 +2471,7 @@ const AdsetComponent = ({
                   ]}
                   required
                   initialValue={"Find More"}
-                  tooltip="This is a required field"
+                // tooltip="This is a required field"
                 >
                   <TextArea
                     placeholder="Description"
@@ -2489,11 +2502,11 @@ const AdsetComponent = ({
                         }}
                       >
                         <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                        <Tooltip title="This is a required field">
+                        {/* <Tooltip title="This is a required field">
                           <QuestionCircleOutlined
                             style={{ marginLeft: 4, cursor: "pointer" }}
                           />
-                        </Tooltip>
+                        </Tooltip> */}
                       </div>
                       <EditOutlined
                         style={{ cursor: "pointer" }}
@@ -2533,7 +2546,7 @@ const AdsetComponent = ({
                     },
                   ]}
                   required
-                  tooltip="This is a required field"
+                // tooltip="This is a required field"
                 >
                   <TextArea
                     placeholder="Display Link"
@@ -2992,7 +3005,7 @@ const CreateCampaignDrawer = ({
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [draftsData, setDraftsData] = useState([]);
   const [popupInputs, setPopupInputs] = useState({ input1: "", input2: "", reportCat: "" });
-  const [errors, setErrors] = useState({ input1: "", input2: "" });
+  const [errors, setErrors] = useState({ input1: "", input2: "", reportCat: "" });
   const [refreshDraft, setRefreshDraft] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -3283,14 +3296,14 @@ const CreateCampaignDrawer = ({
 
   const handleConfirm = async () => {
     const newErrors = {
-      input1: popupInputs.input1.trim() ? "" : "Category is required",
+      input1: popupInputs.input1.trim() ? "" : " Template category is required",
       input2: popupInputs.input2.trim() ? "" : "Template name is required",
     };
     setErrors(newErrors);
 
     const hasErrors = Object.values(newErrors).some((msg) => msg !== "");
     if (hasErrors) {
-      message?.error?.("Please fill the required fields");
+      // message?.error?.("Please fill the required fields");
       return;
     }
 
@@ -4156,7 +4169,7 @@ const CreateCampaignDrawer = ({
   const fetchDraftDetails = async () => {
     if (!account) return;
     try {
-      const res = await axios.get("https://www.testapi.adsgoat.in/api/getDraftData", {
+      const res = await axios.get("https://www.testapi.adsgoat.in/api/newGetDraftData", {
         params: { accountNumber: account },
         headers: { Authorization: token },
         validateStatus: () => true,
@@ -4197,7 +4210,11 @@ const CreateCampaignDrawer = ({
       const data = await response.json();
 
       if (data.ok) {
-        message.success("Draft deleted successfully");
+        message.open({
+          type: 'success',
+          content: "Draft deleted successfully",
+          className: theme === 'dark' ? 'dark-message' : '',
+        })
         await fetchDraftDetails();
       } else {
         message.error(data.message || "Failed to delete draft");
@@ -4268,7 +4285,11 @@ const CreateCampaignDrawer = ({
       const json = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(json.message || `Update failed (${resp.status})`);
 
-      message.success("Draft updated successfully");
+      message.open({
+        type: 'success',
+        content: "Draft updated successfully",
+        className: theme === 'dark' ? 'dark-message' : '',
+      })
 
       await postDraftSaveCleanup();
 
@@ -4288,7 +4309,7 @@ const CreateCampaignDrawer = ({
     newSelectedRef.current = "";
     setPopupInputs({ input1: "", input2: "" });
     form.resetFields();
-    setAdsets([{ id: uuidv4(), AdsetPanelName: "Adset 1", DailyAdd_amount: 0 }]);
+    setAdsets([{ id: uuidv4(), AdsetPanelName: "ADSET 1", DailyAdd_amount: 0 }]);
     setSelectedFiles({});
     setSelectedFilesFromCreatives({});
     setSelectedFilesFromMedia?.({});
@@ -4311,11 +4332,17 @@ const CreateCampaignDrawer = ({
     setOpenCreativesDrawer(false);
     setIsModalVisible(false);
   };
+  // useEffect(() => {
+  //   if (account && visible) {
+  //     fetchAccountDetails();
+  //   }
+  // }, [account, visible]);
   useEffect(() => {
-    if (account && visible) {
-      fetchAccountDetails();
+    if (visible && accountNumber) {
+      form.setFieldsValue({ Account_Number: accountNumber });
+      fetchAccountDetails(); 
     }
-  }, [account, visible]);
+  }, [accountNumber, visible, form]);
 
   useEffect(() => {
     setDraftsData([]);
@@ -4325,6 +4352,16 @@ const CreateCampaignDrawer = ({
   }, [account]);
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
+    if(adsets.length === 1){
+      form.setFieldsValue({
+        adsets: {
+          [0]: {
+            AdsetName: e.target.value,
+            AddName: e.target.value,
+          }
+        }
+      });
+    }
     const newName = e.target.value;
     setCampaignName(newName);
   };
@@ -4995,9 +5032,10 @@ const CreateCampaignDrawer = ({
     // abcd
     const selectedCategory = (popupInputs?.reportCat || "").trim();
     if (!selectedCategory) {
-      message.error("Category is required");
+      // message.error("Category is required");
       return;
     }
+
 
     const campaignData = await MultipleAdsestsFetching(formValues);
     campaignData.Category = selectedCategory;
@@ -5018,7 +5056,11 @@ const CreateCampaignDrawer = ({
         );
 
         if (response.ok) {
-          message.success("Campaign created successfully");
+          message.open({
+            type: 'success',
+            content: "Campaign created successfully",
+            className: theme === 'dark' ? 'dark-message' : '',
+          })
           console.log("Form data submitted successfully");
           setLoading(false); // Stop the spinner
           setSelectedFilesFromCreatives({});
@@ -5027,10 +5069,19 @@ const CreateCampaignDrawer = ({
           onClose();
           setSelectedPositions({});
           setAdsets([
-            { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
+            { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1", AdsetName: "", AddName: "" },
           ]);
           isManual !== "manual" && setIsManual(false);
           newSelectedRef.current = null; // Reset the newSelectedRef
+          setPopupInputs((s) => ({ ...s, reportCat: "" }));
+          form.resetFields();
+          form.setFieldValue({})
+          changeRRefrst();
+          setCampaignLevelDailyBudget(0);
+          setAdsetLevelDailyBudget(0);
+          setIsCampaignBudgetActive(false);
+          setIsAnyAdsetBudgetSet(false);
+          setShowBidAmount(false);
         } else {
           console.error("Failed to submit form data");
         }
@@ -5614,18 +5665,18 @@ const CreateCampaignDrawer = ({
     Status: "PAUSED",
     Special_categories: "NONE",
     Bid_strategy: "LOWEST_COST_WITHOUT_CAP",
-    Account_Number: accountis === "All" ? "" : accountis,
+    Account_Number: accountis === "All" ? "" : accountNumber,
     Daily_amount: 0, // Initial daily budget for the campaign
-    Name: campaignName,
-    adsets: [
-      getDefaultAdset(
-        campaignName,
-        caption,
-        websiteURL,
-        imagehash,
-        currentDate
-      ),
-    ], // 🔁 only one initial adset
+    // Name: campaignName,
+    // adsets: [
+    //   getDefaultAdset(
+    //     campaignName,
+    //     caption,
+    //     websiteURL,
+    //     imagehash,
+    //     currentDate
+    //   ),
+    // ], // 🔁 only one initial adset
   };
 
   useEffect(() => {
@@ -5651,7 +5702,7 @@ const CreateCampaignDrawer = ({
     setAdsetLevelDailyBudget(0);
     // setCampaignLevelDailyBudget(0);
     setAdsets([
-      { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
+      { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
     ]);
     onClose(); // Call onClose handler to close the drawer
     setActiveKey(["1"]);
@@ -5662,6 +5713,8 @@ const CreateCampaignDrawer = ({
     setSelectedFilesFromMedia({}); // Clear selected files from media
     setSelectedFiles({}); // Clear all selected files
     setShowBidAmount(false); // Reset showBidAmount state
+
+
 
 
     // 4) Clear draft/template-related UI
@@ -6039,7 +6092,7 @@ const CreateCampaignDrawer = ({
     setAdsets(
       adsetObjects.map((adsetObj, index) => ({
         id: adsetObj.id ?? uuidv4(),
-        AdsetPanelName: `Adset ${index + 1}`,
+        AdsetPanelName: `ADSET ${index + 1}`,
         DailyAdd_amount: adsetObj.Daily_amount
           ? adsetObj.Daily_amount / 100
           : 0,
@@ -6049,7 +6102,7 @@ const CreateCampaignDrawer = ({
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
       id: adsetObj.id ?? uuidv4(),
-      AdsetPanelName: `Adset ${index + 1}`,
+      AdsetPanelName: `ADSET ${index + 1}`,
       AdsetName: adsetObj.AdsetName,
       DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
       optimization_goal: adsetObj.optimization_goal,
@@ -6425,7 +6478,7 @@ const CreateCampaignDrawer = ({
           })}
 
           {filteredDrafts.length === 0 && (
-            <p style={{ textAlign: "center", gridColumn: "1/-1", color: "#999" }}>
+            <p style={{ textAlign: "center", gridColumn: "1/-1", color: theme === "dark" ? "#fff" : "#999", }}>
               No templates found
             </p>
           )}
@@ -6514,7 +6567,7 @@ const CreateCampaignDrawer = ({
                 <Form.Item
                   name="Account_Number"
                   label={
-                    <span style={{ color: "#B4B4B4" }}>Account Number</span>
+                    <span style={{ color: "#B4B4B4" }}>Account number</span>
                   }
                   rules={[
                     {
@@ -6677,7 +6730,7 @@ const CreateCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
-                {/*pk*/}
+                {/*1234*/}
                 {/* <Form.Item
                                     name="Daily_amount"
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
@@ -6945,6 +6998,7 @@ const CreateCampaignDrawer = ({
                   handleFieldChange={handleFieldChange}
                   network={network}
                   accountis={accountis}
+                  imagehash={imagehash}
                 />
               );
               // <ffff/>
@@ -7081,7 +7135,10 @@ const CreateCampaignDrawer = ({
                         } green-border-select`}
                       value={popupInputs.reportCat || undefined}
                       optionLabelProp="value"
-                      onChange={(val) => setPopupInputs(s => ({ ...s, reportCat: val }))}
+                      onChange={(val) => {
+                        setPopupInputs(s => ({ ...s, reportCat: val }));
+                        if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
+                      }}
                       showSearch
                       filterOption={(input, option) =>
                         (option?.name || "").toLowerCase().includes(input.toLowerCase())
@@ -7159,10 +7216,11 @@ const CreateCampaignDrawer = ({
                         </div>
                       )}
                     />
+                    {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
                   </div>
                   <div>
                     <Select
-                      placeholder="Select draft category"
+                      placeholder="Select template category"
                       className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                       dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
                       value={popupInputs.input1 || undefined}
@@ -7212,38 +7270,38 @@ const CreateCampaignDrawer = ({
                             </span>
                           </div>
                         ),
-                        
+
                       }))}
                       dropdownRender={(menu) => (
-                      <div>
-                        {menu}
-                        <div
-                          style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}
-                          
-                        >
-                          <Input
-                            size="small"
-                            placeholder="New category"
-                            value={newCategory}
-                            onChange={(e) => setNewCategory(e.target.value)}
-                            onPressEnter={(e) => { e.preventDefault(); addCategory(); }}
-                            className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                          />
-                          <Button
-                            size="small"
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
-                            style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
-                          />
+                        <div>
+                          {menu}
+                          <div
+                            style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}
+
+                          >
+                            <Input
+                              size="small"
+                              placeholder="New category"
+                              value={newCategory}
+                              onChange={(e) => setNewCategory(e.target.value)}
+                              onPressEnter={(e) => { e.preventDefault(); addCategory(); }}
+                              className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                            />
+                            <Button
+                              size="small"
+                              type="primary"
+                              icon={<PlusOutlined />}
+                              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
+                              style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                     />
 
                     {errors.input1 && <div style={{ color: "red", fontSize: 12 }}>{errors.input1}</div>}
-                    
+
 
 
                   </div>
@@ -7330,7 +7388,8 @@ const CreateCampaignDrawer = ({
                     onClick={async () => {
                       const cat = (popupInputs?.reportCat || "").trim();
                       if (!cat) {
-                        message.error("Category is required");
+                        setErrors((e) => ({ ...e, reportCat: "Report category is required" }));
+                        // message.error("Category is required");
                         return;
                       }
 

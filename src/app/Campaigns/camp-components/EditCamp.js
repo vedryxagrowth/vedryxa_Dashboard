@@ -117,7 +117,7 @@ const EditCampaignDrawer1 = ({ rowData, visible, onClose, changeRRefrst}) => {
                             <div style={{ display: "flex", flexWrap: "wrap" }}>
                                 <Form.Item
                                     name="Account_Number"
-                                    label="Account Number"
+                                    label="Account number"
                                     style={{ flex: 1, marginRight: "8px" }}
                                 >
                                     <Input disabled />
