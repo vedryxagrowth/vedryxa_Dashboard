@@ -9826,6 +9826,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   <Select
                     variant="filled"
                     mode="multiple"
+                    disabled={fullCampaignData?.camapaignlevel?.campaignid}
                     allowClear
                     options={[
                       { value: "HOUSING", label: "Housing", title: "" },
