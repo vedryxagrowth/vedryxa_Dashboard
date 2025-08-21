@@ -6730,7 +6730,7 @@ const CreateCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
-                {/*pk*/}
+                {/*1234*/}
                 {/* <Form.Item
                                     name="Daily_amount"
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
