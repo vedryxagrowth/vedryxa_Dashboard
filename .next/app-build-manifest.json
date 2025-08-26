@@ -1,10 +1,10 @@
 {
   "pages": {
-    "/Reports/page": [
+    "/AiAssistant/[AccountNumber]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/Reports/page.css",
-      "static/chunks/app/Reports/page.js"
+      "static/css/app/AiAssistant/[AccountNumber]/page.css",
+      "static/chunks/app/AiAssistant/[AccountNumber]/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -12,10 +12,17 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/_not-found/page": [
+    "/Reports/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/css/app/Reports/page.css",
+      "static/chunks/app/Reports/page.js"
+    ],
+    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.css",
+      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js"
     ]
   }
 }

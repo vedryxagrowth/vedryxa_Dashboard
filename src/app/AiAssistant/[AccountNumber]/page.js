@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useTokenContext } from '../../components/parent'; 
+import { useTokenContext } from '../../components/parent';
 import { useSearchParams } from 'next/navigation';
 
 export default function RecommendationsPage({ params }) {
-           
+
 
     const { theme } = useTokenContext();
     const searchParams = useSearchParams();
@@ -32,16 +32,16 @@ export default function RecommendationsPage({ params }) {
         "FB_Sedo": "Facebook_Sedo",
         "FB_Inmobi": "Facebook_Inmobi",
     }
-   const isDark = theme === 'dark';
+    const isDark = theme === 'dark';
     const bgColor = isDark ? '#1e1e1e' : '#f3f4f6';
     const tabBgActive = isDark ? '#555' : '#fff';
     const textDefault = isDark ? '#d1d5db' : '#000';
     const textActive = '#22c55e';
     const cardColors = useMemo(() => ({
         default: isDark ? '#374151' : '#ffffff',
-        highROI: isDark ? '#064e3b' : '#d1fae5',   
-        lowROI: isDark ? '#7f1d1d' : '#fee2e2',   
-        lowCTR: isDark ? '#5252c3ff' : '#dbeafe', 
+        highROI: isDark ? '#064e3b' : '#d1fae5',
+        lowROI: isDark ? '#7f1d1d' : '#fee2e2',
+        lowCTR: isDark ? '#5252c3ff' : '#dbeafe',
     }), [isDark]);
 
     const borderColors = {
@@ -55,24 +55,33 @@ export default function RecommendationsPage({ params }) {
         lowROI: 'Campaign showing negative ROI for 2 consecutive days',
         lowCTR: 'Click-through rate below 3% for 2 consecutive days',
     };
-     const [requestedAccounts] = useState(initialAccounts);
-    const [respCache, setRespCache] = useState({});    
-    const [presentAccounts, setPresentAccounts] = useState([]); 
-    const [activeTab, setActiveTab] = useState(null);  
+    const [requestedAccounts] = useState(initialAccounts);
+    const [respCache, setRespCache] = useState({});
+    const [presentAccounts, setPresentAccounts] = useState([]);
+    const [activeTab, setActiveTab] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); 
-    
+    const [error, setError] = useState(null);
+
     const dynamicTabs = useMemo(() => {
         if (!presentAccounts.length) return [];
-        const firstAcc = presentAccounts[0];
-        const labelsObj = respCache[firstAcc]?.bucketLabels || {}; 
-      return bucketOrder
-            .filter(key => labelsObj[key]) 
+
+        // Collect all bucket labels across accounts
+        const combinedLabels = {};
+        for (const acc of presentAccounts) {
+            const labels = respCache[acc]?.bucketLabels || {};
+            for (const key of Object.keys(labels)) {
+                combinedLabels[key] = labels[key]; // last one wins, or you can keep the first
+            }
+        }
+
+        return bucketOrder
+            .filter(key => combinedLabels[key])
             .map(key => ({
                 key,
-                label: labelsObj[key],
+                label: combinedLabels[key],
             }));
     }, [presentAccounts, respCache]);
+
     const toUICampaignsByBucket = (summary, bucketKey) => {
         if (!bucketKey || !summary) return [];
         const list = summary?.[bucketKey]?.campaigns || [];
@@ -93,11 +102,11 @@ export default function RecommendationsPage({ params }) {
                 const accounts = Array.isArray(requestedAccounts) ? requestedAccounts : [requestedAccounts];
                 const url =
                     accounts.length === 1
-                        ? `${base}/${encodeURIComponent(accounts[0])}`   
-                        : `${base}?accounts=${accounts.join(',')}`;     
+                        ? `${base}/${encodeURIComponent(accounts[0])}`
+                        : `${base}?accounts=${accounts.join(',')}`;
 
                 const headers = {};
-                if (token) headers.Authorization = token; 
+                if (token) headers.Authorization = token;
                 const res = await fetch(url, { method: 'GET', headers });
                 if (res.status === 404) {
                     const emptySummary = {
@@ -109,13 +118,13 @@ export default function RecommendationsPage({ params }) {
                     for (const acc of accounts) {
                         emptyResp[acc] = {
                             Account: acc,
-                            bucketLabels: null, 
+                            bucketLabels: null,
                             summary: emptySummary,
                         };
                     }
                     setRespCache(emptyResp);
-                    setPresentAccounts([]); 
-                    setActiveTab(null);   
+                    setPresentAccounts([]);
+                    setActiveTab(null);
                     setLoading(false);
                     return;
                 }
@@ -130,11 +139,17 @@ export default function RecommendationsPage({ params }) {
                 const present = accounts.filter(acc => data?.[acc]);
                 setPresentAccounts(present);
                 if (!activeTab && present.length) {
-                    const firstAcc = present[0];
-                    const labels = data[firstAcc]?.bucketLabels || {};
-                    const keys = Object.keys(labels);
+                    const combinedLabels = {};
+                    for (const acc of present) {
+                        const labels = data[acc]?.bucketLabels || {};
+                        for (const key of Object.keys(labels)) {
+                            combinedLabels[key] = labels[key];
+                        }
+                    }
+                    const keys = Object.keys(combinedLabels);
                     if (keys.length) setActiveTab(keys[0]);
                 }
+
             } catch (e) {
                 setError(e?.message || 'Failed to load recommendations');
                 setRespCache({});
@@ -144,7 +159,7 @@ export default function RecommendationsPage({ params }) {
                 setLoading(false);
             }
         })();
-    }, []); 
+    }, []);
     useEffect(() => {
         if (!presentAccounts.length) return;
         const firstAcc = presentAccounts[0];
@@ -156,7 +171,7 @@ export default function RecommendationsPage({ params }) {
             setActiveTab(keys[0]);
         }
     }, [presentAccounts, respCache, activeTab]);
-    const nonePresent = presentAccounts.length === 0;                  
+    const nonePresent = presentAccounts.length === 0;
     const noBuckets = presentAccounts.length > 0 && dynamicTabs.length === 0;
     return (
         <div style={{ padding: 10 }}>
@@ -203,7 +218,7 @@ export default function RecommendationsPage({ params }) {
                 </div>
             ) : noBuckets ? (
                 <div style={{ marginTop: 16, color: isDark ? '#9ca3af' : '#4b5563' }}>
-                    No buckets available from the server for this selection.
+                    No tabs available  for this selection.
                 </div>
             ) : (
                 <>

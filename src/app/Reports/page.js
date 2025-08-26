@@ -10854,7 +10854,18 @@ const MyTablePage = () => {
 
                 const data = await res.json();
                 setRecDataByAccount(data);
-                setRecAccounts(accounts.filter(acc => data?.[acc]));
+                // setRecAccounts(accounts.filter(acc => data?.[acc]));
+                const validAccounts = accounts.filter(acc => {
+                    const accountData = data?.[acc];
+                    if (!accountData) return false;
+
+                    const hasConditions = Array.isArray(accountData.condition) && accountData.condition.length > 0;
+                    const hasSummary = accountData.summary && Object.keys(accountData.summary).length > 0;
+
+                    return hasConditions || hasSummary;
+                });
+
+                setRecAccounts(validAccounts);
             } catch (e) {
                 setAiError(e.message || 'Failed to load');
                 setRecDataByAccount({});
@@ -10904,8 +10915,16 @@ const MyTablePage = () => {
                 },
             ];
         }
-        const first = recDataByAccount[recAccounts[0]] || {};
-        const condition = Array.isArray(first.condition) ? first.condition : [];
+        // const first = recDataByAccount[recAccounts[0]] || {};
+        // const condition = Array.isArray(first.condition) ? first.condition : [];
+        // Collect all conditions across valid accounts
+        const allConditions = new Set();
+        recAccounts.forEach(acc => {
+            const accConditions = recDataByAccount[acc]?.condition || [];
+            accConditions.forEach(c => allConditions.add(c));
+        });
+        const condition = Array.from(allConditions);
+
         const totals = {};
         condition.forEach(k => (totals[k] = 0));
         recAccounts.forEach(acc => {
@@ -11110,27 +11129,36 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space> */}
-            <Space direction="horizontal" style={{ width: '100%', flexWrap: 'wrap', gap: '8px' }}>
-                <Select
-                    showSearch
-                    onChange={onChangeSelectRevenue}
-                    placeholder="Select Network"
-                    defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
-                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                    style={{
-                        width: '160px',
-                        backgroundColor: theme === 'dark' ? '#333' : undefined,
-                        color: theme === 'dark' ? '#fff' : undefined,
-                        border: '1px solid #4CAF50',
-                        borderRadius: '6px'
-                    }}
-                    optionFilterProp="label"
-                    options={networks.map(item => ({ value: item, label: item, title: '' }))}
-                    title=''
-                />
+            <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px 0",
+                flexWrap: "wrap",
+                gap: "12px"
+            }}>
 
-                {/* Account Selector */}
-                {/* <Select
+                <Space direction="horizontal" style={{ width: '100%', flex: 1, gap: '8px' }}>
+                    <Select
+                        showSearch
+                        onChange={onChangeSelectRevenue}
+                        placeholder="Select Network"
+                        defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
+                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        style={{
+                            width: '160px',
+                            backgroundColor: theme === 'dark' ? '#333' : undefined,
+                            color: theme === 'dark' ? '#fff' : undefined,
+                            border: '1px solid #4CAF50',
+                            borderRadius: '6px'
+                        }}
+                        optionFilterProp="label"
+                        options={networks.map(item => ({ value: item, label: item, title: '' }))}
+                        title=''
+                    />
+
+                    {/* Account Selector */}
+                    {/* <Select
                     showSearch
                     onChange={handleChange1}
                     placeholder="Select Account"
@@ -11156,109 +11184,127 @@ const MyTablePage = () => {
                     onDropdownVisibleChange={handleDropdownVisibleChange}
                 /> */}
 
-                <Select
-                    showSearch
-                    placeholder="Select Account"
-                    // Keep the visible state you already have
-                    open={isOpen}
-                    onDropdownVisibleChange={handleDropdownVisibleChange}
+                    <Select
+                        showSearch
+                        placeholder="Select Account"
+                        // Keep the visible state you already have
+                        open={isOpen}
+                        onDropdownVisibleChange={handleDropdownVisibleChange}
 
-                    // 👇 Show first account + count
-                    value={
-                        selectedValue.length === 0
-                            ? undefined
-                            : selectedValue.length === 1
-                                ? selectedValue[0] // just that account number
-                                : `${selectedValue[0]}, +${selectedValue.length - 1} more`
-                    }
+                        // 👇 Show first account + count
+                        value={
+                            selectedValue.length === 0
+                                ? undefined
+                                : selectedValue.length === 1
+                                    ? selectedValue[0] // just that account number
+                                    : `${selectedValue[0]}, +${selectedValue.length - 1} more`
+                        }
 
-                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                    style={{
-                        width: '250px',
-                        whiteSpace: 'nowrap',
-                        color: theme === 'dark' ? 'white' : undefined,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        border: '1px solid #4CAF50',
-                        borderRadius: '6px',
-                    }}
-
-                    // We are not using built-in options anymore
-                    optionFilterProp="value"
-                    // options={accountsAccess.map(createOption)}  // ❌ remove
-                    // onChange={handleChange1}                    // ❌ remove
-
-                    // Custom dropdown with checkboxes (no tick marks in the menu)
-                    dropdownRender={() => (
-                        <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
-                            {renderAccountsCheckboxes(theme)}
-                        </div>
-                    )}
-                />
-
-
-                {/* Date Range */}
-                <ConfigProvider
-                    locale={locale}
-                    theme={{
-                        token: {
-                            colorPrimary: '#91C25F',
-                            colorTextLightSolid: '#000',
-                        },
-                    }}
-                >
-                    <RangePicker
-                        presets={rangePresets}
-                        onChange={handleChange}
-                        disabledDate={disabledDate}
-                        defaultValue={defaultDates}
-                        format="YYYY-MM-DD"
+                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         style={{
-                            width: '240px',
-                            backgroundColor: theme === 'dark' ? '#555' : undefined,
+                            width: '250px',
+                            whiteSpace: 'nowrap',
                             color: theme === 'dark' ? 'white' : undefined,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
                             border: '1px solid #4CAF50',
-                            borderRadius: '6px'
+                            borderRadius: '6px',
                         }}
-                        dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+
+                        // We are not using built-in options anymore
+                        optionFilterProp="value"
+                        // options={accountsAccess.map(createOption)}  // ❌ remove
+                        // onChange={handleChange1}                    // ❌ remove
+
+                        // Custom dropdown with checkboxes (no tick marks in the menu)
+                        dropdownRender={() => (
+                            <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
+                                {renderAccountsCheckboxes(theme)}
+                            </div>
+                        )}
                     />
-                </ConfigProvider>
 
-                {/* Timezone Selector */}
-                <Select
-                    showSearch
-                    onChange={onChangeTime}
-                    placeholder="Timezone"
-                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                    style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
-                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                    optionFilterProp="label"
-                    value={time}
-                    options={timezones.map(item => ({ value: item, label: item }))}
-                    title=''
-                />
 
-                {/* Apply Button */}
-                <Button
-                    type='primary'
-                    onClick={onClickButton}
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}
-                    style={{
-                        backgroundColor: hovered ? '#91C25F' : 'transparent',
-                        border: '1px solid #4CAF50',
-                        borderRadius: '6px',
-                        color: theme === 'dark' ? '#ffffff' : '#000000',
-                        // fontWeight: '600',
-                        padding: '0 16px',
-                        height: '32px',
-                        transition: 'all 0.15s ease-in-out',
-                    }}
-                >
-                    Apply
-                </Button>
-            </Space>
+                    {/* Date Range */}
+                    <ConfigProvider
+                        locale={locale}
+                        theme={{
+                            token: {
+                                colorPrimary: '#91C25F',
+                                colorTextLightSolid: '#000',
+                            },
+                        }}
+                    >
+                        <RangePicker
+                            presets={rangePresets}
+                            onChange={handleChange}
+                            disabledDate={disabledDate}
+                            defaultValue={defaultDates}
+                            format="YYYY-MM-DD"
+                            style={{
+                                width: '240px',
+                                backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                color: theme === 'dark' ? 'white' : undefined,
+                                border: '1px solid #4CAF50',
+                                borderRadius: '6px'
+                            }}
+                            dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+                        />
+                    </ConfigProvider>
+
+                    {/* Timezone Selector */}
+                    <Select
+                        showSearch
+                        onChange={onChangeTime}
+                        placeholder="Timezone"
+                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        optionFilterProp="label"
+                        value={time}
+                        options={timezones.map(item => ({ value: item, label: item }))}
+                        title=''
+                    />
+
+                    {/* Apply Button */}
+                    <Button
+                        type='primary'
+                        onClick={onClickButton}
+                        onMouseEnter={() => setHovered(true)}
+                        onMouseLeave={() => setHovered(false)}
+                        style={{
+                            backgroundColor: hovered ? '#91C25F' : 'transparent',
+                            border: '1px solid #4CAF50',
+                            borderRadius: '6px',
+                            color: theme === 'dark' ? '#ffffff' : '#000000',
+                            // fontWeight: '600',
+                            padding: '0 16px',
+                            height: '32px',
+                            transition: 'all 0.15s ease-in-out',
+                        }}
+                    >
+                        Apply
+                    </Button>
+                </Space>
+                <div style={{ textAlign: "right", marginRight: '15px' }}>
+                    <h3 style={{
+                        margin: 0,
+                        fontSize: '20px',
+                        fontWeight: 600,
+                        color: theme === 'dark' ? '#fff' : '#4b5563'
+                    }}>
+                        Strategic Reports Center
+                    </h3>
+                    <p style={{
+                        margin: 0,
+                        fontSize: '13px',
+                        color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
+                    }}>
+                        Deep insights for strategic decisions
+                    </p>
+                </div>
+            </div>
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>

@@ -1417,7 +1417,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         onClickRefresh={onClickRefresh}
                         onStatusFilterChange={handleStatusFilterChange}
                         campaignStatusLabel={campaignStatusLabels}
-                         accountsFromReports={['589661833553963','1069491537580034']}
+                         accountsFromReports={newaccount}
                          network={newRevenuePratner}
                          time={newtime}
                     />
