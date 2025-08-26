@@ -48,6 +48,7 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
+    "FB_InuvoPrism": "Facebook_InuvoPrism"
 }
 const selectTimezone = {
     UTC: 'UTCDate',

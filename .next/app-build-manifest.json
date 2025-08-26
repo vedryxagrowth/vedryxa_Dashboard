@@ -1,5 +1,6 @@
 {
   "pages": {
+<<<<<<< HEAD
     "/_not-found/page": [
       "static/chunks/webpack-4522679014bdb28a.js",
       "static/chunks/fd9d1056-5875aa7e6087797a.js",
@@ -551,6 +552,19 @@
       "static/chunks/4119-ba73bf28e3dea888.js",
       "static/chunks/7215-8aa5007758c4daa3.js",
       "static/chunks/app/Reports/page-1e588171253c0765.js"
+=======
+    "/Reports/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Reports/page.css",
+      "static/chunks/app/Reports/page.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
+>>>>>>> DevUi
     ]
   }
 }
