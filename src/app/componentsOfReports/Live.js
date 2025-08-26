@@ -1432,6 +1432,9 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         onClickRefresh={onClickRefresh}
                         onStatusFilterChange={handleStatusFilterChange}
                         campaignStatusLabel={campaignStatusLabels}
+                         accountsFromReports={['589661833553963','1069491537580034']}
+                         network={newRevenuePratner}
+                         time={newtime}
                     />
                     {/* <Space size={2}>
                 <Input

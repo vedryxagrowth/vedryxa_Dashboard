@@ -186,23 +186,23 @@ const MyTablePage = () => {
 
 
     const handleStatusFilterChange = (key) => {
-    if (key === 'active') {
-        setCampaignStatusFilter('ACTIVE');
-    } else if (key === 'pause') {
-        setCampaignStatusFilter('PAUSED');
-    } else if (key === 'all') {
-        setCampaignStatusFilter('ALL');
-    }
+        if (key === 'active') {
+            setCampaignStatusFilter('ACTIVE');
+        } else if (key === 'pause') {
+            setCampaignStatusFilter('PAUSED');
+        } else if (key === 'all') {
+            setCampaignStatusFilter('ALL');
+        }
     };
 
     const campaignStatusLabel = useMemo(() => {
         switch ((campaignStatusFilter || 'ALL').toUpperCase()) {
-          case 'ACTIVE':
-            return 'Active';
-          case 'PAUSED':
-            return 'Paused';
-          default:
-            return 'All';
+            case 'ACTIVE':
+                return 'Active';
+            case 'PAUSED':
+                return 'Paused';
+            default:
+                return 'All';
         }
     }, [campaignStatusFilter]);
 
@@ -297,16 +297,16 @@ const MyTablePage = () => {
     const carouselRef = useRef();
 
     // top of component
-const campaignStatusOverridesRef = useRef(new Map());
-// NEW for adset level:
-const adsetStatusOverridesRef   = useRef(new Map()); // key -> "ACTIVE"/"PAUSED"
-const adsetPinOverridesRef      = useRef(new Map()); // key -> boolean
-const adsetCommentOverridesRef  = useRef(new Map()); // 
+    const campaignStatusOverridesRef = useRef(new Map());
+    // NEW for adset level:
+    const adsetStatusOverridesRef = useRef(new Map()); // key -> "ACTIVE"/"PAUSED"
+    const adsetPinOverridesRef = useRef(new Map()); // key -> boolean
+    const adsetCommentOverridesRef = useRef(new Map()); // 
 
-// top-level (same place you created the other refs)
-const adStatusOverridesRef   = React.useRef(new Map());  // "ACTIVE" | "PAUSED"
-const adPinOverridesRef      = React.useRef(new Map());  // boolean
-const adCommentOverridesRef  = React.useRef(new Map());  // { text, editedBy, editedAt }
+    // top-level (same place you created the other refs)
+    const adStatusOverridesRef = React.useRef(new Map());  // "ACTIVE" | "PAUSED"
+    const adPinOverridesRef = React.useRef(new Map());  // boolean
+    const adCommentOverridesRef = React.useRef(new Map());  // { text, editedBy, editedAt }
 
 
     // const gridRef = useRef();
@@ -357,16 +357,16 @@ const adCommentOverridesRef  = React.useRef(new Map());  // { text, editedBy, ed
     const [hovered, setHovered] = useState(false);
 
     const initialOne =
-accountNumberFromDashboard
-  ? accountNumberFromDashboard.replace(/\+/g, " ")
-  : (storedData
-      ? storedData.account
-      : (typeof networksData[0] === "string"
-          ? networksData[0]
-          : networksData[0].accountNumber));
+        accountNumberFromDashboard
+            ? accountNumberFromDashboard.replace(/\+/g, " ")
+            : (storedData
+                ? storedData.account
+                : (typeof networksData[0] === "string"
+                    ? networksData[0]
+                    : networksData[0].accountNumber));
 
-const [selectedValue, setSelectedValue] = useState([String(initialOne)]); // now an array
-console.log("multiple accounts:", selectedValue);
+    const [selectedValue, setSelectedValue] = useState([String(initialOne)]); // now an array
+    console.log("multiple accounts:", selectedValue);
 
     // useEffect(() => {
     //     const fetchAllCampaigns = async () => {
@@ -395,43 +395,43 @@ console.log("multiple accounts:", selectedValue);
     // }, [newaccount]);
     useEffect(() => {
         const fetchAllCampaigns = async () => {
-          try {
-            const body = { accountNumbers: (selectedValue || []).map(String) };
-      
-            const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', body);
-            const data = res.data || [];
-      
-            // Map EXACTLY to your DB shape:
-            const enrichedAdsetRows = data.flatMap((campaign) =>
-              (campaign.adsets || []).map((adset) => ({
-                // keep adset info
-                adset_id: String(adset.adset_id),
-                adsetname: adset.name,
-                adset_budget: adset.budget,   // { daily_budget, lifetime_budget }
-                adset_status: adset.status,
-                bid_amount: adset.bid_amount,
-      
-                // attach campaign-level info for this adset row
-                campaignid: String(campaign.campaign_id),
-                campaignname: campaign.name,
-                campaign_status: campaign.status,
-                campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
-                accountNumber: String(campaign.accountNumber),
-                revenuePartner: campaign.revenuePartner,
-                start: campaign.start,
-                end: campaign.end,
-              }))
-            );
-      
-            setAllCampaignData(enrichedAdsetRows);
-          } catch (err) {
-            console.error('Failed to fetch all campaigns', err);
-            setAllCampaignData([]);
-          }
+            try {
+                const body = { accountNumbers: (selectedValue || []).map(String) };
+
+                const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', body);
+                const data = res.data || [];
+
+                // Map EXACTLY to your DB shape:
+                const enrichedAdsetRows = data.flatMap((campaign) =>
+                    (campaign.adsets || []).map((adset) => ({
+                        // keep adset info
+                        adset_id: String(adset.adset_id),
+                        adsetname: adset.name,
+                        adset_budget: adset.budget,   // { daily_budget, lifetime_budget }
+                        adset_status: adset.status,
+                        bid_amount: adset.bid_amount,
+
+                        // attach campaign-level info for this adset row
+                        campaignid: String(campaign.campaign_id),
+                        campaignname: campaign.name,
+                        campaign_status: campaign.status,
+                        campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
+                        accountNumber: String(campaign.accountNumber),
+                        revenuePartner: campaign.revenuePartner,
+                        start: campaign.start,
+                        end: campaign.end,
+                    }))
+                );
+
+                setAllCampaignData(enrichedAdsetRows);
+            } catch (err) {
+                console.error('Failed to fetch all campaigns', err);
+                setAllCampaignData([]);
+            }
         };
-      
+
         if (selectedValue?.length) fetchAllCampaigns();
-      }, [JSON.stringify(selectedValue)]);
+    }, [JSON.stringify(selectedValue)]);
 
     // useEffect(() => {
     //     if (campaignRefreshTrigger === 0) return;
@@ -460,53 +460,53 @@ console.log("multiple accounts:", selectedValue);
     // }, [campaignRefreshTrigger]);
 
     // campaignRefreshTrigger-based refetch (multi-account)
-useEffect(() => {
-    if (campaignRefreshTrigger === 0) return;
-  
-    const fetchUpdatedCampaign = async () => {
-      try {
-        const accounts = Array.isArray(selectedValue)
-          ? selectedValue.map(String)
-          : [String(selectedValue)];
-  
-        const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', {
-          accountNumbers: accounts,
-        });
-  
-        const data = res.data || [];
-  
-        const enrichedAdsetRows = data.flatMap((campaign) =>
-          (campaign.adsets || []).map((adset) => ({
-            // adset fields
-            adset_id: String(adset.adset_id),
-            adsetname: adset.name,
-            adset_budget: adset.budget,     // { daily_budget, lifetime_budget }
-            adset_status: adset.status,
-            bid_amount: adset.bid_amount,
-  
-            // campaign fields
-            campaignid: String(campaign.campaign_id),
-            campaignname: campaign.name,    // matches your DB
-            accountNumber: String(campaign.accountNumber),
-            revenuePartner: campaign.revenuePartner,
-            campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
-            campaign_status: campaign.status,
-            start: campaign.start,
-            end: campaign.end,
-          }))
-        );
-  
-        setAllCampaignData(enrichedAdsetRows);
-      } catch (err) {
-        console.error('Failed to refetch updated campaigns', err);
-      }
-    };
-  
-    fetchUpdatedCampaign();
-    // If you want the refresh to always use the *latest* selection, add selectedValue too:
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campaignRefreshTrigger]);
-  
+    useEffect(() => {
+        if (campaignRefreshTrigger === 0) return;
+
+        const fetchUpdatedCampaign = async () => {
+            try {
+                const accounts = Array.isArray(selectedValue)
+                    ? selectedValue.map(String)
+                    : [String(selectedValue)];
+
+                const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', {
+                    accountNumbers: accounts,
+                });
+
+                const data = res.data || [];
+
+                const enrichedAdsetRows = data.flatMap((campaign) =>
+                    (campaign.adsets || []).map((adset) => ({
+                        // adset fields
+                        adset_id: String(adset.adset_id),
+                        adsetname: adset.name,
+                        adset_budget: adset.budget,     // { daily_budget, lifetime_budget }
+                        adset_status: adset.status,
+                        bid_amount: adset.bid_amount,
+
+                        // campaign fields
+                        campaignid: String(campaign.campaign_id),
+                        campaignname: campaign.name,    // matches your DB
+                        accountNumber: String(campaign.accountNumber),
+                        revenuePartner: campaign.revenuePartner,
+                        campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
+                        campaign_status: campaign.status,
+                        start: campaign.start,
+                        end: campaign.end,
+                    }))
+                );
+
+                setAllCampaignData(enrichedAdsetRows);
+            } catch (err) {
+                console.error('Failed to refetch updated campaigns', err);
+            }
+        };
+
+        fetchUpdatedCampaign();
+        // If you want the refresh to always use the *latest* selection, add selectedValue too:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [campaignRefreshTrigger]);
+
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -5660,158 +5660,158 @@ useEffect(() => {
             //         </div>
             //     );
             // },
-            
+
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignActualSpend, setCampaignActualSpend] = useState({});
                 const [hasBudget, setHasBudget] = useState(false);
-              
+
                 const isGroupRow = !!params?.node?.groupData;
-              
+
                 // campaign id + campaign name for this row/group
                 const campaignId = isGroupRow
-                  ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
-                  : params?.data?.campaignid;
-              
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
                 const campaignname = isGroupRow
-                  ? params?.node?.key
-                  : params?.data?.campaignname;
-              
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
                 // ✅ the *accountNumber of this row/group* (not the selected accounts list)
                 const rowAccountNumber = isGroupRow
-                  ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
-                  : params?.data?.accountNumber;
-              
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
                 const { allCampaignData } = params.context;
-              
+
                 // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
-                  if (!campaignId || !rowAccountNumber || !Array.isArray(allCampaignData)) return;
-              
-                  const matched = allCampaignData.find(
-                    c =>
-                      String(c.campaignid) === String(campaignId) &&
-                      String(c.accountNumber) === String(rowAccountNumber)
-                  );
-              
-                  setCampaignActualSpend(matched ?? {});
-                  setHasBudget(
-                    !!(
-                      matched?.campaign_budget &&
-                      (matched.campaign_budget.daily_budget != null ||
-                       matched.campaign_budget.lifetime_budget != null)
-                    )
-                  );
+                    if (!campaignId || !rowAccountNumber || !Array.isArray(allCampaignData)) return;
+
+                    const matched = allCampaignData.find(
+                        c =>
+                            String(c.campaignid) === String(campaignId) &&
+                            String(c.accountNumber) === String(rowAccountNumber)
+                    );
+
+                    setCampaignActualSpend(matched ?? {});
+                    setHasBudget(
+                        !!(
+                            matched?.campaign_budget &&
+                            (matched.campaign_budget.daily_budget != null ||
+                                matched.campaign_budget.lifetime_budget != null)
+                        )
+                    );
                 }, [campaignId, rowAccountNumber, allCampaignData]);
-              
+
                 const onChangeSpendAndStatus = () => {
-                  if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-              
-                  const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                  setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-              
-                  if (!campaignId || !campaignname) {
-                    message.error("Campaign info missing");
-                    return;
-                  }
-              
-                  // Prefill from the matched record for *this* account
-                  const b = campaignActualSpend?.campaign_budget;
-                  const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                  onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-              
-                  setIsModalVisible(true);
+                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+
+                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
+                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
+
+                    if (!campaignId || !campaignname) {
+                        message.error("Campaign info missing");
+                        return;
+                    }
+
+                    // Prefill from the matched record for *this* account
+                    const b = campaignActualSpend?.campaign_budget;
+                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
+                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
+
+                    setIsModalVisible(true);
                 };
-              
+
                 const handleOk = async () => {
-                  setIsModalVisible(false);
-              
-                  const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
-                  const campaignIdFinal = target?.campaignid;
-                  const campaignnameFinal = target?.campaignname;
-              
-                  const payload = {
-                    campaignId: campaignIdFinal,
-                    budget: Number(changeBudget) * 100,         // cents
-                    accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
-                    campaignname: campaignnameFinal,
-                    updatedby: params.context?.userdetails?.email,
-                  };
-              
-                  if (!payload.campaignId || !payload.accountNumber) {
-                    message.error("Campaign ID or account missing. Cannot update budget.");
-                    return;
-                  }
-              
-                  try {
-                    await apiClient.post('/update/campaign/budget', payload);
-                    message.success("Budget Updated Successfully");
-                    params.context.setCampaignRefreshTrigger(prev => prev + 1);
-                    params.context.changeRRefrst();
-                  } catch (err) {
-                    console.error(err);
-                    message.error("Failed to update budget");
-                  }
+                    setIsModalVisible(false);
+
+                    const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
+                    const campaignIdFinal = target?.campaignid;
+                    const campaignnameFinal = target?.campaignname;
+
+                    const payload = {
+                        campaignId: campaignIdFinal,
+                        budget: Number(changeBudget) * 100,         // cents
+                        accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
+                        campaignname: campaignnameFinal,
+                        updatedby: params.context?.userdetails?.email,
+                    };
+
+                    if (!payload.campaignId || !payload.accountNumber) {
+                        message.error("Campaign ID or account missing. Cannot update budget.");
+                        return;
+                    }
+
+                    try {
+                        await apiClient.post('/update/campaign/budget', payload);
+                        message.success("Budget Updated Successfully");
+                        params.context.setCampaignRefreshTrigger(prev => prev + 1);
+                        params.context.changeRRefrst();
+                    } catch (err) {
+                        console.error(err);
+                        message.error("Failed to update budget");
+                    }
                 };
-              
+
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
-              
+
                 return (
-                  <div>
-                    {hasBudget ? (
-                      <DollarOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
-                    ) : (
-                      <Tooltip title="No budget set for this campaign">
-                        <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
-                      </Tooltip>
-                    )}
-              
-                    {isModalVisible && (
-                      <Modal
-                        title={
-                          Array.isArray(groupedData) && groupedData.length
-                            ? groupedData[0]?.campaignname
-                            : campaignname
-                        }
-                        open={isModalVisible}
-                        onOk={handleOk}
-                        onCancel={() => setIsModalVisible(false)}
-                        width={600}
-                        okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
-                        className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                      >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                          <div style={{ display: 'flex' }}>
-                            <p>Budget Type:&nbsp;</p>
-                            <span style={{ fontWeight: 'normal' }}>
-                              {campaignActualSpend?.campaign_budget?.daily_budget != null
-                                ? 'Daily'
-                                : campaignActualSpend?.campaign_budget?.lifetime_budget != null
-                                ? 'Lifetime'
-                                : 'Unknown'}
-                            </span>
-                          </div>
-              
-                          <Input
-                            type="number"
-                            value={changeBudget}
-                            onChange={(e) => onChangeBudget(e.target.value)}
-                            placeholder="Enter budget in USD"
-                            className={params.context?.theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                          />
-              
-                          <div style={{ display: 'flex' }}>
-                            <p>Campaign ID:&nbsp;</p>
-                            <p>{campaignId}</p>
-                          </div>
-                        </div>
-                      </Modal>
-                    )}
-                  </div>
+                    <div>
+                        {hasBudget ? (
+                            <DollarOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
+                        ) : (
+                            <Tooltip title="No budget set for this campaign">
+                                <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                            </Tooltip>
+                        )}
+
+                        {isModalVisible && (
+                            <Modal
+                                title={
+                                    Array.isArray(groupedData) && groupedData.length
+                                        ? groupedData[0]?.campaignname
+                                        : campaignname
+                                }
+                                open={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={() => setIsModalVisible(false)}
+                                width={600}
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <div style={{ display: 'flex' }}>
+                                        <p>Budget Type:&nbsp;</p>
+                                        <span style={{ fontWeight: 'normal' }}>
+                                            {campaignActualSpend?.campaign_budget?.daily_budget != null
+                                                ? 'Daily'
+                                                : campaignActualSpend?.campaign_budget?.lifetime_budget != null
+                                                    ? 'Lifetime'
+                                                    : 'Unknown'}
+                                        </span>
+                                    </div>
+
+                                    <Input
+                                        type="number"
+                                        value={changeBudget}
+                                        onChange={(e) => onChangeBudget(e.target.value)}
+                                        placeholder="Enter budget in USD"
+                                        className={params.context?.theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    />
+
+                                    <div style={{ display: 'flex' }}>
+                                        <p>Campaign ID:&nbsp;</p>
+                                        <p>{campaignId}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
                 );
-            },                
+            },
         },
         adsetname: {
             headerName: 'AdsetName',
@@ -7103,7 +7103,7 @@ useEffect(() => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7596,7 +7596,7 @@ useEffect(() => {
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             // filter: "agNumberColumnFilter",
-             filter: "agTextColumnFilter",
+            filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -7696,7 +7696,7 @@ useEffect(() => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8277,7 +8277,7 @@ useEffect(() => {
             headerTooltip: "FMargin = (Profit / Spend) * 100",
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8695,151 +8695,151 @@ useEffect(() => {
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignActualSpend, setCampaignActualSpend] = useState({});
                 const [hasBudget, setHasBudget] = useState(false);
-              
+
                 const isGroupRow = !!params?.node?.groupData;
-              
+
                 // campaign id + campaign name for this row/group
                 const campaignId = isGroupRow
-                  ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
-                  : params?.data?.campaignid;
-              
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
                 const campaignname = isGroupRow
-                  ? params?.node?.key
-                  : params?.data?.campaignname;
-              
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
                 // ✅ the *accountNumber of this row/group* (not the selected accounts list)
                 const rowAccountNumber = isGroupRow
-                  ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
-                  : params?.data?.accountNumber;
-              
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
                 const { allCampaignData } = params.context;
-              
+
                 // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
-                  if (!campaignId || !rowAccountNumber || !Array.isArray(allCampaignData)) return;
-              
-                  const matched = allCampaignData.find(
-                    c =>
-                      String(c.campaignid) === String(campaignId) &&
-                      String(c.accountNumber) === String(rowAccountNumber)
-                  );
-              
-                  setCampaignActualSpend(matched ?? {});
-                  setHasBudget(
-                    !!(
-                      matched?.campaign_budget &&
-                      (matched.campaign_budget.daily_budget != null ||
-                       matched.campaign_budget.lifetime_budget != null)
-                    )
-                  );
+                    if (!campaignId || !rowAccountNumber || !Array.isArray(allCampaignData)) return;
+
+                    const matched = allCampaignData.find(
+                        c =>
+                            String(c.campaignid) === String(campaignId) &&
+                            String(c.accountNumber) === String(rowAccountNumber)
+                    );
+
+                    setCampaignActualSpend(matched ?? {});
+                    setHasBudget(
+                        !!(
+                            matched?.campaign_budget &&
+                            (matched.campaign_budget.daily_budget != null ||
+                                matched.campaign_budget.lifetime_budget != null)
+                        )
+                    );
                 }, [campaignId, rowAccountNumber, allCampaignData]);
-              
+
                 const onChangeSpendAndStatus = () => {
-                  if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-              
-                  const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                  setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-              
-                  if (!campaignId || !campaignname) {
-                    message.error("Campaign info missing");
-                    return;
-                  }
-              
-                  // Prefill from the matched record for *this* account
-                  const b = campaignActualSpend?.campaign_budget;
-                  const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                  onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-              
-                  setIsModalVisible(true);
+                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+
+                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
+                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
+
+                    if (!campaignId || !campaignname) {
+                        message.error("Campaign info missing");
+                        return;
+                    }
+
+                    // Prefill from the matched record for *this* account
+                    const b = campaignActualSpend?.campaign_budget;
+                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
+                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
+
+                    setIsModalVisible(true);
                 };
-              
+
                 const handleOk = async () => {
-                  setIsModalVisible(false);
-              
-                  const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
-                  const campaignIdFinal = target?.campaignid;
-                  const campaignnameFinal = target?.campaignname;
-              
-                  const payload = {
-                    campaignId: campaignIdFinal,
-                    budget: Number(changeBudget) * 100,         // cents
-                    accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
-                    campaignname: campaignnameFinal,
-                    updatedby: params.context?.userdetails?.email,
-                  };
-              
-                  if (!payload.campaignId || !payload.accountNumber) {
-                    message.error("Campaign ID or account missing. Cannot update budget.");
-                    return;
-                  }
-              
-                  try {
-                    await apiClient.post('/update/campaign/budget', payload);
-                    message.success("Budget Updated Successfully");
-                    params.context.setCampaignRefreshTrigger(prev => prev + 1);
-                    params.context.changeRRefrst();
-                  } catch (err) {
-                    console.error(err);
-                    message.error("Failed to update budget");
-                  }
+                    setIsModalVisible(false);
+
+                    const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
+                    const campaignIdFinal = target?.campaignid;
+                    const campaignnameFinal = target?.campaignname;
+
+                    const payload = {
+                        campaignId: campaignIdFinal,
+                        budget: Number(changeBudget) * 100,         // cents
+                        accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
+                        campaignname: campaignnameFinal,
+                        updatedby: params.context?.userdetails?.email,
+                    };
+
+                    if (!payload.campaignId || !payload.accountNumber) {
+                        message.error("Campaign ID or account missing. Cannot update budget.");
+                        return;
+                    }
+
+                    try {
+                        await apiClient.post('/update/campaign/budget', payload);
+                        message.success("Budget Updated Successfully");
+                        params.context.setCampaignRefreshTrigger(prev => prev + 1);
+                        params.context.changeRRefrst();
+                    } catch (err) {
+                        console.error(err);
+                        message.error("Failed to update budget");
+                    }
                 };
-              
+
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
-              
+
                 return (
-                  <div>
-                    {hasBudget ? (
-                      <DollarOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
-                    ) : (
-                      <Tooltip title="No budget set for this campaign">
-                        <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
-                      </Tooltip>
-                    )}
-              
-                    {isModalVisible && (
-                      <Modal
-                        title={
-                          Array.isArray(groupedData) && groupedData.length
-                            ? groupedData[0]?.campaignname
-                            : campaignname
-                        }
-                        open={isModalVisible}
-                        onOk={handleOk}
-                        onCancel={() => setIsModalVisible(false)}
-                        width={600}
-                        okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
-                        className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                      >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                          <div style={{ display: 'flex' }}>
-                            <p>Budget Type:&nbsp;</p>
-                            <span style={{ fontWeight: 'normal' }}>
-                              {campaignActualSpend?.campaign_budget?.daily_budget != null
-                                ? 'Daily'
-                                : campaignActualSpend?.campaign_budget?.lifetime_budget != null
-                                ? 'Lifetime'
-                                : 'Unknown'}
-                            </span>
-                          </div>
-              
-                          <Input
-                            type="number"
-                            value={changeBudget}
-                            onChange={(e) => onChangeBudget(e.target.value)}
-                            placeholder="Enter budget in USD"
-                            className={params.context?.theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                          />
-              
-                          <div style={{ display: 'flex' }}>
-                            <p>Campaign ID:&nbsp;</p>
-                            <p>{campaignId}</p>
-                          </div>
-                        </div>
-                      </Modal>
-                    )}
-                  </div>
+                    <div>
+                        {hasBudget ? (
+                            <DollarOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
+                        ) : (
+                            <Tooltip title="No budget set for this campaign">
+                                <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                            </Tooltip>
+                        )}
+
+                        {isModalVisible && (
+                            <Modal
+                                title={
+                                    Array.isArray(groupedData) && groupedData.length
+                                        ? groupedData[0]?.campaignname
+                                        : campaignname
+                                }
+                                open={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={() => setIsModalVisible(false)}
+                                width={600}
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <div style={{ display: 'flex' }}>
+                                        <p>Budget Type:&nbsp;</p>
+                                        <span style={{ fontWeight: 'normal' }}>
+                                            {campaignActualSpend?.campaign_budget?.daily_budget != null
+                                                ? 'Daily'
+                                                : campaignActualSpend?.campaign_budget?.lifetime_budget != null
+                                                    ? 'Lifetime'
+                                                    : 'Unknown'}
+                                        </span>
+                                    </div>
+
+                                    <Input
+                                        type="number"
+                                        value={changeBudget}
+                                        onChange={(e) => onChangeBudget(e.target.value)}
+                                        placeholder="Enter budget in USD"
+                                        className={params.context?.theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    />
+
+                                    <div style={{ display: 'flex' }}>
+                                        <p>Campaign ID:&nbsp;</p>
+                                        <p>{campaignId}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
                 );
-            },  
+            },
         },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
@@ -9019,7 +9019,7 @@ useEffect(() => {
             headerClass: 'hide-menu', // Add a custom class
         },
         spend: {
-            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true,  filter: "agTextColumnFilter",
+            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true, filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -9027,7 +9027,7 @@ useEffect(() => {
             filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
-            headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true,  filter: "agTextColumnFilter",
+            headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true, filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -9038,7 +9038,7 @@ useEffect(() => {
             headerName: 'Profit', field: 'profit', minWidth: 105, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
-            }, sortable: true, headerTooltip: 'Profit = Revenue - Spend',  filter: "agTextColumnFilter",
+            }, sortable: true, headerTooltip: 'Profit = Revenue - Spend', filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -9046,11 +9046,11 @@ useEffect(() => {
             filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
-            headerName: 'Margin', 
-            field: 'margin', 
-            valueGetter: getMargin, 
-            sortable: true, 
-            headerTooltip: '(Profit/Revenue)*100', 
+            headerName: 'Margin',
+            field: 'margin',
+            valueGetter: getMargin,
+            sortable: true,
+            headerTooltip: '(Profit/Revenue)*100',
             filter: 'agTextColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
@@ -9133,7 +9133,7 @@ useEffect(() => {
             headerTooltip: 'FMargin = (Profit / Spend) * 100',
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -9191,15 +9191,15 @@ useEffect(() => {
                 <span>{adId}</span>
                 <Tooltip title={tooltipText}
                 >
-                    <div className ={`${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
+                    <div className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
                         <CopyOutlined
-                        className="copy-icon"
-                        onClick={handleCopy}
-                        style={{
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                        }}
-                    />
+                            className="copy-icon"
+                            onClick={handleCopy}
+                            style={{
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                            }}
+                        />
                     </div>
                 </Tooltip>
             </div>
@@ -9788,7 +9788,7 @@ useEffect(() => {
             headerClass: 'hide-menu',
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend',  filter: "agNumberColumnFilter",
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -10164,36 +10164,36 @@ useEffect(() => {
     const functionCallForCommnets = async (accountOrAccounts) => {
         setCommentsStatus(false);
         const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
-      
+
         try {
-          const { data } = await apiClient.post('/Comment', { accountNumbers: accounts });
-          setCampaignComments(data);     // data already includes all selected accounts’ comments
+            const { data } = await apiClient.post('/Comment', { accountNumbers: accounts });
+            setCampaignComments(data);     // data already includes all selected accounts’ comments
         } catch {
-          setCampaignComments([]);
+            setCampaignComments([]);
         } finally {
-          setCommentsStatus(true);
+            setCommentsStatus(true);
         }
-      };
-      
-      
-      const functionCallForCampaigns = async (accountOrAccounts) => {
+    };
+
+
+    const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
         const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
-      
-        try {
-          const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accounts });
-          setCamapignlevelstatus(data);
-        } catch {
-          setCamapignlevelstatus([]);
-        } finally {
-          setCampaignsStatus(true);
-        }
-      };
 
-      
-      
-      
-      
+        try {
+            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accounts });
+            setCamapignlevelstatus(data);
+        } catch {
+            setCamapignlevelstatus([]);
+        } finally {
+            setCampaignsStatus(true);
+        }
+    };
+
+
+
+
+
 
     // const functionCallForCommnets = async (account) => {
     //     try {
@@ -10262,38 +10262,38 @@ useEffect(() => {
     // }
 
     // ✅ run once on mount (for default network)
-useEffect(() => {
-    const defaultNetwork = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0];
-    if (defaultNetwork) {
-      onChangeSelectRevenue(defaultNetwork);
-    }
-  }, []);
+    useEffect(() => {
+        const defaultNetwork = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0];
+        if (defaultNetwork) {
+            onChangeSelectRevenue(defaultNetwork);
+        }
+    }, []);
 
     // whenever network changes
-const onChangeSelectRevenue = (value) => {
-    const accountsForAccess = adAccounts[value];
-    const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
-  
-    setNetworksData(accountsAccess);
-    setRevenuePartner(value);
-  
-    // ⏰ set timezone
-    value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
-      ? setTime("PDT")
-      : setTime("UTC");
-  
-    // ✅ pick first active account
-    const firstActive = accountsAccess.find(acc => acc.status === "Active");
-    if (firstActive) {
-      setSelectedValue([String(firstActive.accountNumber)]);
-    } else {
-      setSelectedValue([]);
-    }
-  };
+    const onChangeSelectRevenue = (value) => {
+        const accountsForAccess = adAccounts[value];
+        const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+
+        setNetworksData(accountsAccess);
+        setRevenuePartner(value);
+
+        // ⏰ set timezone
+        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
+            ? setTime("PDT")
+            : setTime("UTC");
+
+        // ✅ pick first active account
+        const firstActive = accountsAccess.find(acc => acc.status === "Active");
+        if (firstActive) {
+            setSelectedValue([String(firstActive.accountNumber)]);
+        } else {
+            setSelectedValue([]);
+        }
+    };
 
     const onChangeSelect = (value) => {
         setAccount(value);
-    }   
+    }
 
     const onChangeTime = (value) => {
         setTime(value);
@@ -10301,18 +10301,18 @@ const onChangeSelectRevenue = (value) => {
     }
 
     const onClickButton = async () => {
-         // Clear search input if account was changed
-         if (accountChanged || dateChanged || timezoneChanged) {
+        // Clear search input if account was changed
+        if (accountChanged || dateChanged || timezoneChanged) {
             setInputValue(''); // ✅ Clear search input
             // Also clear AG Grid filter if you're using it
             // gridRef.current?.api?.setQuickFilter?.('');
-          }
-        
-          // Reset change flags
-          setAccountChanged(false);
-          setDateChanged(false);
-          setTimezoneChanged(false);
-        
+        }
+
+        // Reset change flags
+        setAccountChanged(false);
+        setDateChanged(false);
+        setTimezoneChanged(false);
+
         localStorage.removeItem("storedData");
 
         const storedData = {
@@ -10404,7 +10404,7 @@ const onChangeSelectRevenue = (value) => {
             const [start, end] = dates;
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
-            setDateChanged(true); 
+            setDateChanged(true);
         }
         // setDateChanged(true); 
     };
@@ -10552,7 +10552,7 @@ const onChangeSelectRevenue = (value) => {
     // ); // Track selected value
 
     // before:
-// const [selectedValue, setSelectedValue] = useState(<string>);
+    // const [selectedValue, setSelectedValue] = useState(<string>);
 
 
 
@@ -10577,64 +10577,64 @@ const onChangeSelectRevenue = (value) => {
     // };
 
     // value will be an array of accountNumbers (strings)
-const handleChange1 = (values) => {
-    setSelectedValue(values);
-  
-    // Preserve your accountName behavior using the last picked item (if needed)
-    const last = values[values.length - 1];
-    if (last) {
-      const findAccount = (data, accountNumber) =>
-        Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
-  
-      const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
-      if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
-    }
-  
-    onChangeSelect(values);     // now passing array
-    setAccountChanged(true);
-  };
+    const handleChange1 = (values) => {
+        setSelectedValue(values);
 
-  // helper to render the checkbox list using existing accountsAccess
-const renderAccountsCheckboxes = (theme) => (
-    <Checkbox.Group
-      options={accountsAccess.map((account) => ({
-        value: String(account.accountNumber),
-        label: (
-          <div 
-            style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '5px 10px',
-                borderBottom: '1px solid #ddd'
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
-              {/* show accountName only when dropdown open (same as your old pattern) */}
-              {isOpen && (
-                <span style={{ fontSize: 12, color: 'gray' }}>
-                  {account.accountName || ''}
-                </span>
-              )}
-            </div>
-            <span style={{ textAlign: 'right', marginLeft: 10 }}>
-              {account.status === "Active" ? (
-                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
-              ) : (
-                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
-              )}
-            </span>
-          </div>
-        ),
-      }))}
-      value={selectedValue}      // array of selected accountNumbers
-      onChange={handleChange1}   // updates your selectedValue + notifies parent
-      className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
-    />
-  );
-  
-  
+        // Preserve your accountName behavior using the last picked item (if needed)
+        const last = values[values.length - 1];
+        if (last) {
+            const findAccount = (data, accountNumber) =>
+                Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
+
+            const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
+            if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
+        }
+
+        onChangeSelect(values);     // now passing array
+        setAccountChanged(true);
+    };
+
+    // helper to render the checkbox list using existing accountsAccess
+    const renderAccountsCheckboxes = (theme) => (
+        <Checkbox.Group
+            options={accountsAccess.map((account) => ({
+                value: String(account.accountNumber),
+                label: (
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '5px 10px',
+                            borderBottom: '1px solid #ddd'
+                        }}
+                    >
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+                            {/* show accountName only when dropdown open (same as your old pattern) */}
+                            {isOpen && (
+                                <span style={{ fontSize: 12, color: 'gray' }}>
+                                    {account.accountName || ''}
+                                </span>
+                            )}
+                        </div>
+                        <span style={{ textAlign: 'right', marginLeft: 10 }}>
+                            {account.status === "Active" ? (
+                                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                            ) : (
+                                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+                            )}
+                        </span>
+                    </div>
+                ),
+            }))}
+            value={selectedValue}      // array of selected accountNumbers
+            onChange={handleChange1}   // updates your selectedValue + notifies parent
+            className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+        />
+    );
+
+
 
     // Create option with conditional rendering of additional info
     const createOption = (account) => {
@@ -10787,7 +10787,190 @@ const renderAccountsCheckboxes = (theme) => (
             />
         </StickyBox>
     );
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState(null);
+    const [recDataByAccount, setRecDataByAccount] = useState({});
+    const [recAccounts, setRecAccounts] = useState([]);
+    const network = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]
+    function buildAiAssistantHref(selectedValue, network, time) {
+        const accounts = Array.isArray(selectedValue)
+            ? selectedValue
+            : String(selectedValue || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
 
+        if (!accounts.length) return '';
+        const accountsParam = encodeURIComponent(accounts.join(','));
+        const qs = new URLSearchParams();
+        if (network) qs.set('network', String(network));
+        if (time) qs.set('time', String(time));
+
+        const q = qs.toString();
+        return q
+            ? `/AiAssistant/${accountsParam}?${q}`
+            : `/AiAssistant/${accountsParam}`;
+    }
+
+    useEffect(() => {
+        const accounts = Array.isArray(selectedValue)
+            ? selectedValue
+            : String(selectedValue || '').split(',').map(s => s.trim()).filter(Boolean);
+
+        if (!accounts.length) {
+            setRecDataByAccount({});
+            setRecAccounts([]);
+            setAiLoading(false);
+            setAiError(null);
+            return;
+        }
+
+        const url =
+            accounts.length === 1
+                ? `http://localhost:8000/Recommendations/${encodeURIComponent(accounts[0])}`
+                : `http://localhost:8000/Recommendations?accounts=${accounts.join(',')}`;
+
+        const token = localStorage.getItem('token');
+
+        (async () => {
+            try {
+                setAiLoading(true);
+                setAiError(null);
+
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = token;
+                }
+
+                const res = await fetch(url, { method: 'GET', headers });
+                if (res.status === 404) {
+                    setRecDataByAccount({});
+                    setRecAccounts([]);
+                    setAiLoading(false);
+                    return;
+                }
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                setRecDataByAccount(data);
+                setRecAccounts(accounts.filter(acc => data?.[acc]));
+            } catch (e) {
+                setAiError(e.message || 'Failed to load');
+                setRecDataByAccount({});
+                setRecAccounts([]);
+            } finally {
+                setAiLoading(false);
+            }
+        })();
+    }, [selectedValue]);
+    const aiItems = useMemo(() => {
+        if (aiLoading) {
+            return [
+                {
+                    key: 'loading',
+                    disabled: true,
+                    label: (
+                        <span style={{ fontSize: 13, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                            Loading recommendations…
+                        </span>
+                    ),
+                },
+            ];
+        }
+        if (aiError) {
+            return [
+                {
+                    key: 'error',
+                    disabled: true,
+                    label: (
+                        <span style={{ fontSize: 13, color: '#d4380d' }}>
+                            Error: {aiError}
+                        </span>
+                    ),
+                },
+            ];
+        }
+        if (!recAccounts.length) {
+            return [
+                {
+                    key: 'empty',
+                    disabled: true,
+                    label: (
+                        <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                            No recommendations found (last 2 days).
+                        </span>
+                    ),
+                },
+            ];
+        }
+        const first = recDataByAccount[recAccounts[0]] || {};
+        const condition = Array.isArray(first.condition) ? first.condition : [];
+        const totals = {};
+        condition.forEach(k => (totals[k] = 0));
+        recAccounts.forEach(acc => {
+            const s = recDataByAccount[acc]?.summary;
+            if (!s) return;
+            condition.forEach(k => {
+                totals[k] += Number(s?.[k]?.count || 0);
+            });
+        });
+        const LABEL_TEXT_BY_CONDITION = {
+            highROI: 'campaigns showing ROI > 20%',
+            lowROI: 'campaigns showing ROI < -20%',
+            lowCTR: 'campaigns showing CTR < 3%',
+        };
+        const buildQuery = (obj) => {
+            const qs = new URLSearchParams();
+            Object.entries(obj).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && String(v).trim() !== '') {
+                    qs.set(k, String(v));
+                }
+            });
+            return qs.toString();
+        };
+
+        const arr = condition.map((k, idx) => {
+            const text = LABEL_TEXT_BY_CONDITION[k] || 'campaigns';
+            return {
+                key: String(idx + 1),
+                label: (
+                    <div>
+                        <strong>{k} Campaigns</strong>
+                        <div style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#888' }}>
+                            {totals[k]} {text}
+                        </div>
+                    </div>
+                ),
+            };
+        });
+        arr.push({
+            type: 'divider',
+            style: {
+                border: theme === 'dark' ? '1px solid #ccc' : '1px solid #f0f0f0',
+                margin: '6px 0',
+            },
+        });
+
+
+        arr.push({
+            key: 'view-all',
+            label: (
+                <Button
+                    type="link"
+                    onClick={() => {
+                        const href = buildAiAssistantHref(selectedValue, network, time);
+                        if (href) window.open(href, '_blank', 'noopener,noreferrer');
+                    }}
+                    style={{ color: theme === 'dark' ? '#52c41a' : '#389e0d', padding: 0 }}
+                >
+                    View All Recommendations
+                </Button>
+            ),
+        });
+
+        return arr;
+    }, [aiLoading, aiError, recAccounts, recDataByAccount, theme]);
 
     return (
         <div className='reports-container'>
@@ -10973,46 +11156,46 @@ const renderAccountsCheckboxes = (theme) => (
                     onDropdownVisibleChange={handleDropdownVisibleChange}
                 /> */}
 
-<Select
-  showSearch
-  placeholder="Select Account"
-  // Keep the visible state you already have
-  open={isOpen}
-  onDropdownVisibleChange={handleDropdownVisibleChange}
+                <Select
+                    showSearch
+                    placeholder="Select Account"
+                    // Keep the visible state you already have
+                    open={isOpen}
+                    onDropdownVisibleChange={handleDropdownVisibleChange}
 
-  // 👇 Show first account + count
-  value={
-    selectedValue.length === 0
-      ? undefined
-      : selectedValue.length === 1
-        ? selectedValue[0] // just that account number
-        : `${selectedValue[0]}, +${selectedValue.length - 1} more`
-  }
+                    // 👇 Show first account + count
+                    value={
+                        selectedValue.length === 0
+                            ? undefined
+                            : selectedValue.length === 1
+                                ? selectedValue[0] // just that account number
+                                : `${selectedValue[0]}, +${selectedValue.length - 1} more`
+                    }
 
-  dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-  className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-  style={{
-    width: '250px',
-    whiteSpace: 'nowrap',
-    color: theme === 'dark' ? 'white' : undefined,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    border: '1px solid #4CAF50',
-    borderRadius: '6px',
-  }}
+                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                    style={{
+                        width: '250px',
+                        whiteSpace: 'nowrap',
+                        color: theme === 'dark' ? 'white' : undefined,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        border: '1px solid #4CAF50',
+                        borderRadius: '6px',
+                    }}
 
-  // We are not using built-in options anymore
-  optionFilterProp="value"
-  // options={accountsAccess.map(createOption)}  // ❌ remove
-  // onChange={handleChange1}                    // ❌ remove
+                    // We are not using built-in options anymore
+                    optionFilterProp="value"
+                    // options={accountsAccess.map(createOption)}  // ❌ remove
+                    // onChange={handleChange1}                    // ❌ remove
 
-  // Custom dropdown with checkboxes (no tick marks in the menu)
-  dropdownRender={() => (
-    <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
-      {renderAccountsCheckboxes(theme)}
-    </div>
-  )}
-/>
+                    // Custom dropdown with checkboxes (no tick marks in the menu)
+                    dropdownRender={() => (
+                        <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
+                            {renderAccountsCheckboxes(theme)}
+                        </div>
+                    )}
+                />
 
 
                 {/* Date Range */}
@@ -11119,29 +11302,29 @@ const renderAccountsCheckboxes = (theme) => (
                                 </Tooltip>
                             </Col>
                     </div> */}
-                   {activeTab === '3' && (
-                         <Col>
-                         <Space size={2} style={{marginRight: '10px'}}> 
-                             <Input
-                                 placeholder="Search..."
-                                //  prefix={<SearchOutlined />}
-                                 onChange={handleChangeInput}
-                                 onBlur={handleBlur}
-                                //  value={inputValue}
-                                 allowClear
-                                 className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                 style={{
-                                     borderRadius: 8,
-                                     border: '1px solid #4CAF50',
-                                     // background: theme === 'dark' ? '#2a2a2a' : '#fff',
-                                     // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
-                                     color: theme === 'dark' ? '#fff' : '#000',
-                                     fontWeight: 500,
-                                     width: 170,
-                                     marginRight: '5px'
-                                 }}
-                             />   
-                            {/* <Tooltip 
+                    {activeTab === '3' && (
+                        <Col>
+                            <Space size={2} style={{ marginRight: '10px' }}>
+                                <Input
+                                    placeholder="Search..."
+                                    //  prefix={<SearchOutlined />}
+                                    onChange={handleChangeInput}
+                                    onBlur={handleBlur}
+                                    //  value={inputValue}
+                                    allowClear
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    style={{
+                                        borderRadius: 8,
+                                        border: '1px solid #4CAF50',
+                                        // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                                        // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        fontWeight: 500,
+                                        width: 170,
+                                        marginRight: '5px'
+                                    }}
+                                />
+                                {/* <Tooltip 
                                 title={`🍳 This feature is cooking—almost ready to serve 😜`}
                                 overlayInnerStyle={{
                                     backgroundColor: theme === 'dark' ? '#111' : '#fff',
@@ -11151,157 +11334,180 @@ const renderAccountsCheckboxes = (theme) => (
                                     // fontWeight: 500,
                                 }}
                             > */}
-                                 <Dropdown
-                                 overlay={
-                                    <Menu
-                                    className={theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light'}
-                                    onClick={({ key }) => handleStatusFilterChange(key)} 
-                                    items={[
-                                        {
-                                            key: 'all',
-                                            label: (
-                                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                  style={{
-                                                    width: '6px',
-                                                    height: '6px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: '#122F6E',
-                                                    marginRight: '6px',
-                                                  }}
-                                                ></span>
-                                                All
-                                              </span>
-                                            ),
-                                        },
-                                        { 
-                                            key: 'active', 
-                                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
-                                            <span
-                                                    style={{
-                                                    width: '6px',
-                                                    height: '6px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: 'green',
-                                                    marginRight: '6px',
-                                                    }}
-                                                ></span>  
-                                            Active
-                                        
-                                            </span> 
-                                        },
-                                        { 
-                                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
-                                              <span
-                                                style={{
-                                                width: '6px',
-                                                height: '6px',
-                                                borderRadius: '50%',
-                                                backgroundColor: 'red',
-                                                marginRight: '6px',
-                                                }}
-                                            ></span>
-                                            Paused
-                                      
-                                            </span> 
-                                        },
-                                    ]}
-                                    />
-                                 }
-                                 trigger={['click']}
-                             >
-                                 <Button
-                                     type="default"
-                                     style={{
-                                     borderRadius: 8,
-                                     background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                                     border: '1px solid #4CAF50',
-                                     color: theme === 'dark' ? '#95de64' : '#389e0d',
-                                     fontWeight: 500,
-                                     marginRight: '5px'
-                                     }}
-                                 >
-                                     <Space size={2}>
-                                     <FilterOutlined />
-                                     {campaignStatusLabel}
-                                     <DownOutlined style={{ fontSize: 10 }} />
-                                     </Space>
-                                 </Button>
-                             </Dropdown>
-                            {/* </Tooltip>         */}
-                            
-                 
-                             <Tooltip 
-                                title={`🍳 This feature is cooking—almost ready to serve 😜`}
-                                overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',   
-                                    borderRadius: 6,
-                                    // fontWeight: 500,
-                                }}
-                             >
-                                 <Button
-                                     type="default"
-                                     icon={<FaRobot style={{ fontSize: 20 }} />}
-                                     disabled
-                                     style={{
-                                     borderRadius: 8,
-                                     background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-                                     border: '1px solid #4CAF50',
-                                     color: theme === 'dark' ? '#52c41a' : '#389e0d',
-                                     fontWeight: 500,
-                                     cursor: 'not-allowed',
-                                     marginRight: '5px'
-                                     }}
-                                 >
-                                     AI Assistant
-                                 </Button>
-                             </Tooltip>
- 
-                             <Tooltip 
-                                title={`🍳 This feature is cooking—almost ready to serve 😜`}
-                                overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',   
-                                    borderRadius: 6,
-                                    // fontWeight: 500,
-                                }}
-                            >
-                                 <Button
-                                     type="default"
-                                     icon={<SettingOutlined />}
-                                     disabled
-                                     style={{
-                                     borderRadius: 8,
-                                     background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
-                                     border: '1px solid #91d5ff',
-                                     color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
-                                     fontWeight: 500,
-                                     cursor: 'not-allowed',
-                                     marginRight: '5px'
-                                     }}
-                                 >
-                                     Rules
-                                 </Button>
-                             </Tooltip>
- 
-                             {/* <Tooltip title="Click to Refresh Tables"> */}
-                                 <Button
-                                         type="primary"
-                                         style={{
-                                         backgroundColor: '#91C25F',
-                                         border: 'solid 0px',
-                                         color: 'black',
-                                         height:'30px'
-                                     }}
-                                     icon={<ReloadOutlined  className="black-icon" />}
-                                     onClick={onClickRefresh}
-                                 />               
-                             {/* </Tooltip> */}
-                         </Space>
-                     </Col>
+                                <Dropdown
+                                    overlay={
+                                        <Menu
+                                            className={theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light'}
+                                            onClick={({ key }) => handleStatusFilterChange(key)}
+                                            items={[
+                                                {
+                                                    key: 'all',
+                                                    label: (
+                                                        <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    width: '6px',
+                                                                    height: '6px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: '#122F6E',
+                                                                    marginRight: '6px',
+                                                                }}
+                                                            ></span>
+                                                            All
+                                                        </span>
+                                                    ),
+                                                },
+                                                {
+                                                    key: 'active',
+                                                    label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                        <span
+                                                            style={{
+                                                                width: '6px',
+                                                                height: '6px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: 'green',
+                                                                marginRight: '6px',
+                                                            }}
+                                                        ></span>
+                                                        Active
+
+                                                    </span>
+                                                },
+                                                {
+                                                    key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                        <span
+                                                            style={{
+                                                                width: '6px',
+                                                                height: '6px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: 'red',
+                                                                marginRight: '6px',
+                                                            }}
+                                                        ></span>
+                                                        Paused
+
+                                                    </span>
+                                                },
+                                            ]}
+                                        />
+                                    }
+                                    trigger={['click']}
+                                >
+                                    <Button
+                                        type="default"
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#95de64' : '#389e0d',
+                                            fontWeight: 500,
+                                            marginRight: '5px'
+                                        }}
+                                    >
+                                        <Space size={2}>
+                                            <FilterOutlined />
+                                            {campaignStatusLabel}
+                                            <DownOutlined style={{ fontSize: 10 }} />
+                                        </Space>
+                                    </Button>
+                                </Dropdown>
+                                {/* </Tooltip>         */}
+
+                                {/* 
+                                <Tooltip
+                                    title={`🍳 This feature is cooking—almost ready to serve 😜`}
+                                    overlayInnerStyle={{
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        border: '1px solid #ccc',
+                                        borderRadius: 6,
+                                        // fontWeight: 500,
+                                    }}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                                        disabled
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                                            fontWeight: 500,
+                                            cursor: 'not-allowed',
+                                            marginRight: '5px'
+                                        }}
+                                    >
+                                        AI Assistant
+                                    </Button>
+                                </Tooltip> */}
+                                <Dropdown
+                                    menu={{
+                                        items: aiItems,
+                                        className: theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light',
+                                    }}
+                                    trigger={['click']}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                                        disabled={aiLoading} // only disable while *loading*; keep enabled for "no data" to show message
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                                            fontWeight: 500,
+                                            marginRight: '5px',
+                                        }}
+                                    >
+                                        AI Assistant
+                                    </Button>
+                                </Dropdown>
+
+                                <Tooltip
+                                    title={`🍳 This feature is cooking—almost ready to serve 😜`}
+                                    overlayInnerStyle={{
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        border: '1px solid #ccc',
+                                        borderRadius: 6,
+                                        // fontWeight: 500,
+                                    }}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<SettingOutlined />}
+                                        disabled
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                                            border: '1px solid #91d5ff',
+                                            color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                                            fontWeight: 500,
+                                            cursor: 'not-allowed',
+                                            marginRight: '5px'
+                                        }}
+                                    >
+                                        Rules
+                                    </Button>
+                                </Tooltip>
+
+                                {/* <Tooltip title="Click to Refresh Tables"> */}
+                                <Button
+                                    type="primary"
+                                    style={{
+                                        backgroundColor: '#91C25F',
+                                        border: 'solid 0px',
+                                        color: 'black',
+                                        height: '30px'
+                                    }}
+                                    icon={<ReloadOutlined className="black-icon" />}
+                                    onClick={onClickRefresh}
+                                />
+                                {/* </Tooltip> */}
+                            </Space>
+                        </Col>
                     )}
                 </Row>
             </div>
