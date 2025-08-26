@@ -295,6 +295,19 @@ const MyTablePage = () => {
 
     const carouselRef = useRef();
 
+    // top of component
+const campaignStatusOverridesRef = useRef(new Map());
+// NEW for adset level:
+const adsetStatusOverridesRef   = useRef(new Map()); // key -> "ACTIVE"/"PAUSED"
+const adsetPinOverridesRef      = useRef(new Map()); // key -> boolean
+const adsetCommentOverridesRef  = useRef(new Map()); // 
+
+// top-level (same place you created the other refs)
+const adStatusOverridesRef   = React.useRef(new Map());  // "ACTIVE" | "PAUSED"
+const adPinOverridesRef      = React.useRef(new Map());  // boolean
+const adCommentOverridesRef  = React.useRef(new Map());  // { text, editedBy, editedAt }
+
+
     // const gridRef = useRef();
 
     // const gridRef1 = useRef();
@@ -384,7 +397,7 @@ console.log("multiple accounts:", selectedValue);
           try {
             const body = { accountNumbers: (selectedValue || []).map(String) };
       
-            const res = await apiClient.post('/get/AllCampaignsWithAdsets', body);
+            const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', body);
             const data = res.data || [];
       
             // Map EXACTLY to your DB shape:
@@ -455,7 +468,7 @@ useEffect(() => {
           ? selectedValue.map(String)
           : [String(selectedValue)];
   
-        const res = await apiClient.post('/get/AllCampaignsWithAdsets', {
+        const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', {
           accountNumbers: accounts,
         });
   
@@ -10175,6 +10188,8 @@ useEffect(() => {
           setCampaignsStatus(true);
         }
       };
+
+      
       
       
       
@@ -11339,6 +11354,14 @@ const renderAccountsCheckboxes = (theme) => (
                                         newaccount,
                                         userdetails,
                                         theme,
+                                        setCamapignlevelstatus,
+                                        campaignStatusOverridesRef, // ✅ ADD THIS
+                                        adsetStatusOverridesRef,
+                                        adsetPinOverridesRef,
+                                        adsetCommentOverridesRef,
+                                        adStatusOverridesRef,
+                                        adPinOverridesRef,
+                                        adCommentOverridesRef,
                                     }}
                                     handleChangeInput={handleChangeInput}
                                     handleBlur={handleBlur}
@@ -11380,6 +11403,14 @@ const renderAccountsCheckboxes = (theme) => (
                                         newaccount,
                                         userdetails,
                                         theme,
+                                        campaignStatusOverridesRef, // ✅ ADD THIS
+                                        adsetStatusOverridesRef,
+                                        adsetPinOverridesRef,
+                                        adsetCommentOverridesRef,
+                                        adStatusOverridesRef,
+                                        adPinOverridesRef,
+                                        adCommentOverridesRef,
+
                                     }}
                                     theme={theme}
                                     handleChangeInput={handleChangeInput}

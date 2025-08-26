@@ -1838,6 +1838,7 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         selectedAdsets={selectedAdsets}
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
+                        context={context}
                     />
                 </Tabs.TabPane>
             </Tabs>

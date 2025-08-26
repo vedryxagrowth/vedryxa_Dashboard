@@ -1075,20 +1075,40 @@ const autoGroupColumnDef = {
         // campaign status toggle (per row account)
         const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
         const [selectedCampaign, setSelectedCampaign] = useState(null);
-        const [switchOn, setSwitchOn] = useState(false);
+        // const [switchOn, setSwitchOn] = useState(false);
         const [nextChecked, setNextChecked] = useState(false);
         const [pendingAccount, setPendingAccount] = useState(null);
   
         const [comment, setComment] = useState(relatedComment || '');
+
+                       // get override Map from grid context
+const overrides = params.context?.campaignStatusOverridesRef?.current; // Map
+
+// build a stable key per row (account + campaign)
+const statusKey = `${rowAccount}-${campaignid}`;
+
+// INIT: 1) prefer override Map; 2) fallback to row.data.__status; 3) one-time fallback to Camapignlevelstatus
+const [switchOn, setSwitchOn] = useState(() => {
+    const fromMap = overrides?.get(statusKey); // "ACTIVE" / "PAUSED" / undefined
+    if (fromMap === "ACTIVE" || fromMap === "PAUSED") return fromMap === "ACTIVE";
+  
+    if (params.data?.__status) return params.data.__status === "ACTIVE";
+  
+    const st = Camapignlevelstatus.find(
+      s => String(s.campaign_id) === String(campaignid) &&
+           String(s.accountNumber) === String(rowAccount)
+    );
+    return st ? st.status === "ACTIVE" : false;
+});
   
         // init ON/OFF from the correct account
-        useEffect(() => {
-          const st = Camapignlevelstatus.find(s =>
-            String(s.campaign_id) === String(campaignid) &&
-            String(s.accountNumber) === String(rowAccount)
-          );
-          setSwitchOn(st ? st.status === "ACTIVE" : false);
-        }, [Camapignlevelstatus, campaignid, rowAccount]);
+        // useEffect(() => {
+        //   const st = Camapignlevelstatus.find(s =>
+        //     String(s.campaign_id) === String(campaignid) &&
+        //     String(s.accountNumber) === String(rowAccount)
+        //   );
+        //   setSwitchOn(st ? st.status === "ACTIVE" : false);
+        // }, [Camapignlevelstatus, campaignid, rowAccount]);
   
         // status change click -> confirm modal
         const handlePauseClick = (checked) => {
@@ -1098,35 +1118,76 @@ const autoGroupColumnDef = {
           setIsCampaignModalVisibles(true);
         };
   
+        // const handlePauseOk = async () => {
+        //   setSwitchOn(nextChecked); // optimistic
+        //   try {
+        //     const token = localStorage.getItem("token");
+        //     await apiClient.post(
+        //       `/BulkCampaignStatusChange`,
+        //       {
+        //         status: nextChecked ? "ACTIVE" : "PAUSED",
+        //         id: params.data?.identifier,
+        //         campaign_id: campaignid,
+        //         accountNumber: String(pendingAccount), // per row account
+        //         adset_id: adsetid,
+        //         name: campaignName,
+        //         email: userdetails?.email,
+        //       },
+        //       { headers: { Authorization: token } }
+        //     );
+        //     functionCallForCampaigns(pendingAccount);
+        //     message.success(`Campaign ${nextChecked ? 'activated' : 'paused'}`);
+        //   } catch (e) {
+        //     message.error("Failed to update campaign status");
+        //     setSwitchOn(prev => !prev); // revert
+        //   } finally {
+        //     setIsCampaignModalVisibles(false);
+        //     setSelectedCampaign(null);
+        //     setPendingAccount(null);
+        //   }
+        // };
+  
         const handlePauseOk = async () => {
-          setSwitchOn(nextChecked); // optimistic
-          try {
-            const token = localStorage.getItem("token");
-            await apiClient.post(
-              `/campaignStatusChange`,
-              {
-                status: nextChecked ? "ACTIVE" : "PAUSED",
+            const desired = nextChecked;                  // true => ACTIVE, false => PAUSED
+            setSwitchOn(desired);                         // optimistic UI on THIS cell only
+          
+            try {
+              const token = localStorage.getItem("token");
+              const payload = {
+                status: desired ? "ACTIVE" : "PAUSED",
                 id: params.data?.identifier,
                 campaign_id: campaignid,
-                accountNumber: String(pendingAccount), // per row account
+                accountNumber: String(pendingAccount),
                 adset_id: adsetid,
                 name: campaignName,
                 email: userdetails?.email,
-              },
-              { headers: { Authorization: token } }
-            );
-            functionCallForCampaigns(pendingAccount);
-            message.success(`Campaign ${nextChecked ? 'activated' : 'paused'}`);
-          } catch (e) {
-            message.error("Failed to update campaign status");
-            setSwitchOn(prev => !prev); // revert
-          } finally {
-            setIsCampaignModalVisibles(false);
-            setSelectedCampaign(null);
-            setPendingAccount(null);
-          }
-        };
-  
+              };
+          
+              await apiClient.post(
+                `/BulkCampaignStatusChange`,
+                payload,
+                { headers: { Authorization: token } }
+              );
+          
+              const newStatus = desired ? "ACTIVE" : "PAUSED";
+          
+              // ✅ Persist status only in the override Map (no rowData update, no parent setState)
+              if (overrides) {
+                overrides.set(statusKey, newStatus);
+              }
+          
+              message.success(`Campaign ${newStatus.toLowerCase()}`);
+            } catch (e) {
+              // revert only this switch
+              setSwitchOn(prev => !prev);
+              message.error("Failed to update campaign status");
+            } finally {
+              setIsCampaignModalVisibles(false);
+              setSelectedCampaign(null);
+              setPendingAccount(null);
+            }
+          };
+
         const handlePauseCancel = () => {
           setIsCampaignModalVisibles(false);
           setSelectedCampaign(null);
@@ -1282,7 +1343,11 @@ const autoGroupColumnDef = {
             {/* Status toggle (per-account) */}
             <Switch
               checked={switchOn}
-              onChange={handlePauseClick}
+            //   onChange={handlePauseClick}
+                onChange={(checked, e) => {
+                e?.stopPropagation?.();
+                handlePauseClick(checked);
+              }}
               size="small"
               style={{ backgroundColor: switchOn ? '#91C25F' : '#d9d9d9' }}
             />

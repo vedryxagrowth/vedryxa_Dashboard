@@ -57,7 +57,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
+const AdLevelReports = ({context, campaignStatusFilter, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
     // console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -843,23 +843,52 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
         unSortIcon: true,
         headerClass: 'ag-center-header',
       
-        comparator: (campaignA, campaignB) => {
-          if (!campaignA) return 1;
-          if (!campaignB) return -1;
+        // 🔁 Comparator now respects pin overrides so rows re-order immediately
+        // comparator: (campaignA, campaignB, nodeA, nodeB) => {
+        //   // build a helper that can read overrides + server fallback
+        //   const pickPinned = (node) => {
+        //     const d = node?.allLeafChildren?.[0]?.data || node?.data || {};
+        //     const nameKey = d?.adname || d?.campaignname || '';
+        //     const acc = d?.accountNumber ? String(d.accountNumber) : '';
+        //     const pinKey = d?.adid ? `ad:${d.adid}` : `name:${nameKey}__acc:${acc}`;
       
-          const getPinStatusForCampaign = (campaignName) => {
-            const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-            return relatedComment ? relatedComment.pinned : false;
-          };
+        //     // 1) override map from parent context (persists across tabs)
+        //     const override = context?.adPinOverridesRef?.current?.get(pinKey);
+        //     if (override !== undefined) return override;
       
-          const isPinnedA = getPinStatusForCampaign(campaignA);
-          const isPinnedB = getPinStatusForCampaign(campaignB);
+        //     // 2) server fallback
+        //     const rel = campaignComments.find(c =>
+        //       c.campaignname === nameKey &&
+        //       c.Account === acc &&
+        //       (!d?.adid || !c.ad_id || c.ad_id === d.adid)
+        //     );
+        //     return !!rel?.pinned;
+        //   };
       
-          if (isPinnedA !== isPinnedB) {
-            return isPinnedA ? -1 : 1;
-          }
-          return campaignA.localeCompare(campaignB);
-        },
+        //   if (!campaignA) return 1;
+        //   if (!campaignB) return -1;
+      
+        //   const aPinned = pickPinned(nodeA);
+        //   const bPinned = pickPinned(nodeB);
+      
+        //   if (aPinned !== bPinned) return aPinned ? -1 : 1;
+        //   return String(campaignA).localeCompare(String(campaignB));
+        // },
+
+         comparator: (a, b, nodeA, nodeB) => {
+               const pickPinned = (node) => {
+                 const d = node?.group && node.childrenAfterGroup?.length
+                   ? node.childrenAfterGroup[0]?.data
+                   : node?.data;
+                 if (!d) return false;
+                 if (typeof d.__adPinned === 'boolean') return d.__adPinned; // local cache
+                 return !!d.pinned; // server fallback
+               };
+               const pa = pickPinned(nodeA);
+               const pb = pickPinned(nodeB);
+               if (pa !== pb) return pa ? -1 : 1;
+               return String(a || '').localeCompare(String(b || ''));
+             },
       
         cellRenderer: "agGroupCellRenderer",
         cellRendererParams: {
@@ -870,7 +899,7 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
             // group key rendered in the cell
             const firstColumnValue = params.node.key;
             const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
-            const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
+            const adName       = params.node.allLeafChildren?.[0]?.data?.adname || "";
       
             let campaignid, adsetid, adid, rowAccount;
       
@@ -878,36 +907,31 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
               const firstChild = params.node.childrenAfterGroup[0]?.data;
               if (firstChild) {
                 campaignid = firstChild.campaignid ?? null;
-                adsetid = firstChild.adsetid ?? null;
-                adid = firstChild.adid ?? null;
+                adsetid    = firstChild.adsetid ?? null;
+                adid       = firstChild.adid ?? null;
                 rowAccount = firstChild.accountNumber ?? null;
               }
             } else if (params.data) {
               campaignid = params.data.campaignid ?? null;
-              adsetid = params.data.adsetid ?? null;
-              adid = params.data.adid ?? null;
+              adsetid    = params.data.adsetid ?? null;
+              adid       = params.data.adid ?? null;
               rowAccount = params.data.accountNumber ?? null;
             } else {
               console.error('Missing campaignid or adsetid for campaign:', campaignName);
-              return (
-                <div style={{ color: 'red' }}>
-                  Error: campaignid or adsetid missing for {campaignName}
-                </div>
-              );
+              return <div style={{ color: 'red' }}>Error: campaignid or adsetid missing for {campaignName}</div>;
             }
       
-            // ✅ Use the same key for comments everywhere (ad name preferred)
+            // ✅ unified key (ad name preferred)
             const nameKeyForComments = adName || campaignName;
       
-            // accounts list for bulk endpoints (prefer the row’s account if present)
-            const accountsParam = rowAccount
-              ? [String(rowAccount)]
-              : (Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)]);
+            // // accounts param
+            // const accountsParam = rowAccount
+            //   ? [String(rowAccount)]
+            //   : (Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)]);
       
             const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
       
             // ----- helpers (account + ad aware) -----
-            // allow legacy docs that do NOT have top-level ad_id to match
             const byAdScope = (c, name, acc, aid) =>
               c.campaignname === name &&
               c.Account === acc &&
@@ -937,27 +961,85 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
               const c = campaignComments.find(x => byAdScope(x, name, acc, adid));
               return c ? !!c.pinned : false;
             };
+
+                      // stable account key for this row
+ const accKey = String(
+    rowAccount ?? (Array.isArray(newaccount) ? newaccount[0] : newaccount) ?? ''
+  );
+  const accountsParam = [accKey];
       
-            // 🔄 use the same nameKeyForComments for all lookups
-            const accKey = rowAccount || newaccount;
-            const editUserANdTime = getEditedUserAndTime(nameKeyForComments, accKey);
+            // 🔄 same nameKeyForComments for all lookups
+            // const accKey = rowAccount || newaccount;
+            const editUserANdTime    = getEditedUserAndTime(nameKeyForComments, accKey);
             const editPinUserANdTime = getPinEditedUserAndTime(nameKeyForComments, accKey);
-            const relatedStatus = getStatusForCampaign(nameKeyForComments, accKey);
-            const relatedComment = getCommentForCampaign(nameKeyForComments, accKey);
-            const valueWithCount = `${firstColumnValue}`;
+            const relatedStatus      = getStatusForCampaign(nameKeyForComments, accKey);
+            const relatedComment     = getCommentForCampaign(nameKeyForComments, accKey);
+            const valueWithCount     = `${firstColumnValue}`;
       
-            const [tooltipText, setTooltipText] = React.useState("Click to Copy");
+            const [tooltipText, setTooltipText]         = React.useState("Click to Copy");
             const [isModalVisibles, setIsModalVisibles] = React.useState(false);
       
             const [isAdidModalVisibles, setIsAdidModalVisibles] = React.useState(false);
-            const [selectedAdid, setSelectedAdid] = React.useState(null);
-            const [switchStates, setSwitchStates] = React.useState({});
-            const [nextChecked, setNextChecked] = React.useState(false);
+            const [selectedAdid, setSelectedAdid]               = React.useState(null);
+            const [switchStates, setSwitchStates]               = React.useState({});
+            const [nextChecked, setNextChecked]                 = React.useState(false);
       
+            // comment state will be initialized on open from the UI value
             const [comment, setComment] = React.useState(relatedComment || '');
-            const [pinned, setPinned] = React.useState(getPinStatusForCampaignAcc(nameKeyForComments, accKey));
       
-            // initialise switch state from AdLevel (assume ACTIVE if none)
+            // 🔗 pull override refs from parent context
+            const { adPinOverridesRef, adStatusOverridesRef, adCommentOverridesRef } = params?.context || {};
+
+   
+
+ // patch only this leaf row (so comparators/other cells can see updates)
+ const leafNode = params.node.group ? params.node.childrenAfterGroup?.[0] : params.node;
+ const updateLeaf = (patch) => {
+   if (!leafNode?.data) return;
+   const nextData = { ...leafNode.data, ...patch };
+   if (leafNode.updateData) leafNode.updateData(nextData);
+   else params.api.applyTransaction({ update: [nextData] });
+ };
+
+ // quick targeted refresh  resort just this cell
+ const refreshThisCell = () => {
+   params.api.refreshCells({ rowNodes: [params.node], columns: [params.column.getColId()], force: true });
+   params.api.refreshClientSideRowModel('sort');
+ };
+
+      
+            // 🔑 stable keys for this ad
+            const buildAdKeys = ({ adid, nameKey, account }) => {
+              const acc = account ? String(account) : "";
+              const fallback = `name:${nameKey || ""}__acc:${acc}`;
+              const idKey = adid ? `ad:${adid}` : fallback;
+              return { pinKey: idKey, statusKey: idKey, commentKey: idKey };
+            };
+            const { pinKey, statusKey, commentKey } = buildAdKeys({
+              adid,
+              nameKey: nameKeyForComments,
+              account: rowAccount || (Array.isArray(newaccount) ? newaccount[0] : newaccount),
+            });
+      
+            // 🧠 derive UI from overrides first, fallback to server
+            const overridePinned  = adPinOverridesRef?.current?.get(pinKey);
+            const overrideStatus  = adStatusOverridesRef?.current?.get(statusKey);     // "ACTIVE" | "PAUSED"
+            const overrideComment = adCommentOverridesRef?.current?.get(commentKey);   // { text, editedBy, editedAt }
+      
+const pinnedUI  = (overridePinned  !== undefined) ? overridePinned : getPinStatusForCampaignAcc(nameKeyForComments, accKey);
+ const commentUI = (overrideComment?.text ?? relatedComment ?? '') || '';
+ const hasComment = commentUI.trim().length > 0;
+
+ // apply overrides to the row so comparator / other cells see them immediately
+ React.useEffect(() => {
+   if (overrideStatus) updateLeaf({ __adStatus: overrideStatus });
+   if (typeof overridePinned === 'boolean') updateLeaf({ __adPinned: overridePinned });
+   if (overrideComment) updateLeaf({ __adComment: overrideComment.text || '' });
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
+
+      
+            // 🟢 initialise switch state from AdLevel (assume ACTIVE if none)
             React.useEffect(() => {
               if (!adid) return;
               const matchedComment = campaignComments.find(
@@ -975,21 +1057,26 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
               }));
             }, [campaignComments, campaignid, adsetid, adid]);
       
+            // ====== ACTIVE/PAUSE ======
             const handlePauseClick = (aid, checked) => {
               setSelectedAdid(aid);
               setNextChecked(checked);
               setIsAdidModalVisibles(true);
             };
       
-            // bulk ad status change
             const handlePauseOk = async () => {
               if (!selectedAdid) return;
       
+              // optimistic UI via override
+              adStatusOverridesRef?.current?.set(statusKey, nextChecked ? "ACTIVE" : "PAUSED");
               setSwitchStates(prev => ({ ...prev, [selectedAdid]: nextChecked }));
+            //   params.api.refreshCells({ rowNodes: [params.node], columns: [params.column.getColId()], force: true });
+            updateLeaf({ __adStatus: nextChecked ? 'ACTIVE' : 'PAUSED' });
+            refreshThisCell();
       
               try {
                 const response = await apiClient.post(
-                  `/adStatusChange`,
+                  `/BulkAdStatusChange`,
                   {
                     status: nextChecked ? "ACTIVE" : "PAUSED",
                     ad_id: selectedAdid,
@@ -1002,18 +1089,21 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                   authHeaders
                 );
       
-                if (response.status === 200 || response.status === 201) {
-                  refreshComments(accKey);
-                  functionCallForCommnets(accKey);
-                } else {
-                  console.warn(" Backend returned unexpected status:", response.status);
+                if (!(response.status === 200 || response.status === 201)) {
+                  throw new Error(`Unexpected status ${response.status}`);
                 }
               } catch (error) {
-                console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
+                // revert optimistic UI
+                adStatusOverridesRef?.current?.set(statusKey, nextChecked ? "PAUSED" : "ACTIVE");
+                setSwitchStates(prev => ({ ...prev, [selectedAdid]: !nextChecked }));
+                // params.api.refreshCells({ rowNodes: [params.node], columns: [params.column.getColId()], force: true });
+                updateLeaf({ __adStatus: nextChecked ? 'PAUSED' : 'ACTIVE' });
+                refreshThisCell();
+                message.error('Failed to update status.');
+              } finally {
+                setIsAdidModalVisibles(false);
+                setSelectedAdid(null);
               }
-      
-              setIsAdidModalVisibles(false);
-              setSelectedAdid(null);
             };
       
             const handlePauseCancel = () => {
@@ -1021,24 +1111,19 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
               setSelectedAdid(null);
             };
       
-            const copyToClipboard = () => {
-              navigator.clipboard.writeText(firstColumnValue)
-                .then(() => {
-                  setTooltipText("Copied!");
-                  setTimeout(() => setTooltipText("Click to Copy"), 2000);
-                })
-                .catch(() => console.error('Failed to copy to clipboard'));
+            // ====== COMMENT ======
+            const handleEditClick = () => {
+              // initialise editor with the CURRENT UI value (override or server)
+              setComment(commentUI);
+              setIsModalVisibles(true);
             };
       
-            const handleEditClick = () => setIsModalVisibles(true);
-      
-            // bulk upsert comment (create/edit)
             const upsertCommentBulk = async ({ text }) => {
               await apiClient.post(
                 '/Comments/bulk-upsert',
                 {
                   accountNumbers: accountsParam,
-                  campaignname: nameKeyForComments, // ✅ same key used for reads
+                  campaignname: nameKeyForComments,
                   campaignid,
                   adsetid,
                   ad_id: adid,
@@ -1055,7 +1140,7 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                   '/Comments/bulk-delete',
                   {
                     accountNumbers: accountsParam,
-                    campaignname: nameKeyForComments, // ✅ same key used for reads
+                    campaignname: nameKeyForComments,
                     campaignid,
                     adsetid,
                     ad_id: adid,
@@ -1064,11 +1149,24 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                 );
       
                 if (response.status === 200 || response.status === 201) {
-                  refreshComments(accKey);
+                  // optimistic clear
+                //   adCommentOverridesRef?.current?.delete(commentKey);
+                //   params.api.refreshCells({ rowNodes: [params.node], columns: [params.column.getColId()], force: true });
+                // tombstone so UI won't fall back to stale server text
+        adCommentOverridesRef?.current?.set(commentKey, {
+           text: '',
+           editedBy: userdetails?.email,
+           editedAt: new Date().toISOString(),
+           deleted: true,
+         });
+         updateLeaf({ __adComment: '' });
+         refreshThisCell();
+
                   message.success('Comment deleted successfully!');
                   setIsModalVisibles(false);
+                  // optional: refreshComments(accKey);
                 } else {
-                  message.error('Failed to delete the comment. Please try again.-1');
+                  message.error('Failed to delete the comment. Please try again.');
                 }
               } catch (error) {
                 console.error('Error deleting the comment:', error);
@@ -1079,7 +1177,18 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
             const handleOks = async () => {
               try {
                 await upsertCommentBulk({ text: comment });
-                refreshComments(accKey);
+      
+                // optimistic override for instant UI
+                adCommentOverridesRef?.current?.set(commentKey, {
+                  text: comment,
+                  editedBy: userdetails?.email,
+                  editedAt: new Date().toISOString(),
+                });
+                // params.api.refreshCells({ rowNodes: [params.node], columns: [params.column.getColId()], force: true });
+                updateLeaf({ __adComment: comment });
+                refreshThisCell();
+      
+                // optional: refreshComments(accKey);
                 message.success(relatedComment ? "Comment updated successfully!" : "New comment added successfully!");
                 setIsModalVisibles(false);
               } catch (error) {
@@ -1090,6 +1199,7 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
       
             const handleCancels = () => setIsModalVisibles(false);
       
+            // ====== PIN / UNPIN ======
             const CustomTooltipContent = ({ editedTime, usercommit }) => (
               <div style={{ padding: '5px', borderRadius: '5px' }}>
                 <p style={{ margin: 0, color: theme === 'dark' ? "#fff" : "#000" }}>{usercommit}</p>
@@ -1097,49 +1207,54 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
               </div>
             );
       
-            // bulk pin/unpin with per-ad scope
             const handlePinClick = async (campName, campid, asetid, currentPinStatus) => {
               const updatedPinStatus = !currentPinStatus;
       
+              // optimistic override so UI flips  persists across tabs
+              adPinOverridesRef?.current?.set(pinKey, updatedPinStatus);
+      
+              // flip icon and resort immediately
+               updateLeaf({ __adPinned: updatedPinStatus });
+               refreshThisCell();
+      
               try {
                 if (updatedPinStatus) {
-                  const resp = await apiClient.post(
+                  await apiClient.post(
                     '/PinBulk',
                     {
                       accountNumbers: accountsParam,
-                      campaignname: nameKeyForComments, // ✅ same key used for reads
+                      campaignname: nameKeyForComments,
                       campaignid: campid,
                       adsetid: asetid,
                       ad_id: adid,
                       userPin: userdetails?.email,
-                      comment: comment || ''
+                      comment: commentUI || ''
                     },
                     authHeaders
                   );
-                  if (resp.status === 200 || resp.status === 201) {
-                    refreshComments(accKey);
-                  }
                   message.success("Campaign pinned!");
                 } else {
-                  const resp = await apiClient.post(
+                  await apiClient.post(
                     '/UnpinBulk',
                     {
                       accountNumbers: accountsParam,
-                      campaignname: nameKeyForComments, // ✅ same key used for reads
+                      campaignname: nameKeyForComments,
                       campaignid: campid,
                       adsetid: asetid,
                       ad_id: adid
                     },
                     authHeaders
                   );
-                  if (resp.status === 200 || resp.status === 201) {
-                    refreshComments(accKey);
-                  }
                   message.success("Campaign unpinned!");
                 }
-      
-                setPinned(updatedPinStatus);
+                // optional: refreshComments(accKey);
               } catch (error) {
+                // revert on error
+                adPinOverridesRef?.current?.set(pinKey, currentPinStatus);
+                // params.api.refreshCells({ rowNodes: [params.node], columns: [params.column.getColId()], force: true });
+                // params.api.refreshClientSideRowModel('sort');
+                updateLeaf({ __adPinned: currentPinStatus });
+                refreshThisCell();
                 console.error('Error toggling pin status:', error);
                 message.error('Error while updating pin status.');
               }
@@ -1152,8 +1267,8 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                   : "";
       
               return (
-                <Tooltip 
-                title={
+                <Tooltip
+                  title={
                     pinned ? (
                       <div style={{ color: theme === "dark" ? "#fff" : "#000" }}>
                         <CustomTooltipContent
@@ -1163,30 +1278,23 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                       </div>
                     ) : null
                   }
-
-                    // <CustomTooltipContent editedTime={pinTimeDisplay} usercommit={editPinUserANdTime?.userPin} /> : null}
-                    overlayInnerStyle={{
-                        backgroundColor: theme === "dark" ? "#111" : "#fff",
-                        color: theme === "dark" ? "#fff" : "#000",
-                        border: "1px solid #ccc",
-                        borderRadius: 6,
-                      }}
+                  overlayInnerStyle={{
+                    backgroundColor: theme === "dark" ? "#111" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#000",
+                    border: "1px solid #ccc",
+                    borderRadius: 6,
+                  }}
                 >
                   <button
+                  onMouseDown={(e) => e.stopPropagation()}
                     onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
-                    style={{
-                      border: "none",
-                      background: "none",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                    }}
+                    style={{ border: "none", background: "none", cursor: "pointer", fontSize: "16px" }}
                   >
                     {pinned ? "📌" : "📍"}
                   </button>
                 </Tooltip>
               );
             };
-              
       
             // formatted edited time for comment hover (guard against undefined)
             const editedTimeDisplay =
@@ -1196,11 +1304,15 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
       
             return (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                {/* ACTIVE/PAUSE */}
                 <Switch
-                  checked={!!switchStates[adid]}
-                  onClick={(checked) => handlePauseClick(adid, checked)}
+                //   checked={overrideStatus ? overrideStatus === "ACTIVE" : !!switchStates[adid]}
+                //   onClick={(checked) => handlePauseClick(adid, checked)}
+                checked={overrideStatus ? overrideStatus === "ACTIVE" : !!switchStates[adid]}
+                onMouseDown={(e) => e.stopPropagation()}
+                onChange={(checked, e) => { e?.stopPropagation?.(); handlePauseClick(adid, checked); }}
                   size="small"
-                  style={{ backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9' }}
+                  style={{ backgroundColor: (overrideStatus ? overrideStatus === "ACTIVE" : !!switchStates[adid]) ? '#91C25F' : '#d9d9d9' }}
                 />
                 <Modal
                   title="Confirm Action"
@@ -1213,18 +1325,20 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                   <p>Ad ID: {selectedAdid}</p>
                 </Modal>
       
+                {/* PIN */}
                 <PinIcon
                   campaignName={nameKeyForComments}
                   campaignid={campaignid}
                   adsetid={adsetid}
-                  pinned={pinned}
+                  pinned={pinnedUI}
                 />
       
-                {relatedComment && (
+                {/* COMMENT ICONS */}
+                {hasComment ? (
                   <Tooltip
                     title={
                       <div>
-                        <div>{relatedComment || 'No comment available'}</div>
+                        <div>{commentUI}</div>
                         <div>{editedTimeDisplay}</div>
                       </div>
                     }
@@ -1241,11 +1355,11 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                       onClick={handleEditClick}
                     />
                   </Tooltip>
-                )}
-                {!relatedComment && (
+                ) : (
                   <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
                 )}
       
+                {/* COPY + LINK + LABEL */}
                 <Tooltip
                   title={tooltipText}
                   overlayInnerStyle={{
@@ -1256,7 +1370,14 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                   }}
                 >
                   <CopyOutlined
-                    onClick={copyToClipboard}
+                    onClick={() => {
+                      navigator.clipboard.writeText(firstColumnValue)
+                        .then(() => {
+                          setTooltipText("Copied!");
+                          setTimeout(() => setTooltipText("Click to Copy"), 2000);
+                        })
+                        .catch(() => console.error('Failed to copy to clipboard'));
+                    }}
                     style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
                   />
                 </Tooltip>
@@ -1281,29 +1402,25 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
                   <span>{valueWithCount}</span>
                 </Tooltip>
       
+                {/* COMMENT MODAL (AntD v5: use `open`) */}
                 <Modal
                   title={firstColumnValue}
                   className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                  visible={isModalVisibles}
+                  open={isModalVisibles}
                   onOk={handleOks}
                   onCancel={handleCancels}
                   footer={[
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                    <div key="f" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                       <div style={{ display: 'flex', flexDirection: "column" }}>
-                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                        <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
                           Last Edited Time:
                         </span>
-                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                        <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
                           {editedTimeDisplay}
                         </span>
                       </div>
                       <div>
-                        <Button
-                          key="delete"
-                          type="danger"
-                          onClick={handleDelete}
-                          style={{ marginRight: 'auto', border: "1px solid #e3e3da" }}
-                        >
+                        <Button key="delete" type="danger" onClick={handleDelete} style={{ marginRight: 'auto', border: "1px solid #e3e3da" }}>
                           Delete
                         </Button>
                         <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
@@ -1339,7 +1456,8 @@ const AdLevelReports = ({campaignStatusFilter, functionCallForCommnets, startDat
           }
           return params.value;
         }
-    };
+      };
+      
       
       
     function findMaxHour(data) {
@@ -2351,6 +2469,7 @@ const ids = Array.isArray(newaccount)
                                     columnDefs={memorizedColumnDef}
                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                     onCellClicked={onCellClickedLive}
+                                    context={context}
                                     pagination={true}
                                     paginationPageSize={200}
                                     paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}

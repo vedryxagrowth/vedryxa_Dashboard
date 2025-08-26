@@ -1519,6 +1519,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         selectedAdsets={selectedAdsets}
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
+                        context={context}
                     />
                 </Tabs.TabPane>
             </Tabs>

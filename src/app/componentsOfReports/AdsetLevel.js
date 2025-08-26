@@ -280,6 +280,15 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
     return params.data?.accountNumber ?? null;
   })();
 
+  // stable key per adset-row (account + campaign + adset)
+const statusKey = `${rowAccount}|${campaignid}|${adsetid}`;
+
+// grab the Maps from grid context
+const statusMap  = params.context?.adsetStatusOverridesRef?.current;   // "ACTIVE" | "PAUSED"
+const pinMap     = params.context?.adsetPinOverridesRef?.current;      // true | false
+const commentMap = params.context?.adsetCommentOverridesRef?.current;  // { text, editedBy, editedAt }
+
+
   // find the exact comment record for this (campaign+adset+account)
   const rec = campaignComments.find(c =>
     c.campaignname === adsetName &&                       // you store adsetName in campaignname at adset level
@@ -288,12 +297,34 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
     (c.adsetid    ? String(c.adsetid)    === String(adsetid)    : true)
   );
 
-  const relatedComment = rec?.comment ?? null;
-  const editedRaw      = rec?.editedTime ?? rec?.editedPinTime ?? '';
-  const editedBy       = rec?.usercommit ?? rec?.userPin ?? '';
-  const editedPretty   = editedRaw
-    ? moment(editedRaw, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
-    : '';
+
+// comment override first, then backend record
+const commentOverride = commentMap?.get(statusKey);
+const relatedComment  = commentOverride?.text ?? rec?.comment ?? null;
+const editedBy        = commentOverride?.editedBy ?? rec?.usercommit ?? '';
+const editedPretty    = commentOverride?.editedAt
+  ? commentOverride.editedAt
+  : (rec?.editedTime
+      ? moment(rec.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+      : '');
+
+// pin override first, then backend record
+const pinnedOverride = pinMap?.get(statusKey);
+const [pinned, setPinned] = useState(
+  typeof pinnedOverride === 'boolean' ? pinnedOverride : !!rec?.pinned
+);
+// keep in sync if Map changes externally (optional)
+useEffect(() => {
+  if (typeof pinnedOverride === 'boolean') setPinned(pinnedOverride);
+}, [pinnedOverride]);
+
+
+//   const relatedComment = rec?.comment ?? null;
+//   const editedRaw      = rec?.editedTime ?? rec?.editedPinTime ?? '';
+//   const editedBy       = rec?.usercommit ?? rec?.userPin ?? '';
+//   const editedPretty   = editedRaw
+//     ? moment(editedRaw, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+//     : '';
 
 
 
@@ -337,32 +368,55 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                 // const [switchOn, setSwitchOn] = useState(false); // control toggle state
                 const [nextChecked, setNextChecked] = useState(false); // what user clicked
                 const [comment, setComment] = useState(relatedComment || '');
-                const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
+                // const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
                 const [pendingAccount, setPendingAccount] = useState(null);
                
 
-                const [switchOn, setSwitchOn] = useState(true); // default to ACTIVE
+                // const [switchOn, setSwitchOn] = useState(true); // default to ACTIVE
 
     // keep pin in sync
-  useEffect(() => { setPinned(!!rec?.pinned); }, [rec?.pinned]);
+//   useEffect(() => { setPinned(!!rec?.pinned); }, [rec?.pinned]);
 
     // init switch from comments.AdsetLevel per account
-  useEffect(() => {
-    const commentForCampaign = campaignComments.find(obj =>
-      String(obj.campaignid) === String(campaignid) && String(obj.Account) === String(rowAccount)
-    );
+//   useEffect(() => {
+//     const commentForCampaign = campaignComments.find(obj =>
+//       String(obj.campaignid) === String(campaignid) && String(obj.Account) === String(rowAccount)
+//     );
 
+//     let matchedAdset = null;
+//     if (Array.isArray(commentForCampaign?.AdsetLevel)) {
+//       matchedAdset = commentForCampaign.AdsetLevel.find(a => String(a.adset_id) === String(adsetid));
+//     } else if (commentForCampaign?.AdsetLevel?.adset_id &&
+//                String(commentForCampaign?.AdsetLevel?.adset_id) === String(adsetid)) {
+//       matchedAdset = commentForCampaign.AdsetLevel;
+//     }
+
+//     const isActive = matchedAdset?.status === "ACTIVE";
+//     setSwitchOn(matchedAdset ? isActive : true); // fallback ACTIVE
+//   }, [campaignComments, campaignid, adsetid, rowAccount]);
+
+
+// INIT: prefer override map; then row cache; finally derive from comments
+const [switchOn, setSwitchOn] = useState(() => {
+    const over = statusMap?.get(statusKey); // "ACTIVE" | "PAUSED"
+    if (over === "ACTIVE" || over === "PAUSED") return over === "ACTIVE";
+  
+    if (params.data?.__adsetStatus) return params.data.__adsetStatus === "ACTIVE";
+  
+    // fallback to comments structure
+    const commentForCampaign = campaignComments.find(obj =>
+      String(obj.campaignid) === String(campaignid) &&
+      String(obj.Account) === String(rowAccount)
+    );
     let matchedAdset = null;
     if (Array.isArray(commentForCampaign?.AdsetLevel)) {
       matchedAdset = commentForCampaign.AdsetLevel.find(a => String(a.adset_id) === String(adsetid));
     } else if (commentForCampaign?.AdsetLevel?.adset_id &&
-               String(commentForCampaign?.AdsetLevel?.adset_id) === String(adsetid)) {
+               String(commentForCampaign.AdsetLevel.adset_id) === String(adsetid)) {
       matchedAdset = commentForCampaign.AdsetLevel;
     }
-
-    const isActive = matchedAdset?.status === "ACTIVE";
-    setSwitchOn(matchedAdset ? isActive : true); // fallback ACTIVE
-  }, [campaignComments, campaignid, adsetid, rowAccount]);
+    return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
+  });
 
    // Status toggle (per row’s account)
    const handlePauseClick = (checked) => {
@@ -372,33 +426,74 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
     setIsAdsetModalVisibles(true);
   };
 
-  const handlePauseOk = async () => {
-    setSwitchOn(nextChecked); // optimistic
+//   const handlePauseOk = async () => {
+//     setSwitchOn(nextChecked); // optimistic
+//     try {
+//       const token = localStorage.getItem("token");
+//       const payload = {
+//         status: nextChecked ? "ACTIVE" : "PAUSED",
+//         name: adsetName,
+//         accountNumber: String(pendingAccount),     // ← per row account
+//         campaign_id: campaignid,
+//         adset_id: adsetid,
+//         email: userdetails?.email,
+//       };
+//       const resp = await apiClient.post(`/BulkAdsetStatusChange`, payload, {
+//         headers: { Authorization: token }
+//       });
+
+//       if (resp.status === 200 || resp.status === 201) {
+//         // refresh only that account’s comments/status
+//         functionCallForCommnets(pendingAccount);
+//         message.success(`Adset ${nextChecked ? "activated" : "paused"}`);
+//       } else {
+//         console.warn("Unexpected status:", resp.status);
+//       }
+//     } catch (e) {
+//       console.error(e?.response?.data || e.message);
+//       message.error("Failed to update adset status");
+//       setSwitchOn(prev => !prev); // revert
+//     } finally {
+//       setIsAdsetModalVisibles(false);
+//       setSelectedAdset(null);
+//       setPendingAccount(null);
+//     }
+//   };
+
+const handlePauseOk = async () => {
+    const desired = nextChecked; // true => ACTIVE
+    setSwitchOn(desired);        // optimistic (cell only)
     try {
       const token = localStorage.getItem("token");
       const payload = {
-        status: nextChecked ? "ACTIVE" : "PAUSED",
+        status: desired ? "ACTIVE" : "PAUSED",
         name: adsetName,
-        accountNumber: String(pendingAccount),     // ← per row account
+        accountNumber: String(pendingAccount),
         campaign_id: campaignid,
         adset_id: adsetid,
         email: userdetails?.email,
       };
-      const resp = await apiClient.post(`/adsetStatusChange`, payload, {
-        headers: { Authorization: token }
-      });
-
-      if (resp.status === 200 || resp.status === 201) {
-        // refresh only that account’s comments/status
-        functionCallForCommnets(pendingAccount);
-        message.success(`Adset ${nextChecked ? "activated" : "paused"}`);
+      await apiClient.post(`/BulkAdsetStatusChange`, payload,
+        { headers: { Authorization: token } }
+      );
+  
+      const newStatus = desired ? "ACTIVE" : "PAUSED";
+  
+      // write to override map (stable across tabs)
+      statusMap?.set(statusKey, newStatus);
+  
+      // also cache on the row so sort/comparator can see it without reading maps
+      const updatedRow = { ...params.data, __adsetStatus: newStatus };
+      if (params.api?.applyTransaction) {
+        params.api.applyTransaction({ update: [updatedRow] });
       } else {
-        console.warn("Unexpected status:", resp.status);
+        params.node.updateData(updatedRow);
       }
+  
+      message.success(`Adset ${newStatus.toLowerCase()}`);
     } catch (e) {
-      console.error(e?.response?.data || e.message);
+      setSwitchOn(prev => !prev); // revert this cell only
       message.error("Failed to update adset status");
-      setSwitchOn(prev => !prev); // revert
     } finally {
       setIsAdsetModalVisibles(false);
       setSelectedAdset(null);
@@ -413,68 +508,110 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
   };
 
   // ► BULK comment upsert (multi accounts)
-  const handleOks = async () => {
-    try {
-      const body = {
-        accountNumbers: accountsParam,
-        campaignname: adsetName,   // you store adsetName under campaignname on comments
-        campaignid,
-        adsetid,
-        comment,
-        usercommit: userdetails?.email,
-      };
-      await apiClient.post('/Comments/bulk-upsert', body);
-      refreshComments(accountsParam);
-      message.success("Comment saved for selected accounts");
-      setIsModalVisibles(false);
-    } catch (e) {
-      console.error(e?.response?.data || e.message);
-      message.error('Failed to save comment');
-    }
-  };
+//   const handleOks = async () => {
+//     try {
+//       const body = {
+//         accountNumbers: accountsParam,
+//         campaignname: adsetName,   // you store adsetName under campaignname on comments
+//         campaignid,
+//         adsetid,
+//         comment,
+//         usercommit: userdetails?.email,
+//       };
+//       await apiClient.post('/Comments/bulk-upsert', body);
+//       refreshComments(accountsParam);
+//       message.success("Comment saved for selected accounts");
+//       setIsModalVisibles(false);
+//     } catch (e) {
+//       console.error(e?.response?.data || e.message);
+//       message.error('Failed to save comment');
+//     }
+//   };
 
   // ► BULK comment delete
-  const handleDelete = async () => {
-    try {
-      const body = { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid };
-      const resp = await apiClient.post('/Comments/bulk-delete', body);
-      if (resp.status === 200) {
-        refreshComments(accountsParam);
-        message.success('Comment deleted for selected accounts');
-        setIsModalVisibles(false);
-      }
-    } catch (e) {
-      console.error(e?.response?.data || e.message);
-      message.error('Failed to delete comment');
-    }
-  };
+//   const handleDelete = async () => {
+//     try {
+//       const body = { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid };
+//       const resp = await apiClient.post('/Comments/bulk-delete', body);
+//       if (resp.status === 200) {
+//         refreshComments(accountsParam);
+//         message.success('Comment deleted for selected accounts');
+//         setIsModalVisibles(false);
+//       }
+//     } catch (e) {
+//       console.error(e?.response?.data || e.message);
+//       message.error('Failed to delete comment');
+//     }
+//   };
 
   // ► BULK pin/unpin (multi accounts)
-  const handlePinClick = async (currentPinStatus) => {
-    const updated = !currentPinStatus;
+//   const handlePinClick = async (currentPinStatus) => {
+//     const updated = !currentPinStatus;
+//     try {
+//       const body = {
+//         accountNumbers: accountsParam,
+//         campaignname: adsetName,
+//         campaignid,
+//         adsetid,
+//         userPin: userdetails?.email,
+//         comment: comment || ''
+//       };
+//       const resp = updated
+//         ? await apiClient.post('/PinBulk', body)
+//         : await apiClient.post('/UnpinBulk', { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid });
+
+//       if (resp.status === 200) {
+//         refreshComments(accountsParam);
+//         setPinned(updated);
+//         message.success(updated ? "Pinned for selected accounts" : "Unpinned for selected accounts");
+//       }
+//     } catch (e) {
+//       console.error(e?.response?.data || e.message);
+//       message.error("Error while updating pin status");
+//     }
+//   };
+
+const handlePinClick = async (currentPinStatus) => {
+    const next = !currentPinStatus;
+    setPinned(next); // optimistic
     try {
       const body = {
-        accountNumbers: accountsParam,
+        accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
         campaignname: adsetName,
         campaignid,
         adsetid,
         userPin: userdetails?.email,
         comment: comment || ''
       };
-      const resp = updated
+      const resp = next
         ? await apiClient.post('/PinBulk', body)
-        : await apiClient.post('/UnpinBulk', { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid });
-
-      if (resp.status === 200) {
-        refreshComments(accountsParam);
-        setPinned(updated);
-        message.success(updated ? "Pinned for selected accounts" : "Unpinned for selected accounts");
+        : await apiClient.post('/UnpinBulk', {
+            accountNumbers: body.accountNumbers,
+            campaignname: adsetName,
+            campaignid,
+            adsetid
+          });
+  
+      if (resp.status === 200 || resp.status === 201) {
+        // persist in Map + row cache
+        pinMap?.set(statusKey, next);
+        const updatedRow = { ...params.data, __adsetPinned: next };
+        if (params.api?.applyTransaction) {
+          params.api.applyTransaction({ update: [updatedRow] });
+        } else {
+          params.node.updateData(updatedRow);
+        }
+        message.success(next ? "Pinned" : "Unpinned");
+      } else {
+        setPinned(!next); // revert
+        message.error("Failed to update pin");
       }
     } catch (e) {
-      console.error(e?.response?.data || e.message);
+      setPinned(!next); // revert
       message.error("Error while updating pin status");
     }
   };
+  
 
   const PinIcon = ({ pinned }) => (
     <Tooltip
@@ -497,6 +634,52 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
       </button>
     </Tooltip>
   );
+
+  const handleOks = async () => {
+    try {
+      await apiClient.post('/Comments/bulk-upsert', {
+        accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
+        campaignname: adsetName,
+        campaignid,
+        adsetid,
+        comment,
+        usercommit: userdetails?.email,
+      });
+      // persist in Map (stable across tabs)
+      commentMap?.set(statusKey, {
+        text: comment,
+        editedBy: userdetails?.email,
+        editedAt: moment().format("DD-MM-YYYY hh:mm:ss A"),
+      });
+      message.success("Comment saved");
+      setIsModalVisibles(false);
+    } catch (e) {
+      message.error('Failed to save comment');
+    }
+  };
+  
+  const handleDelete = async () => {
+    try {
+      const resp = await apiClient.post('/Comments/bulk-delete', {
+        accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
+        campaignname: adsetName,
+        campaignid,
+        adsetid
+      });
+      if (resp.status === 200) {
+        // clear local override + UI
+        commentMap?.delete(statusKey);
+        setComment('');
+        message.success('Comment deleted');
+        setIsModalVisibles(false);
+      } else {
+        message.error('Failed to delete comment');
+      }
+    } catch (e) {
+      message.error('Failed to delete comment');
+    }
+  };
+  
 
 
 
@@ -781,7 +964,11 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                         <Switch 
                             checked={switchOn}
                             // onClick={(checked) => handlePauseClick(adsetid, checked)} 
-                            onChange={handlePauseClick}
+                            // onChange={handlePauseClick}
+                            onChange={(checked, e) => {
+                                e?.stopPropagation?.();
+                                handlePauseClick(checked);
+                            }}
                             size="small" 
                             style={{
                               backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',

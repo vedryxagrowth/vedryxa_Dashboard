@@ -353,21 +353,43 @@ const rowAccount = (() => {
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
                 const [selectedCampaign, setSelectedCampaign] = useState(null); // store adid when switch clicked
-                const [switchOn, setSwitchOn] = useState(false); // control toggle state
+                // const [switchOn, setSwitchOn] = useState(false); // control toggle state
                 const [nextChecked, setNextChecked] = useState(false); // what user clicked
                 const [comment, setComment] = useState(relatedComment || '');
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
                 const [pendingAccount, setPendingAccount] = useState(null);   // ✅ which account to update/refresh
 
-                
-// set Switch from the right record (campaign_id + accountNumber)
-useEffect(() => {
+                const setCamapignlevelstatusFromGrid = params.context?.setCamapignlevelstatus;
+                // get override Map from grid context
+const overrides = params.context?.campaignStatusOverridesRef?.current; // Map
+
+// build a stable key per row (account + campaign)
+const statusKey = `${rowAccount}-${campaignid}`;
+
+        
+// INIT: 1) prefer override Map; 2) fallback to row.data.__status; 3) one-time fallback to Camapignlevelstatus
+const [switchOn, setSwitchOn] = useState(() => {
+    const fromMap = overrides?.get(statusKey); // "ACTIVE" / "PAUSED" / undefined
+    if (fromMap === "ACTIVE" || fromMap === "PAUSED") return fromMap === "ACTIVE";
+  
+    if (params.data?.__status) return params.data.__status === "ACTIVE";
+  
     const st = Camapignlevelstatus.find(
       s => String(s.campaign_id) === String(campaignid) &&
            String(s.accountNumber) === String(rowAccount)
     );
-    setSwitchOn(st ? st.status === "ACTIVE" : false);
-  }, [Camapignlevelstatus, campaignid, rowAccount]);
+    return st ? st.status === "ACTIVE" : false;
+  });
+
+                
+// set Switch from the right record (campaign_id + accountNumber)
+// useEffect(() => {
+//     const st = Camapignlevelstatus.find(
+//       s => String(s.campaign_id) === String(campaignid) &&
+//            String(s.accountNumber) === String(rowAccount)
+//     );
+//     setSwitchOn(st ? st.status === "ACTIVE" : false);
+//   }, [Camapignlevelstatus, campaignid, rowAccount]);
   
   // open confirm modal; remember account + desired state
   const handlePauseClick = (checked) => {
@@ -377,46 +399,90 @@ useEffect(() => {
     setIsCampaignModalVisibles(true);
   };
   
-  const handlePauseOk = async () => {
-    setSwitchOn(nextChecked); // optimistic UI
+//   const handlePauseOk = async () => {
+//     setSwitchOn(nextChecked); // optimistic UI
+  
+//     try {
+//       const token = localStorage.getItem("token");
+//       const payload = {
+//         status: nextChecked ? "ACTIVE" : "PAUSED",
+//         id: params.data?.identifier,
+//         campaign_id: campaignid,
+//         accountNumber: String(pendingAccount),  // ✅ the row’s account
+//         adset_id: adsetid,
+//         name: campaignName,
+//         email: userdetails?.email,
+//       };
+  
+//       const response = await apiClient.post(
+//         `/BulkCampaignStatusChange`,
+//         payload,
+//         { headers: { Authorization: token } }
+//       );
+  
+//       if (response.status === 200 || response.status === 201) {
+//         // refresh just this account (or your multi-account helper if it supports arrays)
+//         // If your function expects an array, pass [pendingAccount]
+//         functionCallForCampaigns(pendingAccount);
+//         message.success(`Status ${payload.status} on Facebook`);
+//       } else {
+//         console.warn("Unexpected status:", response.status);
+//       }
+//     } catch (error) {
+//       console.error("API call failed:", error?.response?.data || error.message);
+//       message.error("Failed to update campaign status");
+//       // revert UI if needed:
+//       setSwitchOn((prev) => !prev);
+//     } finally {
+//       setIsCampaignModalVisibles(false);
+//       setSelectedCampaign(null);
+//       setPendingAccount(null);
+//     }
+//   };
+
+
+const handlePauseOk = async () => {
+    const desired = nextChecked;                  // true => ACTIVE, false => PAUSED
+    setSwitchOn(desired);                         // optimistic UI on THIS cell only
   
     try {
       const token = localStorage.getItem("token");
       const payload = {
-        status: nextChecked ? "ACTIVE" : "PAUSED",
+        status: desired ? "ACTIVE" : "PAUSED",
         id: params.data?.identifier,
         campaign_id: campaignid,
-        accountNumber: String(pendingAccount),  // ✅ the row’s account
+        accountNumber: String(pendingAccount),
         adset_id: adsetid,
         name: campaignName,
         email: userdetails?.email,
       };
   
-      const response = await apiClient.post(
-        `/campaignStatusChange`,
+      await apiClient.post(
+        `/BulkCampaignStatusChange`,
         payload,
         { headers: { Authorization: token } }
       );
   
-      if (response.status === 200 || response.status === 201) {
-        // refresh just this account (or your multi-account helper if it supports arrays)
-        // If your function expects an array, pass [pendingAccount]
-        functionCallForCampaigns(pendingAccount);
-        message.success(`Status ${payload.status} on Facebook`);
-      } else {
-        console.warn("Unexpected status:", response.status);
+      const newStatus = desired ? "ACTIVE" : "PAUSED";
+  
+      // ✅ Persist status only in the override Map (no rowData update, no parent setState)
+      if (overrides) {
+        overrides.set(statusKey, newStatus);
       }
-    } catch (error) {
-      console.error("API call failed:", error?.response?.data || error.message);
+  
+      message.success(`Campaign ${newStatus.toLowerCase()}`);
+    } catch (e) {
+      // revert only this switch
+      setSwitchOn(prev => !prev);
       message.error("Failed to update campaign status");
-      // revert UI if needed:
-      setSwitchOn((prev) => !prev);
     } finally {
       setIsCampaignModalVisibles(false);
       setSelectedCampaign(null);
       setPendingAccount(null);
     }
   };
+  
+  
 
                 // useEffect(() => {
                 //     const campaignStatus = Camapignlevelstatus.find(
@@ -746,7 +812,11 @@ useEffect(() => {
                         <Switch 
                             checked={switchOn}
                             // onClick={(checked) => handlePauseClick(campaignid, checked)} 
-                            onChange={handlePauseClick} 
+                            // onChange={handlePauseClick} 
+                            onChange={(checked, e) => {
+                                e?.stopPropagation?.();
+                                handlePauseClick(checked);
+                              }}
                             size="small" 
                             style={{
                               backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
