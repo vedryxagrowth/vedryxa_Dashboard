@@ -1501,7 +1501,7 @@ const [switchOn, setSwitchOn] = useState(() => {
         try {
             setLoading1(true);
             const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
-            const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
+            const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newRevenuePratner === "FB_InuvoPrism" ? "Facebook_InuvoPrismDaily" : newtworkCollections[newRevenuePratner] ;
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             // const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
             // const mainData = fetchData.data;

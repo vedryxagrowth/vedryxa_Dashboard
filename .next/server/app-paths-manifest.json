@@ -1,4 +1,10 @@
 {
+<<<<<<< HEAD
   "/_not-found/page": "app/_not-found/page.js",
   "/Reports/page": "app/Reports/page.js"
+=======
+  "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": "app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js",
+  "/Reports/page": "app/Reports/page.js",
+  "/Dashboard/page": "app/Dashboard/page.js"
+>>>>>>> DevUi
 }
