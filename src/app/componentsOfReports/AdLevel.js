@@ -1385,7 +1385,7 @@ const pinnedUI  = (overridePinned  !== undefined) ? overridePinned : getPinStatu
       
                 <LinkOutlined
                   onClick={() => {
-                    const url = `/LiveHistory/LiveAdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                    const url = `/LiveHistory/LiveAdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${rowAccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                     window.open(url, '_blank', 'noopener,noreferrer');
                   }}
                   style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}

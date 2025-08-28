@@ -248,6 +248,7 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                 const adsetName = params.node.key;
 
                 let campaignid, adsetid;
+                let accountNumberToPassHistoryPage;
 
                 if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0]?.data;  // Safe access with optional chaining
@@ -255,12 +256,16 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                     if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
                         campaignid = firstChild.campaignid ?? null;  // Use null-safe access
                         adsetid = firstChild.adsetid ?? null;
+                        accountNumberToPassHistoryPage = firstChild.accountNumber ?? null;
+
                     } else {
                         console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
                     }
                 } else if (params.data) {
                     campaignid = params.data.campaignid ?? null;
                     adsetid = params.data.adsetid ?? null;
+                    accountNumberToPassHistoryPage = params.data.accountNumber ?? null;
+
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -1054,7 +1059,7 @@ const handlePinClick = async (currentPinStatus) => {
                         </Tooltip>
                         <LinkOutlined 
                             onClick={() => {
-                                const url = `/LiveHistory/LiveAdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/LiveHistory/LiveAdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}

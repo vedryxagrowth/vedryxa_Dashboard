@@ -243,6 +243,7 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                 // console.log(params.value, "value");
 
                 const accountsParam = Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)];
+                let accountNumberToPassHistoryPage;
 
                 const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
@@ -255,12 +256,14 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                     if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
                         campaignid = firstChild.campaignid ?? null;  // Use null-safe access
                         adsetid = firstChild.adsetid ?? null;
+                        accountNumberToPassHistoryPage = firstChild.accountNumber ?? null;
                     } else {
                         console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
                     }
                 } else if (params.data) {
                     campaignid = params.data.campaignid ?? null;
                     adsetid = params.data.adsetid ?? null;
+                    accountNumberToPassHistoryPage = params.data.accountNumber ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -271,49 +274,49 @@ const CampaignLevelReports = ({campaignStatusFilter, functionCallForCommnets, co
                 }
 
              
-// row’s account (now present after step 1)
-const rowAccount = (() => {
-    if (params.node.group && params.node.childrenAfterGroup?.length > 0) {
-      return params.node.childrenAfterGroup[0]?.data?.accountNumber ?? null;
-    }
-    return params.data?.accountNumber ?? null;
-  })();
-  
-  const cid = campaignid;
-  const aid = adsetid;
-  
-  // find the exact record for this campaign + account (+ ids if present)
-  const rec = campaignComments.find(c =>
-    c.campaignname === campaignName &&
-    String(c.Account) === String(rowAccount) &&
-    (c.campaignid ? String(c.campaignid) === String(cid) : true) &&
-    (c.adsetid    ? String(c.adsetid)    === String(aid) : true)
-  );
-  
-  // derive UI pieces
-  const relatedComment = rec?.comment ?? null;
-  const editedRaw      = rec?.editedTime ?? rec?.editedPinTime ?? '';
-  const editedBy       = rec?.usercommit ?? rec?.userPin ?? '';
-  const editedPretty   = editedRaw
-    ? moment(editedRaw, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
-    : '';
+        // row’s account (now present after step 1)
+        const rowAccount = (() => {
+            if (params.node.group && params.node.childrenAfterGroup?.length > 0) {
+            return params.node.childrenAfterGroup[0]?.data?.accountNumber ?? null;
+            }
+            return params.data?.accountNumber ?? null;
+        })();
+        
+        const cid = campaignid;
+        const aid = adsetid;
+        
+        // find the exact record for this campaign + account (+ ids if present)
+        const rec = campaignComments.find(c =>
+            c.campaignname === campaignName &&
+            String(c.Account) === String(rowAccount) &&
+            (c.campaignid ? String(c.campaignid) === String(cid) : true) &&
+            (c.adsetid    ? String(c.adsetid)    === String(aid) : true)
+        );
+        
+        // derive UI pieces
+        const relatedComment = rec?.comment ?? null;
+        const editedRaw      = rec?.editedTime ?? rec?.editedPinTime ?? '';
+        const editedBy       = rec?.usercommit ?? rec?.userPin ?? '';
+        const editedPretty   = editedRaw
+            ? moment(editedRaw, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+            : '';
 
-    const getEditedUserAndTime = (cn, acc) => {
-        const r = campaignComments.find(c => c.campaignname === cn && String(c.Account) === String(acc));
-        if (!r) return null;
-        if (r.editedTime || r.usercommit) return { editedTime: r.editedTime, usercommit: r.usercommit };
-        if (r.editedPinTime || r.userPin)  return { editedTime: r.editedPinTime, usercommit: r.userPin };
-        return null;
-      };
-      
-      const getPinEditedUserAndTime = (cn, acc) => {
-        const r = campaignComments.find(c => c.campaignname === cn && String(c.Account) === String(acc));
-        return r && r.pinned ? { editedPinTime: r.editedPinTime, userPin: r.userPin } : null;
-      };
-      
-      // use:
-      const editUserANdTime    = getEditedUserAndTime(campaignName, rowAccount);
-      const editPinUserANdTime = getPinEditedUserAndTime(campaignName, rowAccount);
+            const getEditedUserAndTime = (cn, acc) => {
+                const r = campaignComments.find(c => c.campaignname === cn && String(c.Account) === String(acc));
+                if (!r) return null;
+                if (r.editedTime || r.usercommit) return { editedTime: r.editedTime, usercommit: r.usercommit };
+                if (r.editedPinTime || r.userPin)  return { editedTime: r.editedPinTime, usercommit: r.userPin };
+                return null;
+            };
+            
+            const getPinEditedUserAndTime = (cn, acc) => {
+                const r = campaignComments.find(c => c.campaignname === cn && String(c.Account) === String(acc));
+                return r && r.pinned ? { editedPinTime: r.editedPinTime, userPin: r.userPin } : null;
+            };
+            
+            // use:
+            const editUserANdTime    = getEditedUserAndTime(campaignName, rowAccount);
+            const editPinUserANdTime = getPinEditedUserAndTime(campaignName, rowAccount);
       
   
   
@@ -362,128 +365,128 @@ const rowAccount = (() => {
 
                 const setCamapignlevelstatusFromGrid = params.context?.setCamapignlevelstatus;
                 // get override Map from grid context
-const overrides = params.context?.campaignStatusOverridesRef?.current; // Map
+                const overrides = params.context?.campaignStatusOverridesRef?.current; // Map
 
-// build a stable key per row (account + campaign)
-const statusKey = `${rowAccount}-${campaignid}`;
+                // build a stable key per row (account + campaign)
+                const statusKey = `${rowAccount}-${campaignid}`;
 
-        
-// INIT: 1) prefer override Map; 2) fallback to row.data.__status; 3) one-time fallback to Camapignlevelstatus
-const [switchOn, setSwitchOn] = useState(() => {
-    const fromMap = overrides?.get(statusKey); // "ACTIVE" / "PAUSED" / undefined
-    if (fromMap === "ACTIVE" || fromMap === "PAUSED") return fromMap === "ACTIVE";
-  
-    if (params.data?.__status) return params.data.__status === "ACTIVE";
-  
-    const st = Camapignlevelstatus.find(
-      s => String(s.campaign_id) === String(campaignid) &&
-           String(s.accountNumber) === String(rowAccount)
-    );
-    return st ? st.status === "ACTIVE" : false;
-  });
-
+                        
+                // INIT: 1) prefer override Map; 2) fallback to row.data.__status; 3) one-time fallback to Camapignlevelstatus
+                const [switchOn, setSwitchOn] = useState(() => {
+                    const fromMap = overrides?.get(statusKey); // "ACTIVE" / "PAUSED" / undefined
+                    if (fromMap === "ACTIVE" || fromMap === "PAUSED") return fromMap === "ACTIVE";
                 
-// set Switch from the right record (campaign_id + accountNumber)
-// useEffect(() => {
-//     const st = Camapignlevelstatus.find(
-//       s => String(s.campaign_id) === String(campaignid) &&
-//            String(s.accountNumber) === String(rowAccount)
-//     );
-//     setSwitchOn(st ? st.status === "ACTIVE" : false);
-//   }, [Camapignlevelstatus, campaignid, rowAccount]);
-  
-  // open confirm modal; remember account + desired state
-  const handlePauseClick = (checked) => {
-    setSelectedCampaign(campaignid);
-    setNextChecked(checked);
-    setPendingAccount(rowAccount);        // ✅ remember which account this row belongs to
-    setIsCampaignModalVisibles(true);
-  };
-  
-//   const handlePauseOk = async () => {
-//     setSwitchOn(nextChecked); // optimistic UI
-  
-//     try {
-//       const token = localStorage.getItem("token");
-//       const payload = {
-//         status: nextChecked ? "ACTIVE" : "PAUSED",
-//         id: params.data?.identifier,
-//         campaign_id: campaignid,
-//         accountNumber: String(pendingAccount),  // ✅ the row’s account
-//         adset_id: adsetid,
-//         name: campaignName,
-//         email: userdetails?.email,
-//       };
-  
-//       const response = await apiClient.post(
-//         `/BulkCampaignStatusChange`,
-//         payload,
-//         { headers: { Authorization: token } }
-//       );
-  
-//       if (response.status === 200 || response.status === 201) {
-//         // refresh just this account (or your multi-account helper if it supports arrays)
-//         // If your function expects an array, pass [pendingAccount]
-//         functionCallForCampaigns(pendingAccount);
-//         message.success(`Status ${payload.status} on Facebook`);
-//       } else {
-//         console.warn("Unexpected status:", response.status);
-//       }
-//     } catch (error) {
-//       console.error("API call failed:", error?.response?.data || error.message);
-//       message.error("Failed to update campaign status");
-//       // revert UI if needed:
-//       setSwitchOn((prev) => !prev);
-//     } finally {
-//       setIsCampaignModalVisibles(false);
-//       setSelectedCampaign(null);
-//       setPendingAccount(null);
-//     }
-//   };
+                    if (params.data?.__status) return params.data.__status === "ACTIVE";
+                
+                    const st = Camapignlevelstatus.find(
+                    s => String(s.campaign_id) === String(campaignid) &&
+                        String(s.accountNumber) === String(rowAccount)
+                    );
+                    return st ? st.status === "ACTIVE" : false;
+                });
+
+                                
+                // set Switch from the right record (campaign_id + accountNumber)
+                // useEffect(() => {
+                //     const st = Camapignlevelstatus.find(
+                //       s => String(s.campaign_id) === String(campaignid) &&
+                //            String(s.accountNumber) === String(rowAccount)
+                //     );
+                //     setSwitchOn(st ? st.status === "ACTIVE" : false);
+                //   }, [Camapignlevelstatus, campaignid, rowAccount]);
+                
+                // open confirm modal; remember account + desired state
+                const handlePauseClick = (checked) => {
+                    setSelectedCampaign(campaignid);
+                    setNextChecked(checked);
+                    setPendingAccount(rowAccount);        // ✅ remember which account this row belongs to
+                    setIsCampaignModalVisibles(true);
+                };
+                
+                //   const handlePauseOk = async () => {
+                //     setSwitchOn(nextChecked); // optimistic UI
+                
+                //     try {
+                //       const token = localStorage.getItem("token");
+                //       const payload = {
+                //         status: nextChecked ? "ACTIVE" : "PAUSED",
+                //         id: params.data?.identifier,
+                //         campaign_id: campaignid,
+                //         accountNumber: String(pendingAccount),  // ✅ the row’s account
+                //         adset_id: adsetid,
+                //         name: campaignName,
+                //         email: userdetails?.email,
+                //       };
+                
+                //       const response = await apiClient.post(
+                //         `/BulkCampaignStatusChange`,
+                //         payload,
+                //         { headers: { Authorization: token } }
+                //       );
+                
+                //       if (response.status === 200 || response.status === 201) {
+                //         // refresh just this account (or your multi-account helper if it supports arrays)
+                //         // If your function expects an array, pass [pendingAccount]
+                //         functionCallForCampaigns(pendingAccount);
+                //         message.success(`Status ${payload.status} on Facebook`);
+                //       } else {
+                //         console.warn("Unexpected status:", response.status);
+                //       }
+                //     } catch (error) {
+                //       console.error("API call failed:", error?.response?.data || error.message);
+                //       message.error("Failed to update campaign status");
+                //       // revert UI if needed:
+                //       setSwitchOn((prev) => !prev);
+                //     } finally {
+                //       setIsCampaignModalVisibles(false);
+                //       setSelectedCampaign(null);
+                //       setPendingAccount(null);
+                //     }
+                //   };
 
 
-const handlePauseOk = async () => {
-    const desired = nextChecked;                  // true => ACTIVE, false => PAUSED
-    setSwitchOn(desired);                         // optimistic UI on THIS cell only
-  
-    try {
-      const token = localStorage.getItem("token");
-      const payload = {
-        status: desired ? "ACTIVE" : "PAUSED",
-        id: params.data?.identifier,
-        campaign_id: campaignid,
-        accountNumber: String(pendingAccount),
-        adset_id: adsetid,
-        name: campaignName,
-        email: userdetails?.email,
-      };
-  
-      await apiClient.post(
-        `/BulkCampaignStatusChange`,
-        payload,
-        { headers: { Authorization: token } }
-      );
-  
-      const newStatus = desired ? "ACTIVE" : "PAUSED";
-  
-      // ✅ Persist status only in the override Map (no rowData update, no parent setState)
-      if (overrides) {
-        overrides.set(statusKey, newStatus);
-      }
-  
-      message.success(`Campaign ${newStatus.toLowerCase()}`);
-    } catch (e) {
-      // revert only this switch
-      setSwitchOn(prev => !prev);
-      message.error("Failed to update campaign status");
-    } finally {
-      setIsCampaignModalVisibles(false);
-      setSelectedCampaign(null);
-      setPendingAccount(null);
-    }
-  };
-  
-  
+                const handlePauseOk = async () => {
+                    const desired = nextChecked;                  // true => ACTIVE, false => PAUSED
+                    setSwitchOn(desired);                         // optimistic UI on THIS cell only
+                
+                    try {
+                    const token = localStorage.getItem("token");
+                    const payload = {
+                        status: desired ? "ACTIVE" : "PAUSED",
+                        id: params.data?.identifier,
+                        campaign_id: campaignid,
+                        accountNumber: String(pendingAccount),
+                        adset_id: adsetid,
+                        name: campaignName,
+                        email: userdetails?.email,
+                    };
+                
+                    await apiClient.post(
+                        `/BulkCampaignStatusChange`,
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+                
+                    const newStatus = desired ? "ACTIVE" : "PAUSED";
+                
+                    // ✅ Persist status only in the override Map (no rowData update, no parent setState)
+                    if (overrides) {
+                        overrides.set(statusKey, newStatus);
+                    }
+                
+                    message.success(`Campaign ${newStatus.toLowerCase()}`);
+                    } catch (e) {
+                    // revert only this switch
+                    setSwitchOn(prev => !prev);
+                    message.error("Failed to update campaign status");
+                    } finally {
+                    setIsCampaignModalVisibles(false);
+                    setSelectedCampaign(null);
+                    setPendingAccount(null);
+                    }
+                };
+                
+                
 
                 // useEffect(() => {
                 //     const campaignStatus = Camapignlevelstatus.find(
@@ -959,7 +962,7 @@ const handlePauseOk = async () => {
                         </Tooltip>
                         <LinkOutlined
                             onClick={() => {
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}

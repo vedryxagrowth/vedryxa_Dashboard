@@ -183,7 +183,7 @@ const MyTablePage = () => {
     const [accountChanged, setAccountChanged] = useState(false);
     const [dateChanged, setDateChanged] = useState(false);
     const [timezoneChanged, setTimezoneChanged] = useState(false);
-
+    const [searchText, setSearchText] = useState("");
 
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
@@ -356,17 +356,40 @@ const MyTablePage = () => {
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
 
-    const initialOne =
-        accountNumberFromDashboard
-            ? accountNumberFromDashboard.replace(/\+/g, " ")
-            : (storedData
-                ? storedData.account
-                : (typeof networksData[0] === "string"
-                    ? networksData[0]
-                    : networksData[0].accountNumber));
+    const deriveInitial = (dash, stored, nets) => {
+    const fromDash   = dash?.replace(/\+/g, " ").trim();
+    if (fromDash) return fromDash;
 
-    const [selectedValue, setSelectedValue] = useState([String(initialOne)]); // now an array
-    console.log("multiple accounts:", selectedValue);
+    const fromStore  = stored?.account?.toString().trim();
+    if (fromStore) return fromStore;
+
+    const first = Array.isArray(nets) && nets.length
+        ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
+        : "";
+    return first ? String(first) : "";
+    };
+
+    const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
+
+    // track if the user already changed selection
+    const userPickedRef = useRef(false);
+
+    // initial selection
+    const [selectedValue, setSelectedValue] = useState(
+    Array.isArray(initialOne) ? initialOne.map(String) : []
+    );
+
+    // const initialOne =
+    //     accountNumberFromDashboard
+    //         ? accountNumberFromDashboard.replace(/\+/g, " ")
+    //         : (storedData
+    //             ? storedData.account
+    //             : (typeof networksData[0] === "string"
+    //                 ? networksData[0]
+    //                 : networksData[0].accountNumber));
+
+    // const [selectedValue, setSelectedValue] = useState([String(initialOne)]); // now an array
+    // console.log("multiple accounts:", selectedValue);
 
     // useEffect(() => {
     //     const fetchAllCampaigns = async () => {
@@ -3753,7 +3776,7 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            hide: true,
+            // hide: true,
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -4720,7 +4743,7 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            hide: true,
+            // hide: true,
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -6312,7 +6335,7 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            hide: true,
+            // hide: true,
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -7126,7 +7149,7 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            hide: true,
+            // hide: true,
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -10222,6 +10245,49 @@ const MyTablePage = () => {
     //     }
     // };
 
+    const deriveInitialArray = (dash, stored, nets) => {
+    const fromDash = dash?.replace(/\+/g, " ").trim();
+    if (fromDash) return [fromDash];
+
+    const fromStore = stored?.account;
+    if (Array.isArray(fromStore)) return fromStore.map(String);
+    if (typeof fromStore === "string" && fromStore.trim()) {
+        return fromStore.split(",").map(s => s.trim()).filter(Boolean).map(String);
+    }
+
+    const first =
+        Array.isArray(nets) && nets.length
+        ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
+        : "";
+    return first ? [String(first)] : [];
+    };
+
+    const arraysEqualSet = (a, b) => {
+    if (a.length !== b.length) return false;
+    const sa = new Set(a.map(String));
+    for (const v of b) if (!sa.has(String(v))) return false;
+    return true;
+    };
+
+    useEffect(() => {
+  const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData);
+  if (!preferredArr.length) return;
+
+  const isOnFallback =
+    selectedValue.length === 0 ||
+    (Array.isArray(networksData) &&
+      networksData.length &&
+      selectedValue.length === 1 &&
+      selectedValue[0] === (typeof networksData[0] === "string"
+        ? networksData[0]
+        : networksData[0]?.accountNumber));
+
+  // ✅ Only set if user hasn't manually picked AND current selection differs
+  if (!userPickedRef.current && (isOnFallback || !arraysEqualSet(selectedValue, preferredArr))) {
+    setSelectedValue(preferredArr.map(String));
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [accountNumberFromDashboard, storedData?.account, networksData]);
 
     useEffect(() => {
         if (campaignsStatus && commentsStatus && columnStructureStatus) {
@@ -10578,7 +10644,9 @@ const MyTablePage = () => {
 
     // value will be an array of accountNumbers (strings)
     const handleChange1 = (values) => {
-        setSelectedValue(values);
+        const uniq = Array.from(new Set(values.map(String)));
+        setSelectedValue(uniq);
+        userPickedRef.current = true;
 
         // Preserve your accountName behavior using the last picked item (if needed)
         const last = values[values.length - 1];
@@ -10594,10 +10662,18 @@ const MyTablePage = () => {
         setAccountChanged(true);
     };
 
+    const filteredAccounts = useMemo(() => {
+        const q = searchText.trim().toLowerCase();
+        if (!q) return accountsAccess;
+        return accountsAccess.filter((a) =>
+        `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
+        );
+    }, [accountsAccess, searchText]);
+
     // helper to render the checkbox list using existing accountsAccess
     const renderAccountsCheckboxes = (theme) => (
         <Checkbox.Group
-            options={accountsAccess.map((account) => ({
+            options={filteredAccounts.map((account) => ({
                 value: String(account.accountNumber),
                 label: (
                     <div
@@ -10827,8 +10903,8 @@ const MyTablePage = () => {
 
         const url =
             accounts.length === 1
-                ? `http://localhost:8000/Recommendations/${encodeURIComponent(accounts[0])}`
-                : `http://localhost:8000/Recommendations?accounts=${accounts.join(',')}`;
+                ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
+                : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
 
         const token = localStorage.getItem('token');
 
@@ -11186,6 +11262,8 @@ const MyTablePage = () => {
 
                     <Select
                         showSearch
+                        onSearch={setSearchText}
+                        searchValue={searchText}
                         placeholder="Select Account"
                         // Keep the visible state you already have
                         open={isOpen}

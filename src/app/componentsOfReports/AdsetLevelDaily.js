@@ -278,14 +278,17 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets,context, functionC
                 const adsetName = params.node.key;
 
                 let campaignid, adsetid;
+                let accountNumberToPassHistoryPage;
 
                 if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0].data;
                     campaignid = firstChild.campaignid;
                     adsetid = firstChild.adsetid;
+                    accountNumberToPassHistoryPage = firstChild.accountNumber ?? null;
                 } else if (params.data) {
                     campaignid = params.data.campaignid;
                     adsetid = params.data.adsetid;
+                    accountNumberToPassHistoryPage = params.data.accountNumber ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -1144,7 +1147,7 @@ const handlePauseOk = async () => {
                         </Tooltip>
                         <LinkOutlined 
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/AdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/AdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}

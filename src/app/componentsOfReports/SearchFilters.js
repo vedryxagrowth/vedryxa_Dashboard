@@ -28,8 +28,8 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
 
         const url =
             accounts.length === 1
-                ? `http://localhost:8000/Recommendations/${encodeURIComponent(accounts[0])}`
-                : `http://localhost:8000/Recommendations?accounts=${accounts.join(',')}`;
+                ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
+                : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
 
         const token = localStorage.getItem('token');
 
