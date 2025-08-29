@@ -6,7 +6,7 @@ import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
-import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
+import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
 import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -120,7 +120,8 @@ const MyTablePage = () => {
         "fblinkclicks",
         "cpclinkclicks",
         "adname",
-        "adid"
+        "adid",
+        "accountNumber"
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
@@ -182,7 +183,7 @@ const MyTablePage = () => {
     const [accountChanged, setAccountChanged] = useState(false);
     const [dateChanged, setDateChanged] = useState(false);
     const [timezoneChanged, setTimezoneChanged] = useState(false);
-
+    const [searchText, setSearchText] = useState("");
 
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
@@ -295,6 +296,19 @@ const MyTablePage = () => {
 
     const carouselRef = useRef();
 
+    // top of component
+    const campaignStatusOverridesRef = useRef(new Map());
+    // NEW for adset level:
+    const adsetStatusOverridesRef = useRef(new Map()); // key -> "ACTIVE"/"PAUSED"
+    const adsetPinOverridesRef = useRef(new Map()); // key -> boolean
+    const adsetCommentOverridesRef = useRef(new Map()); // 
+
+    // top-level (same place you created the other refs)
+    const adStatusOverridesRef = React.useRef(new Map());  // "ACTIVE" | "PAUSED"
+    const adPinOverridesRef = React.useRef(new Map());  // boolean
+    const adCommentOverridesRef = React.useRef(new Map());  // { text, editedBy, editedAt }
+
+
     // const gridRef = useRef();
 
     // const gridRef1 = useRef();
@@ -338,59 +352,182 @@ const MyTablePage = () => {
     // const [campaignNamesDActiveDailyLoading, setCampaignNamesDActiveDailyLoading] = useState(false);
 
     const [allCampaignData, setAllCampaignData] = useState([]);
+    console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
 
+    const deriveInitial = (dash, stored, nets) => {
+        const fromDash = dash?.replace(/\+/g, " ").trim();
+        if (fromDash) return fromDash;
+
+        const fromStore = stored?.account?.toString().trim();
+        if (fromStore) return fromStore;
+
+        const first = Array.isArray(nets) && nets.length
+            ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
+            : "";
+        return first ? String(first) : "";
+    };
+
+    const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
+
+    // track if the user already changed selection
+    const userPickedRef = useRef(false);
+
+    // initial selection
+    const [selectedValue, setSelectedValue] = useState(
+        Array.isArray(initialOne) ? initialOne.map(String) : []
+    );
+
+    // const initialOne =
+    //     accountNumberFromDashboard
+    //         ? accountNumberFromDashboard.replace(/\+/g, " ")
+    //         : (storedData
+    //             ? storedData.account
+    //             : (typeof networksData[0] === "string"
+    //                 ? networksData[0]
+    //                 : networksData[0].accountNumber));
+
+    // const [selectedValue, setSelectedValue] = useState([String(initialOne)]); // now an array
+    // console.log("multiple accounts:", selectedValue);
+
+    // useEffect(() => {
+    //     const fetchAllCampaigns = async () => {
+    //         try {
+    //             const res = await apiClient.get(`/get/AllCampaignsWithAdsets?accountNumber=${newaccount}`);
+    //             const enrichedAdsetRows = res.data.flatMap(campaign =>
+    //                 (campaign.adsets || []).map(adset => ({
+    //                     ...adset,
+    //                     campaignid: campaign.campaign_id,
+    //                     campaignname: campaign.name,
+    //                     accountNumber: campaign.accountNumber,
+    //                     revenuePartner: campaign.revenuePartner,
+    //                     campaign_budget: campaign.campaign_budget,
+    //                     campaign_status: campaign.status,
+    //                     start: campaign.start,
+    //                     end: campaign.end
+    //                 }))
+    //             );
+    //             setAllCampaignData(enrichedAdsetRows);
+    //         } catch (err) {
+    //             console.error("Failed to fetch all campaigns", err);
+    //         }
+    //     };
+
+    //     fetchAllCampaigns();
+    // }, [newaccount]);
     useEffect(() => {
         const fetchAllCampaigns = async () => {
             try {
-                const res = await apiClient.get(`/get/AllCampaignsWithAdsets?accountNumber=${newaccount}`);
-                const enrichedAdsetRows = res.data.flatMap(campaign =>
-                    (campaign.adsets || []).map(adset => ({
-                        ...adset,
-                        campaignid: campaign.campaign_id,
+                const body = { accountNumbers: (selectedValue || []).map(String) };
+
+                const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', body);
+                const data = res.data || [];
+
+                // Map EXACTLY to your DB shape:
+                const enrichedAdsetRows = data.flatMap((campaign) =>
+                    (campaign.adsets || []).map((adset) => ({
+                        // keep adset info
+                        adset_id: String(adset.adset_id),
+                        adsetname: adset.name,
+                        adset_budget: adset.budget,   // { daily_budget, lifetime_budget }
+                        adset_status: adset.status,
+                        bid_amount: adset.bid_amount,
+
+                        // attach campaign-level info for this adset row
+                        campaignid: String(campaign.campaign_id),
                         campaignname: campaign.name,
-                        accountNumber: campaign.accountNumber,
-                        revenuePartner: campaign.revenuePartner,
-                        campaign_budget: campaign.campaign_budget,
                         campaign_status: campaign.status,
+                        campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
+                        accountNumber: String(campaign.accountNumber),
+                        revenuePartner: campaign.revenuePartner,
                         start: campaign.start,
-                        end: campaign.end
+                        end: campaign.end,
                     }))
                 );
+
                 setAllCampaignData(enrichedAdsetRows);
             } catch (err) {
-                console.error("Failed to fetch all campaigns", err);
+                console.error('Failed to fetch all campaigns', err);
+                setAllCampaignData([]);
             }
         };
 
-        fetchAllCampaigns();
-    }, [newaccount]);
+        if (selectedValue?.length) fetchAllCampaigns();
+    }, [JSON.stringify(selectedValue)]);
 
+    // useEffect(() => {
+    //     if (campaignRefreshTrigger === 0) return;
+    //     const fetchUpdatedCampaign = async () => {
+    //         try {
+    //             const res = await apiClient.get(`https://prodapis.adsgoat.in/get/AllCampaignsWithAdsets?accountNumber=${newaccount}`);
+    //             const enrichedAdsetRows = res.data.flatMap(campaign =>
+    //                 (campaign.adsets || []).map(adset => ({
+    //                     ...adset,
+    //                     campaignid: campaign.campaign_id,
+    //                     campaignname: campaign.name,
+    //                     accountNumber: campaign.accountNumber,
+    //                     revenuePartner: campaign.revenuePartner,
+    //                     campaign_budget: campaign.campaign_budget,
+    //                     campaign_status: campaign.status,
+    //                     start: campaign.start,
+    //                     end: campaign.end
+    //                 }))
+    //             );
+    //             setAllCampaignData(enrichedAdsetRows);
+    //         } catch (err) {
+    //             console.error("Failed to refetch updated campaigns", err);
+    //         }
+    //     };
+    //     fetchUpdatedCampaign();
+    // }, [campaignRefreshTrigger]);
+
+    // campaignRefreshTrigger-based refetch (multi-account)
     useEffect(() => {
         if (campaignRefreshTrigger === 0) return;
+
         const fetchUpdatedCampaign = async () => {
             try {
-                const res = await apiClient.get(`/get/AllCampaignsWithAdsets?accountNumber=${newaccount}`);
-                const enrichedAdsetRows = res.data.flatMap(campaign =>
-                    (campaign.adsets || []).map(adset => ({
-                        ...adset,
-                        campaignid: campaign.campaign_id,
-                        campaignname: campaign.name,
-                        accountNumber: campaign.accountNumber,
+                const accounts = Array.isArray(selectedValue)
+                    ? selectedValue.map(String)
+                    : [String(selectedValue)];
+
+                const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', {
+                    accountNumbers: accounts,
+                });
+
+                const data = res.data || [];
+
+                const enrichedAdsetRows = data.flatMap((campaign) =>
+                    (campaign.adsets || []).map((adset) => ({
+                        // adset fields
+                        adset_id: String(adset.adset_id),
+                        adsetname: adset.name,
+                        adset_budget: adset.budget,     // { daily_budget, lifetime_budget }
+                        adset_status: adset.status,
+                        bid_amount: adset.bid_amount,
+
+                        // campaign fields
+                        campaignid: String(campaign.campaign_id),
+                        campaignname: campaign.name,    // matches your DB
+                        accountNumber: String(campaign.accountNumber),
                         revenuePartner: campaign.revenuePartner,
-                        campaign_budget: campaign.campaign_budget,
+                        campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
                         campaign_status: campaign.status,
                         start: campaign.start,
-                        end: campaign.end
+                        end: campaign.end,
                     }))
                 );
+
                 setAllCampaignData(enrichedAdsetRows);
             } catch (err) {
-                console.error("Failed to refetch updated campaigns", err);
+                console.error('Failed to refetch updated campaigns', err);
             }
         };
+
         fetchUpdatedCampaign();
+        // If you want the refresh to always use the *latest* selection, add selectedValue too:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [campaignRefreshTrigger]);
 
 
@@ -1552,7 +1689,7 @@ const MyTablePage = () => {
 
                 const onChangeSpendAndStatus = async () => {
                     if (params?.node?.rowPinned === 'bottom') {
-                        return ""; // Return empty string to remove "..."
+                        return ""; // Return empty string to remove "...
                     }
                     if (params?.node?.footer) {
                         return ""; // Prevent modal from opening for group footer rows
@@ -3636,6 +3773,11 @@ const MyTablePage = () => {
 
 
     const columnDefsObjectAdsetLevel = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            // hide: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -4319,6 +4461,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "Total amount spent",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
             headerName: 'Revenue',
@@ -4331,7 +4474,8 @@ const MyTablePage = () => {
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu' // Add a custom class
+            headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
 
         },
         profit: {
@@ -4351,6 +4495,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "Profit = Revenue - Spend",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
 
         },
         margin: {
@@ -4595,6 +4740,11 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdLevel = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            // hide: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -5027,6 +5177,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "Total amount spent",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
             headerName: 'Revenue',
@@ -5039,7 +5190,8 @@ const MyTablePage = () => {
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu' // Add a custom class
+            headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
 
         },
         profit: {
@@ -5059,6 +5211,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "Profit = Revenue - Spend",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
 
         },
         margin: {
@@ -5304,6 +5457,11 @@ const MyTablePage = () => {
 
     //campaign level live
     const columnDefsObject = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            showWhenGrouped: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -5388,79 +5546,231 @@ const MyTablePage = () => {
             enableFilter: false,
             suppressMenu: true,
             hide: !isYesterday(),
+            // cellRenderer: (params) => {
+            //     const [isModalVisible, setIsModalVisible] = useState(false);
+            //     const [groupedData, setGroupedData] = useState([]);
+            //     const [changeBudget, onChangeBudget] = useState();
+            //     const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+            //     const isGroupRow = !!params?.node?.groupData;
+            //     let campaignId = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data?.campaignid : params?.data?.campaignid;
+            //     const campaignname = isGroupRow ? params?.node?.key : params?.data?.campaignname;
+
+            //     useEffect(() => {
+            //         if (!campaignId || !Array.isArray(allCampaignData)) return;
+            //         const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+            //         if (matchedCampaign) {
+            //             setCampaignActualSpend(matchedCampaign);
+            //         }
+            //     }, [campaignId, allCampaignData]);
+
+            //     const onChangeSpendAndStatus = () => {
+            //         if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+            //         const allLeafChildren = params.node?.allLeafChildren || [];
+            //         const grouped = allLeafChildren.map(node => node.data) || [];
+            //         setGroupedData(grouped);
+
+            //         if (!campaignId || !campaignname) {
+            //             message.error("Campaign info missing");
+            //             return;
+            //         }
+
+
+            //         const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
+
+            //         if (matchedCampaign) {
+            //             const budget = parseFloat(
+            //                 matchedCampaign?.campaign_budget?.daily_budget ||
+            //                 matchedCampaign?.campaign_budget?.lifetime_budget ||
+            //                 0
+            //             ) / 100;
+
+            //             onChangeBudget(budget);
+            //             setCampaignActualSpend(matchedCampaign); // ✅ critical
+            //         } else {
+            //             onChangeBudget(undefined);
+            //             setCampaignActualSpend({});
+            //         }
+
+            //         setIsModalVisible(true);
+            //     };
+
+            //     const handleOk = async () => {
+            //         setIsModalVisible(false);
+            //         const isArray = Array.isArray(groupedData);
+            //         const campaignIdFinal = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
+            //         const campaignnameFinal = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;
+
+            //         const payload = {
+            //             campaignId: campaignIdFinal,
+            //             budget: parseFloat(changeBudget) * 100,
+            //             accountNumber: newaccount,
+            //             campaignname: campaignnameFinal,
+            //             updatedby: userdetails?.email,
+            //         };
+
+            //         if (!payload.campaignId) {
+            //             message.error("Campaign ID missing. Cannot update budget.");
+            //             return;
+            //         }
+
+            //         try {
+            //             await apiClient.post('/update/campaign/budget', payload);
+            //             message.success("Budget Updated Successfully");
+            //             // setCampaignRefreshTrigger(prev => prev + 1);
+            //             // changeRRefrst();
+            //             params.context.setCampaignRefreshTrigger(prev => prev + 1);
+            //             params.context.changeRRefrst();
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update budget");
+            //         }
+            //     };
+
+            //     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+            //     return (
+            //         <div>
+            //             {campaignActualSpend?.campaign_budget &&
+            //                 (campaignActualSpend?.campaign_budget?.daily_budget != null ||
+            //                     campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
+            //                 <DollarOutlined
+            //                     style={{ cursor: 'pointer' }}
+            //                     onClick={onChangeSpendAndStatus}
+            //                 />
+            //             ) : (
+            //                 <Tooltip title="No budget set for this campaign">
+            //                     <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+            //                 </Tooltip>
+            //             )}
+
+            //             {isModalVisible && (
+            //                 <Modal
+            //                     title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+            //                     open={isModalVisible}
+            //                     onOk={handleOk}
+            //                     onCancel={() => setIsModalVisible(false)}
+            //                     width={600}
+            //                     okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+            //                     className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+            //                 >
+            //                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            //                         <div style={{ display: 'flex', }}>
+            //                             <p>
+            //                                 Budget Type:
+            //                             </p>{" "}
+            //                             <span style={{ fontWeight: 'normal' }}>
+            //                                 {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
+            //                                     campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
+            //                             </span>
+            //                         </div>
+
+            //                         <Input
+            //                             type="number"
+            //                             value={changeBudget}
+            //                             onChange={(e) => onChangeBudget(e.target.value)}
+            //                             placeholder="Enter budget in USD"
+            //                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+            //                         />
+
+            //                         <div style={{ display: 'flex' }}>
+            //                             <p>Campaign ID: </p>
+            //                             <p>{campaignId}</p>
+            //                         </div>
+            //                     </div>
+            //                 </Modal>
+            //             )}
+            //         </div>
+            //     );
+            // },
+
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
 
                 const isGroupRow = !!params?.node?.groupData;
-                let campaignId = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data?.campaignid : params?.data?.campaignid;
-                const campaignname = isGroupRow ? params?.node?.key : params?.data?.campaignname;
 
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                const { allCampaignData } = params.context;
+
+                // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
-                    if (!campaignId || !Array.isArray(allCampaignData)) return;
-                    const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
-                    if (matchedCampaign) {
-                        setCampaignActualSpend(matchedCampaign);
-                    }
-                }, [campaignId, allCampaignData]);
+                    if (!campaignId || !rowAccountNumber || !Array.isArray(allCampaignData)) return;
+
+                    const matched = allCampaignData.find(
+                        c =>
+                            String(c.campaignid) === String(campaignId) &&
+                            String(c.accountNumber) === String(rowAccountNumber)
+                    );
+
+                    setCampaignActualSpend(matched ?? {});
+                    setHasBudget(
+                        !!(
+                            matched?.campaign_budget &&
+                            (matched.campaign_budget.daily_budget != null ||
+                                matched.campaign_budget.lifetime_budget != null)
+                        )
+                    );
+                }, [campaignId, rowAccountNumber, allCampaignData]);
 
                 const onChangeSpendAndStatus = () => {
                     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-                    const allLeafChildren = params.node?.allLeafChildren || [];
-                    const grouped = allLeafChildren.map(node => node.data) || [];
-                    setGroupedData(grouped);
+
+                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
+                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
 
                     if (!campaignId || !campaignname) {
                         message.error("Campaign info missing");
                         return;
                     }
 
-
-                    const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
-
-                    if (matchedCampaign) {
-                        const budget = parseFloat(
-                            matchedCampaign?.campaign_budget?.daily_budget ||
-                            matchedCampaign?.campaign_budget?.lifetime_budget ||
-                            0
-                        ) / 100;
-
-                        onChangeBudget(budget);
-                        setCampaignActualSpend(matchedCampaign); // ✅ critical
-                    } else {
-                        onChangeBudget(undefined);
-                        setCampaignActualSpend({});
-                    }
+                    // Prefill from the matched record for *this* account
+                    const b = campaignActualSpend?.campaign_budget;
+                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
+                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
 
                     setIsModalVisible(true);
                 };
 
                 const handleOk = async () => {
                     setIsModalVisible(false);
-                    const isArray = Array.isArray(groupedData);
-                    const campaignIdFinal = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
-                    const campaignnameFinal = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;
+
+                    const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
+                    const campaignIdFinal = target?.campaignid;
+                    const campaignnameFinal = target?.campaignname;
 
                     const payload = {
                         campaignId: campaignIdFinal,
-                        budget: parseFloat(changeBudget) * 100,
-                        accountNumber: newaccount,
+                        budget: Number(changeBudget) * 100,         // cents
+                        accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
                         campaignname: campaignnameFinal,
-                        updatedby: userdetails?.email,
+                        updatedby: params.context?.userdetails?.email,
                     };
 
-                    if (!payload.campaignId) {
-                        message.error("Campaign ID missing. Cannot update budget.");
+                    if (!payload.campaignId || !payload.accountNumber) {
+                        message.error("Campaign ID or account missing. Cannot update budget.");
                         return;
                     }
 
                     try {
                         await apiClient.post('/update/campaign/budget', payload);
                         message.success("Budget Updated Successfully");
-                        // setCampaignRefreshTrigger(prev => prev + 1);
-                        // changeRRefrst();
                         params.context.setCampaignRefreshTrigger(prev => prev + 1);
                         params.context.changeRRefrst();
                     } catch (err) {
@@ -5473,13 +5783,8 @@ const MyTablePage = () => {
 
                 return (
                     <div>
-                        {campaignActualSpend?.campaign_budget &&
-                            (campaignActualSpend?.campaign_budget?.daily_budget != null ||
-                                campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
-                            <DollarOutlined
-                                style={{ cursor: 'pointer' }}
-                                onClick={onChangeSpendAndStatus}
-                            />
+                        {hasBudget ? (
+                            <DollarOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
                         ) : (
                             <Tooltip title="No budget set for this campaign">
                                 <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
@@ -5488,22 +5793,27 @@ const MyTablePage = () => {
 
                         {isModalVisible && (
                             <Modal
-                                title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+                                title={
+                                    Array.isArray(groupedData) && groupedData.length
+                                        ? groupedData[0]?.campaignname
+                                        : campaignname
+                                }
                                 open={isModalVisible}
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
-                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                    <div style={{ display: 'flex', }}>
-                                        <p>
-                                            Budget Type:
-                                        </p>{" "}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <div style={{ display: 'flex' }}>
+                                        <p>Budget Type:&nbsp;</p>
                                         <span style={{ fontWeight: 'normal' }}>
-                                            {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
-                                                campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
+                                            {campaignActualSpend?.campaign_budget?.daily_budget != null
+                                                ? 'Daily'
+                                                : campaignActualSpend?.campaign_budget?.lifetime_budget != null
+                                                    ? 'Lifetime'
+                                                    : 'Unknown'}
                                         </span>
                                     </div>
 
@@ -5512,11 +5822,11 @@ const MyTablePage = () => {
                                         value={changeBudget}
                                         onChange={(e) => onChangeBudget(e.target.value)}
                                         placeholder="Enter budget in USD"
-                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        className={params.context?.theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
 
                                     <div style={{ display: 'flex' }}>
-                                        <p>Campaign ID: </p>
+                                        <p>Campaign ID:&nbsp;</p>
                                         <p>{campaignId}</p>
                                     </div>
                                 </div>
@@ -5743,6 +6053,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "Total amount spent",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
             headerName: 'Revenue',
@@ -5755,7 +6066,8 @@ const MyTablePage = () => {
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu' // Add a custom class
+            headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
 
         },
         profit: {
@@ -5775,6 +6087,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "Profit = Revenue - Spend",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
 
         },
         margin: {
@@ -6019,6 +6332,11 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdsetLevelDaily = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            // hide: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -6680,6 +6998,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
             headerName: 'Revenue',
@@ -6694,6 +7013,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         profit: {
             headerName: 'Profit',
@@ -6713,6 +7033,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: 'Profit = Revenue - Spend',
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
             headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
@@ -6825,6 +7146,11 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdLevelDaily = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            // hide: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -7265,6 +7591,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
             headerName: 'Revenue',
@@ -7279,6 +7606,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         profit: {
             headerName: 'Profit',
@@ -7298,6 +7626,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: 'Profit = Revenue - Spend',
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
             headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
@@ -7410,6 +7739,11 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject1 = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            hide: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -7840,6 +8174,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
             headerName: 'Revenue',
@@ -7853,6 +8188,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         profit: {
             headerName: 'Profit',
@@ -7871,6 +8207,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: 'Profit = Revenue - Spend',
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
             headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
@@ -7984,6 +8321,11 @@ const MyTablePage = () => {
 
     //campaignLevelDaily
     const columnDefsObject2 = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            // hide: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -8228,84 +8570,235 @@ const MyTablePage = () => {
             enableFilter: false,
             suppressMenu: true,
             hide: !isYesterday(),
+            // cellRenderer: (params) => {
+            //     const [isModalVisible, setIsModalVisible] = useState(false);
+            //     const [groupedData, setGroupedData] = useState([]);
+            //     const [changeBudget, onChangeBudget] = useState();
+            //     const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+            //     const isGroupRow = !!params?.node?.groupData;
+            //     let campaignId = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data?.campaignid : params?.data?.campaignid;
+            //     const campaignname = isGroupRow ? params?.node?.key : params?.data?.campaignname;
+
+            //     useEffect(() => {
+            //         if (!campaignId || !Array.isArray(allCampaignData)) return;
+            //         const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+            //         if (matchedCampaign) {
+            //             setCampaignActualSpend(matchedCampaign);
+            //         }
+            //     }, [campaignId, allCampaignData]);
+
+            //     const onChangeSpendAndStatus = () => {
+            //         if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+            //         const allLeafChildren = params.node?.allLeafChildren || [];
+            //         const grouped = allLeafChildren.map(node => node.data) || [];
+            //         setGroupedData(grouped);
+
+            //         if (!campaignId || !campaignname) {
+            //             message.error("Campaign info missing");
+            //             return;
+            //         }
+
+            //         // const budget = parseFloat(
+            //         //     campaignActualSpend?.campaign_budget?.daily_budget ||
+            //         //     campaignActualSpend?.campaign_budget?.lifetime_budget || 0
+            //         // ) / 100;
+            //         // onChangeBudget(budget);
+            //         // const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+            //         const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
+
+            //         if (matchedCampaign) {
+            //             const budget = parseFloat(
+            //                 matchedCampaign?.campaign_budget?.daily_budget ||
+            //                 matchedCampaign?.campaign_budget?.lifetime_budget ||
+            //                 0
+            //             ) / 100;
+
+            //             onChangeBudget(budget);
+            //             setCampaignActualSpend(matchedCampaign); // ✅ critical
+            //         } else {
+            //             onChangeBudget(undefined);
+            //             setCampaignActualSpend({});
+            //         }
+
+            //         setIsModalVisible(true);
+            //     };
+
+            //     const handleOk = async () => {
+            //         setIsModalVisible(false);
+            //         const isArray = Array.isArray(groupedData);
+            //         const campaignIdFinal = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
+            //         const campaignnameFinal = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;
+
+            //         const payload = {
+            //             campaignId: campaignIdFinal,
+            //             budget: parseFloat(changeBudget) * 100,
+            //             accountNumber: newaccount,
+            //             campaignname: campaignnameFinal,
+            //             updatedby: userdetails?.email,
+            //         };
+
+            //         if (!payload.campaignId) {
+            //             message.error("Campaign ID missing. Cannot update budget.");
+            //             return;
+            //         }
+
+            //         try {
+            //             await apiClient.post('/update/campaign/budget', payload);
+            //             message.success("Budget Updated Successfully");
+            //             // setCampaignRefreshTrigger(prev => prev + 1);
+            //             // changeRRefrst();
+            //             params.context.setCampaignRefreshTrigger(prev => prev + 1);
+            //             params.context.changeRRefrst();
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update budget");
+            //         }
+            //     };
+
+            //     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+            //     return (
+            //         <div>
+            //             {campaignActualSpend?.campaign_budget &&
+            //                 (campaignActualSpend?.campaign_budget?.daily_budget != null ||
+            //                     campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
+            //                 <DollarOutlined
+            //                     style={{ cursor: 'pointer' }}
+            //                     onClick={onChangeSpendAndStatus}
+            //                 />
+            //             ) : (
+            //                 <Tooltip title="No budget set for this campaign">
+            //                     <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+            //                 </Tooltip>
+            //             )}
+
+            //             {isModalVisible && (
+            //                 <Modal
+            //                     title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+            //                     open={isModalVisible}
+            //                     onOk={handleOk}
+            //                     onCancel={() => setIsModalVisible(false)}
+            //                     width={600}
+            //                     okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+            //                     className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+            //                 >
+            //                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            //                         <div style={{ display: 'flex', }}>
+            //                             <p>
+            //                                 Budget Type:
+            //                             </p>{" "}
+            //                             <span style={{ fontWeight: 'normal' }}>
+            //                                 {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
+            //                                     campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
+            //                             </span>
+            //                         </div>
+
+            //                         <Input
+            //                             type="number"
+            //                             value={changeBudget}
+            //                             onChange={(e) => onChangeBudget(e.target.value)}
+            //                             placeholder="Enter budget in USD"
+            //                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+            //                         />
+
+            //                         <div style={{ display: 'flex' }}>
+            //                             <p>Campaign ID: </p>
+            //                             <p>{campaignId}</p>
+            //                         </div>
+            //                     </div>
+            //                 </Modal>
+            //             )}
+            //         </div>
+            //     );
+            // },
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
 
                 const isGroupRow = !!params?.node?.groupData;
-                let campaignId = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data?.campaignid : params?.data?.campaignid;
-                const campaignname = isGroupRow ? params?.node?.key : params?.data?.campaignname;
 
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                const { allCampaignData } = params.context;
+
+                // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
-                    if (!campaignId || !Array.isArray(allCampaignData)) return;
-                    const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
-                    if (matchedCampaign) {
-                        setCampaignActualSpend(matchedCampaign);
-                    }
-                }, [campaignId, allCampaignData]);
+                    if (!campaignId || !rowAccountNumber || !Array.isArray(allCampaignData)) return;
+
+                    const matched = allCampaignData.find(
+                        c =>
+                            String(c.campaignid) === String(campaignId) &&
+                            String(c.accountNumber) === String(rowAccountNumber)
+                    );
+
+                    setCampaignActualSpend(matched ?? {});
+                    setHasBudget(
+                        !!(
+                            matched?.campaign_budget &&
+                            (matched.campaign_budget.daily_budget != null ||
+                                matched.campaign_budget.lifetime_budget != null)
+                        )
+                    );
+                }, [campaignId, rowAccountNumber, allCampaignData]);
 
                 const onChangeSpendAndStatus = () => {
                     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-                    const allLeafChildren = params.node?.allLeafChildren || [];
-                    const grouped = allLeafChildren.map(node => node.data) || [];
-                    setGroupedData(grouped);
+
+                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
+                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
 
                     if (!campaignId || !campaignname) {
                         message.error("Campaign info missing");
                         return;
                     }
 
-                    // const budget = parseFloat(
-                    //     campaignActualSpend?.campaign_budget?.daily_budget ||
-                    //     campaignActualSpend?.campaign_budget?.lifetime_budget || 0
-                    // ) / 100;
-                    // onChangeBudget(budget);
-                    // const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
-                    const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
-
-                    if (matchedCampaign) {
-                        const budget = parseFloat(
-                            matchedCampaign?.campaign_budget?.daily_budget ||
-                            matchedCampaign?.campaign_budget?.lifetime_budget ||
-                            0
-                        ) / 100;
-
-                        onChangeBudget(budget);
-                        setCampaignActualSpend(matchedCampaign); // ✅ critical
-                    } else {
-                        onChangeBudget(undefined);
-                        setCampaignActualSpend({});
-                    }
+                    // Prefill from the matched record for *this* account
+                    const b = campaignActualSpend?.campaign_budget;
+                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
+                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
 
                     setIsModalVisible(true);
                 };
 
                 const handleOk = async () => {
                     setIsModalVisible(false);
-                    const isArray = Array.isArray(groupedData);
-                    const campaignIdFinal = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
-                    const campaignnameFinal = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;
+
+                    const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
+                    const campaignIdFinal = target?.campaignid;
+                    const campaignnameFinal = target?.campaignname;
 
                     const payload = {
                         campaignId: campaignIdFinal,
-                        budget: parseFloat(changeBudget) * 100,
-                        accountNumber: newaccount,
+                        budget: Number(changeBudget) * 100,         // cents
+                        accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
                         campaignname: campaignnameFinal,
-                        updatedby: userdetails?.email,
+                        updatedby: params.context?.userdetails?.email,
                     };
 
-                    if (!payload.campaignId) {
-                        message.error("Campaign ID missing. Cannot update budget.");
+                    if (!payload.campaignId || !payload.accountNumber) {
+                        message.error("Campaign ID or account missing. Cannot update budget.");
                         return;
                     }
 
                     try {
                         await apiClient.post('/update/campaign/budget', payload);
                         message.success("Budget Updated Successfully");
-                        // setCampaignRefreshTrigger(prev => prev + 1);
-                        // changeRRefrst();
                         params.context.setCampaignRefreshTrigger(prev => prev + 1);
                         params.context.changeRRefrst();
                     } catch (err) {
@@ -8318,13 +8811,8 @@ const MyTablePage = () => {
 
                 return (
                     <div>
-                        {campaignActualSpend?.campaign_budget &&
-                            (campaignActualSpend?.campaign_budget?.daily_budget != null ||
-                                campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
-                            <DollarOutlined
-                                style={{ cursor: 'pointer' }}
-                                onClick={onChangeSpendAndStatus}
-                            />
+                        {hasBudget ? (
+                            <DollarOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
                         ) : (
                             <Tooltip title="No budget set for this campaign">
                                 <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
@@ -8333,22 +8821,27 @@ const MyTablePage = () => {
 
                         {isModalVisible && (
                             <Modal
-                                title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+                                title={
+                                    Array.isArray(groupedData) && groupedData.length
+                                        ? groupedData[0]?.campaignname
+                                        : campaignname
+                                }
                                 open={isModalVisible}
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
-                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                    <div style={{ display: 'flex', }}>
-                                        <p>
-                                            Budget Type:
-                                        </p>{" "}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <div style={{ display: 'flex' }}>
+                                        <p>Budget Type:&nbsp;</p>
                                         <span style={{ fontWeight: 'normal' }}>
-                                            {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
-                                                campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
+                                            {campaignActualSpend?.campaign_budget?.daily_budget != null
+                                                ? 'Daily'
+                                                : campaignActualSpend?.campaign_budget?.lifetime_budget != null
+                                                    ? 'Lifetime'
+                                                    : 'Unknown'}
                                         </span>
                                     </div>
 
@@ -8357,11 +8850,11 @@ const MyTablePage = () => {
                                         value={changeBudget}
                                         onChange={(e) => onChangeBudget(e.target.value)}
                                         placeholder="Enter budget in USD"
-                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        className={params.context?.theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
 
                                     <div style={{ display: 'flex' }}>
-                                        <p>Campaign ID: </p>
+                                        <p>Campaign ID:&nbsp;</p>
                                         <p>{campaignId}</p>
                                     </div>
                                 </div>
@@ -8554,6 +9047,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         revenue: {
             headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true, filter: "agTextColumnFilter",
@@ -8561,6 +9055,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         profit: {
             headerName: 'Profit', field: 'profit', minWidth: 105, aggFunc: spender, cellClassRules: {
@@ -8571,6 +9066,7 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
             headerName: 'Margin',
@@ -8748,6 +9244,11 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject3 = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            // hide: true,
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -9683,33 +10184,110 @@ const MyTablePage = () => {
     //     }
     // }
 
-    const functionCallForCommnets = async (account) => {
-        try {
-            const commentFetch = await apiClient.get(`/Comments/${account}`);
-            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
-            setCampaignComments(campaignComments);
-            setCommentsStatus(true);
+    const functionCallForCommnets = async (accountOrAccounts) => {
+        setCommentsStatus(false);
+        const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
 
-        } catch (err) {
-            setCampaignComments([]); // Reset comments if fetch fails
+        try {
+            const { data } = await apiClient.post('/Comment', { accountNumbers: accounts });
+            setCampaignComments(data);     // data already includes all selected accounts’ comments
+        } catch {
+            setCampaignComments([]);
+        } finally {
             setCommentsStatus(true);
         }
     };
 
-    const functionCallForCampaigns = async (account) => {
-        try {
-            const campaignStatusFetch = await apiClient.get(`/Campaignstatusfb/${account}`);
 
-            if (campaignStatusFetch.status === 200) {
-                setCamapignlevelstatus(campaignStatusFetch.data); // Update state with fetched campaign status
-            }
-            setCampaignsStatus(true);
-        } catch (err) {
-            setCamapignlevelstatus([]); // Reset campaign status if fetch fails
+    const functionCallForCampaigns = async (accountOrAccounts) => {
+        setCampaignsStatus(false);
+        const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
+
+        try {
+            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accounts });
+            setCamapignlevelstatus(data);
+        } catch {
+            setCamapignlevelstatus([]);
+        } finally {
             setCampaignsStatus(true);
         }
     };
 
+
+
+
+
+
+    // const functionCallForCommnets = async (account) => {
+    //     try {
+    //         const commentFetch = await apiClient.get(`/Comments/${account}`);
+    //         const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+    //         setCampaignComments(campaignComments);
+    //         setCommentsStatus(true);
+
+    //     } catch (err) {
+    //         setCampaignComments([]); // Reset comments if fetch fails
+    //         setCommentsStatus(true);
+    //     }
+    // };
+
+    // const functionCallForCampaigns = async (account) => {
+    //     try {
+    //         const campaignStatusFetch = await apiClient.get(`/Campaignstatusfb/${account}`);
+
+    //         if (campaignStatusFetch.status === 200) {
+    //             setCamapignlevelstatus(campaignStatusFetch.data); // Update state with fetched campaign status
+    //         }
+    //         setCampaignsStatus(true);
+    //     } catch (err) {
+    //         setCamapignlevelstatus([]); // Reset campaign status if fetch fails
+    //         setCampaignsStatus(true);
+    //     }
+    // };
+
+    const deriveInitialArray = (dash, stored, nets) => {
+        const fromDash = dash?.replace(/\+/g, " ").trim();
+        if (fromDash) return [fromDash];
+
+        const fromStore = stored?.account;
+        if (Array.isArray(fromStore)) return fromStore.map(String);
+        if (typeof fromStore === "string" && fromStore.trim()) {
+            return fromStore.split(",").map(s => s.trim()).filter(Boolean).map(String);
+        }
+
+        const first =
+            Array.isArray(nets) && nets.length
+                ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
+                : "";
+        return first ? [String(first)] : [];
+    };
+
+    const arraysEqualSet = (a, b) => {
+        if (a.length !== b.length) return false;
+        const sa = new Set(a.map(String));
+        for (const v of b) if (!sa.has(String(v))) return false;
+        return true;
+    };
+
+    useEffect(() => {
+        const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData);
+        if (!preferredArr.length) return;
+
+        const isOnFallback =
+            selectedValue.length === 0 ||
+            (Array.isArray(networksData) &&
+                networksData.length &&
+                selectedValue.length === 1 &&
+                selectedValue[0] === (typeof networksData[0] === "string"
+                    ? networksData[0]
+                    : networksData[0]?.accountNumber));
+
+        // ✅ Only set if user hasn't manually picked AND current selection differs
+        if (!userPickedRef.current && (isOnFallback || !arraysEqualSet(selectedValue, preferredArr))) {
+            setSelectedValue(preferredArr.map(String));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
     useEffect(() => {
         if (campaignsStatus && commentsStatus && columnStructureStatus) {
@@ -9725,8 +10303,12 @@ const MyTablePage = () => {
     };
 
     // ✅ Calls `functionCall` when page loads
+    // useEffect(() => {
+    //     functionCall(account);
+    // }, []);
+
     useEffect(() => {
-        functionCall(account);
+        functionCall(selectedValue);  // pass the array
     }, []);
 
 
@@ -9736,14 +10318,45 @@ const MyTablePage = () => {
     const mnetAccounts = ['674038077865381', '665204411821465'];
     const enkiAccounts = ['364991119488050'];
 
+    // const onChangeSelectRevenue = (value) => {
+    //     const accountsForAccess = adAccounts[value];
+
+    //     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+    //     setNetworksData(accountsAccess);
+    //     setRevenuePartner(value);
+    //     value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc" ? setTime('PDT') : setTime('UTC')
+    // }
+
+    // ✅ run once on mount (for default network)
+    useEffect(() => {
+        const defaultNetwork = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0];
+        if (defaultNetwork) {
+            onChangeSelectRevenue(defaultNetwork);
+        }
+    }, []);
+
+    // whenever network changes
     const onChangeSelectRevenue = (value) => {
         const accountsForAccess = adAccounts[value];
-
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+
         setNetworksData(accountsAccess);
         setRevenuePartner(value);
-        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc" ? setTime('PDT') : setTime('UTC')
-    }
+
+        // ⏰ set timezone
+        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
+            ? setTime("PDT")
+            : setTime("UTC");
+
+        // ✅ pick first active account
+        const firstActive = accountsAccess.find(acc => acc.status === "Active");
+        if (firstActive) {
+            setSelectedValue([String(firstActive.accountNumber)]);
+        } else {
+            setSelectedValue([]);
+        }
+    };
+
     const onChangeSelect = (value) => {
         setAccount(value);
     }
@@ -10000,9 +10613,15 @@ const MyTablePage = () => {
     };
 
     const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
-    const [selectedValue, setSelectedValue] = useState(
-        accountNumberFromDashboard ? accountNumberFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.account : typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber)
-    ); // Track selected value
+    // const [selectedValue, setSelectedValue] = useState(
+    //     accountNumberFromDashboard ? accountNumberFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.account : typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber)
+    // ); // Track selected value
+
+    // before:
+    // const [selectedValue, setSelectedValue] = useState(<string>);
+
+
+
 
     const handleDropdownVisibleChange = (open) => {
         setIsOpen(open); // Set dropdown open state
@@ -10010,18 +10629,88 @@ const MyTablePage = () => {
     };
 
     // Handle option selection
-    const handleChange1 = (value) => {
-        const findAccount = (data, accountNumber) =>
-            Object.values(data).flat().find(item => item.accountNumber === accountNumber) || null;
+    // const handleChange1 = (value) => {
+    //     const findAccount = (data, accountNumber) =>
+    //         Object.values(data).flat().find(item => item.accountNumber === accountNumber) || null;
 
-        const accountNameForAccount = findAccount(userdetails?.adAccounts, value);
-        setAccountName(accountNameForAccount.accountName)
-        setSelectedValue(value); // Update selected value
-        onChangeSelect(value); // Call onChangeSelect function
+    //     const accountNameForAccount = findAccount(userdetails?.adAccounts, value);
+    //     setAccountName(accountNameForAccount.accountName)
+    //     setSelectedValue(value); // Update selected value
+    //     onChangeSelect(value); // Call onChangeSelect function
 
-        // Mark that account was changed
+    //     // Mark that account was changed
+    //     setAccountChanged(true);
+    // };
+
+    // value will be an array of accountNumbers (strings)
+    const handleChange1 = (values) => {
+        const uniq = Array.from(new Set(values.map(String)));
+        setSelectedValue(uniq);
+        userPickedRef.current = true;
+
+        // Preserve your accountName behavior using the last picked item (if needed)
+        const last = values[values.length - 1];
+        if (last) {
+            const findAccount = (data, accountNumber) =>
+                Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
+
+            const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
+            if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
+        }
+
+        onChangeSelect(values);     // now passing array
         setAccountChanged(true);
     };
+
+    const filteredAccounts = useMemo(() => {
+        const q = searchText.trim().toLowerCase();
+        if (!q) return accountsAccess;
+        return accountsAccess.filter((a) =>
+            `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
+        );
+    }, [accountsAccess, searchText]);
+
+    // helper to render the checkbox list using existing accountsAccess
+    const renderAccountsCheckboxes = (theme) => (
+        <Checkbox.Group
+            options={filteredAccounts.map((account) => ({
+                value: String(account.accountNumber),
+                label: (
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '5px 10px',
+                            borderBottom: '1px solid #ddd'
+                        }}
+                    >
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+                            {/* show accountName only when dropdown open (same as your old pattern) */}
+                            {isOpen && (
+                                <span style={{ fontSize: 12, color: 'gray' }}>
+                                    {account.accountName || ''}
+                                </span>
+                            )}
+                        </div>
+                        <span style={{ textAlign: 'right', marginLeft: 10 }}>
+                            {account.status === "Active" ? (
+                                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                            ) : (
+                                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+                            )}
+                        </span>
+                    </div>
+                ),
+            }))}
+            value={selectedValue}      // array of selected accountNumbers
+            onChange={handleChange1}   // updates your selectedValue + notifies parent
+            className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+        />
+    );
+
+
 
     // Create option with conditional rendering of additional info
     const createOption = (account) => {
@@ -10094,9 +10783,11 @@ const MyTablePage = () => {
         updatingColumnsStructure(columnStructure)
     }
 
-    const refreshComments = (comment) => {
-        functionCallForCommnets(comment);
-    }
+    // const refreshComments = (comment) => {
+    //     functionCallForCommnets(comment);
+    // }
+
+    const refreshComments = () => functionCallForCommnets(selectedValue);
 
 
     const items = [
@@ -10172,7 +10863,215 @@ const MyTablePage = () => {
             />
         </StickyBox>
     );
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState(null);
+    const [recDataByAccount, setRecDataByAccount] = useState({});
+    const [recAccounts, setRecAccounts] = useState([]);
+    const network = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]
+    function buildAiAssistantHref(selectedValue, network, time) {
+        const accounts = Array.isArray(selectedValue)
+            ? selectedValue
+            : String(selectedValue || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
 
+        if (!accounts.length) return '';
+        const accountsParam = encodeURIComponent(accounts.join(','));
+        const qs = new URLSearchParams();
+        if (network) qs.set('network', String(network));
+        if (time) qs.set('time', String(time));
+
+        const q = qs.toString();
+        return q
+            ? `/AiAssistant/${accountsParam}?${q}`
+            : `/AiAssistant/${accountsParam}`;
+    }
+
+    useEffect(() => {
+        const accounts = Array.isArray(selectedValue)
+            ? selectedValue
+            : String(selectedValue || '').split(',').map(s => s.trim()).filter(Boolean);
+
+        if (!accounts.length) {
+            setRecDataByAccount({});
+            setRecAccounts([]);
+            setAiLoading(false);
+            setAiError(null);
+            return;
+        }
+
+        // const url =
+        //     accounts.length === 1
+        //         ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
+        //         : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
+
+        // const token = localStorage.getItem('token');
+
+        (async () => {
+            try {
+                setAiLoading(true);
+                setAiError(null);
+
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = token;
+                }
+
+                const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
+
+                const res = await axios.post(
+                    `https://prodapis.adsgoat.in/Recommendations`,
+                    { "accounts": accounts, ...(accounts.length > 1 ? { "merge": true, "includeAccounts": true } : {}) },
+                    authHeaders
+                );
+                if (res.status === 404) {
+                    setRecDataByAccount({});
+                    setRecAccounts([]);
+                    setAiLoading(false);
+                    return;
+                }
+
+                // if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data =  res.data;
+                setRecDataByAccount(data);
+                // setRecAccounts(accounts.filter(acc => data?.[acc]));
+                const validAccounts = accounts.filter(acc => {
+                    const accountData = data?.[acc];
+                    if (!accountData) return false;
+
+                    const hasConditions = Array.isArray(accountData.condition) && accountData.condition.length > 0;
+                    const hasSummary = accountData.summary && Object.keys(accountData.summary).length > 0;
+
+                    return hasConditions || hasSummary;
+                });
+
+                setRecAccounts(validAccounts);
+            } catch (e) {
+                setAiError(e.message || 'Failed to load');
+                setRecDataByAccount({});
+                setRecAccounts([]);
+            } finally {
+                setAiLoading(false);
+            }
+        })();
+    }, [selectedValue]);
+    const aiItems = useMemo(() => {
+        if (aiLoading) {
+            return [
+                {
+                    key: 'loading',
+                    disabled: true,
+                    label: (
+                        <span style={{ fontSize: 13, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                            Loading recommendations…
+                        </span>
+                    ),
+                },
+            ];
+        }
+        // if (aiError) {
+        //     return [
+        //         {
+        //             key: 'error',
+        //             disabled: true,
+        //             label: (
+        //                 <span style={{ fontSize: 13, color: '#d4380d' }}>
+        //                     Error: {aiError}
+        //                 </span>
+        //             ),
+        //         },
+        //     ];
+        // }
+        if (recAccounts.length === 0) {
+            return [
+                {
+                    key: 'empty',
+                    disabled: true,
+                    label: (
+                        <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                            No recommendations found (last 2 days).
+                        </span>
+                    ),
+                },
+            ];
+        }
+        // const first = recDataByAccount[recAccounts[0]] || {};
+        // const condition = Array.isArray(first.condition) ? first.condition : [];
+        // Collect all conditions across valid accounts
+        const allConditions = new Set();
+        recAccounts.forEach(acc => {
+            const accConditions = recDataByAccount[acc]?.condition || [];
+            accConditions.forEach(c => allConditions.add(c));
+        });
+        const condition = Array.from(allConditions);
+
+        const totals = {};
+        condition.forEach(k => (totals[k] = 0));
+        recAccounts.forEach(acc => {
+            const s = recDataByAccount[acc]?.summary;
+            if (!s) return;
+            condition.forEach(k => {
+                totals[k] += Number(s?.[k]?.count || 0);
+            });
+        });
+        const LABEL_TEXT_BY_CONDITION = {
+            highROI: 'campaigns showing ROI > 20%',
+            lowROI: 'campaigns showing ROI < -20%',
+            lowCTR: 'campaigns showing CTR < 3%',
+        };
+        const buildQuery = (obj) => {
+            const qs = new URLSearchParams();
+            Object.entries(obj).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && String(v).trim() !== '') {
+                    qs.set(k, String(v));
+                }
+            });
+            return qs.toString();
+        };
+
+        const arr = condition.map((k, idx) => {
+            const text = LABEL_TEXT_BY_CONDITION[k] || 'campaigns';
+            return {
+                key: String(idx + 1),
+                label: (
+                    <div>
+                        <strong>{k} Campaigns</strong>
+                        <div style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#888' }}>
+                            {totals[k]} {text}
+                        </div>
+                    </div>
+                ),
+            };
+        });
+        arr.push({
+            type: 'divider',
+            style: {
+                border: theme === 'dark' ? '1px solid #ccc' : '1px solid #f0f0f0',
+                margin: '6px 0',
+            },
+        });
+
+
+        arr.push({
+            key: 'view-all',
+            label: (
+                <Button
+                    type="link"
+                    onClick={() => {
+                        const href = buildAiAssistantHref(selectedValue, network, time);
+                        if (href) window.open(href, '_blank', 'noopener,noreferrer');
+                    }}
+                    style={{ color: theme === 'dark' ? '#52c41a' : '#389e0d', padding: 0 }}
+                >
+                    View All Recommendations
+                </Button>
+            ),
+        });
+
+        return arr;
+    }, [aiLoading, aiError, recAccounts, recDataByAccount, theme]);
 
     return (
         <div className='reports-container'>
@@ -10314,12 +11213,13 @@ const MyTablePage = () => {
             </Space> */}
             <div style={{
                 display: "flex",
-                justifyContent: "space-between", 
+                justifyContent: "space-between",
                 alignItems: "center",
                 padding: "8px 0",
-                flexWrap: "wrap", 
+                flexWrap: "wrap",
                 gap: "12px"
             }}>
+
                 <Space direction="horizontal" style={{ width: '100%', flex: 1, gap: '8px' }}>
                     <Select
                         showSearch
@@ -10340,20 +11240,54 @@ const MyTablePage = () => {
                     />
 
                     {/* Account Selector */}
+                    {/* <Select
+                    showSearch
+                    onChange={handleChange1}
+                    placeholder="Select Account"
+                    value={accountNumberToPass ?? selectedValue}
+                    defaultValue={
+                        accountNumberFromDashboard ??
+                        storedData?.account ??
+                        networksData[0]?.accountNumber
+                    }
+                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                    style={{
+                        width: '230px',
+                        whiteSpace: 'nowrap',
+                        color: theme === 'dark' ? 'white' : undefined,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        border: '1px solid #4CAF50',
+                        borderRadius: '6px',
+                    }}
+                    optionFilterProp="value"
+                    options={accountsAccess.map(createOption)}
+                    onDropdownVisibleChange={handleDropdownVisibleChange}
+                /> */}
+
                     <Select
                         showSearch
-                        onChange={handleChange1}
+                        onSearch={setSearchText}
+                        searchValue={searchText}
                         placeholder="Select Account"
-                        value={accountNumberToPass ?? selectedValue}
-                        defaultValue={
-                            accountNumberFromDashboard ??
-                            storedData?.account ??
-                            networksData[0]?.accountNumber
+                        // Keep the visible state you already have
+                        open={isOpen}
+                        onDropdownVisibleChange={handleDropdownVisibleChange}
+
+                        // 👇 Show first account + count
+                        value={
+                            selectedValue.length === 0
+                                ? undefined
+                                : selectedValue.length === 1
+                                    ? selectedValue[0] // just that account number
+                                    : `${selectedValue[0]}, +${selectedValue.length - 1} more`
                         }
+
                         dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         style={{
-                            width: '230px',
+                            width: '250px',
                             whiteSpace: 'nowrap',
                             color: theme === 'dark' ? 'white' : undefined,
                             overflow: 'hidden',
@@ -10361,10 +11295,20 @@ const MyTablePage = () => {
                             border: '1px solid #4CAF50',
                             borderRadius: '6px',
                         }}
+
+                        // We are not using built-in options anymore
                         optionFilterProp="value"
-                        options={accountsAccess.map(createOption)}
-                        onDropdownVisibleChange={handleDropdownVisibleChange}
+                        // options={accountsAccess.map(createOption)}  // ❌ remove
+                        // onChange={handleChange1}                    // ❌ remove
+
+                        // Custom dropdown with checkboxes (no tick marks in the menu)
+                        dropdownRender={() => (
+                            <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
+                                {renderAccountsCheckboxes(theme)}
+                            </div>
+                        )}
                     />
+
 
                     {/* Date Range */}
                     <ConfigProvider
@@ -10427,20 +11371,19 @@ const MyTablePage = () => {
                         Apply
                     </Button>
                 </Space>
-              
                 <div style={{ textAlign: "right", marginRight: '15px' }}>
                     <h3 style={{
                         margin: 0,
                         fontSize: '20px',
                         fontWeight: 600,
-                        color: theme === 'dark' ? '#fff' : '#4b5563'  
+                        color: theme === 'dark' ? '#fff' : '#4b5563'
                     }}>
                         Strategic Reports Center
                     </h3>
                     <p style={{
                         margin: 0,
                         fontSize: '13px',
-                        color: theme === 'dark' ? '#cbd5e1' : '#6b7280'  
+                        color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
                     }}>
                         Deep insights for strategic decisions
                     </p>
@@ -10600,7 +11543,7 @@ const MyTablePage = () => {
                                 </Dropdown>
                                 {/* </Tooltip>         */}
 
-
+                                {/* 
                                 <Tooltip
                                     title={`🍳 This feature is cooking—almost ready to serve 😜`}
                                     overlayInnerStyle={{
@@ -10627,7 +11570,30 @@ const MyTablePage = () => {
                                     >
                                         AI Assistant
                                     </Button>
-                                </Tooltip>
+                                </Tooltip> */}
+                                <Dropdown
+                                    menu={{
+                                        items: aiItems,
+                                        className: theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light',
+                                    }}
+                                    trigger={['click']}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                                        disabled={aiLoading} // only disable while *loading*; keep enabled for "no data" to show message
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                                            fontWeight: 500,
+                                            marginRight: '5px',
+                                        }}
+                                    >
+                                        AI Assistant
+                                    </Button>
+                                </Dropdown>
 
                                 <Tooltip
                                     title={`🍳 This feature is cooking—almost ready to serve 😜`}
@@ -10695,7 +11661,8 @@ const MyTablePage = () => {
                                 <LiveReports
                                     startDate={newStartDate}
                                     endDate={newendDate}
-                                    newaccount={newaccount}
+                                    // newaccount={newaccount}
+                                    newaccount={Array.isArray(selectedValue) ? selectedValue : [selectedValue]}
                                     newtime={newtime}
                                     newRevenuePratner={newRevenuePratner}
                                     inputValue={inputValue}
@@ -10724,10 +11691,19 @@ const MyTablePage = () => {
                                         newaccount,
                                         userdetails,
                                         theme,
+                                        setCamapignlevelstatus,
+                                        campaignStatusOverridesRef, // ✅ ADD THIS
+                                        adsetStatusOverridesRef,
+                                        adsetPinOverridesRef,
+                                        adsetCommentOverridesRef,
+                                        adStatusOverridesRef,
+                                        adPinOverridesRef,
+                                        adCommentOverridesRef,
                                     }}
                                     handleChangeInput={handleChangeInput}
                                     handleBlur={handleBlur}
                                     onClickRefresh={onClickRefresh}
+                                    accountsAccess={accountsAccess}
                                 />
                                 {/* )} */}
                             </Tabs.TabPane>
@@ -10736,7 +11712,8 @@ const MyTablePage = () => {
                                 <DailyReports
                                     startDate={newStartDate}
                                     endDate={newendDate}
-                                    newaccount={newaccount}
+                                    // newaccount={newaccount}
+                                    newaccount={Array.isArray(selectedValue) ? selectedValue : [selectedValue]}
                                     newtime={newtime}
                                     newRevenuePratner={newRevenuePratner}
                                     inputValue={inputValue}
@@ -10764,11 +11741,20 @@ const MyTablePage = () => {
                                         newaccount,
                                         userdetails,
                                         theme,
+                                        campaignStatusOverridesRef, // ✅ ADD THIS
+                                        adsetStatusOverridesRef,
+                                        adsetPinOverridesRef,
+                                        adsetCommentOverridesRef,
+                                        adStatusOverridesRef,
+                                        adPinOverridesRef,
+                                        adCommentOverridesRef,
+
                                     }}
                                     theme={theme}
                                     handleChangeInput={handleChangeInput}
                                     handleBlur={handleBlur}
                                     onClickRefresh={onClickRefresh}
+                                    accountsAccess={accountsAccess}
                                 />
                             </Tabs.TabPane>
 
@@ -10799,6 +11785,7 @@ const MyTablePage = () => {
                                     handleChangeInput={handleChangeInput}
                                     handleBlur={handleBlur}
                                     onClickRefresh={onClickRefresh}
+                                    accountsAccess={accountsAccess}
                                 />
                             </Tabs.TabPane>
 

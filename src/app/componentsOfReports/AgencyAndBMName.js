@@ -120,6 +120,20 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
 
         },
         {
+            field: 'accountNumber',
+            headerName: 'Account',
+            minWidth: 150,
+            // resizable: true,
+            sortable: true,
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
+            flex: 9,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu'
+        },
+        {
             field: 'AgencyName',
             headerName: 'AgencyName',
             minWidth: 150,
@@ -250,6 +264,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                     conversions: 0,
                     fbLeads: 0,
                     adClicks: 0, // Store total ad_clicks
+                    accountNumber: item.accountNumber
                 };
             }
     

@@ -4,8 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
-import { InfoCircleOutlined, DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Badge} from 'antd';
+import { NumberOutlined, InfoCircleOutlined, DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
@@ -63,7 +63,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets}) => {
+const Daily = ({context, campaignStatusFilter, functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -191,644 +191,1328 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
         updateDetails();
     };
 
+    // const autoGroupColumnDef = {
+    //     headerName: 'Ad name',
+    //     minWidth: 450,
+    //     pinned: 'left',
+    //     sortable: true, // Enable sorting
+    //     unSortIcon: true,
+    //     headerClass: 'ag-center-header',
+    //     // filter: 'agTextColumnFilter',      // Enable string filter
+    //     // floatingFilter: false,              // Optional: show quick filter below header
+    //     // suppressMenu: false,
+    //     // showRowGroup: 'adname',
+    //     // field: 'adname',
+    //     // suppressCellSelection: true,
+
+    //     comparator: (campaignA, campaignB) => {
+    //         if (!campaignA) return 1;
+    //         if (!campaignB) return -1;
+
+    //         // Function to get the 'pinned' status of a campaign
+    //         const getPinStatusForCampaign = (campaignName) => {
+    //             const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //             return relatedComment ? relatedComment.pinned : false;
+    //         };
+
+    //         // Prioritize pinned campaigns first (pinned campaigns should come to the top)
+    //         const isPinnedA = getPinStatusForCampaign(campaignA);
+    //         const isPinnedB = getPinStatusForCampaign(campaignB);
+
+    //         if (isPinnedA !== isPinnedB) {
+    //             return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
+    //         }
+
+    //         // If both campaigns have the same pinned status, fallback to alphabetical sorting
+    //         return campaignA.localeCompare(campaignB);
+    //     },
+
+    //     cellRendererParams: {
+    //         suppressCount: false,
+    //         innerRenderer: (params) => {
+    //             if (params.node.footer) {
+    //                 return 'Total';
+    //             }
+
+    //             const firstColumnValue = params.node.key;  // campaign name
+    //             // const campaignName = params.node.key;
+    //             const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+    //             const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
+
+
+    //             let campaignid, adsetid, adid;
+
+    //             if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+    //                 const firstChild = params.node.childrenAfterGroup[0].data;
+    //                 campaignid = firstChild.campaignid;
+    //                 adsetid = firstChild.adsetid;
+    //                 adid = firstChild.adid;
+    //             } else if (params.data) {
+    //                 campaignid = params.data.campaignid;
+    //                 adsetid = params.data.adsetid;
+    //                 adid = params.data.adid;
+    //             } else {
+    //                 console.error('Missing campaignid or adsetid for campaign:', campaignName);
+    //                 return (
+    //                     <div style={{ color: 'red' }}>
+    //                         Error: campaignid or adsetid missing for {campaignName}
+    //                     </div>
+    //                 );
+    //             }
+    //             const getEditedUserAndTime = (campaignName, newaccount) => {
+    //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+    //                 // console.log(relatedStatus, "relatedStatus");
+    //                 const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+    //                 // console.log(relatedStatusTrue);
+    //                 return relatedStatusEditedTime;
+    //             }
+
+    //             const getPinEditedUserAndTime = (campaignName, newaccount) => {
+    //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+    //                 return relatedStatus ? relatedStatus : null;
+    //             };
+
+    //             const getStatusForCampaign = (campaignName, newaccount) => {
+    //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+    //                 // console.log(relatedStatus, "relatedStatus");
+    //                 const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+    //                 // console.log(relatedStatusTrue);
+    //                 return relatedStatusTrue;
+    //             }
+
+    //             const getCommentForCampaign = (campaignName) => {
+    //                 const relatedComment = campaignComments.find(comment => comment.campaignname === adName);
+    //                 return relatedComment ? relatedComment.comment : null;
+    //             };
+
+    //             const getPinStatusForCampaign = (campaignName) => {
+    //                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //                 return relatedComment ? relatedComment.pinned : false;
+    //             };
+
+    //             const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+    //             const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
+    //             const relatedStatus = getStatusForCampaign(campaignName, newaccount);
+    //             const relatedComment = getCommentForCampaign(campaignName);
+    //             // const isStarred = getStarredForCampaign(campaignName);
+    //             const valueWithCount = `${firstColumnValue}`;
+
+    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
+    //             const [isModalVisibles, setIsModalVisibles] = useState(false);
+
+    //             const [isAdidModalVisibles, setIsAdidModalVisibles] = useState(false);
+    //             const [selectedAdid, setSelectedAdid] = useState(null); // store adid when switch clicked
+    //             // const [switchOn, setSwitchOn] = useState(false); // control toggle state
+    //             const [switchStates, setSwitchStates] = useState({}); // { adid1: true, adid2: false }
+    //             const [nextChecked, setNextChecked] = useState(false); // what user clicked
+
+    //             const [comment, setComment] = useState(relatedComment || '');
+    //             // const [starred, setStarred] = useState(isStarred);
+    //             const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
+
+    //              // Update switch state from AdLevel
+    //             //  useEffect(() => {
+    //             //     const matchedComment = campaignComments.find(
+    //             //     (item) =>
+    //             //         item.campaignid === campaignid &&
+    //             //         item.adsetid === adsetid &&
+    //             //         item.AdLevel?.ad_id === adid
+    //             //     );
+                
+    //             //     if (matchedComment?.AdLevel?.status) {
+    //             //         setSwitchOn(matchedComment.AdLevel.status === "ACTIVE");
+    //             //     } else {
+    //             //         // Default to ACTIVE if AdLevel doesn't exist
+    //             //         setSwitchOn(true);
+    //             //       }
+    //             // }, [campaignComments, campaignid, adsetid, adid]);
+
+    //             useEffect(() => {
+    //                 if (!adid) return;
+
+    //                 // Search by campaignid only, not adsetid
+    //                 const matchedComment = campaignComments.find(
+    //                     (item) =>
+    //                     item.campaignid === campaignid &&
+    //                     Array.isArray(item.AdLevel) &&
+    //                     item.AdLevel.some(ad => ad.ad_id === adid)
+    //                 );
+                  
+    //                 // const matchedComment = campaignComments.find(
+    //                 //   (item) =>
+    //                 //     item.campaignid === campaignid &&
+    //                 //     item.adsetid === adsetid &&
+    //                 //     Array.isArray(item.AdLevel) &&
+    //                 //     item.AdLevel.find(ad => ad.ad_id === adid)
+    //                 // );
+                  
+    //                 const adEntry = matchedComment?.AdLevel?.find(ad => ad.ad_id === adid);
+    //                 const isActive = adEntry?.status === "ACTIVE";
+                  
+    //                 if (matchedComment && adEntry) {
+    //                     setSwitchStates((prev) => ({
+    //                       ...prev,
+    //                       [adid]: isActive
+    //                     }));
+    //                 }else {
+    //                     // fallback to true (assume ACTIVE) if no comment in DB
+    //                     setSwitchStates((prev) => ({
+    //                       ...prev,
+    //                       [adid]: true
+    //                     }));
+    //                 }
+    //             }, [campaignComments, campaignid, adsetid, adid]);
+
+    //             const handlePauseClick = (adid, checked) => {
+    //                 setSelectedAdid(adid); 
+    //                 setNextChecked(checked); // user’s toggle intent
+    //                 setIsAdidModalVisibles(true);
+    //             };
+
+    //             const handlePauseOk = async () => {
+    //                 if (!selectedAdid) {
+    //                     console.warn("No ad selected.");
+    //                     return;
+    //                 }
+
+    //                 // update visual switch state for selected ad
+    //                 setSwitchStates((prev) => ({
+    //                     ...prev,
+    //                     [selectedAdid]: nextChecked
+    //                 }));
+
+    //                 // setSwitchOn(nextChecked); // update visual switch state
+                  
+    //                 try {
+    //                   const token = localStorage.getItem("token");
+                  
+    //                   const response = await apiClient.post(`/adStatusChange`,
+    //                     {
+    //                         status: nextChecked ? "ACTIVE" : "PAUSED",
+    //                         id: params.data?.identifier,             
+    //                         ad_id: selectedAdid,                              
+    //                         name: campaignName,
+    //                         accountNumber: newaccount,
+    //                         revenuePartner: params.data?.revenuePartner || "",
+    //                         campaign_id: campaignid,
+    //                         adset_id: adsetid,
+    //                         email: userdetails?.email,
+    //                     },
+    //                     {
+    //                       headers: {
+    //                         Authorization: token
+    //                       }
+    //                     }
+    //                   );
+                  
+    //                   if (response.status === 200 || response.status === 201) {
+    //                     functionCallForCommnets(newaccount)
+    //                     console.log(" Status updated on Facebook:", response.data.status, "Ad ID:", response.data.ad_id);
+    //                   } else {
+    //                     console.warn(" Backend returned unexpected status:", response.status);
+    //                   }
+                  
+    //                 } catch (error) {
+    //                   console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
+    //                 }
+                  
+    //                 setIsAdidModalVisibles(false);
+    //                 setSelectedAdid(null);
+    //             };
+                                   
+    //             const handlePauseCancel = () => {
+    //                 setIsAdidModalVisibles(false);
+    //                 setSelectedAdid(null);
+    //             };
+
+
+    //             const copyToClipboard = () => {
+    //                 navigator.clipboard.writeText(firstColumnValue)
+    //                     .then(() => {
+    //                         setTooltipText("Copied!");
+    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
+    //                     })
+    //                     .catch(() => {
+    //                         console.error('Failed to copy to clipboard');
+    //                     });
+    //             };
+
+    //             const handleEditClick = () => {
+    //                 setIsModalVisibles(true);
+    //             };
+
+    //             const sendNewCommentToAPI = async (logData) => {
+    //                 try {
+    //                     const response = await apiClient.post('/Comments', {
+    //                         commentsdatas: logData,
+    //                     });
+    //                     // console.log('Response from server:', response.data);
+    //                 } catch (error) {
+    //                     console.error('Error sending data to server:', error);
+    //                 }
+    //             };
+
+    //             const sendEditedCommentToAPI = async (logData) => {
+    //                 try {
+    //                     const response = await apiClient.post('/Comments/edit', {
+    //                         campaignname: logData.campaignname,
+    //                         comment: logData.comment,
+    //                         Account: logData.Account,
+    //                         adsetid: logData.adsetid,
+    //                         campaignid: logData.campaignid,
+    //                         status: true
+    //                     });
+    //                     // console.log('Response from server (edited comment):', response.data);
+    //                     return response.data;
+    //                 } catch (error) {
+    //                     console.error('Error sending edited comment to server:', error);
+    //                     throw error;
+    //                 }
+    //             };
+
+    //             const handleDelete = async () => {
+    //                 try {
+    //                     // Prepare the payload for the API call
+    //                     const payload = {
+    //                         campaignname: firstColumnValue,
+    //                         Account: newaccount,
+    //                         adsetid: adsetid,
+    //                         campaignid: campaignid,
+    //                     };
+                
+    //                     // Call the backend API to delete the comment
+    //                     const response = await apiClient.post('/Comments/delete', payload);
+                
+    //                     if (response.status === 200 || response.status === 201) {
+    //                         // Remove the comment from the local state
+    //                         // const updatedComments = campaignComments.filter(
+    //                         //     (comment) => comment.campaignname !== firstColumnValue
+    //                         // );
+                
+    //                         // // Update the state with the updated comments
+    //                         // setCampaignComments(updatedComments);
+    //                         refreshComments(newaccount);
+                
+    //                         // Refresh the table or any other UI component
+    //                         // changeRRefrst();
+                
+    //                         message.success('Comment deleted successfully!');
+    //                         setIsModalVisibles(false); // Close the popup
+    //                     } else {
+    //                         message.error('Failed to delete the comment. Please try again.');
+    //                     }
+    //                 } catch (error) {
+    //                     console.error('Error deleting the comment:', error);
+    //                     message.error('Failed to delete the comment. Please try again.');
+    //                 }
+    //             };
+
+    //             const handleOks = async () => {
+    //                 try {
+    //                     const logData = {
+    //                         Account: newaccount,
+    //                         usercommit: userdetails?.email,
+    //                         campaignname: firstColumnValue,
+    //                         comment: comment,
+    //                         campaignid: campaignid,
+    //                         adsetid: adsetid
+    //                     };
+
+    //                     if (relatedComment) {
+    //                         await sendEditedCommentToAPI(logData);
+    //                         refreshComments(newaccount);
+    //                         message.success("Comment updated successfully!");
+    //                     } else {
+    //                         await sendNewCommentToAPI(logData);
+    //                         refreshComments(newaccount);
+    //                         message.success("New comment added successfully!");
+    //                     }
+
+                        
+    //                     setIsModalVisibles(false);
+    //                 } catch (error) {
+    //                     console.error('Error while submitting comment:', error);
+    //                     message.error("Error while submitting the comment.");
+    //                 }
+    //             };
+
+    //             const handleCancels = () => {
+    //                 setIsModalVisibles(false);
+    //             };
+
+    //             const CustomTooltipContent = ({ editedTime, usercommit }) => (
+    //                 <div style={{ padding: '5px', borderRadius: '5px' }}>
+    //                     <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
+    //                     <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+    //                 </div>
+    //             );
+
+    //             const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
+    //                 const updatedPinStatus = !currentPinStatus;
+
+    //                 try {
+    //                     let response;
+    //                     if (updatedPinStatus) {
+    //                         response = await apiClient.post('/Pin', {
+    //                             campaignname: campaignName,
+    //                             Account: newaccount,
+    //                             campaignid: campaignid,
+    //                             adsetid: adsetid,
+    //                             userPin: userdetails?.email,
+    //                             comment: comment || ''
+    //                         });
+    //                         // changeRRefrst();
+    //                         if(response.status ===200 || response.status === 201){
+    //                             refreshComments(newaccount);
+    //                         }
+
+    //                         message.success("Campaign pinned!");
+    //                     } else {
+    //                         response = await apiClient.post('/Unpin', {
+    //                             campaignname: campaignName,
+    //                             Account: newaccount,
+    //                             campaignid: campaignid,
+    //                             adsetid: adsetid
+    //                         });
+    //                         // changeRRefrst();
+    //                         if(response.status ===200 || response.status === 201){
+    //                             refreshComments(newaccount);
+    //                         }
+
+    //                         message.success("Campaign unpinned!");
+    //                     }
+
+    //                     // Update campaignComments with the new pinned status and edited user/time
+    //                     // const updatedComments = campaignComments.map(cmt =>
+    //                     //     cmt.campaignname === campaignName
+    //                     //         ? {
+    //                     //             ...cmt,
+    //                     //             pinned: updatedPinStatus,
+    //                     //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    //                     //             userPin: userdetails?.email
+    //                     //         }
+    //                     //         : cmt
+    //                     // );
+
+    //                     // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
+    //                     //     updatedComments.push({
+    //                     //         campaignname: campaignName,
+    //                     //         pinned: updatedPinStatus,
+    //                     //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    //                     //         userPin: userdetails?.email
+    //                     //     });
+    //                     // }
+    //                     // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
+    //                     // setCampaignComments(sortedComments);
+    //                     setPinned(updatedPinStatus);
+    //                 } catch (error) {
+    //                     console.error('Error toggling pin status', error);
+    //                     message.error('Error while updating pin status.');
+    //                 }
+    //             };
+
+    //             const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
+    //                 return (
+    //                     <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
+    //                         <button
+    //                             onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+    //                             style={{
+    //                                 border: "none",
+    //                                 background: "none",
+    //                                 cursor: "pointer",
+    //                                 fontSize: "16px",
+    //                             }}
+    //                         >
+    //                             {pinned ? "📌" : "📍"}
+    //                         </button>
+    //                     </Tooltip>
+    //                 );
+    //             };
+
+    //             return (
+    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    //                     <Switch 
+    //                         // checked={switchOn}
+    //                         checked={!!switchStates[adid]}
+    //                         onClick={(checked) => handlePauseClick(adid, checked)}
+    //                         size="small" 
+    //                         style={{
+    //                           backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9',
+    //                         }} 
+    //                     />
+    //                     <Modal
+    //                         title="Confirm Action"
+    //                         open={isAdidModalVisibles}
+    //                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+    //                         onOk={handlePauseOk}
+    //                         onCancel={handlePauseCancel}
+    //                     >
+    //                         <p>
+    //                             Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?
+    //                         </p>
+    //                         <p>Ad ID: {selectedAdid}</p>
+    //                     </Modal>
+    //                     <PinIcon
+    //                         campaignName={campaignName}
+    //                         campaignid={campaignid}
+    //                         adsetid={adsetid}
+    //                         // pinned={getPinStatusForCampaign(campaignName)}
+    //                         pinned={pinned}
+    //                     />
+    //                     {/* <div style={{ marginLeft: '2px' }}>
+    //                         {(() => {
+    //                             // Find the matching campaign in the Camapignlevelstatus array
+    //                             const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
+
+    //                             if (campaignStatus) {
+    //                                 const { status, start, end } = campaignStatus;
+
+    //                                 // Tooltip content with start and end dates
+    //                                 const tooltipContent = (
+    //                                     <div>
+    //                                         <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
+    //                                         <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
+    //                                     </div>
+    //                                 );
+
+    //                                 if (status === 'PAUSED') {
+    //                                     return (
+    //                                         <Tooltip title={tooltipContent}>
+    //                                             <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} className='black-icon-pause' />
+    //                                         </Tooltip>
+    //                                     );
+    //                                 } else if (status === 'ACTIVE') {
+    //                                     return (
+    //                                         <Tooltip title={tooltipContent}>
+    //                                             <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active'/>
+    //                                         </Tooltip>
+    //                                     );
+    //                                 } else {
+    //                                     // Default for unknown status
+    //                                     return (
+    //                                         <Tooltip title={tooltipContent}>
+    //                                             <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+    //                                         </Tooltip>
+    //                                     );
+    //                                 }
+    //                             } else {
+    //                                 // Fallback if no matching campaign is found
+    //                                 return (
+    //                                     <Tooltip title="No campaign data available">
+    //                                         <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+    //                                     </Tooltip>
+    //                                 );
+    //                             }
+    //                         })()}
+    //                     </div> */}
+    //                     {relatedComment ? (
+    //                         <Tooltip
+    //                             // title={relatedComment || 'No comment available'}
+    //                             title={
+    //                                 <div>
+    //                                   <div>{relatedComment || 'No comment available'}</div>
+    //                                   <div>
+    //                                     {editUserANdTime
+    //                                       ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+    //                                       : ""}
+    //                                   </div>
+    //                                 </div>
+    //                             }
+    //                             overlayInnerStyle={{
+    //                                 backgroundColor: theme === 'dark' ? '#111' : '#fff',
+    //                                 color: theme === 'dark' ? '#fff' : '#000',
+    //                                 border: '1px solid #ccc',   
+    //                                 borderRadius: 6,
+    //                                 // fontWeight: 500,
+    //                             }}
+    //                         >
+    //                             <MessageOutlined
+    //                             className={theme === "dark" ? "black-icon-comment" : 'Message'}
+    //                             style={{
+    //                                 cursor: 'pointer',
+    //                                 marginLeft: '10px',
+    //                                 marginRight: '10px',
+    //                                 color: '#4CAF50'
+    //                             }}
+    //                             onClick={handleEditClick} // Open modal directly on click
+    //                             />
+    //                         </Tooltip>
+    //                     ) : (
+    //                         <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
+    //                     )}
+    //                     <Tooltip 
+    //                         title={tooltipText}
+    //                         overlayInnerStyle={{
+    //                             backgroundColor: theme === 'dark' ? '#111' : '#fff',
+    //                             color: theme === 'dark' ? '#fff' : '#000',
+    //                             border: '1px solid #ccc',   
+    //                             borderRadius: 6,
+    //                             // fontWeight: 500,
+    //                         }}
+    //                     >
+    //                         <CopyOutlined
+    //                             onClick={copyToClipboard}
+    //                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
+    //                         />
+    //                     </Tooltip>
+    //                     <LinkOutlined 
+    //                         onClick={() => {
+    //                             const url = `/DailyAndCampaignHistory/AdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+    //                             window.open(url, '_blank', 'noopener,noreferrer');
+    //                         }}
+    //                         style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
+    //                     />
+    //                     <Tooltip 
+    //                         title={valueWithCount}
+    //                         overlayInnerStyle={{
+    //                             backgroundColor: theme === 'dark' ? '#111' : '#fff',
+    //                             color: theme === 'dark' ? '#fff' : '#000',
+    //                             border: '1px solid #ccc',   
+    //                             borderRadius: 6,
+    //                             // fontWeight: 500,
+    //                         }}
+    //                     >
+    //                         <span
+    //                             // onClick={() => {
+    //                             //     const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+    //                             //     window.open(url, '_blank', 'noopener,noreferrer');
+    //                             // }}
+    //                         >
+    //                             {valueWithCount}
+    //                         </span>
+    //                     </Tooltip>
+    //                     <Modal
+    //                         title={firstColumnValue}
+    //                         visible={isModalVisibles}
+    //                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+    //                         onOk={handleOks} // Default Ok button functionality
+    //                         onCancel={handleCancels} // Default Cancel button functionality
+    //                         footer={[
+    //                             <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+    //                                 <div style={{display:'flex', flexDirection:"column"}}>
+    //                                     <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
+    //                                         Last Edited Time:
+    //                                     </span>
+    //                                     <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
+    //                                         {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
+    //                                     </span>
+
+    //                                 </div>
+    //                                 <div>
+    //                                 <Button
+    //                                     key="delete"
+    //                                     type="danger"
+    //                                     onClick={handleDelete}
+    //                                     style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
+    //                                 >
+    //                                     Delete
+    //                                 </Button>
+    //                                 <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+    //                                     Cancel
+    //                                 </Button>
+    //                                 <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
+    //                                     Ok
+    //                                 </Button>
+    //                                 </div>
+    //                             </div>
+    //                         ]}
+    //                     >
+    //                         <Input.TextArea
+    //                             placeholder="Enter your comments here"
+    //                             value={comment}
+    //                             onChange={(e) => setComment(e.target.value)}
+    //                         />
+    //                     </Modal>
+    //                 </div>
+    //             );
+    //         }
+    //     }
+    // };
+
     const autoGroupColumnDef = {
         headerName: 'Ad name',
         minWidth: 450,
         pinned: 'left',
-        sortable: true, // Enable sorting
+        sortable: true,
         unSortIcon: true,
         headerClass: 'ag-center-header',
-        // filter: 'agTextColumnFilter',      // Enable string filter
-        // floatingFilter: false,              // Optional: show quick filter below header
-        // suppressMenu: false,
-        // showRowGroup: 'adname',
-        // field: 'adname',
-        // suppressCellSelection: true,
+      
+        // comparator: (campaignA, campaignB) => {
+        //   if (!campaignA) return 1;
+        //   if (!campaignB) return -1;
+      
+        //   const getPinStatusForCampaign = (campaignName) => {
+        //     const relatedComment = campaignComments.find(c => c.campaignname === campaignName);
+        //     return relatedComment ? relatedComment.pinned : false;
+        //   };
+      
+        //   const isPinnedA = getPinStatusForCampaign(campaignA);
+        //   const isPinnedB = getPinStatusForCampaign(campaignB);
+        //   if (isPinnedA !== isPinnedB) return isPinnedA ? -1 : 1;
+      
+        //   return campaignA.localeCompare(campaignB);
+        // },
 
-        comparator: (campaignA, campaignB) => {
-            if (!campaignA) return 1;
-            if (!campaignB) return -1;
-
-            // Function to get the 'pinned' status of a campaign
-            const getPinStatusForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                return relatedComment ? relatedComment.pinned : false;
-            };
-
-            // Prioritize pinned campaigns first (pinned campaigns should come to the top)
-            const isPinnedA = getPinStatusForCampaign(campaignA);
-            const isPinnedB = getPinStatusForCampaign(campaignB);
-
-            if (isPinnedA !== isPinnedB) {
-                return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
-            }
-
-            // If both campaigns have the same pinned status, fallback to alphabetical sorting
-            return campaignA.localeCompare(campaignB);
+        comparator: (a, b, nodeA, nodeB) => {
+               const pickPinned = (node) => {
+                 const d = node?.group && node.childrenAfterGroup?.length
+                   ? node.childrenAfterGroup[0]?.data
+                   : node?.data;
+                 if (!d) return false;
+                 if (typeof d.__adPinned === 'boolean') return d.__adPinned; // local cache
+                 return !!d.pinned; // initial fallback if your rowData has `pinned`
+               };
+               const pa = pickPinned(nodeA);
+               const pb = pickPinned(nodeB);
+               if (pa !== pb) return pa ? -1 : 1;
+               return String(a || '').localeCompare(String(b || ''));
         },
-
+      
+        // ✅ use AG Grid group renderer (like Adlevel.js)
+        cellRenderer: "agGroupCellRenderer",
         cellRendererParams: {
-            suppressCount: false,
-            innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total';
-                }
-
-                const firstColumnValue = params.node.key;  // campaign name
-                // const campaignName = params.node.key;
-                const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
-                const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
-
-
-                let campaignid, adsetid, adid;
-
-                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
-                    const firstChild = params.node.childrenAfterGroup[0].data;
-                    campaignid = firstChild.campaignid;
-                    adsetid = firstChild.adsetid;
-                    adid = firstChild.adid;
-                } else if (params.data) {
-                    campaignid = params.data.campaignid;
-                    adsetid = params.data.adsetid;
-                    adid = params.data.adid;
-                } else {
-                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
-                    return (
-                        <div style={{ color: 'red' }}>
-                            Error: campaignid or adsetid missing for {campaignName}
-                        </div>
-                    );
-                }
-                const getEditedUserAndTime = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    // console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
-                    // console.log(relatedStatusTrue);
-                    return relatedStatusEditedTime;
-                }
-
-                const getPinEditedUserAndTime = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    return relatedStatus ? relatedStatus : null;
-                };
-
-                const getStatusForCampaign = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    // console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
-                    // console.log(relatedStatusTrue);
-                    return relatedStatusTrue;
-                }
-
-                const getCommentForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === adName);
-                    return relatedComment ? relatedComment.comment : null;
-                };
-
-                const getPinStatusForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.pinned : false;
-                };
-
-                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
-                const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
-                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
-                const relatedComment = getCommentForCampaign(campaignName);
-                // const isStarred = getStarredForCampaign(campaignName);
-                const valueWithCount = `${firstColumnValue}`;
-
-                const [tooltipText, setTooltipText] = useState("Click to Copy");
-                const [isModalVisibles, setIsModalVisibles] = useState(false);
-
-                const [isAdidModalVisibles, setIsAdidModalVisibles] = useState(false);
-                const [selectedAdid, setSelectedAdid] = useState(null); // store adid when switch clicked
-                // const [switchOn, setSwitchOn] = useState(false); // control toggle state
-                const [switchStates, setSwitchStates] = useState({}); // { adid1: true, adid2: false }
-                const [nextChecked, setNextChecked] = useState(false); // what user clicked
-
-                const [comment, setComment] = useState(relatedComment || '');
-                // const [starred, setStarred] = useState(isStarred);
-                const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
-
-                 // Update switch state from AdLevel
-                //  useEffect(() => {
-                //     const matchedComment = campaignComments.find(
-                //     (item) =>
-                //         item.campaignid === campaignid &&
-                //         item.adsetid === adsetid &&
-                //         item.AdLevel?.ad_id === adid
-                //     );
-                
-                //     if (matchedComment?.AdLevel?.status) {
-                //         setSwitchOn(matchedComment.AdLevel.status === "ACTIVE");
-                //     } else {
-                //         // Default to ACTIVE if AdLevel doesn't exist
-                //         setSwitchOn(true);
-                //       }
-                // }, [campaignComments, campaignid, adsetid, adid]);
-
-                useEffect(() => {
-                    if (!adid) return;
-
-                    // Search by campaignid only, not adsetid
-                    const matchedComment = campaignComments.find(
-                        (item) =>
-                        item.campaignid === campaignid &&
-                        Array.isArray(item.AdLevel) &&
-                        item.AdLevel.some(ad => ad.ad_id === adid)
-                    );
-                  
-                    // const matchedComment = campaignComments.find(
-                    //   (item) =>
-                    //     item.campaignid === campaignid &&
-                    //     item.adsetid === adsetid &&
-                    //     Array.isArray(item.AdLevel) &&
-                    //     item.AdLevel.find(ad => ad.ad_id === adid)
-                    // );
-                  
-                    const adEntry = matchedComment?.AdLevel?.find(ad => ad.ad_id === adid);
-                    const isActive = adEntry?.status === "ACTIVE";
-                  
-                    if (matchedComment && adEntry) {
-                        setSwitchStates((prev) => ({
-                          ...prev,
-                          [adid]: isActive
-                        }));
-                    }else {
-                        // fallback to true (assume ACTIVE) if no comment in DB
-                        setSwitchStates((prev) => ({
-                          ...prev,
-                          [adid]: true
-                        }));
-                    }
-                }, [campaignComments, campaignid, adsetid, adid]);
-
-                const handlePauseClick = (adid, checked) => {
-                    setSelectedAdid(adid); 
-                    setNextChecked(checked); // user’s toggle intent
-                    setIsAdidModalVisibles(true);
-                };
-
-                const handlePauseOk = async () => {
-                    if (!selectedAdid) {
-                        console.warn("No ad selected.");
-                        return;
-                    }
-
-                    // update visual switch state for selected ad
-                    setSwitchStates((prev) => ({
-                        ...prev,
-                        [selectedAdid]: nextChecked
-                    }));
-
-                    // setSwitchOn(nextChecked); // update visual switch state
-                  
-                    try {
-                      const token = localStorage.getItem("token");
-                  
-                      const response = await apiClient.post(`/adStatusChange`,
-                        {
-                            status: nextChecked ? "ACTIVE" : "PAUSED",
-                            id: params.data?.identifier,             
-                            ad_id: selectedAdid,                              
-                            name: campaignName,
-                            accountNumber: newaccount,
-                            revenuePartner: params.data?.revenuePartner || "",
-                            campaign_id: campaignid,
-                            adset_id: adsetid,
-                            email: userdetails?.email,
-                        },
-                        {
-                          headers: {
-                            Authorization: token
-                          }
-                        }
-                      );
-                  
-                      if (response.status === 200 || response.status === 201) {
-                        // functionCallForCommnets(newaccount)
-                        console.log(" Status updated on Facebook:", response.data.status, "Ad ID:", response.data.ad_id);
-                      } else {
-                        console.warn(" Backend returned unexpected status:", response.status);
-                      }
-                  
-                    } catch (error) {
-                      console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
-                    }
-                  
-                    setIsAdidModalVisibles(false);
-                    setSelectedAdid(null);
-                };
-                                   
-                const handlePauseCancel = () => {
-                    setIsAdidModalVisibles(false);
-                    setSelectedAdid(null);
-                };
-
-
-                const copyToClipboard = () => {
-                    navigator.clipboard.writeText(firstColumnValue)
-                        .then(() => {
-                            setTooltipText("Copied!");
-                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
-                        })
-                        .catch(() => {
-                            console.error('Failed to copy to clipboard');
-                        });
-                };
-
-                const handleEditClick = () => {
-                    setIsModalVisibles(true);
-                };
-
-                const sendNewCommentToAPI = async (logData) => {
-                    try {
-                        const response = await apiClient.post('/Comments', {
-                            commentsdatas: logData,
-                        });
-                        // console.log('Response from server:', response.data);
-                    } catch (error) {
-                        console.error('Error sending data to server:', error);
-                    }
-                };
-
-                const sendEditedCommentToAPI = async (logData) => {
-                    try {
-                        const response = await apiClient.post('/Comments/edit', {
-                            campaignname: logData.campaignname,
-                            comment: logData.comment,
-                            Account: logData.Account,
-                            adsetid: logData.adsetid,
-                            campaignid: logData.campaignid,
-                            status: true
-                        });
-                        // console.log('Response from server (edited comment):', response.data);
-                        return response.data;
-                    } catch (error) {
-                        console.error('Error sending edited comment to server:', error);
-                        throw error;
-                    }
-                };
-
-                const handleDelete = async () => {
-                    try {
-                        // Prepare the payload for the API call
-                        const payload = {
-                            campaignname: firstColumnValue,
-                            Account: newaccount,
-                            adsetid: adsetid,
-                            campaignid: campaignid,
-                        };
-                
-                        // Call the backend API to delete the comment
-                        const response = await apiClient.post('/Comments/delete', payload);
-                
-                        if (response.status === 200 || response.status === 201) {
-                            // Remove the comment from the local state
-                            // const updatedComments = campaignComments.filter(
-                            //     (comment) => comment.campaignname !== firstColumnValue
-                            // );
-                
-                            // // Update the state with the updated comments
-                            // setCampaignComments(updatedComments);
-                            refreshComments(newaccount);
-                
-                            // Refresh the table or any other UI component
-                            // changeRRefrst();
-                
-                            message.success('Comment deleted successfully!');
-                            setIsModalVisibles(false); // Close the popup
-                        } else {
-                            message.error('Failed to delete the comment. Please try again.');
-                        }
-                    } catch (error) {
-                        console.error('Error deleting the comment:', error);
-                        message.error('Failed to delete the comment. Please try again.');
-                    }
-                };
-
-                const handleOks = async () => {
-                    try {
-                        const logData = {
-                            Account: newaccount,
-                            usercommit: userdetails?.email,
-                            campaignname: firstColumnValue,
-                            comment: comment,
-                            campaignid: campaignid,
-                            adsetid: adsetid
-                        };
-
-                        if (relatedComment) {
-                            await sendEditedCommentToAPI(logData);
-                            refreshComments(newaccount);
-                            message.success("Comment updated successfully!");
-                        } else {
-                            await sendNewCommentToAPI(logData);
-                            refreshComments(newaccount);
-                            message.success("New comment added successfully!");
-                        }
-
-                        
-                        setIsModalVisibles(false);
-                    } catch (error) {
-                        console.error('Error while submitting comment:', error);
-                        message.error("Error while submitting the comment.");
-                    }
-                };
-
-                const handleCancels = () => {
-                    setIsModalVisibles(false);
-                };
-
-                const CustomTooltipContent = ({ editedTime, usercommit }) => (
-                    <div style={{ padding: '5px', borderRadius: '5px' }}>
-                        <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
-                        <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
-                    </div>
-                );
-
-                const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
-                    const updatedPinStatus = !currentPinStatus;
-
-                    try {
-                        let response;
-                        if (updatedPinStatus) {
-                            response = await apiClient.post('/Pin', {
-                                campaignname: campaignName,
-                                Account: newaccount,
-                                campaignid: campaignid,
-                                adsetid: adsetid,
-                                userPin: userdetails?.email,
-                                comment: comment || ''
-                            });
-                            // changeRRefrst();
-                            if(response.status ===200 || response.status === 201){
-                                refreshComments(newaccount);
-                            }
-
-                            message.success("Campaign pinned!");
-                        } else {
-                            response = await apiClient.post('/Unpin', {
-                                campaignname: campaignName,
-                                Account: newaccount,
-                                campaignid: campaignid,
-                                adsetid: adsetid
-                            });
-                            // changeRRefrst();
-                            if(response.status ===200 || response.status === 201){
-                                refreshComments(newaccount);
-                            }
-
-                            message.success("Campaign unpinned!");
-                        }
-
-                        // Update campaignComments with the new pinned status and edited user/time
-                        // const updatedComments = campaignComments.map(cmt =>
-                        //     cmt.campaignname === campaignName
-                        //         ? {
-                        //             ...cmt,
-                        //             pinned: updatedPinStatus,
-                        //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-                        //             userPin: userdetails?.email
-                        //         }
-                        //         : cmt
-                        // );
-
-                        // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
-                        //     updatedComments.push({
-                        //         campaignname: campaignName,
-                        //         pinned: updatedPinStatus,
-                        //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-                        //         userPin: userdetails?.email
-                        //     });
-                        // }
-                        // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
-                        // setCampaignComments(sortedComments);
-                        setPinned(updatedPinStatus);
-                    } catch (error) {
-                        console.error('Error toggling pin status', error);
-                        message.error('Error while updating pin status.');
-                    }
-                };
-
-                const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
-                    return (
-                        <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
-                            <button
-                                onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
-                                style={{
-                                    border: "none",
-                                    background: "none",
-                                    cursor: "pointer",
-                                    fontSize: "16px",
-                                }}
-                            >
-                                {pinned ? "📌" : "📍"}
-                            </button>
-                        </Tooltip>
-                    );
-                };
-
-                return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <Switch 
-                            // checked={switchOn}
-                            checked={!!switchStates[adid]}
-                            onClick={(checked) => handlePauseClick(adid, checked)}
-                            size="small" 
-                            style={{
-                              backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9',
-                            }} 
-                        />
-                        <Modal
-                            title="Confirm Action"
-                            open={isAdidModalVisibles}
-                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                            onOk={handlePauseOk}
-                            onCancel={handlePauseCancel}
-                        >
-                            <p>
-                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?
-                            </p>
-                            <p>Ad ID: {selectedAdid}</p>
-                        </Modal>
-                        <PinIcon
-                            campaignName={campaignName}
-                            campaignid={campaignid}
-                            adsetid={adsetid}
-                            // pinned={getPinStatusForCampaign(campaignName)}
-                            pinned={pinned}
-                        />
-                        {/* <div style={{ marginLeft: '2px' }}>
-                            {(() => {
-                                // Find the matching campaign in the Camapignlevelstatus array
-                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
-
-                                if (campaignStatus) {
-                                    const { status, start, end } = campaignStatus;
-
-                                    // Tooltip content with start and end dates
-                                    const tooltipContent = (
-                                        <div>
-                                            <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
-                                            <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
-                                        </div>
-                                    );
-
-                                    if (status === 'PAUSED') {
-                                        return (
-                                            <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} className='black-icon-pause' />
-                                            </Tooltip>
-                                        );
-                                    } else if (status === 'ACTIVE') {
-                                        return (
-                                            <Tooltip title={tooltipContent}>
-                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active'/>
-                                            </Tooltip>
-                                        );
-                                    } else {
-                                        // Default for unknown status
-                                        return (
-                                            <Tooltip title={tooltipContent}>
-                                                <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-                                            </Tooltip>
-                                        );
-                                    }
-                                } else {
-                                    // Fallback if no matching campaign is found
-                                    return (
-                                        <Tooltip title="No campaign data available">
-                                            <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-                                        </Tooltip>
-                                    );
-                                }
-                            })()}
-                        </div> */}
-                        {relatedComment ? (
-                            <Tooltip
-                                // title={relatedComment || 'No comment available'}
-                                title={
-                                    <div>
-                                      <div>{relatedComment || 'No comment available'}</div>
-                                      <div>
-                                        {editUserANdTime
-                                          ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
-                                          : ""}
-                                      </div>
-                                    </div>
-                                }
-                                overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',   
-                                    borderRadius: 6,
-                                    // fontWeight: 500,
-                                }}
-                            >
-                                <MessageOutlined
-                                className={theme === "dark" ? "black-icon-comment" : 'Message'}
-                                style={{
-                                    cursor: 'pointer',
-                                    marginLeft: '10px',
-                                    marginRight: '10px',
-                                    color: '#4CAF50'
-                                }}
-                                onClick={handleEditClick} // Open modal directly on click
-                                />
-                            </Tooltip>
-                        ) : (
-                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
-                        )}
-                        <Tooltip 
-                            title={tooltipText}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',   
-                                borderRadius: 6,
-                                // fontWeight: 500,
-                            }}
-                        >
-                            <CopyOutlined
-                                onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
-                            />
-                        </Tooltip>
-                        <LinkOutlined 
-                            onClick={() => {
-                                const url = `/DailyAndCampaignHistory/AdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                window.open(url, '_blank', 'noopener,noreferrer');
-                            }}
-                            style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
-                        />
-                        <Tooltip 
-                            title={valueWithCount}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',   
-                                borderRadius: 6,
-                                // fontWeight: 500,
-                            }}
-                        >
-                            <span
-                                // onClick={() => {
-                                //     const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                //     window.open(url, '_blank', 'noopener,noreferrer');
-                                // }}
-                            >
-                                {valueWithCount}
-                            </span>
-                        </Tooltip>
-                        <Modal
-                            title={firstColumnValue}
-                            visible={isModalVisibles}
-                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                            onOk={handleOks} // Default Ok button functionality
-                            onCancel={handleCancels} // Default Cancel button functionality
-                            footer={[
-                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                                    <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
-                                            Last Edited Time:
-                                        </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
-                                            {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
-                                        </span>
-
-                                    </div>
-                                    <div>
-                                    <Button
-                                        key="delete"
-                                        type="danger"
-                                        onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
-                                    >
-                                        Delete
-                                    </Button>
-                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
-                                        Cancel
-                                    </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
-                                        Ok
-                                    </Button>
-                                    </div>
-                                </div>
-                            ]}
-                        >
-                            <Input.TextArea
-                                placeholder="Enter your comments here"
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                            />
-                        </Modal>
-                    </div>
-                );
+          suppressCount: false,
+          innerRenderer: (params) => {
+            if (params.node.footer) return 'Total';
+      
+            const firstColumnValue = params.node.key; // group key (Ad name)
+            const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+            const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
+      
+            let campaignid, adsetid, adid, rowAccount;
+      
+            if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
+              const firstChild = params.node.childrenAfterGroup[0]?.data;
+              if (firstChild) {
+                campaignid = firstChild.campaignid ?? null;
+                adsetid = firstChild.adsetid ?? null;
+                adid = firstChild.adid ?? null;
+                rowAccount = firstChild.accountNumber ?? null; // prefer row account if present
+              }
+            } else if (params.data) {
+              campaignid = params.data.campaignid ?? null;
+              adsetid = params.data.adsetid ?? null;
+              adid = params.data.adid ?? null;
+              rowAccount = params.data.accountNumber ?? null;  // prefer row account if present
+            } else {
+              console.error('Missing campaignid or adsetid for campaign:', campaignName);
+              return (
+                <div style={{ color: 'red' }}>
+                  Error: campaignid or adsetid missing for {campaignName}
+                </div>
+              );
             }
+      
+            // prefer ad name for ad-level comment docs; fallback on campaign name
+            const nameKeyForComments = adName || campaignName;
+      
+            // ✅ build accountNumbers for bulk endpoints
+            // const accountsParam = rowAccount
+            //   ? [String(rowAccount)]
+            //   : (Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)]);
+      
+            const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
+      
+            // ---- helpers aware of account + ad_id ----
+            const getEditedUserAndTime = (cName, acc) =>
+              campaignComments.find(c => c.campaignname === cName && c.Account === acc && (!adid || c.ad_id === adid)) || null;
+      
+            const getPinEditedUserAndTime = (cName, acc) =>
+              campaignComments.find(c => c.campaignname === cName && c.Account === acc && (!adid || c.ad_id === adid)) || null;
+      
+            const getStatusForCampaign = (cName, acc) => {
+              const relatedStatus = campaignComments.find(c => c.campaignname === cName && c.Account === acc && (!adid || c.ad_id === adid));
+              return relatedStatus !== undefined && relatedStatus?.status === true ? true : relatedStatus !== undefined ? false : null;
+            };
+      
+            const getCommentForCampaign = (name, acc) => {
+              const c = campaignComments.find(x => x.campaignname === name && x.Account === acc && (!adid || x.ad_id === adid));
+              return c ? c.comment : null;
+            };
+      
+            const getPinStatusForCampaignAcc = (name, acc) => {
+              const c = campaignComments.find(x => x.campaignname === name && x.Account === acc && (!adid || x.ad_id === adid));
+              return c ? !!c.pinned : false;
+            };
+      
+            // const editUserANdTime = getEditedUserAndTime(nameKeyForComments, rowAccount || newaccount);
+            // const editPinUserANdTime = getPinEditedUserAndTime(nameKeyForComments, rowAccount || newaccount);
+            // const relatedStatus = getStatusForCampaign(nameKeyForComments, rowAccount || newaccount);
+            // const relatedComment = getCommentForCampaign(nameKeyForComments, rowAccount || newaccount);
+            const valueWithCount = `${firstColumnValue}`;
+      
+            const [tooltipText, setTooltipText] = React.useState("Click to Copy");
+            const [isModalVisibles, setIsModalVisibles] = React.useState(false);
+      
+            const [isAdidModalVisibles, setIsAdidModalVisibles] = React.useState(false);
+            const [selectedAdid, setSelectedAdid] = React.useState(null);
+            const [switchStates, setSwitchStates] = React.useState({});
+            const [nextChecked, setNextChecked] = React.useState(false);
+      
+            // const [comment, setComment] = React.useState(relatedComment || '');
+            // const [pinned, setPinned] = React.useState(getPinStatusForCampaignAcc(nameKeyForComments, rowAccount || newaccount));
+
+            //  const accKey = String(
+            //        rowAccount ?? (Array.isArray(newaccount) ? newaccount[0] : newaccount) ?? ''
+            //     );
+            const accKey = String(rowAccount ?? (Array.isArray(newaccount) ? newaccount[0] : newaccount) ?? '');
+            const accountsParam = [accKey]; // always a single normalized string for this row
+
+            const editUserANdTime = getEditedUserAndTime(nameKeyForComments, accKey);
+            const editPinUserANdTime = getPinEditedUserAndTime(nameKeyForComments, accKey);
+            const relatedStatus = getStatusForCampaign(nameKeyForComments, accKey);
+                
+                // helper: patch only the leaf data (no whole table refresh)
+                 const leafNode = params.node.group ? params.node.childrenAfterGroup?.[0] : params.node;
+                 const updateLeaf = (patch) => {
+                   if (!leafNode?.data) return;
+                   const nextData = { ...leafNode.data, ...patch };
+                   if (leafNode.updateData) leafNode.updateData(nextData);
+                   else params.api.applyTransaction({ update: [nextData] });
+                };
+                
+                // per-ad stable key
+                const statusKey = `${accKey}|${campaignid}|${adsetid}|${adid}`;
+                
+                // maps from context
+                 const statusMap  = params.context?.adStatusOverridesRef?.current;   // "ACTIVE" | "PAUSED"
+                 const pinMap     = params.context?.adPinOverridesRef?.current;      // boolean
+                 const commentMap = params.context?.adCommentOverridesRef?.current;  // { text, editedBy, editedAt }
+                
+                // local tick for targeted cell refresh
+                 const [tick, setTick] = React.useState(0);
+                 const refreshThisCell = () => {
+                   setTick(t => t + 1);
+                   params.api.refreshCells({ rowNodes: [params.node], columns: [params.column.getColId()], force: true });
+                   params.api.refreshClientSideRowModel('sort');
+                };
+                
+                // derive UI state from maps (fall back to server data)
+                 const commentOverride = commentMap?.get(statusKey);
+                const relatedComment  = (commentOverride?.text ?? getCommentForCampaign(nameKeyForComments, accKey)) || '';
+                const hasComment = relatedComment.trim().length > 0;
+
+                 const [comment, setComment] = React.useState(relatedComment || '');
+                 React.useEffect(() => setComment(relatedComment || ''), [relatedComment]);
+                
+                 const pinnedOverride = pinMap?.get(statusKey);
+                 const [pinned, setPinned] = React.useState(
+                   typeof pinnedOverride === 'boolean'
+                     ? pinnedOverride
+                     : getPinStatusForCampaignAcc(nameKeyForComments, accKey)
+                );
+                
+                const [switchOn, setSwitchOn] = React.useState(() => {
+                    const fromMap = statusMap?.get(statusKey);
+                    if (fromMap === 'ACTIVE' || fromMap === 'PAUSED') return fromMap === 'ACTIVE';
+                    if (params.data?.__adStatus) return params.data.__adStatus === 'ACTIVE';
+                    const matched = campaignComments.find(it =>
+                      String(it.campaignid) === String(campaignid) &&
+                      String(it.Account)    === String(rowAccount) &&
+                      Array.isArray(it.AdLevel) &&
+                      it.AdLevel.some(a => String(a.ad_id) === String(adid))
+                    );
+                    const adEntry = matched?.AdLevel?.find(a => String(a.ad_id) === String(adid));
+                    return adEntry ? adEntry.status === 'ACTIVE' : true;
+                  });
+                
+                // apply cached overrides to the row on mount (so comparator sees them)
+                 React.useEffect(() => {
+                   if (statusMap?.has(statusKey)) updateLeaf({ __adStatus: statusMap.get(statusKey) });
+                   if (typeof pinnedOverride === 'boolean') updateLeaf({ __adPinned: pinnedOverride });
+                   // eslint-disable-next-line react-hooks/exhaustive-deps
+                 }, []);
+
+                 // ====== ACTION HANDLERS (all optimistic + local patch) ======
+
+const handlePauseOk = async () => {
+    if (!selectedAdid) return;
+    const desired = nextChecked; // true => ACTIVE
+  
+    setSwitchOn(desired); // optimistic
+    try {
+      await apiClient.post('/BulkAdStatusChange', {
+        status: desired ? 'ACTIVE' : 'PAUSED',
+        ad_id: selectedAdid,
+        name: campaignName,
+        accountNumbers: accountsParam,
+        campaign_id: campaignid,
+        adset_id: adsetid,
+        email: userdetails?.email,
+      }, authHeaders);
+  
+      const newStatus = desired ? 'ACTIVE' : 'PAUSED';
+      statusMap?.set(statusKey, newStatus);      // persist across tabs
+      updateLeaf({ __adStatus: newStatus });     // patch only this row
+      message.success(`Ad ${newStatus.toLowerCase()}`);
+      refreshThisCell();
+    } catch (e) {
+      setSwitchOn(prev => !prev);                // revert UI
+      message.error('Failed to update ad status');
+    } finally {
+      setIsAdidModalVisibles(false);
+      setSelectedAdid(null);
+    }
+  };
+  
+  const handlePinClick = async (_campName, campid, asetid, current) => {
+    const next = !current;
+    setPinned(next); // optimistic
+    try {
+      if (next) {
+        await apiClient.post('/PinBulk', {
+          accountNumbers: accountsParam,
+          campaignname: nameKeyForComments,
+          campaignid: campid,
+          adsetid: asetid,
+          ad_id: adid,
+          userPin: userdetails?.email,
+          comment: comment || ''
+        }, authHeaders);
+      } else {
+        await apiClient.post('/UnpinBulk', {
+          accountNumbers: accountsParam,
+          campaignname: nameKeyForComments,
+          campaignid: campid,
+          adsetid: asetid,
+          ad_id: adid
+        }, authHeaders);
+      }
+  
+      pinMap?.set(statusKey, next);          // persist
+      updateLeaf({ __adPinned: next });      // patch only this row
+      message.success(next ? 'Pinned' : 'Unpinned');
+      refreshThisCell();
+    } catch {
+      setPinned(!next);                      // revert UI
+      message.error('Error while updating pin status');
+    }
+  };
+  
+  const handleOks = async () => {
+    try {
+      await apiClient.post('/Comments/bulk-upsert', {
+        accountNumbers: accountsParam,
+        campaignname: nameKeyForComments,
+        campaignid,
+        adsetid,
+        ad_id: adid,
+        comment,
+        usercommit: userdetails?.email
+      }, authHeaders);
+  
+      commentMap?.set(statusKey, {
+        text: comment,
+        editedBy: userdetails?.email,
+        editedAt: moment().format('DD-MM-YYYY hh:mm:ss A'),
+      });
+      message.success(relatedComment ? 'Comment updated' : 'Comment added');
+      setIsModalVisibles(false);
+      refreshThisCell();
+    } catch {
+      message.error('Error while submitting the comment');
+    }
+  };
+  
+  const handleDelete = async () => {
+    try {
+      await apiClient.post('/Comments/bulk-delete', {
+        accountNumbers: accountsParam,
+        campaignname: nameKeyForComments,
+        campaignid,
+        adsetid,
+        ad_id: adid
+      }, authHeaders);
+  
+    //   commentMap?.delete(statusKey);
+      // tombstone override so UI doesn't fall back to stale server comment
+   commentMap?.set(statusKey, {
+         text: '',
+         editedBy: userdetails?.email,
+         editedAt: moment().format('DD-MM-YYYY hh:mm:ss A'),
+         deleted: true,
+       });
+      setComment('');
+      message.success('Comment deleted');
+      setIsModalVisibles(false);
+      refreshThisCell();
+    } catch {
+      message.error('Failed to delete the comment');
+    }
+  };
+      
+            // init switch state from comments (assume ACTIVE if none)
+            // React.useEffect(() => {
+            //   if (!adid) return;
+            //   const matchedComment = campaignComments.find(
+            //     (item) =>
+            //       item.campaignid === campaignid &&
+            //       Array.isArray(item.AdLevel) &&
+            //       item.AdLevel.some(ad => ad.ad_id === adid)
+            //   );
+            //   const adEntry = matchedComment?.AdLevel?.find(ad => ad.ad_id === adid);
+            //   const isActive = adEntry?.status === "ACTIVE";
+      
+            //   setSwitchStates(prev => ({
+            //     ...prev,
+            //     [adid]: matchedComment && adEntry ? isActive : true
+            //   }));
+            // }, [campaignComments, campaignid, adsetid, adid]);
+      
+            const handlePauseClick = (aid, checked) => {
+              setSelectedAdid(aid);
+              setNextChecked(checked);
+              setIsAdidModalVisibles(true);
+            };
+      
+            // ✅ bulk /adStatusChange (accounts array)
+            // const handlePauseOk = async () => {
+            //   if (!selectedAdid) return;
+      
+            //   setSwitchStates(prev => ({ ...prev, [selectedAdid]: nextChecked }));
+      
+            //   try {
+            //     const response = await apiClient.post(
+            //       `/BulkAdStatusChange`,
+            //       {
+            //         status: nextChecked ? "ACTIVE" : "PAUSED",
+            //         ad_id: selectedAdid,
+            //         name: campaignName,
+            //         accountNumbers: accountsParam,
+            //         campaign_id: campaignid,
+            //         adset_id: adsetid,
+            //         email: userdetails?.email,
+            //       },
+            //       authHeaders
+            //     );
+      
+            //     if (response.status === 200 || response.status === 201) {
+            //       refreshComments(rowAccount || newaccount);
+            //       functionCallForCommnets(rowAccount || newaccount);
+            //     } else {
+            //       console.warn(" Backend returned unexpected status:", response.status);
+            //     }
+            //   } catch (error) {
+            //     console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
+            //   }
+      
+            //   setIsAdidModalVisibles(false);
+            //   setSelectedAdid(null);
+            // };
+      
+            const handlePauseCancel = () => {
+              setIsAdidModalVisibles(false);
+              setSelectedAdid(null);
+            };
+      
+            const copyToClipboard = () => {
+              navigator.clipboard.writeText(firstColumnValue)
+                .then(() => {
+                  setTooltipText("Copied!");
+                  setTimeout(() => setTooltipText("Click to Copy"), 2000);
+                })
+                .catch(() => console.error('Failed to copy to clipboard'));
+            };
+      
+            const handleEditClick = () => setIsModalVisibles(true);
+      
+            // ✅ bulk upsert comment (per-ad scope)
+            const upsertCommentBulk = async ({ text }) => {
+              await apiClient.post(
+                '/Comments/bulk-upsert',
+                {
+                  accountNumbers: accountsParam,
+                  campaignname: nameKeyForComments,  // keep your "campaignname" field name
+                  campaignid,
+                  adsetid,
+                  ad_id: adid,                      // per-ad scope
+                  comment: text,
+                  usercommit: userdetails?.email,
+                },
+                authHeaders
+              );
+            };
+      
+            // const handleDelete = async () => {
+            //   try {
+            //     const response = await apiClient.post(
+            //       '/Comments/bulk-delete',
+            //       {
+            //         accountNumbers: accountsParam,
+            //         campaignname: nameKeyForComments,
+            //         campaignid,
+            //         adsetid,
+            //         ad_id: adid,                   // per-ad scope
+            //       },
+            //       authHeaders
+            //     );
+      
+            //     if (response.status === 200 || response.status === 201) {
+            //       refreshComments(rowAccount || newaccount);
+            //       message.success('Comment deleted successfully!');
+            //       setIsModalVisibles(false);
+            //     } else {
+            //       message.error('Failed to delete the comment. Please try again.');
+            //     }
+            //   } catch (error) {
+            //     console.error('Error deleting the comment:', error);
+            //     message.error('Failed to delete the comment. Please try again.');
+            //   }
+            // };
+      
+            // const handleOks = async () => {
+            //   try {
+            //     await upsertCommentBulk({ text: comment });
+            //     refreshComments(rowAccount || newaccount);
+            //     message.success(relatedComment ? "Comment updated successfully!" : "New comment added successfully!");
+            //     setIsModalVisibles(false);
+            //   } catch (error) {
+            //     console.error('Error while submitting comment:', error);
+            //     message.error("Error while submitting the comment.");
+            //   }
+            // };
+      
+            const handleCancels = () => setIsModalVisibles(false);
+      
+            const CustomTooltipContent = ({ editedTime, usercommit }) => (
+              <div style={{ padding: '5px', borderRadius: '5px' }}>
+                <p style={{ margin: 0, color: theme === 'dark' ? "#fff" : "#000" }}>{usercommit}</p>
+                <p style={{ margin: 0, color: theme === 'dark' ? "#fff" : "#000" }}>{editedTime}</p>
+              </div>
+            );
+      
+            // ✅ bulk Pin/Unpin (per-ad scope)
+            // const handlePinClick = async (campName, campid, asetid, currentPinStatus) => {
+            //   const updatedPinStatus = !currentPinStatus;
+      
+            //   try {
+            //     if (updatedPinStatus) {
+            //       const resp = await apiClient.post(
+            //         '/PinBulk',
+            //         {
+            //           accountNumbers: accountsParam,
+            //           campaignname: nameKeyForComments, // pin doc under the same name used for comments
+            //           campaignid: campid,
+            //           adsetid: asetid,
+            //           ad_id: adid,                 // per-ad scope
+            //           userPin: userdetails?.email,
+            //           comment: comment || ''
+            //         },
+            //         authHeaders
+            //       );
+            //       if (resp.status === 200 || resp.status === 201) {
+            //         refreshComments(rowAccount || newaccount);
+            //       }
+            //       message.success("Campaign pinned!");
+            //     } else {
+            //       const resp = await apiClient.post(
+            //         '/UnpinBulk',
+            //         {
+            //           accountNumbers: accountsParam,
+            //           campaignname: nameKeyForComments,
+            //           campaignid: campid,
+            //           adsetid: asetid,
+            //           ad_id: adid                  // per-ad scope
+            //         },
+            //         authHeaders
+            //       );
+            //       if (resp.status === 200 || resp.status === 201) {
+            //         refreshComments(rowAccount || newaccount);
+            //       }
+            //       message.success("Campaign unpinned!");
+            //     }
+      
+            //     setPinned(updatedPinStatus);
+            //   } catch (error) {
+            //     console.error('Error toggling pin status:', error);
+            //     message.error('Error while updating pin status.');
+            //   }
+            // };
+      
+            const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
+              return (
+                <Tooltip 
+                    title={pinned ? (
+                        <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> 
+                    ): null
+                    }
+                    overlayInnerStyle={{
+                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#000',
+                        border: '1px solid #ccc',   
+                        borderRadius: 6,
+                        // fontWeight: 500,
+                    }}
+                >
+                  <button
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+                    style={{
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      fontSize: "16px",
+                    }}
+                  >
+                    {pinned ? "📌" : "📍"}
+                  </button>
+                </Tooltip>
+              );
+            };
+      
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <Switch
+                //   checked={!!switchStates[adid]}
+                //   onClick={(checked) => handlePauseClick(adid, checked)}
+                checked={switchOn}
+                onMouseDown={(e) => e.stopPropagation()}
+                onChange={(checked, e) => { e?.stopPropagation?.(); handlePauseClick(adid, checked); }}
+                  size="small"
+                //   style={{ backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9' }}
+                style={{ backgroundColor: switchOn ? '#91C25F' : '#d9d9d9' }}
+                />
+                <Modal
+                  title="Confirm Action"
+                  open={isAdidModalVisibles}
+                  className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                  onOk={handlePauseOk}
+                  onCancel={handlePauseCancel}
+                >
+                  <p>Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?</p>
+                  <p>Ad ID: {selectedAdid}</p>
+                </Modal>
+      
+                <PinIcon
+                  campaignName={campaignName}
+                  campaignid={campaignid}
+                  adsetid={adsetid}
+                  pinned={pinned}
+                />
+      
+                {hasComment ? (
+                  <Tooltip
+                    title={
+                      <div>
+                        <div>{relatedComment || 'No comment available'}</div>
+                        <div>
+                          {editUserANdTime
+                            ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                            : ""}
+                        </div>
+                      </div>
+                    }
+                    overlayInnerStyle={{
+                      backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                      color: theme === 'dark' ? '#fff' : '#000',
+                      border: '1px solid #ccc',
+                      borderRadius: 6,
+                    }}
+                  >
+                    <MessageOutlined
+                      className={theme === "dark" ? "black-icon-comment" : 'Message'}
+                      style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: '#4CAF50' }}
+                      onClick={handleEditClick}
+                    />
+                  </Tooltip>
+                ) : (
+                  <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
+                )}
+      
+                <Tooltip
+                  title={tooltipText}
+                  overlayInnerStyle={{
+                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                    color: theme === 'dark' ? '#fff' : '#000',
+                    border: '1px solid #ccc',
+                    borderRadius: 6,
+                  }}
+                >
+                  <CopyOutlined
+                    onClick={copyToClipboard}
+                    style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
+                  />
+                </Tooltip>
+      
+                <LinkOutlined
+                  onClick={() => {
+                    const url = `/DailyAndCampaignHistory/AdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${rowAccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  }}
+                  style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
+                />
+      
+                <Tooltip
+                  title={valueWithCount}
+                  overlayInnerStyle={{
+                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                    color: theme === 'dark' ? '#fff' : '#000',
+                    border: '1px solid #ccc',
+                    borderRadius: 6,
+                  }}
+                >
+                  <span>{valueWithCount}</span>
+                </Tooltip>
+      
+                <Modal
+                  title={firstColumnValue}
+                  visible={isModalVisibles}
+                  className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                  onOk={handleOks}
+                  onCancel={handleCancels}
+                  footer={[
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                      <div style={{ display:'flex', flexDirection:"column" }}>
+                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                          Last Edited Time:
+                        </span>
+                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                          {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
+                        </span>
+                      </div>
+                      <div>
+                        <Button
+                          key="delete"
+                          type="danger"
+                          onClick={handleDelete}
+                          style={{ marginRight: 'auto', border: "1px solid #e3e3da" }}
+                        >
+                          Delete
+                        </Button>
+                        <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                          Cancel
+                        </Button>
+                        <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
+                          Ok
+                        </Button>
+                      </div>
+                    </div>
+                  ]}
+                >
+                  <Input.TextArea
+                    placeholder="Enter your comments here"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                </Modal>
+              </div>
+            );
+          }
+        },
+      
+        processCellForClipboard: (params) => {
+          if (params.node.group) {
+            if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
+              return params.node.key;
+            }
+            return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
+              ? params.node.key
+              : "";
+          }
+          return params.value;
         }
     };
-
+      
     const adStatusMap = useMemo(() => {
         const map = new Map();
       
@@ -880,7 +1564,27 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
             console.log(adsets, "adsets");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
-            const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
+            // const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
+
+                  // ✅ multi-account param (array of strings)
+    const accountsParam = Array.isArray(newaccount)
+    ? newaccount.map(String)
+    : [String(newaccount)];
+
+  // ✅ call the new multi-account endpoint
+  const fetchData = await apiClient.post(
+    `/AdLevelAccounts`,
+    {
+      dateStart: startDate,
+      dateEnd: endDate,
+      accountNumbers: accountsParam,
+      timezone: newtime,
+      status: 'Daily',                  // "Daily" | "Live"
+      network: "Facebook_Mnet_AD",        // keep your original value
+      adsetids: adsets,
+      campaignids: campaigns
+    }
+  );
             const mainData = fetchData.data;
             console.log("MainData:", mainData);
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
@@ -1102,6 +1806,8 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
                     // console.log(eachData.campaign_name, "campaign_name");
                     return (
                         {
+                            // ✅ include accountNumber so actions (pin/comment/status) can be per-account
+                            accountNumber: String(eachData.accountNumber),
                             campaignname: eachData.campaign_name,
                             adsetname: eachData.adsetName,
                             date: eachData[specifiedTimeZone],
@@ -1496,6 +2202,11 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
         }
     }, [memorizedDailyData]);
     
+        // normalize to array
+const ids = Array.isArray(newaccount)
+? newaccount
+: (newaccount ? [newaccount] : []);
+
     return(
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
@@ -1545,9 +2256,57 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
                                                 <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
                                             </Space>
                                         </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
-                                        </Col>
+                                        </Col> */}
+                                        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+        {ids.length <= 1 ? (
+            // Single (or none) → plain text
+            <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+            Id: {ids[0] ?? "-"}
+            </Text>
+        ) : (
+            // Multiple → only an icon; hover shows selected accounts
+            <Tooltip
+            title={
+                <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                {ids.map((id, i) => {
+                    const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
+                    return(<div
+                    key={`${id}-${i}`}
+                    style={{
+                        padding: "4px 6px",
+                        borderBottom: "1px solid rgba(0,0,0,0.06)",
+                        fontSize: 12,
+                        color: theme === "dark" ? "#ddd" : "#333",
+                        display: "flex",
+                        flexDirection: "column"
+                    }}
+                    >
+                    <div>{id}</div>
+                    <div>{getAccountObject?.accountName}</div>
+                    </div>)
+            })}
+                </div>
+            }
+            overlayInnerStyle={{
+                maxWidth: 320,
+                background: theme === "dark" ? "#1f1f1f" : '#fff',
+                color: theme === "dark" ? "#fff" : '#000'
+            }}
+            >
+            <Badge count={ids.length} size="small" offset={[0, 2]}>
+                <NumberOutlined
+                style={{
+                    fontSize: 18,
+                    cursor: "pointer",
+                    color: theme === "dark" ? "#9ad" : "#1677ff"
+                }}
+                />
+            </Badge>
+            </Tooltip>
+        )}
+        </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                         </Col>
@@ -1624,6 +2383,7 @@ const Daily = ({campaignStatusFilter, functionCallForCommnets, functionCallForCa
                                         rowData={memorizedDailyData}
                                         columnDefs={memorizedColumnDef1}
                                         onCellClicked={onCellClicked}
+                                        context={context}
                                         pagination={true}
                                         paginationPageSize={200}
                                         paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}

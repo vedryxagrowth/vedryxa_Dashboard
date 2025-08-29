@@ -120,6 +120,7 @@ const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                     conversions: 0,
                     fbLeads: 0,
                     adClicks: 0, // Store total ad_clicks
+                    accountNumber: item.accountNumber
                 };
             }
     
@@ -182,6 +183,20 @@ const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenueP
             menuTabs: [],
             headerClass: 'hide-menu' // Add a custom class
 
+        },
+        {
+            field: 'accountNumber',
+            headerName: 'Account',
+            // minWidth: 150,
+            // resizable: true,
+            sortable: true,
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
+            flex: 9,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu'
         },
         {
             field: `${newtime}Date`,
