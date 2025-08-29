@@ -66,7 +66,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
     console.log("new multiple accounts:", newaccount);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -1461,6 +1461,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
                         context={context}
+                        accountsAccess={accountsAccess}
                     />
                 </Tabs.TabPane>
                 <Tabs.TabPane key="2">
@@ -1494,6 +1495,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
                         context={context}
+                        accountsAccess={accountsAccess}
                     />
                 </Tabs.TabPane>
                 <Tabs.TabPane key="3">
@@ -1524,6 +1526,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
                         context={context}
+                        accountsAccess={accountsAccess}
                     />
                 </Tabs.TabPane>
             </Tabs>

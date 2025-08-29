@@ -63,7 +63,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
+const Daily = ({campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -2106,8 +2106,9 @@ const ids = Array.isArray(newaccount)
             <Tooltip
             title={
                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                {ids.map((id, i) => (
-                    <div
+                {ids.map((id, i) => {
+                    const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
+                    return(<div
                     key={`${id}-${i}`}
                     style={{
                         padding: "4px 6px",
@@ -2116,9 +2117,10 @@ const ids = Array.isArray(newaccount)
                         color: theme === "dark" ? "#ddd" : "#333"
                     }}
                     >
-                    {id}
-                    </div>
-                ))}
+                    <div>{id}</div>
+                    <div>{getAccountObject?.accountName}</div>
+                    </div>)
+            })}
                 </div>
             }
             overlayInnerStyle={{

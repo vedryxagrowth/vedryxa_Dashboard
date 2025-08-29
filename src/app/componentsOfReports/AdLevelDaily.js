@@ -63,7 +63,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({context, campaignStatusFilter, functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets}) => {
+const Daily = ({context, campaignStatusFilter, functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -2270,19 +2270,23 @@ const ids = Array.isArray(newaccount)
             <Tooltip
             title={
                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                {ids.map((id, i) => (
-                    <div
+                {ids.map((id, i) => {
+                    const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
+                    return(<div
                     key={`${id}-${i}`}
                     style={{
                         padding: "4px 6px",
                         borderBottom: "1px solid rgba(0,0,0,0.06)",
                         fontSize: 12,
-                        color: theme === "dark" ? "#ddd" : "#333"
+                        color: theme === "dark" ? "#ddd" : "#333",
+                        display: "flex",
+                        flexDirection: "column"
                     }}
                     >
-                    {id}
-                    </div>
-                ))}
+                    <div>{id}</div>
+                    <div>{getAccountObject?.accountName}</div>
+                    </div>)
+            })}
                 </div>
             }
             overlayInnerStyle={{

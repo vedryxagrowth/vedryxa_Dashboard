@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Col, Space, Input, Button, Dropdown, Menu, Tooltip } from 'antd';
 import { SearchOutlined, FilterOutlined, DownOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
 import { FaRobot } from 'react-icons/fa';
+import axios from 'axios';
 
 const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBlur, onClickRefresh, onStatusFilterChange, accountsFromReports = [],
     network,
@@ -25,11 +26,11 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
             setAiError(null);
             return;
         }
-
-        const url =
-            accounts.length === 1
-                ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
-                : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
+        //https://prodapis.adsgoat.in
+        // const url =
+        //     accounts.length === 1
+        //         ? `http://localhost:8000/Recommendations/${encodeURIComponent(accounts[0])}`
+        //         : `http://localhost:8000/Recommendations?accounts=${accounts.join(',')}`;
 
         const token = localStorage.getItem('token');
 
@@ -42,8 +43,13 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                 if (token) {
                     headers['Authorization'] = token;
                 }
+                const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
 
-                const res = await fetch(url, { method: 'GET', headers });
+                const res = await axios.post(
+                  `https://prodapis.adsgoat.in/Recommendations`,
+                  {"accounts": accounts, ...(accounts.length > 1 ? {"merge":true,"includeAccounts":true} : {})},
+                  authHeaders
+                );
 
                 if (res.status === 404) {
                     setRecDataByAccount({});
@@ -52,9 +58,9 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                     return;
                 }
 
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                // if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                const data = await res.json();
+                const data = res.data;
                 setRecDataByAccount(data);
                 // setRecAccounts(accounts.filter(acc => data?.[acc]));
                 const validAccounts = accounts.filter(acc => {
@@ -69,7 +75,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
 
                 setRecAccounts(validAccounts);
             } catch (e) {
-                setAiError(e.message || 'Failed to load');
+                // setAiError(e.message || 'Failed to load');
                 setRecDataByAccount({});
                 setRecAccounts([]);
             } finally {
@@ -106,7 +112,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                 },
             ];
         }
-        if (!recAccounts.length) {
+        if (recAccounts.length === 0) {
             return [
                 {
                     key: 'empty',

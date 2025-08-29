@@ -3346,7 +3346,7 @@ const CreateCampaignDrawer = ({
       await new Promise((r) => setTimeout(r, 500));
       setConfirmLoading(false);
       setOpen(false);
-      setPopupInputs({ input1: "", input2: "" });
+      setPopupInputs(prev => ({ input1: "", input2: "", reportCat: prev.reportCat }));
       setErrors({ input1: "", input2: "" });
       return;
     } catch (err) {
@@ -7190,7 +7190,7 @@ const CreateCampaignDrawer = ({
                         )
                       }))}
 
-                      style={{ minWidth: 240 }}
+                      style={{ width: 240 }}
                       dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
                       dropdownRender={(menu) => (
                         <div>
@@ -7224,6 +7224,7 @@ const CreateCampaignDrawer = ({
                       className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                       dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
                       value={popupInputs.input1 || undefined}
+                      style={{ width: 240 }}
                       onChange={(val) => {
                         setPopupInputs((s) => ({ ...s, input1: val }));
                         if (errors.input1) setErrors((e) => ({ ...e, input1: "" }));

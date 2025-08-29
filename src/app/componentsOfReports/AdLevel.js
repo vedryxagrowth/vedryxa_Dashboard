@@ -58,8 +58,9 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({context, campaignStatusFilter, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
+const AdLevelReports = ({context, campaignStatusFilter, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess }) => {
     // console.log(columnDefs, "columnDefs");
+    // console.log(accountsAccess)
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -2366,8 +2367,9 @@ const ids = Array.isArray(newaccount)
             <Tooltip
             title={
                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                {ids.map((id, i) => (
-                    <div
+                {ids.map((id, i) => {
+                    const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
+                    return (<div
                     key={`${id}-${i}`}
                     style={{
                         padding: "4px 6px",
@@ -2376,9 +2378,10 @@ const ids = Array.isArray(newaccount)
                         color: theme === "dark" ? "#ddd" : "#333"
                     }}
                     >
-                    {id}
-                    </div>
-                ))}
+                    <div>{id}</div>
+                    <div>{getAccountObject?.accountName}</div>
+                    </div>)
+            })}
                 </div>
             }
             overlayInnerStyle={{
@@ -2399,9 +2402,9 @@ const ids = Array.isArray(newaccount)
             </Tooltip>
         )}
         </Col>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    {ids.length === 0 && <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
-                                    </Col>
+                                    </Col>}
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                     </Col>

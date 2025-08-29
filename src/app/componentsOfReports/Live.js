@@ -66,7 +66,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
     console.log("new multiple accounts:", newaccount);
@@ -1780,6 +1780,7 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
                         context={context}
+                        accountsAccess={accountsAccess}
                     />
                 </Tabs.TabPane>
                 <Tabs.TabPane key="2">
@@ -1813,6 +1814,7 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
                         context={context}
+                        accountsAccess={accountsAccess}
                     />
                 </Tabs.TabPane>
                 <Tabs.TabPane key="3">
@@ -1843,6 +1845,7 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
                         context={context}
+                        accountsAccess={accountsAccess}
                     />
                 </Tabs.TabPane>
             </Tabs>

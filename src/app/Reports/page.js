@@ -357,16 +357,16 @@ const MyTablePage = () => {
     const [hovered, setHovered] = useState(false);
 
     const deriveInitial = (dash, stored, nets) => {
-    const fromDash   = dash?.replace(/\+/g, " ").trim();
-    if (fromDash) return fromDash;
+        const fromDash = dash?.replace(/\+/g, " ").trim();
+        if (fromDash) return fromDash;
 
-    const fromStore  = stored?.account?.toString().trim();
-    if (fromStore) return fromStore;
+        const fromStore = stored?.account?.toString().trim();
+        if (fromStore) return fromStore;
 
-    const first = Array.isArray(nets) && nets.length
-        ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
-        : "";
-    return first ? String(first) : "";
+        const first = Array.isArray(nets) && nets.length
+            ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
+            : "";
+        return first ? String(first) : "";
     };
 
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
@@ -376,7 +376,7 @@ const MyTablePage = () => {
 
     // initial selection
     const [selectedValue, setSelectedValue] = useState(
-    Array.isArray(initialOne) ? initialOne.map(String) : []
+        Array.isArray(initialOne) ? initialOne.map(String) : []
     );
 
     // const initialOne =
@@ -9247,7 +9247,7 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            hide: true,
+            // hide: true,
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -10246,48 +10246,48 @@ const MyTablePage = () => {
     // };
 
     const deriveInitialArray = (dash, stored, nets) => {
-    const fromDash = dash?.replace(/\+/g, " ").trim();
-    if (fromDash) return [fromDash];
+        const fromDash = dash?.replace(/\+/g, " ").trim();
+        if (fromDash) return [fromDash];
 
-    const fromStore = stored?.account;
-    if (Array.isArray(fromStore)) return fromStore.map(String);
-    if (typeof fromStore === "string" && fromStore.trim()) {
-        return fromStore.split(",").map(s => s.trim()).filter(Boolean).map(String);
-    }
+        const fromStore = stored?.account;
+        if (Array.isArray(fromStore)) return fromStore.map(String);
+        if (typeof fromStore === "string" && fromStore.trim()) {
+            return fromStore.split(",").map(s => s.trim()).filter(Boolean).map(String);
+        }
 
-    const first =
-        Array.isArray(nets) && nets.length
-        ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
-        : "";
-    return first ? [String(first)] : [];
+        const first =
+            Array.isArray(nets) && nets.length
+                ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
+                : "";
+        return first ? [String(first)] : [];
     };
 
     const arraysEqualSet = (a, b) => {
-    if (a.length !== b.length) return false;
-    const sa = new Set(a.map(String));
-    for (const v of b) if (!sa.has(String(v))) return false;
-    return true;
+        if (a.length !== b.length) return false;
+        const sa = new Set(a.map(String));
+        for (const v of b) if (!sa.has(String(v))) return false;
+        return true;
     };
 
     useEffect(() => {
-  const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData);
-  if (!preferredArr.length) return;
+        const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData);
+        if (!preferredArr.length) return;
 
-  const isOnFallback =
-    selectedValue.length === 0 ||
-    (Array.isArray(networksData) &&
-      networksData.length &&
-      selectedValue.length === 1 &&
-      selectedValue[0] === (typeof networksData[0] === "string"
-        ? networksData[0]
-        : networksData[0]?.accountNumber));
+        const isOnFallback =
+            selectedValue.length === 0 ||
+            (Array.isArray(networksData) &&
+                networksData.length &&
+                selectedValue.length === 1 &&
+                selectedValue[0] === (typeof networksData[0] === "string"
+                    ? networksData[0]
+                    : networksData[0]?.accountNumber));
 
-  // ✅ Only set if user hasn't manually picked AND current selection differs
-  if (!userPickedRef.current && (isOnFallback || !arraysEqualSet(selectedValue, preferredArr))) {
-    setSelectedValue(preferredArr.map(String));
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [accountNumberFromDashboard, storedData?.account, networksData]);
+        // ✅ Only set if user hasn't manually picked AND current selection differs
+        if (!userPickedRef.current && (isOnFallback || !arraysEqualSet(selectedValue, preferredArr))) {
+            setSelectedValue(preferredArr.map(String));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
     useEffect(() => {
         if (campaignsStatus && commentsStatus && columnStructureStatus) {
@@ -10666,7 +10666,7 @@ const MyTablePage = () => {
         const q = searchText.trim().toLowerCase();
         if (!q) return accountsAccess;
         return accountsAccess.filter((a) =>
-        `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
+            `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
         );
     }, [accountsAccess, searchText]);
 
@@ -10901,12 +10901,12 @@ const MyTablePage = () => {
             return;
         }
 
-        const url =
-            accounts.length === 1
-                ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
-                : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
+        // const url =
+        //     accounts.length === 1
+        //         ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
+        //         : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
 
-        const token = localStorage.getItem('token');
+        // const token = localStorage.getItem('token');
 
         (async () => {
             try {
@@ -10918,7 +10918,13 @@ const MyTablePage = () => {
                     headers['Authorization'] = token;
                 }
 
-                const res = await fetch(url, { method: 'GET', headers });
+                const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
+
+                const res = await axios.post(
+                    `https://prodapis.adsgoat.in/Recommendations`,
+                    { "accounts": accounts, ...(accounts.length > 1 ? { "merge": true, "includeAccounts": true } : {}) },
+                    authHeaders
+                );
                 if (res.status === 404) {
                     setRecDataByAccount({});
                     setRecAccounts([]);
@@ -10926,9 +10932,9 @@ const MyTablePage = () => {
                     return;
                 }
 
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                // if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                const data = await res.json();
+                const data =  res.data;
                 setRecDataByAccount(data);
                 // setRecAccounts(accounts.filter(acc => data?.[acc]));
                 const validAccounts = accounts.filter(acc => {
@@ -10965,20 +10971,20 @@ const MyTablePage = () => {
                 },
             ];
         }
-        if (aiError) {
-            return [
-                {
-                    key: 'error',
-                    disabled: true,
-                    label: (
-                        <span style={{ fontSize: 13, color: '#d4380d' }}>
-                            Error: {aiError}
-                        </span>
-                    ),
-                },
-            ];
-        }
-        if (!recAccounts.length) {
+        // if (aiError) {
+        //     return [
+        //         {
+        //             key: 'error',
+        //             disabled: true,
+        //             label: (
+        //                 <span style={{ fontSize: 13, color: '#d4380d' }}>
+        //                     Error: {aiError}
+        //                 </span>
+        //             ),
+        //         },
+        //     ];
+        // }
+        if (recAccounts.length === 0) {
             return [
                 {
                     key: 'empty',
@@ -11697,6 +11703,7 @@ const MyTablePage = () => {
                                     handleChangeInput={handleChangeInput}
                                     handleBlur={handleBlur}
                                     onClickRefresh={onClickRefresh}
+                                    accountsAccess={accountsAccess}
                                 />
                                 {/* )} */}
                             </Tabs.TabPane>
@@ -11747,6 +11754,7 @@ const MyTablePage = () => {
                                     handleChangeInput={handleChangeInput}
                                     handleBlur={handleBlur}
                                     onClickRefresh={onClickRefresh}
+                                    accountsAccess={accountsAccess}
                                 />
                             </Tabs.TabPane>
 
@@ -11777,6 +11785,7 @@ const MyTablePage = () => {
                                     handleChangeInput={handleChangeInput}
                                     handleBlur={handleBlur}
                                     onClickRefresh={onClickRefresh}
+                                    accountsAccess={accountsAccess}
                                 />
                             </Tabs.TabPane>
 

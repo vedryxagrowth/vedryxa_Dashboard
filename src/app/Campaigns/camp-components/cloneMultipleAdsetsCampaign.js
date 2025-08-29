@@ -54,6 +54,7 @@ import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
 import { FaTrashCan } from "react-icons/fa6";
+import { Category } from "@mui/icons-material";
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 
@@ -4085,7 +4086,7 @@ const AdsetComponent = ({
                             borderRadius: "6px",
                             padding: "1px 2px",
                             transition: "all 0.2s ease-in-out",
-                            fontSize:'8px'
+                            fontSize: '8px'
                           }}
                         >
                           <MoreOutlined />
@@ -6075,7 +6076,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       }
     });
 
-    return `Adset ${highestNumber + 1}`;
+    return `ADSET ${highestNumber + 1}`;
   };
 
   // Helper function to get default adset data
@@ -6753,6 +6754,43 @@ const CloneMultipleAdsetCampaignDrawer = ({
 
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
+    if (adsets.length === 1) {
+      form.setFieldsValue({
+        adsets: {
+          [0]: {
+            AdsetName: e.target.value,
+            AddName: e.target.value,
+          }
+        }
+      });
+      // setNewAddLevelData(prev(data,i) => {})
+      setNewAddLevelData((prev) => {
+        const key = adsets[0].id;
+        const list = Array.isArray(prev[key])
+          ? prev[key].filter(Boolean)
+          : [];
+
+        const next = list.map((item, idx) => ({
+          ...item,
+          AddName: `${e.target.value}_${idx + 1}`,
+        }));
+
+        return { ...prev, [key]: next };
+      });
+      setAddLevelData((prev) => {
+        const key = adsets[0].id;
+        const list = Array.isArray(prev[key])
+          ? prev[key].filter(Boolean)
+          : [];
+
+        const next = list.map((item, idx) => ({
+          ...item,
+          AddName: `${e.target.value}_${idx + 1}`,
+        }));
+
+        return { ...prev, [key]: next };
+      });
+    }
     const newName = e.target.value;
     setCampaignName(newName);
   };
@@ -7526,6 +7564,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       Account_Number: values.Account_Number,
       Approval: "PENDING_APPROVAL",
       fbstatus: "No-Live",
+      Category: fullCampaignData.Category || "",
       camapaignlevel: {
         createdby: session?.user?.name,
         Name: values.Name,

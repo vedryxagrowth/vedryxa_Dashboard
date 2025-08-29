@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTokenContext } from '../../components/parent';
 import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
 export default function RecommendationsPage({ params }) {
 
@@ -97,17 +98,15 @@ export default function RecommendationsPage({ params }) {
             try {
                 setLoading(true);
                 setError(null);
-
-                const base = 'http://localhost:8000/Recommendations';
                 const accounts = Array.isArray(requestedAccounts) ? requestedAccounts : [requestedAccounts];
-                const url =
-                    accounts.length === 1
-                        ? `${base}/${encodeURIComponent(accounts[0])}`
-                        : `${base}?accounts=${accounts.join(',')}`;
-
-                const headers = {};
-                if (token) headers.Authorization = token;
-                const res = await fetch(url, { method: 'GET', headers });
+                
+                const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
+                
+                const res = await axios.post(
+                    `https://prodapis.adsgoat.in/Recommendations`,
+                    {"accounts": accounts, ...(accounts.length > 1 ? {"merge":true,"includeAccounts":true} : {})},
+                    authHeaders
+                );
                 if (res.status === 404) {
                     const emptySummary = {
                         highROI: { count: 0, campaigns: [] },
@@ -129,12 +128,12 @@ export default function RecommendationsPage({ params }) {
                     return;
                 }
 
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(`HTTP ${res.status} ${text}`);
-                }
+                // if (!res.ok) {
+                //     const text = await res.text();
+                //     throw new Error(`HTTP ${res.status} ${text}`);
+                // }
 
-                const data = await res.json();
+                const data = res.data;
                 setRespCache(data);
                 const present = accounts.filter(acc => data?.[acc]);
                 setPresentAccounts(present);
