@@ -10269,22 +10269,44 @@ const MyTablePage = () => {
         return true;
     };
 
-    useEffect(() => {
-        const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData);
+    // useEffect(() => {
+    //     const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData);
+    //     if (!preferredArr.length) return;
+
+    //     const isOnFallback =
+    //         selectedValue.length === 0 ||
+    //         (Array.isArray(networksData) &&
+    //             networksData.length &&
+    //             selectedValue.length === 1 &&
+    //             selectedValue[0] === (typeof networksData[0] === "string"
+    //                 ? networksData[0]
+    //                 : networksData[0]?.accountNumber));
+
+    //     // ✅ Only set if user hasn't manually picked AND current selection differs
+    //     if (!userPickedRef.current && (isOnFallback || !arraysEqualSet(selectedValue, preferredArr))) {
+    //         setSelectedValue(preferredArr.map(String));
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [accountNumberFromDashboard, storedData?.account, networksData]);
+
+   useEffect(() => {
+        const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData) || [];
         if (!preferredArr.length) return;
 
-        const isOnFallback =
-            selectedValue.length === 0 ||
-            (Array.isArray(networksData) &&
-                networksData.length &&
-                selectedValue.length === 1 &&
-                selectedValue[0] === (typeof networksData[0] === "string"
-                    ? networksData[0]
-                    : networksData[0]?.accountNumber));
+        // normalize (stringify, dedupe, sort) to avoid ref/order churn
+        const toNorm = (arr) =>
+            Array.from(new Set((arr || []).map(String))).filter(Boolean).sort();
 
-        // ✅ Only set if user hasn't manually picked AND current selection differs
-        if (!userPickedRef.current && (isOnFallback || !arraysEqualSet(selectedValue, preferredArr))) {
-            setSelectedValue(preferredArr.map(String));
+        const normPreferred = toNorm(preferredArr);
+        const normSelected = toNorm(selectedValue);
+
+        const same =
+            normPreferred.length === normSelected.length &&
+            normPreferred.every((v, i) => v === normSelected[i]);
+
+        // ✅ Only set if user hasn't manually picked AND content actually differs
+        if (!userPickedRef.current && !same) {
+            setSelectedValue(normPreferred);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accountNumberFromDashboard, storedData?.account, networksData]);
