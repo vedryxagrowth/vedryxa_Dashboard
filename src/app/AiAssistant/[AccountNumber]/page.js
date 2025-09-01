@@ -63,25 +63,24 @@ export default function RecommendationsPage({ params }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const dynamicTabs = useMemo(() => {
-        if (!presentAccounts.length) return [];
+  const dynamicTabs = useMemo(() => {
+    if (!presentAccounts.length) return [];
 
-        // Collect all bucket labels across accounts
-        const combinedLabels = {};
-        for (const acc of presentAccounts) {
-            const labels = respCache[acc]?.bucketLabels || {};
-            for (const key of Object.keys(labels)) {
-                combinedLabels[key] = labels[key]; // last one wins, or you can keep the first
-            }
+    // Collect all bucket labels dynamically (no hardcoded order)
+    const combinedLabels = {};
+    for (const acc of presentAccounts) {
+        const labels = respCache[acc]?.bucketLabels || {};
+        for (const [key, val] of Object.entries(labels)) {
+            combinedLabels[key] = val;
         }
+    }
 
-        return bucketOrder
-            .filter(key => combinedLabels[key])
-            .map(key => ({
-                key,
-                label: combinedLabels[key],
-            }));
-    }, [presentAccounts, respCache]);
+    return Object.entries(combinedLabels).map(([key, label]) => ({
+        key,
+        label,
+    }));
+}, [presentAccounts, respCache]);
+
 
     const toUICampaignsByBucket = (summary, bucketKey) => {
         if (!bucketKey || !summary) return [];
