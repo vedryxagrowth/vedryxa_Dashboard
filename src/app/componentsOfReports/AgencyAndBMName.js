@@ -34,7 +34,8 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
-    "FB_TonicRsoc":"Facebook_TonicRsoc"
+    "FB_TonicRsoc":"Facebook_TonicRsoc",
+    "FB_InuvoPrism": "Facebook_InuvoPrism"
 }
 
 const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage}) => {
@@ -117,6 +118,20 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
             menuTabs: [],
             headerClass: 'hide-menu' // Add a custom class
 
+        },
+        {
+            field: 'accountNumber',
+            headerName: 'Account',
+            minWidth: 150,
+            // resizable: true,
+            sortable: true,
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
+            flex: 9,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu'
         },
         {
             field: 'AgencyName',
@@ -249,6 +264,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                     conversions: 0,
                     fbLeads: 0,
                     adClicks: 0, // Store total ad_clicks
+                    accountNumber: item.accountNumber
                 };
             }
     

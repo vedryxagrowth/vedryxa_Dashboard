@@ -930,14 +930,49 @@ const AddComponent = ({
       typeof viewSingleAd.filename === "object" &&
       viewSingleAd.filename !== null
     ) {
-      console.log(
-        viewSingleAd.filename,
-        "viewSingleAd.filename in useEffect 1"
-      );
-      setSelectedFiles([viewSingleAd.filename]);
-      setSelectedFilesFromMedia([viewSingleAd.filename]);
-      setSelectedOption("upload");
-      setSelectedFilesFromCreatives([]);
+      if (viewSingleAd?.filename?.url) {
+        setSelectedFiles([
+          {
+            uid: uuidv4(),
+            name: viewSingleAd?.filename.url,
+            status: "done",
+            type: viewSingleAd?.filename?.url?.endsWith(".jpg")
+              ? "image/jpg"
+              : viewSingleAd?.filename?.url?.endsWith(".jpeg")
+                ? "image/jpeg"
+                : viewSingleAd?.filename.url?.endsWith(".png")
+                  ? "image/png"
+                  : "video/",
+            url: viewSingleAd?.filename?.url,
+          },
+        ]);
+        setSelectedFilesFromCreatives([
+          {
+            uid: uuidv4(),
+            name: viewSingleAd?.filename?.url,
+            status: "done",
+            type: viewSingleAd?.filename?.url?.endsWith(".jpg")
+              ? "image/jpg"
+              : viewSingleAd?.filename?.url?.endsWith(".jpeg")
+                ? "image/jpeg"
+                : viewSingleAd?.filename.url?.endsWith(".png")
+                  ? "image/png"
+                  : "video/",
+            url: viewSingleAd?.filename?.url,
+          },
+        ]);
+        setSelectedFilesFromMedia([]);
+        setSelectedOption("creative");
+      } else {
+        console.log(
+          viewSingleAd.filename,
+          "viewSingleAd.filename in useEffect 1"
+        );
+        setSelectedFiles([viewSingleAd.filename]);
+        setSelectedFilesFromMedia([viewSingleAd.filename]);
+        setSelectedOption("upload");
+        setSelectedFilesFromCreatives([]);
+      }
     } else {
       console.log(
         viewSingleAd.filename,
@@ -1650,7 +1685,7 @@ const AddComponent = ({
               },
             ]}
             required
-            tooltip="This is a required field"
+          // tooltip="This is a required field"
           >
             <TextArea
               placeholder="Primary text"
@@ -1689,7 +1724,7 @@ const AddComponent = ({
               },
             ]}
             required
-            tooltip="This is a required field"
+          // tooltip="This is a required field"
           >
             <TextArea
               placeholder="Headline"
@@ -1712,7 +1747,7 @@ const AddComponent = ({
             ]}
             required
             initialValue={"Find More"}
-            tooltip="This is a required field"
+          // tooltip="This is a required field"
           >
             <TextArea
               placeholder="Description"
@@ -1741,17 +1776,20 @@ const AddComponent = ({
                   }}
                 >
                   <span>Website_URL</span>
-                  <Tooltip title="This is a required field" overlayInnerStyle={{
-                    backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-                    color: theme === 'dark' ? '#ffffff' : '#000000',
-                    borderRadius: 6,
-                    padding: '6px 10px',
-                    fontSize: '14px',
-                  }}>
+                  {/* <Tooltip
+                    // title="This is a required field"
+                    overlayInnerStyle={{
+                      backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                      color: theme === "dark" ? "#ffffff" : "#000000",
+                      borderRadius: 6,
+                      padding: "6px 10px",
+                      fontSize: "14px",
+                    }}
+                  >
                     <QuestionCircleOutlined
                       style={{ marginLeft: 4, cursor: "pointer" }}
                     />
-                  </Tooltip>
+                  </Tooltip> */}
                 </div>
                 <EditOutlined
                   style={{ cursor: "pointer" }}
@@ -1789,7 +1827,7 @@ const AddComponent = ({
               },
             ]}
             required
-            tooltip="This is a required field"
+          // tooltip="This is a required field"
           >
             <TextArea
               placeholder="Display Link"
@@ -2241,6 +2279,9 @@ const AdsetComponent = ({
   onClose,
   changeRRefrst,
 }) => {
+  const [dailyBudget, setDailyBudget] = useState(
+    adset.Daily_amount ? adset.Daily_amount / 100 : 0
+  );
   const [activeMediaIndex, setActiveMediaIndex] = useState(null);
   const [addlevelData, setAddLevelData] = useState(adset.addlevel || []);
   const [newAddLevelData, setNewAddLevelData] = useState(adset.addlevel || []);
@@ -2802,6 +2843,7 @@ const AdsetComponent = ({
           return newUpdatedAd;
         } else {
           const fileData = await getFilenameDeatials(item.filename);
+          re_lunch = true;
           const newAd = {
             id: item.id,
             page_id: item.page_id,
@@ -2828,9 +2870,24 @@ const AdsetComponent = ({
 
     console.log("New Add Level Data:", newAddLevel);
 
-    let AdsetsData = { id: adset.id };
+    let AdsetsData = { id: adset.id, buying_type: "AUCTION" };
     if (adset.Adsetid) {
       AdsetsData["Adsetid"] = adset.Adsetid;
+    }
+    if (adset.Status) {
+      AdsetsData["Status"] = adset.Status;
+    }
+    if (adset["re_lunch_adsetname"]) {
+      AdsetsData["re_lunch_adsetname"] = adset["re_lunch_adsetname"];
+    }
+    if (adset["re_lunch_bid_amount"]) {
+      AdsetsData["re_lunch_bid_amount"] = adset["re_lunch_bid_amount"];
+    }
+    if (adset["re_lunch_daily_amount"]) {
+      AdsetsData["re_lunch_daily_amount"] = adset["re_lunch_daily_amount"];
+    }
+    if (adset["re_lunch_targeting"]) {
+      AdsetsData["re_lunch_targeting"] = adset["re_lunch_targeting"];
     }
     if (adset.Adsetid && adset.AdsetName !== formValues.AdsetName) {
       AdsetsData["AdsetName"] = formValues.AdsetName;
@@ -2947,7 +3004,6 @@ const AdsetComponent = ({
         formValues.placements === "Advance"
       ) {
         AdsetsData["placements"] = formValues.placements;
-        return;
       } else if (
         adset.placements === "manual" &&
         formValues.placements === "Advance"
@@ -2956,8 +3012,8 @@ const AdsetComponent = ({
         AdsetsData["re_lunch_targeting"] = true;
         re_lunch = true;
       } else if (
-        ((adset.placements === "Advance") === formValues.placements) ===
-        "manual"
+        adset.placements === "Advance" &&
+        formValues.placements === "manual"
       ) {
         AdsetsData["placements"] = formValues.placements;
         AdsetsData["Facebook_positions"] =
@@ -3878,7 +3934,7 @@ const AdsetComponent = ({
       const mappedWithAddName = mapped.map((item, i) => ({
         id: item.id,
         AddName: `${addName}_${nextAddNumber + i}`,
-        filename: item.url,
+        filename: item,
         page_id: form.getFieldValue("page_id"),
         message: primaryText,
         headline: headline,
@@ -4076,20 +4132,20 @@ const AdsetComponent = ({
     <Spin spinning={loading}>
       <Modal
         title={adset.AdsetName || `Edit Adset`}
-        className={` ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        className={` ${theme === "dark" ? "dark-theme-modal" : ""}`}
         onCancel={closeDrawer}
         visible={drawerVisible}
-         width="85%"
+        width="85%"
         footer={null}
         centered
         bodyStyle={{
-          height: '80vh',
-          overflowY: 'auto',
+          height: "80vh",
+          overflowY: "auto",
           padding: 10,
-          backgroundColor: theme === 'dark' ? '#333' : '#fff',
-          color: theme === 'dark' ? '#fff' : '#000',
+          backgroundColor: theme === "dark" ? "#333" : "#fff",
+          color: theme === "dark" ? "#fff" : "#000",
         }}
-        style={{ borderRadius: '12px' }}
+        style={{ borderRadius: "12px" }}
       >
         <Form
           key={adset.id}
@@ -4579,22 +4635,23 @@ const AdsetComponent = ({
                       placeholder="$"
                       min={0}
                       step={0.01}
-                      value={adset.Daily_amount ? adset.Daily_amount / 100 : 0}
+                      value={dailyBudget}
                       onChange={(value) => {
                         // Handle the change, updating the adset value both in the form and the adset state
                         // handleAdsetChange(index, value);
 
-                        // Ensure that 'adsets' is defined and is an array
-                        const adsets = form.getFieldValue("adsets") || []; // Fallback to empty array if undefined
+                        // // Ensure that 'adsets' is defined and is an array
+                        // const adsets = form.getFieldValue("adsets") || []; // Fallback to empty array if undefined
 
-                        // Update only the DailyAdd_amount in the form without disturbing other values
-                        const updatedAdsets = adsets.map((ad, i) =>
-                          i === index ? { ...ad, DailyAdd_amount: value } : ad
-                        );
+                        // // Update only the DailyAdd_amount in the form without disturbing other values
+                        // const updatedAdsets = adsets.map((ad, i) =>
+                        //   i === index ? { ...ad, DailyAdd_amount: value } : ad
+                        // );
 
                         form.setFieldsValue({
                           DailyAdd_amount: value,
                         });
+                        setDailyBudget(value);
                       }}
                       // readOnly={isCampaignBudgetActive} // Make adset budget read-only if campaign budget is active
                       style={{ width: 120 }}
@@ -4899,7 +4956,7 @@ const AdsetComponent = ({
                                 </>
                             )} */}
                 <Form.Item
-                   label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
+                  label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                   name="placements"
                   rules={[{ required: true, message: "Please select a mode!" }]}
                   initialValue={adset.placements || "Advance"}
@@ -5065,17 +5122,53 @@ const AdsetComponent = ({
                       }}
                     >
                       <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setViewSingleAd({}); // Reset viewSingleAd when collapsing
-                          setActiveMediaIndex(null);
-                        }}
+                        // onClick={(e) => {
+                        //   e.stopPropagation();
+                        //   setViewSingleAd({}); 
+                        //   setActiveMediaIndex(null);
+                        // }}
                       >
                         AD LEVEL
                       </span>
                       {(selectedFiles || []).length > 0 && (
                         <div onClick={(e) => e.stopPropagation()}>
-                          <Breadcrumb separator="/">
+                          <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
+                            <div style={{ display: 'flex' }}>
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setViewSingleAd({});
+                                  setActiveMediaIndex(-1);
+                                }}
+                                style={{
+                                  fontWeight: activeMediaIndex === -1 ? "500" : "normal",
+                                  color:
+                                    activeMediaIndex === -1
+                                      ? "#91C25F"
+                                      : theme === "dark"
+                                        ? "#fff"
+                                        : "#333",
+                                  cursor: "pointer",
+                                  backgroundColor:
+                                    activeMediaIndex === -1
+                                      ? theme === "dark"
+                                        ? "rgba(145,194,95,0.2)"
+                                        : "rgba(145,194,95,0.15)"
+                                      : "transparent",
+                                  border:
+                                    activeMediaIndex === -1
+                                      ? "1px solid #4caf50"
+                                      : "2px solid transparent",
+                                  borderRadius: "6px",
+                                  padding: "1px 2px",
+                                  transition: "all 0.2s ease-in-out",
+                                  fontSize: '8px'
+                                }}
+                              >
+                                <MoreOutlined />
+                              </span>
+                              <span style={{ color: theme === "dark" ? "#fff" : "#333", marginRight: '10px', marginLeft: '5px' }}>/</span>
+                            </div>
                             {newAddLevelData.map((_, i) => (
                               <Breadcrumb.Item key={i}>
                                 <span
@@ -5085,13 +5178,27 @@ const AdsetComponent = ({
                                     setActiveMediaIndex(i);
                                   }}
                                   style={{
-                                    fontWeight:
-                                      activeMediaIndex === i ? "900" : "normal",
+                                    fontWeight: activeMediaIndex === i ? "500" : "normal",
                                     color:
                                       activeMediaIndex === i
                                         ? "#91C25F"
-                                        : "#888",
+                                        : theme === "dark"
+                                          ? "#fff"
+                                          : "#333",
                                     cursor: "pointer",
+                                    backgroundColor:
+                                      activeMediaIndex === i
+                                        ? theme === "dark"
+                                          ? "rgba(145,194,95,0.2)"
+                                          : "rgba(145,194,95,0.15)"
+                                        : "transparent",
+                                    border:
+                                      activeMediaIndex === i
+                                        ? "1px solid #4caf50"
+                                        : "2px solid transparent",
+                                    borderRadius: "6px",
+                                    padding: "1px 5px",
+                                    transition: "all 0.2s ease-in-out",
                                   }}
                                 >
                                   {i + 1}
@@ -6021,7 +6128,11 @@ const AdsetComponent = ({
                           />
                         </Form.Item>
                         <Form.Item
-                          label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
+                          label={
+                            <span style={{ color: "#B4B4B4" }}>
+                              Primary text
+                            </span>
+                          }
                           name="message"
                           rules={[
                             {
@@ -6030,7 +6141,7 @@ const AdsetComponent = ({
                             },
                           ]}
                           required
-                          tooltip="This is a required field"
+                        // tooltip="This is a required field"
                         >
                           <TextArea
                             placeholder="Primary text"
@@ -6070,7 +6181,9 @@ const AdsetComponent = ({
                                             />
                                         </Form.Item> */}
                         <Form.Item
-                          label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
+                          label={
+                            <span style={{ color: "#B4B4B4" }}>Headline</span>
+                          }
                           name="headline"
                           rules={[
                             {
@@ -6079,7 +6192,7 @@ const AdsetComponent = ({
                             },
                           ]}
                           required
-                          tooltip="This is a required field"
+                        // tooltip="This is a required field"
                         >
                           <TextArea
                             placeholder="Headline"
@@ -6102,7 +6215,11 @@ const AdsetComponent = ({
                         </Form.Item>
 
                         <Form.Item
-                          label={<span style={{ color: "#B4B4B4" }}>Description</span>}
+                          label={
+                            <span style={{ color: "#B4B4B4" }}>
+                              Description
+                            </span>
+                          }
                           name="Description"
                           rules={[
                             {
@@ -6112,7 +6229,7 @@ const AdsetComponent = ({
                           ]}
                           required
                           initialValue={"Find More"}
-                          tooltip="This is a required field"
+                        // tooltip="This is a required field"
                         >
                           <TextArea
                             placeholder="Description"
@@ -6150,18 +6267,25 @@ const AdsetComponent = ({
                                   paddingRight: "50px",
                                 }}
                               >
-                                <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                                <Tooltip title="This is a required field" overlayInnerStyle={{
-                                  backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-                                  color: theme === 'dark' ? '#ffffff' : '#000000',
-                                  borderRadius: 6,
-                                  padding: '6px 10px',
-                                  fontSize: '14px',
-                                }}>
+                                <span style={{ color: "#B4B4B4" }}>
+                                  Website_URL
+                                </span>
+                                {/* <Tooltip
+                                  // title="This is a required field"
+                                  overlayInnerStyle={{
+                                    backgroundColor:
+                                      theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                    color:
+                                      theme === "dark" ? "#ffffff" : "#000000",
+                                    borderRadius: 6,
+                                    padding: "6px 10px",
+                                    fontSize: "14px",
+                                  }}
+                                >
                                   <QuestionCircleOutlined
                                     style={{ marginLeft: 4, cursor: "pointer" }}
                                   />
-                                </Tooltip>
+                                </Tooltip> */}
                               </div>
                               <EditOutlined
                                 style={{ cursor: "pointer" }}
@@ -6200,7 +6324,11 @@ const AdsetComponent = ({
                           />
                         </Form.Item>
                         <Form.Item
-                          label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
+                          label={
+                            <span style={{ color: "#B4B4B4" }}>
+                              Display link
+                            </span>
+                          }
                           name="Caption"
                           rules={[
                             {
@@ -6209,7 +6337,7 @@ const AdsetComponent = ({
                             },
                           ]}
                           required
-                          tooltip="This is a required field"
+                        // tooltip="This is a required field"
                         >
                           <TextArea
                             placeholder="Display Link"

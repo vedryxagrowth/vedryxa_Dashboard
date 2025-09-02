@@ -545,6 +545,2020 @@ function getPositionsByKeys(keys) {
   return allPositions.filter((pos) => keySet.has(pos.key));
 }
 
+const AddComponent = ({
+  imagehash,
+  adset,
+  network,
+  accountis,
+  isViewAdset,
+  viewSingleAd,
+  newAddLevelData,
+  setNewAddLevelData,
+  activeMediaIndex,
+  setSelectedFilesFromAdset,
+  setSelectedFilesFromCreativesFromAdset,
+  setSelectedFilesFromMediaFromAdset,
+}) => {
+  const { theme } = useTokenContext();
+  const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
+    useState(false);
+  const [primaryText, setPrimaryText] = useState("");
+  const [headline, setHeadline] = useState("");
+  const [caption, setCaption] = useState("");
+  const [description, setDescription] = useState("");
+  const [websiteURL, setWebsiteURL] = useState("");
+  const [addName, setAddName] = useState("");
+  const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
+  const [creativeIndex, setCreativeIndex] = useState(null);
+  const [selectedOption, setSelectedOption] = useState("creative");
+  const [editedImages, setEditedImages] = useState({});
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState(
+    []
+  );
+  const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
+  const [form] = Form.useForm();
+  console.log(viewSingleAd, "viewSingleAd in AddComponent");
+  console.log(activeMediaIndex, "activeMediaIndex in AddComponent");
+  console.log(accountis, "accountis in AddComponent");
+  console.log(selectedFiles, "selectedFiles in AddComponent");
+  console.log(selectedFilesFromMedia, "selectedFilesFromMedia in AddComponent");
+  console.log(
+    selectedFilesFromCreatives,
+    "selectedFilesFromCreatives in AddComponent"
+  );
+
+  const onReturnUrl = (text) => {
+    setIsModalVisibleForURLBuilder(false);
+    setWebsiteURL(text);
+    // const currentAdsets = form.getFieldValue("adsets") || [];
+    // const updatedAdsets = [...currentAdsets];
+    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+      setCaption(text.split("//")[1].split("/")[0]);
+      //   setNewAddLevelData((prev) => {
+      //     return prev.map((item, idx) =>
+      //       item.id === viewSingleAd.id
+      //         ? {
+      //             ...item,
+      //             Website_URL: text,
+      //             Caption: text.split("//")[1].split("/")[0],
+      //           }
+      //         : item
+      //     );
+      //   });
+      setNewAddLevelData((prev) => {
+        const key = adset.id;
+        const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+        const next = list.map((ad) =>
+          ad?.id === viewSingleAd?.id
+            ? {
+              ...ad,
+              Website_URL: text,
+              Caption: text.split("//")[1].split("/")[0],
+            }
+            : ad
+        );
+
+        return { ...prev, [key]: next };
+      });
+
+      // updatedAdsets[index] = {
+      //     ...updatedAdsets[index],
+      //     Website_URL: text,
+      //     Caption: text.split('//')[1].split("/")[0],
+      // };
+      form.setFieldsValue({
+        Website_URL: text,
+        Caption: text.split("//")[1].split("/")[0],
+      });
+    } else {
+      setCaption(text.split("/")[0]);
+      form.setFieldsValue({ Website_URL: text, Caption: text.split("/")[0] });
+      // updatedAdsets[index] = {
+      //     ...updatedAdsets[index],
+      //     Website_URL: text,
+      //     Caption: text.split('/')[0],
+      // };
+      //   setNewAddLevelData((prev) => {
+      //     return prev.map((item, idx) =>
+      //       item.id === viewSingleAd.id
+      //         ? {
+      //             ...item,
+      //             Website_URL: text,
+      //             Caption: text.split("/")[0],
+      //           }
+      //         : item
+      //     );
+      //   });
+      setNewAddLevelData((prev) => {
+        const key = adset.id;
+        const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+        const next = list.map((ad) =>
+          ad?.id === viewSingleAd?.id
+            ? { ...ad, Website_URL: text, Caption: text.split("/")[0] }
+            : ad
+        );
+
+        return { ...prev, [key]: next };
+      });
+    }
+  };
+
+  const onChangeAddNameForIndividualAd = (e) => {
+    const updatedAddName = e.target.value;
+    setAddName(updatedAddName);
+
+    // setNewAddLevelData((prevArray) => {
+    //   const existingAdsetArrayUsingAdsetId = prevArray[adset.id];
+    //   let editedExistingAdsetArrayUsingAdsetId = [];
+    //   if (existingAdsetArrayUsingAdsetId) {
+    //     editedExistingAdsetArrayUsingAdsetId =
+    //       existingAdsetArrayUsingAdsetId.map((ad) => {
+    //         ad.id === viewSingleAd.id ? { ...ad, AddName: updatedAddName } : ad;
+    //       });
+    //   }
+    //   return {
+    //     ...prevArray,
+    //     [adset.id]: editedExistingAdsetArrayUsingAdsetId || [],
+    //   };
+    // });
+
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.map((ad) =>
+        ad?.id === viewSingleAd?.id ? { ...ad, AddName: updatedAddName } : ad
+      );
+
+      return { ...prev, [key]: next };
+    });
+
+    // setNewAddLevelData((prevArray) =>
+    //   prevArray.map((ad) =>
+    //     ad.id === viewSingleAd.id ? { ...ad, AddName: updatedAddName } : ad
+    //   )
+    // );
+  };
+
+  const onChangePrimaryTextForIndividualAd = (e) => {
+    const updatedAddName = e.target.value;
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.map((ad) =>
+        ad?.id === viewSingleAd?.id ? { ...ad, message: updatedAddName } : ad
+      );
+
+      return { ...prev, [key]: next };
+    });
+  };
+
+  const onChangeHeadlineForIndividualAd = (e) => {
+    const updatedAddName = e.target.value;
+    setHeadline(updatedAddName);
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.map((ad) =>
+        ad?.id === viewSingleAd?.id ? { ...ad, headline: updatedAddName } : ad
+      );
+
+      return { ...prev, [key]: next };
+    });
+  };
+
+  const onChangeDescriptionForIndividualAd = (e) => {
+    const updatedAddName = e.target.value;
+    setDescription(updatedAddName);
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.map((ad) =>
+        ad?.id === viewSingleAd?.id
+          ? { ...ad, Description: updatedAddName }
+          : ad
+      );
+
+      return { ...prev, [key]: next };
+    });
+  };
+
+  const onChangeWebsiteURLForIndividualAd = (e) => {
+    const updatedAddName = e.target.value;
+    setWebsiteURL(updatedAddName);
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.map((ad) =>
+        ad?.id === viewSingleAd?.id
+          ? { ...ad, Website_URL: updatedAddName }
+          : ad
+      );
+
+      return { ...prev, [key]: next };
+    });
+  };
+
+  const onChangeDisplayLinkForIndividualAd = (e) => {
+    const updatedAddName = e.target.value;
+    setCaption(updatedAddName);
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.map((ad) =>
+        ad?.id === viewSingleAd?.id ? { ...ad, Caption: updatedAddName } : ad
+      );
+
+      return { ...prev, [key]: next };
+    });
+  };
+
+  const onClickEdit = () => {
+    setIsModalVisibleForURLBuilder(true);
+  };
+
+  const getUrlBuilder = useMemo(() => {
+    switch (network) {
+      case "FB_Mnet":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Tonic1":
+        return (
+          <TonicUrlBuilder
+            accountis={accountis}
+            defaultValues={websiteURL}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_System1":
+        return (
+          <System1UrlBuilder
+            accountis={accountis}
+            defaultValues={websiteURL}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_DomainActive":
+        return (
+          <DActiveUrlBuilder
+            accountis={accountis}
+            defaultValues={websiteURL}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+    }
+  }, [network, accountis, onReturnUrl]);
+
+  const handleCancelForURLBuilder = () => {
+    setIsModalVisibleForURLBuilder(false);
+  };
+
+  const onClickCreativesDrawer = (adset) => {
+    console.log("Creatives Drawer Opened");
+    setOpenCreativesDrawer(true);
+    setCreativeIndex(adset.id);
+  };
+
+  const selectedFilesData = (data, index, adsetId = creativeIndex) => {
+    const mapped = [
+      {
+        id: data[0]?.id || uuidv4(),
+        uid: data[0]?.uid || `-${Date.now()}-0`,
+        name: data[0]?.name,
+        status: "done",
+        type: data[0]?.url?.endsWith(".jpg")
+          ? "image/jpg"
+          : data[0]?.url?.endsWith(".jpeg")
+            ? "image/jpeg"
+            : data[0]?.url?.endsWith(".png")
+              ? "image/png"
+              : "video/",
+        url: data[0]?.url,
+        adsetId,
+      },
+    ];
+
+    // ✅ Set flat array (no adsetId nesting)
+    setSelectedFilesFromCreatives((prev) => [...prev, ...mapped]);
+    setSelectedFiles((prev) => [...prev, ...mapped]);
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.map((ad) =>
+        ad?.id === viewSingleAd?.id ? { ...ad, filename: mapped[0] } : ad
+      );
+
+      return { ...prev, [key]: next };
+    });
+    // const targetIndex = newAddLevelData.findIndex(
+    //   (item) => item.id === viewSingleAd.id
+    // );
+
+    const arr = Array.isArray(newAddLevelData?.[adset.id])
+      ? newAddLevelData[adset.id]
+      : [];
+    const targetIndex = arr.findIndex((item) => item?.id === viewSingleAd?.id);
+
+    // function insertAtIndex(array, index, newObject) {
+    //   // Clamp index to be within 0 and array.length
+    //   const safeIndex = Math.min(Math.max(index, 0), array.length);
+
+    //   return [
+    //     ...array.slice(0, safeIndex), // elements before the insert position
+    //     newObject, // the new object to insert
+    //     ...array.slice(safeIndex), // elements from insert position onward
+    //   ];
+    // }
+
+    // Usage in React state setter:
+    // setSelectedFilesFromAdset((prevArray) => {
+    //   const newObject =
+    //     {
+    //       ...mapped[0],
+    //       id: viewSingleAd.id,
+    //       ...(viewSingleAd.Addid ? { Addid: viewSingleAd.Addid } : {}),
+    //     } || {};
+    //   const insertIndex = targetIndex; // dynamically set this as you like
+
+    //   return insertAtIndex(prevArray, insertIndex, newObject);
+    // });
+
+    // setSelectedFilesFromCreativesFromAdset((prevArray) => {
+    //   const newObject =
+    //     {
+    //       ...mapped[0],
+    //       id: viewSingleAd.id,
+    //       ...(viewSingleAd.Addid ? { Addid: viewSingleAd.Addid } : {}),
+    //     } || {};
+    //   const insertIndex = targetIndex; // dynamically set this as you like
+
+    //   return insertAtIndex(prevArray, insertIndex, newObject);
+    // });
+    // setSelectedFilesFromAdset((prev) =>
+    //   prev.map((f) => {
+    //     if (f.id === viewSingleAd.id) {
+    //       return {
+    //         ...mapped[0],
+    //         id: viewSingleAd.id,
+    //         ...(viewSingleAd.Addid ? { Addid: viewSingleAd.Addid } : {}),
+    //       };
+    //     } else {
+    //       return f;
+    //     }
+    //   })
+    // );
+
+    setSelectedFilesFromAdset(
+      (prev) => {
+        const key = adset.id;
+        const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+        const next = list.map((ad) =>
+          ad?.id === viewSingleAd?.id
+            ? {
+              ...mapped[0],
+              id: viewSingleAd.id,
+              ...(viewSingleAd.Addid ? { Addid: viewSingleAd.Addid } : {}),
+            }
+            : ad
+        );
+
+        return { ...prev, [key]: next };
+      }
+
+      //   // prev.map((f) => {
+      //   //   if (f.id === viewSingleAd.id) {
+      //   //     return {
+      //   //       ...mapped[0],
+      //   //       id: viewSingleAd.id,
+      //   //       ...(viewSingleAd.Addid ? { Addid: viewSingleAd.Addid } : {}),
+      //   //     };
+      //   //   } else {
+      //   //     return f;
+      //   //   }
+      //   // })
+    );
+    // setSelectedFilesFromCreativesFromAdset((prev) =>
+    //   prev.map((f) => {
+    //     if (f.id === viewSingleAd.id) {
+    //       return {
+    //         ...mapped[0],
+    //         id: viewSingleAd.id,
+    //         ...(viewSingleAd.Addid ? { Addid: viewSingleAd.Addid } : {}),
+    //       };
+    //     } else {
+    //       return f;
+    //     }
+    //   })
+    // );
+    // setSelectedFilesFromCreativesFromAdset((prev) => {
+    //   const newObject = {
+    //     ...mapped[0],
+    //     id: viewSingleAd.id,
+    //     ...(viewSingleAd.Addid ? { Addid: viewSingleAd.Addid } : {}),
+    //   };
+
+    //   const index = prev.findIndex((f) => f.id === viewSingleAd.id);
+
+    //   if (index !== -1) {
+    //     // ✅ Update existing object
+    //     return prev.map((f, i) => (i === index ? newObject : f));
+    //   } else {
+    //     // ❌ Not Found: Insert at targetIndex
+    //     const safeIndex = Math.max(0, Math.min(targetIndex, prev.length));
+    //     return [
+    //       ...prev.slice(0, safeIndex),
+    //       newObject,
+    //       ...prev.slice(safeIndex),
+    //     ];
+    //   }
+    // });
+
+    setSelectedFilesFromCreativesFromAdset((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev?.[key]) ? prev[key].filter(Boolean) : [];
+      console.log(list, "list in selectedFilesFromCreativesFromAdset");
+      const idx = list.findIndex((f) => f?.id === viewSingleAd?.id);
+      console.log(idx, "idx in selectedFilesFromCreativesFromAdset");
+      console.log(
+        targetIndex,
+        "targetIndex in selectedFilesFromCreativesFromAdset"
+      );
+
+      // what to store when inserting a new item
+      const makeNew = {
+        ...mapped?.[0],
+        id: viewSingleAd?.id,
+        ...(viewSingleAd?.Addid ? { Addid: viewSingleAd.Addid } : {}), // <-- mirrors your reference code
+      };
+
+      console.log(makeNew, "makeNew in selectedFilesFromCreativesFromAdset");
+
+      // if your items might key on Addid/_id, expand this matcher
+
+      if (idx !== -1) {
+        // update existing (only the filename, per your reference)
+        const next = list.map((f, i) => (i === idx ? makeNew : f));
+        console.log(next, "next in selectedFilesFromCreativesFromAdset");
+        return { ...prev, [key]: next };
+      }
+
+      // not found → insert at targetIndex (clamped)
+      const safeIndex = Math.max(
+        0,
+        Math.min(targetIndex ?? list.length, list.length)
+      );
+      console.log(
+        safeIndex,
+        "safeIndex in selectedFilesFromCreativesFromAdset"
+      );
+      const next = [
+        ...list.slice(0, safeIndex),
+        makeNew,
+        ...list.slice(safeIndex),
+      ];
+      console.log(
+        next,
+        "next in selectedFilesFromCreativesFromAdset after insert"
+      );
+      return { ...prev, [key]: next };
+    });
+
+    setSelectedFilesFromMediaFromAdset((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+      const next = list.filter((ad) => ad?.id !== viewSingleAd?.id);
+
+      return { ...prev, [key]: next };
+    });
+
+    // ✅ Update form's top-level MediaContent field
+    const currentMedia = form.getFieldValue("MediaContent") || [];
+    form.setFieldsValue({
+      MediaContent: [...currentMedia, ...mapped],
+    });
+
+    form.validateFields(["MediaContent"]);
+    setOpenCreativesDrawer(false);
+  };
+
+  let initialValues = {
+    Website_URL: viewSingleAd?.Website_URL || "",
+    Caption: viewSingleAd?.Caption || "",
+    headline: viewSingleAd?.headline || "",
+    Description: viewSingleAd?.Description || "",
+    message: viewSingleAd?.message || "",
+    page_id: viewSingleAd?.page_id || "",
+    AddName: viewSingleAd?.AddName || "",
+  };
+
+  useEffect(() => {
+    console.log(viewSingleAd, "viewSingleAd in useEffect");
+    console.log(typeof viewSingleAd.filename, "viewSingleAd.filename type");
+    console.log(
+      typeof viewSingleAd.filename === "object" &&
+      viewSingleAd.filename !== null
+    );
+    if (
+      typeof viewSingleAd.filename === "object" &&
+      viewSingleAd.filename !== null
+    ) {
+      if (viewSingleAd?.filename?.url) {
+        setSelectedFiles([
+          {
+            uid: uuidv4(),
+            name: viewSingleAd?.filename.url,
+            status: "done",
+            type: viewSingleAd?.filename?.url?.endsWith(".jpg")
+              ? "image/jpg"
+              : viewSingleAd?.filename?.url?.endsWith(".jpeg")
+                ? "image/jpeg"
+                : viewSingleAd?.filename.url?.endsWith(".png")
+                  ? "image/png"
+                  : "video/",
+            url: viewSingleAd?.filename?.url,
+          },
+        ]);
+        setSelectedFilesFromCreatives([
+          {
+            uid: uuidv4(),
+            name: viewSingleAd?.filename?.url,
+            status: "done",
+            type: viewSingleAd?.filename?.url?.endsWith(".jpg")
+              ? "image/jpg"
+              : viewSingleAd?.filename?.url?.endsWith(".jpeg")
+                ? "image/jpeg"
+                : viewSingleAd?.filename.url?.endsWith(".png")
+                  ? "image/png"
+                  : "video/",
+            url: viewSingleAd?.filename?.url,
+          },
+        ]);
+        setSelectedFilesFromMedia([]);
+        setSelectedOption("creative");
+      } else {
+        console.log(
+          viewSingleAd.filename,
+          "viewSingleAd.filename in useEffect 1"
+        );
+        setSelectedFiles([viewSingleAd.filename]);
+        setSelectedFilesFromMedia([viewSingleAd.filename]);
+        setSelectedOption("upload");
+        setSelectedFilesFromCreatives([]);
+      }
+    } else {
+      console.log(
+        viewSingleAd.filename,
+        "viewSingleAd.filename in useEffect 2"
+      );
+      setSelectedFiles([
+        {
+          uid: uuidv4(),
+          name: viewSingleAd?.filename,
+          status: "done",
+          type: viewSingleAd?.filename?.endsWith(".jpg")
+            ? "image/jpg"
+            : viewSingleAd?.filename?.endsWith(".jpeg")
+              ? "image/jpeg"
+              : viewSingleAd?.filename.endsWith(".png")
+                ? "image/png"
+                : "video/",
+          url: viewSingleAd?.filename,
+        },
+      ]);
+      setSelectedFilesFromCreatives([
+        {
+          uid: uuidv4(),
+          name: viewSingleAd?.filename,
+          status: "done",
+          type: viewSingleAd?.filename?.endsWith(".jpg")
+            ? "image/jpg"
+            : viewSingleAd?.filename?.endsWith(".jpeg")
+              ? "image/jpeg"
+              : viewSingleAd?.filename.endsWith(".png")
+                ? "image/png"
+                : "video/",
+          url: viewSingleAd?.filename,
+        },
+      ]);
+      setSelectedFilesFromMedia([]);
+      setSelectedOption("creative");
+    }
+    form.setFieldsValue({
+      Website_URL: viewSingleAd?.Website_URL || "",
+      Caption: viewSingleAd?.Caption || "",
+      headline: viewSingleAd?.headline || "",
+      Description: viewSingleAd?.Description || "",
+      message: viewSingleAd?.message || "",
+      page_id: viewSingleAd?.page_id || "",
+      AddName: viewSingleAd?.AddName || "",
+    });
+    setAddName(viewSingleAd?.AddName || "");
+    setPrimaryText(viewSingleAd?.message || "");
+    setHeadline(viewSingleAd?.headline || "");
+    setCaption(viewSingleAd?.Caption || "");
+    setDescription(viewSingleAd?.Description || "");
+    setWebsiteURL(viewSingleAd?.Website_URL || "");
+  }, [viewSingleAd]);
+
+  return (
+    <Form
+      layout="vertical"
+      form={form}
+      initialValues={initialValues}
+    //   style={{ maxWidth: 700, margin: "0 auto", padding: "1rem" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          width: "100%",
+        }}
+      >
+        {/* <div
+              style={{
+              display: "flex",
+              justifyContent: "space-between",
+              }}
+          > */}
+        <div style={{ flex: "70%", marginRight: "5%" }}>
+          <div style={{ display: "flex", gap: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <Form.Item
+                label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
+                style={{ flex: 1 }}
+              >
+                <Select
+                  disabled={selectedFiles.length > 0}
+                  value={selectedOption || "creative"}
+                  onChange={(value) => {
+                    setSelectedOption(value);
+                    form.validateFields(["MediaContent"]); // Revalidate when switching source
+                  }}
+                  style={{ marginBottom: 16 }}
+                  dropdownClassName={theme === "dark" && "custom-dropdown"}
+                  className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                    } green-border-select`}
+                >
+                  <Option value="upload">Upload</Option>
+                  <Option value="creative">Creative library</Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="MediaContent"
+                rules={[
+                  {
+                    validator: async () => {
+                      // Default to empty array if the value for the index is undefined
+                      const mediaFiles = selectedFilesFromMedia || [];
+                      const creativeFiles = selectedFilesFromCreatives || [];
+
+                      // Check if there are any files selected based on the selected option
+                      if (
+                        (selectedOption === "upload" &&
+                          mediaFiles.length === 0) ||
+                        (selectedOption === "creative" &&
+                          creativeFiles.length === 0)
+                      ) {
+                        throw new Error("Please select Upload!");
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <div>
+                  {/* Upload UI */}
+                  <div
+                    className="custom-dark-mode"
+                    style={{
+                      display: selectedOption === "upload" ? "block" : "none",
+                    }}
+                  >
+                    <Upload
+                      beforeUpload={() => false}
+                      //   disabled={isViewAdset}
+                      // onChange={(info) => {
+                      //   const newFiles = info.fileList.map((file) => ({
+                      //     ...file,
+                      //     uid: file.uid || `-${Date.now()}`,
+                      //     source: "media",
+                      //     thumbUrl:
+                      //       file.thumbUrl ||
+                      //       (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
+                      //   }));
+
+                      //   setSelectedFiles((prev) => {
+                      //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
+                      //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
+                      //     const updated = [...(prev[index] || []), ...filtered];
+                      //     const newState = { ...prev, [index]: updated };
+                      //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                      //     form.validateFields([['adsets', index, 'MediaContent']]);
+                      //     return newState;
+                      //   });
+
+                      //   setSelectedFilesFromMedia((prev) => {
+                      //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
+                      //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
+                      //     const updated = [...(prev[index] || []), ...filtered];
+                      //     const newState = { ...prev, [index]: updated };
+                      //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                      //     form.validateFields([['adsets', index, 'MediaContent']]);
+                      //     return newState;
+                      //   });
+                      // }}
+                      //   onChange={(info) => {
+                      //     const newFiles = info.fileList.map((file) => ({
+                      //       ...file,
+                      //       uid: file.uid || `-${Date.now()}`,
+                      //       source: "media",
+                      //       adsetId: viewSingleAd.id, // Include adset identifier in file
+                      //       thumbUrl:
+                      //         file.thumbUrl ||
+                      //         (file.originFileObj
+                      //           ? URL.createObjectURL(file.originFileObj)
+                      //           : undefined),
+                      //     }));
+
+                      //     // Update selectedFiles (flat array)
+                      //     setSelectedFiles((prev) => {
+                      //       const existingUids = new Set(prev.map((f) => f.uid));
+                      //       const updated = [
+                      //         ...prev,
+                      //         ...newFiles.filter((f) => !existingUids.has(f.uid)),
+                      //       ];
+                      //       return updated;
+                      //     });
+
+                      //     // Update selectedFilesFromMedia (flat array)
+                      //     setSelectedFilesFromMedia((prev) => {
+                      //       const existingUids = new Set(prev.map((f) => f.uid));
+                      //       const updated = [
+                      //         ...prev,
+                      //         ...newFiles.filter((f) => !existingUids.has(f.uid)),
+                      //       ];
+                      //       return updated;
+                      //     });
+
+                      //     // Update form field
+                      //     const formMedia =
+                      //       form.getFieldValue([
+                      //         "adsets",
+                      //         index,
+                      //         "MediaContent",
+                      //       ]) || [];
+                      //     const existingUidsInForm = new Set(
+                      //       formMedia.map((f) => f.uid)
+                      //     );
+                      //     const updatedFormMedia = [
+                      //       ...formMedia,
+                      //       ...newFiles.filter(
+                      //         (f) => !existingUidsInForm.has(f.uid)
+                      //       ),
+                      //     ];
+
+                      //     form.setFieldsValue({
+                      //       adsets: {
+                      //         [index]: {
+                      //           MediaContent: updatedFormMedia,
+                      //         },
+                      //       },
+                      //     });
+
+                      //     form.validateFields([
+                      //       ["adsets", index, "MediaContent"],
+                      //     ]);
+                      //   }}
+
+                      onChange={(info) => {
+                        if (!info.fileList || info.fileList.length === 0)
+                          return;
+                        const newFiles = info.fileList.map((file) => ({
+                          ...file,
+                          id: uuidv4(),
+                          uid: file.uid || `-${Date.now()}`,
+                          source: "media",
+                          adsetId: viewSingleAd.id,
+                          thumbUrl:
+                            file.thumbUrl ||
+                            (file.originFileObj
+                              ? URL.createObjectURL(file.originFileObj)
+                              : undefined),
+                        }));
+
+                        if (!newFiles[0]) return;
+
+                        console.log(newFiles[0], "newFiles[0] in onChange");
+
+                        setSelectedFiles((prev) => {
+                          const existingUids = new Set(prev.map((f) => f.uid));
+                          return [
+                            ...prev,
+                            ...newFiles.filter((f) => !existingUids.has(f.uid)),
+                          ];
+                        });
+
+                        setSelectedFilesFromMedia((prev) => {
+                          const existingUids = new Set(prev.map((f) => f.uid));
+                          return [
+                            ...prev,
+                            ...newFiles.filter((f) => !existingUids.has(f.uid)),
+                          ];
+                        });
+                        // setNewAddLevelData((prevArray) =>
+                        //   prevArray.map((ad) =>
+                        //     ad.id === viewSingleAd.id
+                        //       ? {
+                        //           ...ad,
+                        //           filename: newFiles[0],
+                        //           uid: newFiles[0].uid,
+                        //         }
+                        //       : ad
+                        //   )
+                        // );
+                        setNewAddLevelData((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+
+                          const next = list.map((ad) =>
+                            ad?.id === viewSingleAd?.id
+                              ? {
+                                ...ad,
+                                filename: newFiles[0],
+                                uid: newFiles[0].uid,
+                              }
+                              : ad
+                          );
+
+                          return { ...prev, [key]: next };
+                        });
+                        // const targetIndex = newAddLevelData.findIndex(
+                        //   (item) => item.id === viewSingleAd.id
+                        // );
+                        const arr = Array.isArray(newAddLevelData?.[adset.id])
+                          ? newAddLevelData[adset.id]
+                          : [];
+                        const targetIndex = arr.findIndex(
+                          (item) => item?.id === viewSingleAd?.id
+                        );
+
+                        // function insertAtIndex(array, index, newObject) {
+                        //   // Clamp index to be within 0 and array.length
+                        //   const safeIndex = Math.min(
+                        //     Math.max(index, 0),
+                        //     array.length
+                        //   );
+
+                        //   return [
+                        //     ...array.slice(0, safeIndex), // elements before the insert position
+                        //     newObject, // the new object to insert
+                        //     ...array.slice(safeIndex), // elements from insert position onward
+                        //   ];
+                        // }
+
+                        // Usage in React state setter:
+                        // setSelectedFilesFromAdset((prevArray) => {
+                        //   const newObject =
+                        //     {
+                        //       ...newFiles[0],
+                        //       id: viewSingleAd.id,
+                        //       ...(viewSingleAd.Addid
+                        //         ? { Addid: viewSingleAd.Addid }
+                        //         : {}),
+                        //     } || {};
+                        //   const insertIndex = targetIndex; // dynamically set this as you like
+
+                        //   return insertAtIndex(
+                        //     prevArray,
+                        //     insertIndex,
+                        //     newObject
+                        //   );
+                        // });
+
+                        // setSelectedFilesFromMediaFromAdset((prevArray) => [
+                        //   ...prevArray,
+                        //   {
+                        //     ...newFiles[0],
+                        //     id: viewSingleAd.id,
+                        //     ...(viewSingleAd.Addid
+                        //       ? { Addid: viewSingleAd.Addid }
+                        //       : {}),
+                        //     canDelete: false,
+                        //   },
+                        // ]);
+
+                        // setSelectedFilesFromAdset((prev) =>
+                        //   prev.map((f) => {
+                        //     if (f.id === viewSingleAd.id) {
+                        //       return {
+                        //         ...newFiles[0],
+                        //         id: viewSingleAd.id,
+                        //         ...(viewSingleAd.Addid
+                        //           ? { Addid: viewSingleAd.Addid }
+                        //           : {}),
+                        //       };
+                        //     } else {
+                        //       return f;
+                        //     }
+                        //   })
+                        // );
+
+                        setSelectedFilesFromAdset((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+
+                          console.log(list, "list in selectedFilesFromAdset");
+
+                          const next = list.map((ad) =>
+                            ad?.id === viewSingleAd?.id
+                              ? {
+                                ...newFiles[0],
+                                id: viewSingleAd.id,
+                                ...(viewSingleAd.Addid
+                                  ? { Addid: viewSingleAd.Addid }
+                                  : {}),
+                              }
+                              : ad
+                          );
+                          console.log(next, "next in selectedFilesFromAdset");
+                          console.log({ ...prev, [key]: next });
+
+                          return { ...prev, [key]: next };
+                        });
+
+                        // setSelectedFilesFromMediaFromAdset((prev) => {
+                        //   const index = prev.findIndex(
+                        //     (f) => f.id === viewSingleAd.id
+                        //   );
+
+                        //   const newObject = {
+                        //     ...newFiles[0],
+                        //     id: viewSingleAd.id,
+                        //     canDelete: viewSingleAd.Addid ? false : true,
+                        //     ...(viewSingleAd.Addid
+                        //       ? { Addid: viewSingleAd.Addid }
+                        //       : {}),
+                        //   };
+
+                        //   if (index !== -1) {
+                        //     // ID exists: update
+                        //     return prev.map((f, i) =>
+                        //       i === index ? newObject : f
+                        //     );
+                        //   } else {
+                        //     // ID not found: append
+                        //     return [...prev, newObject];
+                        //   }
+                        // });
+
+                        // setSelectedFilesFromCreativesFromAdset((prev) =>
+                        //   prev.filter((f) => f.id !== viewSingleAd.id)
+                        // );
+
+                        setSelectedFilesFromMediaFromAdset((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev?.[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+                          console.log(
+                            list,
+                            "list in selectedFilesFromCreativesFromAdset"
+                          );
+                          const idx = list.findIndex(
+                            (f) => f?.id === viewSingleAd?.id
+                          );
+                          console.log(
+                            idx,
+                            "idx in selectedFilesFromCreativesFromAdset"
+                          );
+                          console.log(
+                            targetIndex,
+                            "targetIndex in selectedFilesFromCreativesFromAdset"
+                          );
+
+                          // what to store when inserting a new item
+                          const makeNew = {
+                            ...newFiles?.[0],
+                            id: viewSingleAd?.id,
+                            ...(viewSingleAd?.Addid
+                              ? { Addid: viewSingleAd.Addid }
+                              : {}),
+                            canDelete: viewSingleAd.Addid ? false : true, // <-- mirrors your reference code
+                          };
+
+                          console.log(
+                            makeNew,
+                            "makeNew in selectedFilesFromCreativesFromAdset"
+                          );
+
+                          // if your items might key on Addid/_id, expand this matcher
+
+                          if (idx !== -1) {
+                            // update existing (only the filename, per your reference)
+                            const next = list.map((f, i) =>
+                              i === idx ? makeNew : f
+                            );
+                            console.log(
+                              next,
+                              "next in selectedFilesFromCreativesFromAdset"
+                            );
+                            return { ...prev, [key]: next };
+                          }
+
+                          // not found → insert at targetIndex (clamped)
+                          const safeIndex = Math.max(
+                            0,
+                            Math.min(targetIndex ?? list.length, list.length)
+                          );
+                          console.log(
+                            safeIndex,
+                            "safeIndex in selectedFilesFromCreativesFromAdset"
+                          );
+                          const next = [
+                            ...list.slice(0, safeIndex),
+                            makeNew,
+                            ...list.slice(safeIndex),
+                          ];
+                          console.log(
+                            next,
+                            "next in selectedFilesFromCreativesFromAdset after insert"
+                          );
+                          return { ...prev, [key]: next };
+                        });
+
+                        setSelectedFilesFromCreativesFromAdset((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+
+                          console.log(
+                            list,
+                            "list in selectedFilesFromCreativesFromAdset"
+                          );
+
+                          const next = list.filter(
+                            (ad) => ad?.id !== viewSingleAd?.id
+                          );
+                          console.log(
+                            next,
+                            "next in selectedFilesFromCreativesFromAdset"
+                          );
+
+                          return { ...prev, [key]: next };
+                        });
+
+                        // ✅ Ensure formMedia is always an array
+                        const rawFormMedia = form.getFieldValue("MediaContent");
+                        const formMedia = Array.isArray(rawFormMedia)
+                          ? rawFormMedia
+                          : [];
+
+                        const existingUidsInForm = new Set(
+                          formMedia.map((f) => f.uid)
+                        );
+                        const updatedFormMedia = [
+                          ...formMedia,
+                          ...newFiles.filter(
+                            (f) => !existingUidsInForm.has(f.uid)
+                          ),
+                        ];
+
+                        form.setFieldsValue({
+                          MediaContent: updatedFormMedia,
+                        });
+
+                        form.validateFields(["MediaContent"]);
+                      }}
+                      // onRemove={(fileToRemove) => {
+                      //   setSelectedFilesFromMedia((prev) => {
+                      //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
+                      //     const newState = { ...prev, [index]: updated };
+                      //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                      //     form.validateFields([['adsets', index, 'MediaContent']]);
+                      //     return newState;
+                      //   });
+
+                      //   setSelectedFiles((prev) => {
+                      //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
+                      //     const newState = { ...prev, [index]: updated };
+                      //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                      //     form.validateFields([['adsets', index, 'MediaContent']]);
+                      //     return newState;
+                      //   });
+
+                      //   return true;
+                      // }}
+                      // onChange={(info) => {
+                      //     const newFiles = info.fileList.map((file) => ({
+                      //       ...file,
+                      //       uid: file.uid || `-${Date.now()}`,
+                      //       status: 'done',
+                      //       type: file.type,
+                      //       thumbUrl: file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
+                      //       adsetIndex: index, // Tag the file with adsetIndex
+                      //     }));
+
+                      //     setSelectedFiles(prev => [...prev, ...newFiles]);
+                      //     setSelectedFilesFromMedia(prev => [...prev, ...newFiles]);
+
+                      //     const currentAll = [...selectedFiles, ...newFiles];
+                      //     const filtered = currentAll.filter(f => f.adsetIndex === index);
+
+                      //     form.setFieldsValue({
+                      //       adsets: {
+                      //         [index]: {
+                      //           MediaContent: filtered
+                      //         }
+                      //       }
+                      //     });
+
+                      //     form.validateFields([['adsets', index, 'MediaContent']]);
+                      // }}
+
+                      // onRemove={(fileToRemove) => {
+                      //     setSelectedFiles(prev => prev.filter(f => f.uid !== fileToRemove.uid));
+                      //     setSelectedFilesFromMedia(prev => prev.filter(f => f.uid !== fileToRemove.uid));
+
+                      //     const updated = selectedFiles.filter(f => f.uid !== fileToRemove.uid && f.adsetIndex === index);
+
+                      //     form.setFieldsValue({
+                      //       adsets: {
+                      //         [index]: {
+                      //           MediaContent: updated
+                      //         }
+                      //       }
+                      //     });
+
+                      //     form.validateFields([['adsets', index, 'MediaContent']]);
+                      //     return true;
+                      // }}
+
+                      //   onRemove={(fileToRemove) => {
+                      //     // Remove from selectedFilesFromMedia
+                      //     setSelectedFilesFromMedia((prev) =>
+                      //       prev.filter((f) => f.uid !== fileToRemove.uid)
+                      //     );
+
+                      //     // Remove from selectedFiles
+                      //     setSelectedFiles((prev) =>
+                      //       prev.filter((f) => f.uid !== fileToRemove.uid)
+                      //     );
+
+                      //     // Remove from form field
+                      //     const updatedFormMedia = (
+                      //       form.getFieldValue([
+                      //         "adsets",
+                      //         index,
+                      //         "MediaContent",
+                      //       ]) || []
+                      //     ).filter((f) => f.uid !== fileToRemove.uid);
+
+                      //     form.setFieldsValue({
+                      //       adsets: {
+                      //         [index]: {
+                      //           MediaContent: updatedFormMedia,
+                      //         },
+                      //       },
+                      //     });
+
+                      //     form.validateFields([
+                      //       ["adsets", index, "MediaContent"],
+                      //     ]);
+
+                      //     return true;
+                      //   }}
+                      //   multiple
+                      onRemove={(fileToRemove) => {
+                        // Remove from selectedFilesFromMedia
+                        setSelectedFilesFromMedia((prev) =>
+                          prev.filter((f) => f.uid !== fileToRemove.uid)
+                        );
+
+                        // Remove from selectedFiles
+                        setSelectedFiles((prev) =>
+                          prev.filter((f) => f.uid !== fileToRemove.uid)
+                        );
+
+                        // setSelectedFilesFromAdset((prev) =>
+                        //   prev.filter((f) => f.id !== viewSingleAd.id)
+                        // );
+
+                        // setSelectedFilesFromMediaFromAdset((prev) =>
+                        //   prev.filter((f) => f.id !== viewSingleAd.id)
+                        // );
+
+                        // Safely get MediaContent array from form (top-level, not nested)
+                        const rawFormMedia = form.getFieldValue("MediaContent");
+                        const formMedia = Array.isArray(rawFormMedia)
+                          ? rawFormMedia
+                          : [];
+
+                        const updatedFormMedia = formMedia.filter(
+                          (f) => f.uid !== fileToRemove.uid
+                        );
+
+                        // Directly update top-level MediaContent field
+                        form.setFieldsValue({
+                          MediaContent: updatedFormMedia,
+                        });
+
+                        // Validate
+                        form.validateFields(["MediaContent"]);
+
+                        return true;
+                      }}
+                      className={
+                        theme === "dark" ? "upload-dark" : "upload-light"
+                      }
+                      maxCount={1}
+                      fileList={selectedFilesFromMedia || []}
+                      listType="picture"
+                      accept="image/*, video/*"
+                    >
+                      <Button
+                        disabled={selectedFiles.length > 0}
+                        icon={<UploadOutlined />}
+                        className="dark-icon-button"
+                        style={{
+                          color: theme === "dark" ? "white" : "#000",
+                        }}
+                      >
+                        Select files
+                      </Button>
+                    </Upload>
+                  </div>
+
+                  {/* Creative Library UI */}
+                  {selectedOption === "creative" && (
+                    <div>
+                      <Button
+                        disabled={selectedFiles.length > 0}
+                        icon={<UploadOutlined />}
+                        onClick={() => {
+                          onClickCreativesDrawer(viewSingleAd);
+                        }}
+                        className="dark-icon-button"
+                        style={{
+                          color: theme === "dark" ? "#fff" : "#000",
+                        }}
+                      >
+                        Select files
+                      </Button>
+
+                      {selectedFilesFromCreatives?.length > 0 && (
+                        <div style={{ marginTop: "10px" }}>
+                          {selectedFilesFromCreatives.map((file, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: 8,
+                              }}
+                            >
+                              {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                              {/* <Tooltip title={file.name}> */}
+                              {file.type?.startsWith("image/") && (
+                                <img
+                                  src={
+                                    file.originFileObj
+                                      ? URL.createObjectURL(file.originFileObj)
+                                      : file.url
+                                  }
+                                  alt="preview"
+                                  style={{
+                                    width: 40,
+                                    height: 40,
+                                    objectFit: "cover",
+                                    borderRadius: 4,
+                                    marginLeft: 8,
+                                  }}
+                                />
+                              )}
+                              <span
+                                style={{
+                                  maxWidth: 160,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  paddingLeft: 8,
+                                  color: theme === "dark" ? "#fff" : "#000",
+                                }}
+                              >
+                                {file.name}
+                              </span>
+                              {/* </Tooltip> */}
+
+                              {/* <DeleteOutlined
+                                                                                  onClick={() => {
+                                                                                      const updated = selectedFilesFromCreatives[index].filter(
+                                                                                      (f) => f.uid !== file.uid
+                                                                                      );
+                                                                                      setSelectedFilesFromCreatives(updated);
+                                                                                      setSelectedFiles((prev) =>
+                                                                                      prev[index].filter((f) => f.uid !== file.uid)
+                                                                                      );
+                                                                                      form.setFieldsValue({ MediaContent: updated });
+                                                                                      form.validateFields(["MediaContent"]);
+                                                                                  }}
+                                                                                  style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                                  /> */}
+                              {!isViewAdset && (
+                                <DeleteOutlined
+                                  onClick={() => {
+                                    // 1. Remove from selectedFilesFromCreatives
+                                    setSelectedFilesFromCreatives([]);
+
+                                    // 2. Remove from selectedFiles
+                                    setSelectedFiles([]);
+
+                                    // 3. Update the top-level form field `MediaContent`
+                                    const currentMedia =
+                                      form.getFieldValue("MediaContent") || [];
+                                    const updatedMedia = currentMedia.filter(
+                                      (f) => f.uid !== file.uid
+                                    );
+
+                                    form.setFieldsValue({
+                                      MediaContent: updatedMedia,
+                                    });
+
+                                    // 4. Validate only the `MediaContent` field
+                                    form.validateFields(["MediaContent"]);
+                                  }}
+                                  style={{
+                                    color: "red",
+                                    marginLeft: 12,
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              name="page_id"
+              initialValue={imagehash?.pageID}
+              label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 3, marginLeft: "1%" }}
+            >
+              <Input
+                style={{ width: "23%" }}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+              />
+            </Form.Item>
+          </div>
+          <Form.Item
+            name="AddName"
+            initialValue={viewSingleAd.AddName || ""}
+            label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+          >
+            <Input
+              style={{ width: "60%" }}
+              onChange={(e) => onChangeAddNameForIndividualAd(e)}
+              className={
+                theme === "dark" ? "custom-input-dark" : "custom-input-light"
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
+            name="message"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a message!",
+              },
+            ]}
+            required
+          // tooltip="This is a required field"
+          >
+            <TextArea
+              placeholder="Primary text"
+              autoSize={{ minRows: 2, maxRows: 10 }}
+              onChange={(e) => onChangePrimaryTextForIndividualAd(e)}
+              className={
+                theme === "dark" ? "custom-input-dark" : "custom-input-light"
+              }
+            />
+          </Form.Item>
+          {/* <Form.Item
+                                                  label="Caption"
+                                                  name="Caption"
+                                                  rules={[
+                                                      {
+                                                          required: true,
+                                                          message: "Please enter a Caption!",
+                                                      },
+                                                  ]}
+                                                  required
+                                                  tooltip="This is a required field">
+                                                  <TextArea
+                                                      placeholder="Caption"
+                                                      autoSize={{ minRows: 2, maxRows: 10 }}
+                                                      onChange={(e) => setCaption(e.target.value)}
+  
+                                                  />
+                                              </Form.Item> */}
+          <Form.Item
+            label="Headline"
+            name="headline"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a Name!",
+              },
+            ]}
+            required
+          // tooltip="This is a required field"
+          >
+            <TextArea
+              placeholder="Headline"
+              autoSize={{ minRows: 2, maxRows: 10 }}
+              onChange={(e) => onChangeHeadlineForIndividualAd(e)}
+              className={
+                theme === "dark" ? "custom-input-dark" : "custom-input-light"
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Description"
+            name="Description"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a Description!",
+              },
+            ]}
+            required
+            initialValue={"Find More"}
+          // tooltip="This is a required field"
+          >
+            <TextArea
+              placeholder="Description"
+              autoSize={{ minRows: 2, maxRows: 10 }}
+              onChange={(e) => onChangeDescriptionForIndividualAd(e)}
+              className={
+                theme === "dark" ? "custom-input-dark" : "custom-input-light"
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label={
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    paddingRight: "50px",
+                  }}
+                >
+                  <span>Website_URL</span>
+                  {/* <Tooltip
+                    title="This is a required field"
+                    overlayInnerStyle={{
+                      backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                      color: theme === "dark" ? "#ffffff" : "#000000",
+                      borderRadius: 6,
+                      padding: "6px 10px",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <QuestionCircleOutlined
+                      style={{ marginLeft: 4, cursor: "pointer" }}
+                    />
+                  </Tooltip> */}
+                </div>
+                <EditOutlined
+                  style={{ cursor: "pointer" }}
+                  onClick={() => onClickEdit()}
+                />
+              </div>
+            }
+            labelCol={{ style: { width: "100%" } }} // Makes the label full width
+            wrapperCol={{ style: { width: "100%" } }} // Ensures TextArea takes the same full width
+            name="Website_URL"
+            rules={[
+              {
+                required: true,
+                message: "Please select Website_URL!",
+              },
+            ]}
+            required
+          >
+            <TextArea
+              placeholder="Website_URL"
+              autoSize={{ minRows: 5, maxRows: 15 }}
+              onChange={(e) => onChangeWebsiteURLForIndividualAd(e)}
+              className={
+                theme === "dark" ? "custom-input-dark" : "custom-input-light"
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label="Display Link"
+            name="Caption"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a Caption!",
+              },
+            ]}
+            required
+          // tooltip="This is a required field"
+          >
+            <TextArea
+              placeholder="Display Link"
+              autoSize={{ minRows: 2, maxRows: 10 }}
+              onChange={(e) => onChangeDisplayLinkForIndividualAd(e)}
+              className={
+                theme === "dark" ? "custom-input-dark" : "custom-input-light"
+              }
+            />
+          </Form.Item>
+          <Modal
+            title="URL Builder"
+            visible={isModalVisibleForURLBuilder}
+            onCancel={handleCancelForURLBuilder}
+            // footer={[
+            //     <Button key="cancel" onClick={handleCancel}>
+            //         Cancel
+            //     </Button>,
+            //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
+            //         Submit
+            //     </Button>
+            // ]}
+            footer={null}
+            width="80%" // Set width of the modal
+            bodyStyle={{ height: "50vh", overflowY: "auto" }}
+            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+              }`}
+          >
+            {getUrlBuilder}
+          </Modal>
+
+          {/* <Form.Item
+                                              label="URL Parameters"
+                                              name="urlParameters"
+                                              tooltip="This is a required field"
+                                          >
+                                              <TextArea
+                                                  placeholder="URL Parameters"
+                                                  autoSize={{ minRows: 5, maxRows: 15 }}
+                                              />
+                                          </Form.Item> */}
+        </div>
+
+        <div style={{ flex: "30%" }}>
+          {selectedFiles && selectedFiles.length > 0
+            ? selectedFiles.map((file, i) => (
+              <Badge
+                key={i}
+                count={
+                  file?.url?.endsWith(".png") ||
+                    file?.url?.endsWith(".jpg") ||
+                    file?.url?.endsWith(".jpeg") ||
+                    file?.url?.endsWith(".mp4") ? null : (
+                    <EditOutlined
+                      style={{
+                        fontSize: "25px",
+                        color: "#fff",
+                      }}
+                      onClick={() => handleEditClick(file)}
+                    />
+                  )
+                }
+                style={{
+                  backgroundColor: "#52c41a",
+                  borderRadius: "50%",
+                  position: "absolute",
+                  top: "5px",
+                  right: "5px",
+                  zIndex: 10,
+                  cursor: "pointer",
+                }}
+                offset={[5, 5]}
+              >
+                <div className="container-ad-preview">
+                  <div
+                    className="ad-preview"
+                    style={{
+                      width: "350px",
+                      backgroundColor: theme === "dark" ? "#4f4f4d" : "#fff",
+                    }}
+                  >
+                    <div className="ad-heading">
+                      <div className="img">
+                        {file?.url?.endsWith(".png") ||
+                          file?.url?.endsWith(".jpg") ||
+                          file?.url?.endsWith(".jpeg") ? (
+                          <img
+                            src={file?.url}
+                            alt="preview"
+                            width="40"
+                            height="40"
+                            style={{ objectFit: "cover" }}
+                          />
+                        ) : file?.url?.endsWith(".mp4") ? (
+                          <video
+                            src={file?.url}
+                            width="40"
+                            height="30"
+                            style={{ objectFit: "cover" }}
+                            muted
+                          />
+                        ) : file?.type?.startsWith("image/") ? (
+                          <img
+                            src={
+                              editedImages[file?.name]
+                                ? editedImages[file?.name]
+                                : file?.originFileObj
+                                  ? URL.createObjectURL(file.originFileObj)
+                                  : file?.url
+                            }
+                            alt="preview"
+                            width="40"
+                            height="40"
+                            style={{ objectFit: "cover" }}
+                          />
+                        ) : (
+                          <video
+                            src={
+                              file?.originFileObj
+                                ? URL.createObjectURL(file.originFileObj)
+                                : file?.url
+                            }
+                            width="40"
+                            height="30"
+                            style={{ objectFit: "cover" }}
+                            muted
+                          />
+                        )}
+                      </div>
+
+                      <div className="title">
+                        <div
+                          className="main"
+                          style={{
+                            wordWrap: "break-word",
+                            whiteSpace: "normal",
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {addName}
+                          <div className="sub">
+                            {imagehash?.pageName ? (
+                              <>
+                                {imagehash.pageName}{" "}
+                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                              </>
+                            ) : (
+                              <GlobalOutlined style={{ opacity: "0.6" }} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="close">
+                        <CloseOutlined style={{ fontSize: "20px" }} />
+                      </div>
+                      <div className="moreoptions">
+                        <MoreOutlined style={{ fontSize: "20px" }} />
+                      </div>
+                    </div>
+
+                    <div
+                      className="ad-desc"
+                      style={{
+                        wordWrap: "break-word",
+                        whiteSpace: "normal",
+                        color: theme === "dark" ? "white" : "#000",
+                      }}
+                    >
+                      {primaryText}
+                    </div>
+
+                    {/* <div className="ad-image"> */}
+                    <div
+                      className="ad-image"
+                      style={{
+                        width: "350px",
+                        height: "300px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {file?.url?.endsWith(".png") ||
+                        file?.url?.endsWith(".jpg") ||
+                        file?.url?.endsWith(".jpeg") ? (
+                        <img
+                          src={file?.url}
+                          alt="ad"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      ) : file?.url?.endsWith(".mp4") ? (
+                        <video
+                          controls
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        >
+                          <source src={file?.url} />
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : file?.type?.startsWith("image/") ? (
+                        <img
+                          src={
+                            editedImages[file?.name]
+                              ? editedImages[file?.name]
+                              : file?.originFileObj
+                                ? URL.createObjectURL(file.originFileObj)
+                                : file?.url
+                          }
+                          alt="ad"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      ) : (
+                        <video
+                          src={
+                            file?.originFileObj
+                              ? URL.createObjectURL(file.originFileObj)
+                              : file?.url
+                          }
+                          controls
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        >
+                          <source
+                            src={
+                              file?.originFileObj
+                                ? URL.createObjectURL(file.originFileObj)
+                                : file?.url
+                            }
+                          />
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </div>
+                    {/* </div> */}
+
+                    {/* <div
+                          className="ad-image"
+                          style={{
+                            width: "350px",
+                            height: "300px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {file?.url?.endsWith(".png") ||
+                          file?.url?.endsWith(".jpg") ||
+                          file?.url?.endsWith(".jpeg") ? (
+                            <img
+                              src={file?.url}
+                              alt="ad"
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                              }}
+                            />
+                          ) : file?.url?.endsWith(".mp4") ? (
+                            <video
+                              controls
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                              }}
+                            >
+                              <source src={file?.url} />
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : file?.type?.startsWith("image/") ? (
+                            <img
+                              src={
+                                editedImages[file?.name]
+                                  ? editedImages[file?.name]
+                                  : file?.originFileObj
+                                  ? URL.createObjectURL(file.originFileObj)
+                                  : file?.url
+                              }
+                              alt="ad"
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                              }}
+                            />
+                          ) : (
+                            <video
+                              controls
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                              }}
+                            >
+                              <source
+                                src={
+                                  file?.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file?.url
+                                }
+                              />
+                              Your browser does not support the video tag.
+                            </video>
+                          )}
+                        </div> */}
+
+                    <div className="ad-cta">
+                      <div className="details">
+                        <div
+                          className="link"
+                          style={{
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {caption}
+                        </div>
+                        <div
+                          className="title"
+                          style={{
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {headline}
+                        </div>
+                        <div
+                          className="desc"
+                          style={{
+                            color: theme === "dark" ? "white" : "#000",
+                          }}
+                        >
+                          {description}
+                        </div>
+                      </div>
+                      <div className="ad-button">
+                        <button
+                          style={{
+                            backgroundColor: "#91C25F",
+                            color: "#000",
+                            borderColor: "#91C25F",
+                            borderWidth: "0px",
+                          }}
+                        >
+                          Learn More
+                        </button>
+                      </div>
+                    </div>
+
+                    <a
+                      href={websiteURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        wordWrap: "break-word",
+                        whiteSpace: "normal",
+                        color: "#0066cc",
+                        padding: "15px",
+                        margin: '10px'
+                      }}
+                    >
+                      {websiteURL}
+                    </a>
+
+                    <div className="icons">
+                      <div
+                        className="like"
+                        style={{
+                          color: theme === "dark" ? "white" : "#000",
+                        }}
+                      >
+                        <LikeOutlined style={{ fontSize: "20px" }} /> Like
+                      </div>
+                      <div
+                        className="comment"
+                        style={{
+                          color: theme === "dark" ? "white" : "#000",
+                        }}
+                      >
+                        <CommentOutlined style={{ fontSize: "20px" }} />{" "}
+                        Comment
+                      </div>
+                      <div
+                        className="share"
+                        style={{
+                          color: theme === "dark" ? "white" : "#000",
+                        }}
+                      >
+                        <ShareAltOutlined style={{ fontSize: "20px" }} />{" "}
+                        Share
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Badge>
+            ))
+            : null}
+        </div>
+        {openCreativesDrawer && (
+          <Drawer
+            title="Select Creatives"
+            width="95%"
+            open={openCreativesDrawer}
+            onClose={() => setOpenCreativesDrawer(false)}
+            style={{
+              backgroundColor: theme === "dark" ? "#333" : "#fff",
+              color: theme === "dark" ? "#fff" : "#000",
+            }}
+          >
+            {/* <CreativesDrawer
+                                      selectedFilesData={selectedFilesData}
+                                      
+                                  /> */}
+            <ImageUploadPage
+              selectedFilesData={selectedFilesData}
+              fromCampaigns={true}
+              network={network}
+              Account_Number={accountis}
+            />
+          </Drawer>
+        )}
+        {/* </div> */}
+      </div>
+    </Form>
+  );
+};
+
 const AdsetComponent = ({
   index,
   adset,
@@ -576,7 +2590,12 @@ const AdsetComponent = ({
   selectedPositions,
   selectedPublishers,
   setSelectedPublishers,
+  addlevelData,
+  newAddLevelData,
+  setAddLevelData,
+  setNewAddLevelData,
   view,
+  setIsAnyAdsetBudgetSet,
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -591,14 +2610,23 @@ const AdsetComponent = ({
   const [creativeIndex, setCreativeIndex] = useState(null);
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
-
-
+  const [viewSingleAd, setViewSingleAd] = useState({});
 
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
   console.log(selectedPositions?.[adset.id]);
   console.log(adset, "adset in adset component");
+  console.log(selectedFiles, "selectedFiles in adset component");
+  console.log(adset.id, "adset id in adset component");
+  console.log(adset, "adset in adset component");
+  console.log(
+    selectedFiles[adset.id],
+    "selectedFiles for adset id in adset component"
+  );
+
+  console.log(addlevelData, "addlevelData in adset component");
+  console.log(newAddLevelData, "newAddLevelData in adset component");
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -612,6 +2640,18 @@ const AdsetComponent = ({
         Website_URL: text,
         Caption: text.split("//")[1].split("/")[0],
       };
+      setNewAddLevelData((prev) => {
+        const key = adset.id;
+        const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+        const next = list.map((ad) => ({
+          ...ad,
+          Website_URL: text,
+          Caption: text.split("//")[1].split("/")[0],
+        }));
+
+        return { ...prev, [key]: next };
+      });
     } else {
       setCaption(text.split("/")[0]);
       updatedAdsets[index] = {
@@ -619,6 +2659,18 @@ const AdsetComponent = ({
         Website_URL: text,
         Caption: text.split("/")[0],
       };
+      setNewAddLevelData((prev) => {
+        const key = adset.id;
+        const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+
+        const next = list.map((ad) => ({
+          ...ad,
+          Website_URL: text,
+          Caption: text.split("/")[0],
+        }));
+
+        return { ...prev, [key]: next };
+      });
     }
 
     // Update the form with the new adsets
@@ -640,17 +2692,20 @@ const AdsetComponent = ({
     // console.log(text, "text");
   };
 
-
-  
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
         return (
-          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
         );
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
+            defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
           />
@@ -658,6 +2713,7 @@ const AdsetComponent = ({
       case "FB_System1":
         return (
           <System1UrlBuilder
+            defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
           />
@@ -665,6 +2721,7 @@ const AdsetComponent = ({
       case "FB_DomainActive":
         return (
           <DActiveUrlBuilder
+            defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
           />
@@ -717,10 +2774,10 @@ const AdsetComponent = ({
     }));
 
     // Optionally reset selected positions for this adset
-    setSelectedPositions((prev) => ({
-      ...prev,
-      [adset.id]: [], // clear when publishers change
-    }));
+    // setSelectedPositions((prev) => ({
+    //   ...prev,
+    //   [adset.id]: [], // clear when publishers change
+    // }));
   };
 
   const handleCancelForURLBuilder = () => {
@@ -900,6 +2957,7 @@ const AdsetComponent = ({
 
   const selectedFilesData = (data, index, adsetId = creativeIndex) => {
     const mapped = data.map((file, i) => ({
+      id: uuidv4(),
       uid: file.uid || `-${Date.now()}-${i}`,
       name: file?.name,
       status: "done",
@@ -911,6 +2969,7 @@ const AdsetComponent = ({
             ? "image/png"
             : "video/",
       url: file?.url,
+      adsetId,
     }));
 
     setSelectedFilesFromCreatives((prev) => ({
@@ -923,6 +2982,36 @@ const AdsetComponent = ({
       [adsetId]: [...(prev[adsetId] || []), ...mapped],
     }));
 
+    setNewAddLevelData((prev) => {
+      const key = adset.id;
+      const list = Array.isArray(prev[key]) ? prev[key].filter(Boolean) : [];
+      const getNextAddNumber = (prev) => {
+        const numbers = prev
+          .map((item) => {
+            const parts = item.AddName?.split("_");
+            const lastPart = parts?.[parts.length - 1];
+            return lastPart ? parseInt(lastPart, 10) : 0;
+          })
+          .filter((n) => !isNaN(n));
+        const max = numbers.length > 0 ? Math.max(...numbers) : 0;
+        return max + 1;
+      };
+      const nextAddNumber = list?.length + 1 || getNextAddNumber(list);
+      const newAds = mapped.map((item, i) => ({
+        id: item.id,
+        AddName: `${addName}_${nextAddNumber + i}`,
+        filename: item,
+        uid: item.uid,
+        page_id: form.getFieldValue("page_id"),
+        message: primaryText,
+        headline: headline,
+        Description: description,
+        Caption: caption,
+        Website_URL: websiteURL,
+      }));
+      const next = [...list, ...newAds];
+      return { ...prev, [key]: next };
+    });
     form.setFieldsValue({
       adsets: {
         [index]: {
@@ -948,6 +3037,17 @@ const AdsetComponent = ({
   }, [selectedFilesFromCreatives, adset.id]);
 
   useEffect(() => {
+    if (adset?.addlevel) {
+      setCaption(adset?.addlevel[0].Caption || "");
+      setPrimaryText(adset?.addlevel[0].message || "");
+      setAddName(adset?.AdsetName);
+      setHeadline(adset?.addlevel[0].headline || "");
+      setDescription(adset?.addlevel[0].Description || "");
+      setWebsiteURL(adset?.addlevel[0].Website_URL || "");
+    }
+  }, [adset]);
+
+  useEffect(() => {
     // Re-run once selectedPositions or adset.id updates
     if (
       selectedPositions?.[adset.id] &&
@@ -962,6 +3062,7 @@ const AdsetComponent = ({
       });
     }
   }, [selectedPositions, adset.id]);
+
   // useEffect(() => {
   //     if(adset?.DailyAdd_amount){
   //         form.setFieldsValue({
@@ -1035,59 +3136,71 @@ const AdsetComponent = ({
               {adset.AdsetPanelName}
             </span>
 
-            <div>
-              {index !== 0 && (
-                <Popconfirm
-                  title="Are you sure to delete this Adset?"
-                  onConfirm={(e) => {
-                    e.stopPropagation(); // Prevent panel collapse
-                    removeAdset(index, adset.id);
+            {!view && (
+              <div>
+                {index !== 0 && !adset.Adsetid && (
+                  <Popconfirm
+                    title="Are you sure to delete this Adset?"
+                    onConfirm={(e) => {
+                      e.stopPropagation(); // Prevent panel collapse
+                      removeAdset(index, adset.id);
+                    }}
+                    okText="Yes"
+                    cancelText="No"
+                    style={{ float: "right", marginLeft: "10px" }}
+                  >
+                    <Button
+                      type="text"
+                      onClick={(e) => e.stopPropagation()} // Prevent panel collapse
+                      icon={<FaTrashCan color="#EC7117" />}
+                    />
+                  </Popconfirm>
+                )}
+                <Button
+                  type="text"
+                  icon={
+                    <PlusOutlined
+                      style={{ color: theme === "dark" ? "#fff" : "#000" }}
+                    />
+                  }
+                  // onClick={() => {
+                  //     const updatedAdsets = adsets.filter((_, i) => i !== index);
+                  //     setAdsets(updatedAdsets);
+                  //     setActiveKey(['1']); // Reset to the first panel
+                  // }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent panel
+                    addAdset();
                   }}
-                  okText="Yes"
-                  cancelText="No"
                   style={{ float: "right", marginLeft: "10px" }}
-                >
-                  <Button
-                    type="text"
-                    onClick={(e) => e.stopPropagation()} // Prevent panel collapse
-                    icon={<FaTrashCan color="#EC7117" />}
-                  />
-                </Popconfirm>
-              )}
-              <Button
-                type="text"
-                icon={
-                  <PlusOutlined
-                    style={{ color: theme === "dark" ? "#fff" : "#000" }}
-                  />
-                }
-                // onClick={() => {
-                //     const updatedAdsets = adsets.filter((_, i) => i !== index);
-                //     setAdsets(updatedAdsets);
-                //     setActiveKey(['1']); // Reset to the first panel
-                // }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent panel
-                  addAdset();
-                }}
-                style={{ float: "right", marginLeft: "10px" }}
-              />
-              <Button
-                type="text"
-                icon={<CopyOutlined />}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent panel collapse
-                  cloneAdset(adset.id);
-                }}
-                style={{ float: "right", marginLeft: "10px" }}
-              />
-            </div>
+                />
+                <Button
+                  type="text"
+                  icon={<CopyOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent panel collapse
+                    cloneAdset(adset.id);
+                  }}
+                  style={{ float: "right", marginLeft: "10px" }}
+                />
+              </div>
+            )}
           </div>
         }
         className="adset-collapse-panel"
         key={adset.id}
         forceRender
       >
+        <div style={{ display: "flex", height: "0px" }}>
+          <Form.Item
+            name={["adsets", index, "id"]}
+            initialValue={adset.id}
+          ></Form.Item>
+          <Form.Item
+            name={["adsets", index, "Adsetid"]}
+            initialValue={adset.Adsetid}
+          ></Form.Item>
+        </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
           <Form.Item
             name={["adsets", index, "AdsetName"]}
@@ -1130,6 +3243,7 @@ const AdsetComponent = ({
             initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
           >
             <Select
+              disabled={adset.Adsetid || view ? true : false}
               options={[
                 { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
                 { value: "LINK_CLICKS", label: "Clicks" },
@@ -1156,6 +3270,7 @@ const AdsetComponent = ({
             initialValue={adset.billing_event || "IMPRESSIONS"}
           >
             <Select
+              disabled={adset.Adsetid || view ? true : false}
               options={[
                 { value: "IMPRESSIONS", label: "Impressions" },
                 { value: "VALUE", label: "Value" },
@@ -1180,6 +3295,7 @@ const AdsetComponent = ({
             initialValue={currentDate ? dayjs(currentDate) : dayjs()}
           >
             <DatePicker
+              disabled={adset.Adsetid || view ? true : false}
               showTime
               dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
               className="green-border-picker"
@@ -1203,6 +3319,7 @@ const AdsetComponent = ({
             initialValue={adset.action_source || "website"}
           >
             <Select
+              disabled={adset.Adsetid || view ? true : false}
               options={[
                 { value: "website", label: "Website" },
                 { value: "email", label: "Email" },
@@ -1229,6 +3346,7 @@ const AdsetComponent = ({
             initialValue={adset.custom_event_type || "LEAD"}
           >
             <Select
+              disabled={adset.Adsetid || view ? true : false}
               options={[
                 { value: "LEAD", label: "Lead" },
                 { value: "PURCHASE", label: "Purchase" },
@@ -1287,6 +3405,7 @@ const AdsetComponent = ({
               </Select>
             ) : (
               <Input
+                disabled={adset.Adsetid || view ? true : false}
                 className={
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
@@ -1451,19 +3570,40 @@ const AdsetComponent = ({
                 value={adset.DailyAdd_amount}
                 onChange={(value) => {
                   // Handle the change, updating the adset value both in the form and the adset state
-                  handleAdsetChange(index, value);
+                  //   handleAdsetChange(index, value);
+
+                  //   // Ensure that 'adsets' is defined and is an array
+                  //   const adsets = form.getFieldValue("adsets") || []; // Fallback to empty array if undefined
+
+                  //   // Update only the DailyAdd_amount in the form without disturbing other values
+                  //   const updatedAdsets = adsets.map((ad, i) =>
+                  //     i === index ? { ...ad, DailyAdd_amount: value } : ad
+                  //   );
+
+                  //   form.setFieldsValue({
+                  //     adsets: updatedAdsets,
+                  //   });
+                  const finalValue = value === null ? 0 : value;
+
+                  // Update adset value in the component state
+                  handleAdsetChange(index, finalValue);
 
                   // Ensure that 'adsets' is defined and is an array
-                  const adsets = form.getFieldValue("adsets") || []; // Fallback to empty array if undefined
+                  const adsets = form.getFieldValue("adsets") || [];
 
-                  // Update only the DailyAdd_amount in the form without disturbing other values
+                  // Update only the DailyAdd_amount without disturbing other values
                   const updatedAdsets = adsets.map((ad, i) =>
-                    i === index ? { ...ad, DailyAdd_amount: value } : ad
+                    i === index ? { ...ad, DailyAdd_amount: finalValue } : ad
                   );
 
-                  form.setFieldsValue({
-                    adsets: updatedAdsets,
-                  });
+                  form.setFieldsValue({ adsets: updatedAdsets });
+                  const hasBudget = updatedAdsets.some(
+                    (ad) => Number(ad.DailyAdd_amount) > 0
+                  );
+                  setIsAnyAdsetBudgetSet(hasBudget);
+
+                  // // Trigger validation for this specific field
+                  // form.validateFields([["adsets", index, "DailyAdd_amount"]]);
                 }}
                 readOnly={isCampaignBudgetActive} // Make adset budget read-only if campaign budget is active
                 style={{ width: 120 }}
@@ -1632,7 +3772,7 @@ const AdsetComponent = ({
               },
             ]}
             style={{ flex: "1 1 150px" }}
-            initialValue={adset.Gender || "0"}
+            initialValue={JSON.stringify(adset?.Gender) || "1"}
           >
             <Select
               options={[
@@ -1651,7 +3791,7 @@ const AdsetComponent = ({
             label={<span style={{ color: "#B4B4B4" }}>Language</span>}
             rules={[{ required: true, message: "Please select an option!" }]}
             style={{ flex: "1 1 150px" }}
-            initialValue={adset.Language || "English (US)"}
+            initialValue={adset.Language || [6]}
           >
             <Select
               mode="multiple"
@@ -1755,7 +3895,7 @@ const AdsetComponent = ({
                         </>
                     )} */}
           <Form.Item
-             label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
+            label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
             name={["adsets", index, "placements"]}
             rules={[{ required: true, message: "Please select a mode!" }]}
             initialValue={adset.placements || "Advance"}
@@ -1905,31 +4045,92 @@ const AdsetComponent = ({
                   width: "100%",
                 }}
               >
-                <span>AD LEVEL</span>
-                {(selectedFiles[index] || []).length > 0 && (
+                <span
+                  // onClick={(e) => {
+                  //   e.stopPropagation();
+                  //   setViewSingleAd({}); 
+                  //   setActiveMediaIndex({});
+                  // }}
+                >
+                  AD LEVEL
+                </span>
+                {(newAddLevelData[adset.id] || []).length > 0 && (
                   <div onClick={(e) => e.stopPropagation()}>
-                    <Breadcrumb separator="/">
-                      {selectedFiles[index].map((_, i) => (
+                    <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
+                      <div style={{ display: 'flex' }}>
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setViewSingleAd({});
+                            setActiveMediaIndex((prev) => ({
+                              ...prev,
+                              [index]: -1, // 🔹 mark -1 as active for MoreOutlined
+                            }));
+                          }}
+                          style={{
+                            fontWeight: activeMediaIndex[index] === -1 ? "500" : "normal",
+                            color:
+                              activeMediaIndex[index] === -1
+                                ? "#91C25F"
+                                : theme === "dark"
+                                  ? "#fff"
+                                  : "#333",
+                            cursor: "pointer",
+                            backgroundColor:
+                              activeMediaIndex[index] === -1
+                                ? theme === "dark"
+                                  ? "rgba(145,194,95,0.2)"
+                                  : "rgba(145,194,95,0.15)"
+                                : "transparent",
+                            border:
+                              activeMediaIndex[index] === -1
+                                ? "1px solid #4caf50"
+                                : "2px solid transparent",
+                            borderRadius: "6px",
+                            padding: "1px 2px",
+                            transition: "all 0.2s ease-in-out",
+                            fontSize: '8px'
+                          }}
+                        >
+                          <MoreOutlined />
+                        </span>
+                        <span style={{ color: theme === "dark" ? "#fff" : "#333", marginRight: '10px', marginLeft: '5px' }}>/</span>
+                      </div>
+                      {newAddLevelData[adset.id].map((_, i) => (
                         <Breadcrumb.Item key={i}>
                           <span
                             onClick={(e) => {
                               e.stopPropagation();
+                              setViewSingleAd(newAddLevelData[adset.id][i]);
                               setActiveMediaIndex((prev) => ({
                                 ...prev,
                                 [index]: i,
                               }));
                             }}
                             style={{
-                              fontWeight:
-                                activeMediaIndex[index] === i
-                                  ? "900"
-                                  : "normal",
+                              fontWeight: activeMediaIndex[index] === i ? "500" : "normal",
                               color:
                                 activeMediaIndex[index] === i
                                   ? "#91C25F"
-                                  : "#888",
+                                  : theme === "dark"
+                                    ? "#fff"
+                                    : "#333",
                               cursor: "pointer",
+                              backgroundColor:
+                                activeMediaIndex[index] === i
+                                  ? theme === "dark"
+                                    ? "rgba(145,194,95,0.2)"
+                                    : "rgba(145,194,95,0.15)"
+                                  : "transparent",
+                              border:
+                                activeMediaIndex[index] === i
+                                  ? "1px solid #4caf50"
+                                  : "2px solid transparent",
+                              borderRadius: "6px",
+                              padding: "1px 5px",
+                              transition: "all 0.2s ease-in-out",
                             }}
+
                           >
                             {i + 1}
                           </span>
@@ -1941,341 +4142,737 @@ const AdsetComponent = ({
               </div>
             }
           >
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div style={{ flex: "70%", marginRight: "5%" }}>
-                <div style={{ display: "flex", gap: "16px" }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Form.Item
-                      label={
-                        <span style={{ color: "#B4B4B4" }}>Select source</span>
-                      }
-                      style={{ flex: 1 }}
-                    >
-                      <Select
-                        value={selectedOption}
-                        onChange={(value) => {
-                          setSelectedOption(value);
-                          form.validateFields(["MediaContent"]); // Revalidate when switching source
-                        }}
-                        style={{ marginBottom: 16 }}
-                        dropdownClassName={
-                          theme === "dark" && "custom-dropdown"
+            {viewSingleAd && Object.keys(viewSingleAd).length > 0 && (
+              <AddComponent
+                adset={adset}
+                imagehash={imagehash}
+                accountis={accountis}
+                network={network}
+                isViewAdset={false}
+                viewSingleAd={viewSingleAd}
+                newAddLevelData={newAddLevelData}
+                setNewAddLevelData={setNewAddLevelData}
+                activeMediaIndex={activeMediaIndex}
+                setSelectedFilesFromAdset={setSelectedFiles}
+                setSelectedFilesFromCreativesFromAdset={
+                  setSelectedFilesFromCreatives
+                }
+                setSelectedFilesFromMediaFromAdset={setSelectedFilesFromMedia}
+              />
+            )}
+            {Object.keys(viewSingleAd).length === 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div style={{ flex: "70%", marginRight: "5%" }}>
+                  <div style={{ display: "flex", gap: "16px" }}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <Form.Item
+                        label={
+                          <span style={{ color: "#B4B4B4" }}>
+                            Select source
+                          </span>
                         }
-                        className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                          } green-border-select`}
+                        style={{ flex: 1 }}
                       >
-                        <Option value="upload">Upload</Option>
-                        <Option value="creative">Creative library</Option>
-                      </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                      name={["adsets", index, "MediaContent"]}
-                      rules={[
-                        {
-                          validator: async () => {
-                            // Default to empty array if the value for the index is undefined
-                            const mediaFiles =
-                              selectedFilesFromMedia[adset.id] || [];
-                            const creativeFiles =
-                              selectedFilesFromCreatives[adset.id] || [];
-
-                            // Check if there are any files selected based on the selected option
-                            if (
-                              (selectedOption === "upload" &&
-                                mediaFiles.length === 0) ||
-                              (selectedOption === "creative" &&
-                                creativeFiles.length === 0)
-                            ) {
-                              throw new Error("Please select Upload!");
-                            }
-                            return Promise.resolve();
-                          },
-                        },
-                      ]}
-                    >
-                      <div>
-                        {/* Upload UI */}
-                        <div
-                          className="custom-dark-mode"
-                          style={{
-                            display:
-                              selectedOption === "upload" ? "block" : "none",
+                        <Select
+                          value={selectedOption}
+                          onChange={(value) => {
+                            setSelectedOption(value);
+                            form.validateFields(["MediaContent"]); // Revalidate when switching source
                           }}
+                          style={{ marginBottom: 16 }}
+                          dropdownClassName={
+                            theme === "dark" && "custom-dropdown"
+                          }
+                          className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                            } green-border-select`}
                         >
-                          <Upload
-                            beforeUpload={() => false}
-                            disabled={view}
-                            // onChange={(info) => {
-                            //   const newFiles = info.fileList.map((file) => ({
-                            //     ...file,
-                            //     uid: file.uid || `-${Date.now()}`,
-                            //     source: "media",
-                            //     thumbUrl:
-                            //       file.thumbUrl ||
-                            //       (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
-                            //   }));
+                          <Option value="upload">Upload</Option>
+                          <Option value="creative">Creative library</Option>
+                        </Select>
+                      </Form.Item>
 
-                            //   setSelectedFiles((prev) => {
-                            //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
-                            //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
-                            //     const updated = [...(prev[index] || []), ...filtered];
-                            //     const newState = { ...prev, [index]: updated };
-                            //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-                            //     form.validateFields([['adsets', index, 'MediaContent']]);
-                            //     return newState;
-                            //   });
+                      <Form.Item
+                        name={["adsets", index, "MediaContent"]}
+                        rules={[
+                          {
+                            validator: async () => {
+                              // Default to empty array if the value for the index is undefined
+                              const mediaFiles =
+                                selectedFilesFromMedia[adset.id] || [];
+                              const creativeFiles =
+                                selectedFilesFromCreatives[adset.id] || [];
 
-                            //   setSelectedFilesFromMedia((prev) => {
-                            //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
-                            //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
-                            //     const updated = [...(prev[index] || []), ...filtered];
-                            //     const newState = { ...prev, [index]: updated };
-                            //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-                            //     form.validateFields([['adsets', index, 'MediaContent']]);
-                            //     return newState;
-                            //   });
-                            // }}
-                            onChange={(info) => {
-                              const newFiles = info.fileList.map((file) => ({
-                                ...file,
-                                uid: file.uid || `-${Date.now()}`,
-                                source: "media",
-                                thumbUrl:
-                                  file.thumbUrl ||
-                                  (file.originFileObj
-                                    ? URL.createObjectURL(file.originFileObj)
-                                    : undefined),
-                              }));
-
-                              setSelectedFiles((prev) => {
-                                const existingUids = new Set(
-                                  (prev[adset.id] || []).map((f) => f.uid)
-                                );
-                                const updated = [
-                                  ...(prev[adset.id] || []),
-                                  ...newFiles.filter(
-                                    (f) => !existingUids.has(f.uid)
-                                  ),
-                                ];
-                                return { ...prev, [adset.id]: updated };
-                              });
-
-                              setSelectedFilesFromMedia((prev) => {
-                                const existingUids = new Set(
-                                  (prev[adset.id] || []).map((f) => f.uid)
-                                );
-                                const updated = [
-                                  ...(prev[adset.id] || []),
-                                  ...newFiles.filter(
-                                    (f) => !existingUids.has(f.uid)
-                                  ),
-                                ];
-                                return { ...prev, [adset.id]: updated };
-                              });
-
-                              const formMedia =
-                                form.getFieldValue([
-                                  "adsets",
-                                  index,
-                                  "MediaContent",
-                                ]) || [];
-                              form.setFieldsValue({
-                                adsets: {
-                                  [index]: {
-                                    MediaContent: [...formMedia, ...newFiles],
-                                  },
-                                },
-                              });
-
-                              form.validateFields([
-                                ["adsets", index, "MediaContent"],
-                              ]);
+                              // Check if there are any files selected based on the selected option
+                              if (
+                                (selectedOption === "upload" &&
+                                  mediaFiles.length === 0) ||
+                                (selectedOption === "creative" &&
+                                  creativeFiles.length === 0)
+                              ) {
+                                throw new Error("Please select Upload!");
+                              }
+                              return Promise.resolve();
+                            },
+                          },
+                        ]}
+                      >
+                        <div>
+                          {/* Upload UI */}
+                          <div
+                            className="custom-dark-mode"
+                            style={{
+                              display:
+                                selectedOption === "upload" ? "block" : "none",
                             }}
-                            // onRemove={(fileToRemove) => {
-                            //   setSelectedFilesFromMedia((prev) => {
-                            //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
-                            //     const newState = { ...prev, [index]: updated };
-                            //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-                            //     form.validateFields([['adsets', index, 'MediaContent']]);
-                            //     return newState;
-                            //   });
-
-                            //   setSelectedFiles((prev) => {
-                            //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
-                            //     const newState = { ...prev, [index]: updated };
-                            //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-                            //     form.validateFields([['adsets', index, 'MediaContent']]);
-                            //     return newState;
-                            //   });
-
-                            //   return true;
-                            // }}
-                            // onChange={(info) => {
-                            //     const newFiles = info.fileList.map((file) => ({
-                            //       ...file,
-                            //       uid: file.uid || `-${Date.now()}`,
-                            //       status: 'done',
-                            //       type: file.type,
-                            //       thumbUrl: file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
-                            //       adsetIndex: index, // Tag the file with adsetIndex
-                            //     }));
-
-                            //     setSelectedFiles(prev => [...prev, ...newFiles]);
-                            //     setSelectedFilesFromMedia(prev => [...prev, ...newFiles]);
-
-                            //     const currentAll = [...selectedFiles, ...newFiles];
-                            //     const filtered = currentAll.filter(f => f.adsetIndex === index);
-
-                            //     form.setFieldsValue({
-                            //       adsets: {
-                            //         [index]: {
-                            //           MediaContent: filtered
-                            //         }
-                            //       }
-                            //     });
-
-                            //     form.validateFields([['adsets', index, 'MediaContent']]);
-                            // }}
-
-                            // onRemove={(fileToRemove) => {
-                            //     setSelectedFiles(prev => prev.filter(f => f.uid !== fileToRemove.uid));
-                            //     setSelectedFilesFromMedia(prev => prev.filter(f => f.uid !== fileToRemove.uid));
-
-                            //     const updated = selectedFiles.filter(f => f.uid !== fileToRemove.uid && f.adsetIndex === index);
-
-                            //     form.setFieldsValue({
-                            //       adsets: {
-                            //         [index]: {
-                            //           MediaContent: updated
-                            //         }
-                            //       }
-                            //     });
-
-                            //     form.validateFields([['adsets', index, 'MediaContent']]);
-                            //     return true;
-                            // }}
-
-                            onRemove={(fileToRemove) => {
-                              setSelectedFilesFromMedia((prev) => {
-                                const updated = (prev[adset.id] || []).filter(
-                                  (f) => f.uid !== fileToRemove.uid
-                                );
-                                return { ...prev, [adset.id]: updated };
-                              });
-
-                              setSelectedFiles((prev) => {
-                                const updated = (prev[adset.id] || []).filter(
-                                  (f) => f.uid !== fileToRemove.uid
-                                );
-                                return { ...prev, [adset.id]: updated };
-                              });
-
-                              const updatedFormMedia = (
-                                form.getFieldValue([
-                                  "adsets",
-                                  index,
-                                  "MediaContent",
-                                ]) || []
-                              ).filter((f) => f.uid !== fileToRemove.uid);
-
-                              form.setFieldsValue({
-                                adsets: {
-                                  [index]: {
-                                    MediaContent: updatedFormMedia,
-                                  },
-                                },
-                              });
-
-                              form.validateFields([
-                                ["adsets", index, "MediaContent"],
-                              ]);
-                              return true;
-                            }}
-                            multiple
-                            maxCount={10}
-                            fileList={selectedFilesFromMedia[adset.id] || []}
-                            listType="picture"
-                            accept="image/*, video/*"
                           >
-                            <Button
-                              icon={<UploadOutlined />}
-                              className="dark-icon-button"
-                              style={{
-                                color: theme === "dark" ? "white" : "#000",
+                            <Upload
+                              //   beforeUpload={() => false}
+                              disabled={view}
+                              itemRender={(
+                                originNode,
+                                file,
+                                fileList,
+                                actions
+                              ) => {
+                                console.log(file);
+                                // Show delete icon only if `canDelete: true`
+                                return (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    {originNode}
+                                    {file.canDelete !== false && (
+                                      <Button
+                                        size="small"
+                                        type="text"
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => actions.remove()}
+                                        style={{ marginLeft: 8 }}
+                                      />
+                                    )}
+                                  </div>
+                                );
                               }}
-                            >
-                              Select files
-                            </Button>
-                          </Upload>
-                        </div>
+                              // onChange={(info) => {
+                              //   const newFiles = info.fileList.map((file) => ({
+                              //     ...file,
+                              //     uid: file.uid || `-${Date.now()}`,
+                              //     source: "media",
+                              //     thumbUrl:
+                              //       file.thumbUrl ||
+                              //       (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
+                              //   }));
 
-                        {/* Creative Library UI */}
-                        {selectedOption === "creative" && (
-                          <div>
-                            <Button
-                              icon={<UploadOutlined />}
-                              onClick={() => {
-                                onClickCreativesDrawer(adset, index);
-                              }}
-                              className="dark-icon-button"
-                              style={{
-                                color: theme === "dark" ? "#fff" : "#000",
-                              }}
-                            >
-                              Select files
-                            </Button>
+                              //   setSelectedFiles((prev) => {
+                              //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
+                              //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
+                              //     const updated = [...(prev[index] || []), ...filtered];
+                              //     const newState = { ...prev, [index]: updated };
+                              //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                              //     form.validateFields([['adsets', index, 'MediaContent']]);
+                              //     return newState;
+                              //   });
 
-                            {selectedFilesFromCreatives[adset.id]?.length >
-                              0 && (
-                                <div style={{ marginTop: "10px" }}>
-                                  {selectedFilesFromCreatives[adset.id].map(
-                                    (file, index) => (
-                                      <div
-                                        key={index}
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                          marginBottom: 8,
-                                        }}
-                                      >
-                                        {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                        {/* <Tooltip title={file.name}> */}
-                                        {file.type?.startsWith("image/") && (
-                                          <img
-                                            src={
-                                              file.originFileObj
-                                                ? URL.createObjectURL(
-                                                  file.originFileObj
-                                                )
-                                                : file.url
-                                            }
-                                            alt="preview"
-                                            style={{
-                                              width: 40,
-                                              height: 40,
-                                              objectFit: "cover",
-                                              borderRadius: 4,
-                                              marginLeft: 8,
-                                            }}
-                                          />
-                                        )}
-                                        <span
+                              //   setSelectedFilesFromMedia((prev) => {
+                              //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
+                              //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
+                              //     const updated = [...(prev[index] || []), ...filtered];
+                              //     const newState = { ...prev, [index]: updated };
+                              //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                              //     form.validateFields([['adsets', index, 'MediaContent']]);
+                              //     return newState;
+                              //   });
+                              // }}
+                              //1234
+                              //   onChange={(info) => {
+                              //     const newFiles = info.fileList.map((file) => ({
+                              //       ...file,
+                              //       uid: file.uid || `-${Date.now()}`,
+                              //       source: "media",
+                              //       thumbUrl:
+                              //         file.thumbUrl ||
+                              //         (file.originFileObj
+                              //           ? URL.createObjectURL(file.originFileObj)
+                              //           : undefined),
+                              //     }));
+
+                              //     setSelectedFiles((prev) => {
+                              //       const existingUids = new Set(
+                              //         (prev[adset.id] || []).map((f) => f.uid)
+                              //       );
+                              //       const updated = [
+                              //         ...(prev[adset.id] || []),
+                              //         ...newFiles.filter(
+                              //           (f) => !existingUids.has(f.uid)
+                              //         ),
+                              //       ];
+                              //       return { ...prev, [adset.id]: updated };
+                              //     });
+
+                              //     setSelectedFilesFromMedia((prev) => {
+                              //       const existingUids = new Set(
+                              //         (prev[adset.id] || []).map((f) => f.uid)
+                              //       );
+                              //       const updated = [
+                              //         ...(prev[adset.id] || []),
+                              //         ...newFiles.filter(
+                              //           (f) => !existingUids.has(f.uid)
+                              //         ),
+                              //       ];
+                              //       return { ...prev, [adset.id]: updated };
+                              //     });
+
+                              //     const formMedia =
+                              //       form.getFieldValue([
+                              //         "adsets",
+                              //         index,
+                              //         "MediaContent",
+                              //       ]) || [];
+                              //     form.setFieldsValue({
+                              //       adsets: {
+                              //         [index]: {
+                              //           MediaContent: [...formMedia, ...newFiles],
+                              //         },
+                              //       },
+                              //     });
+
+                              //     form.validateFields([
+                              //       ["adsets", index, "MediaContent"],
+                              //     ]);
+                              //   }}
+                              //1234
+                              onChange={(info) => {
+                                const allFiles = info.fileList.map((file) => ({
+                                  ...file,
+                                  id: file.id || uuidv4(),
+                                  canDelete: true,
+                                  uid: file.uid,
+                                  source: "media",
+                                  adsetId: adset.id,
+                                  thumbUrl:
+                                    file.thumbUrl ||
+                                    (file.originFileObj
+                                      ? URL.createObjectURL(file.originFileObj)
+                                      : undefined),
+                                }));
+
+                                setNewAddLevelData((prev) => {
+                                  const getNextAddNumber = (prev) => {
+                                    const numbers = prev
+                                      .map((item) => {
+                                        const parts = item.AddName?.split("_");
+                                        const lastPart =
+                                          parts?.[parts.length - 1];
+                                        return lastPart
+                                          ? parseInt(lastPart, 10)
+                                          : 0;
+                                      })
+                                      .filter((n) => !isNaN(n));
+                                    const max =
+                                      numbers.length > 0
+                                        ? Math.max(...numbers)
+                                        : 0;
+                                    return max + 1;
+                                  };
+
+                                  const key = adset.id;
+                                  const list = Array.isArray(prev[key])
+                                    ? prev[key].filter(Boolean)
+                                    : [];
+
+                                  const nextAddNumber =
+                                    list?.length + 1 || getNextAddNumber(list);
+
+                                  // ✅ Step: Filter only new files that are not already in prev based on uid
+                                  const existingUids = new Set(
+                                    list.map((item) => item.uid)
+                                  );
+                                  const trulyNewFiles = (allFiles || []).filter(
+                                    (item) => !existingUids.has(item?.uid)
+                                  );
+
+                                  const mappedWithAddName = trulyNewFiles.map(
+                                    (item, i) => ({
+                                      id: item.id,
+                                      AddName: `${addName}_${nextAddNumber + i
+                                        }`,
+                                      filename: item,
+                                      uid: item.uid,
+                                      page_id: form.getFieldValue("page_id"),
+                                      message: primaryText,
+                                      headline: headline,
+                                      Description: description,
+                                      Caption: caption,
+                                      Website_URL: websiteURL,
+                                    })
+                                  );
+
+                                  return {
+                                    ...prev,
+                                    [key]: [...list, ...mappedWithAddName],
+                                  };
+                                });
+
+                                // ✅ Step 1: Update selected files
+                                // setSelectedFiles((prev) => {
+                                //   const existingUids = new Set(
+                                //     prev[adset.id].map((f) => f.uid)
+                                //   );
+                                //   const updated = [
+                                //     ...prev[adset.id],
+                                //     ...allFiles.filter(
+                                //       (f) => !existingUids.has(f.uid)
+                                //     ),
+                                //   ];
+                                //   return {...prev, [adset.id]: updated };
+                                // });
+
+                                // setSelectedFilesFromMedia((prev) => {
+                                //   const existingUids = new Set(
+                                //     prev[adset.id].map((f) => f.uid)
+                                //   );
+                                //   const updated = [
+                                //     ...prev[adset.id],
+                                //     ...allFiles.filter(
+                                //       (f) => !existingUids.has(f.uid)
+                                //     ),
+                                //   ];
+                                //   return {...prev, [adset.id]: updated };
+                                // });
+
+                                setSelectedFiles((prev) => {
+                                  const key = adset.id;
+                                  const list = Array.isArray(prev?.[key])
+                                    ? prev[key].filter(Boolean)
+                                    : [];
+                                  const existingUids = new Set(
+                                    list.map((f) => f?.uid).filter(Boolean)
+                                  );
+                                  const appended = (allFiles || []).filter(
+                                    (f) => !existingUids.has(f?.uid)
+                                  );
+                                  return {
+                                    ...prev,
+                                    [key]: [...list, ...appended],
+                                  };
+                                });
+
+                                // ✅ Mirror for Media list
+                                setSelectedFilesFromMedia((prev) => {
+                                  const key = adset.id;
+                                  const list = Array.isArray(prev?.[key])
+                                    ? prev[key].filter(Boolean)
+                                    : [];
+                                  const existingUids = new Set(
+                                    list.map((f) => f?.uid).filter(Boolean)
+                                  );
+                                  const appended = (allFiles || []).filter(
+                                    (f) => !existingUids.has(f?.uid)
+                                  );
+                                  return {
+                                    ...prev,
+                                    [key]: [...list, ...appended],
+                                  };
+                                });
+
+                                //   setNewAddLevelData((prev) => {
+                                //         const getNextAddNumber = (prev) => {
+                                //               const numbers = prev
+                                //                 .map((item) => {
+                                //                   const parts =
+                                //                     item.AddName?.split("_");
+                                //                   const lastPart =
+                                //                     parts?.[parts.length - 1];
+                                //                   return lastPart
+                                //                     ? parseInt(lastPart, 10)
+                                //                     : 0;
+                                //                 })
+                                //                 .filter((n) => !isNaN(n));
+                                //               const max =
+                                //                 numbers.length > 0
+                                //                   ? Math.max(...numbers)
+                                //                   : 0;
+                                //               return max + 1;
+                                //             };
+                                //             const nextAddNumber =
+                                //               getNextAddNumber(prev); // e.g., 3
+
+                                //         const mappedWithAddName = allFiles.map(
+                                //             (item, i) => ({
+                                //                 id: item.id,
+                                //                 AddName: `${addName}_${
+                                //                 nextAddNumber + i
+                                //                 }`, // e.g., Add_4, Add_5
+                                //                 filename: item,
+                                //                 uid: item.uid,
+                                //                 page_id:
+                                //                 form.getFieldValue("page_id"),
+                                //                 message: primaryText,
+                                //                 headline: headline,
+                                //                 Description: description,
+                                //                 Caption: caption,
+                                //                 Website_URL: websiteURL,
+                                //             })
+                                //             ); // Map to the required structure
+                                //         return [...prev, ...mappedWithAddName];
+                                //   })
+
+                                // ✅ Step 2: Filter o
+
+                                //   const newUids = allFiles.map(
+                                //     (f) => f.uid
+                                //   );
+                                //   const alreadyInSelected = new Set(
+                                //     selectedFiles.map((f) => f.uid)
+                                //   );
+                                //   const trulyNewFiles = allFiles.filter(
+                                //     (f) => !alreadyInSelected.has(f.uid)
+                                //   );
+
+                                //   const newAds = trulyNewFiles.map(
+                                //     (item, i) => ({
+                                //       id: item.id, // e.g., Add_4, Add_5
+                                //       filename: item,
+                                //       page_id:
+                                //         form.getFieldValue("page_id"),
+                                //       message: primaryText,
+                                //       headline: headline,
+                                //       Description: description,
+                                //       Caption: caption,
+                                //       Website_URL: websiteURL,
+                                //     })
+                                //   ); // Map to the required structure
+                                //   //   );
+
+                                //   // ✅ Step 3: Update newAddLevelData with only truly new files
+                                //   //   updateTheNewAddLevelData(allFiles);
+
+                                //   setNewAddLevelData((prev) => {
+                                //     const getNextAddNumber = (prev) => {
+                                //       const numbers = prev
+                                //         .map((item) => {
+                                //           const parts =
+                                //             item.AddName?.split("_");
+                                //           const lastPart =
+                                //             parts?.[parts.length - 1];
+                                //           return lastPart
+                                //             ? parseInt(lastPart, 10)
+                                //             : 0;
+                                //         })
+                                //         .filter((n) => !isNaN(n));
+                                //       const max =
+                                //         numbers.length > 0
+                                //           ? Math.max(...numbers)
+                                //           : 0;
+                                //       return max + 1;
+                                //     };
+                                //     const nextAddNumber =
+                                //       getNextAddNumber(prev); // e.g., 3
+                                //     const mappedWithAddName = newAds.map(
+                                //       (item, i) => ({
+                                //         ...item,
+                                //         AddName: `${addName}_${
+                                //           nextAddNumber + i
+                                //         }`,
+                                //       })
+                                //     );
+                                //     return [...prev, ...mappedWithAddName];
+                                //   });
+                                //kkkk
+
+                                //   setNewAddLevelData((prev) => {
+                                //     const existingIds = new Set(
+                                //       prev.map((item) => item.id)
+                                //     );
+
+                                //     // Filter only newly added files
+                                //     const newUniqueFiles = newFiles.filter(
+                                //       (file) => !existingIds.has(file.id)
+                                //     );
+
+                                //     const nextAddNumber =
+                                //       getNextAddNumber(prev); // e.g., 3
+
+                                //     const mappedWithAddName =
+                                //       newUniqueFiles.map((item, i) => ({
+                                //         id: item.id,
+                                //         AddName: `${addName}_${
+                                //           nextAddNumber + i
+                                //         }`, // e.g., Add_4, Add_5
+                                //         filename: item.url,
+                                //         page_id:
+                                //           form.getFieldValue("page_id"),
+                                //         message: primaryText,
+                                //         headline: headline,
+                                //         Description: description,
+                                //         Caption: caption,
+                                //         Website_URL: websiteURL,
+                                //       }));
+
+                                //     return [...prev, ...mappedWithAddName];
+                                //   });
+
+                                // Update form field
+                                const formMedia =
+                                  form.getFieldValue([
+                                    "adsets",
+                                    index,
+                                    "MediaContent",
+                                  ]) || [];
+                                //   const existingUidsInForm = new Set(
+                                //     (formMedia || []).map((f) => f.uid)
+                                //   );
+                                const existingUidsInForm = new Set(
+                                  Array.isArray(formMedia)
+                                    ? formMedia.map((f) => f.uid)
+                                    : []
+                                );
+                                const updatedFormMedia = [
+                                  ...formMedia,
+                                  ...allFiles.filter(
+                                    (f) => !existingUidsInForm.has(f.uid)
+                                  ),
+                                ];
+
+                                form.setFieldsValue({
+                                  adsets: {
+                                    [index]: {
+                                      MediaContent: updatedFormMedia,
+                                    },
+                                  },
+                                });
+
+                                form.validateFields([
+                                  ["adsets", index, "MediaContent"],
+                                ]);
+                              }}
+                              // onRemove={(fileToRemove) => {
+                              //   setSelectedFilesFromMedia((prev) => {
+                              //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
+                              //     const newState = { ...prev, [index]: updated };
+                              //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                              //     form.validateFields([['adsets', index, 'MediaContent']]);
+                              //     return newState;
+                              //   });
+
+                              //   setSelectedFiles((prev) => {
+                              //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
+                              //     const newState = { ...prev, [index]: updated };
+                              //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                              //     form.validateFields([['adsets', index, 'MediaContent']]);
+                              //     return newState;
+                              //   });
+
+                              //   return true;
+                              // }}
+                              // onChange={(info) => {
+                              //     const newFiles = info.fileList.map((file) => ({
+                              //       ...file,
+                              //       uid: file.uid || `-${Date.now()}`,
+                              //       status: 'done',
+                              //       type: file.type,
+                              //       thumbUrl: file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
+                              //       adsetIndex: index, // Tag the file with adsetIndex
+                              //     }));
+
+                              //     setSelectedFiles(prev => [...prev, ...newFiles]);
+                              //     setSelectedFilesFromMedia(prev => [...prev, ...newFiles]);
+
+                              //     const currentAll = [...selectedFiles, ...newFiles];
+                              //     const filtered = currentAll.filter(f => f.adsetIndex === index);
+
+                              //     form.setFieldsValue({
+                              //       adsets: {
+                              //         [index]: {
+                              //           MediaContent: filtered
+                              //         }
+                              //       }
+                              //     });
+
+                              //     form.validateFields([['adsets', index, 'MediaContent']]);
+                              // }}
+
+                              // onRemove={(fileToRemove) => {
+                              //     setSelectedFiles(prev => prev.filter(f => f.uid !== fileToRemove.uid));
+                              //     setSelectedFilesFromMedia(prev => prev.filter(f => f.uid !== fileToRemove.uid));
+
+                              //     const updated = selectedFiles.filter(f => f.uid !== fileToRemove.uid && f.adsetIndex === index);
+
+                              //     form.setFieldsValue({
+                              //       adsets: {
+                              //         [index]: {
+                              //           MediaContent: updated
+                              //         }
+                              //       }
+                              //     });
+
+                              //     form.validateFields([['adsets', index, 'MediaContent']]);
+                              //     return true;
+                              // }}
+
+                              onRemove={(fileToRemove) => {
+                                if (fileToRemove.canDelete === false) {
+                                  return false; // ❌ Prevent removal
+                                }
+                                setSelectedFilesFromMedia((prev) => {
+                                  const updated = (prev[adset.id] || []).filter(
+                                    (f) => f.uid !== fileToRemove.uid
+                                  );
+                                  if (updated.length === 0) {
+                                    setSelectedOption("creative");
+                                  }
+                                  return { ...prev, [adset.id]: updated };
+                                });
+
+                                setSelectedFiles((prev) => {
+                                  const updated = (prev[adset.id] || []).filter(
+                                    (f) => f.uid !== fileToRemove.uid
+                                  );
+                                  return { ...prev, [adset.id]: updated };
+                                });
+
+                                setNewAddLevelData((prev) => {
+                                  const key = adset.id;
+                                  const list = Array.isArray(prev[key])
+                                    ? prev[key].filter(Boolean)
+                                    : [];
+                                  const fileIndex = list.findIndex(
+                                    (f) => f.uid === fileToRemove.uid
+                                  );
+                                  const filtered = list.filter(
+                                    (f) => f.uid !== fileToRemove.uid
+                                  );
+                                  const renumber = (arr, start) => {
+                                    const p = String(
+                                      arr[start]?.AddName ??
+                                      arr[0]?.AddName ??
+                                      "AddName"
+                                    ).replace(/_?\d+$/, "");
+                                    for (let i = start; i < arr.length; i++)
+                                      arr[i] = {
+                                        ...arr[i],
+                                        AddName: `${p}_${i + 1}`,
+                                      };
+                                    return arr;
+                                  };
+                                  const arr = renumber(filtered, fileIndex);
+                                  return {
+                                    ...prev,
+                                    [key]: arr,
+                                  };
+                                });
+
+                                const updatedFormMedia = (
+                                  form.getFieldValue([
+                                    "adsets",
+                                    index,
+                                    "MediaContent",
+                                  ]) || []
+                                ).filter((f) => f.uid !== fileToRemove.uid);
+
+                                form.setFieldsValue({
+                                  adsets: {
+                                    [index]: {
+                                      MediaContent: updatedFormMedia,
+                                    },
+                                  },
+                                });
+
+                                form.validateFields([
+                                  ["adsets", index, "MediaContent"],
+                                ]);
+                                return true;
+                              }}
+                              multiple
+                              maxCount={10}
+                              fileList={selectedFilesFromMedia[adset.id] || []}
+                              showUploadList={{ showRemoveIcon: false }}
+                              listType="picture"
+                              accept="image/*, video/*"
+                            >
+                              <Button
+                                icon={<UploadOutlined />}
+                                className="dark-icon-button"
+                                style={{
+                                  color: theme === "dark" ? "white" : "#000",
+                                }}
+                              >
+                                Select files
+                              </Button>
+                            </Upload>
+                          </div>
+
+                          {/* Creative Library UI */}
+                          {selectedOption === "creative" && (
+                            <div>
+                              <Button
+                                icon={<UploadOutlined />}
+                                onClick={() => {
+                                  onClickCreativesDrawer(adset, index);
+                                }}
+                                className="dark-icon-button"
+                                style={{
+                                  color: theme === "dark" ? "#fff" : "#000",
+                                }}
+                              >
+                                Select files
+                              </Button>
+
+                              {selectedFilesFromCreatives[adset.id]?.length >
+                                0 && (
+                                  <div style={{ marginTop: "10px" }}>
+                                    {selectedFilesFromCreatives[adset.id].map(
+                                      (file, index) => (
+                                        <div
+                                          key={index}
                                           style={{
-                                            maxWidth: 160,
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
-                                            paddingLeft: 8,
-                                            color:
-                                              theme === "dark" ? "#fff" : "#000",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            marginBottom: 8,
                                           }}
                                         >
-                                          {file.name}
-                                        </span>
-                                        {/* </Tooltip> */}
+                                          {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                          {/* <Tooltip title={file.name}> */}
+                                          {file.type?.startsWith("image/") && (
+                                            <img
+                                              src={
+                                                file.originFileObj
+                                                  ? URL.createObjectURL(
+                                                    file.originFileObj
+                                                  )
+                                                  : file.url
+                                              }
+                                              alt="preview"
+                                              style={{
+                                                width: 40,
+                                                height: 40,
+                                                objectFit: "cover",
+                                                borderRadius: 4,
+                                                marginLeft: 8,
+                                              }}
+                                            />
+                                          )}
+                                          <span
+                                            style={{
+                                              maxWidth: 160,
+                                              overflow: "hidden",
+                                              textOverflow: "ellipsis",
+                                              whiteSpace: "nowrap",
+                                              paddingLeft: 8,
+                                              color:
+                                                theme === "dark"
+                                                  ? "#fff"
+                                                  : "#000",
+                                            }}
+                                          >
+                                            {file.name}
+                                          </span>
+                                          {/* </Tooltip> */}
 
-                                        {/* <DeleteOutlined
+                                          {/* <DeleteOutlined
                                                                     onClick={() => {
                                                                         const updated = selectedFilesFromCreatives[index].filter(
                                                                         (f) => f.uid !== file.uid
@@ -2289,80 +4886,163 @@ const AdsetComponent = ({
                                                                     }}
                                                                     style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
                                                                     /> */}
-                                        {!view && (
-                                          <DeleteOutlined
-                                            onClick={() => {
-                                              // Update selectedFilesFromCreatives for the current adset (index)
-                                              const updatedCreatives =
-                                                selectedFilesFromCreatives[
-                                                  adset.id
-                                                ].filter(
-                                                  (f) => f.uid !== file.uid
+                                          {!view && !file.Addid && (
+                                            <DeleteOutlined
+                                              onClick={() => {
+                                                // Update selectedFilesFromCreatives for the current adset (index)
+                                                const updatedCreatives =
+                                                  selectedFilesFromCreatives[
+                                                    adset.id
+                                                  ].filter(
+                                                    (f) => f.uid !== file.uid
+                                                  );
+                                                setSelectedFilesFromCreatives(
+                                                  (prev) => {
+                                                    const updated = {
+                                                      ...prev,
+                                                      [adset.id]:
+                                                        updatedCreatives,
+                                                    }; // Update the adset.id specifically
+                                                    return updated;
+                                                  }
                                                 );
-                                              setSelectedFilesFromCreatives(
-                                                (prev) => {
+
+                                                // Update selectedFiles for the current adset (adset.id)
+                                                const updatedFiles =
+                                                  selectedFiles[adset.id].filter(
+                                                    (f) => f.uid !== file.uid
+                                                  );
+                                                setSelectedFiles((prev) => {
                                                   const updated = {
                                                     ...prev,
-                                                    [adset.id]: updatedCreatives,
-                                                  }; // Update the adset.id specifically
+                                                    [adset.id]: updatedFiles,
+                                                  }; // Update the index specifically
                                                   return updated;
-                                                }
-                                              );
+                                                });
 
-                                              // Update selectedFiles for the current adset (adset.id)
-                                              const updatedFiles = selectedFiles[
-                                                adset.id
-                                              ].filter((f) => f.uid !== file.uid);
-                                              setSelectedFiles((prev) => {
-                                                const updated = {
-                                                  ...prev,
-                                                  [adset.id]: updatedFiles,
-                                                }; // Update the index specifically
-                                                return updated;
-                                              });
+                                                setNewAddLevelData((prev) => {
+                                                  const key = adset.id;
+                                                  const list = Array.isArray(
+                                                    prev[key]
+                                                  )
+                                                    ? prev[key].filter(Boolean)
+                                                    : [];
+                                                  const fileIndex =
+                                                    list.findIndex(
+                                                      (f) => f.id === file.id
+                                                    );
+                                                  const filtered = list.filter(
+                                                    (f) => f.id !== file.id
+                                                  );
+                                                  const renumber = (
+                                                    arr,
+                                                    start
+                                                  ) => {
+                                                    const p = String(
+                                                      arr[start]?.AddName ??
+                                                      arr[0]?.AddName ??
+                                                      "AddName"
+                                                    ).replace(/_?\d+$/, "");
+                                                    for (
+                                                      let i = start;
+                                                      i < arr.length;
+                                                      i++
+                                                    )
+                                                      arr[i] = {
+                                                        ...arr[i],
+                                                        AddName: `${p}_${i + 1}`,
+                                                      };
+                                                    return arr;
+                                                  };
+                                                  const arr = renumber(
+                                                    filtered,
+                                                    fileIndex
+                                                  );
+                                                  return {
+                                                    ...prev,
+                                                    [key]: arr,
+                                                  };
+                                                });
 
-                                              // Update form values with the new MediaContent array
-                                              form.setFieldsValue({
-                                                MediaContent: updatedCreatives,
-                                              });
+                                                // Update form values with the new MediaContent array
+                                                form.setFieldsValue({
+                                                  MediaContent: updatedCreatives,
+                                                });
 
-                                              // Trigger validation
-                                              form.validateFields([
-                                                "MediaContent",
-                                              ]);
-                                            }}
-                                            style={{
-                                              color: "red",
-                                              marginLeft: 12,
-                                              cursor: "pointer",
-                                            }}
-                                          />
-                                        )}
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              )}
-                          </div>
-                        )}
-                      </div>
+                                                // Trigger validation
+                                                form.validateFields([
+                                                  "MediaContent",
+                                                ]);
+                                              }}
+                                              style={{
+                                                color: "red",
+                                                marginLeft: 12,
+                                                cursor: "pointer",
+                                              }}
+                                            />
+                                          )}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                            </div>
+                          )}
+                        </div>
+                      </Form.Item>
+                    </div>
+
+                    <Form.Item
+                      name="page_id"
+                      initialValue={imagehash?.pageID}
+                      label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select an option!",
+                        },
+                      ]}
+                      style={{ flex: 3, marginLeft: "1%" }}
+                    >
+                      <Input
+                        style={{ width: "23%" }}
+                        className={
+                          theme === "dark"
+                            ? "custom-input-dark"
+                            : "custom-input-light"
+                        }
+                      />
                     </Form.Item>
                   </div>
-
                   <Form.Item
-                    name="page_id"
-                    initialValue={imagehash?.pageID}
-                    label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+                    name={["adsets", index, "AddName"]}
+                    initialValue={campaignName}
+                    label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                     rules={[
                       {
                         required: true,
                         message: "Please select an option!",
                       },
                     ]}
-                    style={{ flex: 3, marginLeft: "1%" }}
                   >
                     <Input
-                      style={{ width: "23%" }}
+                      style={{ width: "60%" }}
+                      onChange={(e) => {
+                        setAddName(e.target.value);
+                        setNewAddLevelData((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+
+                          const next = list.map((item, idx) => ({
+                            ...item,
+                            AddName: `${e.target.value}_${idx + 1}`,
+                          }));
+
+                          return { ...prev, [key]: next };
+                        });
+                      }}
                       className={
                         theme === "dark"
                           ? "custom-input-dark"
@@ -2370,52 +5050,47 @@ const AdsetComponent = ({
                       }
                     />
                   </Form.Item>
-                </div>
-                <Form.Item
-                  name={["adsets", index, "AddName"]}
-                  initialValue={campaignName}
-                  label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select an option!",
-                    },
-                  ]}
-                >
-                  <Input
-                    style={{ width: "60%" }}
-                    onChange={(e) => setAddName(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
+                  <Form.Item
+                    label={
+                      <span style={{ color: "#B4B4B4" }}>Primary text</span>
                     }
-                  />
-                </Form.Item>
-                <Form.Item
-                 label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
-                  name={["adsets", index, "message"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter a message!",
-                    },
-                  ]}
-                  required
-                  tooltip="This is a required field"
-                >
-                  <TextArea
-                    placeholder="Primary text"
-                    autoSize={{ minRows: 2, maxRows: 10 }}
-                    onChange={(e) => setPrimaryText(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
-                  />
-                </Form.Item>
-                {/* <Form.Item
+                    name={["adsets", index, "message"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter a message!",
+                      },
+                    ]}
+                    required
+                  // tooltip="This is a required field"
+                  >
+                    <TextArea
+                      placeholder="Primary text"
+                      autoSize={{ minRows: 2, maxRows: 10 }}
+                      onChange={(e) => {
+                        setPrimaryText(e.target.value);
+                        setNewAddLevelData((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+
+                          const next = list.map((item, idx) => ({
+                            ...item,
+                            message: `${e.target.value}`,
+                          }));
+
+                          return { ...prev, [key]: next };
+                        });
+                      }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>
+                  {/* <Form.Item
                                     label="Caption"
                                     name="Caption"
                                     rules={[
@@ -2433,151 +5108,216 @@ const AdsetComponent = ({
 
                                     />
                                 </Form.Item> */}
-                <Form.Item
-                  label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
-                  name={["adsets", index, "headline"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter a Name!",
-                    },
-                  ]}
-                  required
-                  tooltip="This is a required field"
-                >
-                  <TextArea
-                    placeholder="Headline"
-                    autoSize={{ minRows: 2, maxRows: 10 }}
-                    onChange={(e) => setHeadline(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
-                  />
-                </Form.Item>
+                  <Form.Item
+                    label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
+                    name={["adsets", index, "headline"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter a Name!",
+                      },
+                    ]}
+                    required
+                  // tooltip="This is a required field"
+                  >
+                    <TextArea
+                      placeholder="Headline"
+                      autoSize={{ minRows: 2, maxRows: 10 }}
+                      onChange={(e) => {
+                        setHeadline(e.target.value);
+                        setNewAddLevelData((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
 
-                <Form.Item
-                   label={<span style={{ color: "#B4B4B4" }}>Description</span>}
-                  name={["adsets", index, "Description"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter a Description!",
-                    },
-                  ]}
-                  required
-                  initialValue={"Find More"}
-                  tooltip="This is a required field"
-                >
-                  <TextArea
-                    placeholder="Description"
-                    autoSize={{ minRows: 2, maxRows: 10 }}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
-                  />
-                </Form.Item>
-                <Form.Item
-                  label={
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "100%",
+                          const next = list.map((item, idx) => ({
+                            ...item,
+                            headline: `${e.target.value}`,
+                          }));
+
+                          return { ...prev, [key]: next };
+                        });
                       }}
-                    >
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label={
+                      <span style={{ color: "#B4B4B4" }}>Description</span>
+                    }
+                    name={["adsets", index, "Description"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter a Description!",
+                      },
+                    ]}
+                    required
+                    initialValue={"Find More"}
+                  // tooltip="This is a required field"
+                  >
+                    <TextArea
+                      placeholder="Description"
+                      autoSize={{ minRows: 2, maxRows: 10 }}
+                      onChange={(e) => {
+                        setDescription(e.target.value);
+                        setNewAddLevelData((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+
+                          const next = list.map((item, idx) => ({
+                            ...item,
+                            Description: `${e.target.value}`,
+                          }));
+
+                          return { ...prev, [key]: next };
+                        });
+                      }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label={
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          paddingRight: "50px",
+                          justifyContent: "space-between",
+                          width: "100%",
                         }}
                       >
-                       <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                        <Tooltip title="This is a required field">
-                          <QuestionCircleOutlined
-                            style={{ marginLeft: 4, cursor: "pointer" }}
-                          />
-                        </Tooltip>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            paddingRight: "50px",
+                          }}
+                        >
+                          <span style={{ color: "#B4B4B4" }}>Website_URL</span>
+                          {/* <Tooltip title="This is a required field">
+                            <QuestionCircleOutlined
+                              style={{ marginLeft: 4, cursor: "pointer" }}
+                            />
+                          </Tooltip> */}
+                        </div>
+                        <EditOutlined
+                          style={{ cursor: "pointer" }}
+                          onClick={() => onClickEdit(index)}
+                        />
                       </div>
-                      <EditOutlined
-                        style={{ cursor: "pointer" }}
-                        onClick={() => onClickEdit(index)}
-                      />
-                    </div>
-                  }
-                  labelCol={{ style: { width: "100%" } }} // Makes the label full width
-                  wrapperCol={{ style: { width: "100%" } }} // Ensures TextArea takes the same full width
-                  name={["adsets", index, "Website_URL"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select Website_URL!",
-                    },
-                  ]}
-                  required
-                >
-                  <TextArea
-                    placeholder="Website_URL"
-                    autoSize={{ minRows: 5, maxRows: 15 }}
-                    onChange={(e) => setWebsiteURL(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
                     }
-                  />
-                </Form.Item>
-                <Form.Item
-                   label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
-                  name={["adsets", index, "Caption"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter a Caption!",
-                    },
-                  ]}
-                  required
-                  tooltip="This is a required field"
-                >
-                  <TextArea
-                    placeholder="Display Link"
-                    autoSize={{ minRows: 2, maxRows: 10 }}
-                    onChange={(e) => setCaption(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
-                  />
-                </Form.Item>
-                <Modal
-                  title="URL Builder"
-                  visible={isModalVisibleForURLBuilder}
-                  onCancel={handleCancelForURLBuilder}
-                  // footer={[
-                  //     <Button key="cancel" onClick={handleCancel}>
-                  //         Cancel
-                  //     </Button>,
-                  //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
-                  //         Submit
-                  //     </Button>
-                  // ]}
-                  footer={null}
-                  width="80%" // Set width of the modal
-                  bodyStyle={{ height: "50vh", overflowY: "auto" }}
-                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                    }`}
-                >
-                  {getUrlBuilder}
-                </Modal>
+                    labelCol={{ style: { width: "100%" } }} // Makes the label full width
+                    wrapperCol={{ style: { width: "100%" } }} // Ensures TextArea takes the same full width
+                    name={["adsets", index, "Website_URL"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please select Website_URL!",
+                      },
+                    ]}
+                    required
+                  >
+                    <TextArea
+                      placeholder="Website_URL"
+                      autoSize={{ minRows: 5, maxRows: 15 }}
+                      onChange={(e) => {
+                        setWebsiteURL(e.target.value);
+                        setNewAddLevelData((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
 
-                {/* <Form.Item
+                          const next = list.map((item, idx) => ({
+                            ...item,
+                            Website_URL: `${e.target.value}`,
+                          }));
+
+                          return { ...prev, [key]: next };
+                        });
+                      }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label={
+                      <span style={{ color: "#B4B4B4" }}>Display link</span>
+                    }
+                    name={["adsets", index, "Caption"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter a Caption!",
+                      },
+                    ]}
+                    required
+                  // tooltip="This is a required field"
+                  >
+                    <TextArea
+                      placeholder="Display Link"
+                      autoSize={{ minRows: 2, maxRows: 10 }}
+                      onChange={(e) => {
+                        setCaption(e.target.value);
+                        setNewAddLevelData((prev) => {
+                          const key = adset.id;
+                          const list = Array.isArray(prev[key])
+                            ? prev[key].filter(Boolean)
+                            : [];
+
+                          const next = list.map((item, idx) => ({
+                            ...item,
+                            Caption: `${e.target.value}`,
+                          }));
+
+                          return { ...prev, [key]: next };
+                        });
+                      }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>
+
+                  <Modal
+                    title="URL Builder"
+                    visible={isModalVisibleForURLBuilder}
+                    onCancel={handleCancelForURLBuilder}
+                    // footer={[
+                    //     <Button key="cancel" onClick={handleCancel}>
+                    //         Cancel
+                    //     </Button>,
+                    //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
+                    //         Submit
+                    //     </Button>
+                    // ]}
+                    footer={null}
+                    width="80%" // Set width of the modal
+                    bodyStyle={{ height: "50vh", overflowY: "auto" }}
+                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                      }`}
+                  >
+                    {getUrlBuilder}
+                  </Modal>
+
+                  {/* <Form.Item
                                 label="URL Parameters"
                                 name="urlParameters"
                                 tooltip="This is a required field"
@@ -2587,64 +5327,179 @@ const AdsetComponent = ({
                                     autoSize={{ minRows: 5, maxRows: 15 }}
                                 />
                             </Form.Item> */}
-              </div>
+                </div>
 
-              <div style={{ flex: "30%" }}>
-                {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0
-                  ? selectedFiles[adset.id].map((file, i) => (
-                    <Badge
-                      key={i}
-                      count={
-                        file?.url?.endsWith(".png") ||
-                          file?.url?.endsWith(".jpg") ||
-                          file?.url?.endsWith(".jpeg") ||
-                          file?.url?.endsWith(".mp4") ? null : (
-                          <EditOutlined
-                            style={{ fontSize: "25px", color: "#fff" }}
-                            onClick={() => handleEditClick(file)}
-                          />
-                        )
-                      }
-                      style={{
-                        backgroundColor: "#52c41a",
-                        borderRadius: "50%",
-                        position: "absolute",
-                        top: "5px",
-                        right: "5px",
-                        zIndex: 10,
-                        cursor: "pointer",
-                      }}
-                      offset={[5, 5]}
-                    >
-                      <div className="container-ad-preview">
-                        <div
-                          className="ad-preview"
-                          style={{
-                            width: "350px",
-                            backgroundColor:
-                              theme === "dark" ? "#4f4f4d" : "#fff",
-                          }}
-                        >
-                          <div className="ad-heading">
-                            <div className="img">
+                <div style={{ flex: "30%" }}>
+                  {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0
+                    ? selectedFiles[adset.id].map((file, i) => (
+                      <Badge
+                        key={i}
+                        count={
+                          file?.url?.endsWith(".png") ||
+                            file?.url?.endsWith(".jpg") ||
+                            file?.url?.endsWith(".jpeg") ||
+                            file?.url?.endsWith(".mp4") ? null : (
+                            <EditOutlined
+                              style={{ fontSize: "25px", color: "#fff" }}
+                              onClick={() => handleEditClick(file)}
+                            />
+                          )
+                        }
+                        style={{
+                          backgroundColor: "#52c41a",
+                          borderRadius: "50%",
+                          position: "absolute",
+                          top: "5px",
+                          right: "5px",
+                          zIndex: 10,
+                          cursor: "pointer",
+                        }}
+                        offset={[5, 5]}
+                      >
+                        <div className="container-ad-preview">
+                          <div
+                            className="ad-preview"
+                            style={{
+                              width: "350px",
+                              backgroundColor:
+                                theme === "dark" ? "#4f4f4d" : "#fff",
+                            }}
+                          >
+                            <div className="ad-heading">
+                              <div className="img">
+                                {file?.url?.endsWith(".png") ||
+                                  file?.url?.endsWith(".jpg") ||
+                                  file?.url?.endsWith(".jpeg") ? (
+                                  <img
+                                    src={file?.url}
+                                    alt="preview"
+                                    width="40"
+                                    height="40"
+                                    style={{ objectFit: "cover" }}
+                                  />
+                                ) : file?.url?.endsWith(".mp4") ? (
+                                  <video
+                                    src={file?.url}
+                                    width="40"
+                                    height="30"
+                                    style={{ objectFit: "cover" }}
+                                    muted
+                                  />
+                                ) : file?.type?.startsWith("image/") ? (
+                                  <img
+                                    src={
+                                      editedImages[file?.name]
+                                        ? editedImages[file?.name]
+                                        : file?.originFileObj
+                                          ? URL.createObjectURL(
+                                            file.originFileObj
+                                          )
+                                          : file?.url
+                                    }
+                                    alt="preview"
+                                    width="40"
+                                    height="40"
+                                    style={{ objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <video
+                                    src={
+                                      file?.originFileObj
+                                        ? URL.createObjectURL(
+                                          file.originFileObj
+                                        )
+                                        : file?.url
+                                    }
+                                    width="40"
+                                    height="30"
+                                    style={{ objectFit: "cover" }}
+                                    muted
+                                  />
+                                )}
+                              </div>
+
+                              <div className="title">
+                                <div
+                                  className="main"
+                                  style={{
+                                    wordWrap: "break-word",
+                                    whiteSpace: "normal",
+                                    color:
+                                      theme === "dark" ? "white" : "#000",
+                                  }}
+                                >
+                                  {addName}
+                                  <div className="sub">
+                                    {imagehash?.pageName ? (
+                                      <>
+                                        {imagehash.pageName}{" "}
+                                        <GlobalOutlined
+                                          style={{ opacity: "0.6" }}
+                                        />
+                                      </>
+                                    ) : (
+                                      <GlobalOutlined
+                                        style={{ opacity: "0.6" }}
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="close">
+                                <CloseOutlined style={{ fontSize: "20px" }} />
+                              </div>
+                              <div className="moreoptions">
+                                <MoreOutlined style={{ fontSize: "20px" }} />
+                              </div>
+                            </div>
+
+                            <div
+                              className="ad-desc"
+                              style={{
+                                wordWrap: "break-word",
+                                whiteSpace: "normal",
+                                color: theme === "dark" ? "white" : "#000",
+                              }}
+                            >
+                              {primaryText}
+                            </div>
+
+                            <div
+                              className="ad-image"
+                              style={{
+                                width: "350px",
+                                height: "300px",
+                                display: "flex",
+                                alignItems: "center",
+                                marginTop: '4px',
+                                justifyContent: "center",
+                              }}
+                            >
                               {file?.url?.endsWith(".png") ||
                                 file?.url?.endsWith(".jpg") ||
                                 file?.url?.endsWith(".jpeg") ? (
                                 <img
                                   src={file?.url}
-                                  alt="preview"
-                                  width="40"
-                                  height="40"
-                                  style={{ objectFit: "cover" }}
+                                  alt="ad"
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "100%",
+                                    objectFit: "contain",
+                                  }}
                                 />
                               ) : file?.url?.endsWith(".mp4") ? (
                                 <video
-                                  src={file?.url}
-                                  width="40"
-                                  height="30"
-                                  style={{ objectFit: "cover" }}
-                                  muted
-                                />
+                                  controls
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "100%",
+                                    objectFit: "contain",
+                                  }}
+                                >
+                                  <source src={file?.url} />
+                                  Your browser does not support the video tag.
+                                </video>
                               ) : file?.type?.startsWith("image/") ? (
                                 <img
                                   src={
@@ -2656,240 +5511,141 @@ const AdsetComponent = ({
                                         )
                                         : file?.url
                                   }
-                                  alt="preview"
-                                  width="40"
-                                  height="40"
-                                  style={{ objectFit: "cover" }}
+                                  alt="ad"
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "100%",
+                                    objectFit: "contain",
+                                  }}
                                 />
                               ) : (
                                 <video
-                                  src={
-                                    file?.originFileObj
-                                      ? URL.createObjectURL(
-                                        file.originFileObj
-                                      )
-                                      : file?.url
-                                  }
-                                  width="40"
-                                  height="30"
-                                  style={{ objectFit: "cover" }}
-                                  muted
-                                />
+                                  controls
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "100%",
+                                    objectFit: "contain",
+                                  }}
+                                >
+                                  <source
+                                    src={
+                                      file?.originFileObj
+                                        ? URL.createObjectURL(
+                                          file.originFileObj
+                                        )
+                                        : file?.url
+                                    }
+                                  />
+                                  Your browser does not support the video tag.
+                                </video>
                               )}
                             </div>
 
-                            <div className="title">
-                              <div
-                                className="main"
-                                style={{
-                                  wordWrap: "break-word",
-                                  whiteSpace: "normal",
-                                  color: theme === "dark" ? "white" : "#000",
-                                }}
-                              >
-                                {addName}
-                                <div className="sub">
-                                  {imagehash?.pageName ? (
-                                    <>
-                                      {imagehash.pageName}{" "}
-                                      <GlobalOutlined
-                                        style={{ opacity: "0.6" }}
-                                      />
-                                    </>
-                                  ) : (
-                                    <GlobalOutlined
-                                      style={{ opacity: "0.6" }}
-                                    />
-                                  )}
+                            <div className="ad-cta">
+                              <div className="details">
+                                <div
+                                  className="link"
+                                  style={{
+                                    color:
+                                      theme === "dark" ? "white" : "#000",
+                                    marginTop: '10px'
+                                  }}
+
+                                >
+                                  {caption}
+                                </div>
+                                <div
+                                  className="title"
+                                  style={{
+                                    color:
+                                      theme === "dark" ? "white" : "#000",
+                                    marginTop: '5px'
+                                  }}
+                                >
+                                  {headline}
+                                </div>
+                                <div
+                                  className="desc"
+                                  style={{
+                                    color:
+                                      theme === "dark" ? "white" : "#000",
+                                    marginTop: '5px'
+                                  }}
+                                >
+                                  {description}
                                 </div>
                               </div>
+                              <div className="ad-button">
+                                <button
+                                  style={{
+                                    backgroundColor: "#91C25F",
+                                    color: "#000",
+                                    borderColor: "#91C25F",
+                                    borderWidth: "0px",
+                                  }}
+                                >
+                                  Learn More
+                                </button>
+                              </div>
                             </div>
 
-                            <div className="close">
-                              <CloseOutlined style={{ fontSize: "20px" }} />
-                            </div>
-                            <div className="moreoptions">
-                              <MoreOutlined style={{ fontSize: "20px" }} />
-                            </div>
-                          </div>
+                            <a
+                              href={websiteURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                wordWrap: "break-word",
+                                whiteSpace: "normal",
+                                color: "#0066cc",
+                                padding: "5px",
+                                marginTop: '15px',
+                                marginLeft: '10px'
+                              }}
+                            >
+                              {websiteURL}
+                            </a>
 
-                          <div
-                            className="ad-desc"
-                            style={{
-                              wordWrap: "break-word",
-                              whiteSpace: "normal",
-                              color: theme === "dark" ? "white" : "#000",
-                            }}
-                          >
-                            {primaryText}
-                          </div>
-
-                          <div
-                            className="ad-image"
-                            style={{
-                              width: "350px",
-                              height: "300px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {file?.url?.endsWith(".png") ||
-                              file?.url?.endsWith(".jpg") ||
-                              file?.url?.endsWith(".jpeg") ? (
-                              <img
-                                src={file?.url}
-                                alt="ad"
-                                style={{
-                                  maxWidth: "100%",
-                                  maxHeight: "100%",
-                                  objectFit: "contain",
-                                }}
-                              />
-                            ) : file?.url?.endsWith(".mp4") ? (
-                              <video
-                                controls
-                                style={{
-                                  maxWidth: "100%",
-                                  maxHeight: "100%",
-                                  objectFit: "contain",
-                                }}
-                              >
-                                <source src={file?.url} />
-                                Your browser does not support the video tag.
-                              </video>
-                            ) : file?.type?.startsWith("image/") ? (
-                              <img
-                                src={
-                                  editedImages[file?.name]
-                                    ? editedImages[file?.name]
-                                    : file?.originFileObj
-                                      ? URL.createObjectURL(file.originFileObj)
-                                      : file?.url
-                                }
-                                alt="ad"
-                                style={{
-                                  maxWidth: "100%",
-                                  maxHeight: "100%",
-                                  objectFit: "contain",
-                                }}
-                              />
-                            ) : (
-                              <video
-                                controls
-                                style={{
-                                  maxWidth: "100%",
-                                  maxHeight: "100%",
-                                  objectFit: "contain",
-                                }}
-                              >
-                                <source
-                                  src={
-                                    file?.originFileObj
-                                      ? URL.createObjectURL(
-                                        file.originFileObj
-                                      )
-                                      : file?.url
-                                  }
-                                />
-                                Your browser does not support the video tag.
-                              </video>
-                            )}
-                          </div>
-
-                          <div className="ad-cta">
-                            <div className="details">
+                            <div className="icons">
                               <div
-                                className="link"
+                                className="like"
                                 style={{
                                   color: theme === "dark" ? "white" : "#000",
                                 }}
                               >
-                                {caption}
+                                <LikeOutlined style={{ fontSize: "20px" }} />{" "}
+                                Like
                               </div>
                               <div
-                                className="title"
+                                className="comment"
                                 style={{
                                   color: theme === "dark" ? "white" : "#000",
                                 }}
                               >
-                                {headline}
+                                <CommentOutlined
+                                  style={{ fontSize: "20px" }}
+                                />{" "}
+                                Comment
                               </div>
                               <div
-                                className="desc"
+                                className="share"
                                 style={{
                                   color: theme === "dark" ? "white" : "#000",
                                 }}
                               >
-                                {description}
+                                <ShareAltOutlined
+                                  style={{ fontSize: "20px" }}
+                                />{" "}
+                                Share
                               </div>
-                            </div>
-                            <div className="ad-button">
-                              <button
-                                style={{
-                                  backgroundColor: "#91C25F",
-                                  color: "#000",
-                                  borderColor: "#91C25F",
-                                  borderWidth: "0px",
-                                }}
-                              >
-                                Learn More
-                              </button>
-                            </div>
-                          </div>
-
-                          <a
-                            href={websiteURL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              wordWrap: "break-word",
-                              whiteSpace: "normal",
-                              color: "#0066cc",
-                              padding: "10px",
-                            }}
-                          >
-                            {websiteURL}
-                          </a>
-
-                          <div className="icons">
-                            <div
-                              className="like"
-                              style={{
-                                color: theme === "dark" ? "white" : "#000",
-                              }}
-                            >
-                              <LikeOutlined style={{ fontSize: "20px" }} />{" "}
-                              Like
-                            </div>
-                            <div
-                              className="comment"
-                              style={{
-                                color: theme === "dark" ? "white" : "#000",
-                              }}
-                            >
-                              <CommentOutlined style={{ fontSize: "20px" }} />{" "}
-                              Comment
-                            </div>
-                            <div
-                              className="share"
-                              style={{
-                                color: theme === "dark" ? "white" : "#000",
-                              }}
-                            >
-                              <ShareAltOutlined
-                                style={{ fontSize: "20px" }}
-                              />{" "}
-                              Share
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </Badge>
-                  ))
-                  : null}
+                      </Badge>
+                    ))
+                    : null}
+                </div>
               </div>
-            </div>
+            )}
           </Panel>
         </Collapse>
         {openCreativesDrawer && (
@@ -2939,6 +5695,7 @@ const AdsetComponent = ({
     </Collapse>
   );
 };
+
 const EditMultipleAdsetCampaignDrawer = ({
   visible,
   onClose,
@@ -2988,7 +5745,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState({});
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
   const [adsets, setAdsets] = useState([
-    { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
+    { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
   ]);
   const [creativeIndex, setCreativeIndex] = useState(0);
   const selectedRef = useRef({});
@@ -3008,6 +5765,8 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [errors, setErrors] = useState({ input1: "", input2: "" });
   const [refreshDraft, setRefreshDraft] = useState(false);
   const [fullCampaignData, setFullCampaignData] = useState(null);
+  const [addlevelData, setAddLevelData] = useState({});
+  const [newAddLevelData, setNewAddLevelData] = useState({});
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
   console.log(selectedRow, "selectedRow in EditMultipleAdsetCampaignDrawer");
 
@@ -3117,55 +5876,53 @@ const EditMultipleAdsetCampaignDrawer = ({
   //     setIsAnyAdsetBudgetSet(anyAdsetFilled);
   // }, [adsets]);
   const fetchData = async (selectedRow) => {
-      try {
-        if (selectedRow) {
-          const response = await axios.get(
-            `https://www.testapi.adsgoat.in/api/newviecampaigndata/${selectedRow.identifier}`,
-            {
-              headers: {
-                Authorization: token,
-              },
-            }
-          );
-          console.log("hello viewdata", ...response.data);
-          setFullCampaignData(response?.data[0]);
+    try {
+      if (selectedRow) {
+        const response = await axios.get(
+          `https://www.testapi.adsgoat.in/api/newviecampaigndata/${selectedRow.identifier}`,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        console.log("hello viewdata", ...response.data);
+        setFullCampaignData(response?.data[0]);
 
-          setFormValuesFromDraft(response?.data[0]);
-          // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
-          //     const selectedOption = item.selectedOption || "creative";
+        setFormValuesFromDraft(response?.data[0]);
+        // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
+        //     const selectedOption = item.selectedOption || "creative";
 
-          //     const defaultFile = item.filename
-          //         ? [
-          //             {
-          //                 uid: `file-${index}`,
-          //                 name: item.filename.split("/").pop(),
-          //                 url: item.filename,
-          //                 type: item.filename.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
-          //                 source: selectedOption === "upload" ? "media" : "creative",
-          //             },
-          //         ]
-          //         : [];
+        //     const defaultFile = item.filename
+        //         ? [
+        //             {
+        //                 uid: `file-${index}`,
+        //                 name: item.filename.split("/").pop(),
+        //                 url: item.filename,
+        //                 type: item.filename.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
+        //                 source: selectedOption === "upload" ? "media" : "creative",
+        //             },
+        //         ]
+        //         : [];
 
-          //     return {
-          //         ...item,
-          //         key: `panel-${index}`,
-          //         selectedOption,
-          //         selectedFilesFromMedia: [], // selectedOption === "upload" ? defaultFile : []
-          //         selectedFilesFromCreatives: selectedOption === "creative" ? defaultFile : [],
-          //         selectedFiles: defaultFile,
-          //     };
-          // });
+        //     return {
+        //         ...item,
+        //         key: `panel-${index}`,
+        //         selectedOption,
+        //         selectedFilesFromMedia: [], // selectedOption === "upload" ? defaultFile : []
+        //         selectedFilesFromCreatives: selectedOption === "creative" ? defaultFile : [],
+        //         selectedFiles: defaultFile,
+        //     };
+        // });
 
-          // setPanels(enrichedPanels);
-        }
-      } catch (error) {
-        console.error("Error fetching campaign list:", error);
+        // setPanels(enrichedPanels);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching campaign list:", error);
+    }
+  };
 
   useEffect(() => {
-    
-
     fetchData(selectedRow);
   }, [selectedRow]);
 
@@ -3301,7 +6058,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     // Loop to find the highest number in adset names
     adsetNames.forEach((name) => {
       if (typeof name === "string") {
-        const match = name.match(/^Adset (\d+)/);
+        const match = name.match(/^ADSET (\d+)/);
         if (match && match[1]) {
           const num = parseInt(match[1]);
           if (num > highestNumber) {
@@ -3983,9 +6740,9 @@ const EditMultipleAdsetCampaignDrawer = ({
     }
   }, [accountNumber, visible]);
 
-  useEffect(() => {
-    fetchDraftDeatils();
-  }, [refreshDraft]);
+  //   useEffect(() => {
+  //     fetchDraftDeatils();
+  //   }, [refreshDraft]);
 
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
@@ -4659,6 +7416,10 @@ const EditMultipleAdsetCampaignDrawer = ({
     // abcd
     const campaignData = await MultipleAdsestsFetching(formValues);
 
+    console.log(fullCampaignData, "fullCampaignData");
+
+    console.log("Campaign Data:", campaignData);
+
     try {
       if (campaignData) {
         // console.log("Campaign Data:", campaignData);
@@ -4671,7 +7432,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               "Content-Type": "application/json",
               Authorization: token,
             },
-            body: JSON.stringify(campaignData),
+            body: JSON.stringify({ ...campaignData, ...(fullCampaignData?.campaignid ? { re_launch: true } : {}) }),
           }
         );
 
@@ -4689,6 +7450,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           ]);
           isManual !== "manual" && setIsManual(false);
           newSelectedRef.current = null; // Reset the newSelectedRef
+          changeRRefrst();
         } else {
           console.error("Failed to submit form data");
         }
@@ -4699,7 +7461,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     } finally {
       setLoading(false); // Stop the spinner after the process is complete
     }
-    //efgh
+    //efgh 1234
 
     // if (formValues) {
     //     const onSuccess = (status, response) => {
@@ -4747,13 +7509,114 @@ const EditMultipleAdsetCampaignDrawer = ({
   }
 
   const MultipleAdsestsFetching = async (values) => {
-    let AllAdsetsData = {
-      identifier: fullCampaignData.identifier,
-      campaign_name: values.Name,
-      Account_Number: values.Account_Number,
-      Approval: "PENDING_APPROVAL",
-      fbstatus: "No-Live",
-      camapaignlevel: {
+    // let AllAdsetsData = {
+    //   identifier: fullCampaignData.identifier,
+    //   campaign_name: values.Name,
+    //   Account_Number: values.Account_Number,
+    //   Approval: "PENDING_APPROVAL",
+    //   fbstatus: "No-Live",
+    //   camapaignlevel: {
+    //     createdby: session?.user?.name,
+    //     Name: values.Name,
+    //     Objectives: values.Objectives,
+    //     Special_categories: values.Special_categories,
+    //     Bid_strategy: values.Bid_strategy,
+    //     Daily_amount: parseFloat(values.Daily_amount) * 100,
+    //     Status: values.Status,
+    //     access_token: imagehash.token,
+    //     createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
+    //     ...(fullCampaignData.camapaignlevel.campaignid
+    //       ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
+    //       : {}),
+    //   },
+    // };
+    let number = 1;
+    let AllAdsetsData = {};
+    AllAdsetsData["identifier"] = fullCampaignData.identifier;
+    AllAdsetsData["campaign_name"] = values?.Name;
+    AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
+    AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus;
+    AllAdsetsData["Category"] = fullCampaignData.Category;
+    if (fullCampaignData.camapaignlevel.campaignid) {
+      AllAdsetsData["camapaignlevel"] = {};
+      AllAdsetsData["camapaignlevel"]["campaignid"] =
+        fullCampaignData.camapaignlevel.campaignid;
+      AllAdsetsData["camapaignlevel"]["createdDate"] =
+        fullCampaignData.camapaignlevel.createdDate;
+      AllAdsetsData["camapaignlevel"]["createdby"] =
+        fullCampaignData.camapaignlevel.createdby;
+      AllAdsetsData["camapaignlevel"]["access_token"] =
+        fullCampaignData.camapaignlevel.access_token;
+      AllAdsetsData["camapaignlevel"]["Status"] =
+        fullCampaignData.camapaignlevel.Status;
+      AllAdsetsData["camapaignlevel"]["Objectives"] =
+        fullCampaignData.camapaignlevel.Objectives;
+      if (fullCampaignData.camapaignlevel.Name === values.Name) {
+        AllAdsetsData["camapaignlevel"]["Name"] =
+          fullCampaignData.camapaignlevel.Name;
+      } else {
+        AllAdsetsData["camapaignlevel"]["Name"] = values.Name;
+        AllAdsetsData["camapaignlevel"]["re_lunch_campaign_name"] = true;
+      }
+      if (
+        JSON.stringify(fullCampaignData.camapaignlevel.Special_categories) ===
+        JSON.stringify(values.Special_categories)
+      ) {
+        AllAdsetsData["camapaignlevel"]["Special_categories"] =
+          fullCampaignData.camapaignlevel.Special_categories;
+      } else {
+        AllAdsetsData["camapaignlevel"]["Special_categories"] =
+          values.Special_categories;
+        AllAdsetsData["camapaignlevel"]["re_lunch_special_categories"] = true;
+      }
+      if (
+        JSON.stringify(fullCampaignData.camapaignlevel.Bid_strategy) ===
+        JSON.stringify(values.Bid_strategy)
+      ) {
+        AllAdsetsData["camapaignlevel"]["Bid_strategy"] =
+          fullCampaignData.camapaignlevel.Bid_strategy;
+      } else {
+        AllAdsetsData["camapaignlevel"]["Bid_strategy"] = values.Bid_strategy;
+        AllAdsetsData["camapaignlevel"]["re_lunch_bid_strategy"] = true;
+      }
+      if (
+        fullCampaignData.camapaignlevel.Daily_amount ===
+        parseFloat(values.Daily_amount) * 100
+      ) {
+        AllAdsetsData["camapaignlevel"]["Daily_amount"] =
+          fullCampaignData.camapaignlevel.Daily_amount;
+      } else {
+        if (
+          fullCampaignData.camapaignlevel.Daily_amount > 0 &&
+          parseFloat(values.Daily_amount) * 100 > 0
+        ) {
+          AllAdsetsData["camapaignlevel"]["Daily_amount"] =
+            parseFloat(values.Daily_amount) * 100;
+          AllAdsetsData["camapaignlevel"]["re_lunch_daily_amount"] = true;
+        } else if (
+          fullCampaignData.camapaignlevel.Daily_amount > 0 &&
+          parseFloat(values.Daily_amount) * 100 === 0
+        ) {
+          AllAdsetsData["camapaignlevel"]["Daily_amount"] = 0;
+          AllAdsetsData["camapaignlevel"]["re_lunch_daily_amount"] = true;
+          AllAdsetsData["camapaignlevel"][
+            "re_lunch_daily_amount_in_adsets"
+          ] = true;
+        } else if (
+          fullCampaignData.camapaignlevel.Daily_amount === 0 &&
+          parseFloat(values.Daily_amount) * 100 > 0
+        ) {
+          AllAdsetsData["camapaignlevel"]["Daily_amount"] =
+            parseFloat(values.Daily_amount) * 100;
+          AllAdsetsData["camapaignlevel"]["re_lunch_daily_amount"] = true;
+          AllAdsetsData["camapaignlevel"][
+            "re_lunch_daily_amount_in_campaign"
+          ] = true;
+        }
+      }
+    } else {
+      AllAdsetsData["camapaignlevel"] = {
         createdby: session?.user?.name,
         Name: values.Name,
         Objectives: values.Objectives,
@@ -4766,8 +7629,9 @@ const EditMultipleAdsetCampaignDrawer = ({
         ...(fullCampaignData.camapaignlevel.campaignid
           ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
           : {}),
-      },
-    };
+      };
+    }
+
     const onSuccess = (status, response) => {
       console.log("Upload success:", response);
     };
@@ -4776,103 +7640,924 @@ const EditMultipleAdsetCampaignDrawer = ({
       console.error("Upload error:", error);
     };
 
-    for (let i = 0; i < values.adsets.length; i++) {
-      let AdsetsData = {};
+    let re_lunch = false;
 
-      const imageHashArray = await customRequest(
-        values.adsets[i],
-        i,
-        onSuccess,
-        onError,
-        adsets[i].id
+    for (let newAdset of values.adsets) {
+      console.log(newAdset, "newAdset");
+      let AdsetsData = { buying_type: "AUCTION" };
+      const adsetKeys = Object.keys(fullCampaignData).filter((key) =>
+        key.startsWith("adsetlevel_")
       );
-      const addLevelData = imageHashArray.map((media, index) => {
-        if (media.imag_hash) {
-          // This is an image
-          return {
-            id: uuidv4(),
-            AddName: `${values.adsets[i].AddName}_${index + 1}`,
-            filename: media.filename,
-            imag_hash: media.imag_hash,
-            page_id: values.page_id,
-            message: values.adsets[i].message,
-            headline: values.adsets[i].headline,
-            Description: values.adsets[i].Description,
-            Caption: values.adsets[i].Caption,
-            Website_URL: values.adsets[i].Website_URL,
+      console.log(adsetKeys, "adsetKeys");
+      const adsetObjects = adsetKeys.map((key) => fullCampaignData[key]);
+      console.log(adsetObjects, "adsetObjects");
 
-            // urlParameters: values.urlParameters
-          };
-        } else if (media.videoid) {
-          // This is a video
-          return {
-            id: uuidv4(),
-            AddName: `${values.adsets[i].AddName}_${index + 1}`,
-            filename: media.filename,
-            videoid: media.videoid,
-            thambnailurl: media.thambnailurl,
-            page_id: values.page_id,
-            message: values.adsets[i].message,
-            headline: values.adsets[i].headline,
-            Description: values.adsets[i].Description,
-            Caption: values.adsets[i].Caption,
-            Website_URL: values.adsets[i].Website_URL,
-            // urlParameters: values.urlParameters
-          };
+      const findMatchingAdset = adsetObjects.find(
+        (adset) => adset.id === newAdset.id
+      );
+
+      console.log(findMatchingAdset, "findMatchingAdset");
+
+      const formValuesObject = values.adsets.find(
+        (adset) => adset.id === newAdset.id
+      );
+
+      console.log(formValuesObject, "formValuesObject");
+
+      //   const newAddLevelData = n || [];
+      //   const addlevelData = formValuesObject.addlevelData || [];
+
+      const getFilenameDeatials = async (file) => {
+        console.log(file, "file in getFilenameDeatials");
+        const token = fullCampaignData?.camapaignlevel?.access_token;
+        let mediaHashArray = {};
+        const onSuccess = (status, response) => {
+          console.log("Upload success:", response);
+        };
+
+        const onError = (status, error) => {
+          console.error("Upload error:", error);
+        };
+        let fileBlob = null;
+        let s3FileUrl = null;
+        const folderPath = `${network}/${fullCampaignData.Account_Number}/${fullCampaignData.campaign_name}`;
+        const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
+          const fullPath = `${folderPath}/${fileName}`;
+          const formData = new FormData();
+          formData.append("file", fileBlob, fileName);
+          formData.append("filename", fullPath); // required in body
+
+          try {
+            const response = await fetch(
+              "https://prodapis.adsgoat.in/uploadUserFiles",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: localStorage.getItem("token"),
+                  username: imagehash.username || "default-user", // required in headers
+                },
+                body: formData,
+              }
+            );
+
+            if (!response.ok) throw new Error("S3 upload failed");
+
+            const data = await response.json();
+            return data.imageUrl;
+          } catch (err) {
+            console.error("Error uploading to S3:", err);
+            return null;
+          }
+        };
+
+        if (file?.url) {
+          console.log(file, "file in getFilenameDeatials with url");
+          const response = await fetch(
+            `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: localStorage.getItem("token"),
+              },
+            }
+          );
+
+          fileBlob = await response.blob();
+          s3FileUrl = await uploadFileToS3(fileBlob, file.name, folderPath);
+
+          const formData = new FormData();
+          formData.append("file", fileBlob, file.name);
+          formData.append("access_token", token);
+
+          let fbResponse;
+          if (
+            file.url.endsWith(".png") ||
+            file.url.endsWith(".jpg") ||
+            file.url.endsWith(".jpeg")
+          ) {
+            const fileName = file.name.split("/").pop();
+
+            fbResponse = await axios.post(
+              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/adimages`,
+              formData,
+              { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            if (fbResponse.status === 200) {
+              onSuccess("ok", fbResponse);
+              mediaHashArray = {
+                filename: s3FileUrl,
+                imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+              };
+            } else {
+              onError("error", fbResponse);
+              console.error("Image upload failed");
+            }
+          } else if (file.url.endsWith(".mp4")) {
+            fbResponse = await axios.post(
+              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/advideos`,
+              formData,
+              { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            if (fbResponse.status === 200) {
+              const videoid = fbResponse?.data?.id;
+              await new Promise((resolve) => setTimeout(resolve, 10000));
+
+              const thumbnailResponse = await axios.get(
+                `https://graph.facebook.com/v20.0/${videoid}`,
+                {
+                  params: {
+                    access_token: token,
+                    fields: "thumbnails",
+                    is_preferred: true,
+                  },
+                }
+              );
+
+              const preferredThumbnail =
+                thumbnailResponse.data.thumbnails.data.find(
+                  (thumbnail) => thumbnail.is_preferred === true
+                );
+              const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+
+              onSuccess("ok", fbResponse);
+              mediaHashArray = {
+                filename: s3FileUrl,
+                videoid: videoid,
+                thambnailurl: uri,
+              };
+            } else {
+              onError("error", fbResponse);
+              console.error("Video upload to Facebook failed");
+            }
+          }
+        } else {
+          const uniqueId = uuidv4();
+          const safeName = `blob_${uniqueId}_${file.name}`;
+          const editedImage = editedImages[file.name];
+          fileBlob = editedImage
+            ? await fetch(editedImage).then((res) => res.blob())
+            : file.originFileObj;
+          s3FileUrl = await uploadFileToS3(fileBlob, safeName, folderPath);
+
+          const formData = new FormData();
+          formData.append("file", fileBlob, safeName);
+          formData.append("access_token", token);
+
+          let response, fbResponse;
+
+          if (file.type.startsWith("image/")) {
+            response = await axios.post(
+              "https://www.testapi.adsgoat.in/upload",
+              formData,
+              {
+                headers: {
+                  Authorization: localStorage.getItem("token"),
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+
+            //   if (!response.data.imageUrl) {
+            //     onError("Error: Image URL not returned from custom API");
+            //     console.error(
+            //       "Image upload to custom API failed, imageUrl missing"
+            //     );
+            //     continue;
+            //   }
+
+            fbResponse = await axios.post(
+              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/adimages`,
+              formData,
+              { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            if (response.status === 200 && fbResponse.status === 200) {
+              onSuccess("ok", response);
+              mediaHashArray = {
+                filename: s3FileUrl,
+                imag_hash: fbResponse.data?.images?.[safeName]?.hash,
+              };
+            } else {
+              onError("error", response);
+              console.error("Image upload failed");
+            }
+          } else if (file.type.startsWith("video/")) {
+            response = await axios.post(
+              "https://www.testapi.adsgoat.in/upload",
+              formData,
+              {
+                headers: {
+                  Authorization: localStorage.getItem("token"),
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+
+            //   if (response.status !== 200) {
+            //     onError("error", response);
+            //     console.error("Video upload to custom API failed");
+            //     continue;
+            //   }
+
+            fbResponse = await axios.post(
+              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/advideos`,
+              formData,
+              { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            if (fbResponse.status === 200) {
+              const videoid = fbResponse?.data?.id;
+              await new Promise((resolve) => setTimeout(resolve, 10000));
+
+              const thumbnailResponse = await axios.get(
+                `https://graph.facebook.com/v20.0/${videoid}`,
+                {
+                  params: {
+                    access_token: token,
+                    fields: "thumbnails",
+                    is_preferred: true,
+                  },
+                }
+              );
+
+              const preferredThumbnail =
+                thumbnailResponse.data.thumbnails.data.find(
+                  (thumbnail) => thumbnail.is_preferred === true
+                );
+              const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+
+              onSuccess("ok", fbResponse);
+              mediaHashArray = {
+                filename: s3FileUrl,
+                videoid: videoid,
+                thambnailurl: uri,
+              };
+            } else {
+              onError("error", fbResponse);
+              console.error("Video upload to Facebook failed");
+            }
+          }
         }
-      });
-      AdsetsData[`adsetlevel_${i + 1}`] = {
-        id: uuidv4(),
-        AdsetName: values.adsets[i].AdsetName,
-        Daily_amount: values.adsets[i].DailyAdd_amount
-          ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
-          : "",
-        optimization_goal: values.adsets[i].optimization_goal,
-        billing_event: values.adsets[i].billing_event,
-        start_time: moment(values.adsets[i].DatePicker.$d)
+        return mediaHashArray;
+      };
+
+      const newAddLevel = await Promise.all(
+        newAddLevelData[newAdset.id].map(async (item) => {
+          console.log(item, "item in newAddLevel");
+          const getItem =
+            addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
+          if (Object.keys(getItem).length > 0) {
+            const newUpdatedAd = { id: item.id, page_id: item.page_id };
+            if (Object.keys(getItem).length > 0 && item.Addid) {
+              newUpdatedAd["Addid"] = item.Addid;
+            }
+            if (Object.keys(getItem).length > 0 && item.Ad_Status) {
+              newUpdatedAd["Ad_Status"] = item.Ad_Status;
+            }
+            if (Object.keys(getItem).length > 0 && item.status) {
+              newUpdatedAd["status"] = item.status;
+            }
+            if (
+              Object.keys(getItem).length > 0 &&
+              item.message === getItem.message
+            ) {
+              newUpdatedAd["message"] = item.message;
+            } else {
+              newUpdatedAd["message"] = item.message;
+              newUpdatedAd["re_lunch"] = true;
+              re_lunch = true;
+            }
+            if (
+              Object.keys(getItem).length > 0 &&
+              item.headline === getItem.headline
+            ) {
+              newUpdatedAd["headline"] = item.headline;
+            } else {
+              newUpdatedAd["headline"] = item.headline;
+              newUpdatedAd["re_lunch"] = true;
+              re_lunch = true;
+            }
+            if (
+              Object.keys(getItem).length > 0 &&
+              item.Description === getItem.Description
+            ) {
+              newUpdatedAd["Description"] = item.Description;
+            } else {
+              newUpdatedAd["Description"] = item.Description;
+              newUpdatedAd["re_lunch"] = true;
+              re_lunch = true;
+            }
+            if (
+              Object.keys(getItem).length > 0 &&
+              item.Caption === getItem.Caption
+            ) {
+              newUpdatedAd["Caption"] = item.Caption;
+            } else {
+              newUpdatedAd["Caption"] = item.Caption;
+              newUpdatedAd["re_lunch"] = true;
+              re_lunch = true;
+            }
+            if (
+              Object.keys(getItem).length > 0 &&
+              item.Website_URL === getItem.Website_URL
+            ) {
+              newUpdatedAd["Website_URL"] = item.Website_URL;
+            } else {
+              newUpdatedAd["Website_URL"] = item.Website_URL;
+              newUpdatedAd["re_lunch"] = true;
+              re_lunch = true;
+            }
+            if (
+              Object.keys(getItem).length > 0 &&
+              item.AddName === getItem.AddName
+            ) {
+              newUpdatedAd["AddName"] = item.AddName;
+            } else {
+              newUpdatedAd["AddName"] = item.AddName;
+              newUpdatedAd["re_lunch_addname"] = true;
+              re_lunch = true;
+            }
+            if (
+              Object.keys(getItem).length > 0 &&
+              item.filename === getItem.filename
+            ) {
+              newUpdatedAd["filename"] = item.filename;
+              if (item.imag_hash) {
+                newUpdatedAd["imag_hash"] = item.imag_hash;
+              } else {
+                newUpdatedAd["videoid"] = getItem.videoid;
+                newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+              }
+            } else {
+              re_lunch = true;
+              newUpdatedAd["filename"] = item.filename;
+              const updatedFilesDeatils = await getFilenameDeatials(
+                item.filename
+              );
+              if (Object.keys(updatedFilesDeatils).length > 0) {
+                if (updatedFilesDeatils.imag_hash) {
+                  newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
+                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+                  newUpdatedAd["re_lunch"] = true;
+                } else if (updatedFilesDeatils.videoid) {
+                  newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
+                  newUpdatedAd["thambnailurl"] =
+                    updatedFilesDeatils.thambnailurl;
+                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+                  newUpdatedAd["re_lunch"] = true;
+                }
+              }
+            }
+            return newUpdatedAd;
+          } else {
+            const fileData = await getFilenameDeatials(item.filename);
+            re_lunch = true;
+            const newAd = {
+              id: item.id,
+              page_id: item.page_id,
+              message: item.message,
+              headline: item.headline,
+              Description: item.Description,
+              Caption: item.Caption,
+              Website_URL: item.Website_URL,
+              AddName: item.AddName,
+            };
+            if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
+              newAd["imag_hash"] = fileData.imag_hash;
+              newAd["filename"] = fileData.filename;
+            }
+            if (Object.keys(fileData).length > 0 && fileData.videoid) {
+              newAd["videoid"] = fileData.videoid;
+              newAd["filename"] = fileData.filename;
+              newAd["thambnailurl"] = fileData.thambnailurl;
+            }
+            return newAd;
+          }
+        })
+      );
+
+      console.log(newAddLevel, "newAddLevel");
+
+      //   const imageHashArray = await customRequest(
+      //     values.adsets[i],
+      //     i,
+      //     onSuccess,
+      //     onError,
+      //     adsets[i].id
+      //   );
+      //   const addLevelData = imageHashArray.map((media, index) => {
+      //     if (media.imag_hash) {
+      //       // This is an image
+      //       return {
+      //         id: uuidv4(),
+      //         AddName: `${values.adsets[i].AddName}_${index + 1}`,
+      //         filename: media.filename,
+      //         imag_hash: media.imag_hash,
+      //         page_id: values.page_id,
+      //         message: values.adsets[i].message,
+      //         headline: values.adsets[i].headline,
+      //         Description: values.adsets[i].Description,
+      //         Caption: values.adsets[i].Caption,
+      //         Website_URL: values.adsets[i].Website_URL,
+
+      //         // urlParameters: values.urlParameters
+      //       };
+      //     } else if (media.videoid) {
+      //       // This is a video
+      //       return {
+      //         id: uuidv4(),
+      //         AddName: `${values.adsets[i].AddName}_${index + 1}`,
+      //         filename: media.filename,
+      //         videoid: media.videoid,
+      //         thambnailurl: media.thambnailurl,
+      //         page_id: values.page_id,
+      //         message: values.adsets[i].message,
+      //         headline: values.adsets[i].headline,
+      //         Description: values.adsets[i].Description,
+      //         Caption: values.adsets[i].Caption,
+      //         Website_URL: values.adsets[i].Website_URL,
+      //         // urlParameters: values.urlParameters
+      //       };
+      //     }
+      //   });
+      if (findMatchingAdset && formValuesObject) {
+        if (findMatchingAdset.Adsetid) {
+          AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
+          AdsetsData["id"] = findMatchingAdset.id;
+        }
+        if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
+          AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
+        } else {
+          AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
+          AdsetsData["re_lunch_adset_name"] = true;
+        }
+        if (findMatchingAdset.Status) {
+          AdsetsData["Status"] = findMatchingAdset.Status;
+        }
+        if (findMatchingAdset["re_lunch_adsetname"]) {
+          AdsetsData["re_lunch_adsetname"] =
+            findMatchingAdset["re_lunch_adsetname"];
+        }
+        if (findMatchingAdset["re_lunch_bid_amount"]) {
+          AdsetsData["re_lunch_bid_amount"] =
+            findMatchingAdset["re_lunch_bid_amount"];
+        }
+        if (findMatchingAdset["re_lunch_daily_amount"]) {
+          AdsetsData["re_lunch_daily_amount"] =
+            findMatchingAdset["re_lunch_daily_amount"];
+        }
+        if (findMatchingAdset["re_lunch_targeting"]) {
+          AdsetsData["re_lunch_targeting"] =
+            findMatchingAdset["re_lunch_targeting"];
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.AdsetName !== formValuesObject.AdsetName
+        ) {
+          AdsetsData["AdsetName"] = formValuesObject.AdsetName;
+          AdsetsData["re_lunch_adsetname"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["AdsetName"] = formValuesObject.AdsetName;
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.bid_amount &&
+          findMatchingAdset.bid_amount / 100 !== formValuesObject.bid_amount
+        ) {
+          AdsetsData["bid_amount"] = formValuesObject.bid_amount
+            ? parseFloat(formValuesObject.bid_amount) * 100
+            : 0;
+          AdsetsData["re_lunch_bid_amount"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["bid_amount"] = formValuesObject.bid_amount
+            ? parseFloat(formValuesObject.bid_amount) * 100
+            : 0;
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.Daily_amount &&
+          findMatchingAdset.Daily_amount !==
+          (formValuesObject.DailyAdd_amount
+            ? parseFloat(formValuesObject.DailyAdd_amount) * 100
+            : "")
+        ) {
+          AdsetsData["Daily_amount"] = formValuesObject.DailyAdd_amount
+            ? parseFloat(formValuesObject.DailyAdd_amount) * 100
+            : "";
+          AdsetsData["re_lunch_daily_amount"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["Daily_amount"] = formValuesObject.DailyAdd_amount
+            ? parseFloat(formValuesObject.DailyAdd_amount) * 100
+            : "";
+        }
+        if (findMatchingAdset.Adsetid) {
+          AdsetsData["optimization_goal"] = findMatchingAdset.optimization_goal;
+          AdsetsData["billing_event"] = findMatchingAdset.billing_event;
+          AdsetsData["start_time"] = findMatchingAdset.start_time;
+          AdsetsData["action_source"] = findMatchingAdset.action_source;
+          AdsetsData["custom_event_type"] = findMatchingAdset.custom_event_type;
+          AdsetsData["pixel_id"] = findMatchingAdset.pixel_id;
+        } else {
+          AdsetsData["optimization_goal"] = formValuesObject.optimization_goal;
+          AdsetsData["billing_event"] = formValuesObject.billing_event;
+          AdsetsData["start_time"] = moment(formValuesObject.DatePicker.$d)
+            .tz(imagehash.timeZone)
+            .format("YYYY-MM-DDTHH:mm:ssZ");
+          AdsetsData["action_source"] = formValuesObject.action_source;
+          AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
+          AdsetsData["pixel_id"] = formValuesObject.pixel_id;
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.countries &&
+          findMatchingAdset.countries !== formValuesObject.countries
+        ) {
+          AdsetsData["countries"] = formValuesObject.countries;
+          AdsetsData["re_lunch_targeting"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["countries"] = formValuesObject.countries;
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.Min_Age &&
+          findMatchingAdset.Min_Age !== formValuesObject.Min_Age
+        ) {
+          AdsetsData["Min_Age"] = formValuesObject.Min_Age;
+          AdsetsData["re_lunch_targeting"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["Min_Age"] = formValuesObject.Min_Age;
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.Max_Age &&
+          findMatchingAdset.Max_Age !== formValuesObject.Max_Age
+        ) {
+          AdsetsData["Max_Age"] = formValuesObject.Max_Age;
+          AdsetsData["re_lunch_targeting"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["Max_Age"] = formValuesObject.Max_Age;
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.locales &&
+          JSON.stringify(findMatchingAdset.locales) !==
+          JSON.stringify(formValuesObject.Language)
+        ) {
+          AdsetsData["locales"] = formValuesObject.Language;
+          AdsetsData["re_lunch_targeting"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["locales"] = formValuesObject.Language;
+        }
+        if (
+          findMatchingAdset.Adsetid &&
+          findMatchingAdset.Gender &&
+          findMatchingAdset.Gender !== parseInt(formValuesObject.Gender)
+        ) {
+          AdsetsData["Gender"] = parseInt(formValuesObject.Gender);
+          AdsetsData["re_lunch_targeting"] = true;
+          re_lunch = true;
+        } else {
+          AdsetsData["Gender"] = parseInt(formValuesObject.Gender);
+        }
+        if (findMatchingAdset.Adsetid && findMatchingAdset.placements) {
+          console.log(
+            findMatchingAdset.placements,
+            "adset placements in adset component"
+          );
+          if (
+            findMatchingAdset.placements === "Advance" &&
+            formValuesObject.placements === "Advance"
+          ) {
+            AdsetsData["placements"] = formValuesObject.placements;
+          } else if (
+            findMatchingAdset.placements === "manual" &&
+            formValuesObject.placements === "Advance"
+          ) {
+            AdsetsData["placements"] = formValuesObject.placements;
+            AdsetsData["re_lunch_targeting"] = true;
+            re_lunch = true;
+          } else if (
+            findMatchingAdset.placements === "Advance" &&
+            formValuesObject.placements === "manual"
+          ) {
+            AdsetsData["placements"] = formValuesObject.placements;
+            AdsetsData["Facebook_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Facebook"
+              ) || [];
+            AdsetsData["instagram_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Instagram"
+              ) || [];
+            AdsetsData["audience_network_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Audience"
+              ) || [];
+            AdsetsData["messenger_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Messenger"
+              ) || [];
+            AdsetsData["position"] = formValuesObject.positions.map((item) => {
+              if (item && typeof item === "object" && !Array.isArray(item)) {
+                if ("key" in item) return item.key;
+                if ("value" in item) return item.value;
+                return null; // optional: return null if neither exists
+              }
+              return item;
+            });
+            AdsetsData["device_platforms"] = formValuesObject.device_platforms;
+            AdsetsData["publisher_platforms"] = formValuesObject.platforms;
+
+            AdsetsData["re_lunch_targeting"] = true;
+            re_lunch = true;
+          } else if (
+            findMatchingAdset.placements === "manual" &&
+            formValuesObject.placements === "manual"
+          ) {
+            console.log(findMatchingAdset.placements);
+            AdsetsData["placements"] = formValuesObject.placements;
+            if (
+              JSON.stringify(findMatchingAdset.publisher_platforms) !==
+              JSON.stringify(formValuesObject.platforms)
+            ) {
+              AdsetsData["publisher_platforms"] = formValuesObject.platforms;
+              AdsetsData["re_lunch_targeting"] = true;
+              re_lunch = true;
+            } else {
+              AdsetsData["publisher_platforms"] = formValuesObject.platforms;
+            }
+            if (
+              JSON.stringify(findMatchingAdset.Facebook_positions) !==
+              JSON.stringify(
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Facebook"
+                )
+              )
+            ) {
+              AdsetsData["Facebook_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Facebook"
+                ) || [];
+              AdsetsData["re_lunch_targeting"] = true;
+              re_lunch = true;
+            } else {
+              AdsetsData["Facebook_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Facebook"
+                ) || [];
+            }
+            if (
+              JSON.stringify(findMatchingAdset.instagram_positions) !==
+              JSON.stringify(
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Instagram"
+                )
+              )
+            ) {
+              AdsetsData["instagram_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Instagram"
+                ) || [];
+              AdsetsData["re_lunch_targeting"] = true;
+            } else {
+              AdsetsData["instagram_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Instagram"
+                ) || [];
+            }
+            if (
+              JSON.stringify(findMatchingAdset.audience_network_positions) !==
+              JSON.stringify(
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Audience"
+                )
+              )
+            ) {
+              AdsetsData["audience_network_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Audience"
+                ) || [];
+              AdsetsData["re_lunch_targeting"] = true;
+              re_lunch = true;
+            } else {
+              AdsetsData["audience_network_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Audience"
+                ) || [];
+            }
+            if (
+              JSON.stringify(findMatchingAdset.messenger_positions) !==
+              JSON.stringify(
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Messenger"
+                )
+              )
+            ) {
+              AdsetsData["messenger_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Messenger"
+                ) || [];
+              AdsetsData["re_lunch_targeting"] = true;
+              re_lunch = true;
+            } else {
+              AdsetsData["messenger_positions"] =
+                extractValuesByPartialLabel(
+                  selectedPositions[formValuesObject?.id],
+                  "Messenger"
+                ) || [];
+            }
+            AdsetsData["position"] = formValuesObject.positions.map((item) => {
+              if (item && typeof item === "object" && !Array.isArray(item)) {
+                if ("key" in item) return item.key;
+                if ("value" in item) return item.value;
+                return null; // optional: return null if neither exists
+              }
+              return item;
+            });
+            if (
+              JSON.stringify(findMatchingAdset.device_platforms) !==
+              JSON.stringify(formValuesObject.device_platforms)
+            ) {
+              AdsetsData["device_platforms"] =
+                formValuesObject.device_platforms;
+              AdsetsData["re_lunch_targeting"] = true;
+              re_lunch = true;
+            } else {
+              AdsetsData["device_platforms"] =
+                formValuesObject.device_platforms;
+            }
+          }
+        } else {
+          AdsetsData["placements"] = formValuesObject.placements;
+          if (formValuesObject.placements === "manual") {
+            AdsetsData["publisher_platforms"] = formValuesObject.platforms;
+            AdsetsData["Facebook_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Facebook"
+              ) || [];
+            AdsetsData["instagram_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Instagram"
+              ) || [];
+            AdsetsData["audience_network_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Audience"
+              ) || [];
+            AdsetsData["messenger_positions"] =
+              extractValuesByPartialLabel(
+                selectedPositions[formValuesObject?.id],
+                "Messenger"
+              ) || [];
+            AdsetsData["position"] = formValuesObject.positions.map((item) => {
+              if (item && typeof item === "object" && !Array.isArray(item)) {
+                if ("key" in item) return item.key;
+                if ("value" in item) return item.value;
+                return null; // optional: return null if neither exists
+              }
+              return item;
+            });
+            AdsetsData["device_platforms"] = formValuesObject.device_platforms;
+          }
+        }
+        AdsetsData["buying_type"] = "AUCTION";
+        AdsetsData["addlevel"] = newAddLevel;
+      } else {
+        AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
+        AdsetsData["Daily_amount"] = formValuesObject.DailyAdd_amount
+          ? parseFloat(formValuesObject.DailyAdd_amount) * 100
+          : "";
+        AdsetsData["bid_amount"] = formValuesObject.bid_amount
+          ? parseFloat(formValuesObject.bid_amount) * 100
+          : 0;
+        AdsetsData["optimization_goal"] = formValuesObject.optimization_goal;
+        AdsetsData["billing_event"] = formValuesObject.billing_event;
+        AdsetsData["start_time"] = moment(formValuesObject.DatePicker.$d)
           .tz(imagehash.timeZone)
-          .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
-        action_source: values.adsets[i].action_source,
-        custom_event_type: values.adsets[i].custom_event_type,
-        pixel_id: values.pixel_id,
-        bid_amount: values.adsets[i].bid_amount
-          ? parseFloat(values.adsets[i].bid_amount) * 100
-          : 0,
-        countries: values.adsets[i].countries,
-        Min_Age: values.adsets[i].Min_Age,
-        Max_Age: values.adsets[i].Max_Age,
-        Gender: parseInt(values.adsets[i].Gender),
-        locales: values.adsets[i].Language,
-        placements: values.adsets[i].placements,
-        ...(values.adsets[i].placements !== "Advance" && {
-          publisher_platforms: values.adsets[i].platforms,
-          Facebook_positions:
+          .format("YYYY-MM-DDTHH:mm:ssZ"); //formValuesObject.DatePicker.$d
+        AdsetsData["action_source"] = formValuesObject.action_source;
+        AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
+        AdsetsData["pixel_id"] = values.pixel_id;
+        AdsetsData["countries"] = formValuesObject.countries;
+        AdsetsData["Min_Age"] = formValuesObject.Min_Age;
+        AdsetsData["Max_Age"] = formValuesObject.Max_Age;
+        AdsetsData["Gender"] = parseInt(formValuesObject.Gender);
+        AdsetsData["locales"] = formValuesObject.Language;
+        AdsetsData["placements"] = formValuesObject.placements;
+        if (formValuesObject.placements !== "Advance") {
+          AdsetsData["publisher_platforms"] = formValuesObject.platforms;
+          AdsetsData["Facebook_positions"] =
             extractValuesByPartialLabel(
               selectedPositions[adsets[i].id],
               "Facebook"
-            ) || [],
-          instagram_positions:
+            ) || [];
+          AdsetsData["instagram_positions"] =
             extractValuesByPartialLabel(
               selectedPositions[adsets[i].id],
               "Instagram"
-            ) || [],
-          audience_network_positions:
+            ) || [];
+          AdsetsData["audience_network_positions"] =
             extractValuesByPartialLabel(
               selectedPositions[adsets[i].id],
               "Audience"
-            ) || [],
-          messenger_positions:
+            ) || [];
+          AdsetsData["messenger_positions"] =
             extractValuesByPartialLabel(
               selectedPositions[adsets[i].id],
               "Messenger"
-            ) || [],
-          position: values.adsets[i].positions,
-          device_platforms: values.adsets[i].device_platforms,
-        }),
-        buying_type: "AUCTION",
-        addlevel: addLevelData,
+            ) || [];
+          AdsetsData["position"] = formValuesObject.positions;
+          AdsetsData["device_platforms"] = formValuesObject.device_platforms;
+        } else {
+          AdsetsData["placements"] = formValuesObject.placements;
+        }
+        AdsetsData["buying_type"] = "AUCTION";
+        AdsetsData["addlevel"] = newAddLevel;
+      }
+
+      //   AdsetsData[`adsetlevel_${i + 1}`] = {
+      //     id: uuidv4(),
+      //   AdsetName: values.adsets[i].AdsetName,
+      //   Daily_amount: values.adsets[i].DailyAdd_amount
+      //     ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
+      //     : "",
+      //   optimization_goal: values.adsets[i].optimization_goal,
+      //   billing_event: values.adsets[i].billing_event,
+      //   start_time: moment(values.adsets[i].DatePicker.$d)
+      //     .tz(imagehash.timeZone)
+      //     .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+      //   action_source: values.adsets[i].action_source,
+      //   custom_event_type: values.adsets[i].custom_event_type,
+      //   pixel_id: values.pixel_id,
+      //   bid_amount: values.adsets[i].bid_amount
+      //     ? parseFloat(values.adsets[i].bid_amount) * 100
+      //     : 0,
+      //   countries: values.adsets[i].countries,
+      //   Min_Age: values.adsets[i].Min_Age,
+      //   Max_Age: values.adsets[i].Max_Age,
+      //   Gender: parseInt(values.adsets[i].Gender),
+      //   locales: values.adsets[i].Language,
+      //   placements: values.adsets[i].placements,
+      //   ...(values.adsets[i].placements !== "Advance" && {
+      //     publisher_platforms: values.adsets[i].platforms,
+      //     Facebook_positions:
+      //       extractValuesByPartialLabel(
+      //         selectedPositions[adsets[i].id],
+      //         "Facebook"
+      //       ) || [],
+      //     instagram_positions:
+      //       extractValuesByPartialLabel(
+      //         selectedPositions[adsets[i].id],
+      //         "Instagram"
+      //       ) || [],
+      //     audience_network_positions:
+      //       extractValuesByPartialLabel(
+      //         selectedPositions[adsets[i].id],
+      //         "Audience"
+      //       ) || [],
+      //     messenger_positions:
+      //       extractValuesByPartialLabel(
+      //         selectedPositions[adsets[i].id],
+      //         "Messenger"
+      //       ) || [],
+      //     position: values.adsets[i].positions,
+      //     device_platforms: values.adsets[i].device_platforms,
+      //   }),
+      //   buying_type: "AUCTION",
+      //     addlevel: addLevelData,
+      //   };
+      AllAdsetsData = {
+        ...AllAdsetsData,
+        [`adsetlevel_${number}`]: AdsetsData,
       };
-      AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+      number++;
     }
     return AllAdsetsData;
   };
@@ -5678,7 +9363,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
   //     checkFormCompletion();
   // };
-const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
   const setFormValuesFromDraft = (draft) => {
     if (!draft) return;
 
@@ -5694,12 +9379,30 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
     setAdsets(
       adsetObjects.map((adsetObj, index) => ({
         id: adsetObj.id ?? uuidv4(),
-        AdsetPanelName: `Adset ${index + 1}`,
+        AdsetPanelName: `ADSET ${index + 1}`,
         DailyAdd_amount: adsetObj.Daily_amount
           ? adsetObj.Daily_amount / 100
           : 0,
+        Adsetid: adsetObj.Adsetid || "",
+        ...adsetObj, // Spread the adsetObj properties
       }))
     );
+
+    setAddLevelData((prev) => {
+      const adsetAddLevelData = {};
+      adsetObjects.forEach((adsetObj, index) => {
+        adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+      });
+      return { ...prev, ...adsetAddLevelData };
+    });
+
+    setNewAddLevelData((prev) => {
+      const adsetAddLevelData = {};
+      adsetObjects.forEach((adsetObj, index) => {
+        adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+      });
+      return { ...prev, ...adsetAddLevelData };
+    });
 
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
@@ -5715,7 +9418,7 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
       countries: adsetObj.countries,
       Min_Age: adsetObj.Min_Age,
       Max_Age: adsetObj.Max_Age,
-      Gender: adsetObj.Gender,
+      Gender: JSON.stringify(adsetObj.Gender),
       platforms: adsetObj.publisher_platforms || [],
       device_platforms: adsetObj.device_platforms || [],
       Language: adsetObj.locales,
@@ -5760,6 +9463,7 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
     // });
     const mapped = (data) =>
       data.map((file, i) => ({
+        id: file?.id,
         uid: `-${Date.now()}-${i}`,
         name: file?.filename,
         status: "done",
@@ -5771,6 +9475,7 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
               ? "image/png"
               : "video/",
         url: file?.filename,
+        Addid: file?.Addid || null,
       }));
 
     adsetObjects.forEach((adsetObj) => {
@@ -5888,40 +9593,44 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
   };
   return (
     <Modal
-      title={`View Campaign Details ----> ${selectedRow?.Account_Number} / ${selectedRow?.campaign_name}`}
-        // <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        //   {/* <span>{selectedRow?.campaign_name}</span> */}
-            
-        // </div>
-      
-       className={` ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+      title={
+        view
+          ? `View Campaign Details ----> ${selectedRow?.Account_Number} / ${selectedRow?.campaign_name}`
+          : `${selectedRow?.campaign_name}`
+      }
+      // <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      //   {/* <span>{selectedRow?.campaign_name}</span> */}
+
+      // </div>
+
+      className={` ${theme === "dark" ? "dark-theme-modal" : ""}`}
       open={visible}
       onCancel={handleDrawerClose}
       footer={null}
       centered
       width="85%"
       bodyStyle={{
-        height: '80vh',
-        overflowY: 'auto',
+        height: "80vh",
+        overflowY: "auto",
         padding: 10,
-        backgroundColor: theme === 'dark' ? '#333' : '#fff',
-        color: theme === 'dark' ? '#fff' : '#000',
+        backgroundColor: theme === "dark" ? "#333" : "#fff",
+        color: theme === "dark" ? "#fff" : "#000",
       }}
-      style={{ borderRadius: '12px' }}
+      style={{ borderRadius: "12px" }}
     >
       {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
             <Button
               type="primary"
               style={{
-                backgroundColor: '#91C25F',
-                color: '#000',
-                borderColor: '#91C25F',
+                backgroundColor: "#91C25F",
+                color: "#000",
+                borderColor: "#91C25F",
                 borderWidth: 0,
-                marginBottom: '10px',
-                cursor: 'pointer',
-                marginLeft: '10px'
+                marginBottom: "10px",
+                cursor: "pointer",
+                marginLeft: "10px",
               }}
               onClick={() => setShowApprovalModal(true)}
             >
@@ -5936,7 +9645,13 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
               // showIcon
               // banner
               className="blinking"
-              style={{ textAlign: 'center', marginRight: '10px', backgroundColor: theme === 'dark' && '#444', color: theme === 'dark' && '#fff', marginBottom: '10px', }}
+              style={{
+                textAlign: "center",
+                marginRight: "10px",
+                backgroundColor: theme === "dark" && "#444",
+                color: theme === "dark" && "#fff",
+                marginBottom: "10px",
+              }}
             />
           </div>
         </div>
@@ -5946,8 +9661,7 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
         title="Confirm Approval"
         open={showApprovalModal}
         onOk={() => {
-          handleUpdateApprovalForAdsets(selectedRow.identifier,
-        "Approved")
+          handleUpdateApprovalForAdsets(selectedRow.identifier, "Approved");
           setShowApprovalModal(false);
         }}
         onCancel={() => setShowApprovalModal(false)}
@@ -5956,8 +9670,6 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
       >
         <p>Are you sure you want to approve this campaign?</p>
       </Modal>
-
-
 
       {/* <Select value={newSelectedRef.current} placeholder="Select draft"
                 style={{
@@ -6014,7 +9726,7 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
                 <Form.Item
                   name="Account_Number"
                   label={
-                    <span style={{ color: "#B4B4B4" }}>Account Number</span>
+                    <span style={{ color: "#B4B4B4" }}>Account number</span>
                   }
                   rules={[
                     {
@@ -6074,6 +9786,7 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
                   <Select
                     // onChange={getpixelandpageid}
                     variant="filled"
+                    disabled={fullCampaignData?.camapaignlevel?.campaignid}
                     options={[
                       { value: "OUTCOME_LEADS", label: "Leads", title: "" },
                       { value: "OUTCOME_SALES", label: "Sales", title: "" },
@@ -6114,6 +9827,7 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
                   <Select
                     variant="filled"
                     mode="multiple"
+                    disabled={fullCampaignData?.camapaignlevel?.campaignid}
                     allowClear
                     options={[
                       { value: "HOUSING", label: "Housing", title: "" },
@@ -6318,13 +10032,13 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
         </Form.Item>
       </Tooltip> */}
                 <Tooltip
-                 overlayInnerStyle={{
-                backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-                color: theme === 'dark' ? '#ffffff' : '#000000',
-                borderRadius: 6,
-                padding: '6px 10px',
-                fontSize: '14px',
-              }}
+                  overlayInnerStyle={{
+                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                    color: theme === "dark" ? "#ffffff" : "#000000",
+                    borderRadius: 6,
+                    padding: "6px 10px",
+                    fontSize: "14px",
+                  }}
                   title={
                     isAnyAdsetBudgetSet
                       ? "You have enabled daily budget in the Adset Level"
@@ -6333,10 +10047,11 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
                 >
                   <Form.Item
                     name="Daily_amount"
-                   label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                    label={
+                      <span style={{ color: "#B4B4B4" }}>Daily budget</span>
+                    }
                     rules={[
                       {
-                        
                         required: !(
                           isAnyAdsetBudgetSet || campaignLevelDailyBudget > 0
                         ),
@@ -6454,6 +10169,12 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
                   handleFieldChange={handleFieldChange}
                   network={network}
                   accountis={accountis}
+                  addlevelData={addlevelData}
+                  newAddLevelData={newAddLevelData}
+                  setAddLevelData={setAddLevelData}
+                  setNewAddLevelData={setNewAddLevelData}
+                  setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
+                  imagehash={imagehash}
                 />
               );
               // <ffff/>
@@ -6773,7 +10494,6 @@ const [showApprovalModal, setShowApprovalModal] = useState(false);
           />
         </Drawer>
       )}
-
     </Modal>
   );
 };

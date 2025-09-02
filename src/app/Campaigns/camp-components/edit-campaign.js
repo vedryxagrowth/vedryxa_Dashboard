@@ -124,7 +124,11 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
             formRef.current.resetFields();
         }
 
-        message.success("Campaign created successfully");
+        message.open({
+            type: 'success',
+            content: "Campaign created successfully",
+            className: theme === 'dark' ? 'dark-message' : '',
+        })
         setTimeout(() => {
             window.location.reload();
         }, 2000);
@@ -270,7 +274,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                             <div style={{ display: "flex" }}>
                                 <Form.Item
                                     name="Account_Number"
-                                    label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -782,7 +786,8 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Primary text"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
@@ -800,7 +805,8 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Headline"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
@@ -817,7 +823,8 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Description"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
@@ -833,7 +840,8 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field">
+                                    // tooltip="This is a required field"
+                                    >
                                         <TextArea
                                             placeholder="Caption"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
@@ -849,7 +857,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field"
+                                    // tooltip="This is a required field"
                                     >
                                         <TextArea
                                             placeholder="Website_URL"
@@ -860,7 +868,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                     <Form.Item
                                         label="URL Parameters"
                                         name="urlParameters"
-                                        tooltip="This is a required field"
+                                    // tooltip="This is a required field"
                                     >
                                         <TextArea
                                             placeholder="URL Parameters"

@@ -10,6 +10,7 @@ import {
   Input,
   Space,
   Drawer,
+  message,
   theme,
   Tag,
   Popconfirm,
@@ -38,9 +39,11 @@ import axios from "axios";
 import { useTokenContext } from "../../components/parent";
 import Editads from "./EditAds";
 import moment from "moment-timezone";
-import Createnewads from "./Createads";
+// import Createnewads from "./Createads";
 import AdsetComponent from "./editMultipleAdset";
+import NewAdsetComponent from "./newAdsets";
 import { FaEye, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import Createnewads from "./CreateadsForAdsets";
 
 const AdsetCard = ({
   adset,
@@ -64,6 +67,97 @@ const AdsetCard = ({
   const [adsetDrawerOpen, setAdsetDrawerOpen] = useState(false);
   const [adsetToEdit, setAdsetToEdit] = useState(null);
   const [isViewAdset, setIsViewAdset] = useState(false);
+
+  const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
+
+  const [tick, setTick] = useState(false);
+
+  const adsetKey = adset?.adsetKey || `adsetlevel_${index + 1}`;
+
+  const [isActive, setIsActive] = useState(
+    String(adset?.Status ?? adset?.status ?? "PAUSED").toUpperCase() === "ACTIVE"
+  );
+
+  // keep switch in sync if parent re-renders with new data
+  useEffect(() => {
+    setIsActive(String(adset?.Status ?? adset?.status ?? "PAUSED").toUpperCase() === "ACTIVE");
+  }, [adset?.Status, adset?.status]);
+
+  const handleChange = async (checked) => {
+    const newStatus = checked ? "ACTIVE" : "PAUSED";
+    const campaignIdentifier = viewCampaignData?.identifier; // you already have this in scope
+    // const adsetIdentifier = adset?.id;                       // your internal adset UUID/id
+    const adsetKey = adset?.adsetKey || `adsetlevel_${index + 1}`; // adjust this to your data
+
+    if (!campaignIdentifier) {
+      message.error("Missing campaign identifier");
+      return;
+    }
+    if (!adsetKey) {
+      message.error("Missing adset identifier");
+      return;
+    }
+
+    // optimistic UI
+    const prev = isActive;
+    setIsActive(checked);
+    // setLoading(true);
+
+    try {
+      await axios.post(
+        "https://www.testapi.adsgoat.in/api/toggleAdsetStatus",
+        {
+          // backend should accept these fields:
+          campaignRef: campaignIdentifier,   // prefer UUID identifier
+          adsetKey,
+          // adsetIdentifier,                   // your internal adset id (used to locate nested adset)
+          // adsetId,                           // optional FB adset id (if exists -> call FB)
+          newStatus,
+        },
+        { headers: { Authorization: token } }
+      );
+
+      message.success(`Adset ${newStatus.toLowerCase()}`);
+      // refresh parent list if needed
+      // changeRRefrst && changeRRefrst();
+    } catch (err) {
+      setIsActive(prev); // rollback on error
+      message.error(
+        err?.response?.data?.message || err?.message || "Failed to update adset status"
+      );
+    }
+  };
+
+  const makeHandleChangeAd = (currentItem, adsetKey) => async (checked) => {
+    const newStatus = checked ? "ACTIVE" : "PAUSED";
+    const campaignIdentifier = viewCampaignData?.identifier;
+    const adIdentifier = currentItem?.id;
+
+    if (!campaignIdentifier) return message.error("Missing campaign identifier");
+    if (!adsetKey) return message.error("Missing adset key");
+    if (!adIdentifier) return message.error("Missing ad identifier");
+
+    // optimistic UI: flip locally and re-render
+    const prev = String(currentItem?.Ad_Status ?? currentItem?.Status ?? currentItem?.status ?? "PAUSED").toUpperCase();
+    currentItem.Ad_Status = newStatus;
+    setTick((t) => !t);
+
+    try {
+      await axios.post(
+        "https://www.testapi.adsgoat.in/api/toggleAdStatus",
+        { campaignRef: campaignIdentifier, adsetKey, adIdentifier, newStatus },
+        { headers: { Authorization: token } }
+      );
+      message.success(`Ad ${newStatus.toLowerCase()}`);
+    } catch (err) {
+      // rollback on error
+      currentItem.Ad_Status = prev;
+      setTick((t) => !t);
+      console.error("Failed to update ad status:", err);
+      message.error(err?.response?.data?.message || "Failed to update ad status");
+    }
+  };
+
 
   const isVideo = (filename) => {
     const videoExtensions = [".mp4", ".mov", ".avi", ".webm"];
@@ -191,11 +285,17 @@ const AdsetCard = ({
   ).length;
   const pendingCount = adset.addlevel.filter((item) => !item.status).length;
 
-  return (
+  const createnewads = () => {
+    setnewadsDrawerVisible(true);
+  };
 
+  const onCloseDrawer = () => {
+    setnewadsDrawerVisible(false);
+  };
+
+  return (
     <Card
       bordered={false}
-
       style={{
         width: "100%",
         borderRadius: 12,
@@ -264,31 +364,43 @@ const AdsetCard = ({
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-
-          <Switch
+          {/* <Switch
             // checked={record.Status === "ACTIVE"}
             // onChange={(checked) => onToggleStatus(record, checked)}
             checkedChildren="✓"
             unCheckedChildren="✗"
-
             style={{
               // backgroundColor:
               // record.Status === "ACTIVE" ? "#91C25F" : undefined,
               minWidth: 32,
               height: 22,
+              transform: "scale(0.8)",
+              cursor: "not-allowed",
+            }}
+          /> */}
+          <Switch
+            checkedChildren="✓"
+            unCheckedChildren="✗"
+            checked={isActive}
+            onChange={handleChange}
+            style={{
+              backgroundColor: isActive ? "#91C25F" : undefined,
+              minWidth: 32,
+              height: 22,
               transform: 'scale(0.8)',
-              cursor: 'not-allowed'
-
             }}
           />
 
-          <Tooltip title="View" overlayInnerStyle={{
-            backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-            borderRadius: 6,
-            padding: '6px 10px',
-            fontSize: '14px'
-          }}>
+          <Tooltip
+            title="View"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+              borderRadius: 6,
+              padding: "6px 10px",
+              fontSize: "14px",
+            }}
+          >
             <FaEye
               onClick={() => editAdsetForCampaign(adset, true)}
             // style={{ color: "#888", cursor: "pointer" }}
@@ -297,13 +409,16 @@ const AdsetCard = ({
           {
             //   approvedCount === 0 &&
             !restrictedEmails.includes(userdetails.email) && (
-              <Tooltip title="Edit" overlayInnerStyle={{
-                backgroundColor: theme === 'dark' ? '#2b2b2b' : '#ffffff',
-                color: theme === 'dark' ? '#ffffff' : '#000000',
-                borderRadius: 6,
-                padding: '6px 10px',
-                fontSize: '14px'
-              }}>
+              <Tooltip
+                title="Edit"
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: "14px",
+                }}
+              >
                 <FaPenToSquare
                   onClick={() => editAdsetForCampaign(adset, false)}
                 // style={{ color: "#888", cursor: "pointer" }}
@@ -315,14 +430,16 @@ const AdsetCard = ({
             !restrictedEmails.includes(userdetails.email) && (
               <Popconfirm
                 icon={<ExclamationCircleFilled className="Exckamationicon" />}
-                title={<span
-                  style={{
-                    color: theme === "dark" ? "#FFFFFF" : "#333",
-                    fontWeight: 600,
-                  }}
-                >
-                  Are you sure to delete this Adset?
-                </span>}
+                title={
+                  <span
+                    style={{
+                      color: theme === "dark" ? "#FFFFFF" : "#333",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Are you sure to delete this Adset?
+                  </span>
+                }
                 onConfirm={(e) => {
                   e.stopPropagation(); // Prevent panel collapse
                   removeAdset(adset.id, viewCampaignData.identifier);
@@ -342,8 +459,7 @@ const AdsetCard = ({
                 }}
                 cancelButtonProps={{
                   style: {
-                    backgroundColor:
-                      theme === "dark" ? "#555" : " transparent",
+                    backgroundColor: theme === "dark" ? "#555" : " transparent",
                     color: theme === "dark" ? "#fff" : "#000",
                     border: "1px solid #4caf50",
                   },
@@ -358,7 +474,11 @@ const AdsetCard = ({
               >
                 <span
                   onClick={(e) => e.stopPropagation()}
-                  style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
                 >
                   <FaTrashCan color="#EC7117" />
                 </span>
@@ -400,19 +520,23 @@ const AdsetCard = ({
 
       {/* Conditional Detail Section */}
 
-      {
-        expanded && adset.addlevel && (
-          <Row
-            gutter={[16, 16]}
-            style={{
-              marginTop: 10,
-              display: "flex",
-              flexWrap: "nowrap",
-              overflow: "auto",
-            }}
-          >
-            {adset.addlevel.map((item, index) => (
-              // <div key={index} style={{display:'flex', width:"100%", marginTop:'10px', flexWrap:"wrap"}}>
+      {expanded && adset.addlevel && (
+        <Row
+          gutter={[16, 16]}
+          style={{
+            marginTop: 10,
+            display: "flex",
+            flexWrap: "nowrap",
+            overflow: "auto",
+          }}
+        >
+          {adset.addlevel.map((item, index) => {
+
+            const adIsActive =
+              String(item?.Ad_Status ?? item?.Status ?? item?.status ?? "PAUSED").toUpperCase() === "ACTIVE";
+
+            // <div key={index} style={{display:'flex', width:"100%", marginTop:'10px', flexWrap:"wrap"}}>
+            return (
               <Col span={12}>
                 <Card
                   title={null}
@@ -484,20 +608,30 @@ const AdsetCard = ({
                           {/* Sponsored <GlobalOutlined style={{ opacity: "0.6", marginLeft: "4px" }} />/ */}
                         </div>
                       </div>
+                      {/* <Switch
+                      // checked={record.Status === "ACTIVE"}
+                      // onChange={(checked) => onToggleStatus(record, checked)}
+                      checkedChildren="✓"
+                      unCheckedChildren="✗"
+                      style={{
+                        // backgroundColor:
+                        // record.Status === "ACTIVE" ? "#91C25F" : undefined,
+                        minWidth: 32,
+                        height: 22,
+                        transform: "scale(0.8)",
+                        cursor: "not-allowed",
+                      }}
+                    /> */}
                       <Switch
-                        // checked={record.Status === "ACTIVE"}
-                        // onChange={(checked) => onToggleStatus(record, checked)}
                         checkedChildren="✓"
                         unCheckedChildren="✗"
-
+                        checked={adIsActive}
+                        onChange={makeHandleChangeAd(item, adsetKey)}
                         style={{
-                          // backgroundColor:
-                          // record.Status === "ACTIVE" ? "#91C25F" : undefined,
+                          backgroundColor: adIsActive ? "#91C25F" : undefined,
                           minWidth: 32,
                           height: 22,
                           transform: 'scale(0.8)',
-                          cursor: 'not-allowed'
-
                         }}
                       />
 
@@ -728,7 +862,7 @@ const AdsetCard = ({
                               style={{
                                 margin: "20px",
                                 borderColor: " #ff6666",
-                                backgroundColor: '#EC7117',
+                                backgroundColor: "#EC7117",
                                 padding: "10px",
                               }}
                               onClick={() => handleRejectClick(item)}
@@ -747,7 +881,7 @@ const AdsetCard = ({
                             alignItems: "center",
                             color: "green",
                             fontWeight: "bold",
-                            marginTop: '10px',
+                            marginTop: "10px",
                           }}
                         >
                           <CheckCircleOutlined style={{ marginRight: "5px" }} />
@@ -779,11 +913,46 @@ const AdsetCard = ({
                   </div>
                 </Card>
               </Col>
-              // </div>
-            ))}
-          </Row>
-        )
-      }
+            )
+            // </div>
+          })}
+          {!restrictedEmails.includes(userdetails.email) && (
+            <Col span={12} style={{ flex: "0 0 auto" }}>
+              <Card
+                bordered={false}
+                style={{
+                  maxWidth: '280px',
+                  height: '100%',
+                  minHeight: '300px', // matches height with other ad cards
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  backgroundColor: theme === "dark" ? "#333" : '#f5f5f5',
+                  cursor: "pointer"
+                }}
+              >
+                <Button
+                  onClick={createnewads}
+                  type="primary"
+                  icon={<PlusOutlined className="black-icon" />}
+                  style={{
+                    backgroundColor: '#91C25F',
+                    color: "#000",
+                    borderColor: '#91C25F',
+                    borderWidth: "0px",
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                  }}
+                >
+                  New ad
+                </Button>
+              </Card>
+            </Col>
+          )}
+        </Row>
+      )}
       <Modal
         title="Reject ad"
         visible={isRejectModalVisible}
@@ -799,23 +968,53 @@ const AdsetCard = ({
           rows={4}
         />
       </Modal>
-      {
-        adsetToEdit && (
-          <AdsetComponent
-            viewCampaignData={viewCampaignData}
-            network={network}
-            isViewAdset={isViewAdset}
-            adset={adset}
-            imagehash={imagehash}
-            changeRRefrst={changeRRefrst}
-            accountis={viewCampaignData?.Account_Number}
-            onClose={() => {
-              setAdsetDrawerOpen(false); // Close the drawer
-              setAdsetToEdit(null); // Reset the selected item to avoid showing old data
-            }}
-          />
-        )
-      }
+      {adsetToEdit && (
+        <AdsetComponent
+          viewCampaignData={viewCampaignData}
+          network={network}
+          isViewAdset={isViewAdset}
+          adset={adset}
+          imagehash={imagehash}
+          changeRRefrst={changeRRefrst}
+          accountis={viewCampaignData?.Account_Number}
+          onClose={() => {
+            setAdsetDrawerOpen(false); // Close the drawer
+            setAdsetToEdit(null); // Reset the selected item to avoid showing old data
+          }}
+        />
+      )}
+      <Modal
+        title="New Ad"
+        placement="right"
+        // closable={false}
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+          }`}
+        onCancel={onCloseDrawer}
+        open={newadsDrawerVisible}
+        footer={null}
+        centered
+        width="85%"
+        bodyStyle={{
+          height: '80vh',
+          overflowY: 'auto',
+          padding: 10,
+          backgroundColor: theme === 'dark' ? '#333' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
+        }}
+        style={{ borderRadius: '12px' }}
+      >
+        <Createnewads
+          index={index}
+          data={viewCampaignData}
+          visible={newadsDrawerVisible}
+          onClose={onCloseDrawer}
+          rerenders={changeRRefrst}
+          // adsData={viewCampaignData?.addlevel}
+          adsData={viewCampaignData?.[adsetKey]?.addlevel || []}  // 👈 Fix here
+          adsetKey={adsetKey}
+          network={network}
+        />
+      </Modal>
       <Drawer
         title="Edit ad"
         width={"100%"}
@@ -844,9 +1043,7 @@ const AdsetCard = ({
         )}{" "}
         {/* Pass selected item data to the Editads component */}
       </Drawer>
-    </Card >
-
-
+    </Card>
   );
 };
 
@@ -862,6 +1059,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
   const [imagehash, setimagehash] = useState("");
+  const [newAdsetDrawerVisible, setNewAdsetDrawerVisible] = useState(false);
 
   console.log(userdetails, "userdetails");
   console.log(record, "record in expanded adsets content");
@@ -882,6 +1080,13 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
     "shravan.k@winkleads.com",
     "abhynay.k@winkleads.com",
   ];
+  const createnewAdset = () => {
+    setNewAdsetDrawerVisible(true);
+  };
+
+  const onCloseAdsetDrawer = () => {
+    setNewAdsetDrawerVisible(false);
+  };
 
   const imageHashCaller = async (record) => {
     try {
@@ -1026,30 +1231,30 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
   };
 
   return (
-    < >
-      <div style={{ backgroundColor: theme === "dark" ? "#252525ff" : "#E9E9E9", }}>
-        <div style={{display:'flex',justifyContent: 'flex-end' }}> 
-          
-        <Button
-          type="primary"
-          icon={<PlusOutlined/>}
-          style={{
-            backgroundColor: "#91C25F",
-            color: "#000",
-            border: "none",
-            borderRadius: "6px",
-            fontSize:'14px',
-            marginRight:'15px',
-            marginBottom:'10px',
-            marginTop:'5px',
-            width:'100px',
-            cursor:'not-allowed'
-          }}
-          
-        >
-          New adset
-        </Button>
-
+    <>
+      <div
+        style={{ backgroundColor: theme === "dark" ? "#252525ff" : "#E9E9E9" }}
+      >
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            style={{
+              backgroundColor: "#91C25F",
+              color: "#000",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "14px",
+              marginRight: "15px",
+              marginBottom: "10px",
+              marginTop: "5px",
+              width: "100px",
+              //   cursor: "not-allowed",
+            }}
+            onClick={createnewAdset}
+          >
+            New adset
+          </Button>
         </div>
 
         <Row
@@ -1059,12 +1264,10 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
             flexWrap: "wrap",
             overflowX: "auto",
             padding: "10px",
-            marginTop: '-15px'
+            marginTop: "-15px",
             // backgroundColor: theme === "dark" ? "#252525ff" : "#E9E9E9",
           }}
-
         >
-
           {viewCampaignData &&
             Object.entries(viewCampaignData)
               .filter(([key]) => key.startsWith("adsetlevel_"))
@@ -1082,36 +1285,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
                   />
                 </Col>
               ))}
-          {/* {!restrictedEmails.includes(userdetails.email) && (
-                    <Col span={8}>
-                        <Card
-                            bordered={false}
-                            style={{
-                                maxWidth: '340px',
-                                height: '100%', // Set height for the card
-                                display: 'flex', // Flexbox to center content
-                                justifyContent: 'center', // Center horizontally
-                                alignItems: 'center', // Center vertically
-                                borderRadius: '8px',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                backgroundColor: theme === "dark" ? "#333" : '#f5f5f5', // Light background color
-                            }}
-                        >
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined   className="black-icon"/>} // Icon for "Create Ads"
-                                onClick={createnewads} // Your function to create new ads
-                                // style={{
-                                //     padding: '8px 16px',
-                                //     borderRadius: '8px',
-                                // }}
-                                style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",padding: '8px 16px',borderRadius: '8px',}}
-                            >
-                                Create ads
-                            </Button>
-                        </Card>
-                    </Col>
-                )} */}
+
         </Row>
       </div>
       {/* <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -1120,26 +1294,31 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
                 </Button>
             </div> */}
       <Drawer
-        title="Create ads"
+        title="Create adset"
         placement="right"
         // closable={false}
-        onClose={onCloseDrawer}
-        open={newadsDrawerVisible}
+        onClose={onCloseAdsetDrawer}
+        open={newAdsetDrawerVisible}
         width="100%" // Adjust width as needed
         style={{
           backgroundColor: theme === "dark" ? "#333" : "#fff",
           color: theme === "dark" ? "#fff" : "#000",
         }}
       >
-        <Createnewads
+        <NewAdsetComponent
           data={viewCampaignData}
-          visible={newadsDrawerVisible}
-          onClose={onCloseDrawer}
+          visible={newAdsetDrawerVisible}
+          onClose={onCloseAdsetDrawer}
           rerenders={changeRRefrst}
-          adsData={viewCampaignData?.addlevel}
+          adsData={viewCampaignData?.adset}
           network={network}
+          viewCampaignData={viewCampaignData}
+          imagehash={imagehash}
+          changeRRefrst={changeRRefrst}
+          accountis={viewCampaignData?.Account_Number}
         />
       </Drawer>
+
       <Drawer
         title="Edit ad"
         width={"100%"}

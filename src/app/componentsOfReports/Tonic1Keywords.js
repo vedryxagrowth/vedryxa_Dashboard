@@ -165,14 +165,17 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                 const campaignName = params.node.key;
 
                 let campaignid, adsetid;
+                let accountNumberToPassHistoryPage;
 
                 if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0].data;
                     campaignid = firstChild.campaignid;
                     adsetid = firstChild.adsetid;
+                    accountNumberToPassHistoryPage = firstChild.accountNumber ?? null;
                 } else if (params.data) {
                     campaignid = params.data.campaignid;
                     adsetid = params.data.adsetid;
+                    accountNumberToPassHistoryPage = params.data.accountNumber ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -504,7 +507,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                         >
@@ -634,6 +637,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
+                            accountNumber: eachData.accountNumber
                             // compaignid: eachData.campaign_id,
                         }
                     )
@@ -715,9 +719,13 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     const onCellClicked = (event) => {
         
         if (event.colDef.field === 'adsetname') {
+            const accountNumber =
+            event.data?.accountNumber ??
+            (event.node?.group ? event.node.allLeafChildren?.[0]?.data?.accountNumber : undefined);
+
             const value = event.value;
             if (value !== undefined) {
-                const url = `/DailyAndCampaignHistory/AdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                const url = `/DailyAndCampaignHistory/AdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumber}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
         }
