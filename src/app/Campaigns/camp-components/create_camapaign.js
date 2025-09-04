@@ -2949,6 +2949,7 @@ const CreateCampaignDrawer = ({
   accountis,
   network,
 }) => {
+  console.log(accountis, "accountis in CreateCampaignDrawer");
   // const [selectedFile, setSelectedFile] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2961,7 +2962,10 @@ const CreateCampaignDrawer = ({
   const [submitErrors, setSubmitErrors] = useState([]);
 
   const [accountNumber, setAccountNumber] = useState(accountis);
+  const [pixel_id_list, setPixel_id_list]= useState([]);
+  const [page_id_list, setPage_id_list] = useState([]);
   const [imagehash, setimagehash] = useState("");
+  const [imageHashArray, setImageHashArray] = useState([]);
   const { data: session } = useSession();
   var token = localStorage.getItem("token");
   const [showBidAmount, setShowBidAmount] = useState(false);
@@ -3026,7 +3030,11 @@ const CreateCampaignDrawer = ({
   const [rCurrentCategory, setRCurrentCategory] = useState(null);
   const [rEditedName, setREditedName] = useState("");
 
-  const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
+  // const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
+  const account = useMemo(() => {
+    const v = Array.isArray(accountis) ? accountis[0] : accountis;
+    return String(v ?? '').trim();
+  }, [accountis]);
   const { confirm } = Modal
 
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
@@ -4079,6 +4087,8 @@ const CreateCampaignDrawer = ({
 
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
+    // const pageIDList = 
+    console.log(imagehash, "imagehash in useEffect");
     form.setFieldsValue({
       pixel_id: imagehash?.pixelID,
       page_id: imagehash?.pageID,
@@ -4109,6 +4119,10 @@ const CreateCampaignDrawer = ({
     }
   }, [imagehash, form]);
 
+  useEffect(() => {
+    console.log(imageHashArray, "imageHashArray in useEffect");
+  }, [imageHashArray]);
+
   const Accountchange = (e) => {
     setAccountNumber(e.target.value);
   };
@@ -4119,7 +4133,7 @@ const CreateCampaignDrawer = ({
   const fetchAccountDetails = async () => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/hashimageidentity/${accountNumber}`,
+        `http://localhost:4500/api/newhashimageidentity/${accountNumber}`,
         {
           headers: {
             Authorization: token,
@@ -4127,6 +4141,8 @@ const CreateCampaignDrawer = ({
         }
       );
       console.log("account data", ...response?.data);
+
+      setImageHashArray(response?.data || []);
 
       setimagehash(...response?.data);
     } catch (error) {
@@ -4340,7 +4356,7 @@ const CreateCampaignDrawer = ({
   useEffect(() => {
     if (visible && accountNumber) {
       form.setFieldsValue({ Account_Number: accountNumber });
-      fetchAccountDetails(); 
+      fetchAccountDetails();
     }
   }, [accountNumber, visible, form]);
 
@@ -4352,7 +4368,7 @@ const CreateCampaignDrawer = ({
   }, [account]);
   const handleNameChange = async (e) => {
     // console.log("Account Number:", accountNumber);
-    if(adsets.length === 1){
+    if (adsets.length === 1) {
       form.setFieldsValue({
         adsets: {
           [0]: {
@@ -6257,6 +6273,9 @@ const CreateCampaignDrawer = ({
     setCaption("");
   };
 
+  const newAccountNumbers = Array.isArray(accountis) ? accountis?.map(acc => ({value: acc, label: acc})) : [];
+  console.log("New Account Numbers:", newAccountNumbers);
+
 
   return (
     <Modal
@@ -6576,9 +6595,9 @@ const CreateCampaignDrawer = ({
                     },
                   ]}
                   // style={{ width: 200, }}
-                  style={{ flex: 0.16 }}
+                  style={{ flex: 0.19 }}
                 >
-                  <Input
+                  {/* <Input
                     value={accountNumber}
                     onChange={Accountchange}
                     className={
@@ -6586,6 +6605,21 @@ const CreateCampaignDrawer = ({
                         ? "custom-input-dark"
                         : "custom-input-light"
                     }
+                  /> */}
+                  <Select
+                    mode="multiple"
+                    value={accountis}                // array of strings
+                    onChange={Accountchange}             // gets string[]
+                    options={newAccountNumbers}             // [{value,label}]
+                    placeholder="Select account(s)"
+                    // showSearch
+                    optionFilterProp="label"
+                    allowClear
+                    maxTagCount={1}                                      // 👈 always show only the first selected
+                    maxTagPlaceholder={(omitted) => `+${omitted.length}`} // 👈 rest as a count
+                    className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                    dropdownClassName={theme === "dark" && "custom-dropdown"}
+                    style={{ width: "100%", borderRadius: 8 }}
                   />
                 </Form.Item>
                 <Form.Item
@@ -6621,7 +6655,7 @@ const CreateCampaignDrawer = ({
                       message: "Please select an option!",
                     },
                   ]}
-                  style={{ flex: 0.15, marginLeft: "1%" }}
+                  style={{ flex: 0.13, marginLeft: "1%" }}
                 // style={{ width: 170, marginLeft: "1%" }}
                 >
                   <Select

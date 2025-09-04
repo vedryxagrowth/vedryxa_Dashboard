@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   FilterOutlined,
   CheckCircleFilled,
@@ -28,6 +28,7 @@ import {
   Skeleton,
   Tabs,
   Popconfirm,
+  Checkbox
 } from "antd";
 import {
   EditOutlined,
@@ -98,6 +99,7 @@ const App = () => {
   if (userdetails?.role === "Revenue_Partner") {
     redirect("/Dashboard");
   }
+  const {adAccounts} = userdetails || {};
   const [hovered, setHovered] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationSize, setPaginationSize] = useState(10);
@@ -124,6 +126,7 @@ const App = () => {
     useState(false);
   const [selectedEditCampaign, setselectedEditCampaign] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingForMultipleAdsets, setLoadingForMultipleAdsets] = useState(false);
   const [draftsLoading, setDraftsLoading] = useState(true);
   const [draftsData, setDraftsData] = useState([]);
   const [adsetsdrawerVisible, setadsetsDrawerVisible] = useState(false);
@@ -133,7 +136,7 @@ const App = () => {
   const [options, setOptions] = useState([]);
   const [createcamselectedacc, setcreatecamselectedacc] = useState("");
   const [selectedKey, setSelectedKey] = useState(null);
-  const [selectedValue, setSelectedValue] = useState(null);
+  const [selectedValue, setSelectedValue] = useState([]);
   const [valueOptions, setValueOptions] = useState([]);
   const [error, setError] = useState(false);
   const { theme } = useTokenContext();
@@ -163,6 +166,9 @@ const App = () => {
     setViewCloneMultipleAdsetDataDrawerVisible,
   ] = useState(false);
   const [view, setView] = useState(false);
+  const [accountChanged, setAccountChanged] = useState(false);
+  
+      // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
     setCampaignStatusFilter(key);
   };
@@ -256,6 +262,8 @@ const App = () => {
     },
   ];
 
+  const userPickedRef = useRef(false);
+
   // Function to disable future dates
   const disabledDate = (current) => {
     return current && current > dayjs().endOf("day");
@@ -312,6 +320,13 @@ const App = () => {
   //     setselectedEditCampaign(record);
   //     setEditcamapaignDrawerVisible(true);
   // }
+
+  const accountsForAccess = adAccounts[selectedKey];
+    // console.log(accountsForAccess, "accounts Access");
+
+  const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+
+
   const items = [
     { key: "1", label: "Old", content: "Content for Live data" },
     { key: "2", label: "New", content: "Content for Daily data" },
@@ -529,13 +544,13 @@ const App = () => {
     end = endDate,
     search = ""
   ) => {
-    setLoading(true);
+    setLoadingForMultipleAdsets(true);
     setError(null);
     try {
       // Construct URL with optional startDate and endDate
       //https://www.testapi.adsgoat.in
       // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
-      let url = `https://www.testapi.adsgoat.in/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      let url = `http://localhost:4500/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
       if (start && end) {
         url += `&startDate=${start}&endDate=${end}`;
       }
@@ -551,6 +566,8 @@ const App = () => {
       });
       const allCampaigns = response?.data;
 
+      console.log(allCampaigns, "all multiple adset campaigns");
+
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
         ? allCampaigns.filter(
@@ -564,12 +581,15 @@ const App = () => {
 
       setcreatecamselectedacc(accountNumber);
 
-      setMultipleAdsetCampaignData(filteredCampaignData);
+      console.log(filteredCampaignData, "multiple adset campaigns");
+
+      // setMultipleAdsetCampaignData(filteredCampaignData);
+      setMultipleAdsetCampaignData(allCampaigns);
     } catch (error) {
       console.error("Error fetching campaign data:", error);
       setError("Failed to fetch campaign data.");
     } finally {
-      setLoading(false);
+      setLoadingForMultipleAdsets(false);
     }
   };
 
@@ -622,54 +642,55 @@ const App = () => {
       setEndDate(end.format("YYYY-MM-DD"));
     }
   };
-  
-const allowFetchOnSelectRef = useRef(false); 
 
-const handleKeyChange = (key) => {
-  setSelectedKey(key);
-  setSelectedValue(null);
-};
+  const allowFetchOnSelectRef = useRef(false);
 
-const handleValueChange = (value) => {
-  setSelectedValue(value);
-  allowFetchOnSelectRef.current = false; 
-};
+  const handleKeyChange = (key) => {
+    setSelectedKey(key);
+    setSelectedValue([]);
+  };
 
-const handleApply = () => {
-  if (selectedValue && startDate && endDate) {
-    
+  const handleValueChange = (value) => {
+    setSelectedValue(value);
+    allowFetchOnSelectRef.current = false;
+  };
+
+  const handleApply = () => {
+    if (selectedValue && startDate && endDate) {
+
+      fetchData(selectedValue, startDate, endDate);
+      fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+      setAccountChanged(false);
+
+      allowFetchOnSelectRef.current = true;
+    } else {
+      message.warning("Please select project, account and date range");
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedValue || !startDate || !endDate) return;
     fetchData(selectedValue, startDate, endDate);
+  }, [refrst]);
+
+  useEffect(() => {
+    if (!selectedValue || !startDate || !endDate) return;
+    if (!allowFetchOnSelectRef.current) return;
+    fetchData(selectedValue, startDate, endDate);
+
+    allowFetchOnSelectRef.current = false;
+  }, [selectedValue]);
+
+  useEffect(() => {
+    if (!selectedValue || !startDate || !endDate) return;
+    if (!allowFetchOnSelectRef.current) return;
     fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
-    
-    allowFetchOnSelectRef.current = true;
-  } else {
-    message.warning("Please select project, account and date range");
-  }
-};
-
-useEffect(() => {
-  if (!selectedValue || !startDate || !endDate) return;
-  fetchData(selectedValue, startDate, endDate);
-}, [refrst]); 
-
-useEffect(() => {
-  if (!selectedValue || !startDate || !endDate) return;
-  if (!allowFetchOnSelectRef.current) return;
-  fetchData(selectedValue, startDate, endDate);
- 
-  allowFetchOnSelectRef.current = false;
-}, [selectedValue]); 
-
-useEffect(() => {
-  if (!selectedValue || !startDate || !endDate) return;
-  if (!allowFetchOnSelectRef.current) return;
-  fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
-  allowFetchOnSelectRef.current = false;
-}, [selectedValue]);
-useEffect(() => {
-  if (!selectedValue || !startDate || !endDate) return;
-  fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
-}, [refrst]);
+    allowFetchOnSelectRef.current = false;
+  }, [selectedValue]);
+  useEffect(() => {
+    if (!selectedValue || !startDate || !endDate) return;
+    fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+  }, [refrst]);
 
   // Handle value change
   // const handleValueChange = (value) => {
@@ -768,6 +789,7 @@ useEffect(() => {
   const [useaproval, setuseraproval] = useState(null);
   const [isModalVisibleForAdsets, setIsModalVisibleForAdsets] = useState(false);
   const [useaprovalForAdsets, setuseraprovalForAdsets] = useState(null);
+  const [searchText, setSearchText] = useState("");
 
   const handleUpdateApproval = async (id, newApprovalValue) => {
     try {
@@ -1666,11 +1688,11 @@ useEffect(() => {
 
       changeRRefrst && changeRRefrst();
 
-       message.open({
-                type: 'success',
-                content: "Campaign deleted",
-                className: theme === 'dark' ? 'dark-message' : '',
-       })
+      message.open({
+        type: 'success',
+        content: "Campaign deleted",
+        className: theme === 'dark' ? 'dark-message' : '',
+      })
     } catch (err) {
       console.error("Delete campaign error:", {
         status: err?.response?.status,
@@ -2117,6 +2139,14 @@ useEffect(() => {
       //     )}
       //   </div>
       // ),
+    },
+    {
+      title: "Account number",
+      dataIndex: "Account_Number",
+      key: "Account_Number",
+      // width: 320,
+      align: "center",
+      
     },
     // {
     //   title: "Actions",
@@ -2976,6 +3006,82 @@ useEffect(() => {
       onClick={(e) => setSelected(e.key)}
     />
   );
+
+  const handleDropdownVisibleChange = (open) => {
+        setIsOpen(open); // Set dropdown open state
+        // setAccountNumberToPass(null);
+  };
+
+  const onChangeSelect = (value) => {
+        // setAccount(value);
+  }
+
+  const handleChange1 = (values) => {
+    const uniq = Array.from(new Set(values.map(String)));
+    setSelectedValue(uniq);
+    userPickedRef.current = true;
+
+    // Preserve your accountName behavior using the last picked item (if needed)
+    const last = values[values.length - 1];
+    if (last) {
+      const findAccount = (data, accountNumber) =>
+        Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
+
+      const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
+      // if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
+    }
+
+    onChangeSelect(values);     // now passing array
+    setAccountChanged(true);
+  };
+
+  const filteredAccounts = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return accountsAccess;
+    return accountsAccess.filter((a) =>
+      `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
+    );
+  }, [accountsAccess, searchText]);
+
+  const renderAccountsCheckboxes = (theme) => (
+    <Checkbox.Group
+      options={filteredAccounts.map((account) => ({
+        value: String(account.accountNumber),
+        label: (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '5px 10px',
+              borderBottom: '1px solid #ddd'
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+              {/* show accountName only when dropdown open (same as your old pattern) */}
+              {isOpen && (
+                <span style={{ fontSize: 12, color: 'gray' }}>
+                  {account.accountName || ''}
+                </span>
+              )}
+            </div>
+            <span style={{ textAlign: 'right', marginLeft: 10 }}>
+              {account.status === "Active" ? (
+                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+              ) : (
+                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+              )}
+            </span>
+          </div>
+        ),
+      }))}
+      value={selectedValue}      // array of selected accountNumbers
+      onChange={handleChange1}   // updates your selectedValue + notifies parent
+      className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+    />
+  );
+
   return (
     <div>
       <CreateCampaignDrawer
@@ -3133,13 +3239,17 @@ useEffect(() => {
             </Select>
 
             {/* 🔹 Select Account */}
-            <Select
+            {/* <Select
               showSearch
+              mode="multiple"
               placeholder="Select Accounts"
               style={{ width: 225 }}
               onChange={handleValueChange}
               disabled={!selectedKey}
               value={selectedValue}
+              optionLabelProp="label" 
+              maxTagCount={1}                                      // 👈 always show only the first selected
+              maxTagPlaceholder={(omitted) => `+${omitted.length}`} // 👈 rest as a count
               optionFilterProp="children"
               filterOption={(input, option) =>
                 /^[0-9]*$/.test(input) &&
@@ -3148,10 +3258,10 @@ useEffect(() => {
               onDropdownVisibleChange={(open) => setIsOpen(open)}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
+                } green-border-select vm-accounts-one-line`}
             >
               {valueOptions.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
+                <Select.Option key={option.value} value={option.value} label={option.value}>
                   <div
                     style={{
                       display: "flex",
@@ -3208,7 +3318,50 @@ useEffect(() => {
                   </div>
                 </Select.Option>
               ))}
-            </Select>
+            </Select> */}
+
+            <Select
+              showSearch
+              onSearch={setSearchText}
+              searchValue={searchText}
+              placeholder="Select Account"
+              // Keep the visible state you already have
+              open={isOpen}
+              onDropdownVisibleChange={handleDropdownVisibleChange}
+
+              // 👇 Show first account + count
+              value={
+                selectedValue.length === 0
+                  ? undefined
+                  : selectedValue.length === 1
+                    ? selectedValue[0] // just that account number
+                    : `${selectedValue[0]}, +${selectedValue.length - 1} more`
+              }
+
+              dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+              className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+              style={{
+                width: '250px',
+                whiteSpace: 'nowrap',
+                color: theme === 'dark' ? 'white' : undefined,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                border: '1px solid #4CAF50',
+                borderRadius: '6px',
+              }}
+
+              // We are not using built-in options anymore
+              optionFilterProp="value"
+              // options={accountsAccess.map(createOption)}  // ❌ remove
+              // onChange={handleChange1}                    // ❌ remove
+
+              // Custom dropdown with checkboxes (no tick marks in the menu)
+              dropdownRender={() => (
+                <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
+                  {renderAccountsCheckboxes(theme)}
+                </div>
+              )}
+            />
 
             {/* 🔹 Date Picker */}
             <ConfigProvider
@@ -3428,13 +3581,14 @@ useEffect(() => {
 
       <div>{renderCarouselNav()}</div>
 
-      {loading ? (
+      {/* {loading ? (
         <Skeleton
           active
           paragraph={{ rows: 12 }}
           style={{ marginTop: "10px" }}
         />
-      ) : (
+      ) 
+      : (
         // <Table
         //     style={{
         //         width: "100%",
@@ -3602,7 +3756,157 @@ useEffect(() => {
           </Tabs>
         </div>
         // </div>
-      )}
+      )} */}
+
+      <div>
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            renderTabBar={() => <></>}
+          >
+            <Tabs.TabPane key="1">
+              {loading ? (
+                <Skeleton
+                  active
+                  paragraph={{ rows: 12 }}
+                  style={{ marginTop: "10px" }}
+                />
+              ) : (
+                <Table
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 300px)",
+                  // minHeight: '100%',
+                  tableLayout: "fixed",
+                }}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
+                columns={columns}
+                dataSource={getFilteredSingleCampaigns()
+                  .map((item, index) => ({
+                    ...item,
+                    key: index,
+                  }))
+                  .reverse()}
+                pagination={{ pageSize: paginationSize }}
+                scroll={{
+                  x: "auto",
+                  y: "calc(63vh)",
+                }}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <ExpandedRowContent
+                      record={record}
+                      changeRRefrst={changeRRefrst}
+                      network={selectedKey}
+                    />
+                  ),
+                  rowExpandable: (record) => !!record,
+                }}
+                rowClassName={() => "custom-row"}
+                rowKey="key"
+                components={{
+                  body: {
+                    row: (props) => (
+                      <tr
+                        {...props}
+                        style={{
+                          ...props.style,
+                          height: "32px",
+                        }}
+                      />
+                    ),
+                    cell: (props) => (
+                      <td
+                        {...props}
+                        style={{
+                          ...props.style,
+                          paddingTop: "6px",
+                          paddingBottom: "6px",
+                          fontSize: "13px",
+                        }}
+                      />
+                    ),
+                  },
+                }}
+              />
+              )
+              }
+            </Tabs.TabPane>
+            <Tabs.TabPane key="2">
+              {loadingForMultipleAdsets ? (
+                <Skeleton
+                  active
+                  paragraph={{ rows: 12 }}
+                  style={{ marginTop: "10px" }}
+                />
+              ) : (
+              <Table
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 300px)",
+                  // minHeight: '100%',
+                  tableLayout: "fixed",
+                }}
+                className={`custom-dark-table ${theme === "dark"
+                  ? "dark-mode-pagination"
+                  : "light-mode-pagination"
+                  }`}
+                columns={columnsformultipleadsets}
+                dataSource={getFilteredMultipleAdsetCampaigns()
+                  .map((item, index) => ({
+                    ...item,
+                    key: index,
+                  }))
+                  .reverse()}
+                pagination={{ pageSize: paginationSize }}
+                scroll={{
+                  x: "auto",
+                  y: "calc(63vh)",
+                }}
+                expandable={{
+                  expandedRowRender: (record) => (
+                    <ExpandedAdsetsContent
+                      record={record}
+                      changeRRefrst={changeRRefrst}
+                      network={selectedKey}
+                    />
+                  ),
+                  rowExpandable: (record) => !!record,
+                }}
+                rowClassName={() => "custom-row"}
+                rowKey="key"
+                components={{
+                  body: {
+                    row: (props) => (
+                      <tr
+                        {...props}
+                        style={{
+                          ...props.style,
+                          height: "32px",
+                        }}
+                      />
+                    ),
+                    cell: (props) => (
+                      <td
+                        {...props}
+                        style={{
+                          ...props.style,
+                          paddingTop: "6px",
+                          paddingBottom: "6px",
+                          fontSize: "13px",
+                        }}
+                      />
+                    ),
+                  },
+                }}
+              />
+              )}
+            </Tabs.TabPane>
+          </Tabs>
+        </div>
 
       {!restrictedEmails.includes(userdetails.email) && (
         <Drawer

@@ -8450,6 +8450,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         AdsetsData["buying_type"] = "AUCTION";
         AdsetsData["addlevel"] = newAddLevel;
       } else {
+        AdsetsData["id"] = formValuesObject.id || uuidv4();
         AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
         AdsetsData["Daily_amount"] = formValuesObject.DailyAdd_amount
           ? parseFloat(formValuesObject.DailyAdd_amount) * 100
@@ -8464,7 +8465,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           .format("YYYY-MM-DDTHH:mm:ssZ"); //formValuesObject.DatePicker.$d
         AdsetsData["action_source"] = formValuesObject.action_source;
         AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
-        AdsetsData["pixel_id"] = values.pixel_id;
+        AdsetsData["pixel_id"] = formValuesObject.pixel_id;
         AdsetsData["countries"] = formValuesObject.countries;
         AdsetsData["Min_Age"] = formValuesObject.Min_Age;
         AdsetsData["Max_Age"] = formValuesObject.Max_Age;
