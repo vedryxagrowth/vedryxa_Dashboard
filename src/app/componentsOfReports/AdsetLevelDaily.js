@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Badge} from 'antd';
-import { NumberOutlined, InfoCircleOutlined, DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
@@ -1034,6 +1034,7 @@ const handlePauseOk = async () => {
                                 Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this adset?
                             </p>
                             <p>Adset ID: {selectedAdset}</p>
+                            <p>Adset Name: {adsetName}</p>
                         </Modal>
                         {/* <PinIcon
                             campaignName={campaignName}
@@ -1818,58 +1819,117 @@ const ids = Array.isArray(newaccount)
                                         {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                         </Col> */}
-                                        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
-        {ids.length <= 1 ? (
-            // Single (or none) → plain text
-            <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-            Id: {ids[0] ?? "-"}
-            </Text>
-        ) : (
-            // Multiple → only an icon; hover shows selected accounts
-            <Tooltip
-            title={
-                <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                {ids.map((id, i) => {
-                    const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
-                    return(<div
-                    key={`${id}-${i}`}
-                    style={{
-                        padding: "4px 6px",
-                        borderBottom: "1px solid rgba(0,0,0,0.06)",
-                        fontSize: 12,
-                        color: theme === "dark" ? "#ddd" : "#333"
-                    }}
-                    >
-                    <div>{id}</div>
-                    <div>{getAccountObject?.accountName}</div>
-                    </div>)
-            })}
-                </div>
-            }
-            overlayInnerStyle={{
-                maxWidth: 320,
-                background: theme === "dark" ? "#1f1f1f" : '#fff',
-                color: theme === "dark" ? "#fff" : '#000'
-            }}
-            >
-            <Badge count={ids.length} size="small" offset={[0, 2]}>
-                <NumberOutlined
-                style={{
-                    fontSize: 18,
-                    cursor: "pointer",
-                    color: theme === "dark" ? "#9ad" : "#1677ff"
+        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+            {ids.length <= 1 ? (
+                // Single (or none) → plain text
+                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                Id: {ids[0] ?? "-"}
+                </Text>
+            ) : (
+                // Multiple → only an icon; hover shows selected accounts
+                <Tooltip
+                title={
+                    <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                    {ids.map((id, i) => {
+                        const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
+                        return(<div
+                        key={`${id}-${i}`}
+                        style={{
+                            padding: "4px 6px",
+                            borderBottom: "1px solid rgba(0,0,0,0.06)",
+                            fontSize: 12,
+                            color: theme === "dark" ? "#ddd" : "#333"
+                        }}
+                        >
+                        <div>{id}</div>
+                        <div>{getAccountObject?.accountName}</div>
+                        </div>)
+                })}
+                    </div>
+                }
+                overlayInnerStyle={{
+                    maxWidth: 320,
+                    background: theme === "dark" ? "#1f1f1f" : '#fff',
+                    color: theme === "dark" ? "#fff" : '#000'
                 }}
-                />
-            </Badge>
-            </Tooltip>
-        )}
+                >
+                <Badge count={ids.length} size="small" offset={[0, 2]}>
+                    <NumberOutlined
+                    style={{
+                        fontSize: 18,
+                        cursor: "pointer",
+                        color: theme === "dark" ? "#9ad" : "grey"
+                    }}
+                    />
+                </Badge>
+                </Tooltip>
+            )}
         </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+
+        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+            {ids.length <= 1 && (
+                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                Name: {newAccountName ?? "-"}
+                </Text>
+            ) 
+            }
+        </Col>
+
+        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+            {ids.length <= 1 ? (
+                // Single → plain text
+                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
+                </Text>
+            ) : (
+                // Multiple → icon with tooltip of selected account ids + timezones
+                <Tooltip
+                title={
+                    <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                    {ids.map((id, i) => {
+                        const acc = accountsAccess.find(a => a.accountNumber === id);
+                        console.log("timezones:", accountsAccess);
+                        const tz = acc?.timeZone ?? "-";
+                        return (
+                        <div
+                            key={`${id}-${i}`}
+                            style={{
+                            padding: "4px 6px",
+                            borderBottom: "1px solid rgba(0,0,0,0.06)",
+                            fontSize: 12,
+                            color: theme === "dark" ? "#ddd" : "#333"
+                            }}
+                        >
+                            {id} - {tz}
+                        </div>
+                        );
+                    })}
+                    </div>
+                }
+                overlayInnerStyle={{
+                    maxWidth: 320,
+                    background: theme === "dark" ? "#1f1f1f" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#000"
+                }}
+                >
+                <Badge count={ids.length} size="small" offset={[0, 2]}>
+                    <GlobalOutlined
+                    style={{
+                        fontSize: 18,
+                        cursor: "pointer",
+                        color: theme === "dark" ? "#9ad" : "grey"
+                    }}
+                    />
+                </Badge>
+                </Tooltip>
+            )}
+        </Col>
+                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
-                                        </Col>
+                                        </Col> */}
 
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                             <Tooltip
