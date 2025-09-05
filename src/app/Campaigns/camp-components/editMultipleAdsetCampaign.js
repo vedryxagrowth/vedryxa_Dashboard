@@ -8084,6 +8084,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       //     }
       //   });
       if (findMatchingAdset && formValuesObject) {
+        console.log("found matching adset and form values");
         if (findMatchingAdset.Adsetid) {
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
@@ -8450,6 +8451,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         AdsetsData["buying_type"] = "AUCTION";
         AdsetsData["addlevel"] = newAddLevel;
       } else {
+        console.log("No matching adset found, using form values only");
         AdsetsData["id"] = formValuesObject.id || uuidv4();
         AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
         AdsetsData["Daily_amount"] = formValuesObject.DailyAdd_amount
@@ -9415,6 +9417,8 @@ const EditMultipleAdsetCampaignDrawer = ({
       billing_event: adsetObj.billing_event,
       action_source: adsetObj.action_source,
       custom_event_type: adsetObj.custom_event_type,
+      pixel_id: adsetObj.pixel_id,
+      page_id: adsetObj.page_id,
       bid_amount: adsetObj.bid_amount / 100,
       countries: adsetObj.countries,
       Min_Age: adsetObj.Min_Age,

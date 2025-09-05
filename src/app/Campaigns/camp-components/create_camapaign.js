@@ -4121,6 +4121,15 @@ const CreateCampaignDrawer = ({
 
   useEffect(() => {
     console.log(imageHashArray, "imageHashArray in useEffect");
+    const pageIdList = imageHashArray.map((item) => ({value: item.pageID, label: `${item.accountNumber} - ${item.pageID}`, accountNumber: item.accountNumber }));
+    const pixelIdList = imageHashArray.map((item) => {
+      if(typeof item.pixelID === "object" && item.pixelID !== null){
+        const arrayOfPixels = Object.entries(item.pixelID).map(([key, value]) => ({ value: value, label: `${item.accountNumber} - ${key} - ${value}`, accountNumber: item.accountNumber  }));
+        return arrayOfPixels;
+      }
+      return {value: item.pixelID, label: `${item.accountNumber} - ${item.pixelID}`, accountNumber: item.accountNumber  };
+    });
+    setPage_id_list(pageIdList);
   }, [imageHashArray]);
 
   const Accountchange = (e) => {
