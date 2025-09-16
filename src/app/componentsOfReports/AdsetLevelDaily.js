@@ -30,7 +30,7 @@ const contentStyle = {
 };
 const { Text } = Typography;
 const newtworkCollections = {
-    "FB_Mnet": "Facebook_Mnet",
+    "FB_Mnet": "Facebook_Mnet_Daily",
     "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
@@ -1382,7 +1382,7 @@ const handlePauseOk = async () => {
                             profit: parseFloat(profit),
                             // margin: margin,
                             fbleads: parseInt(eachData.fbLeads),
-                            conversions: parseInt(conversions),
+                            conversions: parseInt(eachData.conversions),
                             cpc: parseFloat(eachData.cpc),
                             cpclinkclicks: cpcLinkClicks,
                             fbclicks: parseInt(eachData.fbClicks),

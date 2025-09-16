@@ -3105,7 +3105,7 @@ const App = () => {
       <EditMultipleAdsetCampaignDrawer
         view={view}
         visible={viewEditMultipleAdsetDataDrawerVisible}
-        accountis={createcamselectedacc}
+        accountis={selectedEditMultipleAdsetData?.Account_Number}
         onClose={onCloseDrawer}
         changeRRefrst={changeRRefrst}
         network={selectedKey}

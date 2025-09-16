@@ -34,7 +34,7 @@ const revenuePartnerNames = {
 
 
 const newtworkCollections = {
-    "FB_Mnet": "Facebook_Mnet",
+    "FB_Mnet": "Facebook_Mnet_Daily",
     "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
@@ -1400,6 +1400,8 @@ const Dashboard = () => {
                     newKey = "Newsbreak_DomainActive"
                 } else if (key === "FB_DomainActive") {
                     newKey = "Facebook_DActive_Names"
+                } else if (key === "FB_Mnet"){
+                    newKey = "Facebook_Mnet_Daily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 
@@ -1438,7 +1440,7 @@ const Dashboard = () => {
         // console.log(transformedObject);
         let response;
         try {
-            response = await apiClient.post(`/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+            response = await apiClient.post(`http://localhost:8000/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
 
         } catch (error) {
             message.error('API failed to fetch the data please click the reload button', 8);

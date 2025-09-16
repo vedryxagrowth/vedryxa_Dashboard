@@ -7538,6 +7538,8 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["Approval"] = fullCampaignData.Approval;
     AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus;
     AllAdsetsData["Category"] = fullCampaignData.Category;
+    if(fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
+    if(fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
       AllAdsetsData["camapaignlevel"]["campaignid"] =
@@ -7617,7 +7619,8 @@ const EditMultipleAdsetCampaignDrawer = ({
       }
     } else {
       AllAdsetsData["camapaignlevel"] = {
-        createdby: session?.user?.name,
+        createdby: fullCampaignData.camapaignlevel.createdby,
+        Editedby: session?.user?.name,
         Name: values.Name,
         Objectives: values.Objectives,
         Special_categories: values.Special_categories,
@@ -7625,7 +7628,8 @@ const EditMultipleAdsetCampaignDrawer = ({
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
         access_token: imagehash.token,
-        createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
+        createdDate: fullCampaignData.camapaignlevel.createdDate,
+        EditedDate : moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         ...(fullCampaignData.camapaignlevel.campaignid
           ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
           : {}),
@@ -8088,6 +8092,8 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (findMatchingAdset.Adsetid) {
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
+        }else{
+          AdsetsData["id"] = formValuesObject.id;
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
           AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
@@ -8172,7 +8178,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             .format("YYYY-MM-DDTHH:mm:ssZ");
           AdsetsData["action_source"] = formValuesObject.action_source;
           AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
-          AdsetsData["pixel_id"] = formValuesObject.pixel_id;
+          AdsetsData["pixel_id"] = findMatchingAdset.pixel_id;
         }
         if (
           findMatchingAdset.Adsetid &&
