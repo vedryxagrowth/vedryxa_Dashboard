@@ -7,6 +7,9 @@ import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Badge } from 'antd';
 import { NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Badge} from 'antd';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { Tooltip} from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -2222,6 +2225,23 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
                   ariaLabel="loading"
                   wrapperStyle
                   wrapperClass
+                <Modal
+                  title="Confirm Action"
+                  open={isAdidModalVisibles}
+                  className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                  onOk={handlePauseOk}
+                  onCancel={handlePauseCancel}
+                >
+                  <p>Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?</p>
+                  <p>Ad ID: {selectedAdid}</p>
+                  <p>Ad Name: {adName}</p>
+                </Modal>
+      
+                <PinIcon
+                  campaignName={campaignName}
+                  campaignid={campaignid}
+                  adsetid={adsetid}
+                  pinned={pinned}
                 />
               </div>
             </div>
@@ -2363,6 +2383,1012 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
                   </Tooltip>
                 </Col>
                 {/* <Col>
+                ) : (
+                  <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
+                )}
+      
+                <Tooltip
+                  title={tooltipText}
+                  overlayInnerStyle={{
+                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                    color: theme === 'dark' ? '#fff' : '#000',
+                    border: '1px solid #ccc',
+                    borderRadius: 6,
+                  }}
+                >
+                  <CopyOutlined
+                    onClick={copyToClipboard}
+                    style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
+                  />
+                </Tooltip>
+      
+                <LinkOutlined
+                  onClick={() => {
+                    const url = `/DailyAndCampaignHistory/AdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${rowAccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  }}
+                  style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
+                />
+      
+                <Tooltip
+                  title={valueWithCount}
+                  overlayInnerStyle={{
+                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                    color: theme === 'dark' ? '#fff' : '#000',
+                    border: '1px solid #ccc',
+                    borderRadius: 6,
+                  }}
+                >
+                  <span>{valueWithCount}</span>
+                </Tooltip>
+      
+                <Modal
+                  title={firstColumnValue}
+                  visible={isModalVisibles}
+                  className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                  onOk={handleOks}
+                  onCancel={handleCancels}
+                  footer={[
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                      <div style={{ display:'flex', flexDirection:"column" }}>
+                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                          Last Edited Time:
+                        </span>
+                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                          {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
+                        </span>
+                      </div>
+                      <div>
+                        <Button
+                          key="delete"
+                          type="danger"
+                          onClick={handleDelete}
+                          style={{ marginRight: 'auto', border: "1px solid #e3e3da" }}
+                        >
+                          Delete
+                        </Button>
+                        <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                          Cancel
+                        </Button>
+                        <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
+                          Ok
+                        </Button>
+                      </div>
+                    </div>
+                  ]}
+                >
+                  <Input.TextArea
+                    placeholder="Enter your comments here"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                </Modal>
+              </div>
+            );
+          }
+        },
+      
+        processCellForClipboard: (params) => {
+          if (params.node.group) {
+            if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
+              return params.node.key;
+            }
+            return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
+              ? params.node.key
+              : "";
+          }
+          return params.value;
+        }
+    };
+      
+    const adStatusMap = useMemo(() => {
+        const map = new Map();
+      
+        campaignComments.forEach(doc => {
+          if (!doc?.campaignid) return;
+      
+          const processAdset = (adset) => {
+            if (!adset?.adset_id) return;
+      
+            const adLevelList = Array.isArray(doc.AdLevel)
+              ? doc.AdLevel
+              : doc.AdLevel && typeof doc.AdLevel === 'object'
+                ? [doc.AdLevel]
+                : [];
+      
+            adLevelList.forEach(ad => {
+              if (!ad?.ad_id || ad.adset_id !== adset.adset_id) return;
+              const key = `${doc.campaignid}_${ad.adset_id}_${ad.ad_id}`;
+              map.set(key, (ad.status || '').toUpperCase());
+            });
+          };
+      
+          if (Array.isArray(doc.AdsetLevel)) {
+            doc.AdsetLevel.forEach(processAdset);
+          } else if (doc.AdsetLevel && typeof doc.AdsetLevel === 'object') {
+            processAdset(doc.AdsetLevel);
+          }
+        });
+      
+        return map;
+    }, [campaignComments]);
+      
+
+    const getAdStatus = (campaignId, adsetId, adId) => {
+        const key = `${campaignId}_${adsetId}_${adId}`;
+        return adStatusMap.get(key); // returns "ACTIVE" | "PAUSED" | undefined
+    }; 
+
+    const functionCall2 = async () => {
+        try {
+            setLoading1(true);
+            const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
+            const adsets = selectedAdsets.length > 0
+            ? [...new Set(selectedAdsets.map(adset => adset.adsetid))]
+            : [];
+            const campaigns = selectedCampaigns.length > 0
+            ? [...new Set(selectedCampaigns.map(campaign => campaign.campaignid))]
+            : [];
+            console.log(adsets, "adsets");
+            const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
+            // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
+            // const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
+
+                  // ✅ multi-account param (array of strings)
+    const accountsParam = Array.isArray(newaccount)
+    ? newaccount.map(String)
+    : [String(newaccount)];
+
+  // ✅ call the new multi-account endpoint
+  const fetchData = await apiClient.post(
+    `/AdLevelAccounts`,
+    {
+      dateStart: startDate,
+      dateEnd: endDate,
+      accountNumbers: accountsParam,
+      timezone: newtime,
+      status: 'Daily',                  // "Daily" | "Live"
+      network: "Facebook_Mnet_AD",        // keep your original value
+      adsetids: adsets,
+      campaignids: campaigns
+    }
+  );
+            const mainData = fetchData.data;
+            console.log("MainData:", mainData);
+            timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
+
+            let deviceTqMap = new Map();
+
+            // Organize data by ad_id + date
+            if(newRevenuePratner === "FB_TonicRsoc"){
+                mainData.forEach(item => {
+                    const key = `${item.ad_id}_${item[selectTimezone[newtime]]}_${item.keyword}`;
+                    if (!deviceTqMap.has(key)) {
+                        deviceTqMap.set(key, {});
+                    }
+                    // if(newRevenuePratner === "FB_Mnet"){
+                        const entry = deviceTqMap.get(key);
+                            // if (item.device === "Mobile" ) entry.M_tq = item.tq;
+                            // if (item.device === "Desktop" ) entry.D_tq = item.tq;
+                        deviceTqMap.set(key, { ...entry, ...item });
+                    // }
+                });
+            }else{
+                mainData.forEach(item => {
+                    const key = `${item.ad_id}_${item[selectTimezone[newtime]]}`;
+                    if (!deviceTqMap.has(key)) {
+                        deviceTqMap.set(key, {});
+                    }
+                    // if(newRevenuePratner === "FB_Mnet"){
+                        const entry = deviceTqMap.get(key);
+                        if (item.device === "Mobile" ) entry.M_tq = item.tq;
+                        if (item.device === "Desktop" ) entry.D_tq = item.tq;
+                        deviceTqMap.set(key, { ...entry, ...item });
+                    // }
+                });
+            }
+                     
+            
+            const mergedData = Array.from(deviceTqMap.values()).map(entry => {
+                return {
+                    ...entry,
+                    M_tq: entry.M_tq !== undefined ? entry.M_tq : 0,
+                    D_tq: entry.D_tq !== undefined ? entry.D_tq : 0,
+                };
+            });
+
+            console.log(mergedData);
+
+            // 
+
+            function groupByAccountNumber(data, specifiedDateKey) {
+                return data?.reduce((acc, obj) => {
+                    const accountKey = obj.accountNumber;
+                    const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
+            
+                    // Create a combined key for grouping by both accountNumber and dynamically passed date field
+                    const key = `${accountKey}_${dateKey}`;
+            
+                    // Find if the combined key already exists in the accumulator array
+                    let entry = acc.find(item => item.key === key);
+            
+                    if (!entry) {
+                        // If not found, create a new entry for this date
+                        acc.push({
+                            // date: dateKey,
+                            accountNumber: obj.accountNumber,
+                            specifiedDate: obj.specifiedDate,
+                            spend: obj.spend ? parseFloat(obj.spend) : 0,
+                            estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                            fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                            conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                            revenuePartner: obj.revenuePartner,
+                            mediaBuyerName: obj.MediaBuyerName,
+                            holder: obj.Holder,
+                        });
+                    } else {
+                        // If found, sum the respective fields
+                        entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                        entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                        entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                        entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                    }
+            
+                    return acc;
+                }, []).map(dateEntry => {
+                    // Calculate profit after grouping
+                    dateEntry.profit = dateEntry.estimated_revenue - dateEntry.spend;
+                    return dateEntry;
+                });
+            }
+
+
+
+            
+            // let keywordKey = "";
+
+            // mainData.forEach(item => {
+            //     const date = item[selectTimezone[newtime]];
+            //     const adId = item.ad_id;
+            
+            //     if (item.revenuePartner === "Tonic_Rsoc") {
+            //         keywordKey =
+            //             item.keyword && item.keyword.trim() !== "" && item.keyword !== "no"
+            //                 ? item.keyword.trim()
+            //                 : "no";  // ⬅️ group null/empty as "no"
+            //     }            
+            
+            //     const key = item.revenuePartner === "Tonic_Rsoc"
+            //     ? `${adId}_${date}_${keywordKey}`
+            //     : item.revenuePartner === "MEDIA_DOT_NET"
+            //     ? `${adId}_${date}_${item.device}`
+            //     : `${adId}_${date}`;
+            
+            //     const entry = deviceTqMap.get(key) || {
+            //         spend: 0,
+            //         estimated_revenue: 0,
+            //         fbLeads: 0,
+            //         fbClicks: 0,
+            //         fbLinkClicks: 0,
+            //         conversions: 0,
+            //         impressions: 0,
+            //         ad_clicks: 0,
+            //         cpcSum: 0,
+            //         tqSum: 0,
+            //         count: 0,
+            //         M_tq: 0,
+            //         D_tq: 0,
+            //         ...item
+            //     };
+            
+            //     // Device-specific tq
+            //     if (item.revenuePartner === "MEDIA_DOT_NET") {
+            //         if (item.device === "Mobile") entry.M_tq = item.tq;
+            //         if (item.device === "Desktop") entry.D_tq = item.tq;
+            //     }
+            
+            //     // Aggregate
+            //     entry.spend += parseFloat(item.spend || 0);
+            //     entry.estimated_revenue += parseFloat(item.estimated_revenue || 0);
+            //     entry.fbLeads += parseInt(item.fbLeads || 0);
+            //     entry.fbClicks += parseInt(item.fbClicks || 0);
+            //     entry.fbLinkClicks += parseInt(item.fbLinkClicks || 0);
+            //     entry.conversions += parseInt(item.conversions || 0);
+            //     entry.impressions += parseInt(item.impressions || 0);
+            //     entry.ad_clicks += parseInt(item.ad_clicks || 0);
+            //     entry.cpcSum += parseFloat(item.cpc || 0);
+            //     entry.tqSum += parseFloat(item.tq || 0);
+            //     entry.count += 1;
+            
+            //     deviceTqMap.set(key, entry);
+            // });
+
+            // const mergedData = Array.from(deviceTqMap.values()).map(entry => ({
+            //     ...entry,
+            //     M_tq: entry.M_tq || 0,
+            //     D_tq: entry.D_tq || 0,
+            //     spend: entry.spend.toFixed(2),
+            //     estimated_revenue: entry.estimated_revenue.toFixed(2),
+            //     cpc: entry.count ? parseFloat((entry.cpcSum / entry.count).toFixed(2)) : 0,
+            //     tq: entry.count ? parseFloat((entry.tqSum / entry.count).toFixed(2)) : 0
+            // }));
+
+            
+                                    
+
+            console.log("hi");
+            let totalSpend = 0;
+            let totalRevenue = 0;
+            let totalProfit = 0;
+            let totalCpc = 0;
+            let totalFbleads = 0;
+            let totalFbclicks = 0;
+            let totalFblinkclicks = 0;
+            let totalImpressions = 0;
+            let totalConversions = 0;
+            const specifiedTimeZone = selectTimezone[newtime];
+            // console.log(mainData[0], "one");
+            const totalRow = mainData && mainData.length > 0 ?
+                mainData.map((eachData) => {
+                    const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                    const profit = (Revenue - eachData.spend);
+                    const conversions = eachData.conversions !== undefined ? eachData.conversions : 0;
+                    totalRevenue += Revenue;
+                    totalSpend += parseFloat(eachData.spend);
+                    totalProfit += profit;
+                    totalConversions += conversions;
+                    totalCpc += eachData.cpc;
+                    totalFbclicks += eachData.fbClicks;
+                    totalFblinkclicks += eachData.fbLinkClicks;
+                    totalFbleads += eachData.fbLeads;
+                    totalImpressions += eachData.impressions;
+                }) : null;
+
+            const filteredData = mergedData && mergedData.length > 0 ?
+            mergedData.map((eachData) => {
+                    const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                    const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
+                    const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
+                    let rpc = newRevenuePratner === "FB_Mnet" && newtime === "UTC" ? eachData.ad_clicks !== 0 ? (Math.round((Revenue / eachData.ad_clicks) * 100) / 100) : 0 : eachData.conversions !== 0 ? (Math.round((Revenue / eachData.conversions) * 100) / 100) : 0;
+                    const revenue = ((eachData.estimated_revenue - eachData.spend) / (eachData.fbLeads * rpc)) * 100;
+                    let fMargin = revenue !== 0 ? Math.round(((profit / revenue) * 100) * 100) / 100 : 0;
+                    const cpl = eachData.fbLeads !== 0 ? Math.round((eachData.spend / eachData.fbLeads) * 100) / 100 : 0;
+                    let ncpl = newRevenuePratner === "FB_Mnet" && newtime === "UTC" ? eachData.ad_clicks !== 0 ? Math.round((eachData.spend / eachData.ad_clicks) * 100) / 100 : 0 : eachData.conversions !== 0 ? Math.round((eachData.spend / eachData.conversions) * 100) / 100 : 0;
+                    const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.spend) * 100) * 100) / 100}%` : '0%';
+                    const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
+                    const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
+                    const conversions = newRevenuePratner === "FB_Mnet" && newtime === "UTC" 
+                    ? eachData.ad_clicks !== undefined 
+                        ? eachData.ad_clicks 
+                        : '0'
+                    : eachData.conversions !== undefined 
+                        ? eachData.conversions 
+                        : '0';
+                    rpc = !isNaN(rpc) ? rpc : 0;
+                    ncpl = !isNaN(ncpl) ? ncpl : 0;
+                    fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+                    const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                    const spend = parseFloat(eachData.spend);
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
+
+                    // console.log(eachData.campaign_name, "campaign_name");
+                    return (
+                        {
+                            // ✅ include accountNumber so actions (pin/comment/status) can be per-account
+                            accountNumber: String(eachData.accountNumber),
+                            campaignname: eachData.campaign_name,
+                            adsetname: eachData.adsetName,
+                            date: eachData[specifiedTimeZone],
+                            'fb-hour': eachData.campaign_id,
+                            'mnet-hour': eachData.campaign_id,
+                            spend: parseFloat(eachData.spend).toFixed(2),
+                            revenue: parseFloat(mainRvenue).toFixed(2),
+                            profit: parseFloat(profit),
+                            // margin: margin,
+                            fbleads: parseInt(eachData.fbLeads),
+                            conversions: parseInt(conversions),
+                            cpc: parseFloat(eachData.cpc),
+                            cpclinkclicks: cpcLinkClicks,
+                            fbclicks: parseInt(eachData.fbClicks),
+                            fblinkclicks: parseInt(eachData.fbLinkClicks),
+                            impressions: parseInt(eachData.impressions),
+                            ctr: ctr,
+                            rpc: parseFloat(rpc),
+                            cpl: parseFloat(cpl),
+                            ncpl: parseFloat(cpl),
+                            roi: roi,
+                            fmargin: fMargin,
+                            campaignid: eachData.campaign_id,
+                            adsetid: eachData.adset_id,
+                            timezone: 'UTC',
+                            adid: eachData.ad_id,
+                            adname: eachData.adName,
+                            actions: '...',
+                            from: "",
+                            profitloss: "",
+                            M_tq: parseFloat(eachData.M_tq).toFixed(2),
+                            D_tq: parseFloat(eachData.D_tq).toFixed(2), 
+                            fbCron: eachData.fbCron,
+                            revenueCron: eachData.revenueCron,
+                            cronStatus: eachData.cronStatus,
+                            accountStatus: eachData.accountStatus,
+                            keyword: eachData.keyword || '',
+                        }
+                    )
+                }) : null;
+
+                console.log("returnedData:", filteredData);
+
+                const getValidField = (field) => {
+                    for (const item of mainData) {
+                      if (item[field] && item[field].toLowerCase() !== 'failed') {
+                        return item[field];
+                      }
+                    }
+                    return '-';
+                  };
+                  
+                  fbCron.current = getValidField('fbCron');
+                  revenueCron.current = getValidField('revenueCron');
+                  cronStatus.current = getValidField('cronStatus');
+                  accountStatus.current = getValidField('accountStatus');
+                                
+
+            const fullData = filteredData?.length > 0 ? [...filteredData] : [];
+
+            const filteredByStatus =
+            !campaignStatusFilter || campaignStatusFilter.toUpperCase() === 'ALL'
+              ? fullData
+              : fullData.filter(item => {
+                  const raw = getAdStatus(item.campaignid, item.adsetid, item.adid);
+                  const status = (raw || 'ACTIVE').toUpperCase();
+                  return status === campaignStatusFilter.toUpperCase();
+                });
+          
+            setdailyData(filteredByStatus); // or setAdLevelData if you use a different state
+
+            setDailyFixedFooter(
+                [
+                    {
+                        campaignName: 'Total',
+                        actions: '',
+                        spend: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                        revenue: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                        profit: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                        margin: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                        rpc: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredByStatus?.length).toFixed(2)),
+                        cpl: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredByStatus?.length).toFixed(2)),
+                        ncpl: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredByStatus?.length).toFixed(2)),
+                        fbleads: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                        conversions: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                        fmargin: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                        roi: parseFloat(((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                        cpc: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredByStatus?.length).toFixed(2)),
+                        cpclinkclicks: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredByStatus?.length).toFixed(2)),
+                        fbclicks: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                        fblinkclicks: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
+                        impressions: parseFloat(filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                        ctr: parseFloat((filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredByStatus?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                        M_tq: (function() {
+                            const nonZero = filteredByStatus.filter(d => parseFloat(d.M_tq) > 0);
+                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq), 0);
+                            return (total / nonZero.length || 0).toFixed(2);
+                          })(),
+                          D_tq: (function() {
+                            const nonZero = filteredByStatus.filter(d => parseFloat(d.D_tq) > 0);
+                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq), 0);
+                            return (total / nonZero.length || 0).toFixed(2);
+                          })(),    
+                    }
+                ]
+            );
+
+            // setDailyFixedFooter(
+            //     [
+            //         {
+            //             campaignName: 'Total',
+            //             actions: '',
+            //             spend: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+            //             revenue: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+            //             profit: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+            //             margin: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+            //             rpc: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / fullData?.length).toFixed(2)),
+            //             cpl: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / fullData?.length).toFixed(2)),
+            //             ncpl: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / fullData?.length).toFixed(2)),
+            //             fbleads: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+            //             conversions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+            //             fmargin: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            //             roi: parseFloat(((fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            //             cpc: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / fullData?.length).toFixed(2)),
+            //             cpclinkclicks: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / fullData?.length).toFixed(2)),
+            //             fbclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            //             fblinkclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
+            //             impressions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            //             ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+            //             M_tq: (function() {
+            //                 const nonZero = fullData.filter(d => parseFloat(d.M_tq) > 0);
+            //                 const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq), 0);
+            //                 return (total / nonZero.length || 0).toFixed(2);
+            //               })(),
+            //               D_tq: (function() {
+            //                 const nonZero = fullData.filter(d => parseFloat(d.D_tq) > 0);
+            //                 const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq), 0);
+            //                 return (total / nonZero.length || 0).toFixed(2);
+            //               })(),    
+            //         }
+            //     ]
+            // );
+
+            // setdailyData(fullData);
+
+            newDailyData.current = fullData;
+            fetchData.status === 200 && setApiStatus(false);
+            fetchData.status === 200 && console.log("Success");
+            // setTrue(false);
+            setLoading1(false);
+        } catch (error) {
+            // console.log(error);
+            // if(error.response.status === 500){
+            //     apiStatus.current = true;
+            // }
+            console.log(error);
+            setApiStatus(true);
+            setLoading1(false);
+        }
+    }
+    const defaultColDef = {
+        comparator: (valueA, valueB) => {
+            // Default comparator for handling null or undefined values
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+        },
+        sortable: true,  // Enable sorting for all columns by default
+        // filter: true,    // Enable filtering for all columns by default
+        resizable: true,
+        flex: 1,
+        minWidth: 150,
+        filter: true, // Enable default filtering
+        suppressHeaderMenuButton: false, // Ensure filter menu button is visible
+        suppressHeaderContextMenu: false,
+    };
+    const onCellClicked = (event) => {
+        
+        if (event.colDef.field === 'adsetname') {
+            const value = event.value;
+            if (value !== undefined) {
+                const url = `/DailyAndCampaignHistory/AdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        }
+        // // ✅ Ensure first selected cell gets highlighted
+        // if (event.event.shiftKey || event.event.ctrlKey) {
+        //     // Add to selection when Shift/Ctrl is pressed
+        //     setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // } else {
+        //     // Single click selects only one cell
+        //     setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+        //     setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // }
+
+    };
+    // const onGridReady = (params, gridId) => {
+    //     gridRef1.current = params;
+    
+    //     params.api.applyColumnState({ 
+    //         state: columnDefs || [], 
+    //         applyOrder: true 
+    //     });
+    // };
+    
+    // // Effect to handle event listener based on toggleStatus
+    // useEffect(() => {
+    //     if (!gridRef1.current) return; // Ensure gridRef exists
+    
+    //     const gridApi = gridRef1.current.api;
+    //     const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid2');
+    
+    //     if (toggleStatus) {
+    //         gridApi.addEventListener('dragStopped', handleDragStopped);
+    //     } else {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped);
+    //     }
+    
+    //     return () => {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped); // Cleanup on unmount
+    //     };
+    // }, [toggleStatus]); 
+    
+    const onGridReady = (params, gridId, gridRef) => {
+        gridRef.current = params;
+        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    };
+    const GroupCellRenderer = (props) => {
+        const [tooltipText, setTooltipText] = useState("Copy to clipboard");
+
+        const copyToClipboard = () => {
+            navigator.clipboard.writeText(props.node.key).then(() => {
+                setTooltipText("Copied!");
+                setTimeout(() => setTooltipText("Copy to clipboard"), 2000);
+            }).catch(() => {
+                alert('Failed to copy!');
+            });
+        };
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexGrow: 1 }}>
+                    {props.node.key} {/* Grouped cell value */}
+                </span>
+                <Tooltip title={tooltipText}>
+                    <CopyOutlined
+                        onClick={copyToClipboard}
+                        style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f' }}
+                    />
+                </Tooltip>
+            </div>
+        );
+    };
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+    // const getMainMenuItems = (params) => {
+    //     const defaultItems = params.defaultItems.slice();
+
+    //     // Find and override the "Reset Columns" option
+    //     const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
+    //     if (resetColumnsItemIndex > -1) {
+    //         defaultItems[resetColumnsItemIndex] = {
+    //             name: 'Reset Columns (Custom)',
+    //             action: () => {
+    //                 changeRRefrst();
+    //             },
+    //             cssClasses: ['custom-reset-columns-item']
+    //         };
+    //         defaultItems.splice(resetColumnsItemIndex + 1, 0, {
+    //             name: 'Add New Column',
+    //             action: showModal,
+    //             cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //         });
+    //     }
+
+    //     return defaultItems;
+    // };
+    const gridOptions1 = useMemo(() => ({
+        onColumnMoved: (params) => {
+            // if (toggleStatus) {
+                debouncedHandleColumnMove(params, 'grid2');
+            // }
+        },
+        defaultColDef: {
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+        },
+        ensureDomOrder: false
+    }), []);
+    const restoreGridState = (gridApi) => {
+        const filterModel = JSON.parse(localStorage.getItem('gridFilterModel'));
+        const sortModel = JSON.parse(localStorage.getItem('gridSortModel'));
+
+        if (gridApi) {
+            if (filterModel) gridApi.setFilterModel(filterModel);
+            if (sortModel) gridApi.setSortModel(sortModel);
+        }
+    };
+
+    // const onRangeSelectionChanged = (params) => {
+    //     // Capture all selected cell positions when range is selected
+    //     const selected = [];
+    //     const rangeSelections = params.api.getCellRanges();
+    
+    //     if (rangeSelections) {
+    //         rangeSelections.forEach((range) => {
+    //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const columns = range.columns.map((col) => col.getColId());
+    
+    //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+    //                 selected.push({ rowIndex, columns });
+    //             }
+    //         });
+    //     }
+    
+    //     setSelectedCells(selected);
+    // };
+    
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
+            });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
+        }
+    };
+    
+
+    
+    const handleReFetchData = () => {
+        functionCall2();
+        setApiStatus(false);
+    }
+
+    useEffect(() => {
+        // if(selectedAdsets){
+            functionCall2();
+            // oneTimeFetch.current = false;
+        // }
+    }, [selectedAdsets, selectedCampaigns]);
+
+      useEffect(() => {
+            functionCall2();
+        }, [campaignStatusFilter, campaignComments]);
+
+    useEffect(() => {
+        if (refreshpage === "Refresh23") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
+
+    useEffect(() => {
+        if (gridRef1.current && gridRef1.current.api) {
+            setTimeout(() => {
+                gridRef1.current.api.refreshCells({ force: true });
+                gridRef1.current.api.redrawRows();
+                gridRef1.current.api.sizeColumnsToFit();
+            }, 200);
+        }
+    }, [memorizedDailyData]);
+    
+        // normalize to array
+const ids = Array.isArray(newaccount)
+? newaccount
+: (newaccount ? [newaccount] : []);
+
+    return(
+                    <div style={{ height: "100%", marginBottom: '20px' }}>
+                        <div style={contentStyle}>
+                            {isLoading1 === true ? 
+                            (
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                    <div className="ag-grid-Loader">
+                                        <Audio
+                                            height="80"
+                                            width="80"
+                                            radius="9"
+                                            color="green"
+                                            ariaLabel="loading"
+                                            wrapperStyle
+                                            wrapperClass
+                                        />
+                                    </div>
+                                </div>
+                            ) : dailyData?.filter((each) => {
+                                const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
+                                const normalizedInput = inputValue.trim().toLowerCase();
+                                return (
+                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                    normalizedCampaign.includes(normalizedInput) ||
+                                    normalizedCampaign.endsWith(normalizedInput)
+                                );
+                            }
+                            )?.length > 0 ? (
+                                <div 
+                                    className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    // style={{
+                                    //     width: '100%',
+                                    //     // borderRadius: 12,
+                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                    //     padding: 10,
+                                    //     height: 'auto',
+                                    //     boxShadow:
+                                    //     theme === 'dark'
+                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                    // }}
+                                >
+                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                            <Space align="center" className='daily-contaier'>
+                                                <div className="blinking-circle"></div>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
+                                            </Space>
+                                        </Col>
+                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
+                                        </Col> */}
+        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+          {ids.length <= 1 ? (
+              // Single (or none) → plain text
+              <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+              Id: {ids[0] ?? "-"}
+              </Text>
+          ) : (
+              // Multiple → only an icon; hover shows selected accounts
+              <Tooltip
+              title={
+                  <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                  {ids.map((id, i) => {
+                      const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
+                      return(<div
+                      key={`${id}-${i}`}
+                      style={{
+                          padding: "4px 6px",
+                          borderBottom: "1px solid rgba(0,0,0,0.06)",
+                          fontSize: 12,
+                          color: theme === "dark" ? "#ddd" : "#333",
+                          display: "flex",
+                          flexDirection: "column"
+                      }}
+                      >
+                      <div>{id}</div>
+                      <div>{getAccountObject?.accountName}</div>
+                      </div>)
+              })}
+                  </div>
+              }
+              overlayInnerStyle={{
+                  maxWidth: 320,
+                  background: theme === "dark" ? "#1f1f1f" : '#fff',
+                  color: theme === "dark" ? "#fff" : '#000'
+              }}
+              >
+              <Badge count={ids.length} size="small" offset={[0, 2]}>
+                  <NumberOutlined
+                  style={{
+                      fontSize: 18,
+                      cursor: "pointer",
+                      color: theme === "dark" ? "#9ad" : "grey"
+                  }}
+                  />
+              </Badge>
+              </Tooltip>
+          )}
+        </Col>
+
+        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+            {ids.length <= 1 && (
+                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                Name: {newAccountName ?? "-"}
+                </Text>
+            ) 
+            }
+        </Col>
+
+        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+            {ids.length <= 1 ? (
+                // Single → plain text
+                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
+                </Text>
+            ) : (
+                // Multiple → icon with tooltip of selected account ids + timezones
+                <Tooltip
+                title={
+                    <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                    {ids.map((id, i) => {
+                        const acc = accountsAccess.find(a => a.accountNumber === id);
+                        console.log("timezones:", accountsAccess);
+                        const tz = acc?.timeZone ?? "-";
+                        return (
+                        <div
+                            key={`${id}-${i}`}
+                            style={{
+                            padding: "4px 6px",
+                            borderBottom: "1px solid rgba(0,0,0,0.06)",
+                            fontSize: 12,
+                            color: theme === "dark" ? "#ddd" : "#333"
+                            }}
+                        >
+                            {id} - {tz}
+                        </div>
+                        );
+                    })}
+                    </div>
+                }
+                overlayInnerStyle={{
+                    maxWidth: 320,
+                    background: theme === "dark" ? "#1f1f1f" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#000"
+                }}
+                >
+                <Badge count={ids.length} size="small" offset={[0, 2]}>
+                    <GlobalOutlined
+                    style={{
+                        fontSize: 18,
+                        cursor: "pointer",
+                        color: theme === "dark" ? "#9ad" : "grey"
+                    }}
+                    />
+                </Badge>
+                </Tooltip>
+            )}
+        </Col>
+                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
+                                        </Col> */}
+                                       
+                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                                < Tooltip
+                                                  title={
+                                                    <div style={{fontSize:'13px'}}>
+                                                    {fbCron.current !== '-' && <div>Fb status: {fbCron.current?.toLowerCase()}</div>}
+                                                    {revenueCron.current !== '-' && <div>Rev status: {revenueCron.current?.toLowerCase()}</div>}
+                                                    {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
+                                                        <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                                        Cron status: {cronStatus.current?.toLowerCase()}
+                                                        </Text>
+                                                    )}
+                                                    {accountStatus.current && <div>
+                                                        Account:  <span
+                                                            style={{ marginLeft:'3px',
+                                                            color:
+                                                                accountStatus.current === 'Active'
+                                                                ? '#91C25F'
+                                                                : accountStatus.current === 'Inactive'
+                                                                ? '#EC7117'
+                                                                : 'gray',
+                                                            // fontWeight: 'bold',
+                                                            }}
+                                                        >
+                                                            {accountStatus.current}
+                                                        </span>
+                                                    </div>}
+                                                    </div>
+                                                }
+                                                overlayInnerStyle={{
+                                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                    border: '1px solid #ccc',   
+                                                    borderRadius: 6,
+                                                    // fontWeight: 500,
+                                                }}
+                                                >
+                                                    <InfoCircleOutlined
+                                                    style={{
+                                                        fontSize: '18px',
+                                                        cursor: 'pointer',
+                                                        marginRight: '10px',
+                                                        color: "#91C25F",
+                                                    }}
+                                                    className="black-icon-info"
+                                                    />
+                                                </Tooltip>
+                                        </Col>
+                                        {/* <Col>
                                             <Tooltip 
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
