@@ -369,7 +369,7 @@ const MyTablePage = () => {
         const first = Array.isArray(nets) && nets.length
             ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
             : "";
-        return first ? String(first) : "";
+        return first ? String(first) : dash ? [dash] : stored?.account ? fromStore : [] ;
     };
 
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
@@ -381,6 +381,8 @@ const MyTablePage = () => {
     const [selectedValue, setSelectedValue] = useState(
         Array.isArray(initialOne) ? initialOne.map(String) : []
     );
+
+    // console.log("multiple accounts:", selectedValue);
 
     // const initialOne =
     //     accountNumberFromDashboard
@@ -10215,8 +10217,12 @@ const MyTablePage = () => {
 
     const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
-        const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
+        // console.log("accountOrAccounts", accountOrAccounts);
+        // console.log(storedData);
+        
+        const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
+        // console.log("accounts", accounts);
         try {
             setInitialLoading(true);
             const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accounts });
@@ -10712,45 +10718,106 @@ const MyTablePage = () => {
     }, [accountsAccess, searchText]);
 
     // helper to render the checkbox list using existing accountsAccess
-    const renderAccountsCheckboxes = (theme) => (
-        <Checkbox.Group
-            options={filteredAccounts.map((account) => ({
-                value: String(account.accountNumber),
-                label: (
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '5px 10px',
-                            borderBottom: '1px solid #ddd'
-                        }}
-                    >
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
-                            {/* show accountName only when dropdown open (same as your old pattern) */}
-                            {isOpen && (
-                                <span style={{ fontSize: 12, color: 'gray' }}>
-                                    {account.accountName || ''}
-                                </span>
-                            )}
-                        </div>
-                        <span style={{ textAlign: 'right', marginLeft: 10 }}>
-                            {account.status === "Active" ? (
-                                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
-                            ) : (
-                                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
-                            )}
-                        </span>
-                    </div>
-                ),
-            }))}
-            value={selectedValue}      // array of selected accountNumbers
-            onChange={handleChange1}   // updates your selectedValue + notifies parent
-            className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
-        />
-    );
+    // const renderAccountsCheckboxes = (theme) => (
+    //     <Checkbox.Group
+    //         options={filteredAccounts.map((account) => ({
+    //             value: String(account.accountNumber),
+    //             label: (
+    //                 <div
+    //                     style={{
+    //                         display: 'flex',
+    //                         justifyContent: 'space-between',
+    //                         alignItems: 'center',
+    //                         padding: '5px 10px',
+    //                         borderBottom: '1px solid #ddd'
+    //                     }}
+    //                 >
+    //                     <div style={{ display: 'flex', flexDirection: 'column' }}>
+    //                         <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+    //                         {/* show accountName only when dropdown open (same as your old pattern) */}
+    //                         {isOpen && (
+    //                             <span style={{ fontSize: 12, color: 'gray' }}>
+    //                                 {account.accountName || ''}
+    //                             </span>
+    //                         )}
+    //                     </div>
+    //                     <span style={{ textAlign: 'right', marginLeft: 10 }}>
+    //                         {account.status === "Active" ? (
+    //                             <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+    //                         ) : (
+    //                             <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+    //                         )}
+    //                     </span>
+    //                 </div>
+    //             ),
+    //         }))}
+    //         value={selectedValue}      // array of selected accountNumbers
+    //         onChange={handleChange1}   // updates your selectedValue + notifies parent
+    //         className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+    //     />
+    // );
 
+     const renderAccountsCheckboxes = (theme) => {
+ 
+        const activeAccounts = filteredAccounts.filter(acc => acc.status === 'Active');
+ 
+        return (
+            <div>
+                {/* All Accounts toggle (active only) */}
+                <Checkbox
+                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                    indeterminate={
+                        selectedValue.length > 0 && selectedValue.length < activeAccounts.length
+                    }
+                    checked={selectedValue.length === activeAccounts.length}
+                    onChange={(e) => {
+                        if (e.target.checked) {
+                            handleChange1(activeAccounts.map(acc => String(acc.accountNumber)));
+                        } else {
+                            handleChange1([]);
+                        }
+                    }}
+                >
+                    <h5 style={{ color: theme === "dark" ? "#fff" : "#333", fontSize: '14px' }}> All Accounts</h5>
+                </Checkbox>
+ 
+                {/* Individual account checkboxes */}
+                <Checkbox.Group
+                    options={filteredAccounts.map((account) => ({
+                        value: String(account.accountNumber),
+                        label: (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '5px 10px',
+                                    borderBottom: '1px solid #ddd'
+                                }}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+                                    {isOpen && (
+                                        <span style={{ fontSize: 12, color: 'gray' }}>
+                                            {account.accountName || ''}
+                                        </span>
+                                    )}
+                                </div>
+                                <span style={{ textAlign: 'right', marginLeft: 10 }}>
+                                    {account.status === 'Active'
+                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                                        : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />}
+                                </span>
+                            </div>
+                        ),
+                    }))}
+                    value={selectedValue}
+                    onChange={handleChange1}
+                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                />
+            </div>
+        );
+    };
 
 
     // Create option with conditional rendering of additional info
@@ -11528,14 +11595,15 @@ const MyTablePage = () => {
                     {activeTab === '3' && (
                         <Col>
                             <Space size={2} style={{ marginRight: '10px' }}>
-                                <Input
+                                <Col sm={12} >
+                                    <Input
                                     placeholder="Search..."
                                     //  prefix={<SearchOutlined />}
                                     onChange={handleChangeInput}
                                     onBlur={handleBlur}
                                     //  value={inputValue}
                                     allowClear
-                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    className={theme === 'dark' ? 'inputat400px custom-input-dark' : 'inputat400px custom-input-light'}
                                     style={{
                                         borderRadius: 8,
                                         border: '1px solid #4CAF50',
@@ -11543,10 +11611,13 @@ const MyTablePage = () => {
                                         // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                                         color: theme === 'dark' ? '#fff' : '#000',
                                         fontWeight: 500,
-                                        width: 170,
-                                        marginRight: '5px'
+                                        // width: 170,
+                                        marginRight: '5px',
+                                    
                                     }}
                                 />
+                                
+                                </Col>
                                 {/* <Tooltip 
                                 title={`🍳 This feature is cooking—almost ready to serve 😜`}
                                 overlayInnerStyle={{
@@ -11736,32 +11807,9 @@ const MyTablePage = () => {
             </div>
             {!moveForward ?
                 (
-                    // <div style={{ width: '100%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    //     {/* <Flex align="center" gap="middle">
-                    //     <Spin size="large" />
-                    // </Flex> */}
-                    //     <div style={{ padding: '24px' }}>
-                    //         <Skeleton active paragraph={{ rows: 20 }} />
-                    //     </div>
-                    // </div>
-
                     <div style={{ padding: '24px' }}>
                             <Skeleton active paragraph={{ rows: 15 }} />
                     </div>
-
-                    // <div className="loader-container ag-container">
-                    //     <div className="ag-grid-Loader">
-                    //         <Audio
-                    //             height="80"
-                    //             width="80"
-                    //             radius="9"
-                    //             color="green"
-                    //             ariaLabel="loading"
-                    //             wrapperStyle
-                    //             wrapperClass
-                    //         />
-                    //     </div>
-                    // </div>
                 ) :
                 (
                     //  initialLoading ?

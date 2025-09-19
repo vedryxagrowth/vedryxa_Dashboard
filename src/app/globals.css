@@ -3663,3 +3663,15 @@ select:focus,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+@media (max-width: 500px) {
+  .inputat400px {
+    width: 100px !important;
+  }
+}
+
+@media (min-width: 500px) {
+  .inputat400px {
+    width: 190px !important;
+  }
+}

@@ -1,12 +1,12 @@
-"use client";
-import { useState, useEffect } from "react";
+ "use client";
+import { useState, useEffect, useRef } from "react";
 import { Form, Input, Button, Drawer, Modal, message, Select } from "antd";
 import axios from "axios";
 import { useTokenContext } from '../../components/parent';
-
+ 
 const { Option } = Select;
-import { CloseOutlined } from "@ant-design/icons";
-
+import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
+ 
 const timezones = [
   "UTC",
   "EEST",
@@ -24,7 +24,7 @@ const timezones = [
   "HST",
   "EST",
 ];
-
+ 
 const timeZoneFullNames = {
   EDT: "America/New_York",
   UTC: "Atlantic/Azores",
@@ -42,7 +42,7 @@ const timeZoneFullNames = {
   HST: "Pacific/Honolulu",
   EST: "America/Toronto",
 };
-
+ 
 const timeZoneShortNames = {
   "America/New_York": "EDT",
   "Atlantic/Azores": "UTC",
@@ -60,7 +60,7 @@ const timeZoneShortNames = {
   "Pacific/Honolulu": "HST",
   "America/Toronto": "EST",
 };
-
+ 
 const availableNetworks = [
   "MEDIA_DOT_NET",
   "MEDIA_DOT_NET_BING",
@@ -72,15 +72,32 @@ const availableNetworks = [
   "Rsoc",
   "Domain Active",
 ];
-
+ 
 const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [BMName, setBMName] = useState("");
   const { theme } = useTokenContext();
   const { apiClient } = useTokenContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newValue, setNewValue] = useState("");
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const [isCustomBMName, setIsCustomBMName] = useState(false);
+ 
+  const [isVisibleBMId, setIsVisibleBMId] = useState(null);
+  const [options, setOptions] = useState([
+    "Winkleads Search",
+    "MODO LEO BM X1",
+  ]);
+  const [newOptions, setNewOptions] = useState([
+    "Winkleads Search",
+    "MODO LEO BM X1",
+  ]);
+  const containerRef = useRef(null);
   const token = localStorage.getItem("token");
   console.log(editeddata, "edit");
-
+ 
+ 
   useEffect(() => {
     if (editeddata) {
       form.setFieldsValue({
@@ -88,48 +105,80 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
         timeZone: timeZoneShortNames[editeddata.timeZone],
         pixelID: editeddata?.pixelID || "",
         pageID: editeddata?.pageID || "",
-        AgencyName: editeddata?.AgencyName || ""
+        AgencyName: editeddata?.AgencyName || "",
+        BMName: editeddata?.BMName || ""
       });
+      setBMName(editeddata.BMName || "");
+ 
     }
   }, [editeddata, form]);
-
+ 
+ 
   const onFinish = async (values) => {
     try {
       const newValues = {
-        ...editeddata,  // Include original values
-        ...values,      // Merge with the updated form values
+        ...editeddata,
+        ...values,
+        BMName: BMName,
+        BMId: values.BMId || editeddata.BMId,
         timeZone: timeZoneFullNames[values.timeZone],
       };
-
       console.log(newValues, "new");
-
-      // Simulate API call with newValues
       const response = await apiClient.post(
         "/updateAccount/",
         { newAccount: newValues }
       );
-
+ 
       if (response.status === 200) {
         message.success("Account Updated successfully");
         form.resetFields();
         onClose(newValues);
       } else {
-        message.error("Failed to create account");
+        message.error("Failed to update account");
       }
     } catch (error) {
       console.error("Error creating account:", error);
-      message.error("Failed to create account");
+      message.error("Failed to update account");
     }
   };
-
   const handleCancel = () => {
     setIsModalVisible(false);
   };
-
+ 
   const showModal = () => {
     setIsModalVisible(true);
   };
-
+  const functionCallBMNames = async () => {
+    const fetchData = await apiClient.get(`/getBMNames/`);
+    const mainData = fetchData.data;
+    setOptions(mainData);
+    setNewOptions(mainData);
+  }
+  useEffect(() => {
+    if (visible) {
+      functionCallBMNames()
+    }
+  }, [visible]);
+  const handleAddNewValue = () => {
+    if (newValue && !options.includes(newValue)) {
+      setOptions([...options, newValue]);
+      setBMName(newValue);
+      setIsCustomBMName(true);
+      form.setFieldsValue({ BMName: newValue, BMId: undefined });
+    }
+    setNewValue("");
+    setIsModalOpen(false);
+  };
+  useEffect(() => {
+    if (isModalOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setModalPosition({ top: rect.top, left: rect.left });
+    }
+  }, [isModalOpen]);
+  useEffect(() => {
+    form.setFieldsValue({ BMName: BMName });
+    setIsVisibleBMId("visible");
+  }, [newValue, form]);
   return (
     <>
       <Drawer
@@ -154,56 +203,116 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             label="Spend Partner"
             name="spendPartner"
             rules={[{ required: true, message: "Please select a Spend partner!" }]}
-            disabled  style={{backgroundColor:'transparent', color: 'black'}}
+            disabled style={{ backgroundColor: 'transparent', color: 'black' }}
           >
-            <Select placeholder="Select a partner" disabled  style={{
-              backgroundColor: theme === 'dark' && '#333', // Background color
+            <Select placeholder="Select a partner" disabled style={{
+              backgroundColor: theme === 'dark' && '#333',
               color: theme === 'dark' && '#fff',
             }} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
               <Option value="Facebook">Facebook</Option>
               <Option value="Google">Google</Option>
             </Select>
           </Form.Item>
-
+ 
           <Form.Item
             label="Spend Account ID"
             name="accountNumber"
             rules={[{ required: true, message: "Please input the spend account ID!" }]}
           >
-            <Input   disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
+ 
           <Form.Item label="Account Name" name="accountName">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
+ 
           <Form.Item label="Pixel ID" name="pixelID">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
+ 
           <Form.Item label="Page ID" name="pageID">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
+ 
           <Form.Item label="Page Name" name="pageName">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
+ 
           <Form.Item label="Agency Name" name="AgencyName">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
           <Form.Item
             label="BM Name"
             name="BMName"
             rules={[{ required: true, message: "Please select a BM Name!" }]}
           >
-            <Select placeholder="Select BM Name"   disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
-              <Option value="Winkleads Search">Winkleads Search</Option>
-              <Option value="MODO LEO BM X1">MODO LEO BM X1</Option>
-            </Select>
+            <div ref={containerRef} style={{ display: "flex" }}>
+              <Select
+                placeholder="Select or add a value"
+                value={BMName}
+                onChange={(value) => {
+                  setBMName(value);
+                  form.setFieldsValue({
+                    BMName: value,
+                    BMId: options.includes(value) ? undefined : ""
+                                    });
+                }}
+                options={options.map((opt) => ({ label: opt, value: opt }))}
+                style={{ flex: 1 }}
+              />
+              <Button
+                style={{ backgroundColor: "#91C25F", width: "24px", marginLeft: "5px" }}
+                onClick={() => setIsModalOpen(true)}
+              >
+                <PlusOutlined className="black-icon" />
+              </Button>
+            </div>
           </Form.Item>
-
+ 
+          {/* Modal for adding new BM Name */}
+          <Modal
+            title="Add new value"
+            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+            open={isModalOpen}
+            onOk={handleAddNewValue}
+            onCancel={() => setIsModalOpen(false)}
+            okText="Add"
+            cancelText="Cancel"
+            centered={false}
+            getContainer={false}
+            style={{
+              position: "absolute",
+              top: `${modalPosition.top - 50}px`,
+              left: `${modalPosition.left}px`,
+              transform: "translateY(0)",
+              width: "200px",
+            }}
+          >
+            <Input
+              placeholder="Enter new value"
+              value={newValue}
+              onChange={(e) => setNewValue(e.target.value)}
+            />
+          </Modal>
+ 
+          {!newOptions.includes(BMName) && (
+            <Form.Item
+              label="BM ID"
+              name="BMId"
+              rules={[{ required: true, message: "Please input the BM ID!" }]}
+            >
+              <Input
+                autoComplete="off"
+                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                style={{
+                  backgroundColor: theme === 'dark' ? '#555' : "white",
+                  color: theme === 'dark' ? 'white' : 'black'
+                }}
+              />
+            </Form.Item>
+          )}
+ 
+ 
           <Form.Item
             label="Time Zone"
             name="timeZone"
@@ -211,8 +320,8 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           >
             <Select
               showSearch
-              disabled  
-              style={{backgroundColor:'transparent', // Background color
+              style={{
+                backgroundColor: 'transparent', // Background color
                 color: theme === 'dark' && '#fff',
               }}
               placeholder="Select Timezone"
@@ -223,7 +332,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               }))}
             />
           </Form.Item>
-
+ 
           <Form.Item
             label="Status"
             name="status"
@@ -238,7 +347,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               <Option value="InActive">InActive</Option>
             </Select>
           </Form.Item>
-
+ 
           <Form.Item
             label="Revenue Partner"
             name="revenuePartner"
@@ -246,7 +355,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           >
             <Select
               showSearch
-              style={{ 
+              style={{
                 width: '100%',
                 backgroundColor: theme === 'dark' && '#333', // Background color
                 color: theme === 'dark' && '#fff',
@@ -259,23 +368,23 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               }))}
             />
           </Form.Item>
-
+ 
           <Form.Item label="Media Buyer" name="MediaBuyerName">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
+ 
           <Form.Item label="Holder" name="Holder">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
-
+ 
           <Form.Item>
-            <Button  style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} onClick={showModal}>
+            <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={showModal}>
               Submit
             </Button>
           </Form.Item>
         </Form>
       </Drawer>
-
+ 
       <Modal
         title="Confirmation"
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
@@ -291,5 +400,5 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
     </>
   );
 };
-
+ 
 export default EditAccountAccess;

@@ -581,7 +581,9 @@ const AdsetComponent = ({
   pixel_id_list,
   page_id_list,
   pageidList,
-  pixelIdList
+  pixelIdList,
+  defaultUrlData,
+  setDefaultUrlData
 }) => {
   console.log(page_id_list, "page_id_list in adset component");
   console.log(pageidList, "pageidList in adset component");
@@ -612,6 +614,7 @@ const AdsetComponent = ({
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
     setWebsiteURL(text);
+    setDefaultUrlData(text);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
     if (network === "FB_Mnet" || network === "FB_DomainActive") {
@@ -650,8 +653,10 @@ const AdsetComponent = ({
   };
 
   const getUrlBuilder = useMemo(() => {
+    // return (extraString) => {
     switch (network) {
       case "FB_Mnet":
+        //defaultValues
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
@@ -677,6 +682,7 @@ const AdsetComponent = ({
           />
         );
     }
+  // }
   }, [network, accountis, onReturnUrl]);
 
   // const getPositionOptions = () => {
@@ -3016,6 +3022,7 @@ const CreateCampaignDrawer = ({
   const [pixelIdList, setPixelIdList] = useState([]);
   const [imagehash, setimagehash] = useState("");
   const [imageHashArray, setImageHashArray] = useState([]);
+  const [newImageHashArray, setNewImageHashArray] = useState([]);
   const { data: session } = useSession();
   var token = localStorage.getItem("token");
   const [showBidAmount, setShowBidAmount] = useState(false);
@@ -3079,8 +3086,10 @@ const CreateCampaignDrawer = ({
   const [rDeleteModalVisible, setRDeleteModalVisible] = useState(false);
   const [rCurrentCategory, setRCurrentCategory] = useState(null);
   const [rEditedName, setREditedName] = useState("");
+  // const []
   const [selectedObjective, setSelectedObjective] = useState("ALL");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [defaultUrlData, setDefaultUrlData] = useState("");
 
   // const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
   const account = useMemo(() => {
@@ -3088,6 +3097,8 @@ const CreateCampaignDrawer = ({
     return String(v ?? '').trim();
   }, [accountis]);
   const { confirm } = Modal
+
+  console.log(imageHashArray);
 
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
   console.log(page_id_list, "page_id_list in CreateCampaignDrawer");
@@ -3401,15 +3412,7 @@ const CreateCampaignDrawer = ({
  
     try {
       const allValues = form.getFieldsValue(true);
-      const draftData = await MultipleAdsetsDraftFetching(allValues);
- 
-      const totalDraftData = {
-        // id: uuidv4(),
-        Category: popupInputs.input1,
-        Draft_Name: popupInputs.input2,
-        ...draftData,
-      };
-      // check duplicate template name
+
       const isDuplicate = (draftsData || []).some(
         (d) => d.Draft_Name.toLowerCase() === popupInputs.input2.trim().toLowerCase()
       );
@@ -3419,26 +3422,39 @@ const CreateCampaignDrawer = ({
         setConfirmLoading(false);
         return Promise.reject();
       }
+
+      const draftData = await MultipleAdsetsDraftFetching(allValues);
  
-      const resp = await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token, // if your middleware expects Bearer
-        },
-        body: JSON.stringify({
-          accountNumber,
-          draftData: totalDraftData,
-          email: session?.user?.email,
-          userName: session?.user?.name,
-        }),
-      });
+      for (const data of draftData){
+        const totalDraftData = {
+        // id: uuidv4(),
+        Category: popupInputs.input1,
+        Draft_Name: popupInputs.input2,
+        ...data,
+        };
+        // check duplicate template name
+        
+  
+        await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token, // if your middleware expects Bearer
+          },
+          body: JSON.stringify({
+            accountNumber: data?.Account_Number,
+            draftData: totalDraftData,
+            email: session?.user?.email,
+            userName: session?.user?.name,
+          }),
+        });
+      }
  
       // ✅ ensure non-2xx throws with a message
-      if (!resp.ok) {
-        const errJson = await resp.json().catch(() => ({}));
-        throw new Error(errJson.message || `Request failed: ${resp.status}`);
-      }
+      // if (!resp.ok) {
+      //   const errJson = await resp.json().catch(() => ({}));
+      //   throw new Error(errJson.message || `Request failed: ${resp.status}`);
+      // }
       await fetchDraftDetails();
       setRefreshDraft((prev) => !prev);
  
@@ -4253,7 +4269,11 @@ const CreateCampaignDrawer = ({
   }, [imageHashArray, form]);
 
   const Accountchange = (e) => {
-    setAccountNumber(e.target.value);
+    console.log(e);
+    const newAccounts = newImageHashArray.filter(item =>
+    e.includes(item.label));
+    console.log(newAccounts); 
+    // setAccountNumber(e.target.value);
   };
   // const handlepositionChange = async (values) => {
   //     console.log(values, "handlepositionChange")
@@ -4272,6 +4292,7 @@ const CreateCampaignDrawer = ({
       console.log("account data", ...response?.data);
 
       setImageHashArray(response?.data || []);
+      setNewImageHashArray(response?.data || []);
 
       setimagehash(...response?.data);
     } catch (error) {
@@ -5510,9 +5531,22 @@ const CreateCampaignDrawer = ({
   };
 
   const MultipleAdsetsDraftFetching = async (values) => {
-    let AllAdsetsData = {
+    const multipleAccounts = values.Account_Number;
+
+    const multipleAccountsData = [];
+    for (let account of multipleAccounts) {
+      const newImageHash = imageHashArray.find(item => item.accountNumber === account);
+      const list_of_page_id = values.page_id;
+      const list_of_pixel_id = values.pixel_id;
+      const page_id = list_of_page_id.find(item => item.includes(account)).split("-");
+      const pixel_id = list_of_pixel_id.find(item => item.includes(account)).split("-");
+      const newPageId = page_id[page_id.length - 1].trim();
+      const newPixelId = pixel_id[pixel_id.length - 1].trim();
+
+      let AllAdsetsData = {
       // id: uuidv4(),
       // Draft_Name:"",
+      Account_Number: account,
       createdby: session?.user?.name,
       createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
       editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
@@ -5542,6 +5576,7 @@ const CreateCampaignDrawer = ({
       let AdsetsData = {};
 
       const imageHashArray = await customRequest(
+        account,
         values.adsets[i],
         i,
         onSuccess,
@@ -5556,7 +5591,7 @@ const CreateCampaignDrawer = ({
             // filename: media.filename,
             // imag_hash: media.imag_hash,
             Ads: imageHashArray.map((media) => media.filename),
-            page_id: values.page_id,
+            page_id: newPageId,
             message: values.adsets[i].message,
             headline: values.adsets[i].headline,
             Description: values.adsets[i].Description,
@@ -5566,68 +5601,71 @@ const CreateCampaignDrawer = ({
           : {
             AddName: `${values.adsets[i].AddName}` || "",
             Ads: [],
-            page_id: values.page_id || "",
+            page_id: newPageId || "",
             message: values.adsets[i].message || "",
             headline: values.adsets[i].headline || "",
             Description: values.adsets[i].Description || "",
             Caption: values.adsets[i].Caption || "",
             Website_URL: values.adsets[i].Website_URL || "",
           };
-      console.log("Add Level Data:", addLevelData);
-      AdsetsData[`adsetlevel_${i + 1}`] = {
-        id: uuidv4(),
-        AdsetName: values.adsets[i].AdsetName || "",
-        Daily_amount: values.adsets[i].DailyAdd_amount
-          ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
-          : "",
-        optimization_goal: values.adsets[i].optimization_goal || "",
-        billing_event: values.adsets[i].billing_event || "",
-        start_time: moment(values.adsets[i].DatePicker.$d)
-          .tz(imagehash.timeZone)
-          .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
-        action_source: values.adsets[i].action_source || "",
-        custom_event_type: values.adsets[i].custom_event_type || "",
-        pixel_id: values.pixel_id,
-        bid_amount: values.adsets[i].bid_amount
-          ? parseFloat(values.adsets[i].bid_amount) * 100
-          : 0,
-        countries: values.adsets[i].countries || "",
-        Min_Age: values.adsets[i].Min_Age || "",
-        Max_Age: values.adsets[i].Max_Age || "",
-        Gender: parseInt(values.adsets[i].Gender) || 0,
-        locales: values.adsets[i].Language || [6],
-        placements: values.adsets[i].placements || "Advance",
-        ...(values.adsets[i].placements !== "Advance" && {
-          publisher_platforms: values.adsets[i].platforms,
-          Facebook_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Facebook"
-            ) || [],
-          instagram_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Instagram"
-            ) || [],
-          audience_network_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Audience"
-            ) || [],
-          messenger_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Messenger"
-            ) || [],
-          position: values.adsets[i].positions,
-          device_platforms: values.adsets[i].device_platforms,
-        }),
-        buying_type: "AUCTION",
-        addlevel: addLevelData || [],
-      };
-      AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+        console.log("Add Level Data:", addLevelData);
+        AdsetsData[`adsetlevel_${i + 1}`] = {
+          id: uuidv4(),
+          AdsetName: values.adsets[i].AdsetName || "",
+          Daily_amount: values.adsets[i].DailyAdd_amount
+            ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
+            : "",
+          optimization_goal: values.adsets[i].optimization_goal || "",
+          billing_event: values.adsets[i].billing_event || "",
+          start_time: moment(values.adsets[i].DatePicker.$d)
+            .tz(imagehash.timeZone)
+            .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+          action_source: values.adsets[i].action_source || "",
+          custom_event_type: values.adsets[i].custom_event_type || "",
+          pixel_id: newPixelId,
+          bid_amount: values.adsets[i].bid_amount
+            ? parseFloat(values.adsets[i].bid_amount) * 100
+            : 0,
+          countries: values.adsets[i].countries || "",
+          Min_Age: values.adsets[i].Min_Age || "",
+          Max_Age: values.adsets[i].Max_Age || "",
+          Gender: parseInt(values.adsets[i].Gender) || 0,
+          locales: values.adsets[i].Language || [6],
+          placements: values.adsets[i].placements || "Advance",
+          ...(values.adsets[i].placements !== "Advance" && {
+            publisher_platforms: values.adsets[i].platforms,
+            Facebook_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Facebook"
+              ) || [],
+            instagram_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Instagram"
+              ) || [],
+            audience_network_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Audience"
+              ) || [],
+            messenger_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Messenger"
+              ) || [],
+            position: values.adsets[i].positions,
+            device_platforms: values.adsets[i].device_platforms,
+          }),
+          buying_type: "AUCTION",
+          addlevel: addLevelData || [],
+        };
+        AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
     }
-    return AllAdsetsData;
+      multipleAccountsData.push(AllAdsetsData);
+    }
+    
+    return multipleAccountsData;
   };
 
   const postData = async (values) => {
@@ -5967,6 +6005,7 @@ const CreateCampaignDrawer = ({
     setSubmitErrors([]);
     setErrors?.({ input1: "", input2: "" });      // if you keep field errors in state
     setIsEditingDraft?.(false);
+    setSelectedTemplate(null);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -7406,6 +7445,8 @@ const CreateCampaignDrawer = ({
                   page_id_list={page_id_list}
                   pageidList={pageidList}
                   pixelIdList={pixelIdList}
+                  setDefaultUrlData={setDefaultUrlData}
+                  defaultUrlData={defaultUrlData}
                 />
               );
               // <ffff/>

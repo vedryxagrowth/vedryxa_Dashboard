@@ -1402,7 +1402,7 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
 
     const renderCarouselNav = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{ padding: '4px 5px' }}>
-            <Row align="middle" justify="space-between" wrap={false}>
+            <Row align="middle"  justify="space-between">
                 <Col flex="auto">
                     <Tabs
                         activeKey={activeTab}

@@ -550,7 +550,7 @@ const App = () => {
       // Construct URL with optional startDate and endDate
       //https://www.testapi.adsgoat.in
       // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
-      let url = `http://localhost:4500/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      let url = `https://www.testapi.adsgoat.in/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
       if (start && end) {
         url += `&startDate=${start}&endDate=${end}`;
       }

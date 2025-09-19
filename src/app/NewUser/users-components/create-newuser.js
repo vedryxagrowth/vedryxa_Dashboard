@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer, Button, Modal, Form, Input, Select, message } from 'antd';
 import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -17,13 +17,15 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
     });
     const [additionalAccounts, setAdditionalAccounts] = useState([]);
     const [selectedNetworks, setSelectedNetworks] = useState([]);
+    const [availableNetworks, setAvailableNetworks] = useState([]);
+
     const [form] = Form.useForm();
 
     var token = localStorage.getItem("token");
 
-    const availableNetworks = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic1", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !selectedNetworks.includes(network));
+    // const availableNetworks = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic1", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !selectedNetworks.includes(network));
     const handleAddAccount = () => {
-        if(availableNetworks.length > 0){
+        if (availableNetworks.length > 0) {
             setAdditionalAccounts([...additionalAccounts, { network: '', inputs: [''] }]);
         }
     };
@@ -49,10 +51,10 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
 
     const handleRemoveInput = (accountIndex, inputIndex) => {
         const updatedAccounts = [...additionalAccounts];
-        
+
         updatedAccounts[accountIndex].inputs = updatedAccounts[accountIndex].inputs.filter((_, i) => i !== inputIndex);
         const indexes = updatedAccounts[accountIndex].inputs.length;
-        if(indexes === 0){
+        if (indexes === 0) {
             handleRemoveAccount(accountIndex);
         }
         setAdditionalAccounts(updatedAccounts);
@@ -73,32 +75,60 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
         document.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
     };
 
+    // useEffect(() => {
+    //     fetch("http://localhost:8000/networks", {
+    //         headers: {
+    //             Authorization: token
+    //         }
+    //     })
+    //         .then((res) => res.json())
+    //         .then((data) => {
+    //             setAvailableNetworks(Array.isArray(data) ? data : []);
+    //         })
+    //         .catch((err) => console.error("Error fetching networks:", err));
+    // }, []);
+
+    useEffect(() => {
+        const fetchNetworks = async () => {
+            try {
+                const res = await apiClient.get("/networks");
+
+                // ✅ ensure it's an array before setting
+                setAvailableNetworks(Array.isArray(res.data) ? res.data : []);
+            } catch (err) {
+                console.error("Error fetching networks:", err);
+            }
+        };
+
+        fetchNetworks();
+    }, []);
+
     const submitForm = async (values) => {
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to create new user?',
             className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
-            onOk: async() => {
+            onOk: async () => {
                 try {
                     let data = {};
-                    if(values.role !== "Revenue_Partner"){
-                        additionalAccounts.map((each)=>{
+                    if (values.role !== "Revenue_Partner") {
+                        additionalAccounts.map((each) => {
                             data[each.network] = each.inputs;
                         });
                     }
-                    else{
-                        additionalAccounts.map((each)=>{
+                    else {
+                        additionalAccounts.map((each) => {
                             data[each.network.split("_")[1]] = each.inputs;
-                        });   
+                        });
                     }
-                    
+
                     const formattedData = {
                         ...values,
                         adAccounts: additionalAccounts.length > 0 ? data : [],
                     };
-                   
-                    const response = await apiClient.post('/api/createUser/', {formattedData});
-                    
+
+                    const response = await apiClient.post('/api/createUser/', { formattedData });
+
                     if (response.status === 200) {
                         message.success("User created successfully"); // Display success message
                         refreshUsers();
@@ -107,7 +137,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         form.resetFields();
                         setAdditionalAccounts([]); // Clear dynamic accounts
                         setSelectedNetworks([]);
-                        
+
                         onClose("email"); // Close drawer
                     } else {
                         console.error('Failed to create user');
@@ -121,10 +151,10 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                 console.log('Cancel');
             },
         });
-        
+
     };
 
-    
+
     return (
         <Drawer
             title="Create a new user"
@@ -150,7 +180,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         },
                     ]}
                 >
-                    <Input autoComplete="off" placeholder='Enter User Name' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Input autoComplete="off" placeholder='Enter User Name' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                 </Form.Item>
 
                 <Form.Item
@@ -163,7 +193,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         },
                     ]}
                 >
-                    <Input autoComplete="off" placeholder='Enter User Email' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Input autoComplete="off" placeholder='Enter User Email' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                 </Form.Item>
 
                 <Form.Item
@@ -176,7 +206,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         },
                     ]}
                 >
-                    <Select 
+                    <Select
                         placeholder="Select a role"
                         className={theme === 'dark' ? 'custom-select-dark' : ''}
                         // style={{
@@ -197,9 +227,9 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                 <Form.Item label="Ad Accounts" name="adAccounts">
                     <div>
                         <div>
-                        {additionalAccounts.map((account, accountIndex) => (
+                            {additionalAccounts.map((account, accountIndex) => (
                                 <div key={accountIndex}>
-                                    <div className='add-accounts' style={{display: 'flex', width:"100%"}}>
+                                    <div className='add-accounts' style={{ display: 'flex', width: "100%" }}>
                                         <Select
                                             placeholder="Select a network"
                                             className='add-accounts-select-network'
@@ -219,19 +249,19 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                                                 </Select.Option>
                                             ))}
                                         </Select>
-                                        <div className='add-account-container' style={{width:'100%', padding:'0px', margin:'0px'}}>
+                                        <div className='add-account-container' style={{ width: '100%', padding: '0px', margin: '0px' }}>
                                             {account.inputs.map((input, inputIndex) => (
                                                 <div key={inputIndex} className='add-account-container-input'>
                                                     <Input
                                                         value={input}
                                                         onChange={(e) => handleInputChange(accountIndex, inputIndex, e.target.value)}
                                                         placeholder="Enter Account ID"
-                                                        style={{ width: '100%', marginRight: '8px', height: '32px',backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} 
+                                                        style={{ width: '100%', marginRight: '8px', height: '32px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                     />
                                                     {account.inputs.length === 1 && inputIndex === 0 && (
                                                         <Button
-                                                            style={{  marginBottom: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                                            style={{ marginBottom: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                                                             type="default"
                                                             onClick={() => handleRemoveAccount(accountIndex)}
 
@@ -250,22 +280,22 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                                                             style={{ cursor: 'pointer', marginLeft: '8px' }}
                                                             onClick={() => handleAddInput(accountIndex)}
                                                         />
-                                                    )}   
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>  
+                                    </div>
                                 </div>
                             ))}
                         </div>
-                        <Button type="dashed" style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<PlusOutlined className="black-icon"/>}>
+                        <Button type="dashed" style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={handleAddAccount} icon={<PlusOutlined className="black-icon" />}>
                             Add Project
                         </Button>
                     </div>
                 </Form.Item>
 
                 <Form.Item>
-                    <Button style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} htmlType="submit">
+                    <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>
