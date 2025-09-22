@@ -30,7 +30,7 @@ const contentStyle = {
 };
 const { Text } = Typography;
 const newtworkCollections = {
-    "FB_Mnet": "Facebook_Mnet",
+    "FB_Mnet": "Facebook_Mnet_Daily",
     "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
@@ -1512,7 +1512,7 @@ const [switchOn, setSwitchOn] = useState(() => {
                 ? newaccount.map(String)
                 : [String(newaccount)];
 
-            const resp = await apiClient.post('/CampaignLevelAccounts', {
+            const resp = await apiClient.post('http://localhost:8000/CampaignLevelAccounts', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -1604,7 +1604,7 @@ const [switchOn, setSwitchOn] = useState(() => {
                             profit: parseFloat(profit),
                             // margin: margin,
                             fbleads: parseInt(eachData.fbLeads),
-                            conversions: parseInt(conversions),
+                            conversions: parseInt(eachData.conversions),
                             cpc: parseFloat(eachData.cpc),
                             cpclinkclicks: cpcLinkClicks,
                             fbclicks: parseInt(eachData.fbClicks),

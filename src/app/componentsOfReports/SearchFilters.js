@@ -215,7 +215,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                     onChange={handleChangeInput}
                     onBlur={handleBlur}
                     allowClear
-                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                    className={theme === 'dark' ? 'inputat400px custom-input-dark' : 'inputat400px custom-input-light'}
                     style={{
                         borderRadius: 8,
                         border: '1px solid #91C25F',

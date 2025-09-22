@@ -21,6 +21,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import locale from 'antd/es/date-picker/locale/en_US';
 import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
+import { Audio } from 'react-loader-spinner';
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
     "FB_MnetBing": "Facebook_MnetBing",
@@ -157,6 +158,8 @@ const MyTablePage = () => {
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    const inputBuffer = useRef(''); // holds interim value
+    const backspaceTimer = useRef(null);
     const [newInputValue, setNewInputValue] = useState(inputValue);
 
     const [refrst, setRefrst] = useState(false);
@@ -166,6 +169,8 @@ const MyTablePage = () => {
     const [commentsStatus, setCommentsStatus] = useState(false);
     const [campaignsStatus, setCampaignsStatus] = useState(false);
     const [moveForward, setMoveForward] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [allCampaignsStatus, setAllCampaignsStatus] = useState(false);
 
     const [colDefs, setColDefs] = useState([]);
     const [colDailyDefs, setColDailyDefs] = useState([]);
@@ -217,10 +222,33 @@ const MyTablePage = () => {
         }
     };
 
+    // const handleChangeInput = (e) => {
+    //     // setInputValue(newInputValue.trim());
+    //     setInputValue(e.target.value);
+    //     // gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
+    // };
+
     const handleChangeInput = (e) => {
-        // setInputValue(newInputValue.trim());
-        setInputValue(e.target.value);
-        // gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
+        const value = e?.target?.value ?? '';
+
+        const isBackspace = e.nativeEvent.inputType === 'deleteContentBackward';
+
+        if (isBackspace) {
+        inputBuffer.current = value;
+
+        // Clear existing timer
+        if (backspaceTimer.current) {
+            clearTimeout(backspaceTimer.current);
+        }
+
+        // Delay updating the actual state
+        backspaceTimer.current = setTimeout(() => {
+            setInputValue(inputBuffer.current);
+        }, 200); // delay after last backspace
+        } else {
+        // For all other keys — update instantly
+        setInputValue(value);
+        }
     };
 
     const handleChangeNewInputValue = (e) => {
@@ -366,7 +394,7 @@ const MyTablePage = () => {
         const first = Array.isArray(nets) && nets.length
             ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
             : "";
-        return first ? String(first) : "";
+        return first ? String(first) : dash ? [dash] : stored?.account ? fromStore : [] ;
     };
 
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
@@ -378,6 +406,8 @@ const MyTablePage = () => {
     const [selectedValue, setSelectedValue] = useState(
         Array.isArray(initialOne) ? initialOne.map(String) : []
     );
+
+    // console.log("multiple accounts:", selectedValue);
 
     // const initialOne =
     //     accountNumberFromDashboard
@@ -8735,7 +8765,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                const { allCampaignData } = params.context;
+                const { allCampaignData } = params?.context || {};
 
                 // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
@@ -10107,6 +10137,7 @@ const MyTablePage = () => {
 
     const functionCallForUserColumnStructure = async () => {
         try {
+            setInitialLoading(true);
             const fetchData = await apiClient.get(`/api/singleUserData?email=${userdetails.email}`);
             const mainData = fetchData.data;
             setColumnStructure(mainData?.columnStructure);
@@ -10137,6 +10168,7 @@ const MyTablePage = () => {
             //   console.log('Updated columnDefsOfAdID:', newColumnDefs);
             setColumnStructureStatus(true);
         } catch (error) {
+            setInitialLoading(false);
             if (error.response?.status === 500 && retryCount < MAX_RETRIES) {
                 retryCount++;
                 console.warn(`Retrying... Attempt ${retryCount}/${MAX_RETRIES}`);
@@ -10150,13 +10182,18 @@ const MyTablePage = () => {
 
     const functionCallForAllCampaignsData = async () => {
         try {
+            // setInitialLoading(true);
+            setAllCampaignsStatus(false);
             const fetchData = await apiClient.get(
                 `/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
             );
             setAllProfitLossArray(fetchData?.data);
+            setAllCampaignsStatus(true);
         }
         catch (err) {
+            setInitialLoading(false);
             setAllProfitLossArray([]);
+            setAllCampaignsStatus(true);
         }
 
     }
@@ -10189,27 +10226,39 @@ const MyTablePage = () => {
         const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
 
         try {
+            setInitialLoading(true);
             const { data } = await apiClient.post('/Comment', { accountNumbers: accounts });
             setCampaignComments(data);     // data already includes all selected accounts’ comments
+            setInitialLoading(false);
         } catch {
             setCampaignComments([]);
+            setInitialLoading(false);
         } finally {
             setCommentsStatus(true);
+            setInitialLoading(false);
         }
     };
 
 
     const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
-        const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
+        // console.log("accountOrAccounts", accountOrAccounts);
+        // console.log(storedData);
+        
+        const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
+        // console.log("accounts", accounts);
         try {
+            setInitialLoading(true);
             const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accounts });
             setCamapignlevelstatus(data);
+            setInitialLoading(false);
         } catch {
             setCamapignlevelstatus([]);
+            setInitialLoading(false);
         } finally {
             setCampaignsStatus(true);
+            setInitialLoading(false);
         }
     };
 
@@ -10289,7 +10338,7 @@ const MyTablePage = () => {
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
-   useEffect(() => {
+    useEffect(() => {
         const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData) || [];
         if (!preferredArr.length) return;
 
@@ -10312,10 +10361,10 @@ const MyTablePage = () => {
     }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
     useEffect(() => {
-        if (campaignsStatus && commentsStatus && columnStructureStatus) {
+        if (campaignsStatus && commentsStatus && columnStructureStatus && allCampaignsStatus) {
             setMoveForward(true);
         }
-    }, [campaignsStatus, commentsStatus, columnStructureStatus]);
+    }, [campaignsStatus, commentsStatus, columnStructureStatus, allCampaignsStatus]);
 
     const functionCall = async (account) => {
         await functionCallForAllCampaignsData();
@@ -10416,6 +10465,7 @@ const MyTablePage = () => {
         setCampaignsStatus(false);
         setCommentsStatus(false);
         setColumnStructureStatus(false);
+        setAllCampaignsStatus(false);
         setMoveForward(false);
 
         setNewEndDate(endDate);
@@ -10693,45 +10743,106 @@ const MyTablePage = () => {
     }, [accountsAccess, searchText]);
 
     // helper to render the checkbox list using existing accountsAccess
-    const renderAccountsCheckboxes = (theme) => (
-        <Checkbox.Group
-            options={filteredAccounts.map((account) => ({
-                value: String(account.accountNumber),
-                label: (
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '5px 10px',
-                            borderBottom: '1px solid #ddd'
-                        }}
-                    >
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
-                            {/* show accountName only when dropdown open (same as your old pattern) */}
-                            {isOpen && (
-                                <span style={{ fontSize: 12, color: 'gray' }}>
-                                    {account.accountName || ''}
-                                </span>
-                            )}
-                        </div>
-                        <span style={{ textAlign: 'right', marginLeft: 10 }}>
-                            {account.status === "Active" ? (
-                                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
-                            ) : (
-                                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
-                            )}
-                        </span>
-                    </div>
-                ),
-            }))}
-            value={selectedValue}      // array of selected accountNumbers
-            onChange={handleChange1}   // updates your selectedValue + notifies parent
-            className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
-        />
-    );
+    // const renderAccountsCheckboxes = (theme) => (
+    //     <Checkbox.Group
+    //         options={filteredAccounts.map((account) => ({
+    //             value: String(account.accountNumber),
+    //             label: (
+    //                 <div
+    //                     style={{
+    //                         display: 'flex',
+    //                         justifyContent: 'space-between',
+    //                         alignItems: 'center',
+    //                         padding: '5px 10px',
+    //                         borderBottom: '1px solid #ddd'
+    //                     }}
+    //                 >
+    //                     <div style={{ display: 'flex', flexDirection: 'column' }}>
+    //                         <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+    //                         {/* show accountName only when dropdown open (same as your old pattern) */}
+    //                         {isOpen && (
+    //                             <span style={{ fontSize: 12, color: 'gray' }}>
+    //                                 {account.accountName || ''}
+    //                             </span>
+    //                         )}
+    //                     </div>
+    //                     <span style={{ textAlign: 'right', marginLeft: 10 }}>
+    //                         {account.status === "Active" ? (
+    //                             <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+    //                         ) : (
+    //                             <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+    //                         )}
+    //                     </span>
+    //                 </div>
+    //             ),
+    //         }))}
+    //         value={selectedValue}      // array of selected accountNumbers
+    //         onChange={handleChange1}   // updates your selectedValue + notifies parent
+    //         className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+    //     />
+    // );
 
+     const renderAccountsCheckboxes = (theme) => {
+ 
+        const activeAccounts = filteredAccounts.filter(acc => acc.status === 'Active');
+ 
+        return (
+            <div>
+                {/* All Accounts toggle (active only) */}
+                <Checkbox
+                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                    indeterminate={
+                        selectedValue.length > 0 && selectedValue.length < activeAccounts.length
+                    }
+                    checked={selectedValue.length === activeAccounts.length}
+                    onChange={(e) => {
+                        if (e.target.checked) {
+                            handleChange1(activeAccounts.map(acc => String(acc.accountNumber)));
+                        } else {
+                            handleChange1([]);
+                        }
+                    }}
+                >
+                    <h5 style={{ color: theme === "dark" ? "#fff" : "#333", fontSize: '14px' }}> All Accounts</h5>
+                </Checkbox>
+ 
+                {/* Individual account checkboxes */}
+                <Checkbox.Group
+                    options={filteredAccounts.map((account) => ({
+                        value: String(account.accountNumber),
+                        label: (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '5px 10px',
+                                    borderBottom: '1px solid #ddd'
+                                }}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+                                    {isOpen && (
+                                        <span style={{ fontSize: 12, color: 'gray' }}>
+                                            {account.accountName || ''}
+                                        </span>
+                                    )}
+                                </div>
+                                <span style={{ textAlign: 'right', marginLeft: 10 }}>
+                                    {account.status === 'Active'
+                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                                        : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />}
+                                </span>
+                            </div>
+                        ),
+                    }))}
+                    value={selectedValue}
+                    onChange={handleChange1}
+                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                />
+            </div>
+        );
+    };
 
 
     // Create option with conditional rendering of additional info
@@ -10932,6 +11043,7 @@ const MyTablePage = () => {
 
         (async () => {
             try {
+                setInitialLoading(true);
                 setAiLoading(true);
                 setAiError(null);
 
@@ -10956,7 +11068,7 @@ const MyTablePage = () => {
 
                 // if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                const data =  res.data;
+                const data = res.data;
                 setRecDataByAccount(data);
                 // setRecAccounts(accounts.filter(acc => data?.[acc]));
                 const validAccounts = accounts.filter(acc => {
@@ -10970,12 +11082,15 @@ const MyTablePage = () => {
                 });
 
                 setRecAccounts(validAccounts);
+                setInitialLoading(false);
             } catch (e) {
+                setInitialLoading(false);
                 setAiError(e.message || 'Failed to load');
                 setRecDataByAccount({});
                 setRecAccounts([]);
             } finally {
                 setAiLoading(false);
+                setInitialLoading(false);
             }
         })();
     }, [selectedValue]);
@@ -11233,34 +11348,38 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space> */}
-            <div style={{
+           <div style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "8px 0",
+                // padding: "8px 0",
                 flexWrap: "wrap",
                 gap: "12px"
             }}>
 
-                <Space direction="horizontal" style={{ width: '100%', flex: 1, gap: '8px' }}>
-                    <Select
-                        showSearch
-                        onChange={onChangeSelectRevenue}
-                        placeholder="Select Network"
-                        defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
-                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                        style={{
-                            width: '160px',
-                            backgroundColor: theme === 'dark' ? '#333' : undefined,
-                            color: theme === 'dark' ? '#fff' : undefined,
-                            border: '1px solid #4CAF50',
-                            borderRadius: '6px'
-                        }}
-                        optionFilterProp="label"
-                        options={networks.map(item => ({ value: item, label: item, title: '' }))}
-                        title=''
-                    />
+                <Row align="middle" style={{ gap: "8px" }}
+                >
 
+                    <Col flex="none">
+                        <Select
+                            showSearch
+                            onChange={onChangeSelectRevenue}
+                            placeholder="Select Network"
+                            defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
+                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            style={{
+                                width: '160px',
+                                backgroundColor: theme === 'dark' ? '#333' : undefined,
+                                color: theme === 'dark' ? '#fff' : undefined,
+                                border: '1px solid #4CAF50',
+                                borderRadius: '6px'
+                            }}
+                            optionFilterProp="label"
+                            options={networks.map(item => ({ value: item, label: item, title: '' }))}
+                            title=''
+
+                        />
+                    </Col>
                     {/* Account Selector */}
                     {/* <Select
                     showSearch
@@ -11288,128 +11407,193 @@ const MyTablePage = () => {
                     onDropdownVisibleChange={handleDropdownVisibleChange}
                 /> */}
 
-                    <Select
-                        showSearch
-                        onSearch={setSearchText}
-                        searchValue={searchText}
-                        placeholder="Select Account"
-                        // Keep the visible state you already have
-                        open={isOpen}
-                        onDropdownVisibleChange={handleDropdownVisibleChange}
 
-                        // 👇 Show first account + count
-                        value={
-                            selectedValue.length === 0
-                                ? undefined
-                                : selectedValue.length === 1
-                                    ? selectedValue[0] // just that account number
-                                    : `${selectedValue[0]}, +${selectedValue.length - 1} more`
-                        }
+                    <Col flex="none">
+                        <Select
+                            showSearch
+                            onSearch={setSearchText}
+                            searchValue={searchText}
+                            placeholder="Select Account"
+                            // Keep the visible state you already have
+                            open={isOpen}
+                            onDropdownVisibleChange={handleDropdownVisibleChange}
 
-                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                        style={{
-                            width: '250px',
-                            whiteSpace: 'nowrap',
-                            color: theme === 'dark' ? 'white' : undefined,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            border: '1px solid #4CAF50',
-                            borderRadius: '6px',
-                        }}
+                            // 👇 Show first account + count
+                            value={
+                                selectedValue.length === 0
+                                    ? undefined
+                                    : selectedValue.length === 1
+                                        ? selectedValue[0] // just that account number
+                                        : `${selectedValue[0]}, +${selectedValue.length - 1} more`
+                            }
 
-                        // We are not using built-in options anymore
-                        optionFilterProp="value"
-                        // options={accountsAccess.map(createOption)}  // ❌ remove
-                        // onChange={handleChange1}                    // ❌ remove
+                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            style={{
+                                width: '250px',
+                                whiteSpace: 'nowrap',
+                                color: theme === 'dark' ? 'white' : undefined,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                border: '1px solid #4CAF50',
+                                borderRadius: '6px',
+                            }}
 
-                        // Custom dropdown with checkboxes (no tick marks in the menu)
-                        dropdownRender={() => (
-                            <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
-                                {renderAccountsCheckboxes(theme)}
-                            </div>
-                        )}
-                    />
+                            // We are not using built-in options anymore
+                            optionFilterProp="value"
+                            // options={accountsAccess.map(createOption)}  // ❌ remove
+                            // onChange={handleChange1}                    // ❌ remove
+
+                            // Custom dropdown with checkboxes (no tick marks in the menu)
+                            dropdownRender={() => (
+
+                                <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
+                                    {renderAccountsCheckboxes(theme)}
+                                </div>
+                            )}
+                        />
+                    </Col>
+
 
 
                     {/* Date Range */}
-                    <ConfigProvider
-                        locale={locale}
-                        theme={{
-                            token: {
-                                colorPrimary: '#91C25F',
-                                colorTextLightSolid: '#000',
-                            },
-                        }}
-                    >
-                        <RangePicker
-                            presets={rangePresets}
-                            onChange={handleChange}
-                            disabledDate={disabledDate}
-                            defaultValue={defaultDates}
-                            format="YYYY-MM-DD"
-                            style={{
-                                width: '240px',
-                                backgroundColor: theme === 'dark' ? '#555' : undefined,
-                                color: theme === 'dark' ? 'white' : undefined,
-                                border: '1px solid #4CAF50',
-                                borderRadius: '6px'
+                    <Col flex="none" className='Dashboard-Details-1'>
+                        <ConfigProvider
+                            locale={locale}
+                            theme={{
+                                token: {
+                                    colorPrimary: '#91C25F',
+                                    colorTextLightSolid: '#000',
+                                },
                             }}
-                            dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
-                        />
-                    </ConfigProvider>
-
+                        >
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{
+                                    width: '240px',
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                    border: '1px solid #4CAF50',
+                                    borderRadius: '6px'
+                                }}
+                                dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                            />
+                        </ConfigProvider>
+                    </Col>
+                    <Col flex="none" className='Dashboard-Details-2'>
+                        <ConfigProvider
+                            locale={locale}
+                            theme={{
+                                token: {
+                                    colorPrimary: '#91C25F',
+                                    colorTextLightSolid: '#000',
+                                },
+                            }}
+                        >
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{
+                                    width: '240px',
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                    border: '1px solid #4CAF50',
+                                    borderRadius: '6px'
+                                }}
+                                // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+                                dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                            />
+                        </ConfigProvider>
+                    </Col>
                     {/* Timezone Selector */}
-                    <Select
-                        showSearch
-                        onChange={onChangeTime}
-                        placeholder="Timezone"
-                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                        style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
-                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                        optionFilterProp="label"
-                        value={time}
-                        options={timezones.map(item => ({ value: item, label: item }))}
-                        title=''
-                    />
+
+                    <Col>
+                        <Select
+                            showSearch
+                            onChange={onChangeTime}
+                            placeholder="Timezone"
+                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            optionFilterProp="label"
+                            value={time}
+                            options={timezones.map(item => ({ value: item, label: item }))}
+                            title=''
+                        />
+                    </Col>
+
 
                     {/* Apply Button */}
-                    <Button
-                        type='primary'
-                        onClick={onClickButton}
-                        onMouseEnter={() => setHovered(true)}
-                        onMouseLeave={() => setHovered(false)}
-                        style={{
-                            backgroundColor: hovered ? '#91C25F' : 'transparent',
-                            border: '1px solid #4CAF50',
-                            borderRadius: '6px',
-                            color: theme === 'dark' ? '#ffffff' : '#000000',
-                            // fontWeight: '600',
-                            padding: '0 16px',
-                            height: '32px',
-                            transition: 'all 0.15s ease-in-out',
-                        }}
-                    >
-                        Apply
-                    </Button>
-                </Space>
-                <div style={{ textAlign: "right", marginRight: '15px' }}>
-                    <h3 style={{
-                        margin: 0,
-                        fontSize: '20px',
-                        fontWeight: 600,
-                        color: theme === 'dark' ? '#fff' : '#4b5563'
-                    }}>
-                        Strategic Reports Center
-                    </h3>
-                    <p style={{
-                        margin: 0,
-                        fontSize: '13px',
-                        color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
-                    }}>
-                        Deep insights for strategic decisions
-                    </p>
-                </div>
+
+                    <Col>
+                        <Button
+                            type='primary'
+                            onClick={onClickButton}
+                            onMouseEnter={() => setHovered(true)}
+                            onMouseLeave={() => setHovered(false)}
+                            style={{
+                                backgroundColor: hovered ? '#91C25F' : 'transparent',
+                                border: '1px solid #4CAF50',
+                                borderRadius: '6px',
+                                color: theme === 'dark' ? '#ffffff' : '#000000',
+                                // fontWeight: '600',
+                                padding: '0 16px',
+                                height: '32px',
+                                transition: 'all 0.15s ease-in-out',
+                            }}
+                        >
+                            Apply
+                        </Button>
+                    </Col>
+
+                    <div  className='Dashboard-Details-2'>
+                        <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
+                        <h3 style={{
+                            margin: 0,
+                            fontSize: '20px',
+                            fontWeight: 600,
+                            color: theme === 'dark' ? '#fff' : '#4b5563'
+                        }}>
+                            Strategic Reports Center
+                        </h3>
+                        <p style={{
+                            margin: 0,
+                            fontSize: '13px',
+                            color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
+                        }}>
+                            Deep insights for strategic decisions
+                        </p>
+                    </Col>
+                    </div>
+                    {/* </Space> */}
+                </Row>
+                <div  className='Dashboard-Details-1'>
+                        <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
+                        <h3 style={{
+                            margin: 0,
+                            fontSize: '20px',
+                            fontWeight: 600,
+                            color: theme === 'dark' ? '#fff' : '#4b5563'
+                        }}>
+                            Strategic Reports Center
+                        </h3>
+                        <p style={{
+                            margin: 0,
+                            fontSize: '13px',
+                            color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
+                        }}>
+                            Deep insights for strategic decisions
+                        </p>
+                    </Col>
+                    </div>
+
             </div>
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
@@ -11457,14 +11641,15 @@ const MyTablePage = () => {
                     {activeTab === '3' && (
                         <Col>
                             <Space size={2} style={{ marginRight: '10px' }}>
-                                <Input
+                                <Col sm={12} >
+                                    <Input
                                     placeholder="Search..."
                                     //  prefix={<SearchOutlined />}
                                     onChange={handleChangeInput}
                                     onBlur={handleBlur}
                                     //  value={inputValue}
                                     allowClear
-                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    className={theme === 'dark' ? 'inputat400px custom-input-dark' : 'inputat400px custom-input-light'}
                                     style={{
                                         borderRadius: 8,
                                         border: '1px solid #4CAF50',
@@ -11472,10 +11657,13 @@ const MyTablePage = () => {
                                         // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                                         color: theme === 'dark' ? '#fff' : '#000',
                                         fontWeight: 500,
-                                        width: 170,
-                                        marginRight: '5px'
+                                        // width: 170,
+                                        marginRight: '5px',
+                                    
                                     }}
                                 />
+                                
+                                </Col>
                                 {/* <Tooltip 
                                 title={`🍳 This feature is cooking—almost ready to serve 😜`}
                                 overlayInnerStyle={{
@@ -11665,16 +11853,18 @@ const MyTablePage = () => {
             </div>
             {!moveForward ?
                 (
-                    <div style={{ width: '100%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        {/* <Flex align="center" gap="middle">
-                        <Spin size="large" />
-                    </Flex> */}
-                        <div style={{ padding: '24px' }}>
-                            <Skeleton active paragraph={{ rows: 20 }} />
-                        </div>
+                    <div style={{ padding: '24px' }}>
+                            <Skeleton active paragraph={{ rows: 15 }} />
                     </div>
                 ) :
                 (
+                    //  initialLoading ?
+                    //     <div style={{ width: '100%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    //         <div style={{ padding: '24px' }}>
+                    //             <Skeleton active paragraph={{ rows: 20 }} />
+                    //         </div>
+                    //     </div>
+                    //     :
                     <div>
 
                         <Tabs className="zoom-95" activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>

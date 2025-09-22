@@ -7538,6 +7538,8 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["Approval"] = fullCampaignData.Approval;
     AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus;
     AllAdsetsData["Category"] = fullCampaignData.Category;
+    if(fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
+    if(fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
       AllAdsetsData["camapaignlevel"]["campaignid"] =
@@ -7617,7 +7619,8 @@ const EditMultipleAdsetCampaignDrawer = ({
       }
     } else {
       AllAdsetsData["camapaignlevel"] = {
-        createdby: session?.user?.name,
+        createdby: fullCampaignData.camapaignlevel.createdby,
+        Editedby: session?.user?.name,
         Name: values.Name,
         Objectives: values.Objectives,
         Special_categories: values.Special_categories,
@@ -7625,7 +7628,8 @@ const EditMultipleAdsetCampaignDrawer = ({
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
         access_token: imagehash.token,
-        createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
+        createdDate: fullCampaignData.camapaignlevel.createdDate,
+        EditedDate : moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         ...(fullCampaignData.camapaignlevel.campaignid
           ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
           : {}),
@@ -8084,9 +8088,12 @@ const EditMultipleAdsetCampaignDrawer = ({
       //     }
       //   });
       if (findMatchingAdset && formValuesObject) {
+        console.log("found matching adset and form values");
         if (findMatchingAdset.Adsetid) {
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
+        }else{
+          AdsetsData["id"] = formValuesObject.id;
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
           AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
@@ -8171,7 +8178,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             .format("YYYY-MM-DDTHH:mm:ssZ");
           AdsetsData["action_source"] = formValuesObject.action_source;
           AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
-          AdsetsData["pixel_id"] = formValuesObject.pixel_id;
+          AdsetsData["pixel_id"] = findMatchingAdset.pixel_id;
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -8450,6 +8457,8 @@ const EditMultipleAdsetCampaignDrawer = ({
         AdsetsData["buying_type"] = "AUCTION";
         AdsetsData["addlevel"] = newAddLevel;
       } else {
+        console.log("No matching adset found, using form values only");
+        AdsetsData["id"] = formValuesObject.id || uuidv4();
         AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
         AdsetsData["Daily_amount"] = formValuesObject.DailyAdd_amount
           ? parseFloat(formValuesObject.DailyAdd_amount) * 100
@@ -8464,7 +8473,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           .format("YYYY-MM-DDTHH:mm:ssZ"); //formValuesObject.DatePicker.$d
         AdsetsData["action_source"] = formValuesObject.action_source;
         AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
-        AdsetsData["pixel_id"] = values.pixel_id;
+        AdsetsData["pixel_id"] = formValuesObject.pixel_id;
         AdsetsData["countries"] = formValuesObject.countries;
         AdsetsData["Min_Age"] = formValuesObject.Min_Age;
         AdsetsData["Max_Age"] = formValuesObject.Max_Age;
@@ -9414,6 +9423,8 @@ const EditMultipleAdsetCampaignDrawer = ({
       billing_event: adsetObj.billing_event,
       action_source: adsetObj.action_source,
       custom_event_type: adsetObj.custom_event_type,
+      pixel_id: adsetObj.pixel_id,
+      page_id: adsetObj.page_id,
       bid_amount: adsetObj.bid_amount / 100,
       countries: adsetObj.countries,
       Min_Age: adsetObj.Min_Age,

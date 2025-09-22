@@ -3647,3 +3647,31 @@ select:focus,
   color: #4caf50 !important;
 }
 /*  */
+.single-row-select .ant-select-selector {
+  white-space: nowrap !important;
+}
+/* Prevent wrapping for tags inside this Select */
+.single-row-select .ant-select-selection-overflow {
+  flex-wrap: nowrap !important;
+}
+
+/* Optional: truncate long account numbers with ellipsis */
+.single-row-select .ant-select-selection-item {
+  max-width: 150px;       /* adjust width */
+  min-width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 500px) {
+  .inputat400px {
+    width: 100px !important;
+  }
+}
+
+@media (min-width: 500px) {
+  .inputat400px {
+    width: 190px !important;
+  }
+}
