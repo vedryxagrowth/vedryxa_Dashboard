@@ -158,6 +158,8 @@ const MyTablePage = () => {
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    const inputBuffer = useRef(''); // holds interim value
+    const backspaceTimer = useRef(null);
     const [newInputValue, setNewInputValue] = useState(inputValue);
 
     const [refrst, setRefrst] = useState(false);
@@ -220,10 +222,33 @@ const MyTablePage = () => {
         }
     };
 
+    // const handleChangeInput = (e) => {
+    //     // setInputValue(newInputValue.trim());
+    //     setInputValue(e.target.value);
+    //     // gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
+    // };
+
     const handleChangeInput = (e) => {
-        // setInputValue(newInputValue.trim());
-        setInputValue(e.target.value);
-        // gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
+        const value = e?.target?.value ?? '';
+
+        const isBackspace = e.nativeEvent.inputType === 'deleteContentBackward';
+
+        if (isBackspace) {
+        inputBuffer.current = value;
+
+        // Clear existing timer
+        if (backspaceTimer.current) {
+            clearTimeout(backspaceTimer.current);
+        }
+
+        // Delay updating the actual state
+        backspaceTimer.current = setTimeout(() => {
+            setInputValue(inputBuffer.current);
+        }, 200); // delay after last backspace
+        } else {
+        // For all other keys — update instantly
+        setInputValue(value);
+        }
     };
 
     const handleChangeNewInputValue = (e) => {
@@ -11332,10 +11357,11 @@ const MyTablePage = () => {
                 gap: "12px"
             }}>
 
-                <Row align="middle" style={{ gap: "8px" }}
+                <Row align="middle" justify="space-between" style={{ gap: "8px", width:"100%" }}
                 >
 
-                    <Col flex="none">
+                    <div style={{display:"flex"}}>
+                        <Col flex="none">
                         <Select
                             showSearch
                             onChange={onChangeSelectRevenue}
@@ -11527,8 +11553,10 @@ const MyTablePage = () => {
                             Apply
                         </Button>
                     </Col>
+                    </div>
 
-                    <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
+                    <div>
+                        <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
                         <h3 style={{
                             margin: 0,
                             fontSize: '20px',
@@ -11545,6 +11573,7 @@ const MyTablePage = () => {
                             Deep insights for strategic decisions
                         </p>
                     </Col>
+                    </div>
                     {/* </Space> */}
                 </Row>
 
