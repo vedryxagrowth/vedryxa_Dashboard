@@ -1512,7 +1512,7 @@ const [switchOn, setSwitchOn] = useState(() => {
                 ? newaccount.map(String)
                 : [String(newaccount)];
 
-            const resp = await apiClient.post('/CampaignLevelAccounts', {
+            const resp = await apiClient.post('http://localhost:8000/CampaignLevelAccounts', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,

@@ -11348,20 +11348,19 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space> */}
-            <div style={{
+           <div style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "8px 0",
+                // padding: "8px 0",
                 flexWrap: "wrap",
                 gap: "12px"
             }}>
 
-                <Row align="middle" justify="space-between" style={{ gap: "8px", width:"100%" }}
+                <Row align="middle" style={{ gap: "8px" }}
                 >
 
-                    <div style={{display:"flex"}}>
-                        <Col flex="none">
+                    <Col flex="none">
                         <Select
                             showSearch
                             onChange={onChangeSelectRevenue}
@@ -11553,9 +11552,8 @@ const MyTablePage = () => {
                             Apply
                         </Button>
                     </Col>
-                    </div>
 
-                    <div>
+                    <div  className='Dashboard-Details-2'>
                         <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
                         <h3 style={{
                             margin: 0,
@@ -11576,6 +11574,25 @@ const MyTablePage = () => {
                     </div>
                     {/* </Space> */}
                 </Row>
+                <div  className='Dashboard-Details-1'>
+                        <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
+                        <h3 style={{
+                            margin: 0,
+                            fontSize: '20px',
+                            fontWeight: 600,
+                            color: theme === 'dark' ? '#fff' : '#4b5563'
+                        }}>
+                            Strategic Reports Center
+                        </h3>
+                        <p style={{
+                            margin: 0,
+                            fontSize: '13px',
+                            color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
+                        }}>
+                            Deep insights for strategic decisions
+                        </p>
+                    </Col>
+                    </div>
 
             </div>
 
