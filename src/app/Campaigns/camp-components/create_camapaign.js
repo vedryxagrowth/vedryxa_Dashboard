@@ -3093,11 +3093,11 @@ const CreateCampaignDrawer = ({
 
   // const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
   const account = useMemo(() => {
-  if (Array.isArray(accountis)) {
-    return accountis.map((a) => String(a).trim()); // ✅ supports multiple accounts
-  }
-  return [String(accountis ?? '').trim()];
-}, [accountis]);
+    if (Array.isArray(accountis)) {
+      return accountis.map((a) => String(a).trim()); // ✅ supports multiple accounts
+    }
+    return [String(accountis ?? '').trim()];
+  }, [accountis]);
   const { confirm } = Modal
 
   console.log(imageHashArray);
@@ -3164,101 +3164,79 @@ const CreateCampaignDrawer = ({
     });
   }, [draftsData, searchText, selectedCategory, selectedObjective]);
 
-  // useEffect(() => {
-  //   if (!account) return;
-  //   (async () => {
-  //     const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}`, {
-  //       headers: { Authorization: token }
-  //     });
-  //     const json = await resp.json();
-  //     if (json.ok) {
-  //       setCategories(json.categories);
-  //     }
-  //   })();
-  // }, [account, token]);
-useEffect(() => {
-  if (!account || account.length === 0) return;
 
-  const accountArray = Array.isArray(account) ? account : [account];
+  useEffect(() => {
+    if (!account || account.length === 0) return;
 
-  (async () => {
-    const resp = await fetch(`http://localhost:4500/api/getcategories`, {
+    const accountArray = Array.isArray(account) ? account : [account];
+
+    (async () => {
+      const resp = await fetch(`http://localhost:4500/api/getcategories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ accounts: accountArray }),
+      });
+
+      const json = await resp.json();
+      if (json.ok) {
+        setCategories(json.categories);
+      }
+    })();
+  }, [account, token]);
+
+  const addCategory = async () => {
+    const name = newCategory.trim();
+    if (!name || !account) return;
+
+    const accounts = Array.isArray(account) ? account : [account];
+
+    const resp = await fetch("http://localhost:4500/api/categories", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
       },
-      body: JSON.stringify({ accounts: accountArray }),
+      body: JSON.stringify({ accounts, name }),
     });
 
     const json = await resp.json();
-    if (json.ok) {
-      setCategories(json.categories);
-    }
-  })();
-}, [account, token]);
-
-
-
-
-  // const addCategory = async () => {
-  //   const name = newCategory.trim();
-  //   if (!name || !account) return;
-  //   const resp = await fetch("http://localhost:4500/api/categories", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json", Authorization: token },
-  //     body: JSON.stringify({ accountNumber: account, name })
-  //   });
-  //   const json = await resp.json();
-  //   if (resp.ok && json.ok) {
-  //     setCategories(prev => [...prev, json.category]);
-  //     setPopupInputs(s => ({ ...s, input1: json.category.name }));
-  //     setNewCategory("");
-  //     setErrors(e => ({ ...e, input1: "" }));
-  //     message.success("Category added");
-  //   } else {
-  //     message.error(json.message || "Add failed");
-  //   }
-  // };
-const addCategory = async () => {
-  const name = newCategory.trim();
-  if (!name || !account) return;
-
-  const accounts = Array.isArray(account) ? account : [account];
-
-  const resp = await fetch("http://localhost:4500/api/categories", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: token,
-    },
-    body: JSON.stringify({ accounts, name }),
-  });
-
-  const json = await resp.json();
-  if (resp.ok && json.ok) {
-    setCategories(prev => [...prev, ...json.added]);
-    setPopupInputs(s => ({ ...s, input1: json.added[0]?.name || "" }));
-    setNewCategory("");
-    setErrors(e => ({ ...e, input1: "" }));
-    message.success(`Category added to ${json.added.length} account(s)`);
-  } else {
-    message.error(json.message || "Add failed");
-  }
-};
-
-  const deleteCategory = async (catId) => {
-    if (!catId || !account) return;
-    const deleted = categories.find(c => c.categoryId === catId);
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}/${catId}`, {
-      method: "DELETE",
-      headers: { Authorization: token }
-    });
-    const json = await resp.json().catch(() => ({}));
     if (resp.ok && json.ok) {
-      setCategories(prev => prev.filter(c => c.categoryId !== catId));
+      setCategories(prev => [...prev, ...json.added]);
+      setPopupInputs(s => ({ ...s, input1: json.added[0]?.name || "" }));
+      setNewCategory("");
+      setErrors(e => ({ ...e, input1: "" }));
+      message.success(`Category added to ${json.added.length} account(s)`);
+    } else {
+      message.error(json.message || "Add failed");
+    }
+  };
+  const deleteCategory = async (accountNumber, catId) => {
+    if (!catId || !accountNumber) return;
+
+    const deleted = categories.find(c => c.categoryId === catId);
+
+    const resp = await fetch(
+      `http://localhost:4500/api/categories/${accountNumber}/${catId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: token },
+      }
+    );
+
+    const json = await resp.json().catch(() => ({}));
+
+    if (resp.ok && json.ok) {
+      setCategories(prev =>
+        prev.filter(c => !(c.categoryId === catId && c.accountNumber === accountNumber))
+      );
       if (deleted?.name) {
-        setPopupInputs(s => ({ ...s, input1: s.input1 === deleted.name ? "" : s.input1 }));
+        setPopupInputs(s => ({
+          ...s,
+          input1: s.input1 === deleted.name ? "" : s.input1
+        }));
       }
       message.success("Category deleted");
     } else {
@@ -3266,19 +3244,32 @@ const addCategory = async () => {
     }
   };
 
-  const renameCategory = async (catId, newName) => {
+  const renameCategory = async (accountNumber, catId, newName) => {
     const clean = newName?.trim();
-    if (!catId || !clean || !account) return;
+    if (!catId || !clean || !accountNumber) return;
+
     const oldName = categories.find(c => c.categoryId === catId)?.name;
-    const resp = await fetch(`http://localhost:4500/api/categories/${account}/${catId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ name: clean })
-    });
+
+    const resp = await fetch(
+      `http://localhost:4500/api/categories/${accountNumber}/${catId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({ name: clean }),
+      }
+    );
+
     const json = await resp.json().catch(() => ({}));
     if (resp.ok && json.ok) {
-      setCategories(prev => prev.map(c => c.categoryId === catId ? { ...c, name: clean } : c));
-      setPopupInputs(s => ({ ...s, input1: s.input1 === oldName ? clean : s.input1 }));
+      setCategories(prev =>
+        prev.map(c =>
+          c.categoryId === catId ? { ...c, name: clean } : c
+        )
+      );
+      setPopupInputs(s => ({
+        ...s,
+        input1: s.input1 === oldName ? clean : s.input1,
+      }));
       message.success("Category renamed");
     } else {
       message.error(json.message || "Rename failed");
@@ -3286,71 +3277,126 @@ const addCategory = async () => {
   };
 
   useEffect(() => {
-    if (!account) return;
+    if (!account || account.length === 0) return;
+
+    const accountArray = Array.isArray(account) ? account : [account];
+
     (async () => {
-      const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}`, {
-        headers: { Authorization: token }
+      const resp = await fetch(`http://localhost:4500/api/getreportcategories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ accounts: accountArray }),
       });
+
       const json = await resp.json().catch(() => ({}));
-      if (resp.ok && json.ok) setReportCategories(json.categories);
+      if (json.ok) {
+        setReportCategories(json.categories);
+      }
     })();
   }, [account, token]);
+
+
   const addReportCategory = async () => {
     const name = newReportCategory.trim();
     if (!name || !account) return;
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/reportcategory", {
+
+    const accounts = Array.isArray(account) ? account : [account];
+
+    const resp = await fetch("http://localhost:4500/api/reportcategory", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ accountNumber: account, name })
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accounts, name }),
     });
-    const json = await resp.json().catch(() => ({}));
+
+    const json = await resp.json();
     if (resp.ok && json.ok) {
-      setReportCategories(prev => [...prev, json.category]);
-      setPopupInputs(s => ({ ...s, reportCat: json.category.name }));
+      // Append newly added report categories
+      setReportCategories(prev => [...prev, ...json.added]);
+
+      // If you want to auto-select the first new category in your popup
+      setPopupInputs(s => ({ ...s, reportCat: json.added[0]?.name || "" }));
+
+      // Reset input + error states
       setNewReportCategory("");
-      message.success("Report category added");
+      setErrors(e => ({ ...e, reportCat: "" }));
+
+      message.success(`Report category added to ${json.added.length} account(s)`);
     } else {
       message.error(json.message || "Add failed");
     }
   };
 
-  const renameReportCategory = async (catId, newName) => {
+  const renameReportCategory = async (accountNumber, catId, newName) => {
     const clean = newName?.trim();
-    if (!catId || !clean || !account) return;
-    const oldName = reportCategories.find(c => c.categoryId === catId)?.name;
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}/${catId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ name: clean })
-    });
+    if (!catId || !clean || !accountNumber) return;
+
+    const old = reportCategories.find(
+      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+    )?.name;
+
+    if (old && old.trim().toLowerCase() === clean.toLowerCase()) {
+      message.info("No changes to save");
+      return;
+    }
+
+    const resp = await fetch(
+      `http://localhost:4500/api/reportcategory/${accountNumber}/${catId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({ name: clean }),
+      }
+    );
+
     const json = await resp.json().catch(() => ({}));
     if (resp.ok && json.ok) {
-      setReportCategories(prev => prev.map(c => c.categoryId === catId ? { ...c, name: clean } : c));
-      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === oldName ? clean : s.reportCat }));
+      setReportCategories(prev =>
+        prev.map(c =>
+          String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber)
+            ? { ...c, name: clean }
+            : c
+        )
+      );
+      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === old ? clean : s.reportCat }));
       message.success("Report category renamed");
     } else {
       message.error(json.message || "Rename failed");
     }
   };
 
-  const deleteReportCategory = async (catId) => {
-    if (!catId || !account) return;
-    const deleted = reportCategories.find(c => c.categoryId === catId);
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}/${catId}`, {
-      method: "DELETE",
-      headers: { Authorization: token }
-    });
+
+  const deleteReportCategory = async (accountNumber, catId) => {
+    if (!catId || !accountNumber) return;
+
+    const resp = await fetch(
+      `http://localhost:4500/api/reportcategory/${accountNumber}/${catId}`,
+      { method: "DELETE", headers: { Authorization: token } }
+    );
     const json = await resp.json().catch(() => ({}));
+
     if (resp.ok && json.ok) {
-      setReportCategories(prev => prev.filter(c => c.categoryId !== catId));
-      if (deleted?.name) {
-        setPopupInputs(s => ({ ...s, reportCat: s.reportCat === deleted.name ? "" : s.reportCat }));
-      }
+      setReportCategories(prev =>
+        prev.filter(c =>
+          !(String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber))
+        )
+      );
       message.success("Report category deleted");
     } else {
       message.error(json.message || "Delete failed");
     }
   };
+
+
+
+
 
 
   // const handleConfirm = async() => {
@@ -3487,7 +3533,7 @@ const addCategory = async () => {
         // check duplicate template name
 
 
-        await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
+        await fetch("http://localhost:4500/api/submitDraftDataNew", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -4384,19 +4430,48 @@ const addCategory = async () => {
   //   }
   // };
 
+  // const fetchDraftDetails = async () => {
+  //   if (!account) return;
+  //   try {
+  //     const res = await axios.get("http://localhost:4500/api/newGetDraftData", {
+  //       params: { accountNumber: account },
+  //       headers: { Authorization: token },
+  //       validateStatus: () => true,
+  //     });
+
+  //     if (res.status === 200 && res.data?.ok) {
+  //       setDraftsData(Array.isArray(res.data.drafts) ? res.data.drafts : []);
+  //     } else if (res.status === 404) {
+  //       setDraftsData([]);
+  //     } else {
+  //       message.error(res.data?.message || `Failed to load drafts (${res.status})`);
+  //     }
+  //   } catch (err) {
+  //     console.error("fetchDraftDetails error:", err);
+  //     message.error("Error fetching drafts");
+  //   }
+  // };
   const fetchDraftDetails = async () => {
     if (!account) return;
+
+    // normalize `account` to an array
+    const accounts = Array.isArray(account) ? account.filter(Boolean) : [account];
+
     try {
-      const res = await axios.get("https://www.testapi.adsgoat.in/api/newGetDraftData", {
-        params: { accountNumber: account },
-        headers: { Authorization: token },
-        validateStatus: () => true,
-      });
+      const res = await axios.post(
+        "http://localhost:4500/api/newGetDraftData",
+        { accounts }, // 👈 send array (works for single & multiple)
+        {
+          headers: { Authorization: token },
+          validateStatus: () => true,
+        }
+      );
 
       if (res.status === 200 && res.data?.ok) {
+        // flat list; each draft has `accountNumber`
         setDraftsData(Array.isArray(res.data.drafts) ? res.data.drafts : []);
-      } else if (res.status === 404) {
-        setDraftsData([]);
+        // If you prefer per-account map later:
+        // setDraftsByAccount(res.data.draftsByAccount);
       } else {
         message.error(res.data?.message || `Failed to load drafts (${res.status})`);
       }
@@ -4406,54 +4481,86 @@ const addCategory = async () => {
     }
   };
 
-  const deleteDraft = async (draftId) => {
-    if (!draftId) {
-      message.error("Draft ID is missing");
-      return;
-    }
 
-    try {
-      const response = await fetch("https://www.testapi.adsgoat.in/api/deleteDraft", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        body: JSON.stringify({
-          accountNumber: account,
-          draftId: draftId
-        })
-      });
+  // const deleteDraft = async (draftId) => {
+  //   if (!draftId) {
+  //     message.error("Draft ID is missing");
+  //     return;
+  //   }
 
-      const data = await response.json();
+  //   try {
+  //     const response = await fetch("http://localhost:4500/api/deleteDraft", {
+  //       method: "DELETE",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: token,
+  //       },
+  //       body: JSON.stringify({
+  //         accountNumber: account,
+  //         draftId: draftId
+  //       })
+  //     });
 
-      if (data.ok) {
-        message.open({
-          type: 'success',
-          content: "Draft deleted successfully",
-          className: theme === 'dark' ? 'dark-message' : '',
-        })
-        await fetchDraftDetails();
-      } else {
-        message.error(data.message || "Failed to delete draft");
-      }
-    } catch (error) {
-      console.error("Error deleting draft:", error);
-      message.error("An error occurred while deleting");
-    }
-  };
+  //     const data = await response.json();
 
-  const handleDelete = (draftId) => {
-    setDeleteModal({ visible: true, id: draftId });
+  //     if (data.ok) {
+  //       message.open({
+  //         type: 'success',
+  //         content: "Draft deleted successfully",
+  //         className: theme === 'dark' ? 'dark-message' : '',
+  //       })
+  //       await fetchDraftDetails();
+  //     } else {
+  //       message.error(data.message || "Failed to delete draft");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting draft:", error);
+  //     message.error("An error occurred while deleting");
+  //   }
+  // };
+const deleteDraft = async (accountNumber, draftId) => {
+  if (!accountNumber || !draftId) {
+    message.error("Missing account number or draft id");
+    return;
+  }
+
+  const resp = await fetch("http://localhost:4500/api/deleteDraft", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    },
+    body: JSON.stringify({ accountNumber, draftId }),
+  });
+
+  const data = await resp.json().catch(() => ({}));
+
+  if (resp.ok && data.ok) {
+    setDraftsData(prev =>
+      prev.filter(
+        d =>!(
+            String(d.accountNumber) === String(accountNumber) &&
+            String(d.draftId) === String(draftId)
+          )
+      )
+    );
+    message.success("Draft deleted successfully");
+  } else {
+    message.error(data.message || "Failed to delete draft");
+  }
+};
+
+  const handleDelete = (Account_Number,draftId) => {
+    setDeleteModal({ visible: true, id: draftId ,Account_Number});
   };
 
   const onConfirmDelete = async () => {
     try {
       setDeleting(true);
-      await deleteDraft(deleteModal.id);
+      await deleteDraft(deleteModal.Account_Number,deleteModal.id);
     } finally {
       setDeleting(false);
-      setDeleteModal({ visible: false, id: null });
+      setDeleteModal({ visible: false, id: null ,Account_Number:null});
     }
   };
 
@@ -4468,8 +4575,6 @@ const addCategory = async () => {
       Draft_Id: draft.draftId,
     };
     setPopupInputs({ input1: draft.Category || "", input2: draft.Draft_Name || "" });
-
-
     setIsEditingDraft(true);
   };
   // const handleSaveEditedDraft = async () => {
@@ -4558,7 +4663,7 @@ const addCategory = async () => {
       };
 
 
-      const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
+      const resp = await fetch("http://localhost:4500/api/updateDraftSmart", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
         body: JSON.stringify({
@@ -6673,7 +6778,7 @@ const addCategory = async () => {
               (option?.name || "").toLowerCase().includes(input.toLowerCase())
             }
             options={reportCategories.map(c => ({
-              value: c.name,
+              value: `${c.name} - ${c.accountNumber}`,
               name: c.name,
               id: c.categoryId,
 
@@ -6685,14 +6790,13 @@ const addCategory = async () => {
                   gap: 8
 
                 }}>
-
                   <span style={{
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                     maxWidth: 200
-                  }}>
-                    {c.name}
+                  }} title={`${c.name} - ${c.accountNumber}`}>
+                    {c.name} - {c.accountNumber}
                   </span>
                   <span style={{ display: "flex", gap: 10 }}>
                     <FaPenToSquare
@@ -6877,7 +6981,7 @@ const addCategory = async () => {
                     <FaTrashCan
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(draft.draftId);
+                        handleDelete(draft.Account_Number, draft.draftId);
                       }}
                       style={{ fontSize: 14, color: "#EC7117", cursor: "pointer" }}
                       title="Delete"
@@ -6897,6 +7001,20 @@ const addCategory = async () => {
                     width: "100%",
                   }}
                 >
+                  <span style={{ color: "#B4B4B4" }}>Account Number</span>
+                  <span
+                    title={draft?.Account_Number ?? "-"}
+                    style={{
+                      textAlign: "right",
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {draft?.Account_Number ?? "-"}
+                  </span>
                   <span style={{ color: "#B4B4B4" }}>Category</span>
                   <span
                     title={draft?.Category ?? "-"}
@@ -7573,7 +7691,64 @@ const addCategory = async () => {
 
                 {/* Inline input boxes */}
 
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginTop: 8, }}>
 
+
+                  <Modal
+                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                    title="Edit Category"
+                    visible={editModalVisible}
+                    onOk={async () => {
+                      if (editedName.trim() && currentCategory) {
+                        await renameCategory(
+                          currentCategory.accountNumber,   // ✅ pass the right account number
+                          currentCategory.categoryId,
+                          editedName.trim()
+                        );
+                        setEditModalVisible(false);
+                        setEditedName("");
+                        setCurrentCategory(null);
+                      }
+                    }}
+                    onCancel={() => {
+                      setEditModalVisible(false);
+                      setEditedName("");
+                      setCurrentCategory(null);
+                    }}
+                    okText="Save"
+                  >
+                    <Input
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                    />
+                  </Modal>
+
+                  <Modal
+                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                    title="Delete Category"
+                    visible={deleteModalVisible}
+                    onOk={async () => {
+                      if (currentCategory) {
+                        await deleteCategory(
+                          currentCategory.accountNumber,   // ✅ use the category’s own account
+                          currentCategory.categoryId
+                        );
+                        setDeleteModalVisible(false);
+                        setCurrentCategory(null);
+                      }
+                    }}
+                    onCancel={() => {
+                      setDeleteModalVisible(false);
+                      setCurrentCategory(null);
+                    }}
+                    okText="Delete"
+                    okButtonProps={{ danger: true }}
+                  >
+                    <p>Are you sure you want to delete the category "{currentCategory?.name}"?</p>
+                  </Modal>
+
+                </div>
 
 
                 <Modal
@@ -7583,12 +7758,17 @@ const addCategory = async () => {
                   open={rEditModalVisible}
                   onOk={async () => {
                     if (rEditedName.trim() && rCurrentCategory) {
-                      await renameReportCategory(rCurrentCategory.categoryId, rEditedName.trim());
+                      await renameReportCategory(
+                        rCurrentCategory.accountNumber,
+                        rCurrentCategory.categoryId,
+                        rEditedName.trim()
+                      );
                       setREditModalVisible(false);
                       setREditedName("");
                       setRCurrentCategory(null);
                     }
                   }}
+
                   onCancel={() => {
                     setREditModalVisible(false);
                     setREditedName("");
@@ -7610,12 +7790,15 @@ const addCategory = async () => {
                     }`}
                   open={rDeleteModalVisible}
                   onOk={async () => {
-                    if (rCurrentCategory) {
-                      await deleteReportCategory(rCurrentCategory.categoryId);
-                      setRDeleteModalVisible(false);
-                      setRCurrentCategory(null);
-                    }
+                    if (!rCurrentCategory) return;
+                    await deleteReportCategory(
+                      rCurrentCategory.accountNumber ?? (Array.isArray(account) ? account[0] : account),
+                      rCurrentCategory.categoryId
+                    );
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
                   }}
+
                   onCancel={() => {
                     setRDeleteModalVisible(false);
                     setRCurrentCategory(null);
@@ -7625,7 +7808,7 @@ const addCategory = async () => {
                 >
                   <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
                 </Modal>
-           <div style={{ display: 'flex', marginTop: '10px' }}>
+                <div style={{ display: 'flex', marginTop: '10px' }}>
                   <Button
                     type="primary"
                     style={{
