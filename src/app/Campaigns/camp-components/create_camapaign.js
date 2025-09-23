@@ -682,7 +682,7 @@ const AdsetComponent = ({
           />
         );
     }
-  // }
+    // }
   }, [network, accountis, onReturnUrl]);
 
   // const getPositionOptions = () => {
@@ -3093,9 +3093,11 @@ const CreateCampaignDrawer = ({
 
   // const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
   const account = useMemo(() => {
-    const v = Array.isArray(accountis) ? accountis[0] : accountis;
-    return String(v ?? '').trim();
-  }, [accountis]);
+  if (Array.isArray(accountis)) {
+    return accountis.map((a) => String(a).trim()); // ✅ supports multiple accounts
+  }
+  return [String(accountis ?? '').trim()];
+}, [accountis]);
   const { confirm } = Modal
 
   console.log(imageHashArray);
@@ -3136,12 +3138,12 @@ const CreateCampaignDrawer = ({
 
   const filteredDrafts = useMemo(() => {
     if (!Array.isArray(draftsData)) return [];
- 
+
     return draftsData.filter((draft) => {
       const formattedBudget = draft?.camapaignlevel?.Daily_amount != null
         ? `$${draft.camapaignlevel.Daily_amount}/day`
         : "";
- 
+
       const matchesSearch = searchText
         ? draft.Draft_Name?.toLowerCase().includes(searchText.toLowerCase()) ||
         draft.Category?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -3152,48 +3154,98 @@ const CreateCampaignDrawer = ({
         selectedCategory && selectedCategory !== "ALL"
           ? draft.Category === selectedCategory
           : true;
- 
+
       const matchesObjective =
         selectedObjective && selectedObjective !== "ALL"
           ? draft?.camapaignlevel?.Objectives === selectedObjective
           : true;
- 
+
       return matchesSearch && matchesCategory && matchesObjective;
     });
   }, [draftsData, searchText, selectedCategory, selectedObjective]);
 
-  useEffect(() => {
-    if (!account) return;
-    (async () => {
-      const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}`, {
-        headers: { Authorization: token }
-      });
-      const json = await resp.json();
-      if (json.ok) {
-        setCategories(json.categories);
-      }
-    })();
-  }, [account, token]);
+  // useEffect(() => {
+  //   if (!account) return;
+  //   (async () => {
+  //     const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}`, {
+  //       headers: { Authorization: token }
+  //     });
+  //     const json = await resp.json();
+  //     if (json.ok) {
+  //       setCategories(json.categories);
+  //     }
+  //   })();
+  // }, [account, token]);
+useEffect(() => {
+  if (!account || account.length === 0) return;
 
-  const addCategory = async () => {
-    const name = newCategory.trim();
-    if (!name || !account) return;
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/categories", {
+  const accountArray = Array.isArray(account) ? account : [account];
+
+  (async () => {
+    const resp = await fetch(`http://localhost:4500/api/getcategories`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ accountNumber: account, name })
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accounts: accountArray }),
     });
+
     const json = await resp.json();
-    if (resp.ok && json.ok) {
-      setCategories(prev => [...prev, json.category]);
-      setPopupInputs(s => ({ ...s, input1: json.category.name }));
-      setNewCategory("");
-      setErrors(e => ({ ...e, input1: "" }));
-      message.success("Category added");
-    } else {
-      message.error(json.message || "Add failed");
+    if (json.ok) {
+      setCategories(json.categories);
     }
-  };
+  })();
+}, [account, token]);
+
+
+
+
+  // const addCategory = async () => {
+  //   const name = newCategory.trim();
+  //   if (!name || !account) return;
+  //   const resp = await fetch("http://localhost:4500/api/categories", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json", Authorization: token },
+  //     body: JSON.stringify({ accountNumber: account, name })
+  //   });
+  //   const json = await resp.json();
+  //   if (resp.ok && json.ok) {
+  //     setCategories(prev => [...prev, json.category]);
+  //     setPopupInputs(s => ({ ...s, input1: json.category.name }));
+  //     setNewCategory("");
+  //     setErrors(e => ({ ...e, input1: "" }));
+  //     message.success("Category added");
+  //   } else {
+  //     message.error(json.message || "Add failed");
+  //   }
+  // };
+const addCategory = async () => {
+  const name = newCategory.trim();
+  if (!name || !account) return;
+
+  const accounts = Array.isArray(account) ? account : [account];
+
+  const resp = await fetch("http://localhost:4500/api/categories", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token,
+    },
+    body: JSON.stringify({ accounts, name }),
+  });
+
+  const json = await resp.json();
+  if (resp.ok && json.ok) {
+    setCategories(prev => [...prev, ...json.added]);
+    setPopupInputs(s => ({ ...s, input1: json.added[0]?.name || "" }));
+    setNewCategory("");
+    setErrors(e => ({ ...e, input1: "" }));
+    message.success(`Category added to ${json.added.length} account(s)`);
+  } else {
+    message.error(json.message || "Add failed");
+  }
+};
 
   const deleteCategory = async (catId) => {
     if (!catId || !account) return;
@@ -3218,7 +3270,7 @@ const CreateCampaignDrawer = ({
     const clean = newName?.trim();
     if (!catId || !clean || !account) return;
     const oldName = categories.find(c => c.categoryId === catId)?.name;
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}/${catId}`, {
+    const resp = await fetch(`http://localhost:4500/api/categories/${account}/${catId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: token },
       body: JSON.stringify({ name: clean })
@@ -3401,22 +3453,22 @@ const CreateCampaignDrawer = ({
       input2: popupInputs.input2.trim() ? "" : "Template name is required",
     };
     setErrors(newErrors);
- 
+
     const hasErrors = Object.values(newErrors).some((msg) => msg !== "");
     if (hasErrors) {
       // message?.error?.("Please fill the required fields");
       return Promise.reject();
     }
- 
+
     setConfirmLoading(true);
- 
+
     try {
       const allValues = form.getFieldsValue(true);
 
       const isDuplicate = (draftsData || []).some(
         (d) => d.Draft_Name.toLowerCase() === popupInputs.input2.trim().toLowerCase()
       );
- 
+
       if (isDuplicate) {
         newErrors.input2 = "Template name already exists";
         setConfirmLoading(false);
@@ -3424,17 +3476,17 @@ const CreateCampaignDrawer = ({
       }
 
       const draftData = await MultipleAdsetsDraftFetching(allValues);
- 
-      for (const data of draftData){
+
+      for (const data of draftData) {
         const totalDraftData = {
-        // id: uuidv4(),
-        Category: popupInputs.input1,
-        Draft_Name: popupInputs.input2,
-        ...data,
+          // id: uuidv4(),
+          Category: popupInputs.input1,
+          Draft_Name: popupInputs.input2,
+          ...data,
         };
         // check duplicate template name
-        
-  
+
+
         await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
           method: "POST",
           headers: {
@@ -3449,7 +3501,7 @@ const CreateCampaignDrawer = ({
           }),
         });
       }
- 
+
       // ✅ ensure non-2xx throws with a message
       // if (!resp.ok) {
       //   const errJson = await resp.json().catch(() => ({}));
@@ -3457,7 +3509,7 @@ const CreateCampaignDrawer = ({
       // }
       await fetchDraftDetails();
       setRefreshDraft((prev) => !prev);
- 
+
       // Resolve cleanly so Popconfirm closes without warnings
       await new Promise((r) => setTimeout(r, 500));
       setConfirmLoading(false);
@@ -4271,8 +4323,8 @@ const CreateCampaignDrawer = ({
   const Accountchange = (e) => {
     console.log(e);
     const newAccounts = newImageHashArray.filter(item =>
-    e.includes(item.label));
-    console.log(newAccounts); 
+      e.includes(item.label));
+    console.log(newAccounts);
     // setAccountNumber(e.target.value);
   };
   // const handlepositionChange = async (values) => {
@@ -4470,7 +4522,7 @@ const CreateCampaignDrawer = ({
   const handleSaveEditedDraft = async () => {
     const trimmedCat = popupInputs.input1.trim();
     const trimmedName = popupInputs.input2.trim();
- 
+
     // Required field check
     const newErrors = {
       input1: trimmedCat ? "" : "Template category is required",
@@ -4478,7 +4530,7 @@ const CreateCampaignDrawer = ({
     };
     setErrors(newErrors);
     if (Object.values(newErrors).some((msg) => msg !== "")) return Promise.reject();
- 
+
     // 🔑 Duplicate check but ignore the draft we are editing
     const isDuplicate = (draftsData || []).some(
       (d) =>
@@ -4493,19 +4545,19 @@ const CreateCampaignDrawer = ({
       message.error("No draft selected to edit");
       return
     }
- 
+
     try {
       setConfirmLoading(true);
       const allValues = form.getFieldsValue(true);
       const draftData = await MultipleAdsetsDraftFetching(allValues);
- 
+
       const totalDraftData = {
         Category: popupInputs.input1,
         Draft_Name: popupInputs.input2,
         ...draftData,
       };
- 
- 
+
+
       const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
@@ -4515,18 +4567,18 @@ const CreateCampaignDrawer = ({
           payload: totalDraftData,
         }),
       });
- 
+
       const json = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(json.message || `Update failed (${resp.status})`);
- 
+
       message.open({
         type: 'success',
         content: "Draft updated successfully",
         className: theme === 'dark' ? 'dark-message' : '',
       })
- 
+
       await postDraftSaveCleanup();
- 
+
     } catch (err) {
       console.error("Save draft (edit) error:", err);
       message.error(err?.message || "Failed to update draft");
@@ -5544,70 +5596,70 @@ const CreateCampaignDrawer = ({
       const newPixelId = pixel_id[pixel_id.length - 1].trim();
 
       let AllAdsetsData = {
-      // id: uuidv4(),
-      // Draft_Name:"",
-      Account_Number: account,
-      createdby: session?.user?.name,
-      createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
-      editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
-      camapaignlevel: {
-        // createdby: session?.user?.name,
-        Name: values.Name || "",
-        Objectives: values.Objectives || "",
-        Special_categories: values.Special_categories || "NONE",
-        Bid_strategy: values.Bid_strategy,
-        Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
-        Status: values.Status,
-        // access_token: imagehash.token,
-        createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
-      },
-    };
-    const onSuccess = (status, response) => {
-      console.log("Upload success:", response);
-    };
+        // id: uuidv4(),
+        // Draft_Name:"",
+        Account_Number: account,
+        createdby: session?.user?.name,
+        createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
+        editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
+        camapaignlevel: {
+          // createdby: session?.user?.name,
+          Name: values.Name || "",
+          Objectives: values.Objectives || "",
+          Special_categories: values.Special_categories || "NONE",
+          Bid_strategy: values.Bid_strategy,
+          Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
+          Status: values.Status,
+          // access_token: imagehash.token,
+          createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
+        },
+      };
+      const onSuccess = (status, response) => {
+        console.log("Upload success:", response);
+      };
 
-    const onError = (status, error) => {
-      console.error("Upload error:", error);
-    };
+      const onError = (status, error) => {
+        console.error("Upload error:", error);
+      };
 
-    console.log("Adsets:", values);
+      console.log("Adsets:", values);
 
-    for (let i = 0; i < values.adsets.length; i++) {
-      let AdsetsData = {};
+      for (let i = 0; i < values.adsets.length; i++) {
+        let AdsetsData = {};
 
-      const imageHashArray = await customRequest(
-        account,
-        values.adsets[i],
-        i,
-        onSuccess,
-        onError,
-        adsets[i].id
-      );
-      console.log("Image Hash Array:", imageHashArray);
-      const addLevelData =
-        imageHashArray && imageHashArray.length > 0
-          ? {
-            AddName: `${values.adsets[i].AddName}` || "",
-            // filename: media.filename,
-            // imag_hash: media.imag_hash,
-            Ads: imageHashArray.map((media) => media.filename),
-            page_id: newPageId,
-            message: values.adsets[i].message,
-            headline: values.adsets[i].headline,
-            Description: values.adsets[i].Description,
-            Caption: values.adsets[i].Caption,
-            Website_URL: values.adsets[i].Website_URL,
-          }
-          : {
-            AddName: `${values.adsets[i].AddName}` || "",
-            Ads: [],
-            page_id: newPageId || "",
-            message: values.adsets[i].message || "",
-            headline: values.adsets[i].headline || "",
-            Description: values.adsets[i].Description || "",
-            Caption: values.adsets[i].Caption || "",
-            Website_URL: values.adsets[i].Website_URL || "",
-          };
+        const imageHashArray = await customRequest(
+          account,
+          values.adsets[i],
+          i,
+          onSuccess,
+          onError,
+          adsets[i].id
+        );
+        console.log("Image Hash Array:", imageHashArray);
+        const addLevelData =
+          imageHashArray && imageHashArray.length > 0
+            ? {
+              AddName: `${values.adsets[i].AddName}` || "",
+              // filename: media.filename,
+              // imag_hash: media.imag_hash,
+              Ads: imageHashArray.map((media) => media.filename),
+              page_id: newPageId,
+              message: values.adsets[i].message,
+              headline: values.adsets[i].headline,
+              Description: values.adsets[i].Description,
+              Caption: values.adsets[i].Caption,
+              Website_URL: values.adsets[i].Website_URL,
+            }
+            : {
+              AddName: `${values.adsets[i].AddName}` || "",
+              Ads: [],
+              page_id: newPageId || "",
+              message: values.adsets[i].message || "",
+              headline: values.adsets[i].headline || "",
+              Description: values.adsets[i].Description || "",
+              Caption: values.adsets[i].Caption || "",
+              Website_URL: values.adsets[i].Website_URL || "",
+            };
         console.log("Add Level Data:", addLevelData);
         AdsetsData[`adsetlevel_${i + 1}`] = {
           id: uuidv4(),
@@ -5661,10 +5713,10 @@ const CreateCampaignDrawer = ({
           addlevel: addLevelData || [],
         };
         AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
-    }
+      }
       multipleAccountsData.push(AllAdsetsData);
     }
-    
+
     return multipleAccountsData;
   };
 
@@ -7573,260 +7625,7 @@ const CreateCampaignDrawer = ({
                 >
                   <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
                 </Modal>
-
-
-                {/* <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginTop: 8, }}>
-                  <div>
-                    <Select
-                      placeholder="Select report category"
-                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                        } green-border-select`}
-                      value={popupInputs.reportCat || undefined}
-                      optionLabelProp="value"
-                      onChange={(val) => {
-                        setPopupInputs(s => ({ ...s, reportCat: val }));
-                        if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
-                      }}
-                      showSearch
-                      filterOption={(input, option) =>
-                        (option?.name || "").toLowerCase().includes(input.toLowerCase())
-                      }
-                      options={reportCategories.map(c => ({
-                        value: c.name,
-                        name: c.name,
-                        id: c.categoryId,
-
-                        label: (
-                          <div style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            gap: 8
-
-                          }}>
-
-                            <span style={{
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              maxWidth: 200
-                            }}>
-                              {c.name}
-                            </span>
-                            <span style={{ display: "flex", gap: 10 }}>
-                              <FaPenToSquare
-                                style={{ fontSize: 12 }}
-                                title="Edit"
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setRCurrentCategory(c);
-                                  setREditedName(c.name);
-                                  setREditModalVisible(true);
-                                }}
-                              />
-                              <FaTrashCan
-                                style={{ fontSize: 12, color: "#EC7117" }}
-                                title="Delete"
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setRCurrentCategory(c);
-                                  setRDeleteModalVisible(true);
-                                }}
-                              />
-                            </span>
-                          </div>
-                        )
-                      }))}
-
-                      style={{ width: 240 }}
-                      dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
-                      dropdownRender={(menu) => (
-                        <div>
-                          {menu}
-                          <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
-                            <Input
-                              size="small"
-                              placeholder="New report category"
-                              value={newReportCategory}
-                              onChange={(e) => setNewReportCategory(e.target.value)}
-                              onPressEnter={addReportCategory}
-                              className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                            />
-                            <Button
-                              size="small"
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={addReportCategory}
-                              style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    />
-                    {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
-                  </div>
-                  <div>
-                    <Select
-                      placeholder="Select template category"
-                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
-                      dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
-                      value={popupInputs.input1 || undefined}
-                      style={{ width: 240 }}
-                      onChange={(val) => {
-                        setPopupInputs((s) => ({ ...s, input1: val }));
-                        if (errors.input1) setErrors((e) => ({ ...e, input1: "" }));
-                      }}
-                      showSearch
-                      optionLabelProp="value"
-                      filterOption={(input, option) =>
-                        (option?.name || "").toLowerCase().includes(input.toLowerCase())
-                      }
-                      options={categories.map((c) => ({
-                        value: c.name,
-                        name: c.name,
-                        id: c.categoryId,
-                        label: (
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                            <span
-                              style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}
-                              title={c.name}
-                            >
-                              {c.name}
-                            </span>
-                            <span style={{ display: "flex", gap: 10 }}>
-                              <FaPenToSquare
-                                style={{ fontSize: 12, cursor: "pointer" }}
-                                title="Edit"
-                                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setCurrentCategory(c);
-                                  setEditedName(c.name);
-                                  setEditModalVisible(true);
-                                }}
-                              />
-                              <FaTrashCan
-                                style={{ fontSize: 12, color: "#EC7117", cursor: "pointer" }}
-                                title="Delete"
-                                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setCurrentCategory(c);
-                                  setDeleteModalVisible(true);
-                                }}
-                              />
-                            </span>
-                          </div>
-                        ),
-
-                      }))}
-                      dropdownRender={(menu) => (
-                        <div>
-                          {menu}
-                          <div
-                            style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}
-
-                          >
-                            <Input
-                              size="small"
-                              placeholder="New category"
-                              value={newCategory}
-                              onChange={(e) => setNewCategory(e.target.value)}
-                              onPressEnter={(e) => { e.preventDefault(); addCategory(); }}
-                              className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                            />
-                            <Button
-                              size="small"
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
-                              style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    />
-
-                    {errors.input1 && <div style={{ color: "red", fontSize: 12 }}>{errors.input1}</div>}
-
-
-
-                  </div>
-                  <Modal
-                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                      }`}
-                    title="Edit Category"
-                    visible={editModalVisible}
-                    onOk={async () => {
-                      if (editedName.trim() && currentCategory) {
-                        await renameCategory(currentCategory.categoryId, editedName.trim());
-                        setEditModalVisible(false);
-                        setEditedName("");
-                        setCurrentCategory(null);
-                      }
-                    }}
-                    onCancel={() => {
-                      setEditModalVisible(false);
-                      setEditedName("");
-                      setCurrentCategory(null);
-                    }}
-                    okText="Save"
-                  >
-                    <Input
-                      value={editedName}
-                      onChange={(e) => setEditedName(e.target.value)}
-                      className={
-                        theme === "dark"
-                          ? "custom-input-dark"
-                          : "custom-input-light"
-                      }
-
-                    />
-                  </Modal>
-                  <Modal
-                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                      }`}
-                    title="Delete Category"
-                    visible={deleteModalVisible}
-                    onOk={async () => {
-                      if (currentCategory) {
-                        await deleteCategory(currentCategory.categoryId);
-                        setDeleteModalVisible(false);
-                        setCurrentCategory(null);
-                      }
-                    }}
-                    onCancel={() => {
-                      setDeleteModalVisible(false);
-                      setCurrentCategory(null);
-                    }}
-                    okText="Delete"
-                    okButtonProps={{ danger: true }}
-                  >
-                    <p>Are you sure you want to delete the category "{currentCategory?.name}"?</p>
-                  </Modal>
-
-                  <div>
-                    <Input
-                      placeholder="Template Name"
-                      value={popupInputs.input2}
-                      onChange={(e) => setPopupInputs((s) => ({ ...s, input2: e.target.value }))}
-                      status={errors.input2 ? "error" : ""}
-                      className={
-                        theme === "dark"
-                          ? "custom-input-dark"
-                          : "custom-input-light"
-                      }
-                    />
-                    {errors.input2 && <div style={{ color: "red", fontSize: 12 }}>{errors.input2}</div>}
-                  </div>
-
-
-                </div> */}
-
-
-                <div style={{ display: 'flex', marginTop: '10px' }}>
+           <div style={{ display: 'flex', marginTop: '10px' }}>
                   <Button
                     type="primary"
                     style={{
@@ -7914,7 +7713,7 @@ const CreateCampaignDrawer = ({
                           className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                           dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
                           value={popupInputs.input1 || undefined}
-                          style={{ width: 240 }}
+                          style={{ width: 280 }}
                           onChange={(val) => {
                             setPopupInputs((s) => ({ ...s, input1: val }));
                             if (errors.input1) setErrors((e) => ({ ...e, input1: "" }));
@@ -7925,16 +7724,13 @@ const CreateCampaignDrawer = ({
                             (option?.name || "").toLowerCase().includes(input.toLowerCase())
                           }
                           options={categories.map((c) => ({
-                            value: c.name,
+                            value: `${c.name} - ${c.accountNumber}`,
                             name: c.name,
                             id: c.categoryId,
                             label: (
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                                <span
-                                  style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}
-                                  title={c.name}
-                                >
-                                  {c.name}
+                                <span title={`${c.name} - ${c.accountNumber}`}>
+                                  {c.name} - {c.accountNumber}
                                 </span>
                                 <span style={{ display: "flex", gap: 10 }}>
                                   <FaPenToSquare
