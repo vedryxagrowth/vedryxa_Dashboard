@@ -4518,49 +4518,50 @@ const CreateCampaignDrawer = ({
   //     message.error("An error occurred while deleting");
   //   }
   // };
-const deleteDraft = async (accountNumber, draftId) => {
-  if (!accountNumber || !draftId) {
-    message.error("Missing account number or draft id");
-    return;
-  }
+  const deleteDraft = async (accountNumber, draftId) => {
+    if (!accountNumber || !draftId) {
+      message.error("Missing account number or draft id");
+      return;
+    }
 
-  const resp = await fetch("http://localhost:4500/api/deleteDraft", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: token,
-    },
-    body: JSON.stringify({ accountNumber, draftId }),
-  });
+    const resp = await fetch("http://localhost:4500/api/deleteDraft", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accountNumber, draftId }),
+    });
 
-  const data = await resp.json().catch(() => ({}));
+    const data = await resp.json().catch(() => ({}));
 
-  if (resp.ok && data.ok) {
-    setDraftsData(prev =>
-      prev.filter(
-        d =>!(
+    if (resp.ok && data.ok) {
+
+      setDraftsData(prev =>
+        prev.filter(
+          d => !(
             String(d.accountNumber) === String(accountNumber) &&
             String(d.draftId) === String(draftId)
           )
-      )
-    );
-    message.success("Draft deleted successfully");
-  } else {
-    message.error(data.message || "Failed to delete draft");
-  }
-};
+        )
+      );
+      message.success("Draft deleted successfully");
+    } else {
+      message.error(data.message || "Failed to delete draft");
+    }
+  };
 
-  const handleDelete = (Account_Number,draftId) => {
-    setDeleteModal({ visible: true, id: draftId ,Account_Number});
+  const handleDelete = (Account_Number, draftId) => {
+    setDeleteModal({ visible: true, id: draftId, Account_Number });
   };
 
   const onConfirmDelete = async () => {
     try {
       setDeleting(true);
-      await deleteDraft(deleteModal.Account_Number,deleteModal.id);
+      await deleteDraft(deleteModal.Account_Number, deleteModal.id);
     } finally {
       setDeleting(false);
-      setDeleteModal({ visible: false, id: null ,Account_Number:null});
+      setDeleteModal({ visible: false, id: null, Account_Number: null });
     }
   };
 
@@ -6778,7 +6779,7 @@ const deleteDraft = async (accountNumber, draftId) => {
               (option?.name || "").toLowerCase().includes(input.toLowerCase())
             }
             options={reportCategories.map(c => ({
-              value: `${c.name} - ${c.accountNumber}`,
+              value: `${c.name}`,
               name: c.name,
               id: c.categoryId,
 
@@ -7907,12 +7908,17 @@ const deleteDraft = async (accountNumber, draftId) => {
                             (option?.name || "").toLowerCase().includes(input.toLowerCase())
                           }
                           options={categories.map((c) => ({
-                            value: `${c.name} - ${c.accountNumber}`,
+                            value: `${c.name}`,
                             name: c.name,
                             id: c.categoryId,
                             label: (
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                                <span title={`${c.name} - ${c.accountNumber}`}>
+                                <span style={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 200
+                                }} title={`${c.name} - ${c.accountNumber}`}>
                                   {c.name} - {c.accountNumber}
                                 </span>
                                 <span style={{ display: "flex", gap: 10 }}>
