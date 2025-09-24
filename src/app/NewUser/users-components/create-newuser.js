@@ -6,6 +6,18 @@ import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 
 const Createnewuser = ({ visible, onClose, refreshUsers }) => {
+    const { userdetails } = useTokenContext();
+    if (!userdetails?.adAccounts) {
+        return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ padding: '24px' }}>
+                <Skeleton active paragraph={{ rows: 10 }} />
+            </div>
+            {/* <Flex align="center" gap="middle">
+                    <Spin size="large" />
+                </Flex> */}
+        </div>;
+    }
+    console.log(userdetails);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -25,8 +37,9 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
 
     // const availableNetworks = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic1", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !selectedNetworks.includes(network));
     const handleAddAccount = () => {
-        if (availableNetworks.length > 0) {
+        if (availableNetworks?.length > 0 && (availableNetworks?.length !== additionalAccounts?.length)) {
             setAdditionalAccounts([...additionalAccounts, { network: '', inputs: [''] }]);
+
         }
     };
 
@@ -89,19 +102,27 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
     // }, []);
 
     useEffect(() => {
-        const fetchNetworks = async () => {
-            try {
-                const res = await apiClient.get("/networks");
+        if (userdetails?.role !== "Special_User") {
+            const fetchNetworks = async () => {
+                try {
+                    const res = await apiClient.get("/networks");
 
-                // ✅ ensure it's an array before setting
-                setAvailableNetworks(Array.isArray(res.data) ? res.data : []);
-            } catch (err) {
-                console.error("Error fetching networks:", err);
+                    // ✅ ensure it's an array before setting
+                    setAvailableNetworks(Array.isArray(res.data) ? res.data : []);
+                } catch (err) {
+                    console.error("Error fetching networks:", err);
+                }
+            };
+
+            fetchNetworks()
+        } else {
+            const networks = []
+            for (const [network, value] of Object.entries(userdetails?.adAccounts)) {
+                networks.push(network)
             }
-        };
-
-        fetchNetworks();
-    }, []);
+            setAvailableNetworks(networks);
+        }
+    }, [visible]);
 
     const submitForm = async (values) => {
         Modal.confirm({
@@ -218,9 +239,15 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
-                        <Select.Option value="Revenue_Partner">Revenue_Partner</Select.Option>
-                        <Select.Option value="Admin">Admin</Select.Option>
-                        <Select.Option value="Manager">Manager</Select.Option>
+                        {userdetails.role !== "Special_User" && (
+                            <Select.Option value="Revenue_Partner">Revenue_Partner</Select.Option>
+                        )}
+                        {userdetails.role !== "Special_User" && (
+                            <Select.Option value="Admin">Admin</Select.Option>
+                        )}
+                        {userdetails.role !== "Special_User" && (
+                            <Select.Option value="Manager">Manager</Select.Option>
+                        )}
                     </Select>
                 </Form.Item>
 
@@ -243,11 +270,16 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                                             value={account.network}
                                             onChange={(value) => handleNetworkChange(accountIndex, value)}
                                         >
-                                            {availableNetworks.map((network) => (
-                                                <Select.Option key={network} value={network}>
-                                                    {network}
-                                                </Select.Option>
-                                            ))}
+                                            {availableNetworks
+                                                // 👇 Filter so that only unselected networks OR the current one is visible
+                                                .filter(network =>
+                                                    !selectedNetworks.includes(network) || network === account.network
+                                                )
+                                                .map((network) => (
+                                                    <Select.Option key={network} value={network}>
+                                                        {network}
+                                                    </Select.Option>
+                                                ))}
                                         </Select>
                                         <div className='add-account-container' style={{ width: '100%', padding: '0px', margin: '0px' }}>
                                             {account.inputs.map((input, inputIndex) => (

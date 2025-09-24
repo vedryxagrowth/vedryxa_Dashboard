@@ -1,12 +1,12 @@
- "use client";
+"use client";
 import { useState, useEffect, useRef } from "react";
 import { Form, Input, Button, Drawer, Modal, message, Select } from "antd";
 import axios from "axios";
 import { useTokenContext } from '../../components/parent';
- 
+
 const { Option } = Select;
 import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
- 
+
 const timezones = [
   "UTC",
   "EEST",
@@ -24,7 +24,7 @@ const timezones = [
   "HST",
   "EST",
 ];
- 
+
 const timeZoneFullNames = {
   EDT: "America/New_York",
   UTC: "Atlantic/Azores",
@@ -42,7 +42,7 @@ const timeZoneFullNames = {
   HST: "Pacific/Honolulu",
   EST: "America/Toronto",
 };
- 
+
 const timeZoneShortNames = {
   "America/New_York": "EDT",
   "Atlantic/Azores": "UTC",
@@ -60,7 +60,7 @@ const timeZoneShortNames = {
   "Pacific/Honolulu": "HST",
   "America/Toronto": "EST",
 };
- 
+
 const availableNetworks = [
   "MEDIA_DOT_NET",
   "MEDIA_DOT_NET_BING",
@@ -72,8 +72,8 @@ const availableNetworks = [
   "Rsoc",
   "Domain Active",
 ];
- 
-const EditAccountAccess = ({ editeddata, visible, onClose }) => {
+
+const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [BMName, setBMName] = useState("");
@@ -83,8 +83,9 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   const [newValue, setNewValue] = useState("");
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [isCustomBMName, setIsCustomBMName] = useState(false);
- 
+
   const [isVisibleBMId, setIsVisibleBMId] = useState(null);
+  const [uniquePartners, setUniquePartners] = useState([]);
   const [options, setOptions] = useState([
     "Winkleads Search",
     "MODO LEO BM X1",
@@ -96,8 +97,8 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   const containerRef = useRef(null);
   const token = localStorage.getItem("token");
   console.log(editeddata, "edit");
- 
- 
+
+
   useEffect(() => {
     if (editeddata) {
       form.setFieldsValue({
@@ -109,11 +110,11 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
         BMName: editeddata?.BMName || ""
       });
       setBMName(editeddata.BMName || "");
- 
+
     }
   }, [editeddata, form]);
- 
- 
+
+
   const onFinish = async (values) => {
     try {
       const newValues = {
@@ -128,7 +129,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
         "/updateAccount/",
         { newAccount: newValues }
       );
- 
+
       if (response.status === 200) {
         message.success("Account Updated successfully");
         form.resetFields();
@@ -144,7 +145,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   const handleCancel = () => {
     setIsModalVisible(false);
   };
- 
+
   const showModal = () => {
     setIsModalVisible(true);
   };
@@ -156,9 +157,13 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   }
   useEffect(() => {
     if (visible) {
-      functionCallBMNames()
+      const uniqueBMName = [...new Set(AccountsData?.map(item => item?.BMName).filter(val => val && val.trim() !== ""))].sort((a, b) => a.localeCompare(b));
+      const uniquePartners = [...new Set(AccountsData?.map(item => item?.revenuePartner).filter(val => val && val.trim() !== ""))].sort((a, b) => a.localeCompare(b));
+      setUniquePartners(uniquePartners);
+      setOptions(uniqueBMName);
+      setNewOptions(uniqueBMName);
     }
-  }, [visible]);
+  }, [visible, AccountsData]);
   const handleAddNewValue = () => {
     if (newValue && !options.includes(newValue)) {
       setOptions([...options, newValue]);
@@ -213,7 +218,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               <Option value="Google">Google</Option>
             </Select>
           </Form.Item>
- 
+
           <Form.Item
             label="Spend Account ID"
             name="accountNumber"
@@ -221,23 +226,23 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           >
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
- 
+
           <Form.Item label="Account Name" name="accountName">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
- 
+
           <Form.Item label="Pixel ID" name="pixelID">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
- 
+
           <Form.Item label="Page ID" name="pageID">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
- 
+
           <Form.Item label="Page Name" name="pageName">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
- 
+
           <Form.Item label="Agency Name" name="AgencyName">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
@@ -248,6 +253,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           >
             <div ref={containerRef} style={{ display: "flex" }}>
               <Select
+                showSearch
                 placeholder="Select or add a value"
                 value={BMName}
                 onChange={(value) => {
@@ -255,7 +261,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
                   form.setFieldsValue({
                     BMName: value,
                     BMId: options.includes(value) ? undefined : ""
-                                    });
+                  });
                 }}
                 options={options.map((opt) => ({ label: opt, value: opt }))}
                 style={{ flex: 1 }}
@@ -268,7 +274,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               </Button>
             </div>
           </Form.Item>
- 
+
           {/* Modal for adding new BM Name */}
           <Modal
             title="Add new value"
@@ -294,7 +300,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               onChange={(e) => setNewValue(e.target.value)}
             />
           </Modal>
- 
+
           {!newOptions.includes(BMName) && (
             <Form.Item
               label="BM ID"
@@ -311,8 +317,8 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               />
             </Form.Item>
           )}
- 
- 
+
+
           <Form.Item
             label="Time Zone"
             name="timeZone"
@@ -332,7 +338,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               }))}
             />
           </Form.Item>
- 
+
           <Form.Item
             label="Status"
             name="status"
@@ -347,7 +353,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               <Option value="InActive">InActive</Option>
             </Select>
           </Form.Item>
- 
+
           <Form.Item
             label="Revenue Partner"
             name="revenuePartner"
@@ -362,21 +368,21 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               }}
               placeholder="Select Revenue Partner"
               dropdownClassName={theme === 'dark' && "custom-dropdown"}
-              options={availableNetworks.map((item) => ({
+              options={uniquePartners.map((item) => ({
                 value: item,
                 label: item,
               }))}
             />
           </Form.Item>
- 
+
           <Form.Item label="Media Buyer" name="MediaBuyerName">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
- 
+
           <Form.Item label="Holder" name="Holder">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
- 
+
           <Form.Item>
             <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={showModal}>
               Submit
@@ -384,7 +390,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           </Form.Item>
         </Form>
       </Drawer>
- 
+
       <Modal
         title="Confirmation"
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
@@ -400,5 +406,5 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
     </>
   );
 };
- 
+
 export default EditAccountAccess;
