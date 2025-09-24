@@ -3053,7 +3053,7 @@ const CreateCampaignDrawer = ({
     { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
   ]);
   const [creativeIndex, setCreativeIndex] = useState(0);
-  const selectedRef = useRef({});
+  const selectedRef = useRef(null);
   const newSelectedRef = useRef(null);
   const { theme } = useTokenContext();
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
@@ -3171,7 +3171,7 @@ const CreateCampaignDrawer = ({
     const accountArray = Array.isArray(account) ? account : [account];
 
     (async () => {
-      const resp = await fetch(`http://localhost:4500/api/getcategories`, {
+      const resp = await fetch(`https://www.testapi.adsgoat.in/api/getcategories`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -3193,7 +3193,7 @@ const CreateCampaignDrawer = ({
 
     const accounts = Array.isArray(account) ? account : [account];
 
-    const resp = await fetch("http://localhost:4500/api/categories", {
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/newcategories", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -3219,7 +3219,7 @@ const CreateCampaignDrawer = ({
     const deleted = categories.find(c => c.categoryId === catId);
 
     const resp = await fetch(
-      `http://localhost:4500/api/categories/${accountNumber}/${catId}`,
+      `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
       {
         method: "DELETE",
         headers: { Authorization: token },
@@ -3248,10 +3248,13 @@ const CreateCampaignDrawer = ({
     const clean = newName?.trim();
     if (!catId || !clean || !accountNumber) return;
 
-    const oldName = categories.find(c => c.categoryId === catId)?.name;
+    // const oldName = categories.find(c => c.categoryId === catId)?.name;
+     const oldName = categories.find(
+      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+    )?.name;
 
     const resp = await fetch(
-      `http://localhost:4500/api/categories/${accountNumber}/${catId}`,
+      `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
@@ -3282,7 +3285,7 @@ const CreateCampaignDrawer = ({
     const accountArray = Array.isArray(account) ? account : [account];
 
     (async () => {
-      const resp = await fetch(`http://localhost:4500/api/getreportcategories`, {
+      const resp = await fetch(`https://www.testapi.adsgoat.in/api/getreportcategories`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -3305,7 +3308,7 @@ const CreateCampaignDrawer = ({
 
     const accounts = Array.isArray(account) ? account : [account];
 
-    const resp = await fetch("http://localhost:4500/api/reportcategory", {
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/newreportcategory", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -3346,7 +3349,7 @@ const CreateCampaignDrawer = ({
     }
 
     const resp = await fetch(
-      `http://localhost:4500/api/reportcategory/${accountNumber}/${catId}`,
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
@@ -3376,7 +3379,7 @@ const CreateCampaignDrawer = ({
     if (!catId || !accountNumber) return;
 
     const resp = await fetch(
-      `http://localhost:4500/api/reportcategory/${accountNumber}/${catId}`,
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
       { method: "DELETE", headers: { Authorization: token } }
     );
     const json = await resp.json().catch(() => ({}));
@@ -3533,7 +3536,7 @@ const CreateCampaignDrawer = ({
         // check duplicate template name
 
 
-        await fetch("http://localhost:4500/api/submitDraftDataNew", {
+        await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -4459,8 +4462,8 @@ const CreateCampaignDrawer = ({
 
     try {
       const res = await axios.post(
-        "http://localhost:4500/api/newGetDraftData",
-        { accounts }, 
+        "https://www.testapi.adsgoat.in/api/newGetDraftData",
+        { accounts },
         {
           headers: { Authorization: token },
           validateStatus: () => true,
@@ -4524,7 +4527,7 @@ const CreateCampaignDrawer = ({
       return;
     }
 
-    const resp = await fetch("http://localhost:4500/api/deleteDraft", {
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/deleteDraft", {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -4574,6 +4577,7 @@ const CreateCampaignDrawer = ({
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
+      accountNumber: draft.Account_Number
     };
     setPopupInputs({ input1: draft.Category || "", input2: draft.Draft_Name || "" });
     setIsEditingDraft(true);
@@ -4628,61 +4632,78 @@ const CreateCampaignDrawer = ({
   const handleSaveEditedDraft = async () => {
     const trimmedCat = popupInputs.input1.trim();
     const trimmedName = popupInputs.input2.trim();
-
-    // Required field check
     const newErrors = {
       input1: trimmedCat ? "" : "Template category is required",
       input2: trimmedName ? "" : "Template name is required",
     };
     setErrors(newErrors);
-    if (Object.values(newErrors).some((msg) => msg !== "")) return Promise.reject();
+    if (Object.values(newErrors).some((msg) => msg !== "")) return;
 
-    // 🔑 Duplicate check but ignore the draft we are editing
     const isDuplicate = (draftsData || []).some(
       (d) =>
         d.Draft_Name?.trim().toLowerCase() === trimmedName.toLowerCase() &&
-        d.draftId !== selectedRef.current?.Draft_Id   // 👈 skip current draft
+        d.draftId !== selectedRef.current?.Draft_Id
     );
     if (isDuplicate) {
       setErrors((e) => ({ ...e, input2: "Template name already exists" }));
-      return Promise.reject();
+      return;
     }
-    if (!selectedRef.current?.Draft_Id) {
+
+  
+    if (!selectedRef.current?.Draft_Id || !selectedRef.current?.accountNumber) {
       message.error("No draft selected to edit");
-      return
+      return;
     }
 
     try {
       setConfirmLoading(true);
       const allValues = form.getFieldsValue(true);
-      const draftData = await MultipleAdsetsDraftFetching(allValues);
-
+      const draftData = await MultipleAdsetsDraftFetching(allValues, selectedRef.current.accountNumber);
+      if (!draftData) {
+        message.error("Draft data not found for selected account");
+        setConfirmLoading(false);
+        return;
+      }
       const totalDraftData = {
         Category: popupInputs.input1,
         Draft_Name: popupInputs.input2,
         ...draftData,
       };
+      const selectedAccountNumber = selectedRef.current.accountNumber;
 
+      let filteredPayload;
+      if (Array.isArray(totalDraftData)) {
+        filteredPayload = totalDraftData.find(
+          (d) => d.Account_Number === selectedAccountNumber
+        );
+      } else {
+        filteredPayload = Object.values(totalDraftData).find(
+          (d) => d.Account_Number === selectedAccountNumber
+        );
+      }
 
-      const resp = await fetch("http://localhost:4500/api/updateDraftSmart", {
+      if (!filteredPayload) {
+        message.error("Draft data not found for the selected account");
+        setConfirmLoading(false);
+        return;
+      }
+      const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
         body: JSON.stringify({
-          accountNumber:account,
+          accountNumber: selectedAccountNumber, 
           draftId: selectedRef.current.Draft_Id,
-          payload: totalDraftData,
+          payload: filteredPayload,              
         }),
       });
 
       const json = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(json.message || `Update failed (${resp.status})`);
-
       message.open({
         type: 'success',
         content: "Draft updated successfully",
         className: theme === 'dark' ? 'dark-message' : '',
-      })
-
+      });
       await postDraftSaveCleanup();
 
     } catch (err) {
@@ -4692,6 +4713,7 @@ const CreateCampaignDrawer = ({
       setConfirmLoading(false);
     }
   };
+
 
   const postDraftSaveCleanup = async () => {
 
@@ -5559,7 +5581,7 @@ const CreateCampaignDrawer = ({
         Account_Number: account,
         Approval: "PENDING_APPROVAL",
         fbstatus: "No-Live",
-        Category : selectedCategory,
+        Category: selectedCategory,
         camapaignlevel: {
           createdby: session?.user?.name,
           Name: values.Name,
@@ -6697,13 +6719,11 @@ const CreateCampaignDrawer = ({
     if (!draft) return;
 
     console.log("Selected Draft:", draft);
-
-    // Use draft directly (no .data)
     setFormValuesFromDraft(draft);
-
-    selectedRef.current = {
+      selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
+      accountNumber: draft.Account_Number
     };
 
     newSelectedRef.current = draft.Draft_Name;
