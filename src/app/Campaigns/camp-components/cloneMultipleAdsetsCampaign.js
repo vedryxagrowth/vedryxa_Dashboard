@@ -7465,51 +7465,51 @@ const CloneMultipleAdsetCampaignDrawer = ({
 
     console.log("Campaign Data:", campaignData);
 
-    // try {
-    //   if (campaignData) {
-    //     // console.log("Campaign Data:", campaignData);
-    //     //https://www.testapi.adsgoat.in
-    //     const response = await fetch(
-    //       "https://www.testapi.adsgoat.in/api/newsubmitFormData",
-    //       {
-    //         method: "POST",
-    //         headers: {
-    //           "Content-Type": "application/json",
-    //           Authorization: token,
-    //         },
-    //         body: JSON.stringify(campaignData),
-    //       }
-    //     );
+    try {
+      if (campaignData) {
+        // console.log("Campaign Data:", campaignData);
+        //https://www.testapi.adsgoat.in
+        const response = await fetch(
+          "https://www.testapi.adsgoat.in/api/newsubmitFormData",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+            body: JSON.stringify(campaignData),
+          }
+        );
 
-    //     if (response.ok) {
-    //       message.open({
-    //         type: 'success',
-    //         content: "Campaign created successfully",
-    //         className: theme === 'dark' ? 'dark-message' : '',
-    //       })
-    //       console.log("Form data submitted successfully");
-    //       setLoading(false); // Stop the spinner
-    //       setSelectedFilesFromCreatives({});
-    //       setSelectedFilesFromMedia({});
-    //       setSelectedFiles({});
-    //       onClose();
-    //       setSelectedPositions({});
-    //       setAdsets([
-    //         { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
-    //       ]);
-    //       isManual !== "manual" && setIsManual(false);
-    //       newSelectedRef.current = null; // Reset the newSelectedRef
-    //       changeRRefrst()
-    //     } else {
-    //       console.error("Failed to submit form data");
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error("Error during campaign creation:", error);
-    //   message.error("An error occurred while creating the campaign.");
-    // } finally {
-    //   setLoading(false); // Stop the spinner after the process is complete
-    // }
+        if (response.ok) {
+          message.open({
+            type: 'success',
+            content: "Campaign created successfully",
+            className: theme === 'dark' ? 'dark-message' : '',
+          })
+          console.log("Form data submitted successfully");
+          setLoading(false); // Stop the spinner
+          setSelectedFilesFromCreatives({});
+          setSelectedFilesFromMedia({});
+          setSelectedFiles({});
+          onClose();
+          setSelectedPositions({});
+          setAdsets([
+            { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
+          ]);
+          isManual !== "manual" && setIsManual(false);
+          newSelectedRef.current = null; // Reset the newSelectedRef
+          changeRRefrst()
+        } else {
+          console.error("Failed to submit form data");
+        }
+      }
+    } catch (error) {
+      console.error("Error during campaign creation:", error);
+      message.error("An error occurred while creating the campaign.");
+    } finally {
+      setLoading(false); // Stop the spinner after the process is complete
+    }
     //efgh
 
     // if (formValues) {

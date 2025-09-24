@@ -4460,7 +4460,7 @@ const CreateCampaignDrawer = ({
     try {
       const res = await axios.post(
         "http://localhost:4500/api/newGetDraftData",
-        { accounts }, // 👈 send array (works for single & multiple)
+        { accounts }, 
         {
           headers: { Authorization: token },
           validateStatus: () => true,
@@ -4668,7 +4668,7 @@ const CreateCampaignDrawer = ({
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
         body: JSON.stringify({
-          accountNumber: account,
+          accountNumber:account,
           draftId: selectedRef.current.Draft_Id,
           payload: totalDraftData,
         }),
@@ -5559,6 +5559,7 @@ const CreateCampaignDrawer = ({
         Account_Number: account,
         Approval: "PENDING_APPROVAL",
         fbstatus: "No-Live",
+        Category : selectedCategory,
         camapaignlevel: {
           createdby: session?.user?.name,
           Name: values.Name,
