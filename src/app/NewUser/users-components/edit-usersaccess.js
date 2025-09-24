@@ -8,7 +8,7 @@ import { useTokenContext } from '../../components/parent';
 
 const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // console.log(editeddata, "heyy edit-useraccess page")
-    // console.log(editeddata, "editeddata");
+    console.log(editeddata, "editeddata");
     const userAccess = editeddata?.adAccounts;
     // console.log(userAccess, "adAccounts");
     userAccess !== null && userAccess !== undefined ? Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })) : [];
@@ -19,7 +19,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     }
     // console.log(userName, "userName");
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const { theme } = useTokenContext();
+    const { theme, userdetails } = useTokenContext();
     const [availableNetworks, setAvailableNetworks] = useState([]);
 
 
@@ -79,8 +79,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     }, [additionalAccounts, formAccounts]);
 
     const handleAddAccount = () => {
-        // console.log(AddAccounts, "AddAccounts");
-        if (AddAccounts.length > 1) {
+        console.log(AddAccounts, "AddAccounts");
+        console.log(selectedNetworks);
+        console.log(additionalAccounts);
+        if (selectedNetworks?.length !== availableNetworks?.length) {
+            // additionalAccounts
             const newAccount = { network: '', inputs: [''] };
             // setFormAccounts(prevFormAccounts => [...prevFormAccounts, newAccount]);
             setAdditionalAccounts(prevAdditionalAccounts => [...prevAdditionalAccounts, newAccount]);
@@ -226,7 +229,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // }, [selectedNetworks, token]);
 
     useEffect(() => {
-        const fetchNetworks = async () => {
+        if(userdetails?.role !== "Special_User"){
+            const fetchNetworks = async () => {
             try {
                 const res = await axios.get("https://prodapis.adsgoat.in/networks", {
                     headers: {
@@ -246,7 +250,14 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         };
 
         fetchNetworks();
-    }, [selectedNetworks, token]);
+        }else{
+            const networks  = []
+            for (const [network, value] of Object.entries(userdetails?.adAccounts)) {
+                networks.push(network)
+            }
+            setAvailableNetworks(networks);
+        }
+    }, [visible]);
 
 
     const handleCancel = () => {
@@ -419,8 +430,12 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
-                        <Select.Option value="Admin">Admin</Select.Option>
-                        <Select.Option value="Manager">Manager</Select.Option>
+                        {userdetails?.role !== "Special_User" && (
+                            <Select.Option value="Admin">Admin</Select.Option>
+                        )}
+                        {userdetails?.role !== "Special_User" && (
+                            <Select.Option value="Manager">Manager</Select.Option>
+                        )}
                     </Select>
                 </Form.Item>
                 {/* <Form.Item label="Ad Accounts" name="adAccounts">
@@ -472,11 +487,21 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                 value={account.network}
                                 onChange={(value) => handleNetworkChange(accountIndex, value)}
                             >
-                                {availableNetworks.map((network) => (
+                                {/* {availableNetworks.map((network) => (
                                     <Select.Option key={network} value={network}>
                                         {network}
                                     </Select.Option>
-                                ))}
+                                ))} */}
+                                {availableNetworks
+  .filter(
+    (network) =>
+      !selectedNetworks.includes(network) || network === account.network
+  )
+  .map((network) => (
+    <Select.Option key={network} value={network}>
+      {network}
+    </Select.Option>
+  ))}
                             </Select>
                             <div
                                 style={{

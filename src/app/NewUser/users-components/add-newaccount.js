@@ -46,7 +46,7 @@ const timeZoneFullNames = {
 
 const availableNetworks = ["MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 
-const Newaddaccounts = ({ visible, onClose }) => {
+const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
     const [form] = Form.useForm();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [timeZone, setTimeZone] = useState('UTC');
@@ -64,16 +64,12 @@ const Newaddaccounts = ({ visible, onClose }) => {
     var token = localStorage.getItem("token");
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
+    
+    const [uniquePartners, setUniquePartners] = useState([]);
+   
+    const [options, setOptions] = useState([]);
 
-    const [options, setOptions] = useState([
-        "Winkleads Search",
-        "MODO LEO BM X1",
-    ]);
-
-    const [newOptions, setNewOptions] = useState([
-        "Winkleads Search",
-        "MODO LEO BM X1",
-    ]);
+    const [newOptions, setNewOptions] = useState([]);
     
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newValue, setNewValue] = useState("");
@@ -111,18 +107,24 @@ const Newaddaccounts = ({ visible, onClose }) => {
         form.setFieldsValue({ BMName: BMName });
     }, [BMName, form]);
 
-    const functionCallBMNames = async() =>{
-        const fetchData = await apiClient.get(`/getBMNames/`);
-        const mainData = fetchData.data;
-        setOptions(mainData);
-        setNewOptions(mainData);
-    }
+    // const functionCallBMNames = async() =>{
+    //     const fetchData = await apiClient.get(`/getBMNames/`);
+    //     const mainData = fetchData.data;
+    //     setOptions(mainData);
+    //     setNewOptions(mainData);
+    // }
 
     useEffect(()=>{
         if(visible){
-            functionCallBMNames()
+            const uniqueBMName  = [...new Set(AccountsData?.map(item => item?.BMName).filter(val => val && val.trim() !== ""))].sort((a, b) => a.localeCompare(b));
+            const uniquePartners = [...new Set(AccountsData?.map(item => item?.revenuePartner).filter(val => val && val.trim() !== ""))].sort((a, b) => a.localeCompare(b));
+            setUniquePartners(uniquePartners);
+            setOptions(uniqueBMName);
+            setNewOptions(uniqueBMName);
+            setBMName(uniqueBMName[0])
+            setRevenuePartner(uniquePartners[0])
         }
-    }, [visible]);
+    }, [visible, AccountsData]);
 
     const onFinish = async (values) => {
         try {
@@ -232,6 +234,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     <Form.Item label="BM name" name="BMName">
                         <div ref={containerRef} className='form-item-bmname' style={{display:'flex'}}>
                             <Select
+                                showSearch
                                 placeholder="Select or add a value"
                                 value={BMName}
                                 onChange={onChangeBMName}
@@ -331,9 +334,9 @@ const Newaddaccounts = ({ visible, onClose }) => {
                             }}
                             placeholder="Select Revenue partner"
                             optionFilterProp="label"
-                            defaultValue="MEDIA_DOT_NET"
+                            defaultValue={uniquePartners[0]}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            options={availableNetworks.map((item) => ({
+                            options={uniquePartners.map((item) => ({
                                 value: item,
                                 label: item,
                                 title: ''

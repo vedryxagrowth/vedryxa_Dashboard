@@ -49,7 +49,7 @@ const UsersTable = () => {
         </div>;
     }
 
-    if(userdetails?.role !== "Admin"){
+    if(userdetails?.role !== "Admin" && userdetails?.role !== "Special_User"){
         redirect("/Dashboard");
     };
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
@@ -121,11 +121,11 @@ const UsersTable = () => {
     const items = [
         { key: '1', label: 'Users', content: 'Content for Live data' },
         { key: '2', label: 'Accounts', content: 'Content for Daily data' },
-        { key: '3', label: 'Networks', content: 'Content for Campaign data' },
-        { key: '4', label: 'UrlBuilder', content: 'Content for Campaign data' },
+        (userdetails?.role !== "Special_User") && { key: '3', label: 'Networks', content: 'Content for Campaign data' },
+        (userdetails?.role !== "Special_User") && { key: '4', label: 'UrlBuilder', content: 'Content for Campaign data' },
         {key: '5', label: 'CronDashboard', content: 'Content for Crons'},
-        {key: '6', label: 'Updates', content: 'Content for Updates'}
-    ];
+        (userdetails?.role !== "Special_User") && {key: '6', label: 'Updates', content: 'Content for Updates'}
+    ].filter(Boolean);
 
     const handleTabChange = (key) => {
         // const index = parseInt(key, 10) - 1; // Convert tab key to slide index
@@ -214,8 +214,8 @@ const UsersTable = () => {
                 try {
                     await retryWithDelay(debouncedFetchData);
                     await retryWithDelay(debouncedFetchData1);
-                    await retryWithDelay(debouncedFetchData2);
-                    await retryWithDelay(debouncedFetchData4);
+                    (userdetails?.role !== "Special_User") && await retryWithDelay(debouncedFetchData2);
+                    (userdetails?.role !== "Special_User") && await retryWithDelay(debouncedFetchData4);
                 } catch (error) {
                     console.error('Failed to fetch data:', error);
                 }
@@ -1391,9 +1391,9 @@ const UsersTable = () => {
     return (
         <div style={{height:"100%"}}>
             {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} />}
-            <DynamicNewaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} />
+            <DynamicNewaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} AccountsData={AccountsData} />
             <DynamicEdituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
-            <DynamicEditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} />
+            <DynamicEditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer}  AccountsData={AccountsData} />
             <DynamicEditNetworkAccess editeddata={networkAccessData} visible={networkAccessDrawerkVisible} onClose={onCloseDrawer} />
             <DynamicEditUrlBuilder editeddata={urlBuilderAccessData} visible={urlBuliderAccessDrawerkVisible} onClose={onCloseDrawer} />
 
