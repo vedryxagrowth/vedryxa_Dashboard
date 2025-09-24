@@ -1,20 +1,35 @@
 import React, { useState } from 'react';
-import { Collapse, Select, Button, notification } from 'antd';
+import { Collapse, Select, Button, notification, Skeleton } from 'antd';
 import axios from 'axios';
 import { useTokenContext } from '../components/parent';
 const { Panel } = Collapse;
 const { Option } = Select;
 
 const domainMapping = {
-    FB_Mnet: ["FacebookMnet", "MnetToken", "Mnet", "FbMnet"],
+    FB_Mnet: ["FacebookMnet", "MnetToken", "Mnet", "MnetDaily", "MnetTQ", "FbMnet", "FacebookAdid", "filterFacebookPartners"],
     FB_MnetBing: ["FacebookMnet", "MnetBingToken", "MnetBing", "FbMnetBing"],
     FB_System1: ["System1", "FacebookSystem1", "FbSystem1"],
     FB_Bodies: ["FacebookBodies","BodiesToken", "Bodies", "FbBodies"],
     FB_Enki: ["FacebookEnki", "EnkiJobId", "EnkiLive", "FbEnki"],
     Newsbreak_DA: ["Newsbreak", "DomainActive", "NewsbreakDomain"],
     FB_DomainActive: ["FacebookDomainActive", "DActive", "FbDActive"],
-    FB_Tonic1: ["FacebookTonic1", "Tonic1", "FbTonic1"]
+    FB_Tonic1: ["FacebookTonic1", "Tonic1", "FbTonic1"],
+    FB_TonicRsoc: ["FacebookTonicRsoc", "TonicRsoc", "FbTonicRsoc", "FacebookAdid", "filterFacebookPartners" ],
+    FB_InuvoPrism: ["FacebookInuvoPrisam", "Inuvo_Prism", "FbInuvoPrisam", "Inuvo_PrismDaily", "FbInuvoPrisamDaily"]
 };
+
+const newdomainMapping ={
+    FB_Mnet: ["Mnet", "MnetDaily", "MnetTQ", "FbMnet", "filterFacebookPartners"],
+    FB_MnetBing: ["MnetBing", "FbMnetBing"],
+    FB_System1: ["System1", "FbSystem1"],
+    FB_Bodies: ["Bodies", "FbBodies"],
+    FB_Enki: ["EnkiJobId", "EnkiLive", "FbEnki"],
+    Newsbreak_DA: ["DomainActive", "NewsbreakDomain"],
+    FB_DomainActive: ["DActive", "FbDActive"],
+    FB_Tonic1: ["Tonic1", "FbTonic1"],
+    FB_TonicRsoc: [ "TonicRsoc", "FbTonicRsoc", "FacebookAdid", "filterFacebookPartners"],
+    FB_InuvoPrism: ["Inuvo_Prism", "FbInuvoPrisam", "Inuvo_PrismDaily", "FbInuvoPrisamDaily"]
+}
 
 const daysOptions = [
     { label: 'Today', value: 0 },
@@ -26,15 +41,37 @@ const daysOptions = [
 ];
 
 const RequestComponent = ({ network, adAccounts }) => {
-    const { theme } = useTokenContext();
-    const [selectedPath, setSelectedPath] = useState(domainMapping[network]?.[0]);
+    const { theme, userdetails } = useTokenContext();
+    if (!userdetails?.adAccounts) {
+            return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ padding: '24px' }}>
+                    <Skeleton active paragraph={{ rows: 10 }} />
+                </div>
+                {/* <Flex align="center" gap="middle">
+                    <Spin size="large" />
+                </Flex> */}
+            </div>;
+    }
+    const [selectedPath, setSelectedPath] = useState(userdetails?.role === "Special_User" ? newdomainMapping[network]?.[0] : domainMapping[network]?.[0]);
     const [selectedDays, setSelectedDays] = useState(daysOptions[0].value);
     const [loading, setLoading] = useState(false);
 
     const url = `URL/${selectedPath}?days=${selectedDays}`;
 
-    const handleSubmit = async () => {
-        const url = `https://networks.adsgoat.in/${selectedPath}?days=${selectedDays}`;
+    const filterOption = {
+        FB_Mnet: "MEDIA_DOT_NET",
+        FB_TonicRsoc: "Tonic_Rsoc",
+    };
+
+
+    const handleSubmit = async (network) => {
+        
+        // if (selectedPath === "filterFacebookPartners" || selectedPath === "FacebookAdid") {console.log(filterOption[network])};
+
+        let url = `https://networks.adsgoat.in/${selectedPath}?days=${selectedDays}`;
+        if (selectedPath === "filterFacebookPartners" || selectedPath === "FacebookAdid") {
+            url += `&revenuePartner=${filterOption[network]}`;
+        }
         setLoading(true);
         console.log(`Submitting request to ${url} for network ${network}`);
 
@@ -74,7 +111,11 @@ const RequestComponent = ({ network, adAccounts }) => {
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             title=''
                         >
-                            {domainMapping[network]?.map((path, idx) => (
+                            {userdetails?.role === "Special_User" ? newdomainMapping[network]?.map((path, idx) => (
+                                <Option key={idx} value={path} title=''>
+                                    {path}
+                                </Option>
+                            )) : domainMapping[network]?.map((path, idx) => (
                                 <Option key={idx} value={path} title=''>
                                     {path}
                                 </Option>
@@ -107,7 +148,7 @@ const RequestComponent = ({ network, adAccounts }) => {
                         // type="primary" 
                         style={{ backgroundColor: "#91C25F", color: "black" }}
                         loading={loading} 
-                        onClick={handleSubmit}
+                        onClick={()=>handleSubmit(network)}
                     >
                         {loading ? "Loading" : "Submit"}
                     </Button>

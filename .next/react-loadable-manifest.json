@@ -130,40 +130,28 @@
     "id": 16771,
     "files": [
       "static/chunks/7317.95472d1152d9c59e.js",
-      "static/chunks/6771.012c5f7fb539ae2b.js"
+      "static/chunks/6771.a83f26be4ad93746.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/add-newaccount": {
     "id": 72834,
     "files": [
       "static/chunks/1601-da03c9aceaa056b9.js",
-<<<<<<< HEAD
       "static/chunks/2834.fd1d29469f4e97f3.js"
-=======
-      "static/chunks/2834.d7880906df8bdf85.js"
->>>>>>> DevUi
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/create-newuser": {
     "id": 18718,
     "files": [
       "static/chunks/1601-da03c9aceaa056b9.js",
-<<<<<<< HEAD
       "static/chunks/8718.d8268b21f028dcaf.js"
-=======
-      "static/chunks/8718.4d97b7fc2f7d53fa.js"
->>>>>>> DevUi
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-accountaccess": {
     "id": 88081,
     "files": [
       "static/chunks/1601-da03c9aceaa056b9.js",
-<<<<<<< HEAD
       "static/chunks/8081.ebe0c7353273bc2f.js"
-=======
-      "static/chunks/8081.1c9cec4d42610662.js"
->>>>>>> DevUi
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-network": {
@@ -184,11 +172,7 @@
     "id": 39976,
     "files": [
       "static/chunks/1601-da03c9aceaa056b9.js",
-<<<<<<< HEAD
       "static/chunks/9976.7c8e0417ddf476bb.js"
-=======
-      "static/chunks/9976.8c7c317d0fcc5362.js"
->>>>>>> DevUi
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/updates_notifications": {
@@ -306,7 +290,7 @@
     "files": [
       "static/chunks/8110-ba448725de411535.js",
       "static/chunks/3292-3d5ed52563a1a5bd.js",
-      "static/chunks/1997.b6901606d5c0ce59.js"
+      "static/chunks/1997.11e80f603aebf854.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./SearchFilters": {
