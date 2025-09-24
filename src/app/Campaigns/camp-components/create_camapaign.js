@@ -3087,6 +3087,7 @@ const CreateCampaignDrawer = ({
   const [rCurrentCategory, setRCurrentCategory] = useState(null);
   const [rEditedName, setREditedName] = useState("");
   // const []
+  const [selectedAccount, setSelectedAccount] = useState("ALL");
   const [selectedObjective, setSelectedObjective] = useState("ALL");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [defaultUrlData, setDefaultUrlData] = useState("");
@@ -3159,10 +3160,15 @@ const CreateCampaignDrawer = ({
         selectedObjective && selectedObjective !== "ALL"
           ? draft?.camapaignlevel?.Objectives === selectedObjective
           : true;
+      const matchesAccount =
+        selectedAccount && selectedAccount !== "ALL"
+          ? draft.Account_Number === selectedAccount
+          : true;
 
-      return matchesSearch && matchesCategory && matchesObjective;
+      return matchesSearch && matchesCategory && matchesObjective && matchesAccount;
+
     });
-  }, [draftsData, searchText, selectedCategory, selectedObjective]);
+  }, [draftsData, searchText, selectedCategory, selectedObjective, selectedAccount]);
 
 
   useEffect(() => {
@@ -3249,7 +3255,7 @@ const CreateCampaignDrawer = ({
     if (!catId || !clean || !accountNumber) return;
 
     // const oldName = categories.find(c => c.categoryId === catId)?.name;
-     const oldName = categories.find(
+    const oldName = categories.find(
       c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
     )?.name;
 
@@ -3319,13 +3325,8 @@ const CreateCampaignDrawer = ({
 
     const json = await resp.json();
     if (resp.ok && json.ok) {
-      // Append newly added report categories
       setReportCategories(prev => [...prev, ...json.added]);
-
-      // If you want to auto-select the first new category in your popup
       setPopupInputs(s => ({ ...s, reportCat: json.added[0]?.name || "" }));
-
-      // Reset input + error states
       setNewReportCategory("");
       setErrors(e => ({ ...e, reportCat: "" }));
 
@@ -4581,6 +4582,7 @@ const CreateCampaignDrawer = ({
     };
     setPopupInputs({ input1: draft.Category || "", input2: draft.Draft_Name || "" });
     setIsEditingDraft(true);
+    setSelectedTemplate(null);
   };
   // const handleSaveEditedDraft = async () => {
   //   if (!selectedRef.current?.Draft_Id) {
@@ -4629,6 +4631,8 @@ const CreateCampaignDrawer = ({
   //   }
   // };
 
+
+
   const handleSaveEditedDraft = async () => {
     const trimmedCat = popupInputs.input1.trim();
     const trimmedName = popupInputs.input2.trim();
@@ -4649,7 +4653,7 @@ const CreateCampaignDrawer = ({
       return;
     }
 
-  
+
     if (!selectedRef.current?.Draft_Id || !selectedRef.current?.accountNumber) {
       message.error("No draft selected to edit");
       return;
@@ -4665,9 +4669,7 @@ const CreateCampaignDrawer = ({
         return;
       }
       const totalDraftData = {
-        Category: popupInputs.input1,
-        Draft_Name: popupInputs.input2,
-        ...draftData,
+            ...draftData,
       };
       const selectedAccountNumber = selectedRef.current.accountNumber;
 
@@ -4687,13 +4689,18 @@ const CreateCampaignDrawer = ({
         setConfirmLoading(false);
         return;
       }
+      filteredPayload = {
+        ...filteredPayload,
+        Category: popupInputs.input1,
+        Draft_Name: popupInputs.input2,
+      };
       const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
         body: JSON.stringify({
-          accountNumber: selectedAccountNumber, 
+          accountNumber: selectedAccountNumber,
           draftId: selectedRef.current.Draft_Id,
-          payload: filteredPayload,              
+          payload: filteredPayload,
         }),
       });
 
@@ -4705,7 +4712,7 @@ const CreateCampaignDrawer = ({
         className: theme === 'dark' ? 'dark-message' : '',
       });
       await postDraftSaveCleanup();
-
+     
     } catch (err) {
       console.error("Save draft (edit) error:", err);
       message.error(err?.message || "Failed to update draft");
@@ -4713,16 +4720,12 @@ const CreateCampaignDrawer = ({
       setConfirmLoading(false);
     }
   };
-
-
   const postDraftSaveCleanup = async () => {
-
     await fetchDraftDetails();
     setIsEditingDraft(false);
     selectedRef.current = null;
     newSelectedRef.current = "";
     setPopupInputs({ input1: "", input2: "" });
-    form.resetFields();
     setAdsets([{ id: uuidv4(), AdsetPanelName: "ADSET 1", DailyAdd_amount: 0 }]);
     setSelectedFiles({});
     setSelectedFilesFromCreatives({});
@@ -4746,11 +4749,7 @@ const CreateCampaignDrawer = ({
     setOpenCreativesDrawer(false);
     setIsModalVisible(false);
   };
-  // useEffect(() => {
-  //   if (account && visible) {
-  //     fetchAccountDetails();
-  //   }
-  // }, [account, visible]);
+
   useEffect(() => {
     if (visible && accountNumber) {
       form.setFieldsValue({ Account_Number: accountNumber });
@@ -4765,7 +4764,6 @@ const CreateCampaignDrawer = ({
     }
   }, [account]);
   const handleNameChange = async (e) => {
-    // console.log("Account Number:", accountNumber);
     if (adsets.length === 1) {
       form.setFieldsValue({
         adsets: {
@@ -5470,7 +5468,7 @@ const CreateCampaignDrawer = ({
                 "Content-Type": "application/json",
                 Authorization: token,
               },
-              body: JSON.stringify(campaign),
+              body: JSON.stringify({ ...campaign, Category: selectedCategory }),
             }
           );
         }
@@ -5798,9 +5796,9 @@ const CreateCampaignDrawer = ({
             : "",
           optimization_goal: values.adsets[i].optimization_goal || "",
           billing_event: values.adsets[i].billing_event || "",
-          start_time: moment(values.adsets[i].DatePicker.$d)
-            .tz(imagehash.timeZone)
-            .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+          // start_time: moment(values.adsets[i].DatePicker.$d)
+          //   .tz(imagehash.timeZone)
+          //   .format("YYYY-MM-DDTHH:mm:ssZ"), 
           action_source: values.adsets[i].action_source || "",
           custom_event_type: values.adsets[i].custom_event_type || "",
           pixel_id: newPixelId,
@@ -6720,7 +6718,7 @@ const CreateCampaignDrawer = ({
 
     console.log("Selected Draft:", draft);
     setFormValuesFromDraft(draft);
-      selectedRef.current = {
+    selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
       accountNumber: draft.Account_Number
@@ -6734,6 +6732,17 @@ const CreateCampaignDrawer = ({
 
   const newAccountNumbers = Array.isArray(accountis) ? accountis?.map(acc => ({ value: acc, label: acc })) : [];
   console.log("New Account Numbers:", newAccountNumbers);
+
+  const getAccountDetails = (Account_Number) => {
+    if (!Account_Number) return null;
+
+    const matched = imageHashArray.find(
+      (acc) => acc.accountNumber === Account_Number
+    );
+
+    return matched ? matched : null;
+  };
+
 
 
   return (
@@ -6895,7 +6904,7 @@ const CreateCampaignDrawer = ({
         {/* Search + Filter */}
         <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
           <Input
-            placeholder="Search by category or template name or budget"
+            placeholder="Search..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             style={{ flex: 1 }}
@@ -6905,7 +6914,18 @@ const CreateCampaignDrawer = ({
                 : "custom-input-light"
             }
           />
-
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ marginTop: -20 }}>Accounts</span>
+            <Select
+              placeholder="Filter by Accounts"
+              value={selectedAccount}
+              onChange={(value) => setSelectedAccount(value)}
+              style={{ width: 200 }}
+              options={[{ value: "ALL", label: "All Accounts" }, ...newAccountNumbers]}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+            />
+          </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ marginTop: -20 }}>Objectives</span>
             <Select
@@ -7024,8 +7044,7 @@ const CreateCampaignDrawer = ({
                   }}
                 >
                   <span style={{ color: "#B4B4B4" }}>Account Number</span>
-                  <span
-                    title={draft?.Account_Number ?? "-"}
+                  <div
                     style={{
                       textAlign: "right",
                       minWidth: 0,
@@ -7035,8 +7054,25 @@ const CreateCampaignDrawer = ({
                       overflowWrap: "anywhere",
                     }}
                   >
-                    {draft?.Account_Number ?? "-"}
-                  </span>
+                    {/* Show Account Number */}
+                    <div>{draft?.Account_Number ?? "-"}</div>
+
+                    {/* Show Account Name if matched */}
+                    {getAccountDetails(draft?.Account_Number) && (
+                      <div style={{
+                        textAlign: "right",
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        overflowWrap: "anywhere",
+                      }}>
+                        {getAccountDetails(draft?.Account_Number)?.accountName}
+                      </div>
+                    )}
+                  </div>
+
+
                   <span style={{ color: "#B4B4B4" }}>Category</span>
                   <span
                     title={draft?.Category ?? "-"}
@@ -7088,6 +7124,11 @@ const CreateCampaignDrawer = ({
                     onChangeDraft(draft.draftId);
                     setSelectedTemplate(draft);
                     setIsTemplatesModalOpen(false);
+                    setIsEditingDraft(false);
+                    selectedRef.current = null;
+                    newSelectedRef.current = "";
+                    setPopupInputs({ input1: "", input2: "" });
+
                   }}
                 >
                   Use This Template
