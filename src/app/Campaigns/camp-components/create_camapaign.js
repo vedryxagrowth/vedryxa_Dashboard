@@ -546,7 +546,250 @@ function getPositionsByKeys(keys) {
   const keySet = new Set(keys); // Faster lookup
   return allPositions.filter((pos) => keySet.has(pos.key));
 }
+const AccountForm = ({
+  account,
+  theme,
+  form,
+  network,
+  adset,
+  index,
+  allAccounts,
+  selectedIndex,
+}) => {
 
+  const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
+    useState(false);
+  const [websiteURL, setWebsiteURL] = useState("");
+  const [caption, setCaption] = useState("");
+  const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
+ 
+
+  const onReturnUrl = (text) => {
+    // console.log(text)
+    setWebsiteURL(text)
+    setIsModalVisibleForURLBuilder(false);
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = [...currentAdsets];
+    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+      setCaption(text.split("//")[1].split("/")[0]);
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [account]: {
+          Website_URL: text,
+          Caption: text.split("//")[1].split("/")[0],
+        }
+      };
+    } else {
+      setCaption(text.split("/")[0]);
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [account]: {
+          Website_URL: text,
+          Caption: text.split("/")[0],
+        }
+      };
+    }
+    // Update the form with the new adsets
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
+  }
+
+  const handleCancelForURLBuilder = () => {
+    setIsModalVisibleForURLBuilder(false);
+  }
+
+  const onClickEdit = (index) => {
+    setIsModalVisibleForURLBuilder(true);
+    setDefaultURLBuilder(form.getFieldValue(["adsets", index, account, "Website_URL"]));
+  };
+
+  const onClickSetToAllAccounts = () =>{
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = [...currentAdsets];
+    // if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    //   setCaption(text.split("//")[1].split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("//")[1].split("/")[0],
+    //     }
+    //   };
+    // } else {
+    //   setCaption(text.split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("/")[0],
+    //     }
+    //   };
+    // }
+    for (const newAccount of allAccounts){
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [newAccount]: {
+          Website_URL: websiteURL,
+          Caption: caption,
+        }
+      };
+    }
+    // Update the form with the new adsets
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
+  }
+
+
+  const getUrlBuilder = useMemo(() => {
+    // return (extraString) => {
+    switch (network) {
+      case "FB_Mnet":
+        //defaultValues
+        return (
+          <MnetUrlBuilder defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Tonic1":
+        return (
+          <TonicUrlBuilder
+           defaultValues={defaultURLBuilder}
+            accountis={account}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_System1":
+        return (
+          <System1UrlBuilder
+            defaultValues={defaultURLBuilder}
+            accountis={account}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_DomainActive":
+        return (
+          <DActiveUrlBuilder
+            accountis={account}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+    }
+    // }
+  }, [network, account, defaultURLBuilder, onReturnUrl]);
+
+  // useEffect(() => {
+  //   if (selectedIndex === account) {
+  //     form.validateFields(); // Trigger validation when the form is mounted and visible
+  //   }
+  // }, [selectedIndex, account, form]); // Re-run validation on selection change
+
+  // useEffect(() => {
+  //   // Trigger validation only for the specific fields related to this account
+  //   if (selectedIndex === account) {
+  //     form.validateFields([["adsets", index, account, "Caption"], ["adsets", index, account, "Website_URL"]]); // Validate only relevant fields
+  //   }
+  // }, [selectedIndex, account, index, form]);
+
+  const style = {
+    width: '300vw',
+    height: '300vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  return (
+    <div>
+      {/* <Form
+        form={form}
+        layout="vertical"
+        name="accountForm"
+        // initialValues={{ account }} // Populate form with account data
+      > */}
+      <Form.Item
+        // label="Website URL"
+        label={
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                paddingRight: "50px",
+              }}
+            >
+              <span style={{ color: "#B4B4B4" }}>Website_URL</span>
+            </div>
+            <EditOutlined
+              style={{ cursor: "pointer" }}
+              onClick={() => onClickEdit(index)}
+            />
+
+            <Popconfirm
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                color: theme === "dark" ? "#fff" : "#333",
+              }}
+              description={
+                <div style={{color: theme === "dark" ? "#fff" : "#333"}}>
+                  Are you sure to add website url and display link all accounts?
+                </div>
+              }
+              okText={
+                <div onClick={onClickSetToAllAccounts}>
+                  Yes
+                </div>
+              }
+              cancelText="No"
+            >
+              <Button style={{border: "1px solid #91C25F", color: "#000",              // keep text color fixed
+              backgroundColor: "transparent", marginLeft:"50px"}}>Set to All Accounts</Button>
+            </Popconfirm>
+            {/* <div style={style}> */}
+              {/* <Popconfirm title="Thanks for using antd. Have a nice day !" open>
+                <Button type="primary">Set to All Accounts</Button>
+              </Popconfirm> */}
+            {/* </div> */}
+            {/* <Button style={{marginLeft:"50px"}} >Set to All Accounts</Button> */}
+          </div>
+        }
+        name={["adsets", index, account, "Website_URL"]}
+        rules={[{ required: true, message: `Please input Website URL! for ${account}` }]}
+        preserve={true}
+      >
+        <TextArea placeholder="Website URL" autoSize={{ minRows: 5, maxRows: 15 }} />
+      </Form.Item>
+
+      <Form.Item
+        label="Display Link"
+        name={["adsets", index, account, "Caption"]}
+        rules={[{ required: true, message: `Please input Display Link! for ${account}` }]}
+        preserve={true}
+      >
+        <TextArea placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
+      </Form.Item>
+
+      <Modal
+        title="URL Builder"
+        visible={isModalVisibleForURLBuilder}
+        onCancel={handleCancelForURLBuilder}
+        footer={null}
+        width="80%"
+        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+      >
+        {getUrlBuilder}
+      </Modal>
+      {/* </Form> */}
+    </div>
+  );
+};
 const AdsetComponent = ({
   index,
   adset,
@@ -605,6 +848,7 @@ const AdsetComponent = ({
   const [creativeIndex, setCreativeIndex] = useState(null);
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
+   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -2538,7 +2782,7 @@ const AdsetComponent = ({
                     }
                   />
                 </Form.Item>
-                <Form.Item
+                {/* <Form.Item
                   label={
                     <div
                       style={{
@@ -2556,11 +2800,6 @@ const AdsetComponent = ({
                         }}
                       >
                         <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                        {/* <Tooltip title="This is a required field">
-                          <QuestionCircleOutlined
-                            style={{ marginLeft: 4, cursor: "pointer" }}
-                          />
-                        </Tooltip> */}
                       </div>
                       <EditOutlined
                         style={{ cursor: "pointer" }}
@@ -2617,14 +2856,6 @@ const AdsetComponent = ({
                   title="URL Builder"
                   visible={isModalVisibleForURLBuilder}
                   onCancel={handleCancelForURLBuilder}
-                  // footer={[
-                  //     <Button key="cancel" onClick={handleCancel}>
-                  //         Cancel
-                  //     </Button>,
-                  //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
-                  //         Submit
-                  //     </Button>
-                  // ]}
                   footer={null}
                   width="80%" // Set width of the modal
                   bodyStyle={{ height: "50vh", overflowY: "auto" }}
@@ -2632,7 +2863,81 @@ const AdsetComponent = ({
                     }`}
                 >
                   {getUrlBuilder}
-                </Modal>
+                </Modal> */}
+
+                <div>
+                  {/* Ant Design Breadcrumb for Visibility Control */}
+                  {/* <Breadcrumb>
+                    {accountis.map((account) => (
+                      <Breadcrumb.Item
+                        key={account}
+                        onClick={() => setSelectedIndex(String(account))}
+                        style={{
+                          cursor: "pointer",
+                          display: "inline-block", 
+                          border: selectedIndex === String(account) ? "2px solid #91C25F" : "none",
+                          borderRadius: "4px",
+                          padding: "0 8px",
+                          margin: "0 4px",
+                          backgroundColor:
+                            selectedIndex === String(account) ? "#f0f0f0" : "transparent",
+                          fontWeight: selectedIndex === String(account) ? "bold" : "normal",
+                        }}
+                      >
+                        {account}
+                      </Breadcrumb.Item>
+                    ))}
+                  </Breadcrumb> */}
+
+                  <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px", marginBottom: "16px" }}>
+                    {accountis.map((account, index) => (
+                      <React.Fragment key={account}>
+                        <span
+                          onClick={() => setSelectedIndex(String(account))}
+                          style={{
+                            cursor: "pointer",
+                            border: selectedIndex === String(account) ? "1px solid #91C25F" : "",
+                            borderRadius: selectedIndex === String(account) && "4px",
+                            padding: "4px 8px",
+                            // backgroundColor: selectedIndex === String(account) ? "#f0f0f0" : "#ffffff",
+                            fontWeight: selectedIndex === String(account) ? "bold" : "normal",
+                            transition: "all 0.1s ease",
+                          }}
+                        >
+                          {account}
+                        </span>
+
+                        {/* Show "/" unless it's the last item */}
+                        {index !== accountis.length - 1 && (
+                          <span style={{ color: "#ccc", userSelect: "none" }}>/</span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+
+                  {/* Render ALL AccountForms but only show active one */}
+                  {accountis.map((account, newindex) => (
+                    <div
+                      key={account}
+                      style={{ display: selectedIndex === account ? "block" : "none" }} // 🔑 hide inactive ones
+                    >
+                      <AccountForm
+                        index={index}
+                        account={account}
+                        allAccounts={accountis}
+                        adset={adset}
+                        theme={theme}
+                        network={network}
+                        form={form}
+                        onClickEdit={onClickEdit}
+                        isModalVisibleForURLBuilder={isModalVisibleForURLBuilder}
+                        selectedIndex={selectedIndex}
+                        handleCancelForURLBuilder={handleCancelForURLBuilder}
+                        getUrlBuilder={getUrlBuilder}
+                      />
+                    </div>
+                  ))}
+                </div>
 
                 {/* <Form.Item
                                 label="URL Parameters"
@@ -3044,9 +3349,7 @@ const CreateCampaignDrawer = ({
   const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
   const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
   const [activeKey, setActiveKey] = useState(["1"]); // State to control active panels
-  const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState(
-    {}
-  );
+  const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState({});
   const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState({});
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
   const [adsets, setAdsets] = useState([
@@ -3091,6 +3394,11 @@ const CreateCampaignDrawer = ({
   const [selectedObjective, setSelectedObjective] = useState("ALL");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [defaultUrlData, setDefaultUrlData] = useState("");
+  const groupId = uuidv4();
+  const [isEditAccountsModalOpen, setIsEditAccountsModalOpen] = useState(false);
+  const [matchedAccounts, setMatchedAccounts] = useState([]);
+  const [selectedDraft, setSelectedDraft] = useState(null);
+
 
   // const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
   const account = useMemo(() => {
@@ -3537,7 +3845,7 @@ const CreateCampaignDrawer = ({
         // check duplicate template name
 
 
-        await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
+        await fetch("https://www.testapi.adsgoat.in/api/NewsubmitDraftDataNew", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -3545,7 +3853,7 @@ const CreateCampaignDrawer = ({
           },
           body: JSON.stringify({
             accountNumber: data?.Account_Number,
-            draftData: totalDraftData,
+            draftData: { ...totalDraftData, groupId },
             email: session?.user?.email,
             userName: session?.user?.name,
           }),
@@ -4522,52 +4830,109 @@ const CreateCampaignDrawer = ({
   //     message.error("An error occurred while deleting");
   //   }
   // };
-  const deleteDraft = async (accountNumber, draftId) => {
-    if (!accountNumber || !draftId) {
-      message.error("Missing account number or draft id");
+  // const deleteDraft = async (accountNumber, draftId) => {
+  //   if (!accountNumber || !draftId) {
+  //     message.error("Missing account number or draft id");
+  //     return;
+  //   }
+
+  //   const resp = await fetch("http://localhost:4500/api/deleteDraft", {
+  //     method: "DELETE",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: token,
+  //     },
+  //     body: JSON.stringify({ accountNumber, draftId }),
+  //   });
+
+  //   const data = await resp.json().catch(() => ({}));
+
+  //   if (resp.ok && data.ok) {
+
+  //     setDraftsData(prev =>
+  //       prev.filter(
+  //         d => !(
+  //           String(d.accountNumber) === String(accountNumber) &&
+  //           String(d.draftId) === String(draftId)
+  //         )
+  //       )
+  //     );
+  //     message.success("Draft deleted successfully");
+  //   } else {
+  //     message.error(data.message || "Failed to delete draft");
+  //   }
+  // };
+  const deleteDraft = async (groupId) => {
+    if (!groupId) {
+      message.error("Missing groupId");
       return;
     }
 
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/deleteDraft", {
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/NewdeleteDraft", {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
       },
-      body: JSON.stringify({ accountNumber, draftId }),
+      body: JSON.stringify({ groupId }),
     });
 
     const data = await resp.json().catch(() => ({}));
 
     if (resp.ok && data.ok) {
-
-      setDraftsData(prev =>
-        prev.filter(
-          d => !(
-            String(d.accountNumber) === String(accountNumber) &&
-            String(d.draftId) === String(draftId)
-          )
-        )
-      );
-      message.success("Draft deleted successfully");
+      // Remove all drafts in this group from local state
+      setDraftsData(prev => prev.filter(d => d.groupId !== groupId));
+      message.success("Drafts deleted successfully across all accounts");
     } else {
-      message.error(data.message || "Failed to delete draft");
+      message.error(data.message || "Failed to delete drafts");
     }
   };
 
-  const handleDelete = (Account_Number, draftId) => {
-    setDeleteModal({ visible: true, id: draftId, Account_Number });
+  // const handleDelete = (Account_Number, draftId) => {
+  //   setDeleteModal({ visible: true, id: draftId, Account_Number });
+  // };
+  const handleDelete = async (groupId) => {
+    try {
+      const res = await fetch(`https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${groupId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", Authorization: token },
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.message || "Failed to fetch drafts");
+
+      const accounts = json.data.map(d => d.accountNumber);
+      if (!accounts.length) {
+        message.warning("No matching accounts found");
+        return;
+      }
+
+      setMatchedAccounts(accounts);
+      setDeleteModal({ visible: true, groupId });
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || "Failed to fetch matching accounts");
+    }
   };
 
+  // const onConfirmDelete = async () => {
+  //   try {
+  //     setDeleting(true);
+  //     await deleteDraft(deleteModal.Account_Number, deleteModal.id);
+  //   } finally {
+  //     setDeleting(false);
+  //     setDeleteModal({ visible: false, id: null, Account_Number: null });
+  //   }
+  // };
   const onConfirmDelete = async () => {
     try {
       setDeleting(true);
-      await deleteDraft(deleteModal.Account_Number, deleteModal.id);
+      await deleteDraft(deleteModal.groupId);
     } finally {
       setDeleting(false);
-      setDeleteModal({ visible: false, id: null, Account_Number: null });
+      setDeleteModal({ visible: false, groupId: null });
     }
   };
+
 
   const onCancelDelete = () => {
     setDeleteModal({ visible: false, id: null });
@@ -4578,148 +4943,63 @@ const CreateCampaignDrawer = ({
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
-      accountNumber: draft.Account_Number
+      accountNumber: draft.Account_Number,
+      groupId: draft.groupId
     };
     setPopupInputs({ input1: draft.Category || "", input2: draft.Draft_Name || "" });
     setIsEditingDraft(true);
     setSelectedTemplate(null);
-  };
-  // const handleSaveEditedDraft = async () => {
-  //   if (!selectedRef.current?.Draft_Id) {
-  //     message.error("No draft selected to edit");
-  //     return;
-  //   }
-
-  //   try {
-  //     setConfirmLoading(true);
-  //     const allValues = form.getFieldsValue(true);
-  //     const draftData = await MultipleAdsetsDraftFetching(allValues);
-
-  //     const totalDraftData = {
-  //       Category: popupInputs.input1,
-  //       Draft_Name: popupInputs.input2,
-  //       ...draftData,
-  //     };
-
-
-  //     const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
-  //       method: "PATCH",
-  //       headers: { "Content-Type": "application/json", Authorization: token },
-  //       body: JSON.stringify({
-  //         accountNumber: account,
-  //         draftId: selectedRef.current.Draft_Id,
-  //         payload: totalDraftData,
-  //       }),
-  //     });
-
-  //     const json = await resp.json().catch(() => ({}));
-  //     if (!resp.ok) throw new Error(json.message || `Update failed (${resp.status})`);
-
-  //     message.open({
-  //       type: 'success',
-  //       content: "Draft updated successfully",
-  //       className: theme === 'dark' ? 'dark-message' : '',
-  //     })
-
-  //     await postDraftSaveCleanup();
-
-  //   } catch (err) {
-  //     console.error("Save draft (edit) error:", err);
-  //     message.error(err?.message || "Failed to update draft");
-  //   } finally {
-  //     setConfirmLoading(false);
-  //   }
-  // };
-
-
-
+  }
+  
   const handleSaveEditedDraft = async () => {
     const trimmedCat = popupInputs.input1.trim();
     const trimmedName = popupInputs.input2.trim();
+
     const newErrors = {
       input1: trimmedCat ? "" : "Template category is required",
       input2: trimmedName ? "" : "Template name is required",
     };
     setErrors(newErrors);
-    if (Object.values(newErrors).some((msg) => msg !== "")) return;
-
-    const isDuplicate = (draftsData || []).some(
-      (d) =>
-        d.Draft_Name?.trim().toLowerCase() === trimmedName.toLowerCase() &&
-        d.draftId !== selectedRef.current?.Draft_Id
-    );
-    if (isDuplicate) {
-      setErrors((e) => ({ ...e, input2: "Template name already exists" }));
-      return;
-    }
-
-
-    if (!selectedRef.current?.Draft_Id || !selectedRef.current?.accountNumber) {
-      message.error("No draft selected to edit");
-      return;
-    }
+    if (Object.values(newErrors).some(msg => msg !== "")) return Promise.reject();
 
     try {
-      setConfirmLoading(true);
-      const allValues = form.getFieldsValue(true);
-      const draftData = await MultipleAdsetsDraftFetching(allValues, selectedRef.current.accountNumber);
-      if (!draftData) {
-        message.error("Draft data not found for selected account");
-        setConfirmLoading(false);
-        return;
-      }
-      const totalDraftData = {
-            ...draftData,
-      };
-      const selectedAccountNumber = selectedRef.current.accountNumber;
+      // Call your API that fetches all accounts with drafts
+      const res = await fetch(
+        `https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${selectedRef.current.groupId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        }
+      );
 
-      let filteredPayload;
-      if (Array.isArray(totalDraftData)) {
-        filteredPayload = totalDraftData.find(
-          (d) => d.Account_Number === selectedAccountNumber
-        );
-      } else {
-        filteredPayload = Object.values(totalDraftData).find(
-          (d) => d.Account_Number === selectedAccountNumber
-        );
-      }
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.message || "Failed to fetch drafts");
 
-      if (!filteredPayload) {
-        message.error("Draft data not found for the selected account");
-        setConfirmLoading(false);
-        return;
-      }
-      filteredPayload = {
-        ...filteredPayload,
-        Category: popupInputs.input1,
-        Draft_Name: popupInputs.input2,
-      };
-      const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: token },
-        body: JSON.stringify({
-          accountNumber: selectedAccountNumber,
-          draftId: selectedRef.current.Draft_Id,
-          payload: filteredPayload,
-        }),
-      });
-
-      const json = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(json.message || `Update failed (${resp.status})`);
-      message.open({
-        type: 'success',
-        content: "Draft updated successfully",
-        className: theme === 'dark' ? 'dark-message' : '',
-      });
-      await postDraftSaveCleanup();
      
+      const matchedAccounts = json.data
+        .filter(account => account.Drafts.some(draft => draft.groupId === selectedRef.current.groupId))
+        .map(account => account.accountNumber);
+
+      if (matchedAccounts.length === 0) {
+        message.info("No accounts have drafts with this groupId");
+        return;
+      }
+
+     
+      setMatchedAccounts(matchedAccounts);
+      setIsEditAccountsModalOpen(true);
+
     } catch (err) {
-      console.error("Save draft (edit) error:", err);
-      message.error(err?.message || "Failed to update draft");
-    } finally {
-      setConfirmLoading(false);
+      console.error(err);
+      message.error(err.message || "Failed to fetch matched accounts");
     }
   };
+
+
+
   const postDraftSaveCleanup = async () => {
     await fetchDraftDetails();
     setIsEditingDraft(false);
@@ -5623,8 +5903,8 @@ const CreateCampaignDrawer = ({
               message: values.adsets[i].message,
               headline: values.adsets[i].headline,
               Description: values.adsets[i].Description,
-              Caption: values.adsets[i].Caption,
-              Website_URL: values.adsets[i].Website_URL,
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
 
               // urlParameters: values.urlParameters
             };
@@ -5640,8 +5920,8 @@ const CreateCampaignDrawer = ({
               message: values.adsets[i].message,
               headline: values.adsets[i].headline,
               Description: values.adsets[i].Description,
-              Caption: values.adsets[i].Caption,
-              Website_URL: values.adsets[i].Website_URL,
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
               // urlParameters: values.urlParameters
             };
           }
@@ -7023,7 +7303,7 @@ const CreateCampaignDrawer = ({
                     <FaTrashCan
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(draft.Account_Number, draft.draftId);
+                        handleDelete(draft.groupId);
                       }}
                       style={{ fontSize: 14, color: "#EC7117", cursor: "pointer" }}
                       title="Delete"
@@ -7086,6 +7366,7 @@ const CreateCampaignDrawer = ({
                     }}
                   >
                     {draft?.Category ?? "-"}
+
                   </span>
 
                   <span style={{ color: "#B4B4B4" }}>Objective</span>
@@ -7145,7 +7426,7 @@ const CreateCampaignDrawer = ({
         </div>
 
       </Modal>
-      <Modal
+      {/* <Modal
         title={
           <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
             Are you sure you want to delete this draft?
@@ -7162,6 +7443,24 @@ const CreateCampaignDrawer = ({
         cancelText="Cancel"
       >
         <p>This action cannot be undone.</p>
+      </Modal> */}
+      <Modal
+        title="Delete Draft"
+        open={deleteModal.visible}
+        onCancel={onCancelDelete}
+        okText="Yes, Delete"
+        cancelText="Close"
+        confirmLoading={deleting}
+        onOk={onConfirmDelete}
+      >
+        <p>This draft is present in these accounts:</p>
+        <ul>
+          {matchedAccounts.length > 0
+            ? matchedAccounts.map((acc, idx) => <li key={idx}>{acc}</li>)
+            : <li>No matching accounts found</li>
+          }
+        </ul>
+        <p>Are you want delete this draft?</p>
       </Modal>
 
       {/* <Select
@@ -7812,40 +8111,172 @@ const CreateCampaignDrawer = ({
                   </Modal>
 
                 </div>
-
-
                 <Modal
-                  title="Edit Report Category"
-                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                    }`}
-                  open={rEditModalVisible}
+                  title="Edit Accounts"
+                  open={isEditAccountsModalOpen}
+                  onCancel={() => setIsEditAccountsModalOpen(false)}
+                  okText="Yes, Update"
+                  cancelText="Close"
+                  confirmLoading={confirmLoading}
                   onOk={async () => {
-                    if (rEditedName.trim() && rCurrentCategory) {
-                      await renameReportCategory(
-                        rCurrentCategory.accountNumber,
-                        rCurrentCategory.categoryId,
-                        rEditedName.trim()
-                      );
-                      setREditModalVisible(false);
-                      setREditedName("");
-                      setRCurrentCategory(null);
+                    setIsEditAccountsModalOpen(false);
+                    setConfirmLoading(true);
+
+                    try {
+                      const allValues = form.getFieldsValue(true);
+
+                      // Fetch all accounts for this groupId
+                      const accountsToUpdate = matchedAccounts; // matchedAccounts already has all account numbers
+
+                      for (const accountNumber of accountsToUpdate) {
+                        const draftData = await MultipleAdsetsDraftFetching(allValues, accountNumber);
+                        if (!draftData) continue;
+
+                        let filteredPayload;
+                        if (Array.isArray(draftData)) {
+                          filteredPayload = draftData.find(d => d.Account_Number === accountNumber);
+                        } else {
+                          filteredPayload = Object.values(draftData).find(d => d.Account_Number === accountNumber);
+                        }
+
+                        if (!filteredPayload) continue;
+
+                        // Update only the fields you edited
+                        filteredPayload = {
+                          ...filteredPayload,
+                          Category: popupInputs.input1,
+                          Draft_Name: popupInputs.input2,
+                        };
+
+                        // Call API passing groupId and accountNumber
+                        for (const accountNumber of matchedAccounts) {
+                          const draftData = await MultipleAdsetsDraftFetching(allValues, accountNumber);
+                          if (!draftData) continue;
+
+                          let filteredPayload = Array.isArray(draftData)
+                            ? draftData.find(d => d.Account_Number === accountNumber)
+                            : Object.values(draftData).find(d => d.Account_Number === accountNumber);
+
+                          if (!filteredPayload) continue;
+
+                          filteredPayload = {
+                            ...filteredPayload,
+                            Category: popupInputs.input1,
+                            Draft_Name: popupInputs.input2,
+                          };
+
+                          await fetch("https://www.testapi.adsgoat.in/api/NewupdateDraftSmart", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json", Authorization: token },
+                            body: JSON.stringify({
+                              accountNumber,
+                              // draftId: selectedRef.current.draftId,
+                              groupId: selectedRef.current.groupId, // ✅ must include
+                              payload: filteredPayload,
+                            }),
+                          });
+                        }
+
+                        message.success("Draft updated successfully for all accounts in this group");
+                        await postDraftSaveCleanup();
+                      }
+
+
+
+                    } catch (err) {
+                      console.error("Save draft (edit) error:", err);
+                      message.error(err?.message || "Failed to update draft");
+                    } finally {
+                      setConfirmLoading(false);
                     }
                   }}
-
-                  onCancel={() => {
-                    setREditModalVisible(false);
-                    setREditedName("");
-                    setRCurrentCategory(null);
-                  }}
-                  okText="Save"
-                  okButtonProps={theme === "dark" ? { style: { backgroundColor: "#91c25f", borderColor: "#4caf50" } } : {}}
                 >
-                  <Input
-                    value={rEditedName}
-                    onChange={(e) => setREditedName(e.target.value)}
-                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                  />
+                  <p>This draft is present in these accounts:</p>
+                  <ul>
+                    {matchedAccounts.length > 0
+                      ? matchedAccounts.map((acc, idx) => <li key={idx}>{acc}</li>)
+                      : <li>No matching accounts found</li>
+                    }
+                  </ul>
                 </Modal>
+
+                {/* <Modal
+                  title="Edit Accounts"
+                  open={isEditAccountsModalOpen}
+                  onCancel={() => setIsEditAccountsModalOpen(false)}
+                  okText="Yes, Update"
+                  cancelText="Close"
+                  confirmLoading={confirmLoading}
+                  onOk={async () => {
+                    if (!selectedRef.current?.groupId) {
+                      message.error("No draft selected to update");
+                      return;
+                    }
+
+                    setIsEditAccountsModalOpen(false);
+                    setConfirmLoading(true);
+
+                    try {
+                     const allValues = form.getFieldsValue(true);
+                      const draftData = await MultipleAdsetsDraftFetching(allValues, selectedRef.current.accountNumber);
+                      if (!draftData) {
+                        message.error("Draft data not found for selected account");
+                        setConfirmLoading(false);
+                        return;
+                      }
+                      let filteredDraft;
+                      if (Array.isArray(draftData)) {
+                        filteredDraft = draftData.find(d => d.Account_Number === selectedRef.current.accountNumber);
+                      } else {
+                        filteredDraft = Object.values(draftData).find(d => d.Account_Number === selectedRef.current.accountNumber);
+                      }
+
+                      if (!filteredDraft) {
+                        message.error("Draft data not found for selected account");
+                        setConfirmLoading(false);
+                        return;
+                      }
+
+                      filteredDraft = {
+                        ...filteredDraft,
+                        Category: popupInputs.input1,
+                        Draft_Name: popupInputs.input2,
+                      };
+                          const res = await fetch("http://localhost:4500/api/updateDraftSmart", {
+                        method: "PATCH",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: token,
+                        },
+                        body: JSON.stringify({
+                          groupId: selectedRef.current.groupId, 
+                          payload: filteredDraft,               
+                        }),
+                      });
+
+                      const json = await res.json();
+                      if (!json.ok) throw new Error(json.message || "Update failed");
+
+                      message.success("Draft updated for all accounts in this group");
+                      await postDraftSaveCleanup();
+
+                    } catch (err) {
+                      console.error("Failed to update drafts:", err);
+                      message.error(err.message || "Failed to update drafts");
+                    } finally {
+                      setConfirmLoading(false);
+                    }
+                  }}
+                >
+                  <p>This draft is present in these accounts:</p>
+                  <ul>
+                    {matchedAccounts.length > 0
+                      ? matchedAccounts.map((acc, idx) => <li key={idx}>{acc}</li>)
+                      : <li>No matching accounts found</li>
+                    }
+                  </ul>
+                </Modal> */}
+
 
                 <Modal
                   title="Delete Report Category"
@@ -8332,26 +8763,28 @@ const CreateCampaignDrawer = ({
           </Modal>
         </Form>
       </Spin>
-      {openCreativesDrawer && (
-        <Drawer
-          title="Select Creatives"
-          width="95%"
-          open={openCreativesDrawer}
-          onClose={() => setOpenCreativesDrawer(false)}
-          style={{
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
-            color: theme === "dark" ? "#fff" : "#000",
-          }}
-        >
-          <ImageUploadPage
-            selectedFilesData={selectedFilesData}
-            fromCampaigns={true}
-            network={network}
-            Account_Number={accountis}
-          />
-        </Drawer>
-      )}
-    </Modal>
+      {
+        openCreativesDrawer && (
+          <Drawer
+            title="Select Creatives"
+            width="95%"
+            open={openCreativesDrawer}
+            onClose={() => setOpenCreativesDrawer(false)}
+            style={{
+              backgroundColor: theme === "dark" ? "#333" : "#fff",
+              color: theme === "dark" ? "#fff" : "#000",
+            }}
+          >
+            <ImageUploadPage
+              selectedFilesData={selectedFilesData}
+              fromCampaigns={true}
+              network={network}
+              Account_Number={accountis}
+            />
+          </Drawer>
+        )
+      }
+    </Modal >
   );
 };
 
