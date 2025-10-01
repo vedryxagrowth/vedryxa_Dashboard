@@ -92,6 +92,7 @@ const MyTablePage = () => {
         "M_tq",
         "D_tq",
         "from",
+        "category",
         "to",
         "filteration",
         "profitloss",
@@ -189,7 +190,7 @@ const MyTablePage = () => {
     const [dateChanged, setDateChanged] = useState(false);
     const [timezoneChanged, setTimezoneChanged] = useState(false);
     const [searchText, setSearchText] = useState("");
-
+    const [campaignComments, setCampaignComments] = useState([]);
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
             setCampaignStatusFilter('ACTIVE');
@@ -234,20 +235,20 @@ const MyTablePage = () => {
         const isBackspace = e.nativeEvent.inputType === 'deleteContentBackward';
 
         if (isBackspace) {
-        inputBuffer.current = value;
+            inputBuffer.current = value;
 
-        // Clear existing timer
-        if (backspaceTimer.current) {
-            clearTimeout(backspaceTimer.current);
-        }
+            // Clear existing timer
+            if (backspaceTimer.current) {
+                clearTimeout(backspaceTimer.current);
+            }
 
-        // Delay updating the actual state
-        backspaceTimer.current = setTimeout(() => {
-            setInputValue(inputBuffer.current);
-        }, 200); // delay after last backspace
+            // Delay updating the actual state
+            backspaceTimer.current = setTimeout(() => {
+                setInputValue(inputBuffer.current);
+            }, 200); // delay after last backspace
         } else {
-        // For all other keys — update instantly
-        setInputValue(value);
+            // For all other keys — update instantly
+            setInputValue(value);
         }
     };
 
@@ -394,7 +395,7 @@ const MyTablePage = () => {
         const first = Array.isArray(nets) && nets.length
             ? (typeof nets[0] === "string" ? nets[0] : nets[0]?.accountNumber)
             : "";
-        return first ? String(first) : dash ? [dash] : stored?.account ? fromStore : [] ;
+        return first ? String(first) : dash ? [dash] : stored?.account ? fromStore : [];
     };
 
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
@@ -1468,7 +1469,16 @@ const MyTablePage = () => {
         });
         return map;
     }, [Camapignlevelstatus]);
-
+    const commentsMap = useMemo(() => {
+        const map = new Map();
+        campaignComments.forEach((item) => {
+            const key = `${item.campaignname}_${item.Account}`; // unique combo
+            map.set(key, {
+                category: item.category
+            });
+        });
+        return map;
+    }, [campaignComments]);
     const columnDefsObjectOfAdID = {
         M_tq: {
             headerName: 'M_TQ',
@@ -1613,6 +1623,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -2454,6 +2498,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -4336,6 +4414,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -5051,7 +5163,40 @@ const MyTablePage = () => {
 
         },
 
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
 
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -5928,6 +6073,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -6897,6 +7076,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -7490,6 +7703,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -8074,6 +8321,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -8954,6 +9235,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -9595,6 +9910,40 @@ const MyTablePage = () => {
         //     menuTabs: [],
         //     headerClass: 'hide-menu', // Add a custom class
         // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            sortable: true,
+            minWidth: 110,
+            filter: 'agSetColumnFilter',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    console.log(account, "account");
+                    console.log(campaignName, "campaignName");
+                    console.log(commentsMap, "commentsMap");
+
+                    // if (commentsMap.has(campaignName)) {
+                    // const accountMap = commentsMap.get(campaignName);
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    console.log(campaign, "campaign");
+                    return campaign?.category || null;
+                    // }
+                }
+                return '';
+            },
+            valueFormatter: (params) => {
+                return params.value ? params?.value : '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -10223,7 +10572,8 @@ const MyTablePage = () => {
 
     const functionCallForCommnets = async (accountOrAccounts) => {
         setCommentsStatus(false);
-        const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
+        // const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
+        const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         try {
             setInitialLoading(true);
@@ -10244,7 +10594,7 @@ const MyTablePage = () => {
         setCampaignsStatus(false);
         // console.log("accountOrAccounts", accountOrAccounts);
         // console.log(storedData);
-        
+
         const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         // console.log("accounts", accounts);
@@ -10547,7 +10897,7 @@ const MyTablePage = () => {
         // setDateChanged(true); 
     };
 
-    const [campaignComments, setCampaignComments] = useState([]);
+
     const fetchCampaignComments = async () => {
         try {
 
@@ -10782,10 +11132,10 @@ const MyTablePage = () => {
     //     />
     // );
 
-     const renderAccountsCheckboxes = (theme) => {
- 
+    const renderAccountsCheckboxes = (theme) => {
+
         const activeAccounts = filteredAccounts.filter(acc => acc.status === 'Active');
- 
+
         return (
             <div>
                 {/* All Accounts toggle (active only) */}
@@ -10805,7 +11155,7 @@ const MyTablePage = () => {
                 >
                     <h5 style={{ color: theme === "dark" ? "#fff" : "#333", fontSize: '14px' }}> All Accounts</h5>
                 </Checkbox>
- 
+
                 {/* Individual account checkboxes */}
                 <Checkbox.Group
                     options={filteredAccounts.map((account) => ({
@@ -11348,7 +11698,7 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space> */}
-           <div style={{
+            <div style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -11553,29 +11903,29 @@ const MyTablePage = () => {
                         </Button>
                     </Col>
 
-                    <div  className='Dashboard-Details-2'>
+                    <div className='Dashboard-Details-2'>
                         <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
-                        <h3 style={{
-                            margin: 0,
-                            fontSize: '20px',
-                            fontWeight: 600,
-                            color: theme === 'dark' ? '#fff' : '#4b5563'
-                        }}>
-                            Strategic Reports Center
-                        </h3>
-                        <p style={{
-                            margin: 0,
-                            fontSize: '13px',
-                            color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
-                        }}>
-                            Deep insights for strategic decisions
-                        </p>
-                    </Col>
+                            <h3 style={{
+                                margin: 0,
+                                fontSize: '20px',
+                                fontWeight: 600,
+                                color: theme === 'dark' ? '#fff' : '#4b5563'
+                            }}>
+                                Strategic Reports Center
+                            </h3>
+                            <p style={{
+                                margin: 0,
+                                fontSize: '13px',
+                                color: theme === 'dark' ? '#cbd5e1' : '#6b7280'
+                            }}>
+                                Deep insights for strategic decisions
+                            </p>
+                        </Col>
                     </div>
                     {/* </Space> */}
                 </Row>
-                <div  className='Dashboard-Details-1'>
-                        <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
+                <div className='Dashboard-Details-1'>
+                    <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
                         <h3 style={{
                             margin: 0,
                             fontSize: '20px',
@@ -11592,7 +11942,7 @@ const MyTablePage = () => {
                             Deep insights for strategic decisions
                         </p>
                     </Col>
-                    </div>
+                </div>
 
             </div>
 
@@ -11643,26 +11993,26 @@ const MyTablePage = () => {
                             <Space size={2} style={{ marginRight: '10px' }}>
                                 <Col sm={12} >
                                     <Input
-                                    placeholder="Search..."
-                                    //  prefix={<SearchOutlined />}
-                                    onChange={handleChangeInput}
-                                    onBlur={handleBlur}
-                                    //  value={inputValue}
-                                    allowClear
-                                    className={theme === 'dark' ? 'inputat400px custom-input-dark' : 'inputat400px custom-input-light'}
-                                    style={{
-                                        borderRadius: 8,
-                                        border: '1px solid #4CAF50',
-                                        // background: theme === 'dark' ? '#2a2a2a' : '#fff',
-                                        // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
-                                        color: theme === 'dark' ? '#fff' : '#000',
-                                        fontWeight: 500,
-                                        // width: 170,
-                                        marginRight: '5px',
-                                    
-                                    }}
-                                />
-                                
+                                        placeholder="Search..."
+                                        //  prefix={<SearchOutlined />}
+                                        onChange={handleChangeInput}
+                                        onBlur={handleBlur}
+                                        //  value={inputValue}
+                                        allowClear
+                                        className={theme === 'dark' ? 'inputat400px custom-input-dark' : 'inputat400px custom-input-light'}
+                                        style={{
+                                            borderRadius: 8,
+                                            border: '1px solid #4CAF50',
+                                            // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                                            // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            fontWeight: 500,
+                                            // width: 170,
+                                            marginRight: '5px',
+
+                                        }}
+                                    />
+
                                 </Col>
                                 {/* <Tooltip 
                                 title={`🍳 This feature is cooking—almost ready to serve 😜`}
@@ -11854,7 +12204,7 @@ const MyTablePage = () => {
             {!moveForward ?
                 (
                     <div style={{ padding: '24px' }}>
-                            <Skeleton active paragraph={{ rows: 15 }} />
+                        <Skeleton active paragraph={{ rows: 15 }} />
                     </div>
                 ) :
                 (
