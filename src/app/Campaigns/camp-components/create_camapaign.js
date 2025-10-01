@@ -19,6 +19,7 @@ import {
   InputNumber,
   Breadcrumb,
   Popconfirm,
+  Checkbox,
 } from "antd";
 import {
   PlusOutlined,
@@ -36,6 +37,8 @@ import {
   CopyOutlined,
   ExclamationCircleFilled,
   ExclamationCircleOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -54,7 +57,7 @@ import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
-import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import { FaPenToSquare, FaShareFromSquare, FaTrashCan } from "react-icons/fa6";
 import { Category } from "@mui/icons-material";
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
@@ -562,7 +565,7 @@ const AccountForm = ({
   const [websiteURL, setWebsiteURL] = useState("");
   const [caption, setCaption] = useState("");
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
- 
+
 
   const onReturnUrl = (text) => {
     // console.log(text)
@@ -604,7 +607,7 @@ const AccountForm = ({
     setDefaultURLBuilder(form.getFieldValue(["adsets", index, account, "Website_URL"]));
   };
 
-  const onClickSetToAllAccounts = () =>{
+  const onClickSetToAllAccounts = () => {
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
     // if (network === "FB_Mnet" || network === "FB_DomainActive") {
@@ -626,7 +629,7 @@ const AccountForm = ({
     //     }
     //   };
     // }
-    for (const newAccount of allAccounts){
+    for (const newAccount of allAccounts) {
       updatedAdsets[index] = {
         ...updatedAdsets[index],
         [newAccount]: {
@@ -653,7 +656,7 @@ const AccountForm = ({
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
-           defaultValues={defaultURLBuilder}
+            defaultValues={defaultURLBuilder}
             accountis={account}
             onReturnMessage={onReturnUrl}
           />
@@ -737,7 +740,7 @@ const AccountForm = ({
                 color: theme === "dark" ? "#fff" : "#333",
               }}
               description={
-                <div style={{color: theme === "dark" ? "#fff" : "#333"}}>
+                <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
                   Are you sure to add website url and display link all accounts?
                 </div>
               }
@@ -748,11 +751,13 @@ const AccountForm = ({
               }
               cancelText="No"
             >
-              <Button style={{border: "1px solid #91C25F", color: "#000",              // keep text color fixed
-              backgroundColor: "transparent", marginLeft:"50px"}}>Set to All Accounts</Button>
+              <Button style={{
+                border: "1px solid #91C25F", color: "#000",              // keep text color fixed
+                backgroundColor: "transparent", marginLeft: "50px"
+              }}>Set to All Accounts</Button>
             </Popconfirm>
             {/* <div style={style}> */}
-              {/* <Popconfirm title="Thanks for using antd. Have a nice day !" open>
+            {/* <Popconfirm title="Thanks for using antd. Have a nice day !" open>
                 <Button type="primary">Set to All Accounts</Button>
               </Popconfirm> */}
             {/* </div> */}
@@ -848,7 +853,7 @@ const AdsetComponent = ({
   const [creativeIndex, setCreativeIndex] = useState(null);
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
-   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
+  const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -3397,13 +3402,27 @@ const CreateCampaignDrawer = ({
   const groupId = uuidv4();
   const [isEditAccountsModalOpen, setIsEditAccountsModalOpen] = useState(false);
   const [matchedAccounts, setMatchedAccounts] = useState([]);
-  const [selectedDraft, setSelectedDraft] = useState(null);
+  const [shareTemplate, setShareTemplate] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState([]);
+  const { userdetails } = useTokenContext();
+  const [accountChanged, setAccountChanged] = useState(false);
+  const [valueOptions, setValueOptions] = useState([]);
+  const [options, setOptions] = useState([]);
+  const { adAccounts } = userdetails || {};
+  const [selectedDraftForShare, setSelectedDraftForShare] = useState(null);
+  const userPickedRef = useRef(false);
 
 
-  // const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
+
+  const [selectedKey, setSelectedKey] = useState(null);
+
+  const accountsForAccess = adAccounts[selectedKey];
+  const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+
   const account = useMemo(() => {
     if (Array.isArray(accountis)) {
-      return accountis.map((a) => String(a).trim()); // ✅ supports multiple accounts
+      return accountis.map((a) => String(a).trim());
     }
     return [String(accountis ?? '').trim()];
   }, [accountis]);
@@ -3414,6 +3433,184 @@ const CreateCampaignDrawer = ({
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
   console.log(page_id_list, "page_id_list in CreateCampaignDrawer");
   console.log(pixel_id_list, "pixel_id_list in CreateCampaignDrawer");
+  const handleDropdownVisibleChange = (open) => {
+    setIsOpen(open);
+
+  };
+  const onChangeSelect = (value) => {
+
+  }
+  const handleChange1 = (values) => {
+    const uniq = Array.from(new Set(values.map(String)));
+    setSelectedValue(uniq);
+    userPickedRef.current = true;
+    const last = values[values.length - 1];
+    if (last) {
+      const findAccount = (data, accountNumber) =>
+        Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
+
+      const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
+
+    }
+
+    onChangeSelect(values);
+    setAccountChanged(true);
+  };
+  const filteredAccounts = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return accountsAccess;
+    return accountsAccess.filter((a) =>
+      `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
+    );
+  }, [accountsAccess, searchText]);
+  useEffect(() => {
+    if (userdetails?.adAccounts) {
+      const adAccountOptions = Object.keys(userdetails?.adAccounts).map(
+        (key) => ({
+          value: key,
+          label: key,
+        })
+      );
+      setOptions(adAccountOptions);
+    }
+  }, []);
+  const renderAccountsCheckboxes = (theme) => (
+    <Checkbox.Group
+      options={filteredAccounts.map((account) => ({
+        value: String(account.accountNumber),
+        label: (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '5px 10px',
+              borderBottom: '1px solid #ddd'
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+              {/* show accountName only when dropdown open (same as your old pattern) */}
+              {isOpen && (
+                <span style={{ fontSize: 12, color: 'gray' }}>
+                  {account.accountName || ''}
+                </span>
+              )}
+            </div>
+            <span style={{ textAlign: 'right', marginLeft: 10 }}>
+              {account.status === "Active" ? (
+                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+              ) : (
+                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+              )}
+            </span>
+          </div>
+        ),
+      }))}
+      value={selectedValue}      // array of selected accountNumbers
+      onChange={handleChange1}   // updates your selectedValue + notifies parent
+      className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+    />
+  );
+
+  const handleKeyChange = (key) => {
+    setSelectedKey(key);
+    setSelectedValue([]);
+  };
+
+  useEffect(() => {
+    if (selectedKey && userdetails?.adAccounts) {
+      // Mapping over the accounts based on the selected key
+      const accountNumbers = userdetails.adAccounts[selectedKey]?.map(
+        (account) => ({
+          value: account.accountNumber, // Set value as accountNumber
+          label: account.accountNumber, // Set label as accountNumber
+          accountName: account.accountName, // Include accountName for conditional rendering
+          status: account.status,
+        })
+      );
+      setValueOptions(accountNumbers); // Update valueOptions with account numbers
+    } else {
+      setValueOptions([]);
+    }
+  }, [selectedKey, userdetails]);
+
+  const handleShareDraft = async () => {
+
+    if (!selectedDraftForShare) {
+      message.error("No draft selected to share.");
+      return;
+    }
+
+
+    if (!selectedValue || selectedValue.length === 0) {
+      message.warning("Please select at least one account.");
+      return;
+    }
+
+
+    const cleanedDraft = {
+      groupId: selectedDraftForShare.groupId,
+      Draft_Name: selectedDraftForShare.Draft_Name,
+      Category: selectedDraftForShare.Category,
+      camapaignlevel: selectedDraftForShare.camapaignlevel,
+      adsetlevel_1: selectedDraftForShare.adsetlevel_1,
+      createdby: session?.user?.name,
+    };
+
+    const payload = {
+      draftData: cleanedDraft,
+      targetAccounts: selectedValue,
+      email: session?.user?.email,
+      userName: session?.user?.name,
+    };
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        "https://www.testapi.adsgoat.in/api/shareDraftToAccountsObject",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.ok) {
+        message.success(
+          `Draft shared to: ${data.accountsShared.join(", ")}`
+        );
+
+        const skipped = selectedValue.filter(
+          (acc) => !data.accountsShared.includes(acc)
+        );
+        if (skipped.length > 0) {
+          message.info(
+            `Skipped accounts (already have this draft): ${skipped.join(
+              ", "
+            )}`
+          );
+        }
+        setShareTemplate(false);
+        setSelectedValue([]);
+        setSelectedDraftForShare(null);
+      } else {
+        message.error(data.message || "Failed to share draft.");
+      }
+    } catch (err) {
+      console.error("Error sharing draft:", err);
+      message.error("Something went wrong while sharing the draft.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const categoryOptions = useMemo(() => {
     if (!Array.isArray(draftsData)) return [];
@@ -4950,7 +5147,7 @@ const CreateCampaignDrawer = ({
     setIsEditingDraft(true);
     setSelectedTemplate(null);
   }
-  
+
   const handleSaveEditedDraft = async () => {
     const trimmedCat = popupInputs.input1.trim();
     const trimmedName = popupInputs.input2.trim();
@@ -4978,7 +5175,7 @@ const CreateCampaignDrawer = ({
       const json = await res.json();
       if (!json.ok) throw new Error(json.message || "Failed to fetch drafts");
 
-     
+
       const matchedAccounts = json.data
         .filter(account => account.Drafts.some(draft => draft.groupId === selectedRef.current.groupId))
         .map(account => account.accountNumber);
@@ -4988,7 +5185,7 @@ const CreateCampaignDrawer = ({
         return;
       }
 
-     
+
       setMatchedAccounts(matchedAccounts);
       setIsEditAccountsModalOpen(true);
 
@@ -6054,8 +6251,8 @@ const CreateCampaignDrawer = ({
               message: values.adsets[i].message,
               headline: values.adsets[i].headline,
               Description: values.adsets[i].Description,
-              Caption: values.adsets[i].Caption,
-              Website_URL: values.adsets[i].Website_URL,
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
             }
             : {
               AddName: `${values.adsets[i].AddName}` || "",
@@ -6064,8 +6261,8 @@ const CreateCampaignDrawer = ({
               message: values.adsets[i].message || "",
               headline: values.adsets[i].headline || "",
               Description: values.adsets[i].Description || "",
-              Caption: values.adsets[i].Caption || "",
-              Website_URL: values.adsets[i].Website_URL || "",
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
             };
         console.log("Add Level Data:", addLevelData);
         AdsetsData[`adsetlevel_${i + 1}`] = {
@@ -6572,6 +6769,7 @@ const CreateCampaignDrawer = ({
   //     form.validateFields([['adsets', creativeIndex, 'MediaContent']]);
   // };
 
+
   const selectedFilesData = (data) => {
     const mappedFiles = data.map((file, i) => ({
       uid: file.uid || `-${Date.now()}-${i}`,
@@ -6855,34 +7053,44 @@ const CreateCampaignDrawer = ({
     );
 
     // 3. Map adset form values
-    const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
-      id: adsetObj.id ?? uuidv4(),
-      AdsetPanelName: `ADSET ${index + 1}`,
-      AdsetName: adsetObj.AdsetName,
-      DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
-      optimization_goal: adsetObj.optimization_goal,
-      billing_event: adsetObj.billing_event,
-      action_source: adsetObj.action_source,
-      custom_event_type: adsetObj.custom_event_type,
-      bid_amount: adsetObj.bid_amount / 100,
-      countries: adsetObj.countries,
-      Min_Age: adsetObj.Min_Age,
-      Max_Age: adsetObj.Max_Age,
-      Gender: adsetObj.Gender,
-      platforms: adsetObj.publisher_platforms || [],
-      device_platforms: adsetObj.device_platforms || [],
-      Language: adsetObj.locales,
-      placements: adsetObj.placements,
-      position: adsetObj.position || [],
-      AddName: adsetObj.addlevel?.AddName,
-      filename: adsetObj.addlevel?.filename,
-      message: adsetObj.addlevel?.message,
-      headline: adsetObj.addlevel?.headline,
-      Description: adsetObj.addlevel?.Description || "Find More",
-      Caption: adsetObj.addlevel?.Caption,
-      Website_URL: adsetObj.addlevel?.Website_URL,
-      MediaContent: adsetObj.addlevel?.Ads || [],
-    }));
+    const updatedFormAdsets = adsetObjects.map((adsetObj, index) => {
+      const updatedAdset = {};
+      accountis.forEach((account) => {
+        updatedAdset[account] = {
+          Website_URL: adsetObj.addlevel?.Website_URL || "",
+          Caption: adsetObj.addlevel?.Caption || "",
+        };
+      });
+      return {
+        id: adsetObj.id ?? uuidv4(),
+        AdsetPanelName: `ADSET ${index + 1}`,
+        AdsetName: adsetObj.AdsetName,
+        DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
+        optimization_goal: adsetObj.optimization_goal,
+        billing_event: adsetObj.billing_event,
+        action_source: adsetObj.action_source,
+        custom_event_type: adsetObj.custom_event_type,
+        bid_amount: adsetObj.bid_amount / 100,
+        countries: adsetObj.countries,
+        Min_Age: adsetObj.Min_Age,
+        Max_Age: adsetObj.Max_Age,
+        Gender: adsetObj.Gender,
+        platforms: adsetObj.publisher_platforms || [],
+        device_platforms: adsetObj.device_platforms || [],
+        Language: adsetObj.locales,
+        placements: adsetObj.placements,
+        position: adsetObj.position || [],
+        AddName: adsetObj.addlevel?.AddName,
+        filename: adsetObj.addlevel?.filename,
+        message: adsetObj.addlevel?.message,
+        headline: adsetObj.addlevel?.headline,
+        Description: adsetObj.addlevel?.Description || "Find More",
+        ...updatedAdset,
+        // Caption: adsetObj.addlevel?.Caption,
+        // Website_URL: adsetObj.addlevel?.Website_URL,
+        MediaContent: adsetObj.addlevel?.Ads || [],
+      };
+    });
 
     // 4. Update the form fields
     form.setFieldsValue({
@@ -6974,24 +7182,6 @@ const CreateCampaignDrawer = ({
 
     checkFormCompletion();
   };
-
-  // const onChangeDraft = (value) => {
-  //   // const draft = draftsData.find((draft) => draft.id === value);
-  //   const draft = draftsData.find((draft) => draft.draftId === value);
-  //   console.log("Selected Draft:", value);
-  //   console.log(
-  //     "Drafts Data:",
-  //     draftsData.find((draft) => draft.id === value)
-  //   );
-  //   setFormValuesFromDraft(draftsData.find((draft) => draft.id === value));
-  //   selectedRef.current = {
-  //     Draft_Name: draft?.Draft_Name,
-  //     Draft_Id: draft?.id,
-  //   };
-  //   newSelectedRef.current = draft?.Draft_Name;
-  //   setWebsiteURL("");
-  //   setCaption("");
-  // };
   const onChangeDraft = (value) => {
     const draft = draftsData.find(d => d.draftId === value);
     if (!draft) return;
@@ -7237,34 +7427,32 @@ const CreateCampaignDrawer = ({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", // side-by-side, responsive
+            gridTemplateColumns: "repeat(3, 1fr)",
             gap: 16,
-            alignItems: "stretch",
             width: "100%",
-
+            alignItems: "stretch",
           }}
         >
           {filteredDrafts.map((draft) => {
-            const cents = draft?.camapaignlevel?.Daily_amount ?? 0; // if you store cents
+            const cents = draft?.camapaignlevel?.Daily_amount ?? 0;
             const budget = (cents / 100).toLocaleString(undefined, {
               minimumFractionDigits: 0,
               maximumFractionDigits: 2,
             });
-
+            console.log("Website URL:", draft?.adsetlevel_1?.addlevel?.Website_URL);
+            console.log("Caption:", draft?.adsetlevel_1?.addlevel?.Caption);
             return (
               <div
                 key={draft.draftId}
                 style={{
                   border: "1px solid #ddd",
                   borderRadius: "10px",
-                  padding: "10px",
-                  background: "#fff",
+                  padding: "12px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 8,
-                  position: "relative",
-                  backgroundColor: theme === "dark" ? "#383737ff" : " ",
-                  minWidth: 0, // important for ellipsis in grid children
+                  gap: 10,
+                  backgroundColor: theme === "dark" ? "#383737" : "#fff",
+                  minWidth: 0,
                 }}
               >
                 {/* Header row */}
@@ -7295,6 +7483,14 @@ const CreateCampaignDrawer = ({
                   </p>
 
                   <div style={{ display: "flex", gap: 10 }}>
+                    <FaShareFromSquare
+                      style={{ fontSize: 14, cursor: "pointer" }}
+                      title="Share"
+                      onClick={() => {
+                        setSelectedDraftForShare(draft);
+                        setShareTemplate(true);
+                      }}
+                    />
                     <FaPenToSquare
                       onClick={() => handleEditDraft(draft)}
                       style={{ fontSize: 14, cursor: "pointer" }}
@@ -7334,10 +7530,8 @@ const CreateCampaignDrawer = ({
                       overflowWrap: "anywhere",
                     }}
                   >
-                    {/* Show Account Number */}
-                    <div>{draft?.Account_Number ?? "-"}</div>
 
-                    {/* Show Account Name if matched */}
+                    <div>{draft?.Account_Number ?? "-"}</div>
                     {getAccountDetails(draft?.Account_Number) && (
                       <div style={{
                         textAlign: "right",
@@ -7409,7 +7603,6 @@ const CreateCampaignDrawer = ({
                     selectedRef.current = null;
                     newSelectedRef.current = "";
                     setPopupInputs({ input1: "", input2: "" });
-
                   }}
                 >
                   Use This Template
@@ -7462,6 +7655,67 @@ const CreateCampaignDrawer = ({
         </ul>
         <p>Are you want delete this draft?</p>
       </Modal>
+      <Modal
+        title={`Share Template: ${selectedDraftForShare?.Draft_Name || ""}`}
+        open={shareTemplate}
+        onCancel={() => setShareTemplate(false)}
+        onOk={handleShareDraft}
+        okText="Share"
+        cancelText="Close"
+        confirmLoading={loading}
+      >
+        <div style={{ display: 'flex', gap: 16 }}>
+          {/* Project Select */}
+          <Select
+            showSearch
+            placeholder="Select Projects"
+            style={{ width: '100%' }}
+            onChange={handleKeyChange}
+            value={selectedKey}
+            dropdownClassName={theme === "dark" && "custom-dropdown"}
+            className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+          >
+            {options.map((option) => (
+              <Option key={option.value} value={option.value}>
+                {option.label}
+              </Option>
+            ))}
+          </Select>
+
+          {/* Account Select with checkboxes */}
+          <Select
+            showSearch
+            onSearch={setSearchText}
+            searchValue={searchText}
+            placeholder="Select Account"
+            open={isOpen}
+            onDropdownVisibleChange={setIsOpen}
+            value={
+              selectedValue.length === 0
+                ? undefined
+                : selectedValue.length === 1
+                  ? selectedValue[0]
+                  : `${selectedValue[0]}, +${selectedValue.length - 1} more`
+            }
+            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+            style={{
+              width: '100%',
+              whiteSpace: 'nowrap',
+              color: theme === 'dark' ? 'white' : undefined,
+              border: '1px solid #4CAF50',
+              borderRadius: '6px',
+            }}
+            optionFilterProp="value"
+            dropdownRender={() => (
+              <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
+                {renderAccountsCheckboxes(theme)}
+              </div>
+            )}
+          />
+        </div>
+      </Modal>
+
 
       {/* <Select
         value={newSelectedRef.current}
@@ -8119,14 +8373,12 @@ const CreateCampaignDrawer = ({
                   cancelText="Close"
                   confirmLoading={confirmLoading}
                   onOk={async () => {
-                    setIsEditAccountsModalOpen(false);
+                    // setIsEditAccountsModalOpen(false);
                     setConfirmLoading(true);
 
                     try {
                       const allValues = form.getFieldsValue(true);
-
-                      // Fetch all accounts for this groupId
-                      const accountsToUpdate = matchedAccounts; // matchedAccounts already has all account numbers
+                      const accountsToUpdate = matchedAccounts;
 
                       for (const accountNumber of accountsToUpdate) {
                         const draftData = await MultipleAdsetsDraftFetching(allValues, accountNumber);
@@ -8138,17 +8390,12 @@ const CreateCampaignDrawer = ({
                         } else {
                           filteredPayload = Object.values(draftData).find(d => d.Account_Number === accountNumber);
                         }
-
                         if (!filteredPayload) continue;
-
-                        // Update only the fields you edited
                         filteredPayload = {
                           ...filteredPayload,
                           Category: popupInputs.input1,
                           Draft_Name: popupInputs.input2,
                         };
-
-                        // Call API passing groupId and accountNumber
                         for (const accountNumber of matchedAccounts) {
                           const draftData = await MultipleAdsetsDraftFetching(allValues, accountNumber);
                           if (!draftData) continue;
@@ -8171,13 +8418,14 @@ const CreateCampaignDrawer = ({
                             body: JSON.stringify({
                               accountNumber,
                               // draftId: selectedRef.current.draftId,
-                              groupId: selectedRef.current.groupId, // ✅ must include
+                              groupId: selectedRef.current.groupId,
                               payload: filteredPayload,
                             }),
                           });
                         }
 
                         message.success("Draft updated successfully for all accounts in this group");
+                        setIsEditAccountsModalOpen(false);
                         await postDraftSaveCleanup();
                       }
 
@@ -8199,85 +8447,6 @@ const CreateCampaignDrawer = ({
                     }
                   </ul>
                 </Modal>
-
-                {/* <Modal
-                  title="Edit Accounts"
-                  open={isEditAccountsModalOpen}
-                  onCancel={() => setIsEditAccountsModalOpen(false)}
-                  okText="Yes, Update"
-                  cancelText="Close"
-                  confirmLoading={confirmLoading}
-                  onOk={async () => {
-                    if (!selectedRef.current?.groupId) {
-                      message.error("No draft selected to update");
-                      return;
-                    }
-
-                    setIsEditAccountsModalOpen(false);
-                    setConfirmLoading(true);
-
-                    try {
-                     const allValues = form.getFieldsValue(true);
-                      const draftData = await MultipleAdsetsDraftFetching(allValues, selectedRef.current.accountNumber);
-                      if (!draftData) {
-                        message.error("Draft data not found for selected account");
-                        setConfirmLoading(false);
-                        return;
-                      }
-                      let filteredDraft;
-                      if (Array.isArray(draftData)) {
-                        filteredDraft = draftData.find(d => d.Account_Number === selectedRef.current.accountNumber);
-                      } else {
-                        filteredDraft = Object.values(draftData).find(d => d.Account_Number === selectedRef.current.accountNumber);
-                      }
-
-                      if (!filteredDraft) {
-                        message.error("Draft data not found for selected account");
-                        setConfirmLoading(false);
-                        return;
-                      }
-
-                      filteredDraft = {
-                        ...filteredDraft,
-                        Category: popupInputs.input1,
-                        Draft_Name: popupInputs.input2,
-                      };
-                          const res = await fetch("http://localhost:4500/api/updateDraftSmart", {
-                        method: "PATCH",
-                        headers: {
-                          "Content-Type": "application/json",
-                          Authorization: token,
-                        },
-                        body: JSON.stringify({
-                          groupId: selectedRef.current.groupId, 
-                          payload: filteredDraft,               
-                        }),
-                      });
-
-                      const json = await res.json();
-                      if (!json.ok) throw new Error(json.message || "Update failed");
-
-                      message.success("Draft updated for all accounts in this group");
-                      await postDraftSaveCleanup();
-
-                    } catch (err) {
-                      console.error("Failed to update drafts:", err);
-                      message.error(err.message || "Failed to update drafts");
-                    } finally {
-                      setConfirmLoading(false);
-                    }
-                  }}
-                >
-                  <p>This draft is present in these accounts:</p>
-                  <ul>
-                    {matchedAccounts.length > 0
-                      ? matchedAccounts.map((acc, idx) => <li key={idx}>{acc}</li>)
-                      : <li>No matching accounts found</li>
-                    }
-                  </ul>
-                </Modal> */}
-
-
                 <Modal
                   title="Delete Report Category"
                   className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
@@ -8303,6 +8472,7 @@ const CreateCampaignDrawer = ({
                   <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
                 </Modal>
                 <div style={{ display: 'flex', marginTop: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <Button
                     type="primary"
                     style={{
@@ -8319,7 +8489,7 @@ const CreateCampaignDrawer = ({
                       }
 
                       try {
-                        const values = await form.validateFields(); // Validates all form fields
+                        const values = await form.validateFields();
 
                         // Check if campaign-level and adset-level budgets are both zero
                         const campaignLevelDailyBudget = values.Daily_amount;
@@ -8341,10 +8511,10 @@ const CreateCampaignDrawer = ({
                             throw {
                               errorFields: [
                                 {
-                                  name: ["Daily_amount"], // The field where error occurs
+                                  name: ["Daily_amount"],
                                   errors: [
                                     "Daily budget cannot be zero on both Adset and Campaign levels",
-                                  ], // The error message
+                                  ],
                                 },
                               ],
                             };
@@ -8353,10 +8523,10 @@ const CreateCampaignDrawer = ({
 
                         // Clear any previous errors
                         setSubmitErrors([]);
-                        console.log("Form values:", values); // Log form values to verify
+                        console.log("Form values:", values);
 
                         // Call the onFinish logic, passing in the values
-                        onFinish(values); // Trigger the existing logic for form submission
+                        onFinish(values);
 
                         // Optionally trigger confirmation modal (as per your logic)
                         setIsModalVisible(true);
@@ -8365,17 +8535,22 @@ const CreateCampaignDrawer = ({
                         setFormValues(values);
                         setIsCreateCampaignorDraft("createcampaign");
                       } catch (err) {
-                        // Catch any validation errors thrown by form.validateFields
                         const allErrors = err?.errorFields?.map((field) => ({
-                          name: field.name?.[0], // field name
-                          message: field.errors?.[0], // validation message
+                          name: field.name?.[0],
+                          message: field.errors?.[0],
                         }));
-                        setSubmitErrors(allErrors); // Capture and show validation errors
+                        setSubmitErrors(allErrors);
                       }
                     }}
                   >
                     Submit
                   </Button>
+                  {errors.reportCat && (
+                    <div style={{ color: "red", marginTop: "5px" }}>
+                      {errors.reportCat}
+                    </div>
+                  )}
+                  </div>
                   <Popconfirm
                     icon={null}
                     overlayInnerStyle={{
