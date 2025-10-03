@@ -35,7 +35,7 @@ const revenuePartnerNames = {
 
 
 const newtworkCollections = {
-    "FB_Mnet": "Facebook_Mnet",
+    "FB_Mnet": "Facebook_Mnet_Daily",
     "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
@@ -1402,6 +1402,8 @@ const Dashboard = () => {
                     newKey = "Newsbreak_DomainActive"
                 } else if (key === "FB_DomainActive") {
                     newKey = "Facebook_DActive_Names"
+                } else if (key === "FB_Mnet"){
+                    newKey = "Facebook_Mnet_Daily"
                 } else if (key === "FB_InuvoPrism") {
                     newKey = "Facebook_InuvoPrismDaily"
                 }

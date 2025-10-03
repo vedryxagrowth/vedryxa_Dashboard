@@ -7575,9 +7575,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
         Status: values.Status,
         access_token: imagehash.token,
         createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
-        ...(fullCampaignData.camapaignlevel.campaignid
-          ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
-          : {}),
+        // ...(fullCampaignData.camapaignlevel.campaignid
+        //   ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
+        //   : {}),
       },
     };
     let number = 1;

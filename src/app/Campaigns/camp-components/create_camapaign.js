@@ -19,6 +19,7 @@ import {
   InputNumber,
   Breadcrumb,
   Popconfirm,
+  Checkbox,
 } from "antd";
 import {
   PlusOutlined,
@@ -36,6 +37,8 @@ import {
   CopyOutlined,
   ExclamationCircleFilled,
   ExclamationCircleOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -54,7 +57,7 @@ import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
-import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import { FaPenToSquare, FaShareFromSquare, FaTrashCan } from "react-icons/fa6";
 import { Category } from "@mui/icons-material";
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
@@ -546,7 +549,252 @@ function getPositionsByKeys(keys) {
   const keySet = new Set(keys); // Faster lookup
   return allPositions.filter((pos) => keySet.has(pos.key));
 }
+const AccountForm = ({
+  account,
+  theme,
+  form,
+  network,
+  adset,
+  index,
+  allAccounts,
+  selectedIndex,
+}) => {
 
+  const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
+    useState(false);
+  const [websiteURL, setWebsiteURL] = useState("");
+  const [caption, setCaption] = useState("");
+  const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
+
+
+  const onReturnUrl = (text) => {
+    // console.log(text)
+    setWebsiteURL(text)
+    setIsModalVisibleForURLBuilder(false);
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = [...currentAdsets];
+    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+      setCaption(text.split("//")[1].split("/")[0]);
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [account]: {
+          Website_URL: text,
+          Caption: text.split("//")[1].split("/")[0],
+        }
+      };
+    } else {
+      setCaption(text.split("/")[0]);
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [account]: {
+          Website_URL: text,
+          Caption: text.split("/")[0],
+        }
+      };
+    }
+    // Update the form with the new adsets
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
+  }
+
+  const handleCancelForURLBuilder = () => {
+    setIsModalVisibleForURLBuilder(false);
+  }
+
+  const onClickEdit = (index) => {
+    setIsModalVisibleForURLBuilder(true);
+    setDefaultURLBuilder(form.getFieldValue(["adsets", index, account, "Website_URL"]));
+  };
+
+  const onClickSetToAllAccounts = () => {
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = [...currentAdsets];
+    // if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    //   setCaption(text.split("//")[1].split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("//")[1].split("/")[0],
+    //     }
+    //   };
+    // } else {
+    //   setCaption(text.split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("/")[0],
+    //     }
+    //   };
+    // }
+    for (const newAccount of allAccounts) {
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [newAccount]: {
+          Website_URL: websiteURL,
+          Caption: caption,
+        }
+      };
+    }
+    // Update the form with the new adsets
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
+  }
+
+
+  const getUrlBuilder = useMemo(() => {
+    // return (extraString) => {
+    switch (network) {
+      case "FB_Mnet":
+        //defaultValues
+        return (
+          <MnetUrlBuilder defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Tonic1":
+        return (
+          <TonicUrlBuilder
+            defaultValues={defaultURLBuilder}
+            accountis={account}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_System1":
+        return (
+          <System1UrlBuilder
+            defaultValues={defaultURLBuilder}
+            accountis={account}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_DomainActive":
+        return (
+          <DActiveUrlBuilder
+            accountis={account}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+    }
+    // }
+  }, [network, account, defaultURLBuilder, onReturnUrl]);
+
+  // useEffect(() => {
+  //   if (selectedIndex === account) {
+  //     form.validateFields(); // Trigger validation when the form is mounted and visible
+  //   }
+  // }, [selectedIndex, account, form]); // Re-run validation on selection change
+
+  // useEffect(() => {
+  //   // Trigger validation only for the specific fields related to this account
+  //   if (selectedIndex === account) {
+  //     form.validateFields([["adsets", index, account, "Caption"], ["adsets", index, account, "Website_URL"]]); // Validate only relevant fields
+  //   }
+  // }, [selectedIndex, account, index, form]);
+
+  const style = {
+    width: '300vw',
+    height: '300vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  return (
+    <div>
+      {/* <Form
+        form={form}
+        layout="vertical"
+        name="accountForm"
+        // initialValues={{ account }} // Populate form with account data
+      > */}
+      <Form.Item
+        // label="Website URL"
+        label={
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                paddingRight: "50px",
+              }}
+            >
+              <span style={{ color: "#B4B4B4" }}>Website_URL</span>
+            </div>
+            <EditOutlined
+              style={{ cursor: "pointer" }}
+              onClick={() => onClickEdit(index)}
+            />
+
+            <Popconfirm
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                color: theme === "dark" ? "#fff" : "#333",
+              }}
+              description={
+                <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
+                  Are you sure to add website url and display link all accounts?
+                </div>
+              }
+              okText={
+                <div onClick={onClickSetToAllAccounts}>
+                  Yes
+                </div>
+              }
+              cancelText="No"
+            >
+              <Button style={{
+                border: "1px solid #91C25F", color: "#000",              // keep text color fixed
+                backgroundColor: "transparent", marginLeft: "50px"
+              }}>Set to All Accounts</Button>
+            </Popconfirm>
+            {/* <div style={style}> */}
+            {/* <Popconfirm title="Thanks for using antd. Have a nice day !" open>
+                <Button type="primary">Set to All Accounts</Button>
+              </Popconfirm> */}
+            {/* </div> */}
+            {/* <Button style={{marginLeft:"50px"}} >Set to All Accounts</Button> */}
+          </div>
+        }
+        name={["adsets", index, account, "Website_URL"]}
+        rules={[{ required: true, message: `Please input Website URL! for ${account}` }]}
+        preserve={true}
+      >
+        <TextArea placeholder="Website URL" autoSize={{ minRows: 5, maxRows: 15 }} />
+      </Form.Item>
+
+      <Form.Item
+        label="Display Link"
+        name={["adsets", index, account, "Caption"]}
+        rules={[{ required: true, message: `Please input Display Link! for ${account}` }]}
+        preserve={true}
+      >
+        <TextArea placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
+      </Form.Item>
+
+      <Modal
+        title="URL Builder"
+        visible={isModalVisibleForURLBuilder}
+        onCancel={handleCancelForURLBuilder}
+        footer={null}
+        width="80%"
+        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+      >
+        {getUrlBuilder}
+      </Modal>
+      {/* </Form> */}
+    </div>
+  );
+};
 const AdsetComponent = ({
   index,
   adset,
@@ -578,7 +826,20 @@ const AdsetComponent = ({
   selectedPositions,
   selectedPublishers,
   setSelectedPublishers,
+  pixel_id_list,
+  page_id_list,
+  pageidList,
+  pixelIdList,
+  defaultUrlData,
+  setDefaultUrlData
 }) => {
+  console.log(page_id_list, "page_id_list in adset component");
+  console.log(pageidList, "pageidList in adset component");
+  console.log(pixel_id_list, "pixel_id_list in adset component");
+  console.log(pixelIdList, "pixelIdList in adset component");
+  const [] = useState(false);
+  const [] = useState(false);
+  const [] = useState(false);
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
     useState(false);
@@ -592,6 +853,7 @@ const AdsetComponent = ({
   const [creativeIndex, setCreativeIndex] = useState(null);
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
+  const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -601,6 +863,7 @@ const AdsetComponent = ({
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
     setWebsiteURL(text);
+    setDefaultUrlData(text);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
     if (network === "FB_Mnet" || network === "FB_DomainActive") {
@@ -639,8 +902,10 @@ const AdsetComponent = ({
   };
 
   const getUrlBuilder = useMemo(() => {
+    // return (extraString) => {
     switch (network) {
       case "FB_Mnet":
+        //defaultValues
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
@@ -666,6 +931,7 @@ const AdsetComponent = ({
           />
         );
     }
+    // }
   }, [network, accountis, onReturnUrl]);
 
   // const getPositionOptions = () => {
@@ -933,6 +1199,13 @@ const AdsetComponent = ({
     form.validateFields([["adsets", index, "MediaContent"]]);
     setOpenCreativesDrawer(false);
   };
+
+  // useEffect(() => {
+  //   setNewSelectedPageId(pageidList || []);
+  //   setNewSelectedPixelId(pixelIdList || []);
+  //   setNewPageIdList(page_id_list || []);
+  //   setNewPixelIdList(pixel_id_list || []);
+  // }, [page_id_list, pixel_id_list, pageidList, pixelIdList, form]);
 
   useEffect(() => {
     const creatives = selectedFilesFromCreatives?.[adset.id];
@@ -1254,11 +1527,11 @@ const AdsetComponent = ({
                     </Form.Item> */}
           <Form.Item
             name="pixel_id"
-            initialValue={
-              typeof imagehash?.pixelID === "object"
-                ? imagehash.pixelID.Universal
-                : imagehash?.pixelID
-            }
+            // initialValue={
+            //   typeof imagehash?.pixelID === "object"
+            //     ? imagehash.pixelID.Universal
+            //     : imagehash?.pixelID
+            // }
             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
             rules={[
               {
@@ -1268,7 +1541,7 @@ const AdsetComponent = ({
             ]}
             style={{ flex: "140px" }}
           >
-            {typeof imagehash?.pixelID === "object" ? (
+            {/* {typeof imagehash?.pixelID === "object" ? (
               <Select
                 defaultValue={imagehash?.pixelID?.Universal}
                 className={
@@ -1287,7 +1560,22 @@ const AdsetComponent = ({
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
               />
-            )}
+            )} */}
+            <Select
+              mode="multiple"
+              value={pixelIdList}                // array of strings
+              // onChange={Accountchange}             // gets string[]
+              options={pixel_id_list}             // [{value,label}]
+              placeholder="Select account(s)"
+              // showSearch
+              optionFilterProp="label"
+              allowClear
+              maxTagCount={1}                                      // 👈 always show only the first selected
+              maxTagPlaceholder={(omitted) => `+${omitted.length}`} // 👈 rest as a count
+              className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              style={{ width: "100%", borderRadius: 8 }}
+            />
           </Form.Item>
           {/*pk*/}
           {/* <Form.Item
@@ -2356,7 +2644,7 @@ const AdsetComponent = ({
 
                   <Form.Item
                     name="page_id"
-                    initialValue={imagehash?.pageID}
+                    // initialValue={pageidList || []}
                     label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                     rules={[
                       {
@@ -2366,13 +2654,28 @@ const AdsetComponent = ({
                     ]}
                     style={{ flex: 3, marginLeft: "1%" }}
                   >
-                    <Input
+                    {/* <Input
                       style={{ width: "23%" }}
                       className={
                         theme === "dark"
                           ? "custom-input-dark"
                           : "custom-input-light"
                       }
+                    /> */}
+                    <Select
+                      mode="multiple"
+                      value={pageidList}                // array of strings
+                      // onChange={Accountchange}             // gets string[]
+                      options={page_id_list}             // [{value,label}]
+                      placeholder="Select account(s)"
+                      // showSearch
+                      optionFilterProp="label"
+                      allowClear
+                      maxTagCount={1}                                      // 👈 always show only the first selected
+                      maxTagPlaceholder={(omitted) => `+${omitted.length}`} // 👈 rest as a count
+                      className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      style={{ width: "100%", borderRadius: 8 }}
                     />
                   </Form.Item>
                 </div>
@@ -2484,7 +2787,7 @@ const AdsetComponent = ({
                     }
                   />
                 </Form.Item>
-                <Form.Item
+                {/* <Form.Item
                   label={
                     <div
                       style={{
@@ -2502,11 +2805,6 @@ const AdsetComponent = ({
                         }}
                       >
                         <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                        {/* <Tooltip title="This is a required field">
-                          <QuestionCircleOutlined
-                            style={{ marginLeft: 4, cursor: "pointer" }}
-                          />
-                        </Tooltip> */}
                       </div>
                       <EditOutlined
                         style={{ cursor: "pointer" }}
@@ -2563,14 +2861,6 @@ const AdsetComponent = ({
                   title="URL Builder"
                   visible={isModalVisibleForURLBuilder}
                   onCancel={handleCancelForURLBuilder}
-                  // footer={[
-                  //     <Button key="cancel" onClick={handleCancel}>
-                  //         Cancel
-                  //     </Button>,
-                  //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
-                  //         Submit
-                  //     </Button>
-                  // ]}
                   footer={null}
                   width="80%" // Set width of the modal
                   bodyStyle={{ height: "50vh", overflowY: "auto" }}
@@ -2578,7 +2868,81 @@ const AdsetComponent = ({
                     }`}
                 >
                   {getUrlBuilder}
-                </Modal>
+                </Modal> */}
+
+                <div>
+                  {/* Ant Design Breadcrumb for Visibility Control */}
+                  {/* <Breadcrumb>
+                    {accountis.map((account) => (
+                      <Breadcrumb.Item
+                        key={account}
+                        onClick={() => setSelectedIndex(String(account))}
+                        style={{
+                          cursor: "pointer",
+                          display: "inline-block", 
+                          border: selectedIndex === String(account) ? "2px solid #91C25F" : "none",
+                          borderRadius: "4px",
+                          padding: "0 8px",
+                          margin: "0 4px",
+                          backgroundColor:
+                            selectedIndex === String(account) ? "#f0f0f0" : "transparent",
+                          fontWeight: selectedIndex === String(account) ? "bold" : "normal",
+                        }}
+                      >
+                        {account}
+                      </Breadcrumb.Item>
+                    ))}
+                  </Breadcrumb> */}
+
+                  <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px", marginBottom: "16px" }}>
+                    {accountis.map((account, index) => (
+                      <React.Fragment key={account}>
+                        <span
+                          onClick={() => setSelectedIndex(String(account))}
+                          style={{
+                            cursor: "pointer",
+                            border: selectedIndex === String(account) ? "1px solid #91C25F" : "",
+                            borderRadius: selectedIndex === String(account) && "4px",
+                            padding: "4px 8px",
+                            // backgroundColor: selectedIndex === String(account) ? "#f0f0f0" : "#ffffff",
+                            fontWeight: selectedIndex === String(account) ? "bold" : "normal",
+                            transition: "all 0.1s ease",
+                          }}
+                        >
+                          {account}
+                        </span>
+
+                        {/* Show "/" unless it's the last item */}
+                        {index !== accountis.length - 1 && (
+                          <span style={{ color: "#ccc", userSelect: "none" }}>/</span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+
+                  {/* Render ALL AccountForms but only show active one */}
+                  {accountis.map((account, newindex) => (
+                    <div
+                      key={account}
+                      style={{ display: selectedIndex === account ? "block" : "none" }} // 🔑 hide inactive ones
+                    >
+                      <AccountForm
+                        index={index}
+                        account={account}
+                        allAccounts={accountis}
+                        adset={adset}
+                        theme={theme}
+                        network={network}
+                        form={form}
+                        onClickEdit={onClickEdit}
+                        isModalVisibleForURLBuilder={isModalVisibleForURLBuilder}
+                        selectedIndex={selectedIndex}
+                        handleCancelForURLBuilder={handleCancelForURLBuilder}
+                        getUrlBuilder={getUrlBuilder}
+                      />
+                    </div>
+                  ))}
+                </div>
 
                 {/* <Form.Item
                                 label="URL Parameters"
@@ -2949,6 +3313,7 @@ const CreateCampaignDrawer = ({
   accountis,
   network,
 }) => {
+  console.log(accountis, "accountis in CreateCampaignDrawer");
   // const [selectedFile, setSelectedFile] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2961,7 +3326,13 @@ const CreateCampaignDrawer = ({
   const [submitErrors, setSubmitErrors] = useState([]);
 
   const [accountNumber, setAccountNumber] = useState(accountis);
+  const [pixel_id_list, setPixel_id_list] = useState([]);
+  const [page_id_list, setPage_id_list] = useState([]);
+  const [pageidList, setPageIdList] = useState([]);
+  const [pixelIdList, setPixelIdList] = useState([]);
   const [imagehash, setimagehash] = useState("");
+  const [imageHashArray, setImageHashArray] = useState([]);
+  const [newImageHashArray, setNewImageHashArray] = useState([]);
   const { data: session } = useSession();
   var token = localStorage.getItem("token");
   const [showBidAmount, setShowBidAmount] = useState(false);
@@ -2983,16 +3354,14 @@ const CreateCampaignDrawer = ({
   const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
   const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
   const [activeKey, setActiveKey] = useState(["1"]); // State to control active panels
-  const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState(
-    {}
-  );
+  const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState({});
   const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState({});
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
   const [adsets, setAdsets] = useState([
     { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
   ]);
   const [creativeIndex, setCreativeIndex] = useState(0);
-  const selectedRef = useRef({});
+  const selectedRef = useRef(null);
   const newSelectedRef = useRef(null);
   const { theme } = useTokenContext();
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
@@ -3025,11 +3394,223 @@ const CreateCampaignDrawer = ({
   const [rDeleteModalVisible, setRDeleteModalVisible] = useState(false);
   const [rCurrentCategory, setRCurrentCategory] = useState(null);
   const [rEditedName, setREditedName] = useState("");
+  // const []
+  const [selectedAccount, setSelectedAccount] = useState("ALL");
+  const [selectedObjective, setSelectedObjective] = useState("ALL");
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [defaultUrlData, setDefaultUrlData] = useState("");
+  const groupId = uuidv4();
+  const [isEditAccountsModalOpen, setIsEditAccountsModalOpen] = useState(false);
+  const [matchedAccounts, setMatchedAccounts] = useState([]);
+  const [shareTemplate, setShareTemplate] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState([]);
+  const { userdetails } = useTokenContext();
+  const [accountChanged, setAccountChanged] = useState(false);
+  const [valueOptions, setValueOptions] = useState([]);
+  const [options, setOptions] = useState([]);
+  const { adAccounts } = userdetails || {};
+  const [selectedDraftForShare, setSelectedDraftForShare] = useState(null);
+  const userPickedRef = useRef(false);
 
-  const account = useMemo(() => (accountis ?? "").trim(), [accountis]);
+
+
+  const [selectedKey, setSelectedKey] = useState(null);
+
+  const accountsForAccess = adAccounts[selectedKey];
+  const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+
+  const account = useMemo(() => {
+    if (Array.isArray(accountis)) {
+      return accountis.map((a) => String(a).trim());
+    }
+    return [String(accountis ?? '').trim()];
+  }, [accountis]);
   const { confirm } = Modal
 
+  console.log(imageHashArray);
+
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
+  console.log(page_id_list, "page_id_list in CreateCampaignDrawer");
+  console.log(pixel_id_list, "pixel_id_list in CreateCampaignDrawer");
+  const handleDropdownVisibleChange = (open) => {
+    setIsOpen(open);
+
+  };
+  const onChangeSelect = (value) => {
+
+  }
+  const handleChange1 = (values) => {
+    const uniq = Array.from(new Set(values.map(String)));
+    setSelectedValue(uniq);
+    userPickedRef.current = true;
+    const last = values[values.length - 1];
+    if (last) {
+      const findAccount = (data, accountNumber) =>
+        Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
+
+      const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
+
+    }
+
+    onChangeSelect(values);
+    setAccountChanged(true);
+  };
+  const filteredAccounts = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return accountsAccess;
+    return accountsAccess.filter((a) =>
+      `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
+    );
+  }, [accountsAccess, searchText]);
+  useEffect(() => {
+    if (userdetails?.adAccounts) {
+      const adAccountOptions = Object.keys(userdetails?.adAccounts).map(
+        (key) => ({
+          value: key,
+          label: key,
+        })
+      );
+      setOptions(adAccountOptions);
+    }
+  }, []);
+  const renderAccountsCheckboxes = (theme) => (
+    <Checkbox.Group
+      options={filteredAccounts.map((account) => ({
+        value: String(account.accountNumber),
+        label: (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '5px 10px',
+              borderBottom: '1px solid #ddd'
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+              {/* show accountName only when dropdown open (same as your old pattern) */}
+              {isOpen && (
+                <span style={{ fontSize: 12, color: 'gray' }}>
+                  {account.accountName || ''}
+                </span>
+              )}
+            </div>
+            <span style={{ textAlign: 'right', marginLeft: 10 }}>
+              {account.status === "Active" ? (
+                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+              ) : (
+                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+              )}
+            </span>
+          </div>
+        ),
+      }))}
+      value={selectedValue}      // array of selected accountNumbers
+      onChange={handleChange1}   // updates your selectedValue + notifies parent
+      className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+    />
+  );
+
+  const handleKeyChange = (key) => {
+    setSelectedKey(key);
+    setSelectedValue([]);
+  };
+
+  useEffect(() => {
+    if (selectedKey && userdetails?.adAccounts) {
+      // Mapping over the accounts based on the selected key
+      const accountNumbers = userdetails.adAccounts[selectedKey]?.map(
+        (account) => ({
+          value: account.accountNumber, // Set value as accountNumber
+          label: account.accountNumber, // Set label as accountNumber
+          accountName: account.accountName, // Include accountName for conditional rendering
+          status: account.status,
+        })
+      );
+      setValueOptions(accountNumbers); // Update valueOptions with account numbers
+    } else {
+      setValueOptions([]);
+    }
+  }, [selectedKey, userdetails]);
+
+  const handleShareDraft = async () => {
+
+    if (!selectedDraftForShare) {
+      message.error("No draft selected to share.");
+      return;
+    }
+
+
+    if (!selectedValue || selectedValue.length === 0) {
+      message.warning("Please select at least one account.");
+      return;
+    }
+
+
+    const cleanedDraft = {
+      groupId: selectedDraftForShare.groupId,
+      Draft_Name: selectedDraftForShare.Draft_Name,
+      Category: selectedDraftForShare.Category,
+      camapaignlevel: selectedDraftForShare.camapaignlevel,
+      adsetlevel_1: selectedDraftForShare.adsetlevel_1,
+      createdby: session?.user?.name,
+    };
+
+    const payload = {
+      draftData: cleanedDraft,
+      targetAccounts: selectedValue,
+      email: session?.user?.email,
+      userName: session?.user?.name,
+    };
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        "https://www.testapi.adsgoat.in/api/shareDraftToAccountsObject",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.ok) {
+        message.success(
+          `Draft shared to: ${data.accountsShared.join(", ")}`
+        );
+
+        const skipped = selectedValue.filter(
+          (acc) => !data.accountsShared.includes(acc)
+        );
+        if (skipped.length > 0) {
+          message.info(
+            `Skipped accounts (already have this draft): ${skipped.join(
+              ", "
+            )}`
+          );
+        }
+        setShareTemplate(false);
+        setSelectedValue([]);
+        setSelectedDraftForShare(null);
+      } else {
+        message.error(data.message || "Failed to share draft.");
+      }
+    } catch (err) {
+      console.error("Error sharing draft:", err);
+      message.error("Something went wrong while sharing the draft.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const categoryOptions = useMemo(() => {
     if (!Array.isArray(draftsData)) return [];
@@ -3042,31 +3623,74 @@ const CreateCampaignDrawer = ({
     ];
   }, [draftsData]);
 
+  // const filteredDrafts = useMemo(() => {
+  //   if (!Array.isArray(draftsData)) return [];
+
+  //   return draftsData.filter((draft) => {
+  //     const matchesSearch = searchText
+  //       ? draft.Draft_Name?.toLowerCase().includes(searchText.toLowerCase()) ||
+  //       draft.Category?.toLowerCase().includes(searchText.toLowerCase())
+  //       : true;
+
+  //     const matchesCategory =
+  //       selectedCategory && selectedCategory !== "ALL"
+  //         ? draft.Category === selectedCategory
+  //         : true;
+
+  //     return matchesSearch && matchesCategory;
+  //   });
+  // }, [draftsData, searchText, selectedCategory]);
+
+
   const filteredDrafts = useMemo(() => {
     if (!Array.isArray(draftsData)) return [];
 
     return draftsData.filter((draft) => {
+      const formattedBudget = draft?.camapaignlevel?.Daily_amount != null
+        ? `$${draft.camapaignlevel.Daily_amount}/day`
+        : "";
+
       const matchesSearch = searchText
         ? draft.Draft_Name?.toLowerCase().includes(searchText.toLowerCase()) ||
-        draft.Category?.toLowerCase().includes(searchText.toLowerCase())
+        draft.Category?.toLowerCase().includes(searchText.toLowerCase()) ||
+        draft?.camapaignlevel?.Daily_amount?.toString().toLowerCase().includes(searchText.toLowerCase()) ||
+        formattedBudget.toLowerCase().includes(searchText.toLowerCase())
         : true;
-
       const matchesCategory =
         selectedCategory && selectedCategory !== "ALL"
           ? draft.Category === selectedCategory
           : true;
 
-      return matchesSearch && matchesCategory;
+      const matchesObjective =
+        selectedObjective && selectedObjective !== "ALL"
+          ? draft?.camapaignlevel?.Objectives === selectedObjective
+          : true;
+      const matchesAccount =
+        selectedAccount && selectedAccount !== "ALL"
+          ? draft.Account_Number === selectedAccount
+          : true;
+
+      return matchesSearch && matchesCategory && matchesObjective && matchesAccount;
+
     });
-  }, [draftsData, searchText, selectedCategory]);
+  }, [draftsData, searchText, selectedCategory, selectedObjective, selectedAccount]);
 
 
   useEffect(() => {
-    if (!account) return;
+    if (!account || account.length === 0) return;
+
+    const accountArray = Array.isArray(account) ? account : [account];
+
     (async () => {
-      const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}`, {
-        headers: { Authorization: token }
+      const resp = await fetch(`https://www.testapi.adsgoat.in/api/getcategories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ accounts: accountArray }),
       });
+
       const json = await resp.json();
       if (json.ok) {
         setCategories(json.categories);
@@ -3077,35 +3701,53 @@ const CreateCampaignDrawer = ({
   const addCategory = async () => {
     const name = newCategory.trim();
     if (!name || !account) return;
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/categories", {
+
+    const accounts = Array.isArray(account) ? account : [account];
+
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/newcategories", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ accountNumber: account, name })
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accounts, name }),
     });
+
     const json = await resp.json();
     if (resp.ok && json.ok) {
-      setCategories(prev => [...prev, json.category]);
-      setPopupInputs(s => ({ ...s, input1: json.category.name }));
+      setCategories(prev => [...prev, ...json.added]);
+      setPopupInputs(s => ({ ...s, input1: json.added[0]?.name || "" }));
       setNewCategory("");
       setErrors(e => ({ ...e, input1: "" }));
-      message.success("Category added");
+      message.success(`Category added to ${json.added.length} account(s)`);
     } else {
       message.error(json.message || "Add failed");
     }
   };
+  const deleteCategory = async (accountNumber, catId) => {
+    if (!catId || !accountNumber) return;
 
-  const deleteCategory = async (catId) => {
-    if (!catId || !account) return;
     const deleted = categories.find(c => c.categoryId === catId);
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}/${catId}`, {
-      method: "DELETE",
-      headers: { Authorization: token }
-    });
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: token },
+      }
+    );
+
     const json = await resp.json().catch(() => ({}));
+
     if (resp.ok && json.ok) {
-      setCategories(prev => prev.filter(c => c.categoryId !== catId));
+      setCategories(prev =>
+        prev.filter(c => !(c.categoryId === catId && c.accountNumber === accountNumber))
+      );
       if (deleted?.name) {
-        setPopupInputs(s => ({ ...s, input1: s.input1 === deleted.name ? "" : s.input1 }));
+        setPopupInputs(s => ({
+          ...s,
+          input1: s.input1 === deleted.name ? "" : s.input1
+        }));
       }
       message.success("Category deleted");
     } else {
@@ -3113,19 +3755,35 @@ const CreateCampaignDrawer = ({
     }
   };
 
-  const renameCategory = async (catId, newName) => {
+  const renameCategory = async (accountNumber, catId, newName) => {
     const clean = newName?.trim();
-    if (!catId || !clean || !account) return;
-    const oldName = categories.find(c => c.categoryId === catId)?.name;
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/categories/${account}/${catId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ name: clean })
-    });
+    if (!catId || !clean || !accountNumber) return;
+
+    // const oldName = categories.find(c => c.categoryId === catId)?.name;
+    const oldName = categories.find(
+      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+    )?.name;
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({ name: clean }),
+      }
+    );
+
     const json = await resp.json().catch(() => ({}));
     if (resp.ok && json.ok) {
-      setCategories(prev => prev.map(c => c.categoryId === catId ? { ...c, name: clean } : c));
-      setPopupInputs(s => ({ ...s, input1: s.input1 === oldName ? clean : s.input1 }));
+      setCategories(prev =>
+        prev.map(c =>
+          c.categoryId === catId ? { ...c, name: clean } : c
+        )
+      );
+      setPopupInputs(s => ({
+        ...s,
+        input1: s.input1 === oldName ? clean : s.input1,
+      }));
       message.success("Category renamed");
     } else {
       message.error(json.message || "Rename failed");
@@ -3133,71 +3791,121 @@ const CreateCampaignDrawer = ({
   };
 
   useEffect(() => {
-    if (!account) return;
+    if (!account || account.length === 0) return;
+
+    const accountArray = Array.isArray(account) ? account : [account];
+
     (async () => {
-      const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}`, {
-        headers: { Authorization: token }
+      const resp = await fetch(`https://www.testapi.adsgoat.in/api/getreportcategories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ accounts: accountArray }),
       });
+
       const json = await resp.json().catch(() => ({}));
-      if (resp.ok && json.ok) setReportCategories(json.categories);
+      if (json.ok) {
+        setReportCategories(json.categories);
+      }
     })();
   }, [account, token]);
+
+
   const addReportCategory = async () => {
     const name = newReportCategory.trim();
     if (!name || !account) return;
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/reportcategory", {
+
+    const accounts = Array.isArray(account) ? account : [account];
+
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/newreportcategory", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ accountNumber: account, name })
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accounts, name }),
     });
-    const json = await resp.json().catch(() => ({}));
+
+    const json = await resp.json();
     if (resp.ok && json.ok) {
-      setReportCategories(prev => [...prev, json.category]);
-      setPopupInputs(s => ({ ...s, reportCat: json.category.name }));
+      setReportCategories(prev => [...prev, ...json.added]);
+      setPopupInputs(s => ({ ...s, reportCat: json.added[0]?.name || "" }));
       setNewReportCategory("");
-      message.success("Report category added");
+      setErrors(e => ({ ...e, reportCat: "" }));
+
+      message.success(`Report category added to ${json.added.length} account(s)`);
     } else {
       message.error(json.message || "Add failed");
     }
   };
 
-  const renameReportCategory = async (catId, newName) => {
+  const renameReportCategory = async (accountNumber, catId, newName) => {
     const clean = newName?.trim();
-    if (!catId || !clean || !account) return;
-    const oldName = reportCategories.find(c => c.categoryId === catId)?.name;
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}/${catId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: token },
-      body: JSON.stringify({ name: clean })
-    });
+    if (!catId || !clean || !accountNumber) return;
+
+    const old = reportCategories.find(
+      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+    )?.name;
+
+    if (old && old.trim().toLowerCase() === clean.toLowerCase()) {
+      message.info("No changes to save");
+      return;
+    }
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({ name: clean }),
+      }
+    );
+
     const json = await resp.json().catch(() => ({}));
     if (resp.ok && json.ok) {
-      setReportCategories(prev => prev.map(c => c.categoryId === catId ? { ...c, name: clean } : c));
-      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === oldName ? clean : s.reportCat }));
+      setReportCategories(prev =>
+        prev.map(c =>
+          String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber)
+            ? { ...c, name: clean }
+            : c
+        )
+      );
+      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === old ? clean : s.reportCat }));
       message.success("Report category renamed");
     } else {
       message.error(json.message || "Rename failed");
     }
   };
 
-  const deleteReportCategory = async (catId) => {
-    if (!catId || !account) return;
-    const deleted = reportCategories.find(c => c.categoryId === catId);
-    const resp = await fetch(`https://www.testapi.adsgoat.in/api/reportcategory/${account}/${catId}`, {
-      method: "DELETE",
-      headers: { Authorization: token }
-    });
+
+  const deleteReportCategory = async (accountNumber, catId) => {
+    if (!catId || !accountNumber) return;
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      { method: "DELETE", headers: { Authorization: token } }
+    );
     const json = await resp.json().catch(() => ({}));
+
     if (resp.ok && json.ok) {
-      setReportCategories(prev => prev.filter(c => c.categoryId !== catId));
-      if (deleted?.name) {
-        setPopupInputs(s => ({ ...s, reportCat: s.reportCat === deleted.name ? "" : s.reportCat }));
-      }
+      setReportCategories(prev =>
+        prev.filter(c =>
+          !(String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber))
+        )
+      );
       message.success("Report category deleted");
     } else {
       message.error(json.message || "Delete failed");
     }
   };
+
+
+
+
 
 
   // const handleConfirm = async() => {
@@ -3304,41 +4012,56 @@ const CreateCampaignDrawer = ({
     const hasErrors = Object.values(newErrors).some((msg) => msg !== "");
     if (hasErrors) {
       // message?.error?.("Please fill the required fields");
-      return;
+      return Promise.reject();
     }
 
     setConfirmLoading(true);
 
     try {
       const allValues = form.getFieldsValue(true);
+
+      const isDuplicate = (draftsData || []).some(
+        (d) => d.Draft_Name.toLowerCase() === popupInputs.input2.trim().toLowerCase()
+      );
+
+      if (isDuplicate) {
+        newErrors.input2 = "Template name already exists";
+        setConfirmLoading(false);
+        return Promise.reject();
+      }
+
       const draftData = await MultipleAdsetsDraftFetching(allValues);
 
-      const totalDraftData = {
-        // id: uuidv4(),
-        Category: popupInputs.input1,
-        Draft_Name: popupInputs.input2,
-        ...draftData,
-      };
+      for (const data of draftData) {
+        const totalDraftData = {
+          // id: uuidv4(),
+          Category: popupInputs.input1,
+          Draft_Name: popupInputs.input2,
+          ...data,
+        };
+        // check duplicate template name
 
-      const resp = await fetch("https://www.testapi.adsgoat.in/api/submitDraftDataNew", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token, // if your middleware expects Bearer
-        },
-        body: JSON.stringify({
-          accountNumber,
-          draftData: totalDraftData,
-          email: session?.user?.email,
-          userName: session?.user?.name,
-        }),
-      });
+
+        await fetch("https://www.testapi.adsgoat.in/api/NewsubmitDraftDataNew", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token, // if your middleware expects Bearer
+          },
+          body: JSON.stringify({
+            accountNumber: data?.Account_Number,
+            draftData: { ...totalDraftData, groupId },
+            email: session?.user?.email,
+            userName: session?.user?.name,
+          }),
+        });
+      }
 
       // ✅ ensure non-2xx throws with a message
-      if (!resp.ok) {
-        const errJson = await resp.json().catch(() => ({}));
-        throw new Error(errJson.message || `Request failed: ${resp.status}`);
-      }
+      // if (!resp.ok) {
+      //   const errJson = await resp.json().catch(() => ({}));
+      //   throw new Error(errJson.message || `Request failed: ${resp.status}`);
+      // }
       await fetchDraftDetails();
       setRefreshDraft((prev) => !prev);
 
@@ -4079,10 +4802,12 @@ const CreateCampaignDrawer = ({
 
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
-    form.setFieldsValue({
-      pixel_id: imagehash?.pixelID,
-      page_id: imagehash?.pageID,
-    });
+    // const pageIDList = 
+    console.log(imagehash, "imagehash in useEffect");
+    // form.setFieldsValue({
+    //   pixel_id: imagehash?.pixelID,
+    //   page_id: imagehash?.pageID,
+    // });
 
     // Check if all required fields are complete
     const checkFormCompletion = () => {
@@ -4109,8 +4834,53 @@ const CreateCampaignDrawer = ({
     }
   }, [imagehash, form]);
 
+  useEffect(() => {
+    console.log(imageHashArray, "imageHashArray in useEffect");
+    const pageIdList = imageHashArray.map((item) => ({ value: `${item.accountNumber} - ${item.pageID}`, label: `${item.accountNumber} - ${item.pageID}` }));
+    const pageIdListFiltered = imageHashArray.map((item) => `${item.accountNumber} - ${item.pageID}`);
+    const pixelIdListFiltered = imageHashArray.map((item) => {
+      if (typeof item.pixelID === "object" && item.pixelID !== null) {
+        const universalValue = item.pixelID.Universal;
+        if (universalValue) {
+          return `${item.accountNumber} - ${universalValue}`; // ✅ matches options.value
+        }
+        return null;
+      }
+      return `${item.accountNumber} - ${item.pixelID}`;       // ✅ matches options.value
+    }).filter(Boolean)
+    const pixelIdList = imageHashArray.flatMap((item) => {
+      if (typeof item.pixelID === "object" && item.pixelID !== null) {
+        return Object.entries(item.pixelID).map(([key, value]) => ({
+          value: `${item.accountNumber} - ${value}`,
+          label: `${item.accountNumber} - ${key} - ${value}`,
+        }));
+      }
+
+      return {
+        value: `${item.accountNumber} - ${item.pixelID}`,
+        label: `${item.accountNumber} - ${item.pixelID}`,
+      };
+    });
+    console.log(pixelIdList, "pixelIdList");
+    console.log(pixelIdListFiltered, "pixelIdListFiltered");
+    console.log(pageIdList, "pageIdList");
+    console.log(pageIdListFiltered, "pageIdListFiltered");
+    form.setFieldsValue({
+      pixel_id: pixelIdListFiltered,
+      page_id: pageIdListFiltered,
+    });
+    setPixel_id_list(pixelIdList);
+    setPage_id_list(pageIdList);
+    setPixelIdList(pixelIdListFiltered);
+    setPageIdList(pageIdListFiltered);
+  }, [imageHashArray, form]);
+
   const Accountchange = (e) => {
-    setAccountNumber(e.target.value);
+    console.log(e);
+    const newAccounts = newImageHashArray.filter(item =>
+      e.includes(item.label));
+    console.log(newAccounts);
+    // setAccountNumber(e.target.value);
   };
   // const handlepositionChange = async (values) => {
   //     console.log(values, "handlepositionChange")
@@ -4119,7 +4889,7 @@ const CreateCampaignDrawer = ({
   const fetchAccountDetails = async () => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/hashimageidentity/${accountNumber}`,
+        `https://www.testapi.adsgoat.in/api/newhashimageidentity/${accountNumber}`,
         {
           headers: {
             Authorization: token,
@@ -4127,6 +4897,9 @@ const CreateCampaignDrawer = ({
         }
       );
       console.log("account data", ...response?.data);
+
+      setImageHashArray(response?.data || []);
+      setNewImageHashArray(response?.data || []);
 
       setimagehash(...response?.data);
     } catch (error) {
@@ -4166,19 +4939,48 @@ const CreateCampaignDrawer = ({
   //   }
   // };
 
+  // const fetchDraftDetails = async () => {
+  //   if (!account) return;
+  //   try {
+  //     const res = await axios.get("http://localhost:4500/api/newGetDraftData", {
+  //       params: { accountNumber: account },
+  //       headers: { Authorization: token },
+  //       validateStatus: () => true,
+  //     });
+
+  //     if (res.status === 200 && res.data?.ok) {
+  //       setDraftsData(Array.isArray(res.data.drafts) ? res.data.drafts : []);
+  //     } else if (res.status === 404) {
+  //       setDraftsData([]);
+  //     } else {
+  //       message.error(res.data?.message || `Failed to load drafts (${res.status})`);
+  //     }
+  //   } catch (err) {
+  //     console.error("fetchDraftDetails error:", err);
+  //     message.error("Error fetching drafts");
+  //   }
+  // };
   const fetchDraftDetails = async () => {
     if (!account) return;
+
+    // normalize `account` to an array
+    const accounts = Array.isArray(account) ? account.filter(Boolean) : [account];
+
     try {
-      const res = await axios.get("https://www.testapi.adsgoat.in/api/newGetDraftData", {
-        params: { accountNumber: account },
-        headers: { Authorization: token },
-        validateStatus: () => true,
-      });
+      const res = await axios.post(
+        "https://www.testapi.adsgoat.in/api/newGetDraftData",
+        { accounts },
+        {
+          headers: { Authorization: token },
+          validateStatus: () => true,
+        }
+      );
 
       if (res.status === 200 && res.data?.ok) {
+        // flat list; each draft has `accountNumber`
         setDraftsData(Array.isArray(res.data.drafts) ? res.data.drafts : []);
-      } else if (res.status === 404) {
-        setDraftsData([]);
+        // If you prefer per-account map later:
+        // setDraftsByAccount(res.data.draftsByAccount);
       } else {
         message.error(res.data?.message || `Failed to load drafts (${res.status})`);
       }
@@ -4188,56 +4990,146 @@ const CreateCampaignDrawer = ({
     }
   };
 
-  const deleteDraft = async (draftId) => {
-    if (!draftId) {
-      message.error("Draft ID is missing");
+
+  // const deleteDraft = async (draftId) => {
+  //   if (!draftId) {
+  //     message.error("Draft ID is missing");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch("http://localhost:4500/api/deleteDraft", {
+  //       method: "DELETE",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: token,
+  //       },
+  //       body: JSON.stringify({
+  //         accountNumber: account,
+  //         draftId: draftId
+  //       })
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (data.ok) {
+  //       message.open({
+  //         type: 'success',
+  //         content: "Draft deleted successfully",
+  //         className: theme === 'dark' ? 'dark-message' : '',
+  //       })
+  //       await fetchDraftDetails();
+  //     } else {
+  //       message.error(data.message || "Failed to delete draft");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting draft:", error);
+  //     message.error("An error occurred while deleting");
+  //   }
+  // };
+  // const deleteDraft = async (accountNumber, draftId) => {
+  //   if (!accountNumber || !draftId) {
+  //     message.error("Missing account number or draft id");
+  //     return;
+  //   }
+
+  //   const resp = await fetch("http://localhost:4500/api/deleteDraft", {
+  //     method: "DELETE",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: token,
+  //     },
+  //     body: JSON.stringify({ accountNumber, draftId }),
+  //   });
+
+  //   const data = await resp.json().catch(() => ({}));
+
+  //   if (resp.ok && data.ok) {
+
+  //     setDraftsData(prev =>
+  //       prev.filter(
+  //         d => !(
+  //           String(d.accountNumber) === String(accountNumber) &&
+  //           String(d.draftId) === String(draftId)
+  //         )
+  //       )
+  //     );
+  //     message.success("Draft deleted successfully");
+  //   } else {
+  //     message.error(data.message || "Failed to delete draft");
+  //   }
+  // };
+  const deleteDraft = async (groupId) => {
+    if (!groupId) {
+      message.error("Missing groupId");
       return;
     }
 
-    try {
-      const response = await fetch("https://www.testapi.adsgoat.in/api/deleteDraft", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        body: JSON.stringify({
-          accountNumber: account,
-          draftId: draftId
-        })
-      });
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/NewdeleteDraft", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ groupId }),
+    });
 
-      const data = await response.json();
+    const data = await resp.json().catch(() => ({}));
 
-      if (data.ok) {
-        message.open({
-          type: 'success',
-          content: "Draft deleted successfully",
-          className: theme === 'dark' ? 'dark-message' : '',
-        })
-        await fetchDraftDetails();
-      } else {
-        message.error(data.message || "Failed to delete draft");
-      }
-    } catch (error) {
-      console.error("Error deleting draft:", error);
-      message.error("An error occurred while deleting");
+    if (resp.ok && data.ok) {
+      // Remove all drafts in this group from local state
+      setDraftsData(prev => prev.filter(d => d.groupId !== groupId));
+      message.success("Drafts deleted successfully across all accounts");
+    } else {
+      message.error(data.message || "Failed to delete drafts");
     }
   };
 
-  const handleDelete = (draftId) => {
-    setDeleteModal({ visible: true, id: draftId });
+  // const handleDelete = (Account_Number, draftId) => {
+  //   setDeleteModal({ visible: true, id: draftId, Account_Number });
+  // };
+  const handleDelete = async (groupId) => {
+    try {
+      const res = await fetch(`https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${groupId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", Authorization: token },
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.message || "Failed to fetch drafts");
+
+      const accounts = json.data.map(d => d.accountNumber);
+      if (!accounts.length) {
+        message.warning("No matching accounts found");
+        return;
+      }
+
+      setMatchedAccounts(accounts);
+      setDeleteModal({ visible: true, groupId });
+    } catch (err) {
+      console.error(err);
+      message.error(err.message || "Failed to fetch matching accounts");
+    }
   };
 
+  // const onConfirmDelete = async () => {
+  //   try {
+  //     setDeleting(true);
+  //     await deleteDraft(deleteModal.Account_Number, deleteModal.id);
+  //   } finally {
+  //     setDeleting(false);
+  //     setDeleteModal({ visible: false, id: null, Account_Number: null });
+  //   }
+  // };
   const onConfirmDelete = async () => {
     try {
       setDeleting(true);
-      await deleteDraft(deleteModal.id);
+      await deleteDraft(deleteModal.groupId);
     } finally {
       setDeleting(false);
-      setDeleteModal({ visible: false, id: null });
+      setDeleteModal({ visible: false, groupId: null });
     }
   };
+
 
   const onCancelDelete = () => {
     setDeleteModal({ visible: false, id: null });
@@ -4248,67 +5140,69 @@ const CreateCampaignDrawer = ({
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
+      accountNumber: draft.Account_Number,
+      groupId: draft.groupId
     };
     setPopupInputs({ input1: draft.Category || "", input2: draft.Draft_Name || "" });
-
-
     setIsEditingDraft(true);
-  };
+    setSelectedTemplate(null);
+  }
+
   const handleSaveEditedDraft = async () => {
-    if (!selectedRef.current?.Draft_Id) {
-      message.error("No draft selected to edit");
-      return;
-    }
+    const trimmedCat = popupInputs.input1.trim();
+    const trimmedName = popupInputs.input2.trim();
+
+    const newErrors = {
+      input1: trimmedCat ? "" : "Template category is required",
+      input2: trimmedName ? "" : "Template name is required",
+    };
+    setErrors(newErrors);
+    if (Object.values(newErrors).some(msg => msg !== "")) return Promise.reject();
 
     try {
-      setConfirmLoading(true);
-      const allValues = form.getFieldsValue(true);
-      const draftData = await MultipleAdsetsDraftFetching(allValues);
+      // Call your API that fetches all accounts with drafts
+      const res = await fetch(
+        `https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${selectedRef.current.groupId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        }
+      );
 
-      const totalDraftData = {
-        Category: popupInputs.input1,
-        Draft_Name: popupInputs.input2,
-        ...draftData,
-      };
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.message || "Failed to fetch drafts");
 
 
-      const resp = await fetch("https://www.testapi.adsgoat.in/api/updateDraftSmart", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: token },
-        body: JSON.stringify({
-          accountNumber: account,
-          draftId: selectedRef.current.Draft_Id,
-          payload: totalDraftData,
-        }),
-      });
+      const matchedAccounts = json.data
+        .filter(account => account.Drafts.some(draft => draft.groupId === selectedRef.current.groupId))
+        .map(account => account.accountNumber);
 
-      const json = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(json.message || `Update failed (${resp.status})`);
+      if (matchedAccounts.length === 0) {
+        message.info("No accounts have drafts with this groupId");
+        return;
+      }
 
-      message.open({
-        type: 'success',
-        content: "Draft updated successfully",
-        className: theme === 'dark' ? 'dark-message' : '',
-      })
 
-      await postDraftSaveCleanup();
+      setMatchedAccounts(matchedAccounts);
+      setIsEditAccountsModalOpen(true);
 
     } catch (err) {
-      console.error("Save draft (edit) error:", err);
-      message.error(err?.message || "Failed to update draft");
-    } finally {
-      setConfirmLoading(false);
+      console.error(err);
+      message.error(err.message || "Failed to fetch matched accounts");
     }
   };
 
-  const postDraftSaveCleanup = async () => {
 
+
+  const postDraftSaveCleanup = async () => {
     await fetchDraftDetails();
     setIsEditingDraft(false);
     selectedRef.current = null;
     newSelectedRef.current = "";
     setPopupInputs({ input1: "", input2: "" });
-    form.resetFields();
     setAdsets([{ id: uuidv4(), AdsetPanelName: "ADSET 1", DailyAdd_amount: 0 }]);
     setSelectedFiles({});
     setSelectedFilesFromCreatives({});
@@ -4332,15 +5226,11 @@ const CreateCampaignDrawer = ({
     setOpenCreativesDrawer(false);
     setIsModalVisible(false);
   };
-  // useEffect(() => {
-  //   if (account && visible) {
-  //     fetchAccountDetails();
-  //   }
-  // }, [account, visible]);
+
   useEffect(() => {
     if (visible && accountNumber) {
       form.setFieldsValue({ Account_Number: accountNumber });
-      fetchAccountDetails(); 
+      fetchAccountDetails();
     }
   }, [accountNumber, visible, form]);
 
@@ -4351,8 +5241,7 @@ const CreateCampaignDrawer = ({
     }
   }, [account]);
   const handleNameChange = async (e) => {
-    // console.log("Account Number:", accountNumber);
-    if(adsets.length === 1){
+    if (adsets.length === 1) {
       form.setFieldsValue({
         adsets: {
           [0]: {
@@ -4646,13 +5535,14 @@ const CreateCampaignDrawer = ({
   //     }
   // };
 
-  const customRequest = async (data, index, onSuccess, onError, id) => {
+  const customRequest = async (singleaccount, data, index, onSuccess, onError, id) => {
     if (!imagehash || imagehash.length === 0) {
       onError("Image hash data not loaded");
       return [];
     }
-    const token = imagehash.token;
-    const account = imagehash.accountNumber;
+    const newAccountObject = imageHashArray.find(item => item.accountNumber === singleaccount);
+    const token = newAccountObject.token;
+    const account = newAccountObject.accountNumber;
 
     const createS3Folder = async (folderPath) => {
       try {
@@ -4662,7 +5552,7 @@ const CreateCampaignDrawer = ({
             method: "POST",
             headers: {
               Authorization: localStorage.getItem("token"),
-              username: imagehash.username || "default-user",
+              username: newAccountObject.username || "default-user",
               "x-folder": folderPath.endsWith("/")
                 ? folderPath
                 : folderPath + "/",
@@ -4694,7 +5584,7 @@ const CreateCampaignDrawer = ({
             method: "POST",
             headers: {
               Authorization: localStorage.getItem("token"),
-              username: imagehash.username || "default-user", // required in headers
+              username: newAccountObject.username || "default-user", // required in headers
             },
             body: formData,
           }
@@ -4724,7 +5614,7 @@ const CreateCampaignDrawer = ({
             continue;
           }
 
-          const folderPath = `${network}/${imagehash.accountNumber}/${formValues ? formValues.Name : "Drafts"
+          const folderPath = `${network}/${account}/${formValues ? formValues.Name : "Drafts"
             }`;
           await createS3Folder(folderPath);
           let fileBlob = null;
@@ -5036,55 +5926,60 @@ const CreateCampaignDrawer = ({
       return;
     }
 
+    console.log("Form values", formValues);
 
     const campaignData = await MultipleAdsestsFetching(formValues);
-    campaignData.Category = selectedCategory;
+    console.log("Campaign Data before adding category:", campaignData);
+    // campaignData.Category = selectedCategory;
     try {
       if (campaignData) {
         // console.log("Campaign Data:", campaignData);
         //https://www.testapi.adsgoat.in
-        const response = await fetch(
-          "https://www.testapi.adsgoat.in/api/newsubmitFormData",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token,
-            },
-            body: JSON.stringify(campaignData),
-          }
-        );
 
-        if (response.ok) {
-          message.open({
-            type: 'success',
-            content: "Campaign created successfully",
-            className: theme === 'dark' ? 'dark-message' : '',
-          })
-          console.log("Form data submitted successfully");
-          setLoading(false); // Stop the spinner
-          setSelectedFilesFromCreatives({});
-          setSelectedFilesFromMedia({});
-          setSelectedFiles({});
-          onClose();
-          setSelectedPositions({});
-          setAdsets([
-            { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1", AdsetName: "", AddName: "" },
-          ]);
-          isManual !== "manual" && setIsManual(false);
-          newSelectedRef.current = null; // Reset the newSelectedRef
-          setPopupInputs((s) => ({ ...s, reportCat: "" }));
-          form.resetFields();
-          form.setFieldValue({})
-          changeRRefrst();
-          setCampaignLevelDailyBudget(0);
-          setAdsetLevelDailyBudget(0);
-          setIsCampaignBudgetActive(false);
-          setIsAnyAdsetBudgetSet(false);
-          setShowBidAmount(false);
-        } else {
-          console.error("Failed to submit form data");
+        for (const campaign of campaignData) {
+          await fetch(
+            "https://www.testapi.adsgoat.in/api/newsubmitFormData",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: token,
+              },
+              body: JSON.stringify({ ...campaign, Category: selectedCategory }),
+            }
+          );
         }
+
+
+
+        // if (response.ok) {
+        message.open({
+          type: 'success',
+          content: "Campaign created successfully",
+          className: theme === 'dark' ? 'dark-message' : '',
+        })
+        console.log("Form data submitted successfully");
+        setLoading(false); // Stop the spinner
+        setSelectedFilesFromCreatives({});
+        setSelectedFilesFromMedia({});
+        setSelectedFiles({});
+        onClose();
+        setSelectedPositions({});
+        setAdsets([
+          { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1", AdsetName: "", AddName: "" },
+        ]);
+        isManual !== "manual" && setIsManual(false);
+        newSelectedRef.current = null; // Reset the newSelectedRef
+        setPopupInputs((s) => ({ ...s, reportCat: "" }));
+        form.resetFields();
+        form.setFieldValue({})
+        changeRRefrst();
+        setCampaignLevelDailyBudget(0);
+        setAdsetLevelDailyBudget(0);
+        setIsCampaignBudgetActive(false);
+        setIsAnyAdsetBudgetSet(false);
+        setShowBidAmount(false);
+
       }
     } catch (error) {
       console.error("Error during campaign creation:", error);
@@ -5140,251 +6035,293 @@ const CreateCampaignDrawer = ({
   }
 
   const MultipleAdsestsFetching = async (values) => {
-    let AllAdsetsData = {
-      campaign_name: values.Name,
-      Account_Number: values.Account_Number,
-      Approval: "PENDING_APPROVAL",
-      fbstatus: "No-Live",
-      camapaignlevel: {
-        createdby: session?.user?.name,
-        Name: values.Name,
-        Objectives: values.Objectives,
-        Special_categories: values.Special_categories,
-        Bid_strategy: values.Bid_strategy,
-        Daily_amount: parseFloat(values.Daily_amount) * 100,
-        Status: values.Status,
-        access_token: imagehash.token,
-        createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
-      },
-    };
-    const onSuccess = (status, response) => {
-      console.log("Upload success:", response);
-    };
 
-    const onError = (status, error) => {
-      console.error("Upload error:", error);
-    };
+    const multipleAccounts = values.Account_Number;
 
-    for (let i = 0; i < values.adsets.length; i++) {
-      let AdsetsData = {};
+    const multipleAccountsData = [];
 
-      const imageHashArray = await customRequest(
-        values.adsets[i],
-        i,
-        onSuccess,
-        onError,
-        adsets[i].id
-      );
-      const addLevelData = imageHashArray.map((media, index) => {
-        if (media.imag_hash) {
-          // This is an image
-          return {
-            id: uuidv4(),
-            AddName: `${values.adsets[i].AddName}_${index + 1}`,
-            filename: media.filename,
-            imag_hash: media.imag_hash,
-            page_id: values.page_id,
-            message: values.adsets[i].message,
-            headline: values.adsets[i].headline,
-            Description: values.adsets[i].Description,
-            Caption: values.adsets[i].Caption,
-            Website_URL: values.adsets[i].Website_URL,
-
-            // urlParameters: values.urlParameters
-          };
-        } else if (media.videoid) {
-          // This is a video
-          return {
-            id: uuidv4(),
-            AddName: `${values.adsets[i].AddName}_${index + 1}`,
-            filename: media.filename,
-            videoid: media.videoid,
-            thambnailurl: media.thambnailurl,
-            page_id: values.page_id,
-            message: values.adsets[i].message,
-            headline: values.adsets[i].headline,
-            Description: values.adsets[i].Description,
-            Caption: values.adsets[i].Caption,
-            Website_URL: values.adsets[i].Website_URL,
-            // urlParameters: values.urlParameters
-          };
-        }
-      });
-      AdsetsData[`adsetlevel_${i + 1}`] = {
-        id: uuidv4(),
-        AdsetName: values.adsets[i].AdsetName,
-        Daily_amount: values.adsets[i].DailyAdd_amount
-          ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
-          : "",
-        optimization_goal: values.adsets[i].optimization_goal,
-        billing_event: values.adsets[i].billing_event,
-        start_time: moment(values.adsets[i].DatePicker.$d)
-          .tz(imagehash.timeZone)
-          .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
-        action_source: values.adsets[i].action_source,
-        custom_event_type: values.adsets[i].custom_event_type,
-        pixel_id: values.pixel_id,
-        bid_amount: values.adsets[i].bid_amount
-          ? parseFloat(values.adsets[i].bid_amount) * 100
-          : 0,
-        countries: values.adsets[i].countries,
-        Min_Age: values.adsets[i].Min_Age,
-        Max_Age: values.adsets[i].Max_Age,
-        Gender: parseInt(values.adsets[i].Gender),
-        locales: values.adsets[i].Language,
-        placements: values.adsets[i].placements,
-        ...(values.adsets[i].placements !== "Advance" && {
-          publisher_platforms: values.adsets[i].platforms,
-          Facebook_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Facebook"
-            ) || [],
-          instagram_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Instagram"
-            ) || [],
-          audience_network_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Audience"
-            ) || [],
-          messenger_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Messenger"
-            ) || [],
-          position: values.adsets[i].positions,
-          device_platforms: values.adsets[i].device_platforms,
-        }),
-        buying_type: "AUCTION",
-        addlevel: addLevelData,
+    for (let account of multipleAccounts) {
+      const newImageHash = imageHashArray.find(item => item.accountNumber === account);
+      const list_of_page_id = values.page_id;
+      const list_of_pixel_id = values.pixel_id;
+      const page_id = list_of_page_id.find(item => item.includes(account)).split("-");
+      const pixel_id = list_of_pixel_id.find(item => item.includes(account)).split("-");
+      const newPageId = page_id[page_id.length - 1].trim();
+      const newPixelId = pixel_id[pixel_id.length - 1].trim();
+      //12
+      // console.log("page_id", account, page_id[page_id.length - 1].trim());
+      // console.log("pixel_id", account, pixel_id[pixel_id.length - 1].trim());
+      let AllAdsetsData = {
+        campaign_name: values.Name,
+        Account_Number: account,
+        Approval: "PENDING_APPROVAL",
+        fbstatus: "No-Live",
+        Category: selectedCategory,
+        camapaignlevel: {
+          createdby: session?.user?.name,
+          Name: values.Name,
+          Objectives: values.Objectives,
+          Special_categories: values.Special_categories,
+          Bid_strategy: values.Bid_strategy,
+          Daily_amount: parseFloat(values.Daily_amount) * 100,
+          Status: values.Status,
+          access_token: newImageHash.token,
+          createdDate: moment().tz(newImageHash.timeZone).format("YYYY-MM-DD"),
+        },
       };
-      AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+      const onSuccess = (status, response) => {
+        console.log("Upload success:", response);
+      };
+
+      const onError = (status, error) => {
+        console.error("Upload error:", error);
+      };
+
+      for (let i = 0; i < values.adsets.length; i++) {
+        let AdsetsData = {};
+
+        const imagesHashArray = await customRequest(
+          account,
+          values.adsets[i],
+          i,
+          onSuccess,
+          onError,
+          adsets[i].id
+        );
+        const addLevelData = imagesHashArray.map((media, index) => {
+          if (media.imag_hash) {
+            // This is an image
+            return {
+              id: uuidv4(),
+              AddName: `${values.adsets[i].AddName}_${index + 1}`,
+              filename: media.filename,
+              imag_hash: media.imag_hash,
+              page_id: newPageId,
+              message: values.adsets[i].message,
+              headline: values.adsets[i].headline,
+              Description: values.adsets[i].Description,
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
+
+              // urlParameters: values.urlParameters
+            };
+          } else if (media.videoid) {
+            // This is a video
+            return {
+              id: uuidv4(),
+              AddName: `${values.adsets[i].AddName}_${index + 1}`,
+              filename: media.filename,
+              videoid: media.videoid,
+              thambnailurl: media.thambnailurl,
+              page_id: newPageId,
+              message: values.adsets[i].message,
+              headline: values.adsets[i].headline,
+              Description: values.adsets[i].Description,
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
+              // urlParameters: values.urlParameters
+            };
+          }
+        });
+        AdsetsData[`adsetlevel_${i + 1}`] = {
+          id: uuidv4(),
+          AdsetName: values.adsets[i].AdsetName,
+          Daily_amount: values.adsets[i].DailyAdd_amount
+            ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
+            : "",
+          optimization_goal: values.adsets[i].optimization_goal,
+          billing_event: values.adsets[i].billing_event,
+          start_time: moment(values.adsets[i].DatePicker.$d)
+            .tz(imagehash.timeZone)
+            .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+          action_source: values.adsets[i].action_source,
+          custom_event_type: values.adsets[i].custom_event_type,
+          pixel_id: newPixelId,
+          bid_amount: values.adsets[i].bid_amount
+            ? parseFloat(values.adsets[i].bid_amount) * 100
+            : 0,
+          countries: values.adsets[i].countries,
+          Min_Age: values.adsets[i].Min_Age,
+          Max_Age: values.adsets[i].Max_Age,
+          Gender: parseInt(values.adsets[i].Gender),
+          locales: values.adsets[i].Language,
+          placements: values.adsets[i].placements,
+          ...(values.adsets[i].placements !== "Advance" && {
+            publisher_platforms: values.adsets[i].platforms,
+            Facebook_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Facebook"
+              ) || [],
+            instagram_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Instagram"
+              ) || [],
+            audience_network_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Audience"
+              ) || [],
+            messenger_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Messenger"
+              ) || [],
+            position: values.adsets[i].positions,
+            device_platforms: values.adsets[i].device_platforms,
+          }),
+          buying_type: "AUCTION",
+          addlevel: addLevelData,
+        };
+        AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+      }
+
+      multipleAccountsData.push(AllAdsetsData);
+
+      //45
     }
-    return AllAdsetsData;
+
+
+    return multipleAccountsData;
   };
 
   const MultipleAdsetsDraftFetching = async (values) => {
-    let AllAdsetsData = {
-      // id: uuidv4(),
-      // Draft_Name:"",
-      createdby: session?.user?.name,
-      createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
-      editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
-      camapaignlevel: {
-        // createdby: session?.user?.name,
-        Name: values.Name || "",
-        Objectives: values.Objectives || "",
-        Special_categories: values.Special_categories || "NONE",
-        Bid_strategy: values.Bid_strategy,
-        Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
-        Status: values.Status,
-        // access_token: imagehash.token,
-        createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
-      },
-    };
-    const onSuccess = (status, response) => {
-      console.log("Upload success:", response);
-    };
+    const multipleAccounts = values.Account_Number;
 
-    const onError = (status, error) => {
-      console.error("Upload error:", error);
-    };
+    const multipleAccountsData = [];
+    for (let account of multipleAccounts) {
+      const newImageHash = imageHashArray.find(item => item.accountNumber === account);
+      const list_of_page_id = values.page_id;
+      const list_of_pixel_id = values.pixel_id;
+      const page_id = list_of_page_id.find(item => item.includes(account)).split("-");
+      const pixel_id = list_of_pixel_id.find(item => item.includes(account)).split("-");
+      const newPageId = page_id[page_id.length - 1].trim();
+      const newPixelId = pixel_id[pixel_id.length - 1].trim();
 
-    console.log("Adsets:", values);
-
-    for (let i = 0; i < values.adsets.length; i++) {
-      let AdsetsData = {};
-
-      const imageHashArray = await customRequest(
-        values.adsets[i],
-        i,
-        onSuccess,
-        onError,
-        adsets[i].id
-      );
-      console.log("Image Hash Array:", imageHashArray);
-      const addLevelData =
-        imageHashArray && imageHashArray.length > 0
-          ? {
-            AddName: `${values.adsets[i].AddName}` || "",
-            // filename: media.filename,
-            // imag_hash: media.imag_hash,
-            Ads: imageHashArray.map((media) => media.filename),
-            page_id: values.page_id,
-            message: values.adsets[i].message,
-            headline: values.adsets[i].headline,
-            Description: values.adsets[i].Description,
-            Caption: values.adsets[i].Caption,
-            Website_URL: values.adsets[i].Website_URL,
-          }
-          : {
-            AddName: `${values.adsets[i].AddName}` || "",
-            Ads: [],
-            page_id: values.page_id || "",
-            message: values.adsets[i].message || "",
-            headline: values.adsets[i].headline || "",
-            Description: values.adsets[i].Description || "",
-            Caption: values.adsets[i].Caption || "",
-            Website_URL: values.adsets[i].Website_URL || "",
-          };
-      console.log("Add Level Data:", addLevelData);
-      AdsetsData[`adsetlevel_${i + 1}`] = {
-        id: uuidv4(),
-        AdsetName: values.adsets[i].AdsetName || "",
-        Daily_amount: values.adsets[i].DailyAdd_amount
-          ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
-          : "",
-        optimization_goal: values.adsets[i].optimization_goal || "",
-        billing_event: values.adsets[i].billing_event || "",
-        start_time: moment(values.adsets[i].DatePicker.$d)
-          .tz(imagehash.timeZone)
-          .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
-        action_source: values.adsets[i].action_source || "",
-        custom_event_type: values.adsets[i].custom_event_type || "",
-        pixel_id: values.pixel_id,
-        bid_amount: values.adsets[i].bid_amount
-          ? parseFloat(values.adsets[i].bid_amount) * 100
-          : 0,
-        countries: values.adsets[i].countries || "",
-        Min_Age: values.adsets[i].Min_Age || "",
-        Max_Age: values.adsets[i].Max_Age || "",
-        Gender: parseInt(values.adsets[i].Gender) || 0,
-        locales: values.adsets[i].Language || [6],
-        placements: values.adsets[i].placements || "Advance",
-        ...(values.adsets[i].placements !== "Advance" && {
-          publisher_platforms: values.adsets[i].platforms,
-          Facebook_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Facebook"
-            ) || [],
-          instagram_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Instagram"
-            ) || [],
-          audience_network_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Audience"
-            ) || [],
-          messenger_positions:
-            extractValuesByPartialLabel(
-              selectedPositions[adsets[i].id],
-              "Messenger"
-            ) || [],
-          position: values.adsets[i].positions,
-          device_platforms: values.adsets[i].device_platforms,
-        }),
-        buying_type: "AUCTION",
-        addlevel: addLevelData || [],
+      let AllAdsetsData = {
+        // id: uuidv4(),
+        // Draft_Name:"",
+        Account_Number: account,
+        createdby: session?.user?.name,
+        createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
+        editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
+        camapaignlevel: {
+          // createdby: session?.user?.name,
+          Name: values.Name || "",
+          Objectives: values.Objectives || "",
+          Special_categories: values.Special_categories || "NONE",
+          Bid_strategy: values.Bid_strategy,
+          Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
+          Status: values.Status,
+          // access_token: imagehash.token,
+          createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
+        },
       };
-      AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+      const onSuccess = (status, response) => {
+        console.log("Upload success:", response);
+      };
+
+      const onError = (status, error) => {
+        console.error("Upload error:", error);
+      };
+
+      console.log("Adsets:", values);
+
+      for (let i = 0; i < values.adsets.length; i++) {
+        let AdsetsData = {};
+
+        const imageHashArray = await customRequest(
+          account,
+          values.adsets[i],
+          i,
+          onSuccess,
+          onError,
+          adsets[i].id
+        );
+        console.log("Image Hash Array:", imageHashArray);
+        const addLevelData =
+          imageHashArray && imageHashArray.length > 0
+            ? {
+              AddName: `${values.adsets[i].AddName}` || "",
+              // filename: media.filename,
+              // imag_hash: media.imag_hash,
+              Ads: imageHashArray.map((media) => media.filename),
+              page_id: newPageId,
+              message: values.adsets[i].message,
+              headline: values.adsets[i].headline,
+              Description: values.adsets[i].Description,
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
+            }
+            : {
+              AddName: `${values.adsets[i].AddName}` || "",
+              Ads: [],
+              page_id: newPageId || "",
+              message: values.adsets[i].message || "",
+              headline: values.adsets[i].headline || "",
+              Description: values.adsets[i].Description || "",
+              Caption: values.adsets[i][account].Caption,
+              Website_URL: values.adsets[i][account].Website_URL,
+            };
+        console.log("Add Level Data:", addLevelData);
+        AdsetsData[`adsetlevel_${i + 1}`] = {
+          id: uuidv4(),
+          AdsetName: values.adsets[i].AdsetName || "",
+          Daily_amount: values.adsets[i].DailyAdd_amount
+            ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
+            : "",
+          optimization_goal: values.adsets[i].optimization_goal || "",
+          billing_event: values.adsets[i].billing_event || "",
+          // start_time: moment(values.adsets[i].DatePicker.$d)
+          //   .tz(imagehash.timeZone)
+          //   .format("YYYY-MM-DDTHH:mm:ssZ"), 
+          action_source: values.adsets[i].action_source || "",
+          custom_event_type: values.adsets[i].custom_event_type || "",
+          pixel_id: newPixelId,
+          bid_amount: values.adsets[i].bid_amount
+            ? parseFloat(values.adsets[i].bid_amount) * 100
+            : 0,
+          countries: values.adsets[i].countries || "",
+          Min_Age: values.adsets[i].Min_Age || "",
+          Max_Age: values.adsets[i].Max_Age || "",
+          Gender: parseInt(values.adsets[i].Gender) || 0,
+          locales: values.adsets[i].Language || [6],
+          placements: values.adsets[i].placements || "Advance",
+          ...(values.adsets[i].placements !== "Advance" && {
+            publisher_platforms: values.adsets[i].platforms,
+            Facebook_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Facebook"
+              ) || [],
+            instagram_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Instagram"
+              ) || [],
+            audience_network_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Audience"
+              ) || [],
+            messenger_positions:
+              extractValuesByPartialLabel(
+                selectedPositions[adsets[i].id],
+                "Messenger"
+              ) || [],
+            position: values.adsets[i].positions,
+            device_platforms: values.adsets[i].device_platforms,
+          }),
+          buying_type: "AUCTION",
+          addlevel: addLevelData || [],
+        };
+        AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+      }
+      multipleAccountsData.push(AllAdsetsData);
     }
-    return AllAdsetsData;
+
+    return multipleAccountsData;
   };
 
   const postData = async (values) => {
@@ -5724,6 +6661,7 @@ const CreateCampaignDrawer = ({
     setSubmitErrors([]);
     setErrors?.({ input1: "", input2: "" });      // if you keep field errors in state
     setIsEditingDraft?.(false);
+    setSelectedTemplate(null);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -5830,6 +6768,7 @@ const CreateCampaignDrawer = ({
 
   //     form.validateFields([['adsets', creativeIndex, 'MediaContent']]);
   // };
+
 
   const selectedFilesData = (data) => {
     const mappedFiles = data.map((file, i) => ({
@@ -6079,6 +7018,20 @@ const CreateCampaignDrawer = ({
   //     checkFormCompletion();
   // };
 
+  const objectiveOptions = [
+    { value: "ALL", label: "All" },
+    { value: "OUTCOME_LEADS", label: "Leads" },
+    { value: "OUTCOME_SALES", label: "Sales" },
+    { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
+    { value: "OUTCOME_AWARENESS", label: "Awareness" },
+    { value: "OUTCOME_TRAFFIC", label: "Traffic" },
+    { value: "OUTCOME_APP_PROMOTION", label: "App promotion" },
+  ];
+
+  const objectiveLabels = Object.fromEntries(
+    objectiveOptions.map((o) => [o.value, o.label])
+  );
+
   const setFormValuesFromDraft = (draft) => {
     if (!draft) return;
 
@@ -6100,34 +7053,44 @@ const CreateCampaignDrawer = ({
     );
 
     // 3. Map adset form values
-    const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
-      id: adsetObj.id ?? uuidv4(),
-      AdsetPanelName: `ADSET ${index + 1}`,
-      AdsetName: adsetObj.AdsetName,
-      DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
-      optimization_goal: adsetObj.optimization_goal,
-      billing_event: adsetObj.billing_event,
-      action_source: adsetObj.action_source,
-      custom_event_type: adsetObj.custom_event_type,
-      bid_amount: adsetObj.bid_amount / 100,
-      countries: adsetObj.countries,
-      Min_Age: adsetObj.Min_Age,
-      Max_Age: adsetObj.Max_Age,
-      Gender: adsetObj.Gender,
-      platforms: adsetObj.publisher_platforms || [],
-      device_platforms: adsetObj.device_platforms || [],
-      Language: adsetObj.locales,
-      placements: adsetObj.placements,
-      position: adsetObj.position || [],
-      AddName: adsetObj.addlevel?.AddName,
-      filename: adsetObj.addlevel?.filename,
-      message: adsetObj.addlevel?.message,
-      headline: adsetObj.addlevel?.headline,
-      Description: adsetObj.addlevel?.Description || "Find More",
-      Caption: adsetObj.addlevel?.Caption,
-      Website_URL: adsetObj.addlevel?.Website_URL,
-      MediaContent: adsetObj.addlevel?.Ads || [],
-    }));
+    const updatedFormAdsets = adsetObjects.map((adsetObj, index) => {
+      const updatedAdset = {};
+      accountis.forEach((account) => {
+        updatedAdset[account] = {
+          Website_URL: adsetObj.addlevel?.Website_URL || "",
+          Caption: adsetObj.addlevel?.Caption || "",
+        };
+      });
+      return {
+        id: adsetObj.id ?? uuidv4(),
+        AdsetPanelName: `ADSET ${index + 1}`,
+        AdsetName: adsetObj.AdsetName,
+        DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
+        optimization_goal: adsetObj.optimization_goal,
+        billing_event: adsetObj.billing_event,
+        action_source: adsetObj.action_source,
+        custom_event_type: adsetObj.custom_event_type,
+        bid_amount: adsetObj.bid_amount / 100,
+        countries: adsetObj.countries,
+        Min_Age: adsetObj.Min_Age,
+        Max_Age: adsetObj.Max_Age,
+        Gender: adsetObj.Gender,
+        platforms: adsetObj.publisher_platforms || [],
+        device_platforms: adsetObj.device_platforms || [],
+        Language: adsetObj.locales,
+        placements: adsetObj.placements,
+        position: adsetObj.position || [],
+        AddName: adsetObj.addlevel?.AddName,
+        filename: adsetObj.addlevel?.filename,
+        message: adsetObj.addlevel?.message,
+        headline: adsetObj.addlevel?.headline,
+        Description: adsetObj.addlevel?.Description || "Find More",
+        ...updatedAdset,
+        // Caption: adsetObj.addlevel?.Caption,
+        // Website_URL: adsetObj.addlevel?.Website_URL,
+        MediaContent: adsetObj.addlevel?.Ads || [],
+      };
+    });
 
     // 4. Update the form fields
     form.setFieldsValue({
@@ -6219,36 +7182,16 @@ const CreateCampaignDrawer = ({
 
     checkFormCompletion();
   };
-
-  // const onChangeDraft = (value) => {
-  //   // const draft = draftsData.find((draft) => draft.id === value);
-  //   const draft = draftsData.find((draft) => draft.draftId === value);
-  //   console.log("Selected Draft:", value);
-  //   console.log(
-  //     "Drafts Data:",
-  //     draftsData.find((draft) => draft.id === value)
-  //   );
-  //   setFormValuesFromDraft(draftsData.find((draft) => draft.id === value));
-  //   selectedRef.current = {
-  //     Draft_Name: draft?.Draft_Name,
-  //     Draft_Id: draft?.id,
-  //   };
-  //   newSelectedRef.current = draft?.Draft_Name;
-  //   setWebsiteURL("");
-  //   setCaption("");
-  // };
   const onChangeDraft = (value) => {
     const draft = draftsData.find(d => d.draftId === value);
     if (!draft) return;
 
     console.log("Selected Draft:", draft);
-
-    // Use draft directly (no .data)
     setFormValuesFromDraft(draft);
-
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
+      accountNumber: draft.Account_Number
     };
 
     newSelectedRef.current = draft.Draft_Name;
@@ -6256,6 +7199,20 @@ const CreateCampaignDrawer = ({
     setWebsiteURL("");
     setCaption("");
   };
+
+  const newAccountNumbers = Array.isArray(accountis) ? accountis?.map(acc => ({ value: acc, label: acc })) : [];
+  console.log("New Account Numbers:", newAccountNumbers);
+
+  const getAccountDetails = (Account_Number) => {
+    if (!Account_Number) return null;
+
+    const matched = imageHashArray.find(
+      (acc) => acc.accountNumber === Account_Number
+    );
+
+    return matched ? matched : null;
+  };
+
 
 
   return (
@@ -6281,7 +7238,7 @@ const CreateCampaignDrawer = ({
       }}
       style={{ borderRadius: '12px' }}
     >
-      <Button
+      {/* <Button
         type="primary"
         style={{
           border: "1.5px solid #4caf50",
@@ -6292,7 +7249,118 @@ const CreateCampaignDrawer = ({
         onClick={() => setIsTemplatesModalOpen(true)}
       >
         Campaign Templates
-      </Button>
+      </Button> */}
+      <div style={{ display: 'flex' }}>
+        <Button
+          type="primary"
+          style={{
+            border: "1.5px solid #4caf50",
+            borderRadius: "8px",
+            marginBottom: "7px",
+            marginLeft: "2px",
+          }}
+          onClick={() => setIsTemplatesModalOpen(true)}
+        >
+          Campaign Templates
+        </Button>
+        <div style={{ marginLeft: '20px' }}>
+          <Select
+            placeholder="Select report category"
+            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+              } green-border-select`}
+            value={popupInputs.reportCat || undefined}
+            optionLabelProp="value"
+            onChange={(val) => {
+              setPopupInputs(s => ({ ...s, reportCat: val }));
+              if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
+            }}
+            showSearch
+            filterOption={(input, option) =>
+              (option?.name || "").toLowerCase().includes(input.toLowerCase())
+            }
+            options={reportCategories.map(c => ({
+              value: `${c.name}`,
+              name: c.name,
+              id: c.categoryId,
+
+              label: (
+                <div style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 8
+
+                }}>
+                  <span style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: 200
+                  }} title={`${c.name} - ${c.accountNumber}`}>
+                    {c.name} - {c.accountNumber}
+                  </span>
+                  <span style={{ display: "flex", gap: 10 }}>
+                    <FaPenToSquare
+                      style={{ fontSize: 12 }}
+                      title="Edit"
+                      onClick={(e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        setRCurrentCategory(c);
+                        setREditedName(c.name);
+                        setREditModalVisible(true);
+                      }}
+                    />
+                    <FaTrashCan
+                      style={{ fontSize: 12, color: "#EC7117" }}
+                      title="Delete"
+                      onClick={(e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        setRCurrentCategory(c);
+                        setRDeleteModalVisible(true);
+                      }}
+                    />
+                  </span>
+                </div>
+              )
+            }))}
+
+            style={{ width: 240 }}
+            dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+            dropdownRender={(menu) => (
+              <div>
+                {menu}
+                <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
+                  <Input
+                    size="small"
+                    placeholder="New report category"
+                    value={newReportCategory}
+                    onChange={(e) => setNewReportCategory(e.target.value)}
+                    onPressEnter={addReportCategory}
+                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                  />
+                  <Button
+                    size="small"
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={addReportCategory}
+                    style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                  />
+                </div>
+              </div>
+            )}
+          />
+          {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
+        </div>
+        <div style={{ marginLeft: '20px' }}>
+          {selectedTemplate && (
+            <div>
+              <strong>Selected Template:</strong> {selectedTemplate.Draft_Name}
+            </div>
+          )}
+        </div>
+
+      </div>
       <Modal
         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
           }`}
@@ -6306,7 +7374,7 @@ const CreateCampaignDrawer = ({
         {/* Search + Filter */}
         <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
           <Input
-            placeholder="Search by category or template name"
+            placeholder="Search..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             style={{ flex: 1 }}
@@ -6316,51 +7384,75 @@ const CreateCampaignDrawer = ({
                 : "custom-input-light"
             }
           />
-
-          <Select
-            placeholder="Filter by Category"
-            value={selectedCategory || "ALL"}
-            onChange={(value) => setSelectedCategory(value)}
-            style={{ width: 200 }}
-            options={categoryOptions}
-            dropdownClassName={theme === "dark" && "custom-dropdown"}
-            className={`${theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
-          />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ marginTop: -20 }}>Accounts</span>
+            <Select
+              placeholder="Filter by Accounts"
+              value={selectedAccount}
+              onChange={(value) => setSelectedAccount(value)}
+              style={{ width: 200 }}
+              options={[{ value: "ALL", label: "All Accounts" }, ...newAccountNumbers]}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+            />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ marginTop: -20 }}>Objectives</span>
+            <Select
+              placeholder="Filter by Objective"
+              value={selectedObjective}
+              onChange={(value) => setSelectedObjective(value)}
+              style={{ width: 200 }}
+              options={objectiveOptions}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+            />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ marginTop: -20 }}>Categories</span>
+            <Select
+              placeholder="Filter by Category"
+              value={selectedCategory || "ALL"}
+              onChange={(value) => setSelectedCategory(value)}
+              style={{ width: 200 }}
+              options={categoryOptions}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            />
+          </div>
         </div>
 
         {/* Cards */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", // side-by-side, responsive
+            gridTemplateColumns: "repeat(3, 1fr)",
             gap: 16,
-            alignItems: "stretch",
             width: "100%",
-
+            alignItems: "stretch",
           }}
         >
           {filteredDrafts.map((draft) => {
-            const cents = draft?.camapaignlevel?.Daily_amount ?? 0; // if you store cents
+            const cents = draft?.camapaignlevel?.Daily_amount ?? 0;
             const budget = (cents / 100).toLocaleString(undefined, {
               minimumFractionDigits: 0,
               maximumFractionDigits: 2,
             });
-
+            console.log("Website URL:", draft?.adsetlevel_1?.addlevel?.Website_URL);
+            console.log("Caption:", draft?.adsetlevel_1?.addlevel?.Caption);
             return (
               <div
                 key={draft.draftId}
                 style={{
                   border: "1px solid #ddd",
                   borderRadius: "10px",
-                  padding: "10px",
-                  background: "#fff",
+                  padding: "12px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 8,
-                  position: "relative",
-                  backgroundColor: theme === "dark" ? "#383737ff" : " ",
-                  minWidth: 0, // important for ellipsis in grid children
+                  gap: 10,
+                  backgroundColor: theme === "dark" ? "#383737" : "#fff",
+                  minWidth: 0,
                 }}
               >
                 {/* Header row */}
@@ -6391,6 +7483,14 @@ const CreateCampaignDrawer = ({
                   </p>
 
                   <div style={{ display: "flex", gap: 10 }}>
+                    <FaShareFromSquare
+                      style={{ fontSize: 14, cursor: "pointer" }}
+                      title="Share"
+                      onClick={() => {
+                        setSelectedDraftForShare(draft);
+                        setShareTemplate(true);
+                      }}
+                    />
                     <FaPenToSquare
                       onClick={() => handleEditDraft(draft)}
                       style={{ fontSize: 14, cursor: "pointer" }}
@@ -6399,7 +7499,7 @@ const CreateCampaignDrawer = ({
                     <FaTrashCan
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(draft.draftId);
+                        handleDelete(draft.groupId);
                       }}
                       style={{ fontSize: 14, color: "#EC7117", cursor: "pointer" }}
                       title="Delete"
@@ -6419,6 +7519,34 @@ const CreateCampaignDrawer = ({
                     width: "100%",
                   }}
                 >
+                  <span style={{ color: "#B4B4B4" }}>Account Number</span>
+                  <div
+                    style={{
+                      textAlign: "right",
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+
+                    <div>{draft?.Account_Number ?? "-"}</div>
+                    {getAccountDetails(draft?.Account_Number) && (
+                      <div style={{
+                        textAlign: "right",
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        overflowWrap: "anywhere",
+                      }}>
+                        {getAccountDetails(draft?.Account_Number)?.accountName}
+                      </div>
+                    )}
+                  </div>
+
+
                   <span style={{ color: "#B4B4B4" }}>Category</span>
                   <span
                     title={draft?.Category ?? "-"}
@@ -6432,6 +7560,7 @@ const CreateCampaignDrawer = ({
                     }}
                   >
                     {draft?.Category ?? "-"}
+
                   </span>
 
                   <span style={{ color: "#B4B4B4" }}>Objective</span>
@@ -6468,7 +7597,12 @@ const CreateCampaignDrawer = ({
                   style={{ marginTop: "auto" }}
                   onClick={() => {
                     onChangeDraft(draft.draftId);
+                    setSelectedTemplate(draft);
                     setIsTemplatesModalOpen(false);
+                    setIsEditingDraft(false);
+                    selectedRef.current = null;
+                    newSelectedRef.current = "";
+                    setPopupInputs({ input1: "", input2: "" });
                   }}
                 >
                   Use This Template
@@ -6485,7 +7619,7 @@ const CreateCampaignDrawer = ({
         </div>
 
       </Modal>
-      <Modal
+      {/* <Modal
         title={
           <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
             Are you sure you want to delete this draft?
@@ -6502,7 +7636,86 @@ const CreateCampaignDrawer = ({
         cancelText="Cancel"
       >
         <p>This action cannot be undone.</p>
+      </Modal> */}
+      <Modal
+        title="Delete Draft"
+        open={deleteModal.visible}
+        onCancel={onCancelDelete}
+        okText="Yes, Delete"
+        cancelText="Close"
+        confirmLoading={deleting}
+        onOk={onConfirmDelete}
+      >
+        <p>This draft is present in these accounts:</p>
+        <ul>
+          {matchedAccounts.length > 0
+            ? matchedAccounts.map((acc, idx) => <li key={idx}>{acc}</li>)
+            : <li>No matching accounts found</li>
+          }
+        </ul>
+        <p>Are you want delete this draft?</p>
       </Modal>
+      <Modal
+        title={`Share Template: ${selectedDraftForShare?.Draft_Name || ""}`}
+        open={shareTemplate}
+        onCancel={() => setShareTemplate(false)}
+        onOk={handleShareDraft}
+        okText="Share"
+        cancelText="Close"
+        confirmLoading={loading}
+      >
+        <div style={{ display: 'flex', gap: 16 }}>
+          {/* Project Select */}
+          <Select
+            showSearch
+            placeholder="Select Projects"
+            style={{ width: '100%' }}
+            onChange={handleKeyChange}
+            value={selectedKey}
+            dropdownClassName={theme === "dark" && "custom-dropdown"}
+            className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+          >
+            {options.map((option) => (
+              <Option key={option.value} value={option.value}>
+                {option.label}
+              </Option>
+            ))}
+          </Select>
+
+          {/* Account Select with checkboxes */}
+          <Select
+            showSearch
+            onSearch={setSearchText}
+            searchValue={searchText}
+            placeholder="Select Account"
+            open={isOpen}
+            onDropdownVisibleChange={setIsOpen}
+            value={
+              selectedValue.length === 0
+                ? undefined
+                : selectedValue.length === 1
+                  ? selectedValue[0]
+                  : `${selectedValue[0]}, +${selectedValue.length - 1} more`
+            }
+            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+            style={{
+              width: '100%',
+              whiteSpace: 'nowrap',
+              color: theme === 'dark' ? 'white' : undefined,
+              border: '1px solid #4CAF50',
+              borderRadius: '6px',
+            }}
+            optionFilterProp="value"
+            dropdownRender={() => (
+              <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
+                {renderAccountsCheckboxes(theme)}
+              </div>
+            )}
+          />
+        </div>
+      </Modal>
+
 
       {/* <Select
         value={newSelectedRef.current}
@@ -6576,9 +7789,9 @@ const CreateCampaignDrawer = ({
                     },
                   ]}
                   // style={{ width: 200, }}
-                  style={{ flex: 0.16 }}
+                  style={{ flex: 0.19 }}
                 >
-                  <Input
+                  {/* <Input
                     value={accountNumber}
                     onChange={Accountchange}
                     className={
@@ -6586,6 +7799,21 @@ const CreateCampaignDrawer = ({
                         ? "custom-input-dark"
                         : "custom-input-light"
                     }
+                  /> */}
+                  <Select
+                    mode="multiple"
+                    value={accountis}                // array of strings
+                    onChange={Accountchange}             // gets string[]
+                    options={newAccountNumbers}             // [{value,label}]
+                    placeholder="Select account(s)"
+                    // showSearch
+                    optionFilterProp="label"
+                    allowClear
+                    maxTagCount={1}                                      // 👈 always show only the first selected
+                    maxTagPlaceholder={(omitted) => `+${omitted.length}`} // 👈 rest as a count
+                    className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                    dropdownClassName={theme === "dark" && "custom-dropdown"}
+                    style={{ width: "100%", borderRadius: 8 }}
                   />
                 </Form.Item>
                 <Form.Item
@@ -6621,7 +7849,7 @@ const CreateCampaignDrawer = ({
                       message: "Please select an option!",
                     },
                   ]}
-                  style={{ flex: 0.15, marginLeft: "1%" }}
+                  style={{ flex: 0.13, marginLeft: "1%" }}
                 // style={{ width: 170, marginLeft: "1%" }}
                 >
                   <Select
@@ -6999,6 +8227,12 @@ const CreateCampaignDrawer = ({
                   network={network}
                   accountis={accountis}
                   imagehash={imagehash}
+                  pixel_id_list={pixel_id_list}
+                  page_id_list={page_id_list}
+                  pageidList={pageidList}
+                  pixelIdList={pixelIdList}
+                  setDefaultUrlData={setDefaultUrlData}
+                  defaultUrlData={defaultUrlData}
                 />
               );
               // <ffff/>
@@ -7073,247 +8307,20 @@ const CreateCampaignDrawer = ({
 
                 {/* Inline input boxes */}
 
-
-
-
-                <Modal
-                  title="Edit Report Category"
-                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                    }`}
-                  open={rEditModalVisible}
-                  onOk={async () => {
-                    if (rEditedName.trim() && rCurrentCategory) {
-                      await renameReportCategory(rCurrentCategory.categoryId, rEditedName.trim());
-                      setREditModalVisible(false);
-                      setREditedName("");
-                      setRCurrentCategory(null);
-                    }
-                  }}
-                  onCancel={() => {
-                    setREditModalVisible(false);
-                    setREditedName("");
-                    setRCurrentCategory(null);
-                  }}
-                  okText="Save"
-                  okButtonProps={theme === "dark" ? { style: { backgroundColor: "#91c25f", borderColor: "#4caf50" } } : {}}
-                >
-                  <Input
-                    value={rEditedName}
-                    onChange={(e) => setREditedName(e.target.value)}
-                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                  />
-                </Modal>
-
-                <Modal
-                  title="Delete Report Category"
-                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                    }`}
-                  open={rDeleteModalVisible}
-                  onOk={async () => {
-                    if (rCurrentCategory) {
-                      await deleteReportCategory(rCurrentCategory.categoryId);
-                      setRDeleteModalVisible(false);
-                      setRCurrentCategory(null);
-                    }
-                  }}
-                  onCancel={() => {
-                    setRDeleteModalVisible(false);
-                    setRCurrentCategory(null);
-                  }}
-                  okText="Delete"
-                  okButtonProps={{ danger: true, type: "primary" }}
-                >
-                  <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
-                </Modal>
-
-
                 <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginTop: 8, }}>
-                  <div>
-                    <Select
-                      placeholder="Select report category"
-                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                        } green-border-select`}
-                      value={popupInputs.reportCat || undefined}
-                      optionLabelProp="value"
-                      onChange={(val) => {
-                        setPopupInputs(s => ({ ...s, reportCat: val }));
-                        if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
-                      }}
-                      showSearch
-                      filterOption={(input, option) =>
-                        (option?.name || "").toLowerCase().includes(input.toLowerCase())
-                      }
-                      options={reportCategories.map(c => ({
-                        value: c.name,
-                        name: c.name,
-                        id: c.categoryId,
-
-                        label: (
-                          <div style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            gap: 8
-
-                          }}>
-
-                            <span style={{
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              maxWidth: 200
-                            }}>
-                              {c.name}
-                            </span>
-                            <span style={{ display: "flex", gap: 10 }}>
-                              <FaPenToSquare
-                                style={{ fontSize: 12 }}
-                                title="Edit"
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setRCurrentCategory(c);
-                                  setREditedName(c.name);
-                                  setREditModalVisible(true);
-                                }}
-                              />
-                              <FaTrashCan
-                                style={{ fontSize: 12, color: "#EC7117" }}
-                                title="Delete"
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setRCurrentCategory(c);
-                                  setRDeleteModalVisible(true);
-                                }}
-                              />
-                            </span>
-                          </div>
-                        )
-                      }))}
-
-                      style={{ width: 240 }}
-                      dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
-                      dropdownRender={(menu) => (
-                        <div>
-                          {menu}
-                          <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
-                            <Input
-                              size="small"
-                              placeholder="New report category"
-                              value={newReportCategory}
-                              onChange={(e) => setNewReportCategory(e.target.value)}
-                              onPressEnter={addReportCategory}
-                              className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                            />
-                            <Button
-                              size="small"
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={addReportCategory}
-                              style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    />
-                    {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
-                  </div>
-                  <div>
-                    <Select
-                      placeholder="Select template category"
-                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
-                      dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
-                      value={popupInputs.input1 || undefined}
-                      style={{ width: 240 }}
-                      onChange={(val) => {
-                        setPopupInputs((s) => ({ ...s, input1: val }));
-                        if (errors.input1) setErrors((e) => ({ ...e, input1: "" }));
-                      }}
-                      showSearch
-                      optionLabelProp="value"
-                      filterOption={(input, option) =>
-                        (option?.name || "").toLowerCase().includes(input.toLowerCase())
-                      }
-                      options={categories.map((c) => ({
-                        value: c.name,
-                        name: c.name,
-                        id: c.categoryId,
-                        label: (
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                            <span
-                              style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}
-                              title={c.name}
-                            >
-                              {c.name}
-                            </span>
-                            <span style={{ display: "flex", gap: 10 }}>
-                              <FaPenToSquare
-                                style={{ fontSize: 12, cursor: "pointer" }}
-                                title="Edit"
-                                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setCurrentCategory(c);
-                                  setEditedName(c.name);
-                                  setEditModalVisible(true);
-                                }}
-                              />
-                              <FaTrashCan
-                                style={{ fontSize: 12, color: "#EC7117", cursor: "pointer" }}
-                                title="Delete"
-                                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                                onClick={(e) => {
-                                  e.preventDefault(); e.stopPropagation();
-                                  setCurrentCategory(c);
-                                  setDeleteModalVisible(true);
-                                }}
-                              />
-                            </span>
-                          </div>
-                        ),
-
-                      }))}
-                      dropdownRender={(menu) => (
-                        <div>
-                          {menu}
-                          <div
-                            style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}
-
-                          >
-                            <Input
-                              size="small"
-                              placeholder="New category"
-                              value={newCategory}
-                              onChange={(e) => setNewCategory(e.target.value)}
-                              onPressEnter={(e) => { e.preventDefault(); addCategory(); }}
-                              className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                            />
-                            <Button
-                              size="small"
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
-                              style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    />
-
-                    {errors.input1 && <div style={{ color: "red", fontSize: 12 }}>{errors.input1}</div>}
 
 
-
-                  </div>
                   <Modal
-                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                      }`}
+                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                     title="Edit Category"
                     visible={editModalVisible}
                     onOk={async () => {
                       if (editedName.trim() && currentCategory) {
-                        await renameCategory(currentCategory.categoryId, editedName.trim());
+                        await renameCategory(
+                          currentCategory.accountNumber,   // ✅ pass the right account number
+                          currentCategory.categoryId,
+                          editedName.trim()
+                        );
                         setEditModalVisible(false);
                         setEditedName("");
                         setCurrentCategory(null);
@@ -7329,22 +8336,20 @@ const CreateCampaignDrawer = ({
                     <Input
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
-                      className={
-                        theme === "dark"
-                          ? "custom-input-dark"
-                          : "custom-input-light"
-                      }
-
+                      className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
                     />
                   </Modal>
+
                   <Modal
-                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                      }`}
+                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                     title="Delete Category"
                     visible={deleteModalVisible}
                     onOk={async () => {
                       if (currentCategory) {
-                        await deleteCategory(currentCategory.categoryId);
+                        await deleteCategory(
+                          currentCategory.accountNumber,   // ✅ use the category’s own account
+                          currentCategory.categoryId
+                        );
                         setDeleteModalVisible(false);
                         setCurrentCategory(null);
                       }
@@ -7359,26 +8364,115 @@ const CreateCampaignDrawer = ({
                     <p>Are you sure you want to delete the category "{currentCategory?.name}"?</p>
                   </Modal>
 
-                  <div>
-                    <Input
-                      placeholder="Template Name"
-                      value={popupInputs.input2}
-                      onChange={(e) => setPopupInputs((s) => ({ ...s, input2: e.target.value }))}
-                      status={errors.input2 ? "error" : ""}
-                      className={
-                        theme === "dark"
-                          ? "custom-input-dark"
-                          : "custom-input-light"
-                      }
-                    />
-                    {errors.input2 && <div style={{ color: "red", fontSize: 12 }}>{errors.input2}</div>}
-                  </div>
-
-
                 </div>
+                <Modal
+                  title="Edit Accounts"
+                  open={isEditAccountsModalOpen}
+                  onCancel={() => setIsEditAccountsModalOpen(false)}
+                  okText="Yes, Update"
+                  cancelText="Close"
+                  confirmLoading={confirmLoading}
+                  onOk={async () => {
+                    // setIsEditAccountsModalOpen(false);
+                    setConfirmLoading(true);
+
+                    try {
+                      const allValues = form.getFieldsValue(true);
+                      const accountsToUpdate = matchedAccounts;
+
+                      for (const accountNumber of accountsToUpdate) {
+                        const draftData = await MultipleAdsetsDraftFetching(allValues, accountNumber);
+                        if (!draftData) continue;
+
+                        let filteredPayload;
+                        if (Array.isArray(draftData)) {
+                          filteredPayload = draftData.find(d => d.Account_Number === accountNumber);
+                        } else {
+                          filteredPayload = Object.values(draftData).find(d => d.Account_Number === accountNumber);
+                        }
+                        if (!filteredPayload) continue;
+                        filteredPayload = {
+                          ...filteredPayload,
+                          Category: popupInputs.input1,
+                          Draft_Name: popupInputs.input2,
+                        };
+                        for (const accountNumber of matchedAccounts) {
+                          const draftData = await MultipleAdsetsDraftFetching(allValues, accountNumber);
+                          if (!draftData) continue;
+
+                          let filteredPayload = Array.isArray(draftData)
+                            ? draftData.find(d => d.Account_Number === accountNumber)
+                            : Object.values(draftData).find(d => d.Account_Number === accountNumber);
+
+                          if (!filteredPayload) continue;
+
+                          filteredPayload = {
+                            ...filteredPayload,
+                            Category: popupInputs.input1,
+                            Draft_Name: popupInputs.input2,
+                          };
+
+                          await fetch("https://www.testapi.adsgoat.in/api/NewupdateDraftSmart", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json", Authorization: token },
+                            body: JSON.stringify({
+                              accountNumber,
+                              // draftId: selectedRef.current.draftId,
+                              groupId: selectedRef.current.groupId,
+                              payload: filteredPayload,
+                            }),
+                          });
+                        }
+
+                        message.success("Draft updated successfully for all accounts in this group");
+                        setIsEditAccountsModalOpen(false);
+                        await postDraftSaveCleanup();
+                      }
 
 
+
+                    } catch (err) {
+                      console.error("Save draft (edit) error:", err);
+                      message.error(err?.message || "Failed to update draft");
+                    } finally {
+                      setConfirmLoading(false);
+                    }
+                  }}
+                >
+                  <p>This draft is present in these accounts:</p>
+                  <ul>
+                    {matchedAccounts.length > 0
+                      ? matchedAccounts.map((acc, idx) => <li key={idx}>{acc}</li>)
+                      : <li>No matching accounts found</li>
+                    }
+                  </ul>
+                </Modal>
+                <Modal
+                  title="Delete Report Category"
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
+                  open={rDeleteModalVisible}
+                  onOk={async () => {
+                    if (!rCurrentCategory) return;
+                    await deleteReportCategory(
+                      rCurrentCategory.accountNumber ?? (Array.isArray(account) ? account[0] : account),
+                      rCurrentCategory.categoryId
+                    );
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
+                  }}
+
+                  onCancel={() => {
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Delete"
+                  okButtonProps={{ danger: true, type: "primary" }}
+                >
+                  <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
+                </Modal>
                 <div style={{ display: 'flex', marginTop: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <Button
                     type="primary"
                     style={{
@@ -7395,7 +8489,7 @@ const CreateCampaignDrawer = ({
                       }
 
                       try {
-                        const values = await form.validateFields(); // Validates all form fields
+                        const values = await form.validateFields();
 
                         // Check if campaign-level and adset-level budgets are both zero
                         const campaignLevelDailyBudget = values.Daily_amount;
@@ -7417,10 +8511,10 @@ const CreateCampaignDrawer = ({
                             throw {
                               errorFields: [
                                 {
-                                  name: ["Daily_amount"], // The field where error occurs
+                                  name: ["Daily_amount"],
                                   errors: [
                                     "Daily budget cannot be zero on both Adset and Campaign levels",
-                                  ], // The error message
+                                  ],
                                 },
                               ],
                             };
@@ -7429,10 +8523,10 @@ const CreateCampaignDrawer = ({
 
                         // Clear any previous errors
                         setSubmitErrors([]);
-                        console.log("Form values:", values); // Log form values to verify
+                        console.log("Form values:", values);
 
                         // Call the onFinish logic, passing in the values
-                        onFinish(values); // Trigger the existing logic for form submission
+                        onFinish(values);
 
                         // Optionally trigger confirmation modal (as per your logic)
                         setIsModalVisible(true);
@@ -7441,18 +8535,174 @@ const CreateCampaignDrawer = ({
                         setFormValues(values);
                         setIsCreateCampaignorDraft("createcampaign");
                       } catch (err) {
-                        // Catch any validation errors thrown by form.validateFields
                         const allErrors = err?.errorFields?.map((field) => ({
-                          name: field.name?.[0], // field name
-                          message: field.errors?.[0], // validation message
+                          name: field.name?.[0],
+                          message: field.errors?.[0],
                         }));
-                        setSubmitErrors(allErrors); // Capture and show validation errors
+                        setSubmitErrors(allErrors);
                       }
                     }}
                   >
                     Submit
                   </Button>
-                  {isEditingDraft ? (
+                  {errors.reportCat && (
+                    <div style={{ color: "red", marginTop: "5px" }}>
+                      {errors.reportCat}
+                    </div>
+                  )}
+                  </div>
+                  <Popconfirm
+                    icon={null}
+                    overlayInnerStyle={{
+                      backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                      color: theme === "dark" ? "#fff" : "#333",
+                    }}
+                    description={
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        <span style={{ color: theme === "dark" ? "#fff" : "#333" }} >Template Category</span>
+                        <Select
+                          placeholder="Select template category"
+                          className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                          dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                          value={popupInputs.input1 || undefined}
+                          style={{ width: 280 }}
+                          onChange={(val) => {
+                            setPopupInputs((s) => ({ ...s, input1: val }));
+                            if (errors.input1) setErrors((e) => ({ ...e, input1: "" }));
+                          }}
+                          showSearch
+                          optionLabelProp="value"
+                          filterOption={(input, option) =>
+                            (option?.name || "").toLowerCase().includes(input.toLowerCase())
+                          }
+                          options={categories.map((c) => ({
+                            value: `${c.name}`,
+                            name: c.name,
+                            id: c.categoryId,
+                            label: (
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                                <span style={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 200
+                                }} title={`${c.name} - ${c.accountNumber}`}>
+                                  {c.name} - {c.accountNumber}
+                                </span>
+                                <span style={{ display: "flex", gap: 10 }}>
+                                  <FaPenToSquare
+                                    style={{ fontSize: 12, cursor: "pointer" }}
+                                    title="Edit"
+                                    onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                    onClick={(e) => {
+                                      e.preventDefault(); e.stopPropagation();
+                                      setCurrentCategory(c);
+                                      setEditedName(c.name);
+                                      setEditModalVisible(true);
+                                    }}
+                                  />
+                                  <FaTrashCan
+                                    style={{ fontSize: 12, color: "#EC7117", cursor: "pointer" }}
+                                    title="Delete"
+                                    onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                    onClick={(e) => {
+                                      e.preventDefault(); e.stopPropagation();
+                                      setCurrentCategory(c);
+                                      setDeleteModalVisible(true);
+                                    }}
+                                  />
+                                </span>
+                              </div>
+                            ),
+
+                          }))}
+                          dropdownRender={(menu) => (
+                            <div>
+                              {menu}
+                              <div
+                                style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}
+
+                              >
+
+                                <Input
+                                  size="small"
+                                  placeholder="New category"
+                                  value={newCategory}
+                                  onChange={(e) => setNewCategory(e.target.value)}
+                                  onPressEnter={(e) => { e.preventDefault(); addCategory(); }}
+                                  className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                                />
+                                <Button
+                                  size="small"
+                                  type="primary"
+                                  icon={<PlusOutlined />}
+                                  onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
+                                  style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        />
+
+                        {errors.input1 && <div style={{ color: "red", fontSize: 12 }}>{errors.input1}</div>}
+
+                        {/* Input for Template Name */}
+                        <span style={{ color: theme === "dark" ? "#fff" : "#333" }}>Template Name</span>
+                        <Input
+                          placeholder="Template Name"
+                          value={popupInputs.input2}
+                          onChange={(e) => setPopupInputs((s) => ({ ...s, input2: e.target.value }))}
+                          status={errors.input2 ? "error" : ""}
+                          className={
+                            theme === "dark"
+                              ? "custom-input-dark"
+                              : "custom-input-light"
+                          }
+                        />
+                        {errors.input2 && (
+                          <div style={{ color: "red", fontSize: 12 }}>
+                            {errors.input2}
+                          </div>
+                        )}
+                      </div>
+                    }
+                    open={open}
+                    onOpenChange={setOpen}
+                    // onConfirm={handleConfirm}
+                    onConfirm={isEditingDraft ? handleSaveEditedDraft : handleConfirm}
+                    // onCancel={handleCancelPop}
+                    cancelButtonProps={{
+                      style: {
+                        backgroundColor: theme === "dark" ? "#555" : "transparent",
+                        color: theme === "dark" ? "#fff" : "#000",
+                        border: "1px solid #4caf50",
+                      },
+                    }}
+                    okButtonProps={{
+                      loading: confirmLoading,
+                      style: {
+                        backgroundColor: "#91C25F",
+                        color: "#000",
+                        border: "none",
+                      },
+                    }}
+                  >
+                    <Button
+                      type="primary"
+                      style={{
+                        background: "#91c25f",
+                        minWidth: "120px",
+                        borderWidth: "0px",
+                        marginLeft: "10px",
+                      }}
+                      onClick={() => setOpen(true)}
+                    >
+                      {isEditingDraft ? "Save" : "Save Template"} {/* 🔑 dynamic label */}
+
+                    </Button>
+                  </Popconfirm>
+                  {/* {isEditingDraft ? (
                     <Button
                       type="primary"
                       loading={confirmLoading}
@@ -7470,7 +8720,7 @@ const CreateCampaignDrawer = ({
                     >
                       Save Template
                     </Button>
-                  )}
+                  )} */}
                 </div>
 
 
@@ -7688,26 +8938,28 @@ const CreateCampaignDrawer = ({
           </Modal>
         </Form>
       </Spin>
-      {openCreativesDrawer && (
-        <Drawer
-          title="Select Creatives"
-          width="95%"
-          open={openCreativesDrawer}
-          onClose={() => setOpenCreativesDrawer(false)}
-          style={{
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
-            color: theme === "dark" ? "#fff" : "#000",
-          }}
-        >
-          <ImageUploadPage
-            selectedFilesData={selectedFilesData}
-            fromCampaigns={true}
-            network={network}
-            Account_Number={accountis}
-          />
-        </Drawer>
-      )}
-    </Modal>
+      {
+        openCreativesDrawer && (
+          <Drawer
+            title="Select Creatives"
+            width="95%"
+            open={openCreativesDrawer}
+            onClose={() => setOpenCreativesDrawer(false)}
+            style={{
+              backgroundColor: theme === "dark" ? "#333" : "#fff",
+              color: theme === "dark" ? "#fff" : "#000",
+            }}
+          >
+            <ImageUploadPage
+              selectedFilesData={selectedFilesData}
+              fromCampaigns={true}
+              network={network}
+              Account_Number={accountis}
+            />
+          </Drawer>
+        )
+      }
+    </Modal >
   );
 };
 

@@ -235,7 +235,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
         usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PictureOutlined  className={pathname === '/Creatives' && 'black-icon'}/>, 'Creatives'),
         usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <LineChartOutlined  className={pathname === '/Campaigns' && 'black-icon'}/>, 'Campaigns'),
         // getItem('Users', '/Users', <ContainerOutlined />),
-        usersDataForLogin[0]?.role === 'Admin' && getItem('User Role', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>, 'NewUser'),
+        (usersDataForLogin[0]?.role === 'Admin' || usersDataForLogin[0]?.role === 'Special_User') && getItem('User Role', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>, 'NewUser'),
         usersDataForLogin[0]?.role === 'Admin' && getItem('User History', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>, 'Activities'),
     ].filter(Boolean);
     console.log(`menuitems:${menuItems} ,${pathname}`)

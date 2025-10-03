@@ -8,19 +8,20 @@ import { useTokenContext } from '../../components/parent';
 
 const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // console.log(editeddata, "heyy edit-useraccess page")
-    // console.log(editeddata, "editeddata");
+    console.log(editeddata, "editeddata");
     const userAccess = editeddata?.adAccounts;
     // console.log(userAccess, "adAccounts");
     userAccess !== null && userAccess !== undefined ? Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })) : [];
     // console.log(userAccessresult, "userAccessResult");
     let userName;
-    if (editeddata !== null){
+    if (editeddata !== null) {
         userName = editeddata.userName;
     }
     // console.log(userName, "userName");
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const { theme } = useTokenContext();
-    
+    const { theme, userdetails } = useTokenContext();
+    const [availableNetworks, setAvailableNetworks] = useState([]);
+
 
     const [formalldata, setFormData] = useState({
         userName: '',
@@ -35,11 +36,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     const [selectedNetworks, setSelectedNetworks] = useState([]);
     const [editeddatas, setEditeddatas] = useState(null);
     var token = localStorage.getItem("token")
-    useEffect(()=>{
-        if(userAccess !== null && userAccess !== undefined){
+    useEffect(() => {
+        if (userAccess !== null && userAccess !== undefined) {
             setAdditionalAccounts(Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })))
         }
-        else{
+        else {
             setAdditionalAccounts([])
         }
     }, [userAccess]);
@@ -71,15 +72,18 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     //     }
     // };
 
-    let AddAccounts ;
+    let AddAccounts;
 
     useEffect(() => {
         updateSelectedNetworks([...additionalAccounts, ...formAccounts]);
     }, [additionalAccounts, formAccounts]);
 
     const handleAddAccount = () => {
-        // console.log(AddAccounts, "AddAccounts");
-        if(AddAccounts.length > 1){
+        console.log(AddAccounts, "AddAccounts");
+        console.log(selectedNetworks);
+        console.log(additionalAccounts);
+        if (selectedNetworks?.length !== availableNetworks?.length) {
+            // additionalAccounts
             const newAccount = { network: '', inputs: [''] };
             // setFormAccounts(prevFormAccounts => [...prevFormAccounts, newAccount]);
             setAdditionalAccounts(prevAdditionalAccounts => [...prevAdditionalAccounts, newAccount]);
@@ -179,7 +183,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                 console.log('Cancel');
             },
         });
-        
+
     };
 
     const handleRemoveInput1 = (accountIndex, inputIndex) => {
@@ -204,14 +208,56 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         setSelectedNetworks(allAccounts.map(account => account.network).filter(network => network !== ''));
     };
 
-    const getAvailableNetworks = (currentNetwork = '') => {
-        const allSelectedNetworks = selectedNetworks.filter(network => network !== currentNetwork);
-        
-        const data = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !allSelectedNetworks.includes(network));
-        // setNetworks(data);
-        AddAccounts = data;
-        return data;
-    };
+    // const getAvailableNetworks = (currentNetwork = '') => {
+    //     const allSelectedNetworks = selectedNetworks.filter(network => network !== currentNetwork);
+
+    //     const data = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !allSelectedNetworks.includes(network));
+    //     // setNetworks(data);
+    //     AddAccounts = data;
+    //     return data;
+    // };
+
+    // useEffect(() => {
+    //     fetch("http://localhost:8000/networks", { headers: { Authorization: token } })
+    //         .then((res) => res.json())
+    //         .then((data) => {
+    //         const networks = Array.isArray(data) ? data : [];
+    //         const filteredNetworks = networks.filter(n => !selectedNetworks.includes(n));
+    //         setAvailableNetworks(filteredNetworks);
+    //         })
+    //         .catch((err) => console.error("Error fetching networks:", err));
+    // }, [selectedNetworks, token]);
+
+    useEffect(() => {
+        if(userdetails?.role !== "Special_User"){
+            const fetchNetworks = async () => {
+            try {
+                const res = await axios.get("https://prodapis.adsgoat.in/networks", {
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+
+                const networks = Array.isArray(res.data) ? res.data : [];
+                const filteredNetworks = networks.filter(
+                    (n) => !selectedNetworks.includes(n)
+                );
+
+                setAvailableNetworks(filteredNetworks);
+            } catch (err) {
+                console.error("Error fetching networks:", err);
+            }
+        };
+
+        fetchNetworks();
+        }else{
+            const networks  = []
+            for (const [network, value] of Object.entries(userdetails?.adAccounts)) {
+                networks.push(network)
+            }
+            setAvailableNetworks(networks);
+        }
+    }, [visible]);
 
 
     const handleCancel = () => {
@@ -232,7 +278,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
             title: 'Confirmation',
             content: 'Are you sure you want to submit?',
             className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
-            onOk: async() => {
+            onOk: async () => {
                 try {
                     // const allAccounts = [
                     //     ...(editeddata && editeddata.adAccounts ? editeddata.adAccounts : []),
@@ -246,37 +292,37 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         acc[key] = obj[value]; // Assign the value to the accumulated object using the key
                         return acc;
                     }, {});
-        
+
                     const formattedData = {
                         ...values, adAccounts: singleObject
                     };
                     // console.log(formattedData);
                     // console.log(additionalAccounts, "additionalAccounts data");
                     // console.log(singleObject, ":singleObject");
-        
-                    const response = await axios.put(`https://prodapis.adsgoat.in/api/updateUserTableData/`, {formattedData},
+
+                    const response = await axios.put(`https://prodapis.adsgoat.in/api/updateUserTableData/`, { formattedData },
                         {
                             headers: {
                                 'Authorization': token
                             }
                         });
-        
+
                     if (response.status === 200) {
                         message.success("User Edits updated successfully"); // Display success message
 
                         // Pass the updated user data back to the parent to update the table
                         const updatedUserData = { ...editeddata, ...formattedData };
-                        
+
                         // Call onClose and pass the updated data to the parent
                         onClose(updatedUserData);
-                        
+
                         // setTimeout(() => {
                         //     window.location.reload();
                         // }, 1500);
 
-                        setIsModalVisible(false); 
+                        setIsModalVisible(false);
                     }
-                     else {
+                    else {
                         console.error('Failed to update user');
                         // Handle error, show error message
                     }
@@ -288,7 +334,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                 console.log('Cancel');
             },
         });
-        
+
     };
 
 
@@ -319,7 +365,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         // Add other fields with their initial values here
     } : null;
 
-    
+
     // console.log(initialValues, "initialValues")
     return (
         <Drawer
@@ -334,7 +380,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                 layout="vertical"
                 onFinish={submitForm}
                 initialValues={initialValues}
-                key={initialValues?.userName} 
+                key={initialValues?.userName}
                 className={theme === 'dark' ? 'form-dark' : 'form-light'}
             >
                 <Form.Item
@@ -347,7 +393,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Input  disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Input disabled className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                 </Form.Item>
 
                 <Form.Item
@@ -360,7 +406,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Input  disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Input disabled className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                 </Form.Item>
 
                 <Form.Item
@@ -379,13 +425,17 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                             width: '100%',
                             backgroundColor: theme === 'dark' && '#333', // Background color
                             color: theme === 'dark' && '#fff',
-                        }}      
+                        }}
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
-                        <Select.Option value="Admin">Admin</Select.Option>
-                        <Select.Option value="Manager">Manager</Select.Option>
+                        {userdetails?.role !== "Special_User" && (
+                            <Select.Option value="Admin">Admin</Select.Option>
+                        )}
+                        {userdetails?.role !== "Special_User" && (
+                            <Select.Option value="Manager">Manager</Select.Option>
+                        )}
                     </Select>
                 </Form.Item>
                 {/* <Form.Item label="Ad Accounts" name="adAccounts">
@@ -428,7 +478,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                             <Select
                                 placeholder="Select a network"
-                                style={{ width: '145px', height: '30px', marginRight:'8px',
+                                style={{
+                                    width: '145px', height: '30px', marginRight: '8px',
                                     backgroundColor: theme === 'dark' && '#333', // Background color
                                     color: theme === 'dark' && '#fff',
                                 }}
@@ -436,11 +487,21 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                 value={account.network}
                                 onChange={(value) => handleNetworkChange(accountIndex, value)}
                             >
-                                {getAvailableNetworks(account.network).map((network) => (
+                                {/* {availableNetworks.map((network) => (
                                     <Select.Option key={network} value={network}>
                                         {network}
                                     </Select.Option>
-                                ))}
+                                ))} */}
+                                {availableNetworks
+  .filter(
+    (network) =>
+      !selectedNetworks.includes(network) || network === account.network
+  )
+  .map((network) => (
+    <Select.Option key={network} value={network}>
+      {network}
+    </Select.Option>
+  ))}
                             </Select>
                             <div
                                 style={{
@@ -453,59 +514,59 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                             >
                                 {account.inputs.map((input, inputIndex) => (
                                     <div
-                                    key={inputIndex}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginBottom: '8px',
-                                        width: '100%',
-                                        height: '30px',
-                                        justifyContent: 'center',
-                                    }}
+                                        key={inputIndex}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            marginBottom: '8px',
+                                            width: '100%',
+                                            height: '30px',
+                                            justifyContent: 'center',
+                                        }}
                                     >
-                                    <Input
-                                        value={input}
-                                        onChange={(e) =>
-                                        handleInputChange(accountIndex, inputIndex, e.target.value)
-                                        }
-                                        placeholder="Enter Account ID"
-                                        style={{ width: '100%', marginRight: '8px', height: '32px',backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} 
-                                    />
-                                    
-                                    {/* Show DeleteOutlined only if there is more than one input */}
-                                    {account.inputs.length > 1 && inputIndex !== 0 && (
-                                        <DeleteOutlined
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => handleRemoveInput(accountIndex, inputIndex)}
+                                        <Input
+                                            value={input}
+                                            onChange={(e) =>
+                                                handleInputChange(accountIndex, inputIndex, e.target.value)
+                                            }
+                                            placeholder="Enter Account ID"
+                                            style={{ width: '100%', marginRight: '8px', height: '32px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
-                                    )}
 
-                                    {/* Show Remove button only if there is exactly one input */}
-                                    {account.inputs.length === 1 && inputIndex === 0 && (
-                                        <Button
-                                            style={{   backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                            type="default"
-                                            onClick={() => handleRemoveAccount(accountIndex)}
-                                        >
-                                            Remove
-                                        </Button>
-                                    )}
-                                    
-                                    {/* Show PlusOutlined only for the last input */}
-                                    {inputIndex === account.inputs.length - 1 && (
-                                        <PlusOutlined
-                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
-                                        onClick={() => handleAddInput(accountIndex)}
-                                        />
-                                    )}
+                                        {/* Show DeleteOutlined only if there is more than one input */}
+                                        {account.inputs.length > 1 && inputIndex !== 0 && (
+                                            <DeleteOutlined
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => handleRemoveInput(accountIndex, inputIndex)}
+                                            />
+                                        )}
+
+                                        {/* Show Remove button only if there is exactly one input */}
+                                        {account.inputs.length === 1 && inputIndex === 0 && (
+                                            <Button
+                                                style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                                type="default"
+                                                onClick={() => handleRemoveAccount(accountIndex)}
+                                            >
+                                                Remove
+                                            </Button>
+                                        )}
+
+                                        {/* Show PlusOutlined only for the last input */}
+                                        {inputIndex === account.inputs.length - 1 && (
+                                            <PlusOutlined
+                                                style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                onClick={() => handleAddInput(accountIndex)}
+                                            />
+                                        )}
                                     </div>
                                 ))}
                             </div>
 
 
                         </div>
-                        
+
                     </div>
                 ))}
 
@@ -516,15 +577,16 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                 <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                                     <Select
                                         placeholder="Select a network"
-                                        style={{ width: '120px', marginRight: '8px',
+                                        style={{
+                                            width: '120px', marginRight: '8px',
                                             backgroundColor: theme === 'dark' && '#333', // Background color
                                             color: theme === 'dark' && '#fff',
-                                         }}
+                                        }}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         value={account.network}
                                         onChange={(value) => handleNetworkChange1(accountIndex, value)}
                                     >
-                                        {getAvailableNetworks(account.network).map((network) => (
+                                        {availableNetworks.map((network) => (
                                             <Select.Option key={network} value={network}>
                                                 {network}
                                             </Select.Option>
@@ -537,8 +599,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                                     value={input}
                                                     onChange={(e) => handleInputChange1(accountIndex, inputIndex, e.target.value)}
                                                     placeholder="Enter Account ID"
-                                                    style={{ width: '100%', marginRight: '8px', height: '32px',backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} 
+                                                    style={{ width: '100%', marginRight: '8px', height: '32px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                 />
                                                 {inputIndex !== 0 && (
                                                     <DeleteOutlined
@@ -564,15 +626,15 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                             </div>
                         ))}
                     </div>
-                    <Button type="dashed" style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> {/* Wrap icon in a span */}
-                        <PlusOutlined className="black-icon"/>
-                        </span>}>
+                    <Button type="dashed" style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> {/* Wrap icon in a span */}
+                        <PlusOutlined className="black-icon" />
+                    </span>}>
                         Add Project
                     </Button>
                 </Form.Item>
-                
+
                 <Form.Item>
-                    <Button style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} htmlType="submit">
+                    <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>
