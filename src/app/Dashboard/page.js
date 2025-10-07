@@ -53,7 +53,7 @@ const newtworkCollections = {
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 import { generate } from '@ant-design/colors'; // For dynamic color generation
-import { ReloadOutlined } from "@ant-design/icons";
+import { CheckCircleFilled, CloseCircleFilled, CloseCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 import locale from 'antd/es/date-picker/locale/en_US';
 const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
@@ -223,6 +223,8 @@ const RevenuePartnerDashboard = () => {
     const [domainColumnDefs, setDomainColumnDefs] = useState([]);
 
     const [isDomain, setIsDomain] = useState("");
+
+
 
 
     const onChangeTime = (value) => {
@@ -970,7 +972,7 @@ const Dashboard = () => {
                 // Check if the value is an array and if it contains objects
                 if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
                     // Convert array of objects to array of accountNumbers
-                    return [key, value.map(obj => ({ accountNumber: obj.accountNumber, accountName: obj.accountName }))];
+                    return [key, value.map(obj => ({ accountNumber: obj.accountNumber, accountName: obj.accountName, status: obj.status, }))];
                 }
                 // If it's not an array of objects, keep it as is
                 return [key, value];
@@ -991,7 +993,6 @@ const Dashboard = () => {
     //   })();
 
     const transformedData = transformData(userdetails?.adAccounts);
-    console.log(transformedData, "transformedData");
     // console.log(userdetails?.adAccounts, "1");
 
 
@@ -1024,7 +1025,7 @@ const Dashboard = () => {
     const [agencyNameReport, setAgencyNameReport] = useState([]);
 
     const [byAccountNumber, setByAccountNumber] = useState([]);
-     const [hovered, setHovered] = useState(false);
+    const [hovered, setHovered] = useState(false);
 
     const onChangeTime = (value) => {
         setSkeletonLoading(true);
@@ -1057,11 +1058,12 @@ const Dashboard = () => {
         [defaultCategory]: transformedData[defaultCategory], // Default all items in the first category
     });
 
-    const [chartData, setChartData] = useState({ 
+    const [chartData, setChartData] = useState({
         dates: [], newDates: [], spend: [], revenue: [], profit: [], margin: [], ncpl: [], ctr: [], cpc: [], conversions: [], leads: [],
     });
 
-    const [chartDataByDate, setChartDataByDate] = useState({ datesByDate: [], spendByDate: [], revenueByDate: [], profitByDate: [], marginByDate: [], ncplByDate: [], ctrByDate: [], cpcByDate: [], conversionsByDate: [], leadsByDate: [], 
+    const [chartDataByDate, setChartDataByDate] = useState({
+        datesByDate: [], spendByDate: [], revenueByDate: [], profitByDate: [], marginByDate: [], ncplByDate: [], ctrByDate: [], cpcByDate: [], conversionsByDate: [], leadsByDate: [],
     });
 
     const [rowData, setRowData] = useState([]);
@@ -1075,6 +1077,7 @@ const Dashboard = () => {
     const [submitted, setSubmitted] = useState(false);
     const [domainWiseData, setDomainWiseData] = useState([]);
     const { apiClient } = useTokenContext();
+    const [networksWithStatus, setNetworksWithStatus] = useState([]);
 
 
     // const [collectionName, setCollectionName] = useState([]);
@@ -1124,7 +1127,7 @@ const Dashboard = () => {
         CTR: '#2196F3',           // Blue
         CPC: '#F44336',           // Red
         RPC: '#00ACC1',           // Cyan
-    };    
+    };
 
     const toggle = (label) => {
         const chart = chartRef.current;
@@ -1203,7 +1206,23 @@ const Dashboard = () => {
     //     }
     //     // Your existing logic for handling "Select All"
     // };
+    useEffect(() => {
+        var token = localStorage.getItem("token")
+        const fetchNetworksData = async () => {
+            try {
+                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                    headers: {
+                        Authorization: token,
 
+                    }
+                });
+                setNetworksWithStatus(res.data);
+            } catch (error) {
+                console.error('Error fetching networksData:', error);
+            }
+        };
+        fetchNetworksData();
+    }, []);
     const handleChangeDates = (dates) => {
         setSelectedDates(dates || []); // Save selected dates in state
         setIsPickerOpen(true); // Ensure the RangePicker stays open after date selection
@@ -1402,7 +1421,7 @@ const Dashboard = () => {
                     newKey = "Newsbreak_DomainActive"
                 } else if (key === "FB_DomainActive") {
                     newKey = "Facebook_DActive_Names"
-                } else if (key === "FB_Mnet"){
+                } else if (key === "FB_Mnet") {
                     newKey = "Facebook_Mnet_Daily"
                 } else if (key === "FB_InuvoPrism") {
                     newKey = "Facebook_InuvoPrismDaily"
@@ -1914,7 +1933,8 @@ const Dashboard = () => {
         const conversionsByDate = sortedDataByDate.map(d => d.conversions || 0);
         const leadsByDate = sortedDataByDate.map(d => d.fbLeads || 0);
 
-        setChartDataByDate({ datesByDate, spendByDate, revenueByDate, profitByDate, marginByDate, rpcByDate, cplByDate, ncplByDate, ctrByDate, cpcByDate, conversionsByDate, leadsByDate, 
+        setChartDataByDate({
+            datesByDate, spendByDate, revenueByDate, profitByDate, marginByDate, rpcByDate, cplByDate, ncplByDate, ctrByDate, cpcByDate, conversionsByDate, leadsByDate,
         });
 
         console.log(groupedData);
@@ -2178,6 +2198,7 @@ const Dashboard = () => {
             const filteredData = transformedData[category]?.filter(item =>
                 item.accountNumber?.toString().toLowerCase().includes(searchValue)
             ) || [];
+            console.log(`Transformed data for category ${category}:`, transformedData[category]);
 
             return (
                 <div key={category}>
@@ -2191,14 +2212,14 @@ const Dashboard = () => {
                         }}
                     >
                         <Divider style={{ color: theme === 'dark' ? 'white' : 'black' }}>
-                             <Checkbox
+                            <Checkbox
                                 checked={allSelected}
                                 onChange={(e) => handleSelectAllChange(e.target.checked, category)}
                                 style={{ marginRight: '5px' }}
-                                className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light' }
+                                className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light'}
                             />
                             {category}
-                           
+
                         </Divider>
                     </div>
 
@@ -2220,9 +2241,19 @@ const Dashboard = () => {
                                             padding: '5px 10px',
                                             borderBottom: '1px solid #ddd',
                                         }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                <span style={{ fontWeight: '600' }}>{accountNumber}</span>
-                                                <span>{item.accountName || ''}</span>
+                                            <div style={{ display: 'flex' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', marginRight: '5px' }}>
+                                                    <span style={{ fontWeight: '600' }}>{accountNumber}</span>
+                                                    <span>{item.accountName || ''}</span>
+
+                                                </div>
+                                                <div>
+                                                    {item.status === 'Active' ? (
+                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                                                    ) : (
+                                                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ),
@@ -2365,7 +2396,7 @@ const Dashboard = () => {
 
                 const valueWithCount = `${firstColumnValue}`;
                 return (
-                    <div style={{  width: '100%' ,marginRight:'10px'}}>
+                    <div style={{ width: '100%', marginRight: '10px' }}>
                         <span
                             onClick={() => {
                                 const data = {
@@ -3461,7 +3492,7 @@ const Dashboard = () => {
                                                     overflowY: 'auto',
                                                     // width: '100%',
                                                 }}
-                                                
+
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 placeholder="Select projects"
                                                 value={firstSelectValues}
@@ -3481,15 +3512,15 @@ const Dashboard = () => {
                                                         }}
                                                     >
                                                         {menu}
-                                                        
+
                                                     </div>
-                                             
+
                                                 )}
                                                 options={Object.keys(transformedData).map((category) => ({
                                                     value: category,
                                                     label: category,
                                                 }))}
-                                                
+
                                             />
                                         </Col>
 
@@ -3501,7 +3532,7 @@ const Dashboard = () => {
                                                 style={{ width: '100%' }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 placeholder="Select Accounts"
-                                                dropdownClassName={theme === 'dark' ? 'custom-dropdown':'custom-dropdown'}
+                                                dropdownClassName={theme === 'dark' ? 'custom-dropdown' : 'custom-dropdown'}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
                                                 dropdownRender={() => (
                                                     <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
@@ -3621,7 +3652,7 @@ const Dashboard = () => {
                                     width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
                                     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#dbd9d9ff',
                                     padding: "10px",
-                                    marginBottom:'5px',
+                                    marginBottom: '5px',
 
                                     boxShadow:
                                         theme === 'dark'
@@ -3659,12 +3690,35 @@ const Dashboard = () => {
                                                         {menu}
                                                     </div>
                                                 )}
-                                                options={Object.keys(transformedData).map((category) => ({
-                                                    value: category,
-                                                    label: category,
-                                                    title:''
-                                                }))}
-                                                
+                                                // options={Object.keys(transformedData).map((category) => ({
+                                                //     value: category,
+                                                //     label: category,
+                                                //     title: ''
+                                                // }))}
+                                                options={Object.keys(transformedData || {})
+                                                    .sort((a, b) => {
+                                                        const aActive = networksWithStatus.find(n => n.Network === a)?.Status === 'Active' ? 1 : 0;
+                                                        const bActive = networksWithStatus.find(n => n.Network === b)?.Status === 'Active' ? 1 : 0;
+                                                        return bActive - aActive; // Active first
+                                                    })
+                                                    .map(category => {
+                                                        const isActive = networksWithStatus.find(n => n.Network === category)?.Status === 'Active';
+                                                        return {
+                                                            value: category,
+                                                            label: (
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                                    {isActive
+                                                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                                                                        : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
+                                                                    <span style={{ color: theme === 'dark' ? '#fff' : '#000' }}>{category}</span>
+                                                                </div>
+                                                            )
+                                                        };
+                                                    })
+                                                }
+
+                                                optionLabelProp="label"
+
                                             />
                                         </Col>
 
@@ -3701,7 +3755,7 @@ const Dashboard = () => {
                                                 options={timezones.map((item) => ({
                                                     value: item,
                                                     label: item,
-                                                    title:''
+                                                    title: ''
                                                 }))}
                                             />
                                         </Col>
