@@ -18,6 +18,7 @@ import { HiOutlineDuplicate } from "react-icons/hi";
 import Selecto from "react-selecto";
 
 import dayjs from 'dayjs';
+import { Token } from '@mui/icons-material';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
@@ -111,7 +112,24 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const router = useRouter();
 
     const uploadPrefix = `${selectedKey}/${selectedAccountNumber}/`;
+    var token = localStorage.getItem("token")
+    const [networksWithStatus, setNetworksWithStatus] = useState([]);
+    useEffect(() => {
+        const fetchNetworksData = async () => {
+            try {
+                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                    headers: {
+                        Authorization: token,
 
+                    }
+                });
+                setNetworksWithStatus(res.data);
+            } catch (error) {
+                console.error('Error fetching networksData:', error);
+            }
+        };
+        fetchNetworksData();
+    }, []);
     useEffect(() => {
         selectedImagesRef.current = selectedImages;
     }, [selectedImages]);
@@ -1225,23 +1243,23 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const [isHoveredDelete, setIsHoveredDelete] = useState(false);
     const [isHoveredRestore, setIsHoveredRestore] = useState(false);
 
-  const getMenuPosRightOfTarget = (event) => {
+    const getMenuPosRightOfTarget = (event) => {
         const gapX = 12; // used only for right-side spacing
         const gapY = 8;
-    
+
         const targetRect = event.currentTarget.getBoundingClientRect();
         const menuWidth = 180;
         const menuHeight = 160;
-    
+
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-    
+
         let x, y;
-    
+
         // Determine if there's space to the right
         const fitsRight = targetRect.right + menuWidth + gapX <= vw;
         const fitsBelow = targetRect.bottom + gapY + menuHeight <= vh;
-    
+
         // If it fits on the right, add small gap
         if (fitsRight) {
             x = targetRect.right + gapX;
@@ -1249,18 +1267,18 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             // If not, stick the menu directly against the left of the file — no gap
             x = targetRect.left - menuWidth + 200;
         }
-    
+
         // Vertical logic (with small gap always below)
         if (fitsBelow) {
             y = targetRect.bottom + gapY;
         } else {
             y = targetRect.top - menuHeight;
         }
-    
+
         // Final clamp to viewport
         x = Math.max(0, Math.min(x, vw - menuWidth));
         y = Math.max(0, Math.min(y, vh - menuHeight));
-    
+
         return { x, y };
     };
 
@@ -1515,13 +1533,38 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
 
                         >
-                            {options.length > 0 ? (
+                            {/* {options.length > 0 ? (
                                 options.map(option => (
                                     <Option key={option.value} value={option.value} title={null}>
                                         {option.label}
 
                                     </Option>
                                 ))
+                            ) : (
+                                <Option disabled></Option>
+                            )} */}
+                            {options.length > 0 ? (
+                                options
+                                    .sort((a, b) => {
+                                        const aActive = networksWithStatus.find(n => n.Network === a.label)?.Status === "Active" ? 1 : 0;
+                                        const bActive = networksWithStatus.find(n => n.Network === b.label)?.Status === "Active" ? 1 : 0;
+                                        return bActive - aActive; // active first
+                                    })
+                                    .map(option => {
+                                        const isActive = networksWithStatus.find(n => n.Network === option.label)?.Status === "Active";
+                                        return (
+                                            <Option key={option.value} value={option.value} title={null}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    {isActive ? (
+                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                                                    ) : (
+                                                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }}  className='black-icon-pause-1'/>
+                                                    )}
+                                                    <span>{option.label}</span>
+                                                </div>
+                                            </Option>
+                                        );
+                                    })
                             ) : (
                                 <Option disabled></Option>
                             )}

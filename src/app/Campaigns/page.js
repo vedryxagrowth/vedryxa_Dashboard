@@ -69,6 +69,7 @@ import dayjs from "dayjs";
 import { DatePicker } from "antd";
 import StickyBox from "react-sticky-box";
 import { FaClone, FaEye, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import { Token } from "aws-sdk";
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
 
@@ -99,7 +100,7 @@ const App = () => {
   if (userdetails?.role === "Revenue_Partner") {
     redirect("/Dashboard");
   }
-  const {adAccounts} = userdetails || {};
+  const { adAccounts } = userdetails || {};
   const [hovered, setHovered] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationSize, setPaginationSize] = useState(10);
@@ -151,6 +152,8 @@ const App = () => {
   const [multipleAdsetCampaignData, setMultipleAdsetCampaignData] = useState(
     []
   );
+  var token = localStorage.getItem("token")
+  const [networksWithStatus, setNetworksWithStatus] = useState([]);
   const [activeTab, setActiveTab] = useState("1");
   const [campaignStatusFilter, setCampaignStatusFilter] = useState("all");
   const [selectedEditMultipleAdsetData, setSelectedEditMultipleAdsetData] =
@@ -167,12 +170,30 @@ const App = () => {
   ] = useState(false);
   const [view, setView] = useState(false);
   const [accountChanged, setAccountChanged] = useState(false);
-  
-      // const [isOpen, setIsOpen] = useState(false);
+
+
+  // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
     setCampaignStatusFilter(key);
   };
 
+
+  useEffect(() => {
+    const fetchNetworksData = async () => {
+      try {
+        const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+          headers: {
+            Authorization: token,
+
+          }
+        });
+        setNetworksWithStatus(res.data);
+      } catch (error) {
+        console.error('Error fetching networksData:', error);
+      }
+    };
+    fetchNetworksData();
+  }, []);
   const getFilteredSingleCampaigns = () => {
     return campaignData.filter((campaign) => {
       if (campaignStatusFilter === "active") {
@@ -322,7 +343,7 @@ const App = () => {
   // }
 
   const accountsForAccess = adAccounts[selectedKey];
-    // console.log(accountsForAccess, "accounts Access");
+  // console.log(accountsForAccess, "accounts Access");
 
   const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
@@ -488,6 +509,7 @@ const App = () => {
   //         setLoading(false);
   //     }
   // };
+
   const fetchData = async (
     accountNumber = null,
     start = startDate,
@@ -1331,7 +1353,6 @@ const App = () => {
       </div>
     );
   };
-
   const EditableField = ({
     value,
     record,
@@ -2146,7 +2167,7 @@ const App = () => {
       key: "Account_Number",
       // width: 320,
       align: "center",
-      
+
     },
     // {
     //   title: "Actions",
@@ -3008,12 +3029,12 @@ const App = () => {
   );
 
   const handleDropdownVisibleChange = (open) => {
-        setIsOpen(open); // Set dropdown open state
-        // setAccountNumberToPass(null);
+    setIsOpen(open); // Set dropdown open state
+    // setAccountNumberToPass(null);
   };
 
   const onChangeSelect = (value) => {
-        // setAccount(value);
+    // setAccount(value);
   }
 
   const handleChange1 = (values) => {
@@ -3231,11 +3252,33 @@ const App = () => {
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             >
-              {options.map((option) => (
+              {/* {options.map((option) => (
                 <Option key={option.value} value={option.value}>
                   {option.label}
                 </Option>
-              ))}
+              ))} */}
+              {options
+                .sort((a, b) => {
+                  const aActive = networksWithStatus.find(n => n.Network === a.label)?.Status === "Active" ? 1 : 0;
+                  const bActive = networksWithStatus.find(n => n.Network === b.label)?.Status === "Active" ? 1 : 0;
+                  return bActive - aActive; // active first
+                })
+                .map(option => {
+                  const isActive = networksWithStatus.find(n => n.Network === option.label)?.Status === "Active";
+                  return (
+                    <Option key={option.value} value={option.value}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {isActive
+                          ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                          : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1'/>}
+                        <span>{option.label}</span>
+                      </div>
+                    </Option>
+                  );
+                })
+              }
+
+
             </Select>
 
             {/* 🔹 Select Account */}
@@ -3759,20 +3802,20 @@ const App = () => {
       )} */}
 
       <div>
-          <Tabs
-            activeKey={activeTab}
-            onChange={handleTabChange}
-            renderTabBar={() => <></>}
-          >
-            <Tabs.TabPane key="1">
-              {loading ? (
-                <Skeleton
-                  active
-                  paragraph={{ rows: 12 }}
-                  style={{ marginTop: "10px" }}
-                />
-              ) : (
-                <Table
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          renderTabBar={() => <></>}
+        >
+          <Tabs.TabPane key="1">
+            {loading ? (
+              <Skeleton
+                active
+                paragraph={{ rows: 12 }}
+                style={{ marginTop: "10px" }}
+              />
+            ) : (
+              <Table
                 style={{
                   width: "100%",
                   height: "calc(100vh - 300px)",
@@ -3832,17 +3875,17 @@ const App = () => {
                   },
                 }}
               />
-              )
-              }
-            </Tabs.TabPane>
-            <Tabs.TabPane key="2">
-              {loadingForMultipleAdsets ? (
-                <Skeleton
-                  active
-                  paragraph={{ rows: 12 }}
-                  style={{ marginTop: "10px" }}
-                />
-              ) : (
+            )
+            }
+          </Tabs.TabPane>
+          <Tabs.TabPane key="2">
+            {loadingForMultipleAdsets ? (
+              <Skeleton
+                active
+                paragraph={{ rows: 12 }}
+                style={{ marginTop: "10px" }}
+              />
+            ) : (
               <Table
                 style={{
                   width: "100%",
@@ -3903,10 +3946,10 @@ const App = () => {
                   },
                 }}
               />
-              )}
-            </Tabs.TabPane>
-          </Tabs>
-        </div>
+            )}
+          </Tabs.TabPane>
+        </Tabs>
+      </div>
 
       {!restrictedEmails.includes(userdetails.email) && (
         <Drawer
