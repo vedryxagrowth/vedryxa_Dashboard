@@ -191,6 +191,26 @@ const MyTablePage = () => {
     const [timezoneChanged, setTimezoneChanged] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [campaignComments, setCampaignComments] = useState([]);
+    const [networksWithStatus, setNetworksWithStatus] = useState([]);
+
+    useEffect(() => {
+        const fetchNetworksData = async () => {
+            try {
+                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                    headers: {
+                        Authorization: token,
+
+                    }
+                });
+                setNetworksWithStatus(res.data);
+            } catch (error) {
+                console.error('Error fetching networksData:', error);
+            }
+        };
+        fetchNetworksData();
+    }, []);
+
+
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
             setCampaignStatusFilter('ACTIVE');
@@ -11188,8 +11208,8 @@ const MyTablePage = () => {
                                 </div>
                                 <span style={{ textAlign: 'right', marginLeft: 10 }}>
                                     {account.status === 'Active'
-                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
-                                        : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />}
+                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }}  className='black-icon-active-1'/>
+                                        : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
                                 </span>
                             </div>
                         ),
@@ -11732,8 +11752,34 @@ const MyTablePage = () => {
                                 border: '1px solid #4CAF50',
                                 borderRadius: '6px'
                             }}
-                            optionFilterProp="label"
-                            options={networks.map(item => ({ value: item, label: item, title: '' }))}
+                            // optionFilterProp="label"
+                            // options={networks.map(item => ({ value: item, label: item, title: '' }))}
+                            options={
+                                networks
+                                    .sort((a, b) => {
+                                        const aActive = networksWithStatus.find(n => n.Network === a)?.Status === 'Active' ? 1 : 0;
+                                        const bActive = networksWithStatus.find(n => n.Network === b)?.Status === 'Active' ? 1 : 0;
+                                        return bActive - aActive; 
+                                    })
+                                    .map(network => {
+                                        const isActive = networksWithStatus.find(n => n.Network === network)?.Status === 'Active';
+                                        return {
+                                            value: network,
+                                            label: (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    {isActive ? (
+                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                                                    ) : (
+                                                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
+                                                    )}
+                                                    <span>{network}</span>
+                                                </div>
+                                            ),
+                                        };
+                                    })
+                            }
+
+                            optionLabelProp="label"
                             title=''
 
                         />
