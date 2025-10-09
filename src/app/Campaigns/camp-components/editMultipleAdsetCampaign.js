@@ -8731,7 +8731,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       };
       number++;
     }
-    return { ...AllAdsetsData, ...(fullCampaignData?.fbstatus === "Live" ? { re_launch: send_re_launch_status } : {}) };
+    return { ...AllAdsetsData, ...(fullCampaignData?.fbstatus === "Live" ? { re_launch: fullCampaignData.re_launch ? fullCampaignData.re_launch : send_re_launch_status } : {}) };
   };
 
   const MultipleAdsetsDraftFetching = async (values) => {
