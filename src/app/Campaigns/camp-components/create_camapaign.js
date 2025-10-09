@@ -5648,7 +5648,7 @@ const CreateCampaignDrawer = ({
               const fileName = file.name.split("/").pop();
 
               fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                `https://graph.facebook.com/v23.0/act_${account}/adimages`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }
               );
@@ -5665,7 +5665,7 @@ const CreateCampaignDrawer = ({
               }
             } else if (file.url.endsWith(".mp4")) {
               fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                `https://graph.facebook.com/v23.0/act_${account}/advideos`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }
               );
@@ -5675,7 +5675,7 @@ const CreateCampaignDrawer = ({
                 await new Promise((resolve) => setTimeout(resolve, 10000));
 
                 const thumbnailResponse = await axios.get(
-                  `https://graph.facebook.com/v20.0/${videoid}`,
+                  `https://graph.facebook.com/v23.0/${videoid}`,
                   {
                     params: {
                       access_token: token,
@@ -5738,7 +5738,7 @@ const CreateCampaignDrawer = ({
               }
 
               fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                `https://graph.facebook.com/v23.0/act_${account}/adimages`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }
               );
@@ -5772,7 +5772,7 @@ const CreateCampaignDrawer = ({
               }
 
               fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                `https://graph.facebook.com/v23.0/act_${account}/advideos`,
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }
               );
@@ -5782,7 +5782,7 @@ const CreateCampaignDrawer = ({
                 await new Promise((resolve) => setTimeout(resolve, 10000));
 
                 const thumbnailResponse = await axios.get(
-                  `https://graph.facebook.com/v20.0/${videoid}`,
+                  `https://graph.facebook.com/v23.0/${videoid}`,
                   {
                     params: {
                       access_token: token,
@@ -6062,6 +6062,9 @@ const CreateCampaignDrawer = ({
           Name: values.Name,
           Objectives: values.Objectives,
           Special_categories: values.Special_categories,
+          ...(Array.isArray(values?.Special_categories)
+            ? { Special_categories_countries: values.countries }
+            : {}),
           Bid_strategy: values.Bid_strategy,
           Daily_amount: parseFloat(values.Daily_amount) * 100,
           Status: values.Status,
@@ -7916,6 +7919,55 @@ const CreateCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue }) => {
+                    const categories = getFieldValue("Special_categories") || [];
+                    // if "NONE" is selected, hide the countries field
+                    const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                    return showCountries ? (
+                      <Form.Item
+                        name="countries"
+                        label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select at least one country!",
+                          },
+                        ]}
+                        style={{ width: "140px", marginLeft: "1%" }}
+                        initialValue={["US"]} // default
+                      >
+                        <Select
+                          mode="multiple"
+                          allowClear
+                          options={[
+                            { value: "US", label: "United States" },
+                            { value: "GB", label: "United Kingdom" },
+                            { value: "AU", label: "Australia" },
+                            { value: "IN", label: "India" },
+                            { value: "AE", label: "United Arab Emirates" },
+                            { value: "CA", label: "Canada" },
+                            { value: "DE", label: "Germany" },
+                            { value: "FR", label: "France" },
+                            { value: "JP", label: "Japan" },
+                            { value: "CN", label: "China" },
+                            { value: "BR", label: "Brazil" },
+                            { value: "ZA", label: "South Africa" },
+                            { value: "RU", label: "Russia" },
+                            { value: "IT", label: "Italy" },
+                            { value: "ES", label: "Spain" },
+                            { value: "SG", label: "Singapore" },
+                            { value: "NZ", label: "New Zealand" },
+                            { value: "MX", label: "Mexico" },
+                          ]}
+                          dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                          className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                        />
+                      </Form.Item>
+                    ) : null;
+                  }}
+                </Form.Item>
                 <Form.Item
                   name="Bid_strategy"
                   label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
@@ -8473,83 +8525,83 @@ const CreateCampaignDrawer = ({
                 </Modal>
                 <div style={{ display: 'flex', marginTop: '10px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <Button
-                    type="primary"
-                    style={{
-                      background: "#91c25f",
-                      minWidth: "120px",
-                      borderWidth: "0px",
-                    }}
-                    onClick={async () => {
-                      const cat = (popupInputs?.reportCat || "").trim();
-                      if (!cat) {
-                        setErrors((e) => ({ ...e, reportCat: "Report category is required" }));
-                        // message.error("Category is required");
-                        return;
-                      }
+                    <Button
+                      type="primary"
+                      style={{
+                        background: "#91c25f",
+                        minWidth: "120px",
+                        borderWidth: "0px",
+                      }}
+                      onClick={async () => {
+                        const cat = (popupInputs?.reportCat || "").trim();
+                        if (!cat) {
+                          setErrors((e) => ({ ...e, reportCat: "Report category is required" }));
+                          // message.error("Category is required");
+                          return;
+                        }
 
-                      try {
-                        const values = await form.validateFields();
+                        try {
+                          const values = await form.validateFields();
 
-                        // Check if campaign-level and adset-level budgets are both zero
-                        const campaignLevelDailyBudget = values.Daily_amount;
-                        const isCampaignBudgetActive =
-                          parseFloat(campaignLevelDailyBudget) > 0;
+                          // Check if campaign-level and adset-level budgets are both zero
+                          const campaignLevelDailyBudget = values.Daily_amount;
+                          const isCampaignBudgetActive =
+                            parseFloat(campaignLevelDailyBudget) > 0;
 
-                        // Check if any adset has a budget
-                        const isAnyAdsetBudgetSet = values.adsets.some(
-                          (adset) => parseFloat(adset.DailyAdd_amount) > 0
-                        );
-
-                        // If Campaign Budget is not set, check Adsets
-                        if (!isCampaignBudgetActive) {
-                          const isAllAdsetsFilled = values.adsets.every(
+                          // Check if any adset has a budget
+                          const isAnyAdsetBudgetSet = values.adsets.some(
                             (adset) => parseFloat(adset.DailyAdd_amount) > 0
                           );
 
-                          if (!isAllAdsetsFilled) {
-                            throw {
-                              errorFields: [
-                                {
-                                  name: ["Daily_amount"],
-                                  errors: [
-                                    "Daily budget cannot be zero on both Adset and Campaign levels",
-                                  ],
-                                },
-                              ],
-                            };
+                          // If Campaign Budget is not set, check Adsets
+                          if (!isCampaignBudgetActive) {
+                            const isAllAdsetsFilled = values.adsets.every(
+                              (adset) => parseFloat(adset.DailyAdd_amount) > 0
+                            );
+
+                            if (!isAllAdsetsFilled) {
+                              throw {
+                                errorFields: [
+                                  {
+                                    name: ["Daily_amount"],
+                                    errors: [
+                                      "Daily budget cannot be zero on both Adset and Campaign levels",
+                                    ],
+                                  },
+                                ],
+                              };
+                            }
                           }
+
+                          // Clear any previous errors
+                          setSubmitErrors([]);
+                          console.log("Form values:", values);
+
+                          // Call the onFinish logic, passing in the values
+                          onFinish(values);
+
+                          // Optionally trigger confirmation modal (as per your logic)
+                          setIsModalVisible(true);
+
+                          // Save values if needed
+                          setFormValues(values);
+                          setIsCreateCampaignorDraft("createcampaign");
+                        } catch (err) {
+                          const allErrors = err?.errorFields?.map((field) => ({
+                            name: field.name?.[0],
+                            message: field.errors?.[0],
+                          }));
+                          setSubmitErrors(allErrors);
                         }
-
-                        // Clear any previous errors
-                        setSubmitErrors([]);
-                        console.log("Form values:", values);
-
-                        // Call the onFinish logic, passing in the values
-                        onFinish(values);
-
-                        // Optionally trigger confirmation modal (as per your logic)
-                        setIsModalVisible(true);
-
-                        // Save values if needed
-                        setFormValues(values);
-                        setIsCreateCampaignorDraft("createcampaign");
-                      } catch (err) {
-                        const allErrors = err?.errorFields?.map((field) => ({
-                          name: field.name?.[0],
-                          message: field.errors?.[0],
-                        }));
-                        setSubmitErrors(allErrors);
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>
-                  {errors.reportCat && (
-                    <div style={{ color: "red", marginTop: "5px" }}>
-                      {errors.reportCat}
-                    </div>
-                  )}
+                      }}
+                    >
+                      Submit
+                    </Button>
+                    {errors.reportCat && (
+                      <div style={{ color: "red", marginTop: "5px" }}>
+                        {errors.reportCat}
+                      </div>
+                    )}
                   </div>
                   <Popconfirm
                     icon={null}

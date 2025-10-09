@@ -30,7 +30,7 @@ const contentStyle = {
 };
 const { Text } = Typography;
 const newtworkCollections = {
-    "FB_Mnet": "Facebook_Mnet",
+    "FB_Mnet": "Facebook_AD_Daily",
     "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',

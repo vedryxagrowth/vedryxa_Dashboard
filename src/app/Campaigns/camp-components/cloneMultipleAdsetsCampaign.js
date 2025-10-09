@@ -6318,12 +6318,78 @@ const CloneMultipleAdsetCampaignDrawer = ({
   //     });
   // }, [adsets]);
 
+  // const cloneAdset = (adsetId) => {
+  //   const adsetIndex = adsets.findIndex((ad) => ad.id === adsetId);
+  //   if (adsetIndex === -1) return;
+
+  //   const originalAdset = adsets[adsetIndex];
+  //   const newId = uuidv4();
+
+  //   const baseName = originalAdset.AdsetPanelName;
+  //   const copyCount = adsets.filter((ad) =>
+  //     ad.AdsetPanelName.startsWith(baseName)
+  //   ).length;
+  //   const newPanelName =
+  //     copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
+
+  //   const clonedAdset = {
+  //     ...originalAdset,
+  //     id: newId,
+  //     AdsetPanelName: newPanelName,
+  //   };
+
+  //   const currentFormAdsets = form.getFieldValue("adsets") || [];
+
+  //   // ✅ Match by UUID not index!
+  //   const formIndex = currentFormAdsets.findIndex(
+  //     (_, i) => adsets[i]?.id === adsetId
+  //   );
+  //   const clonedFormData = { ...currentFormAdsets[formIndex] };
+
+  //   // ✅ Add `_Copy` to AdsetName and AddName if present
+  //   if (clonedFormData.AdsetName) {
+  //     clonedFormData.AdsetName = `${clonedFormData.AdsetName}_Copy`;
+  //   }
+  //   if (clonedFormData.AddName) {
+  //     clonedFormData.AddName = `${clonedFormData.AddName}_Copy`;
+  //   }
+
+  //   const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
+  //   const updatedAdsets = [...adsets, clonedAdset];
+
+  //   // ✅ Set both states
+  //   setAdsets(updatedAdsets);
+  //   form.setFieldsValue({ adsets: updatedFormAdsets });
+
+  //   // ✅ Clone media/file states by UUID
+  //   const cloneFiles = (prev, setter) => {
+  //     setter((old) => ({ ...old, [newId]: [...(old[adsetId] || [])] }));
+  //   };
+
+  //   cloneFiles(selectedFiles, setSelectedFiles);
+  //   cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
+  //   cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
+
+  //   // ✅ Clone selectedPositions
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [newId]: [...(prev[adsetId] || [])],
+  //   }));
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [newId]: [...(prev[adsetId] || [])],
+  //   }));
+
+  //   // ✅ Open the last panel (the newly cloned one)
+  //   setActiveKey([`${updatedAdsets.length - 1}`]);
+  // };
+
   const cloneAdset = (adsetId) => {
     const adsetIndex = adsets.findIndex((ad) => ad.id === adsetId);
     if (adsetIndex === -1) return;
 
     const originalAdset = adsets[adsetIndex];
-    const newId = uuidv4();
+    const newId = uuidv4(); // ✅ new unique id every time
 
     const baseName = originalAdset.AdsetPanelName;
     const copyCount = adsets.filter((ad) =>
@@ -6332,21 +6398,27 @@ const CloneMultipleAdsetCampaignDrawer = ({
     const newPanelName =
       copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
 
+    // ✅ remove Adsetid (FB id) and Addid
+    const { Adsetid, Addid, ...rest } = originalAdset;
+
     const clonedAdset = {
-      ...originalAdset,
+      ...rest,
       id: newId,
       AdsetPanelName: newPanelName,
     };
 
     const currentFormAdsets = form.getFieldValue("adsets") || [];
 
-    // ✅ Match by UUID not index!
+    // ✅ Match by UUID not index
     const formIndex = currentFormAdsets.findIndex(
       (_, i) => adsets[i]?.id === adsetId
     );
     const clonedFormData = { ...currentFormAdsets[formIndex] };
 
-    // ✅ Add `_Copy` to AdsetName and AddName if present
+    // ✅ Assign the new unique id to the cloned form entry
+    clonedFormData.id = newId;
+
+    // ✅ Add `_Copy` suffixes if present
     if (clonedFormData.AdsetName) {
       clonedFormData.AdsetName = `${clonedFormData.AdsetName}_Copy`;
     }
@@ -6357,20 +6429,48 @@ const CloneMultipleAdsetCampaignDrawer = ({
     const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
     const updatedAdsets = [...adsets, clonedAdset];
 
-    // ✅ Set both states
+    // ✅ Update both states
     setAdsets(updatedAdsets);
     form.setFieldsValue({ adsets: updatedFormAdsets });
 
-    // ✅ Clone media/file states by UUID
+    // ✅ Clone media/file states by UUID (remove Addid)
     const cloneFiles = (prev, setter) => {
-      setter((old) => ({ ...old, [newId]: [...(old[adsetId] || [])] }));
+      setter((old) => ({
+        ...old,
+        [newId]: (old[adsetId] || []).map(({ Addid, ...rest }) => rest),
+      }));
     };
 
     cloneFiles(selectedFiles, setSelectedFiles);
     cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
     cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
 
-    // ✅ Clone selectedPositions
+    // ✅ Clone AddLevelData with newId
+    // setAddLevelData((prev) => ({
+    //   ...prev,
+    //   [newId]: prev[adsetId] ? [...prev[adsetId]] : [],
+    // }));
+
+    // setNewAddLevelData((prev) => ({
+    //   ...prev,
+    //   [newId]: prev[adsetId] ? [...prev[adsetId]] : [],
+    // }));
+
+    setAddLevelData((prev) => ({
+      ...prev,
+      [newId]: prev[adsetId]
+        ? prev[adsetId].map(({ Addid, Ad_Status, ...rest }) => rest)
+        : [],
+    }));
+
+    setNewAddLevelData((prev) => ({
+      ...prev,
+      [newId]: prev[adsetId]
+        ? prev[adsetId].map(({ Addid, Ad_Status, ...rest }) => rest)
+        : [],
+    }));
+
+    // ✅ Clone positions & publishers
     setSelectedPositions((prev) => ({
       ...prev,
       [newId]: [...(prev[adsetId] || [])],
@@ -6380,7 +6480,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       [newId]: [...(prev[adsetId] || [])],
     }));
 
-    // ✅ Open the last panel (the newly cloned one)
+    // ✅ Expand the cloned panel
     setActiveKey([`${updatedAdsets.length - 1}`]);
   };
 
@@ -7570,6 +7670,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
         Name: values.Name,
         Objectives: values.Objectives,
         Special_categories: values.Special_categories,
+        ...(Array.isArray(values?.Special_categories)
+          ? { Special_categories_countries: values.countries }
+          : {}),
         Bid_strategy: values.Bid_strategy,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
@@ -9070,6 +9173,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
       Name: `${draft?.camapaignlevel?.Name}_Copy`,
       Objectives: draft?.camapaignlevel?.Objectives,
       Special_categories: draft?.camapaignlevel?.Special_categories,
+      ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
+        ? { countries: draft.camapaignlevel.Special_categories_countries }
+        : {}),
       Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
       Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
       Status: draft?.camapaignlevel?.Status,
@@ -9481,6 +9587,55 @@ const CloneMultipleAdsetCampaignDrawer = ({
                     className={`${theme === "dark" ? "dark-theme-category" : "light-theme"
                       } green-border-select`}
                   />
+                </Form.Item>
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue }) => {
+                    const categories = getFieldValue("Special_categories") || [];
+                    // if "NONE" is selected, hide the countries field
+                    const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                    return showCountries ? (
+                      <Form.Item
+                        name="countries"
+                        label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select at least one country!",
+                          },
+                        ]}
+                        style={{ width: "140px", marginLeft: "1%" }}
+                        initialValue={["US"]} // default
+                      >
+                        <Select
+                          mode="multiple"
+                          allowClear
+                          options={[
+                            { value: "US", label: "United States" },
+                            { value: "GB", label: "United Kingdom" },
+                            { value: "AU", label: "Australia" },
+                            { value: "IN", label: "India" },
+                            { value: "AE", label: "United Arab Emirates" },
+                            { value: "CA", label: "Canada" },
+                            { value: "DE", label: "Germany" },
+                            { value: "FR", label: "France" },
+                            { value: "JP", label: "Japan" },
+                            { value: "CN", label: "China" },
+                            { value: "BR", label: "Brazil" },
+                            { value: "ZA", label: "South Africa" },
+                            { value: "RU", label: "Russia" },
+                            { value: "IT", label: "Italy" },
+                            { value: "ES", label: "Spain" },
+                            { value: "SG", label: "Singapore" },
+                            { value: "NZ", label: "New Zealand" },
+                            { value: "MX", label: "Mexico" },
+                          ]}
+                          dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                          className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                        />
+                      </Form.Item>
+                    ) : null;
+                  }}
                 </Form.Item>
                 <Form.Item
                   name="Bid_strategy"

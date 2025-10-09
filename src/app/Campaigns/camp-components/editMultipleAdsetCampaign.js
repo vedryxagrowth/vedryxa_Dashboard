@@ -4046,11 +4046,11 @@ const AdsetComponent = ({
                 }}
               >
                 <span
-                  // onClick={(e) => {
-                  //   e.stopPropagation();
-                  //   setViewSingleAd({}); 
-                  //   setActiveMediaIndex({});
-                  // }}
+                // onClick={(e) => {
+                //   e.stopPropagation();
+                //   setViewSingleAd({}); 
+                //   setActiveMediaIndex({});
+                // }}
                 >
                   AD LEVEL
                 </span>
@@ -6068,7 +6068,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       }
     });
 
-    return `Adset ${highestNumber + 1}`;
+    return `ADSET ${highestNumber + 1}`;
   };
 
   // Helper function to get default adset data
@@ -6110,8 +6110,9 @@ const EditMultipleAdsetCampaignDrawer = ({
   // For adding a new adset
   const addAdset = () => {
     const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
+    const newUUID = uuidv4();
     const newAdset = {
-      id: uuidv4(),
+      id: newUUID,
       AdsetPanelName: newAdsetName,
       AdsetName: "", // Add default values for the new adset
       optimization_goal: "OFFSITE_CONVERSIONS",
@@ -6134,6 +6135,14 @@ const EditMultipleAdsetCampaignDrawer = ({
       MediaContent: [], // Default MediaContent as empty array
     };
     setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
+    setAddLevelData((prev) => ({
+      ...prev,
+      [newUUID]: [],
+    }));
+    setNewAddLevelData((prev) => ({
+      ...prev,
+      [newUUID]: [],
+    }));
 
     // Add the new adset to the state
     // setAdsets(prevAdsets => {
@@ -6310,12 +6319,91 @@ const EditMultipleAdsetCampaignDrawer = ({
   //     });
   // }, [adsets]);
 
+  // const cloneAdset = (adsetId) => {
+  //   const adsetIndex = adsets.findIndex((ad) => ad.id === adsetId);
+  //   if (adsetIndex === -1) return;
+
+  //   const originalAdset = adsets[adsetIndex];
+  //   const newId = uuidv4();
+
+  //   const baseName = originalAdset.AdsetPanelName;
+  //   const copyCount = adsets.filter((ad) =>
+  //     ad.AdsetPanelName.startsWith(baseName)
+  //   ).length;
+  //   const newPanelName =
+  //     copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
+
+  //   const { Adsetid, ...rest } = originalAdset;
+
+  //   const clonedAdset = {
+  //     ...rest,
+  //     id: newId,
+  //     AdsetPanelName: newPanelName,
+  //   };
+
+  //   const currentFormAdsets = form.getFieldValue("adsets") || [];
+
+  //   // ✅ Match by UUID not index!
+  //   const formIndex = currentFormAdsets.findIndex(
+  //     (_, i) => adsets[i]?.id === adsetId
+  //   );
+  //   const clonedFormData = { ...currentFormAdsets[formIndex] };
+
+  //   // ✅ Add `_Copy` to AdsetName and AddName if present
+  //   if (clonedFormData.AdsetName) {
+  //     clonedFormData.AdsetName = `${clonedFormData.AdsetName}_Copy`;
+  //   }
+  //   if (clonedFormData.AddName) {
+  //     clonedFormData.AddName = `${clonedFormData.AddName}_Copy`;
+  //   }
+
+  //   const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
+  //   const updatedAdsets = [...adsets, clonedAdset];
+
+  //   // ✅ Set both states
+  //   setAdsets(updatedAdsets);
+  //   form.setFieldsValue({ adsets: updatedFormAdsets });
+
+  //   // ✅ Clone media/file states by UUID
+  //   const cloneFiles = (prev, setter) => {
+  //     setter((old) => ({
+  //       ...old,
+  //       [newId]: (old[adsetId] || []).map(({ Addid, ...rest }) => rest), // remove Addid
+  //     }));
+  //   };
+
+  //   cloneFiles(selectedFiles, setSelectedFiles);
+  //   cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
+  //   cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
+
+  //   setAddLevelData((prev) => ({
+  //     ...prev,
+  //     [newId]: prev[adsetId] ? [...prev[adsetId]] : []}));
+
+  //   setNewAddLevelData((prev) => ({
+  //     ...prev,
+  //     [newId]: prev[adsetId] ? [...prev[adsetId]] : []}));
+
+  //   // ✅ Clone selectedPositions
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [newId]: [...(prev[adsetId] || [])],
+  //   }));
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [newId]: [...(prev[adsetId] || [])],
+  //   }));
+
+  //   // ✅ Open the last panel (the newly cloned one)
+  //   setActiveKey([`${updatedAdsets.length - 1}`]);
+  // };
+
   const cloneAdset = (adsetId) => {
     const adsetIndex = adsets.findIndex((ad) => ad.id === adsetId);
     if (adsetIndex === -1) return;
 
     const originalAdset = adsets[adsetIndex];
-    const newId = uuidv4();
+    const newId = uuidv4(); // ✅ new unique id every time
 
     const baseName = originalAdset.AdsetPanelName;
     const copyCount = adsets.filter((ad) =>
@@ -6324,21 +6412,27 @@ const EditMultipleAdsetCampaignDrawer = ({
     const newPanelName =
       copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
 
+    // ✅ remove Adsetid (FB id) and Addid
+    const { Adsetid, Addid, ...rest } = originalAdset;
+
     const clonedAdset = {
-      ...originalAdset,
+      ...rest,
       id: newId,
       AdsetPanelName: newPanelName,
     };
 
     const currentFormAdsets = form.getFieldValue("adsets") || [];
 
-    // ✅ Match by UUID not index!
+    // ✅ Match by UUID not index
     const formIndex = currentFormAdsets.findIndex(
       (_, i) => adsets[i]?.id === adsetId
     );
     const clonedFormData = { ...currentFormAdsets[formIndex] };
 
-    // ✅ Add `_Copy` to AdsetName and AddName if present
+    // ✅ Assign the new unique id to the cloned form entry
+    clonedFormData.id = newId;
+
+    // ✅ Add `_Copy` suffixes if present
     if (clonedFormData.AdsetName) {
       clonedFormData.AdsetName = `${clonedFormData.AdsetName}_Copy`;
     }
@@ -6349,20 +6443,48 @@ const EditMultipleAdsetCampaignDrawer = ({
     const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
     const updatedAdsets = [...adsets, clonedAdset];
 
-    // ✅ Set both states
+    // ✅ Update both states
     setAdsets(updatedAdsets);
     form.setFieldsValue({ adsets: updatedFormAdsets });
 
-    // ✅ Clone media/file states by UUID
+    // ✅ Clone media/file states by UUID (remove Addid)
     const cloneFiles = (prev, setter) => {
-      setter((old) => ({ ...old, [newId]: [...(old[adsetId] || [])] }));
+      setter((old) => ({
+        ...old,
+        [newId]: (old[adsetId] || []).map(({ Addid, ...rest }) => rest),
+      }));
     };
 
     cloneFiles(selectedFiles, setSelectedFiles);
     cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
     cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
 
-    // ✅ Clone selectedPositions
+    // ✅ Clone AddLevelData with newId
+    // setAddLevelData((prev) => ({
+    //   ...prev,
+    //   [newId]: prev[adsetId] ? [...prev[adsetId]] : [],
+    // }));
+
+    // setNewAddLevelData((prev) => ({
+    //   ...prev,
+    //   [newId]: prev[adsetId] ? [...prev[adsetId]] : [],
+    // }));
+
+    setAddLevelData((prev) => ({
+      ...prev,
+      [newId]: prev[adsetId]
+        ? prev[adsetId].map(({ Addid, Ad_Status, ...rest }) => rest)
+        : [],
+    }));
+
+    setNewAddLevelData((prev) => ({
+      ...prev,
+      [newId]: prev[adsetId]
+        ? prev[adsetId].map(({ Addid, Ad_Status, ...rest }) => rest)
+        : [],
+    }));
+
+    // ✅ Clone positions & publishers
     setSelectedPositions((prev) => ({
       ...prev,
       [newId]: [...(prev[adsetId] || [])],
@@ -6372,9 +6494,10 @@ const EditMultipleAdsetCampaignDrawer = ({
       [newId]: [...(prev[adsetId] || [])],
     }));
 
-    // ✅ Open the last panel (the newly cloned one)
+    // ✅ Expand the cloned panel
     setActiveKey([`${updatedAdsets.length - 1}`]);
   };
+
 
   const removeAdset = (index, adsetid) => {
     // Step 1: Get current form values safely
@@ -7530,6 +7653,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     //       : {}),
     //   },
     // };
+    let send_re_launch_status = false;
     let number = 1;
     let AllAdsetsData = {};
     AllAdsetsData["identifier"] = fullCampaignData.identifier;
@@ -7538,10 +7662,11 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["Approval"] = fullCampaignData.Approval;
     AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus;
     AllAdsetsData["Category"] = fullCampaignData.Category;
-    if(fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
-    if(fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
+    if (fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
+    if (fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
+
       AllAdsetsData["camapaignlevel"]["campaignid"] =
         fullCampaignData.camapaignlevel.campaignid;
       AllAdsetsData["camapaignlevel"]["createdDate"] =
@@ -7560,6 +7685,10 @@ const EditMultipleAdsetCampaignDrawer = ({
       } else {
         AllAdsetsData["camapaignlevel"]["Name"] = values.Name;
         AllAdsetsData["camapaignlevel"]["re_lunch_campaign_name"] = true;
+        send_re_launch_status = true;
+      }
+      if (values.countries && values.countries.length > 0) {
+        AllAdsetsData["camapaignlevel"]["Special_categories_countries"] = values.countries;
       }
       if (
         JSON.stringify(fullCampaignData.camapaignlevel.Special_categories) ===
@@ -7571,6 +7700,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         AllAdsetsData["camapaignlevel"]["Special_categories"] =
           values.Special_categories;
         AllAdsetsData["camapaignlevel"]["re_lunch_special_categories"] = true;
+        send_re_launch_status = true;
       }
       if (
         JSON.stringify(fullCampaignData.camapaignlevel.Bid_strategy) ===
@@ -7581,6 +7711,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       } else {
         AllAdsetsData["camapaignlevel"]["Bid_strategy"] = values.Bid_strategy;
         AllAdsetsData["camapaignlevel"]["re_lunch_bid_strategy"] = true;
+        send_re_launch_status = true;
       }
       if (
         fullCampaignData.camapaignlevel.Daily_amount ===
@@ -7596,6 +7727,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           AllAdsetsData["camapaignlevel"]["Daily_amount"] =
             parseFloat(values.Daily_amount) * 100;
           AllAdsetsData["camapaignlevel"]["re_lunch_daily_amount"] = true;
+          send_re_launch_status = true;
         } else if (
           fullCampaignData.camapaignlevel.Daily_amount > 0 &&
           parseFloat(values.Daily_amount) * 100 === 0
@@ -7605,6 +7737,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           AllAdsetsData["camapaignlevel"][
             "re_lunch_daily_amount_in_adsets"
           ] = true;
+          send_re_launch_status = true;
         } else if (
           fullCampaignData.camapaignlevel.Daily_amount === 0 &&
           parseFloat(values.Daily_amount) * 100 > 0
@@ -7615,6 +7748,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           AllAdsetsData["camapaignlevel"][
             "re_lunch_daily_amount_in_campaign"
           ] = true;
+          send_re_launch_status = true;
         }
       }
     } else {
@@ -7624,12 +7758,15 @@ const EditMultipleAdsetCampaignDrawer = ({
         Name: values.Name,
         Objectives: values.Objectives,
         Special_categories: values.Special_categories,
+        ...(Array.isArray(values?.Special_categories)
+          ? { Special_categories_countries: values.countries }
+          : {}),
         Bid_strategy: values.Bid_strategy,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
         access_token: imagehash.token,
         createdDate: fullCampaignData.camapaignlevel.createdDate,
-        EditedDate : moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
+        EditedDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         ...(fullCampaignData.camapaignlevel.campaignid
           ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
           : {}),
@@ -7932,6 +8069,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             } else {
               newUpdatedAd["message"] = item.message;
               newUpdatedAd["re_lunch"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             }
             if (
@@ -7942,6 +8080,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             } else {
               newUpdatedAd["headline"] = item.headline;
               newUpdatedAd["re_lunch"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             }
             if (
@@ -7952,6 +8091,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             } else {
               newUpdatedAd["Description"] = item.Description;
               newUpdatedAd["re_lunch"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             }
             if (
@@ -7962,6 +8102,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             } else {
               newUpdatedAd["Caption"] = item.Caption;
               newUpdatedAd["re_lunch"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             }
             if (
@@ -7972,6 +8113,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             } else {
               newUpdatedAd["Website_URL"] = item.Website_URL;
               newUpdatedAd["re_lunch"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             }
             if (
@@ -7982,6 +8124,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             } else {
               newUpdatedAd["AddName"] = item.AddName;
               newUpdatedAd["re_lunch_addname"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             }
             if (
@@ -8006,12 +8149,14 @@ const EditMultipleAdsetCampaignDrawer = ({
                   newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
                   newUpdatedAd["filename"] = updatedFilesDeatils.filename;
                   newUpdatedAd["re_lunch"] = true;
+                  send_re_launch_status = true;
                 } else if (updatedFilesDeatils.videoid) {
                   newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
                   newUpdatedAd["thambnailurl"] =
                     updatedFilesDeatils.thambnailurl;
                   newUpdatedAd["filename"] = updatedFilesDeatils.filename;
                   newUpdatedAd["re_lunch"] = true;
+                  send_re_launch_status = true;
                 }
               }
             }
@@ -8019,6 +8164,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           } else {
             const fileData = await getFilenameDeatials(item.filename);
             re_lunch = true;
+            send_re_launch_status = true;
             const newAd = {
               id: item.id,
               page_id: item.page_id,
@@ -8092,7 +8238,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (findMatchingAdset.Adsetid) {
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
-        }else{
+        } else {
           AdsetsData["id"] = formValuesObject.id;
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
@@ -8100,6 +8246,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         } else {
           AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
           AdsetsData["re_lunch_adset_name"] = true;
+          send_re_launch_status = true;
         }
         if (findMatchingAdset.Status) {
           AdsetsData["Status"] = findMatchingAdset.Status;
@@ -8126,6 +8273,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         ) {
           AdsetsData["AdsetName"] = formValuesObject.AdsetName;
           AdsetsData["re_lunch_adsetname"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["AdsetName"] = formValuesObject.AdsetName;
@@ -8139,6 +8287,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             ? parseFloat(formValuesObject.bid_amount) * 100
             : 0;
           AdsetsData["re_lunch_bid_amount"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["bid_amount"] = formValuesObject.bid_amount
@@ -8157,6 +8306,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             ? parseFloat(formValuesObject.DailyAdd_amount) * 100
             : "";
           AdsetsData["re_lunch_daily_amount"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["Daily_amount"] = formValuesObject.DailyAdd_amount
@@ -8187,6 +8337,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         ) {
           AdsetsData["countries"] = formValuesObject.countries;
           AdsetsData["re_lunch_targeting"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["countries"] = formValuesObject.countries;
@@ -8198,6 +8349,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         ) {
           AdsetsData["Min_Age"] = formValuesObject.Min_Age;
           AdsetsData["re_lunch_targeting"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["Min_Age"] = formValuesObject.Min_Age;
@@ -8209,6 +8361,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         ) {
           AdsetsData["Max_Age"] = formValuesObject.Max_Age;
           AdsetsData["re_lunch_targeting"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["Max_Age"] = formValuesObject.Max_Age;
@@ -8221,6 +8374,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         ) {
           AdsetsData["locales"] = formValuesObject.Language;
           AdsetsData["re_lunch_targeting"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["locales"] = formValuesObject.Language;
@@ -8232,6 +8386,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         ) {
           AdsetsData["Gender"] = parseInt(formValuesObject.Gender);
           AdsetsData["re_lunch_targeting"] = true;
+          send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["Gender"] = parseInt(formValuesObject.Gender);
@@ -8252,6 +8407,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           ) {
             AdsetsData["placements"] = formValuesObject.placements;
             AdsetsData["re_lunch_targeting"] = true;
+            send_re_launch_status = true;
             re_lunch = true;
           } else if (
             findMatchingAdset.placements === "Advance" &&
@@ -8290,6 +8446,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             AdsetsData["publisher_platforms"] = formValuesObject.platforms;
 
             AdsetsData["re_lunch_targeting"] = true;
+            send_re_launch_status = true;
             re_lunch = true;
           } else if (
             findMatchingAdset.placements === "manual" &&
@@ -8303,6 +8460,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             ) {
               AdsetsData["publisher_platforms"] = formValuesObject.platforms;
               AdsetsData["re_lunch_targeting"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             } else {
               AdsetsData["publisher_platforms"] = formValuesObject.platforms;
@@ -8322,6 +8480,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   "Facebook"
                 ) || [];
               AdsetsData["re_lunch_targeting"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             } else {
               AdsetsData["Facebook_positions"] =
@@ -8345,6 +8504,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   "Instagram"
                 ) || [];
               AdsetsData["re_lunch_targeting"] = true;
+              send_re_launch_status = true;
             } else {
               AdsetsData["instagram_positions"] =
                 extractValuesByPartialLabel(
@@ -8367,6 +8527,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   "Audience"
                 ) || [];
               AdsetsData["re_lunch_targeting"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             } else {
               AdsetsData["audience_network_positions"] =
@@ -8390,6 +8551,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   "Messenger"
                 ) || [];
               AdsetsData["re_lunch_targeting"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             } else {
               AdsetsData["messenger_positions"] =
@@ -8413,6 +8575,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               AdsetsData["device_platforms"] =
                 formValuesObject.device_platforms;
               AdsetsData["re_lunch_targeting"] = true;
+              send_re_launch_status = true;
               re_lunch = true;
             } else {
               AdsetsData["device_platforms"] =
@@ -8568,7 +8731,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       };
       number++;
     }
-    return AllAdsetsData;
+    return { ...AllAdsetsData, ...(fullCampaignData?.fbstatus === "Live" ? { re_launch: fullCampaignData.re_launch ? fullCampaignData.re_launch : send_re_launch_status } : {}) };
   };
 
   const MultipleAdsetsDraftFetching = async (values) => {
@@ -9451,6 +9614,9 @@ const EditMultipleAdsetCampaignDrawer = ({
       Name: draft?.camapaignlevel?.Name,
       Objectives: draft?.camapaignlevel?.Objectives,
       Special_categories: draft?.camapaignlevel?.Special_categories,
+      ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
+        ? { countries: draft.camapaignlevel.Special_categories_countries }
+        : {}),
       Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
       Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
       Status: draft?.camapaignlevel?.Status,
@@ -9860,6 +10026,110 @@ const EditMultipleAdsetCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
+                {((fullCampaignData?.camapaignlevel?.campaignid) && (fullCampaignData?.camapaignlevel?.Special_categories_countries)) && (
+                  <Form.Item shouldUpdate noStyle>
+                    {({ getFieldValue }) => {
+                      const categories = getFieldValue("Special_categories") || [];
+                      // if "NONE" is selected, hide the countries field
+                      const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                      return showCountries ? (
+                        <Form.Item
+                          name="countries"
+                          label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please select at least one country!",
+                            },
+                          ]}
+                          style={{ width: "140px", marginLeft: "1%" }}
+                          initialValue={["US"]} // default
+                        >
+                          <Select
+                            mode="multiple"
+                            allowClear
+                            disabled={fullCampaignData?.camapaignlevel?.campaignid}
+                            options={[
+                              { value: "US", label: "United States" },
+                              { value: "GB", label: "United Kingdom" },
+                              { value: "AU", label: "Australia" },
+                              { value: "IN", label: "India" },
+                              { value: "AE", label: "United Arab Emirates" },
+                              { value: "CA", label: "Canada" },
+                              { value: "DE", label: "Germany" },
+                              { value: "FR", label: "France" },
+                              { value: "JP", label: "Japan" },
+                              { value: "CN", label: "China" },
+                              { value: "BR", label: "Brazil" },
+                              { value: "ZA", label: "South Africa" },
+                              { value: "RU", label: "Russia" },
+                              { value: "IT", label: "Italy" },
+                              { value: "ES", label: "Spain" },
+                              { value: "SG", label: "Singapore" },
+                              { value: "NZ", label: "New Zealand" },
+                              { value: "MX", label: "Mexico" },
+                            ]}
+                            dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                          />
+                        </Form.Item>
+                      ) : null;
+                    }}
+                  </Form.Item>
+                )}
+                {!(fullCampaignData?.camapaignlevel?.campaignid) && (
+                  <Form.Item shouldUpdate noStyle>
+                    {({ getFieldValue }) => {
+                      const categories = getFieldValue("Special_categories") || [];
+                      // if "NONE" is selected, hide the countries field
+                      const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                      return showCountries ? (
+                        <Form.Item
+                          name="countries"
+                          label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please select at least one country!",
+                            },
+                          ]}
+                          style={{ width: "140px", marginLeft: "1%" }}
+                          initialValue={["US"]} // default
+                        >
+                          <Select
+                            mode="multiple"
+                            allowClear
+                            disabled={fullCampaignData?.camapaignlevel?.campaignid}
+                            options={[
+                              { value: "US", label: "United States" },
+                              { value: "GB", label: "United Kingdom" },
+                              { value: "AU", label: "Australia" },
+                              { value: "IN", label: "India" },
+                              { value: "AE", label: "United Arab Emirates" },
+                              { value: "CA", label: "Canada" },
+                              { value: "DE", label: "Germany" },
+                              { value: "FR", label: "France" },
+                              { value: "JP", label: "Japan" },
+                              { value: "CN", label: "China" },
+                              { value: "BR", label: "Brazil" },
+                              { value: "ZA", label: "South Africa" },
+                              { value: "RU", label: "Russia" },
+                              { value: "IT", label: "Italy" },
+                              { value: "ES", label: "Spain" },
+                              { value: "SG", label: "Singapore" },
+                              { value: "NZ", label: "New Zealand" },
+                              { value: "MX", label: "Mexico" },
+                            ]}
+                            dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                          />
+                        </Form.Item>
+                      ) : null;
+                    }}
+                  </Form.Item>
+                )}
                 <Form.Item
                   name="Bid_strategy"
                   label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}

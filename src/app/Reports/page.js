@@ -4167,14 +4167,17 @@ const MyTablePage = () => {
                 const isGroupRow = !!params?.node?.groupData;
                 let campaignId = null;
                 let initialAdsetId = null;
+                let accountNumber = null;
 
                 if (isGroupRow) {
                     const children = params?.node?.allLeafChildren || [];
                     campaignId = children[0]?.data?.campaignid;
                     initialAdsetId = children[0]?.data?.adsetid;
+                    accountNumber = children[0]?.data?.accountNumber;
                 } else {
                     campaignId = params?.data?.campaignid;
                     initialAdsetId = params?.data?.adsetid;
+                    accountNumber = params?.data?.accountNumber;
                 }
 
                 const campaignname = isGroupRow
@@ -4237,7 +4240,7 @@ const MyTablePage = () => {
 
                     const payload = {
                         adsetId,
-                        accountNumber: newaccount,
+                        accountNumber: accountNumber,
                         campaignname,
                         updatedby: userdetails?.email
                     };
@@ -6828,14 +6831,17 @@ const MyTablePage = () => {
                 const isGroupRow = !!params?.node?.groupData;
                 let campaignId = null;
                 let initialAdsetId = null;
+                let accountNumber = null;
 
                 if (isGroupRow) {
                     const children = params?.node?.allLeafChildren || [];
                     campaignId = children[0]?.data?.campaignid;
                     initialAdsetId = children[0]?.data?.adsetid;
+                    accountNumber = children[0]?.data?.accountNumber;
                 } else {
                     campaignId = params?.data?.campaignid;
                     initialAdsetId = params?.data?.adsetid;
+                    accountNumber = params?.data?.accountNumber;
                 }
 
                 const campaignname = isGroupRow
@@ -6896,9 +6902,11 @@ const MyTablePage = () => {
                     setIsModalVisible(false);
                     const campaignname = groupedData?.[0]?.campaignname;
 
+                    console.log("Submitting budget change:", groupedData);
+
                     const payload = {
                         adsetId,
-                        accountNumber: newaccount,
+                        accountNumber: accountNumber,
                         campaignname,
                         updatedby: userdetails?.email
                     };
