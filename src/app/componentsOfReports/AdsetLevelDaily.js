@@ -1368,6 +1368,8 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                     const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
+                    const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
+                    const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
 
                     // console.log(eachData.campaign_name, "campaign_name");
                     return (
@@ -1401,7 +1403,8 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                             adid: "",
                             adname: "",
                             actions: '...',
-                            from: "",
+                            from: campaign_date?.start ? campaign_date?.start : "",
+                            to: campaign_date?.end ? campaign_date?.end : "",
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
@@ -1409,7 +1412,8 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                             fbCron: eachData.fbCron,
                             revenueCron: eachData.revenueCron,
                             cronStatus: eachData.cronStatus,
-                            accountStatus: eachData.accountStatus
+                            accountStatus: eachData.accountStatus,
+                            category: category?.category || "",
                         }
                     )
                 }) : null;

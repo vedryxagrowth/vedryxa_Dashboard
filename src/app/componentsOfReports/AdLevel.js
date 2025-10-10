@@ -1591,6 +1591,7 @@ const pinnedUI  = (overridePinned  !== undefined) ? overridePinned : getPinStatu
                     const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
                     // console.log(revenueData, "revenueData");
                     const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
+                    const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
                     const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
@@ -1630,6 +1631,7 @@ const pinnedUI  = (overridePinned  !== undefined) ? overridePinned : getPinStatu
                             M_tq: "",
                             D_tq: "",
                             keyword: eachData.keyword,
+                            category: category?.category || "",
                         }
                     )
                 })

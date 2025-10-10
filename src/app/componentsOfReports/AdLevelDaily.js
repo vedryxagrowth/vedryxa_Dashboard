@@ -1803,6 +1803,7 @@ const handlePauseOk = async () => {
                     const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
+                    const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
 
                     // console.log(eachData.campaign_name, "campaign_name");
                     return (
@@ -1846,6 +1847,7 @@ const handlePauseOk = async () => {
                             cronStatus: eachData.cronStatus,
                             accountStatus: eachData.accountStatus,
                             keyword: eachData.keyword || '',
+                            category: category?.category || "",
                         }
                     )
                 }) : null;
