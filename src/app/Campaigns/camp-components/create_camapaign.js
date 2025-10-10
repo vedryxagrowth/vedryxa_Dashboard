@@ -558,6 +558,8 @@ const AccountForm = ({
   index,
   allAccounts,
   selectedIndex,
+  defaultUrlData,
+  setNewDefaultURLBuilder
 }) => {
 
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -565,11 +567,13 @@ const AccountForm = ({
   const [websiteURL, setWebsiteURL] = useState("");
   const [caption, setCaption] = useState("");
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
+  console.log("defaultUrlData in account form", defaultUrlData);
 
 
   const onReturnUrl = (text) => {
     // console.log(text)
     setWebsiteURL(text)
+    setNewDefaultURLBuilder(text);
     setIsModalVisibleForURLBuilder(false);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
@@ -604,7 +608,7 @@ const AccountForm = ({
 
   const onClickEdit = (index) => {
     setIsModalVisibleForURLBuilder(true);
-    setDefaultURLBuilder(form.getFieldValue(["adsets", index, account, "Website_URL"]));
+    setDefaultURLBuilder(form.getFieldValue(["adsets", index, account, "Website_URL"]) ? form.getFieldValue(["adsets", index, account, "Website_URL"]) : defaultUrlData);
   };
 
   const onClickSetToAllAccounts = () => {
@@ -734,28 +738,31 @@ const AccountForm = ({
               onClick={() => onClickEdit(index)}
             />
 
-            <Popconfirm
-              overlayInnerStyle={{
-                backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
-                color: theme === "dark" ? "#fff" : "#333",
-              }}
-              description={
-                <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
-                  Are you sure to add website url and display link all accounts?
-                </div>
-              }
-              okText={
-                <div onClick={onClickSetToAllAccounts}>
-                  Yes
-                </div>
-              }
-              cancelText="No"
-            >
-              <Button style={{
-                border: "1px solid #91C25F", color: "#000",              // keep text color fixed
-                backgroundColor: "transparent", marginLeft: "50px"
-              }}>Set to All Accounts</Button>
-            </Popconfirm>
+            {allAccounts.length > 1 && (
+              <Popconfirm
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                  color: theme === "dark" ? "#fff" : "#333",
+                }}
+                description={
+                  <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
+                    Are you sure to add website url and display link all accounts?
+                  </div>
+                }
+                okText={
+                  <div onClick={onClickSetToAllAccounts}>
+                    Yes
+                  </div>
+                }
+                cancelText="No"
+              >
+
+                <Button style={{
+                  border: "1px solid #91C25F", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                  backgroundColor: "transparent", marginLeft: "50px"
+                }}>Set to All Accounts</Button>
+              </Popconfirm>
+            )}
             {/* <div style={style}> */}
             {/* <Popconfirm title="Thanks for using antd. Have a nice day !" open>
                 <Button type="primary">Set to All Accounts</Button>
@@ -795,6 +802,250 @@ const AccountForm = ({
     </div>
   );
 };
+
+const AdPreviewPerAccount = ({
+  account,
+  adset,
+  selectedFiles,
+  form,
+  theme,
+  editedImages,
+  imagehash,
+}) => {
+  const adFiles = selectedFiles[adset.id] || [];
+
+  // Get form values for this adset and account
+  const websiteURL = Form.useWatch(["adsets", adset.index, account, "Website_URL"], form) || "";
+  const caption = Form.useWatch(["adsets", adset.index, account, "Caption"], form) || "";
+  const headline = Form.useWatch(["adsets", adset.index, "headline"], form) || "";
+  const description = Form.useWatch(["adsets", adset.index, "Description"], form) || "";
+  const primaryText = Form.useWatch(["adsets", adset.index, "message"], form) || "";
+  const addName = Form.useWatch(["adsets", adset.index, "AddName"], form) || "";
+
+  if (adFiles.length === 0) return null;
+
+  return (
+    <div>
+      {adFiles.map((file, i) => (
+        <Badge
+          key={i}
+          style={{
+            backgroundColor: "#52c41a",
+            borderRadius: "50%",
+            position: "absolute",
+            top: "5px",
+            right: "5px",
+            zIndex: 10,
+            cursor: "pointer",
+          }}
+          offset={[5, 5]}
+        >
+          <div className="container-ad-preview">
+            <div
+              className="ad-preview"
+              style={{
+                width: "350px",
+                backgroundColor: theme === "dark" ? "#4f4f4d" : "#fff",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                marginBottom: "16px",
+              }}
+            >
+              <div className="ad-heading" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {file?.type?.startsWith("image/") ? (
+                    <img
+                      src={
+                        editedImages[file?.name]
+                          ? editedImages[file?.name]
+                          : file?.originFileObj
+                            ? URL.createObjectURL(file.originFileObj)
+                            : file?.url
+                      }
+                      alt="preview"
+                      width="40"
+                      height="40"
+                      style={{ objectFit: "cover", borderRadius: "4px" }}
+                    />
+                  ) : (
+                    <video
+                      src={
+                        file?.originFileObj
+                          ? URL.createObjectURL(file.originFileObj)
+                          : file?.url
+                      }
+                      width="40"
+                      height="30"
+                      style={{ objectFit: "cover" }}
+                      muted
+                    />
+                  )}
+                  <div
+                    style={{
+                      color: theme === "dark" ? "#fff" : "#000",
+                      fontWeight: "500",
+                    }}
+                  >
+                    {addName}
+                    <div style={{ opacity: 0.7, fontSize: "12px" }}>
+                      <GlobalOutlined /> {imagehash?.pageName || "Page Name"}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <MoreOutlined style={{ fontSize: "20px", opacity: 0.6 }} />
+                </div>
+              </div>
+
+              <div
+                className="ad-desc"
+                style={{
+                  wordWrap: "break-word",
+                  whiteSpace: "normal",
+                  color: theme === "dark" ? "#fff" : "#000",
+                  padding: "8px 12px",
+                }}
+              >
+                {primaryText}
+              </div>
+
+              <div
+                className="ad-image"
+                style={{
+                  width: "100%",
+                  height: "300px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {file?.type?.startsWith("image/") ? (
+                  <img
+                    src={
+                      editedImages[file?.name]
+                        ? editedImages[file?.name]
+                        : file?.originFileObj
+                          ? URL.createObjectURL(file.originFileObj)
+                          : file?.url
+                    }
+                    alt="ad"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      objectFit: "contain",
+                    }}
+                  />
+                ) : (
+                  <video
+                    controls
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      objectFit: "contain",
+                    }}
+                  >
+                    <source
+                      src={
+                        file?.originFileObj
+                          ? URL.createObjectURL(file.originFileObj)
+                          : file?.url
+                      }
+                    />
+                  </video>
+                )}
+              </div>
+
+              <div
+                className="ad-cta"
+                style={{
+                  padding: "8px 12px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: theme === "dark" ? "#fff" : "#000",
+                    }}
+                  >
+                    {caption}
+                  </div>
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      color: theme === "dark" ? "#fff" : "#000",
+                    }}
+                  >
+                    {headline}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: theme === "dark" ? "#fff" : "#000",
+                    }}
+                  >
+                    {description}
+                  </div>
+                </div>
+                <Button
+                  type="primary"
+                  style={{
+                    backgroundColor: "#91C25F",
+                    borderColor: "#91C25F",
+                    color: "#000",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Learn More
+                </Button>
+              </div>
+
+              {websiteURL && (
+                <a
+                  href={websiteURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#007bff",
+                    padding: "6px 12px",
+                    display: "block",
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {websiteURL}
+                </a>
+              )}
+
+              <div
+                className="icons"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  padding: "8px 0",
+                  borderTop: "1px solid #ccc",
+                }}
+              >
+                <div style={{ color: theme === "dark" ? "#fff" : "#000" }}>
+                  <LikeOutlined /> Like
+                </div>
+                <div style={{ color: theme === "dark" ? "#fff" : "#000" }}>
+                  <CommentOutlined /> Comment
+                </div>
+                <div style={{ color: theme === "dark" ? "#fff" : "#000" }}>
+                  <ShareAltOutlined /> Share
+                </div>
+              </div>
+            </div>
+          </div>
+        </Badge>
+      ))}
+    </div>
+  );
+};
+
 const AdsetComponent = ({
   index,
   adset,
@@ -859,11 +1110,11 @@ const AdsetComponent = ({
   console.log(selectedPublishers, "selectedPublishers in adset component");
   console.log(selectedPositions?.[adset.id]);
   console.log(adset, "adset in adset component");
+  console.log(defaultUrlData, "defaultUrlData in adset component");
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
     setWebsiteURL(text);
-    setDefaultUrlData(text);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
     if (network === "FB_Mnet" || network === "FB_DomainActive") {
@@ -1252,6 +1503,10 @@ const AdsetComponent = ({
       ]);
     }
   }, [adset?.DailyAdd_amount]);
+
+  useEffect(() => {
+    setSelectedIndex(String(accountis[0]));
+  }, [accountis]);
 
   //   useEffect(() => {
   //     if (!selectedPublishers?.[adset.id]) return;
@@ -2939,6 +3194,8 @@ const AdsetComponent = ({
                         selectedIndex={selectedIndex}
                         handleCancelForURLBuilder={handleCancelForURLBuilder}
                         getUrlBuilder={getUrlBuilder}
+                        defaultUrlData={defaultUrlData}
+                        setNewDefaultURLBuilder={setDefaultUrlData}
                       />
                     </div>
                   ))}
@@ -2956,7 +3213,7 @@ const AdsetComponent = ({
                             </Form.Item> */}
               </div>
 
-              <div style={{ flex: "30%" }}>
+              {/* <div style={{ flex: "30%" }}>
                 {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0
                   ? selectedFiles[adset.id].map((file, i) => (
                     <Badge
@@ -3255,6 +3512,22 @@ const AdsetComponent = ({
                     </Badge>
                   ))
                   : null}
+              </div> */}
+              <div style={{ flex: "30%" }}>
+                {accountis.map((account) =>
+                  selectedIndex === account ? (
+                    <AdPreviewPerAccount
+                      key={account}
+                      account={account}
+                      adset={{ ...adset, index }}
+                      selectedFiles={selectedFiles}
+                      form={form}
+                      theme={theme}
+                      editedImages={editedImages}
+                      imagehash={imagehash}
+                    />
+                  ) : null
+                )}
               </div>
             </div>
           </Panel>
@@ -3429,6 +3702,7 @@ const CreateCampaignDrawer = ({
   const { confirm } = Modal
 
   console.log(imageHashArray);
+  console.log(defaultUrlData, "defaultUrlData in CreateCampaignDrawer");
 
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
   console.log(page_id_list, "page_id_list in CreateCampaignDrawer");
@@ -4720,6 +4994,7 @@ const CreateCampaignDrawer = ({
   };
   useEffect(() => {
     setAccountNumber(accountis);
+    setDefaultUrlData("");
   }, [accountis]);
 
   useEffect(() => {
@@ -6214,6 +6489,9 @@ const CreateCampaignDrawer = ({
           Name: values.Name || "",
           Objectives: values.Objectives || "",
           Special_categories: values.Special_categories || "NONE",
+          ...(Array.isArray(values?.Special_categories)
+            ? { Special_categories_countries: values.countries }
+            : {}),
           Bid_strategy: values.Bid_strategy,
           Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
           Status: values.Status,
@@ -6243,6 +6521,7 @@ const CreateCampaignDrawer = ({
           adsets[i].id
         );
         console.log("Image Hash Array:", imageHashArray);
+        const adsetAccountData = values.adsets[i][account] || {};
         const addLevelData =
           imageHashArray && imageHashArray.length > 0
             ? {
@@ -6254,8 +6533,8 @@ const CreateCampaignDrawer = ({
               message: values.adsets[i].message,
               headline: values.adsets[i].headline,
               Description: values.adsets[i].Description,
-              Caption: values.adsets[i][account].Caption,
-              Website_URL: values.adsets[i][account].Website_URL,
+              Caption: adsetAccountData.Caption,
+              Website_URL: adsetAccountData.Website_URL,
             }
             : {
               AddName: `${values.adsets[i].AddName}` || "",
@@ -6264,8 +6543,8 @@ const CreateCampaignDrawer = ({
               message: values.adsets[i].message || "",
               headline: values.adsets[i].headline || "",
               Description: values.adsets[i].Description || "",
-              Caption: values.adsets[i][account].Caption,
-              Website_URL: values.adsets[i][account].Website_URL,
+              Caption: adsetAccountData.Caption || "",
+              Website_URL: adsetAccountData.Website_URL || "",
             };
         console.log("Add Level Data:", addLevelData);
         AdsetsData[`adsetlevel_${i + 1}`] = {
@@ -7101,6 +7380,9 @@ const CreateCampaignDrawer = ({
       Name: draft?.camapaignlevel?.Name,
       Objectives: draft?.camapaignlevel?.Objectives,
       Special_categories: draft?.camapaignlevel?.Special_categories,
+      ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
+        ? { countries: draft.camapaignlevel.Special_categories_countries }
+        : {}),
       Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
       Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
       Status: draft?.camapaignlevel?.Status,

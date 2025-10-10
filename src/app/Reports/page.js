@@ -1646,33 +1646,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -1699,7 +1746,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -1724,7 +1771,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -2521,33 +2568,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -2574,7 +2668,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -2599,7 +2693,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -4440,33 +4534,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4493,7 +4634,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -4518,7 +4659,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -5189,37 +5330,85 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-        },
+        }
+        ,
         from: {
             headerName: 'Start',
             field: 'from',
@@ -5242,7 +5431,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -5267,7 +5456,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -6099,33 +6288,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -6152,7 +6388,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -6177,7 +6413,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -7107,33 +7343,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -7160,7 +7443,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -7185,7 +7468,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -7734,33 +8017,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -7787,7 +8117,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -7812,7 +8142,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -8352,33 +8682,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -8405,7 +8782,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -8430,7 +8807,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -9266,33 +9643,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -9318,7 +9742,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -9343,7 +9767,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -9941,33 +10365,80 @@ const MyTablePage = () => {
         category: {
             headerName: 'Category',
             field: 'category',
-            sortable: true,
             minWidth: 110,
+            sortable: true,
             filter: 'agSetColumnFilter',
+
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
-                    console.log(account, "account");
-                    console.log(campaignName, "campaignName");
-                    console.log(commentsMap, "commentsMap");
-
-                    // if (commentsMap.has(campaignName)) {
-                    // const accountMap = commentsMap.get(campaignName);
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    console.log(campaign, "campaign");
                     return campaign?.category || null;
-                    // }
                 }
-                return '';
+
+                // ✅ For normal (leaf) rows
+                return params.data?.category || null;
             },
-            valueFormatter: (params) => {
-                return params.value ? params?.value : '';
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignname;
+                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    return campaign?.category || null;
+                }
+
+                // ✅ Include leaf rows in filtering
+                return params.data?.category || null;
             },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignname;
+                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const category = campaign?.category;
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = node.data?.category;
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Display formatting
+            valueFormatter: (params) => (params.value ? params.value : ''),
+
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
-                'hide-leaf-cell': (params) => !params.node.group,
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -9994,7 +10465,7 @@ const MyTablePage = () => {
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
-                return '';
+                return params.data?.from || null;
             },
             valueFormatter: (params) => {
                 return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
@@ -10019,7 +10490,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return '';
+                return params.data?.to || null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -11208,7 +11679,7 @@ const MyTablePage = () => {
                                 </div>
                                 <span style={{ textAlign: 'right', marginLeft: 10 }}>
                                     {account.status === 'Active'
-                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }}  className='black-icon-active-1'/>
+                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
                                         : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
                                 </span>
                             </div>
@@ -11759,7 +12230,7 @@ const MyTablePage = () => {
                                     .sort((a, b) => {
                                         const aActive = networksWithStatus.find(n => n.Network === a)?.Status === 'Active' ? 1 : 0;
                                         const bActive = networksWithStatus.find(n => n.Network === b)?.Status === 'Active' ? 1 : 0;
-                                        return bActive - aActive; 
+                                        return bActive - aActive;
                                     })
                                     .map(network => {
                                         const isActive = networksWithStatus.find(n => n.Network === network)?.Status === 'Active';
