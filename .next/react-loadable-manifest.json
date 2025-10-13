@@ -3,7 +3,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -11,7 +11,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -19,7 +19,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -27,7 +27,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -35,7 +35,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -43,7 +43,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -55,7 +55,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -63,7 +63,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -71,7 +71,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -79,7 +79,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -87,7 +87,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -95,7 +95,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/170.59cd91d73477d862.js"
     ]
   },
@@ -103,7 +103,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/7170.310abe74dec8329f.js"
     ]
   },
@@ -111,7 +111,7 @@
     "id": 170,
     "files": [
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/290.c829d73bad30df67.js",
+      "static/chunks/290.fb4b7d4cc47300c3.js",
       "static/chunks/7170.310abe74dec8329f.js"
     ]
   },
@@ -130,7 +130,7 @@
     "id": 16771,
     "files": [
       "static/chunks/7317.95472d1152d9c59e.js",
-      "static/chunks/6771.a83f26be4ad93746.js"
+      "static/chunks/6771.d594c2d42a19a4ed.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/add-newaccount": {
@@ -274,7 +274,7 @@
     "files": [
       "static/chunks/8110-ba448725de411535.js",
       "static/chunks/3292-3d5ed52563a1a5bd.js",
-      "static/chunks/5825.fac1bea3e894f6f7.js"
+      "static/chunks/5825.416496ec5b105002.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdsetLevelDaily": {
@@ -282,7 +282,7 @@
     "files": [
       "static/chunks/8110-ba448725de411535.js",
       "static/chunks/3292-3d5ed52563a1a5bd.js",
-      "static/chunks/9369.456ea226a6eed1da.js"
+      "static/chunks/9369.3b012f2a73e54750.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./CampaignLevelDaily": {
@@ -290,7 +290,7 @@
     "files": [
       "static/chunks/8110-ba448725de411535.js",
       "static/chunks/3292-3d5ed52563a1a5bd.js",
-      "static/chunks/1997.11e80f603aebf854.js"
+      "static/chunks/1997.2d7ec39d95323a95.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./SearchFilters": {
@@ -304,7 +304,7 @@
     "files": [
       "static/chunks/8110-ba448725de411535.js",
       "static/chunks/3292-3d5ed52563a1a5bd.js",
-      "static/chunks/4630.04f554c5ca9638c5.js"
+      "static/chunks/4630.fc19911d8d126645.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdsetLevel": {
@@ -312,7 +312,7 @@
     "files": [
       "static/chunks/8110-ba448725de411535.js",
       "static/chunks/3292-3d5ed52563a1a5bd.js",
-      "static/chunks/9941.8d7fb9a84ac88adc.js"
+      "static/chunks/9941.a2133ebe8d053eaa.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./CampaignLevel": {
@@ -320,7 +320,7 @@
     "files": [
       "static/chunks/8110-ba448725de411535.js",
       "static/chunks/3292-3d5ed52563a1a5bd.js",
-      "static/chunks/781.5aee9cd28c83c162.js"
+      "static/chunks/781.de3906bc9e34a6c3.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./SearchFilters": {

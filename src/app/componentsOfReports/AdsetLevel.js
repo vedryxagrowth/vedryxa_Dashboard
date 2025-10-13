@@ -1468,7 +1468,8 @@ const handlePinClick = async (currentPinStatus) => {
                   c => c.campaignname === eachData.campaign_name
                     && String(c.Account) === String(eachData.accountNumber) // ✅ per-account
                 );
-      
+                const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
+                const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
                 const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                 const spend = parseFloat(eachData.spend);
                 const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0
@@ -1478,13 +1479,11 @@ const handlePinClick = async (currentPinStatus) => {
                 return {
                   // ✅ keep accountNumber on the row
                   accountNumber: String(eachData.accountNumber),
-      
                   campaignname: eachData.campaign_name,
                   adsetname: eachData.adsetName,
                   date: eachData[specifiedTimeZone],
                   'fb-hour': eachData.hour,
                   'mnet-hour': eachData.updatedHour,
-      
                   spend: parseFloat(eachData.spend).toFixed(2),
                   revenue: revenueData ? revenueData : 0,
                   profit: parseFloat(profit),
@@ -1498,18 +1497,15 @@ const handlePinClick = async (currentPinStatus) => {
                   rpc: parseFloat(rpc),
                   cpl: parseFloat(cpl),
                   ncpl: parseFloat(ncpl),
-      
                   adsetid: eachData.adset_id,
                   campaignid: eachData.campaign_id,
                   timezone: eachData[newtime],
-      
                   comment: relatedComment ? relatedComment.comment : null,
-      
                   adid: "",
                   adname: "",
                   actions: '...',
-                  from: "",
-                  to: "",
+                  from: campaign_date?.start ? campaign_date?.start : "",
+                  to: campaign_date?.end ? campaign_date?.end : "",
                   profitloss: "",
                   M_tq: "",
                   D_tq: "",
@@ -1517,6 +1513,7 @@ const handlePinClick = async (currentPinStatus) => {
                   revenueCron: eachData.revenueCron,
                   accountStatus: eachData.accountStatus,
                   cronStatus: eachData.cronStatus,
+                  category: category?.category || "",
                 };
               })
             : [];
