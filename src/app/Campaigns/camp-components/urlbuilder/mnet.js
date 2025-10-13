@@ -199,13 +199,14 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
         const text = defaultValues.split("//")[1].split("/")[3];
         const result = text.replace(/\+/g, " ");
         console.log(result);
-        setKeyWords(result);
+        setKeyWords("");
         console.log(defaultValues.split("//")[1].split("/")[4].split("&")[0].split("?")[1]);
         setChannel(defaultValues.split("//")[1].split("/")[4].split("&")[0].split("?")[1]);
         setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
         setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
         setGeo(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
         setSource("FB");
+        if(defaultValues.includes('&trkfb')){setPixelId('PixelId')}else{setPixelId('None')};
         // console.log(defaultValues.split("//")[1].split("/")[0]);
         // const domainData = response 
       }
