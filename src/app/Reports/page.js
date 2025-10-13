@@ -1650,32 +1650,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -1684,15 +1696,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -1712,9 +1727,6 @@ const MyTablePage = () => {
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
 
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
-
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
@@ -1723,7 +1735,8 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-        },
+        }
+        ,
         from: {
             headerName: 'Start',
             field: 'from',
@@ -2572,32 +2585,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -2606,15 +2631,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -2633,9 +2661,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
@@ -4538,32 +4563,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -4572,15 +4609,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -4599,9 +4639,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
@@ -5334,32 +5371,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -5368,15 +5417,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -5396,9 +5448,6 @@ const MyTablePage = () => {
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
 
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
-
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
@@ -5408,6 +5457,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         }
+
         ,
         from: {
             headerName: 'Start',
@@ -5921,8 +5971,6 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
         },
-
-
         actions: {
             headerName: 'Budget',
             field: 'actions',
@@ -6292,32 +6340,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -6326,15 +6386,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -6353,9 +6416,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
@@ -7347,32 +7407,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -7381,15 +7453,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -7408,9 +7483,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
@@ -8021,32 +8093,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -8055,15 +8139,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -8082,9 +8169,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
@@ -8686,32 +8770,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -8720,15 +8816,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -8747,9 +8846,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
@@ -9647,32 +9743,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -9681,15 +9789,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -9708,9 +9819,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
@@ -10369,32 +10477,44 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agSetColumnFilter',
 
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ For normal (leaf) rows
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
                     const campaignName = firstChild?.data?.campaignname;
                     const campaign = commentsMap.get(`${campaignName}_${account}`);
-                    return campaign?.category || null;
+                    return capitalize(campaign?.category);
                 }
 
                 // ✅ Include leaf rows in filtering
-                return params.data?.category || null;
+                return capitalize(params.data?.category);
             },
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
@@ -10403,15 +10523,18 @@ const MyTablePage = () => {
                     const uniqueCategories = new Set();
 
                     params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
                             const campaignName = firstChild?.data?.campaignname;
                             const campaign = commentsMap.get(`${campaignName}_${account}`);
-                            const category = campaign?.category;
+                            const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
-                            const category = node.data?.category;
+                            const category = capitalize(node.data?.category);
                             if (category) uniqueCategories.add(category);
                         }
                     });
@@ -10430,9 +10553,6 @@ const MyTablePage = () => {
                 // sort normally for leaf nodes
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
-
-            // ✅ Display formatting
-            valueFormatter: (params) => (params.value ? params.value : ''),
 
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
