@@ -6415,9 +6415,12 @@ const CreateCampaignDrawer = ({
           action_source: values.adsets[i].action_source,
           custom_event_type: values.adsets[i].custom_event_type,
           pixel_id: newPixelId,
+          // bid_amount: values.adsets[i].bid_amount
+          //   ? parseFloat(values.adsets[i].bid_amount) * 100
+          //   : 0,
           bid_amount: values.adsets[i].bid_amount
-            ? parseFloat(values.adsets[i].bid_amount) * 100
-            : 0,
+          ? Math.round(Number(values.adsets[i].bid_amount) * 100)
+          : 0,
           countries: values.adsets[i].countries,
           Min_Age: values.adsets[i].Min_Age,
           Max_Age: values.adsets[i].Max_Age,
@@ -6561,9 +6564,12 @@ const CreateCampaignDrawer = ({
           action_source: values.adsets[i].action_source || "",
           custom_event_type: values.adsets[i].custom_event_type || "",
           pixel_id: newPixelId,
+          // bid_amount: values.adsets[i].bid_amount
+          //   ? parseFloat(values.adsets[i].bid_amount) * 100
+          //   : 0,
           bid_amount: values.adsets[i].bid_amount
-            ? parseFloat(values.adsets[i].bid_amount) * 100
-            : 0,
+          ? Math.round(Number(values.adsets[i].bid_amount) * 100)
+          : 0,
           countries: values.adsets[i].countries || "",
           Min_Age: values.adsets[i].Min_Age || "",
           Max_Age: values.adsets[i].Max_Age || "",
