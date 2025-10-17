@@ -1804,7 +1804,7 @@ const handlePauseOk = async () => {
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
                     const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
-
+              
                     // console.log(eachData.campaign_name, "campaign_name");
                     return (
                         {

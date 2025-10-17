@@ -5724,7 +5724,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [submitErrors, setSubmitErrors] = useState([]);
 
-  const [accountNumber, setAccountNumber] = useState(accountis);
+  const [accountNumber, setAccountNumber] = useState(selectedRow?.Account_Number);
   const [imagehash, setimagehash] = useState("");
   const { data: session } = useSession();
   var token = localStorage.getItem("token");
@@ -6677,8 +6677,8 @@ const CloneMultipleAdsetCampaignDrawer = ({
     // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
   };
   useEffect(() => {
-    setAccountNumber(accountis);
-  }, [accountis]);
+    setAccountNumber(selectedRow?.Account_Number);
+  }, [selectedRow]);
 
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
@@ -8686,7 +8686,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     Status: "PAUSED",
     Special_categories: "NONE",
     Bid_strategy: "LOWEST_COST_WITHOUT_CAP",
-    Account_Number: accountis === "All" ? "" : accountis,
+    Account_Number: accountis === "All" ? "" : selectedRow?.Account_Number,
     Daily_amount: 0, // Initial daily budget for the campaign
     Name: campaignName,
     adsets: [
@@ -8702,8 +8702,8 @@ const CloneMultipleAdsetCampaignDrawer = ({
 
   useEffect(() => {
     // Update the form fields when accountis changes
-    form.setFieldsValue({ Account_Number: accountis });
-  }, [accountis, form]);
+    form.setFieldsValue({ Account_Number: selectedRow?.Account_Number });
+  }, [selectedRow, form]);
 
   const handleDrawerClose = () => {
     form.resetFields(); // Reset form fields to their initialValues
@@ -9167,6 +9167,15 @@ const CloneMultipleAdsetCampaignDrawer = ({
       MediaContent: adsetObj.addlevel[0] || [],
     }));
 
+    function getAllAdsetCountries(obj) {
+      return Object.keys(obj)
+        .filter(key => key.startsWith("adsetlevel_"))
+        .map(key => obj[key]?.countries)
+        .filter(Boolean);
+    }
+
+    console.log("All Adset Countries:", getAllAdsetCountries(draft));
+
     // 4. Update the form fields
     form.setFieldsValue({
       adsets: updatedFormAdsets,
@@ -9175,7 +9184,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       Special_categories: draft?.camapaignlevel?.Special_categories,
       ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
         ? { countries: draft.camapaignlevel.Special_categories_countries }
-        : {}),
+        : Array.isArray(draft.camapaignlevel.Special_categories) ? { countries: getAllAdsetCountries(draft)} : {}),
       Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
       Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
       Status: draft?.camapaignlevel?.Status,
@@ -9331,6 +9340,12 @@ const CloneMultipleAdsetCampaignDrawer = ({
       // Handle error
     }
   };
+  function getAllAdsetCountries(obj) {
+    return Object.keys(obj)
+      .filter(key => key.startsWith("adsetlevel_"))
+      .map(key => obj[key]?.countries)
+      .filter(Boolean);
+  }
   return (
     <Modal
       title={
@@ -9358,7 +9373,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       }}
       style={{ borderRadius: "12px" }}
     >
-      {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
+      {/* {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
             <Button
@@ -9409,7 +9424,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         cancelText="Cancel"
       >
         <p>Are you sure you want to approve this campaign?</p>
-      </Modal>
+      </Modal> */}
 
       {/* <Select value={newSelectedRef.current} placeholder="Select draft"
                 style={{

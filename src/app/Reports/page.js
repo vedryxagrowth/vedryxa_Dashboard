@@ -401,6 +401,10 @@ const MyTablePage = () => {
     // const [campaignNamesDActiveDailyLoading, setCampaignNamesDActiveDailyLoading] = useState(false);
 
     const [allCampaignData, setAllCampaignData] = useState([]);
+
+    
+    
+
     console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
@@ -467,6 +471,36 @@ const MyTablePage = () => {
 
     //     fetchAllCampaigns();
     // }, [newaccount]);
+    
+    // useEffect(() => {
+    //         if (allCampaignData.length > 0) {
+    //             setColumnDefs(getColumnDefs(mainData.columnStructure));
+    //         columnDefs1.current = getColumnDefs2(mainData.columnStructure);
+    //         columnDefs2.current = getColumnDefs2(mainData.columnStructure);
+    //         // columnDefs3.current = getColumnDefs3(mainData.columnStructure);
+    //         // columnDefs4.current = getColumnDefs4(mainData.columnStructure);
+    //         columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(mainData.columnStructure));
+    //         // columnDefsAdLevel.current = (getColumnDefsAdLevel([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData.columnStructure)]));
+    //         columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData.columnStructure));
+    //         // columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData.columnStructure)]));
+    //         // Ensure that 'adid' is included in the column structure
+    //         // let updatedColumnStructure = mainData.columnStructure;
+    //         // if (!updatedColumnStructure.includes('adid')) {
+    //         //     updatedColumnStructure = [...updatedColumnStructure, 'adid'];
+    //         // }
+    //         // if (!updatedColumnStructure.includes('adname')) {
+    //         //     updatedColumnStructure = [...updatedColumnStructure, 'adname'];
+    //         // }
+    //         // // Now update the colDefs for the adid grid
+    //         // const newColumnDefs = getColumnDefsObjectOfAdID(updatedColumnStructure);
+    //         // const newColumnDailyDefs = getColumnDefsObjectOfDailyAdID(updatedColumnStructure);
+    //         // setColDefs(newColumnDefs);
+    //         // setColDailyDefs(newColumnDailyDefs);
+    //         //   console.log('Updated columnDefsOfAdID:', newColumnDefs);
+    //         setColumnStructureStatus(true);
+    //     }
+    // }, [allCampaignData, mainData]);
+
     useEffect(() => {
         const fetchAllCampaigns = async () => {
             try {
@@ -4267,7 +4301,7 @@ const MyTablePage = () => {
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const {
-                    allCampaignData,
+                    // allCampaignData,
                     setCampaignRefreshTrigger,
                     changeRRefrst,
                     newaccount,
@@ -6142,7 +6176,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                const { allCampaignData } = params.context;
+                // const { allCampaignData } = params.context;
 
                 // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
@@ -6162,7 +6196,7 @@ const MyTablePage = () => {
                                 matched.campaign_budget.lifetime_budget != null)
                         )
                     );
-                }, [campaignId, rowAccountNumber, allCampaignData]);
+                }, [campaignId, rowAccountNumber, allCampaignData?.length]);
 
                 const onChangeSpendAndStatus = () => {
                     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
@@ -7108,7 +7142,7 @@ const MyTablePage = () => {
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const {
-                    allCampaignData,
+                    // allCampaignData,
                     setCampaignRefreshTrigger,
                     changeRRefrst,
                     newaccount,
@@ -9547,7 +9581,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                const { allCampaignData } = params?.context || {};
+                // const { allCampaignData } = params?.context || {};
 
                 // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
