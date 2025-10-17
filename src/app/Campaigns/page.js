@@ -4,6 +4,7 @@ import {
   FilterOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import {
   Table,
@@ -551,7 +552,7 @@ const App = () => {
 
       setcreatecamselectedacc(accountNumber);
 
-      setCampaignData(filteredCampaignData);
+      setCampaignData(allCampaigns);
     } catch (error) {
       console.error("Error fetching campaign data:", error);
       setError("Failed to fetch campaign data.");
@@ -2160,6 +2161,41 @@ const App = () => {
       //     )}
       //   </div>
       // ),
+      render: (text, record) => (
+        <div
+          style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+        >
+          <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
+          {record.reports && (
+            <span
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                backgroundColor: theme === "dark" ? "#333" : "white",
+                marginLeft: 6,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Tooltip title="View Report">
+                <LinkOutlined
+                  style={{ color: "blue", fontSize: 14 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(
+                      `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
+                      "_blank",
+                      "noopener,noreferrer"
+                    );
+                  }}
+                />
+              </Tooltip>
+            </span>
+          )}
+        </div>
+      ),
     },
     {
       title: "Account number",
@@ -2602,46 +2638,177 @@ const App = () => {
         );
       },
     },
-    {
-      title: "Permission",
-      dataIndex: "Approval",
-      key: "permission",
-      width: 120,
-      align: "center",
-      render: (text, record) => (
-        <>
-          {record.Approval === "PENDING_APPROVAL" && (
-            <>
-              <Button
-                style={{
-                  backgroundColor: "#91C25F",
-                  color: "#000",
-                  borderColor: "#91C25F",
-                  borderWidth: "0px",
-                }}
-                onClick={() => handleApprovalforAdsets(record)} // This sets useaproval and opens modal
-              >
-                Approve
-              </Button>
+    // {
+    //   title: "Permission",
+    //   dataIndex: "Approval",
+    //   key: "permission",
+    //   width: 120,
+    //   align: "center",
+    //   render: (text, record) => (
+    //     <>
+    //       {record.Approval === "PENDING_APPROVAL" && (
+    //         <>
+    //           <Button
+    //             style={{
+    //               backgroundColor: "#91C25F",
+    //               color: "#000",
+    //               borderColor: "#91C25F",
+    //               borderWidth: "0px",
+    //             }}
+    //             onClick={() => handleApprovalforAdsets(record)} // This sets useaproval and opens modal
+    //           >
+    //             Approve
+    //           </Button>
 
-              {/* Show Modal only for selected record */}
-              {useaprovalForAdsets?.identifier === record.identifier && (
-                <Modal
-                  title="Confirm approval"
-                  open={isModalVisibleForAdsets}
-                  onOk={handleOkForAdsets}
-                  onCancel={() => setIsModalVisibleForAdsets(false)}
-                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
-                    }`}
-                >
-                  <p>Are you sure you want to approve?</p>
-                </Modal>
-              )}
-            </>
+    //           {/* Show Modal only for selected record */}
+    //           {useaprovalForAdsets?.identifier === record.identifier && (
+    //             <Modal
+    //               title="Confirm approval"
+    //               open={isModalVisibleForAdsets}
+    //               onOk={handleOkForAdsets}
+    //               onCancel={() => setIsModalVisibleForAdsets(false)}
+    //               className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+    //                 }`}
+    //             >
+    //               <p>Are you sure you want to approve?</p>
+    //             </Modal>
+    //           )}
+    //         </>
+    //       )}
+    //     </>
+    //   ),
+    // },
+    // {
+    //   title: "Permission",
+    //   dataIndex: "Approval",
+    //   key: "permission",
+    //   width: 120,
+    //   align: "center",
+    //   render: (text, record) => {
+    //     const approval = record?.Approval?.toLowerCase();
+    //     const fbstatus = record?.fbstatus?.toLowerCase();
+    //     return fbstatus === "live" ? (
+    //       <Tooltip title="View History">
+    //         <HistoryOutlined
+    //           style={{
+    //             fontSize: 16,
+    //             color: theme === "dark" ? "#91C25F" : "#37474F",
+    //             cursor: "pointer",
+    //           }}
+    //           onClick={(e) => {
+    //             e.stopPropagation();
+    //             const accountNumber = record?.Account_Number;
+    //             if (accountNumber) {
+    //              const href = `/Campaigns/CampaignHistory?account=${encodeURIComponent(accountNumber)}`;
+    //               window.open(href, "_blank", "noopener,noreferrer");
+    //             } else {
+    //               console.error("Account number missing for this record");
+    //             }
+    //           }}
+    //         />
+    //       </Tooltip>
+    //     ) : approval === "pending_approval" ? (
+    //       <>
+    //         <Button
+    //           style={{
+    //             backgroundColor: "#91C25F",
+    //             color: "#000",
+    //             border: "none",
+    //           }}
+    //           onClick={() => handleApproval(record)}
+    //         >
+    //           Approve
+    //         </Button>
+    //         {useaproval?.identifier === record.identifier && (
+    //           <Modal
+    //             title="Confirm approval"
+    //             open={isModalVisible}
+    //             onOk={handleOk}
+    //             onCancel={() => setIsModalVisible(false)}
+    //             className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+    //               }`}
+    //           >
+    //             <p>Are you sure you want to approve?</p>
+    //           </Modal>
+    //         )}
+    //       </>
+    //     ) : null; 
+    //   },
+    // }
+    {
+  title: "Permission",
+  dataIndex: "Approval",
+  key: "permission",
+  width: 120,
+  align: "center",
+  render: (text, record) => {
+    const approval = record?.Approval?.toLowerCase();
+    const fbstatus = record?.fbstatus?.toLowerCase();
+    const accountNumber = record?.Account_Number;
+    const campaignId = record?.campaignid;
+    const openCampaignHistory = () => {
+      if (!campaignId || !accountNumber) {
+        console.error("Missing campaign ID or account number");
+        return;
+      }
+      const href = `/Campaigns/CampaignHistory?account=${encodeURIComponent(
+        accountNumber
+      )}&type=Campaign&id=${encodeURIComponent(campaignId)}`;
+      window.open(href, "_blank", "noopener,noreferrer");
+    };
+    if (fbstatus === "live") {
+      return (
+        <Tooltip title="View Campaign History">
+          <HistoryOutlined
+            style={{
+              fontSize: 16,
+              color: theme === "dark" ? "#91C25F" : "#37474F",
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              openCampaignHistory();
+            }}
+          />
+        </Tooltip>
+      );
+    }
+    if (approval === "pending_approval") {
+      return (
+        <>
+          <Button
+            style={{
+              backgroundColor: "#91C25F",
+              color: "#000",
+              border: "none",
+            }}
+            onClick={() => handleApproval(record)}
+          >
+            Approve
+          </Button>
+
+          {useaproval?.identifier === record.identifier && (
+            <Modal
+              title="Confirm approval"
+              open={isModalVisible}
+              onOk={handleOk}
+              onCancel={() => setIsModalVisible(false)}
+              className={`custom-modal ${
+                theme === "dark" ? "dark-theme-modal" : ""
+              }`}
+            >
+              <p>Are you sure you want to approve?</p>
+            </Modal>
           )}
         </>
-      ),
-    },
+      );
+    }
+
+    return null;
+  },
+     }
+
+
   ];
 
   //     const columns = [
