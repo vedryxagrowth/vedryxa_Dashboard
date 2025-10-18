@@ -397,11 +397,23 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                         }}
                       >
 
-                        <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
+                        <div style={{ fontSize: '12px', flex: 1, marginRight: '10px', width: '100%' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <div style={{ fontWeight: 'bold', fontSize: '16px', color: darkMode ? '#fff' : '#333' }}>{item.title}</div>
 
-                            <div style={{ fontSize: '14px', color: darkMode ? '#fff' : '#333' }}>{item.message}</div>
+                            <div
+                              style={{
+                                fontSize: '14px',
+                                color: darkMode ? '#fff' : '#333',
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'pre-wrap', // preserve newlines, wrap long lines
+                                wordBreak: 'break-word', // force break for long words
+                                maxWidth: '100%', // prevent overflow
+                              }}
+                            >
+                              {item.message}
+                            </div>
                             {/* {item.imageUrl?.includes('.mp4') ? (
                             <video
                               controls
@@ -548,48 +560,48 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           </Button>
         </div>
       </Menu.Item>
-     <Modal
-  open={isPreviewVisible}
-  footer={null}
-  onCancel={() => setIsPreviewVisible(false)}
-  centered
-  width="100%"
-  zIndex={3000}
-  getContainer={document.body}
-  bodyStyle={{
-    margin: 0,
-    padding: 0,
-    overflow: "hidden", 
-  }}
-  style={{
-    maxWidth: "80vw",  
-   
-  }}
->
-  {previewUrl?.includes(".mp4") ? (
-    <video
-      src={previewUrl}
-      controls
-      style={{
-        width: "100%",
-        height: "80vh",   
-        objectFit: "contain",
-        borderRadius: 8,
-      }}
-    />
-  ) : (
-    <img
-      src={previewUrl}
-      alt="Preview"
-      style={{
-        width: "100%",
-        height: "90vh",  
-        objectFit: "contain",
-        borderRadius: 8,
-      }}
-    />
-  )}
-</Modal>
+      <Modal
+        open={isPreviewVisible}
+        footer={null}
+        onCancel={() => setIsPreviewVisible(false)}
+        centered
+        width="100%"
+        zIndex={3000}
+        getContainer={document.body}
+        bodyStyle={{
+          margin: 0,
+          padding: 0,
+          overflow: "hidden",
+        }}
+        style={{
+          maxWidth: "80vw",
+
+        }}
+      >
+        {previewUrl?.includes(".mp4") ? (
+          <video
+            src={previewUrl}
+            controls
+            style={{
+              width: "100%",
+              height: "80vh",
+              objectFit: "contain",
+              borderRadius: 8,
+            }}
+          />
+        ) : (
+          <img
+            src={previewUrl}
+            alt="Preview"
+            style={{
+              width: "100%",
+              height: "90vh",
+              objectFit: "contain",
+              borderRadius: 8,
+            }}
+          />
+        )}
+      </Modal>
 
 
     </Menu>

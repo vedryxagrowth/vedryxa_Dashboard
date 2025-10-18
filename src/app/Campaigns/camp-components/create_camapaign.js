@@ -886,7 +886,7 @@ const AdPreviewPerAccount = ({
                       fontWeight: "500",
                     }}
                   >
-                    {addName}
+                    {/* {addName} */}
                     <div style={{ opacity: 0.7, fontSize: "12px" }}>
                       <GlobalOutlined /> {imagehash?.pageName || "Page Name"}
                     </div>
