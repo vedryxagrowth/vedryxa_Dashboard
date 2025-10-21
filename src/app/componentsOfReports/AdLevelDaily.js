@@ -1574,14 +1574,14 @@ const handlePauseOk = async () => {
 
   // ✅ call the new multi-account endpoint
   const fetchData = await apiClient.post(
-    `/AdLevelAccountsNew`,
+    newRevenuePratner === "FB_Mnet" ? `/AdLevelAccountsNew` : "/AdLevelAccounts",
     {
       dateStart: startDate,
       dateEnd: endDate,
       accountNumbers: accountsParam,
       timezone: newtime,
       status: 'Daily',                  // "Daily" | "Live"
-      network: "Facebook_AD_Daily",        // keep your original value
+      network: newRevenuePratner === "FB_Mnet" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
       adsetids: adsets,
       campaignids: campaigns
     }
