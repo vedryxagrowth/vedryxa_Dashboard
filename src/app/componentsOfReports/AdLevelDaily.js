@@ -1574,14 +1574,14 @@ const handlePauseOk = async () => {
 
   // ✅ call the new multi-account endpoint
   const fetchData = await apiClient.post(
-    `/AdLevelAccountsNew`,
+    newRevenuePratner === "FB_Mnet" ? `/AdLevelAccountsNew` : "/AdLevelAccounts",
     {
       dateStart: startDate,
       dateEnd: endDate,
       accountNumbers: accountsParam,
       timezone: newtime,
       status: 'Daily',                  // "Daily" | "Live"
-      network: "Facebook_AD_Daily",        // keep your original value
+      network: newRevenuePratner === "FB_Mnet" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
       adsetids: adsets,
       campaignids: campaigns
     }
@@ -1804,7 +1804,7 @@ const handlePauseOk = async () => {
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
                     const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
-
+              
                     // console.log(eachData.campaign_name, "campaign_name");
                     return (
                         {

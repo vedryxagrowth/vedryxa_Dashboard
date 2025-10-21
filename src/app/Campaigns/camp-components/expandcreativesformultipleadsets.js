@@ -34,6 +34,7 @@ import {
   PlusSquareOutlined,
   MinusSquareOutlined,
   ExclamationCircleFilled,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import { useTokenContext } from "../../components/parent";
@@ -391,6 +392,24 @@ const AdsetCard = ({
             }}
           />
 
+          <Tooltip title="View Adset History">
+            <HistoryOutlined
+              style={{
+                fontSize: 16,
+                color: theme === "dark" ? "#91C25F" : "#37474F",
+                cursor: "pointer",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                const accountNumber = viewCampaignData?.Account_Number;
+                const adsetId = adset?.Adsetid; // <-- use the real adset ID
+                const url = `/Campaigns/CampaignHistory?account=${accountNumber}&type=Adset&id=${adsetId}`;
+                window.open(url, "_blank"); // opens in new tab
+              }}
+            />
+          </Tooltip>
+
+
           <Tooltip
             title="View"
             overlayInnerStyle={{
@@ -634,6 +653,25 @@ const AdsetCard = ({
                           transform: 'scale(0.8)',
                         }}
                       />
+
+                      <Tooltip title="View Ad History">
+                        <HistoryOutlined
+                          style={{
+                            fontSize: 16,
+                            color: theme === "dark" ? "#91C25F" : "#37474F",
+                            cursor: "pointer",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const accountNumber = viewCampaignData?.Account_Number; // campaign's account number
+                            const adId = item?.Addid; // ✅ use item, not ad
+                            if (!adId || !accountNumber)
+                              return console.error("Ad ID or Account missing");
+                            const url = `/Campaigns/CampaignHistory?account=${accountNumber}&type=Ad&id=${adId}`;
+                            window.open(url, "_blank");
+                          }}
+                        />
+                      </Tooltip>
 
                       <Tooltip title="More Options">
                         <MoreOutlined
