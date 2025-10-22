@@ -2782,17 +2782,17 @@ const App = () => {
               color: "#000",
               border: "none",
             }}
-            onClick={() => handleApproval(record)}
+            onClick={() => handleApprovalforAdsets(record)}
           >
             Approve
           </Button>
 
-          {useaproval?.identifier === record.identifier && (
+          {useaprovalForAdsets?.identifier === record.identifier && (
             <Modal
               title="Confirm approval"
-              open={isModalVisible}
-              onOk={handleOk}
-              onCancel={() => setIsModalVisible(false)}
+              open={isModalVisibleForAdsets}
+              onOk={handleOkForAdsets}
+              onCancel={() => setIsModalVisibleForAdsets(false)}
               className={`custom-modal ${
                 theme === "dark" ? "dark-theme-modal" : ""
               }`}
