@@ -162,20 +162,25 @@ const MnetLiveAdHistory = ({params}) => {
         "cpclinkclicks",
     ];
 
+    // const spender = (params) => {
+    //     var total = 0;
+    //     params.values.forEach((value) => (total += parseFloat(value)));
+    //     var total1 = total.toString()
+    //     var total2 = total1.split(".")
+    //     if (total2[1] !== undefined && total2[1].length > 2) {
+    //       var total22 = total2[1].slice(0, 2)
+    //       var totalone = total2[0] + '.' + total22
+    //       console.log(parseFloat(totalone).toFixed(2), "totalone");
+    //       return parseFloat(totalone).toFixed(2)
+    //     }
+    //     const newTotal = isNaN(total) ? 0 : total;
+    //     return newTotal;
+    // };
+
     const spender = (params) => {
-        var total = 0;
-        params.values.forEach((value) => (total += parseFloat(value)));
-        var total1 = total.toString()
-        var total2 = total1.split(".")
-        if (total2[1] !== undefined && total2[1].length > 2) {
-          var total22 = total2[1].slice(0, 2)
-          var totalone = total2[0] + '.' + total22
-          console.log(parseFloat(totalone).toFixed(2), "totalone");
-          return parseFloat(totalone).toFixed(2)
-        }
-        const newTotal = isNaN(total) ? 0 : total;
-        return newTotal;
-    };
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        return Math.round(total * 100) / 100; // Round to 2 decimal places
+    }
 
     const newSpender = (params) =>{
         var total = 0;
