@@ -6419,8 +6419,8 @@ const CreateCampaignDrawer = ({
           //   ? parseFloat(values.adsets[i].bid_amount) * 100
           //   : 0,
           bid_amount: values.adsets[i].bid_amount
-          ? Math.round(Number(values.adsets[i].bid_amount) * 100)
-          : 0,
+            ? Math.round(Number(values.adsets[i].bid_amount) * 100)
+            : 0,
           countries: values.adsets[i].countries,
           Min_Age: values.adsets[i].Min_Age,
           Max_Age: values.adsets[i].Max_Age,
@@ -6568,8 +6568,8 @@ const CreateCampaignDrawer = ({
           //   ? parseFloat(values.adsets[i].bid_amount) * 100
           //   : 0,
           bid_amount: values.adsets[i].bid_amount
-          ? Math.round(Number(values.adsets[i].bid_amount) * 100)
-          : 0,
+            ? Math.round(Number(values.adsets[i].bid_amount) * 100)
+            : 0,
           countries: values.adsets[i].countries || "",
           Min_Age: values.adsets[i].Min_Age || "",
           Max_Age: values.adsets[i].Max_Age || "",
@@ -7594,6 +7594,7 @@ const CreateCampaignDrawer = ({
                     <FaPenToSquare
                       style={{ fontSize: 12 }}
                       title="Edit"
+                      onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                       onClick={(e) => {
                         e.preventDefault(); e.stopPropagation();
                         setRCurrentCategory(c);
@@ -8648,8 +8649,6 @@ const CreateCampaignDrawer = ({
                 {/* Inline input boxes */}
 
                 <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginTop: 8, }}>
-
-
                   <Modal
                     className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                     title="Edit Category"
@@ -8679,7 +8678,6 @@ const CreateCampaignDrawer = ({
                       className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
                     />
                   </Modal>
-
                   <Modal
                     className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                     title="Delete Category"
@@ -8811,6 +8809,36 @@ const CreateCampaignDrawer = ({
                 >
                   <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
                 </Modal>
+                <Modal
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                  title="Edit Report Category"
+                  visible={rEditModalVisible}
+                  onOk={async () => {
+                    if (rEditedName.trim() && rCurrentCategory) {
+                      await renameReportCategory(
+                        rCurrentCategory.accountNumber,
+                        rCurrentCategory.categoryId,
+                        rEditedName.trim()
+                      );
+                      setREditModalVisible(false);
+                      setREditedName("");
+                      setRCurrentCategory(null);
+                    }
+                  }}
+                  onCancel={() => {
+                    setREditModalVisible(false);
+                    setREditedName("");
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Save"
+                >
+                  <Input
+                    value={rEditedName}
+                    onChange={(e) => setREditedName(e.target.value)}
+                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                  />
+                </Modal>
+
                 <div style={{ display: 'flex', marginTop: '10px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <Button

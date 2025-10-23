@@ -3746,26 +3746,29 @@ select:focus,
   color: #91c25f !important;
 }
 .custom-pagination-dark .ant-table-tbody > tr:hover > td {
-  background-color: rgba(145, 194, 95, 0.12) !important;
+  background-color: #333 !important;
   color: #ffffff !important;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  ;
 }
 
 .custom-pagination-dark .ant-table-tbody > tr > td {
-  background-color: #1f1f1f !important;
   color: #ffffff !important;
   border-color: #333 !important;
 }
 
 .custom-pagination-dark .ant-table-thead > tr > th {
-  background-color: #242424 !important;
   color: #ffffff !important;
   border-color: #333 !important;
 }
 
-.custom-pagination-dark .ant-table-tbody > tr:hover > td {
-  background-color:#333 !important; 
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+
+
+.icon-light1 svg {
+  color: #91c25f; 
+  fill: #91c25f;
 }
 
-
+.icon-dark1  svg{
+  color: #91c25f; 
+  fill: #91c25f;
+}

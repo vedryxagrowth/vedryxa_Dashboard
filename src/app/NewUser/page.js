@@ -33,11 +33,12 @@ const UploadComponent = dynamic(() => import('./users-components/updates_notific
 
 const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User', "Revenue_Partner"];
 const accountStatus = ['All', 'Active', 'InActive'];
-const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
+// const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 const networkStatus = ['All', 'Active', 'InActive'];
 
 const UsersTable = () => {
     const { userdetails } = useTokenContext();
+    
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div style={{ padding: '24px' }}>
@@ -85,7 +86,7 @@ const UsersTable = () => {
     const [revenuePartner, setRevenuePartner] = useState('All');
     const [isSearching, setIsSearching] = useState(false);
     const [isSearchingAccount, setIsSearchingAccount] = useState(false);
-
+    const [availableNetworks, setAvailableNetworks] = useState(['All']);
 
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
 
@@ -133,7 +134,9 @@ const UsersTable = () => {
         setActiveTab(key);
     };
 
-
+useEffect(() => {
+    fetchNetworksData();
+}, []);
     const handleCarouselChange = (index) => {
         setActiveSlide(index); // Update the active tab based on the carousel's current slide
     };
@@ -339,6 +342,17 @@ const UsersTable = () => {
             if (response.status === 200) {
                 setNetworksData(response.data);
                 console.log(response.data, "Networks Data");
+                const uniquePartners = [
+                    'All',
+                    ...new Set(
+                        response.data
+                            .map(item => item.revenuePartner)
+                            .filter(Boolean)
+                    ),
+                ];
+                setAvailableNetworks(uniquePartners);
+
+                console.log("Available Networks:", uniquePartners);
             } else {
                 console.error('Failed to fetch Networks data');
             }
@@ -377,6 +391,7 @@ const UsersTable = () => {
             (revenuePartner === 'All' || item.revenuePartner === revenuePartner)
         );
     };
+   
 
     const filteredNetworkData = networkFilterData();
 
@@ -1545,6 +1560,7 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                         <Select
                                             onChange={onChangeNetwork}
+                                             value={revenuePartner}
                                             defaultValue="All"
                                             style={{
                                                 width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
@@ -1649,6 +1665,7 @@ const UsersTable = () => {
                                         <Select
                                             onChange={onChangeNetwork}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                             value={revenuePartner}
                                             defaultValue="All"
                                             style={{
                                                 width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
@@ -1749,6 +1766,7 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                         <Select
                                             defaultValue="All"
+                                             value={revenuePartner}
                                             style={{
                                                 width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                             }}

@@ -79,10 +79,10 @@ const domainMapping = {
     ],
     FB_InuvoPrism: [
         { label: "1.FacebookInuvoPrism", value: "FacebookInuvoPrisam" },
-        { label: "2.Inuvo_Prism", value: "Inuvo_Prism" },
-        { label: "3.Inuvo_PrismDaily", value: "Inuvo_PrismDaily" },
-        { label: "4.FBInuvoPrism", value: "FbInuvoPrisam" },
-        { label: "5.FBInuvoPrismDaily", value: "FbInuvoPrisamDaily" },
+        { label: "2.Inuvo_Prism Live", value: "Inuvo_Prism" },
+        { label: "3.Inuvo_Prism Daily", value: "Inuvo_PrismDaily" },
+        { label: "4.Filter live InuvoPrism", value: "FbInuvoPrisam" },
+        { label: "5.Filter Daily InuvoPrism", value: "FbInuvoPrisamDaily" },
     ]
 };
 
