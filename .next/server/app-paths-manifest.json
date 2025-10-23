@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "/_not-found/page": "app/_not-found/page.js",
   "/Activities/page": "app/Activities/page.js",
   "/AllCampaigns/AdsetHistory/page": "app/AllCampaigns/AdsetHistory/page.js",
@@ -30,5 +31,12 @@
   "/page": "app/page.js",
   "/LiveHistory/LiveAdsetHistory/[AdsetName]/page": "app/LiveHistory/LiveAdsetHistory/[AdsetName]/page.js",
   "/Users/page": "app/Users/page.js",
+=======
+  "/Dashboard/page": "app/Dashboard/page.js",
+  "/Creatives/page": "app/Creatives/page.js",
+  "/Campaigns/CampaignHistory/page": "app/Campaigns/CampaignHistory/page.js",
+  "/Campaigns/page": "app/Campaigns/page.js",
+  "/NewUser/page": "app/NewUser/page.js",
+>>>>>>> DevUi
   "/Reports/page": "app/Reports/page.js"
 }
