@@ -26,7 +26,7 @@ const domainMapping = {
         { label: "3.MnetLive", value: "Mnet" },
         { label: "4.MnetDaily", value: "MnetDaily" },
         { label: "5.MnetTQ", value: "MnetTQ" },
-        { label: "6.Live & Daily Filter Camapign adset ", value: "FbMnet" },
+        { label: "6.Live & Daily Filter for Camapign & adset ", value: "FbMnet" },
         { label: "7.Live filter Ad", value: "filterFacebookPartners" },
         { label: "8.Daily filter Ad", value: "filterFacebookPartnersDaily" },
         { label: "MnetToken", value: "MnetToken" },
@@ -71,29 +71,29 @@ const domainMapping = {
         { label: "3.FBTonic1", value: "FbTonic1" },
     ],
     FB_TonicRsoc: [
-        { label: "1.FacebookTonicRsoc", value: "FacebookTonicRsoc" },
-        { label: "2.FacebookAdID", value: "FacebookAdid" },
+        { label: "1.Facebook campaign & adset", value: "FacebookTonicRsoc" },
+        { label: "2.Facebook Ad", value: "FacebookAdid" },
         { label: "3.TonicRsoc", value: "TonicRsoc" },
-        { label: "4.FBTonicRsoc", value: "FbTonicRsoc" },
-        { label: "5.FilterPartners", value: "filterFacebookPartners" },
+        { label: "4.Filter campign & adset", value: "FbTonicRsoc" },
+        { label: "5.Filter ad", value: "filterFacebookPartners" },
     ],
     FB_InuvoPrism: [
-        { label: "1.FacebookInuvoPrism", value: "FacebookInuvoPrisam" },
+        { label: "1.Facebook InuvoPrism", value: "FacebookInuvoPrisam" },
         { label: "2.Inuvo_Prism Live", value: "Inuvo_Prism" },
         { label: "3.Inuvo_Prism Daily", value: "Inuvo_PrismDaily" },
-        { label: "4.Filter live InuvoPrism", value: "FbInuvoPrisam" },
-        { label: "5.Filter Daily InuvoPrism", value: "FbInuvoPrisamDaily" },
+        { label: "4.Filter live campaign & adset", value: "FbInuvoPrisam" },
+        { label: "5.Filter Daily campaign & adset", value: "FbInuvoPrisamDaily" },
     ]
 };
 
 const newdomainMapping = {
     FB_Mnet: [
-        { label: "1.MnetLive", value: "Mnet" },
-        { label: "2.MnetDaily", value: "MnetDaily" },
-        { label: "3.MnetTQ", value: "MnetTQ" },
-        { label: "4.FBMnet", value: "FbMnet" },
-        { label: "5.FilterFacebookPartners", value: "filterFacebookPartners" },
-        { label: "6.FilterFacebookPartnersDaily", value: "filterFacebookPartnersDaily" },
+        { label: "1.Mnet Live", value: "Mnet" },
+        { label: "2.Mnet Daily", value: "MnetDaily" },
+        { label: "3.Mnet TQ", value: "MnetTQ" },
+        { label: "4.Live & Daily Filter for Camapign & adset", value: "FbMnet" },
+        { label: "5.Live filter ad", value: "filterFacebookPartners" },
+        { label: "6.Daily filter ad", value: "filterFacebookPartnersDaily" },
     ],
     FB_MnetBing: [
         { label: "1.MnetBing", value: "MnetBing" },
@@ -125,16 +125,16 @@ const newdomainMapping = {
         { label: "2.FBTonic1", value: "FbTonic1" },
     ],
     FB_TonicRsoc: [
-        { label: "1.TonicRsoc", value: "TonicRsoc" },
-        { label: "2.FBTonicRsoc", value: "FbTonicRsoc" },
-        { label: "3.FacebookAdID", value: "FacebookAdid" },
-        { label: "4.FilterFacebookPartners", value: "filterFacebookPartners" },
+         { label: "1.Facebook AdID", value: "FacebookAdid" },
+        { label: "2.TonicRsoc", value: "TonicRsoc" },
+        { label: "3.Filter Campaign & adset", value: "FbTonicRsoc" },
+        { label: "4.Filter ad", value: "filterFacebookPartners" },
     ],
     FB_InuvoPrism: [
-        { label: "1.Inuvo_Prism", value: "Inuvo_Prism" },
-        { label: "2.FBInuvoPrism", value: "FbInuvoPrisam" },
-        { label: "3.Inuvo_PrismDaily", value: "Inuvo_PrismDaily" },
-        { label: "4.FBInuvoPrismDaily", value: "FbInuvoPrisamDaily" },
+        { label: "1.Inuvo_Prism live", value: "Inuvo_Prism" },
+        { label: "2.Inuvo_Prism daily", value: "Inuvo_PrismDaily" },
+        { label: "3.Live filter campaign & adset", value: "FbInuvoPrisam" },
+        { label: "4.Daily filter campign & adset", value: "FbInuvoPrisamDaily" },
     ]
 };
 
