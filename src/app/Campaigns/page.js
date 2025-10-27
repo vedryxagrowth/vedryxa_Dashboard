@@ -2165,7 +2165,9 @@ const App = () => {
         <div
           style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         >
-          <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
+          <span 
+          // onClick={() => handleCampaignNameClick(record)}
+          >{text}</span>
           {record.reports && (
             <span
               style={{
