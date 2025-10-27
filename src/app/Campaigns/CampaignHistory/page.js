@@ -9,6 +9,7 @@ import {
     Space,
     Tag,
     Select,
+    Skeleton,
 } from "antd";
 import {
     ClockCircleOutlined,
@@ -195,10 +196,9 @@ export default function CampaignHistoryPage() {
         );
     };
     const filterOptions = [
-        { value: "All", label: "All" },
+        { value: "All", label: "Active type : All" },
         { value: "Bid", label: "Bid" },
         { value: "Budget", label: "Budget" },
-        { value: "Campaigns", label: "Campaigns" },
         { value: "Schedule", label: "Schedule" },
         { value: "Run Status", label: "Run Status" },
         { value: "Targeting", label: "Targeting" },
@@ -254,7 +254,8 @@ export default function CampaignHistoryPage() {
             key: "changed_by",
             render: (text) => (
                 <Space>
-                    <UserOutlined style={{ color: "#91c25f" }} />
+                  <UserOutlined className={theme === "dark" ? "icon-dark1" : "icon-light1"} />
+
                     <Text style={{ color: theme === "dark" ? "#ffffff" : "#000000" }}>{text}</Text>
                 </Space>
             ),
@@ -265,7 +266,7 @@ export default function CampaignHistoryPage() {
             key: "date_time",
             render: (date) => (
                 <Space>
-                    <ClockCircleOutlined style={{ color: "#91c25f" }} />
+                    <ClockCircleOutlined className={theme === "dark" ? "icon-dark1" : "icon-light1"} />
                     <Text style={{ color: theme === "dark" ? "#ffffff" : "#000000" }}>
                         {new Date(date).toLocaleString("en-GB", {
                             day: "2-digit",
@@ -288,8 +289,6 @@ export default function CampaignHistoryPage() {
                         return activityName.includes("bid");
                     case "Budget":
                         return activityName.includes("budget");
-                    case "Campaigns":
-                        return activityName.includes("campaign");
                     case "Schedule":
                         return (
                             activityName.includes("schedule") ||
@@ -338,27 +337,27 @@ export default function CampaignHistoryPage() {
 
                 <div>
                     <Space>
-                        <Text style={{ color: theme === "dark" ? "#fff" : "#000", fontWeight: 500 }}>
-                            Activity Type:
-                        </Text>
                         <Select
                             value={activityFilter}
                             onChange={setActivityFilter}
+                            dropdownClassName={theme === "dark" && "custom-dropdown"}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                             style={{
                                 width: 200,
                                 borderColor: "#91c25f",
-                            }}
-                            options={filterOptions}
-                            dropdownStyle={{
-                                backgroundColor: theme === "dark" ? "#1f1f1f" : "#fff",
                                 color: theme === "dark" ? "#fff" : "#000",
                             }}
-                            optionRender={(option) => (
-                                <Text style={{ color: theme === "dark" ? "#fff" : "#000" }}>
-                                    {option.label}
-                                </Text>
-                            )}
-                        />
+                            options={filterOptions}
+                            optionLabelProp="label" 
+                        >
+                            {filterOptions.map((option) => (
+                                <Select.Option key={option.value} value={option.value} label={option.label}>
+                                    <Text>
+                                        {option.label}
+                                    </Text>
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Space>
                 </div>
             </div>
@@ -366,7 +365,7 @@ export default function CampaignHistoryPage() {
 
             {loading ? (
                 <div style={{ display: "flex", justifyContent: "center", height: "50vh" }}>
-                    <Spin size="large" />
+                    <Skeleton active paragraph={{ rows: 20 }} />
                 </div>
             ) : data.length > 0 ? (
                 <Table
@@ -379,7 +378,13 @@ export default function CampaignHistoryPage() {
                     className={theme === "dark" ? "custom-pagination-dark" : "custom-pagination-light"}
                 />
             ) : (
-                <Empty description="No activity found" />
+                <Empty
+                    description={
+                        <span style={{ color: theme === "dark" ? "#fff" : "#000" }}>
+                            No activity found
+                        </span>
+                    }
+                />
             )}
         </div>
     );
