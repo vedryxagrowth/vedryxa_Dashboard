@@ -4,8 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, Switch } from 'antd';
-import { DownloadOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, Switch, Badge } from 'antd';
+import { DownloadOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, NumberOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
@@ -232,8 +232,14 @@ const AllCampaigns = ({ campaignStatusFilter, handleChangeInput, handleBlur, onC
                     return params.value || ''; // Just the campaign name
                 }
 
-                const firstColumnValue = params.node.key; // This should give you the campaign name
-                const campaignName = params.node.key;
+                // const firstColumnValue = params.node.key; // This should give you the campaign name
+                const firstColumnValue = (() => {
+                    if (params.node.childrenAfterGroup?.length > 0) {
+                        return params.node.childrenAfterGroup[0]?.data?.campaignname || params.node.key;
+                    }
+                    return params.node.key; // fallback to campaignid
+                })();
+                const campaignName = firstColumnValue;
 
                 let campaignid, adsetid;
 

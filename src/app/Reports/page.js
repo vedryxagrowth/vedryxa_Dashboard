@@ -501,45 +501,45 @@ const MyTablePage = () => {
     //     }
     // }, [allCampaignData, mainData]);
 
-    useEffect(() => {
-        const fetchAllCampaigns = async () => {
-            try {
-                const body = { accountNumbers: (selectedValue || []).map(String) };
+    // useEffect(() => {
+    //     const fetchAllCampaigns = async () => {
+    //         try {
+    //             const body = { accountNumbers: (selectedValue || []).map(String) };
 
-                const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', body);
-                const data = res.data || [];
+    //             const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', body);
+    //             const data = res.data || [];
 
-                // Map EXACTLY to your DB shape:
-                const enrichedAdsetRows = data.flatMap((campaign) =>
-                    (campaign.adsets || []).map((adset) => ({
-                        // keep adset info
-                        adset_id: String(adset.adset_id),
-                        adsetname: adset.name,
-                        adset_budget: adset.budget,   // { daily_budget, lifetime_budget }
-                        adset_status: adset.status,
-                        bid_amount: adset.bid_amount,
+    //             // Map EXACTLY to your DB shape:
+    //             const enrichedAdsetRows = data.flatMap((campaign) =>
+    //                 (campaign.adsets || []).map((adset) => ({
+    //                     // keep adset info
+    //                     adset_id: String(adset.adset_id),
+    //                     adsetname: adset.name,
+    //                     adset_budget: adset.budget,   // { daily_budget, lifetime_budget }
+    //                     adset_status: adset.status,
+    //                     bid_amount: adset.bid_amount,
 
-                        // attach campaign-level info for this adset row
-                        campaignid: String(campaign.campaign_id),
-                        campaignname: campaign.name,
-                        campaign_status: campaign.status,
-                        campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
-                        accountNumber: String(campaign.accountNumber),
-                        revenuePartner: campaign.revenuePartner,
-                        start: campaign.start,
-                        end: campaign.end,
-                    }))
-                );
+    //                     // attach campaign-level info for this adset row
+    //                     campaignid: String(campaign.campaign_id),
+    //                     campaignname: campaign.name,
+    //                     campaign_status: campaign.status,
+    //                     campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
+    //                     accountNumber: String(campaign.accountNumber),
+    //                     revenuePartner: campaign.revenuePartner,
+    //                     start: campaign.start,
+    //                     end: campaign.end,
+    //                 }))
+    //             );
 
-                setAllCampaignData(enrichedAdsetRows);
-            } catch (err) {
-                console.error('Failed to fetch all campaigns', err);
-                setAllCampaignData([]);
-            }
-        };
+    //             setAllCampaignData(enrichedAdsetRows);
+    //         } catch (err) {
+    //             console.error('Failed to fetch all campaigns', err);
+    //             setAllCampaignData([]);
+    //         }
+    //     };
 
-        if (selectedValue?.length) fetchAllCampaigns();
-    }, [JSON.stringify(selectedValue)]);
+    //     if (selectedValue?.length) fetchAllCampaigns();
+    // }, [JSON.stringify(selectedValue)]);
 
     // useEffect(() => {
     //     if (campaignRefreshTrigger === 0) return;
@@ -568,52 +568,52 @@ const MyTablePage = () => {
     // }, [campaignRefreshTrigger]);
 
     // campaignRefreshTrigger-based refetch (multi-account)
-    useEffect(() => {
-        if (campaignRefreshTrigger === 0) return;
+    // useEffect(() => {
+    //     if (campaignRefreshTrigger === 0) return;
 
-        const fetchUpdatedCampaign = async () => {
-            try {
-                const accounts = Array.isArray(selectedValue)
-                    ? selectedValue.map(String)
-                    : [String(selectedValue)];
+    //     const fetchUpdatedCampaign = async () => {
+    //         try {
+    //             const accounts = Array.isArray(selectedValue)
+    //                 ? selectedValue.map(String)
+    //                 : [String(selectedValue)];
 
-                const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', {
-                    accountNumbers: accounts,
-                });
+    //             const res = await apiClient.post('/get/BulkAllCampaignsWithAdsets', {
+    //                 accountNumbers: accounts,
+    //             });
 
-                const data = res.data || [];
+    //             const data = res.data || [];
 
-                const enrichedAdsetRows = data.flatMap((campaign) =>
-                    (campaign.adsets || []).map((adset) => ({
-                        // adset fields
-                        adset_id: String(adset.adset_id),
-                        adsetname: adset.name,
-                        adset_budget: adset.budget,     // { daily_budget, lifetime_budget }
-                        adset_status: adset.status,
-                        bid_amount: adset.bid_amount,
+    //             const enrichedAdsetRows = data.flatMap((campaign) =>
+    //                 (campaign.adsets || []).map((adset) => ({
+    //                     // adset fields
+    //                     adset_id: String(adset.adset_id),
+    //                     adsetname: adset.name,
+    //                     adset_budget: adset.budget,     // { daily_budget, lifetime_budget }
+    //                     adset_status: adset.status,
+    //                     bid_amount: adset.bid_amount,
 
-                        // campaign fields
-                        campaignid: String(campaign.campaign_id),
-                        campaignname: campaign.name,    // matches your DB
-                        accountNumber: String(campaign.accountNumber),
-                        revenuePartner: campaign.revenuePartner,
-                        campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
-                        campaign_status: campaign.status,
-                        start: campaign.start,
-                        end: campaign.end,
-                    }))
-                );
+    //                     // campaign fields
+    //                     campaignid: String(campaign.campaign_id),
+    //                     campaignname: campaign.name,    // matches your DB
+    //                     accountNumber: String(campaign.accountNumber),
+    //                     revenuePartner: campaign.revenuePartner,
+    //                     campaign_budget: campaign.campaign_budget, // { daily_budget, lifetime_budget }
+    //                     campaign_status: campaign.status,
+    //                     start: campaign.start,
+    //                     end: campaign.end,
+    //                 }))
+    //             );
 
-                setAllCampaignData(enrichedAdsetRows);
-            } catch (err) {
-                console.error('Failed to refetch updated campaigns', err);
-            }
-        };
+    //             setAllCampaignData(enrichedAdsetRows);
+    //         } catch (err) {
+    //             console.error('Failed to refetch updated campaigns', err);
+    //         }
+    //     };
 
-        fetchUpdatedCampaign();
-        // If you want the refresh to always use the *latest* selection, add selectedValue too:
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [campaignRefreshTrigger]);
+    //     fetchUpdatedCampaign();
+    //     // If you want the refresh to always use the *latest* selection, add selectedValue too:
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [campaignRefreshTrigger]);
 
 
     const showModal = () => {
@@ -4334,6 +4334,7 @@ const MyTablePage = () => {
                 const [bidAmount, setBidAmount] = useState();
                 const [adsetId, setAdsetId] = useState(null);
                 const [adsetInfo, setAdsetInfo] = useState(null);
+                const [confirmLoading, setConfirmLoading] = useState(false);
                 //   const [, forceRerender] = useState(0);
 
                 const isGroupRow = !!params?.node?.groupData;
@@ -4359,16 +4360,23 @@ const MyTablePage = () => {
                 console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
-                    if (!campaignId || !initialAdsetId || !Array.isArray(allCampaignData)) return;
+                    if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
                     // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
                     // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
-                    const matchedAdset = allCampaignData.find(
-                        (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
-                    );
+                    // const matchedAdset = Camapignlevelstatus.find(
+                    //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+                    // );
+                    const matchedAdset = Camapignlevelstatus
+                        .find(item =>
+                            String(item.campaign_id) === String(campaignId) &&
+                            String(item.accountNumber) === String(accountNumber)
+                        )?.adsets.find(adset =>
+                            String(adset.adset_id) === String(initialAdsetId)
+                        );
                     if (matchedAdset) {
                         setAdsetInfo(matchedAdset);
                     }
-                }, [campaignId, initialAdsetId, allCampaignData]);
+                }, [campaignId, initialAdsetId, Camapignlevelstatus]);
 
                 const onChangeSpendAndStatus = async () => {
                     try {
@@ -4381,9 +4389,13 @@ const MyTablePage = () => {
 
                         const campaign = params.context.allCampaignData.find(c => c.campaign_id === campaignId);
 
-                        const adset = allCampaignData.find(
-                            (adset) => adset.campaignid === campaignId && adset.adset_id === clickedAdsetId
-                        );
+                        const adset = Camapignlevelstatus
+                            .find(item =>
+                                String(item.campaign_id) === String(campaignId) &&
+                                String(item.accountNumber) === String(accountNumber)
+                            )?.adsets.find(adset =>
+                                String(adset.adset_id) === String(initialAdsetId)
+                            );
 
                         if (adset) {
                             const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
@@ -4407,14 +4419,24 @@ const MyTablePage = () => {
                 }
 
                 const handleOk = async () => {
-                    setIsModalVisible(false);
+
                     const campaignname = groupedData?.[0]?.campaignname;
+                    const campaignActualSpend = Camapignlevelstatus
+                        .find(item =>
+                            String(item.campaign_id) === String(campaignId) &&
+                            String(item.accountNumber) === String(accountNumber)
+                        )?.adsets.find(adset =>
+                            String(adset.adset_id) === String(initialAdsetId)
+                        );
 
                     const payload = {
                         adsetId,
                         accountNumber: accountNumber,
                         campaignname,
-                        updatedby: userdetails?.email
+                        campaignId,
+                        updatedby: userdetails?.email,
+                        budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                     };
 
                     if (
@@ -4432,7 +4454,8 @@ const MyTablePage = () => {
                         !isNaN(bidAmount) &&
                         parseFloat(bidAmount) * 100 >= 1
                     ) {
-                        payload.bidAmount = parseFloat(bidAmount) * 100;
+                        // payload.bidAmount = parseFloat(bidAmount) * 100;
+                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -4445,12 +4468,48 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/update/adset/budget', payload);
+                        setConfirmLoading(true);
+                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
                         message.success("Adset Budget and/or Bid Updated");
-                        setCampaignRefreshTrigger(prev => prev + 1); // ✅ Refresh campaign + adset data
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setConfirmLoading(false);
+                            setCamapignlevelstatus(prevStatus =>
+                                prevStatus.map(item =>
+                                    String(item.campaign_id) === String(payload.campaignId) &&
+                                        String(item.accountNumber) === String(payload.accountNumber)
+                                        ? {
+                                            ...item,
+                                            adsets: item.adsets.map(adset =>
+                                                String(adset.adset_id) === String(payload.adsetId)
+                                                    ? {
+                                                        ...adset,
+                                                        ...(payload.budget !== undefined && {
+                                                            budget: {
+                                                                ...adset.budget,
+                                                                daily_budget: String(payload.budget), // ✅ update daily_budget
+                                                                lifetime_budget: null, // optional reset if needed
+                                                            },
+                                                        }),
+                                                        ...(payload.bidAmount !== undefined && {
+                                                            bid_amount: payload.bidAmount, // ✅ update bid_amount
+                                                        }),
+                                                        last_updated_by: payload.updatedby,
+                                                        last_updated_at: new Date().toISOString(),
+                                                    }
+                                                    : adset
+                                            ),
+                                        }
+                                        : item
+                                )
+                            );
+                            setIsModalVisible(false);
+                        }
 
-                        changeRRefrst();
+                        // setCampaignRefreshTrigger(prev => prev + 1); // ✅ Refresh campaign + adset data
+
+                        // changeRRefrst();
                     } catch (err) {
+                        setConfirmLoading(false);
                         console.error(err);
                         message.error("Failed to update adset");
                     }
@@ -4494,12 +4553,32 @@ const MyTablePage = () => {
                             <Modal
                                 title={groupedData?.[0]?.campaignname || 'Edit Adset'}
                                 open={isModalVisible}
+                                // confirmLoading={confirmLoading}
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
+                                {confirmLoading && (
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            background: "rgba(255,255,255,0.7)", // dim background
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            zIndex: 1000,
+                                            borderRadius: "8px",
+                                        }}
+                                    >
+                                        <Spin size="large" tip="Saving..." />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                     <div style={{ display: 'flex' }}>
                                         <p style={{ marginBottom: '0px' }}>
@@ -4514,6 +4593,7 @@ const MyTablePage = () => {
                                     <Input
                                         type="number"
                                         value={changeBudget}
+                                        disabled={!hasBudget}
                                         onChange={(e) => onChangeBudget(e.target.value)}
                                         placeholder="Enter budget in USD"
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -4524,6 +4604,7 @@ const MyTablePage = () => {
                                     <Input
                                         type="number"
                                         value={bidAmount}
+                                        disabled={!hasBid}
                                         onChange={(e) => setBidAmount(e.target.value)}
                                         placeholder="Enter bid amount"
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -4720,10 +4801,55 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         from: {
+            // headerName: 'Start',
+            // field: 'from',
+            // sortable: true,
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     // if (params.node.group) {
+            //     //     const campaignName =
+            //     //         params.node.groupData?.campaignname || params.node.key;
+            //     //     const campaign = campaignMap.get(campaignName);
+            //     //     return campaign && campaign.start
+            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //     //         : '-';
+            //     // }
+            //     // return '';
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+
+            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+            //     }
+            //     return params.data?.from || null;
+            // },
+            // valueFormatter: (params) => {
+            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 // if (params.node.group) {
                 //     const campaignName =
@@ -4735,9 +4861,12 @@ const MyTablePage = () => {
                 // }
                 // return '';
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
@@ -4754,19 +4883,65 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         to: {
+            // headerName: 'End',
+            // field: 'to',
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+            //         return campaign && campaign.end
+            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //             : '-';
+            //     }
+            //     return params.data?.to || null;
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    // const campaign = campaignMap.get(campaignName);
+                    // return campaign && campaign.end
+                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                    //     : '-';
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+                    // console.log(campaignName, "campaignName");
+                    // console.log(campaignId, "campaignId");
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+                    // console.log(campaign, "campaign");
+
                     return campaign && campaign.end
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return params.data?.to || null;
+                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -5151,7 +5326,22 @@ const MyTablePage = () => {
             filter: "agTextColumnFilter",
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu'
+            headerClass: 'hide-menu',
+            resizable: true,
+            sortable: true,
+            // hide: true,
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.campaignid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.campaignid || null;
+            },
         },
         timezone: {
             headerName: 'TimeZone',
@@ -5167,6 +5357,14 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
+            showWhenGrouped: true,
+            minWidth: 170,
+            filter: "agTextColumnFilter",
+            valueGetter: (params) => {
+                if (params.data) return params.data.accountNumber;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.accountNumber || null;
+            },
             // hide: true,
         },
         M_tq: {
@@ -5422,13 +5620,25 @@ const MyTablePage = () => {
 
         },
         adname: {
-            headerName: 'AdName', field: 'adname',
+            headerName: 'AdID', field: 'adname',
 
-            width: 500,
-            hide: true,
-            rowGroup: true,
-            enableRowGroup: true,
-            pinned: 'left',
+            // headerName: 'AdsetId',
+            // field: 'adsetname',
+            resizable: true,
+            sortable: true,
+            // hide: true,
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.adid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.adid || null;
+            },
         },
         adid: {
             headerName: 'AdID',
@@ -5441,6 +5651,10 @@ const MyTablePage = () => {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
             },
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+            pinned: 'left',
             // suppressMenu: true,    // Suppress the column menu
 
         },
@@ -5541,10 +5755,55 @@ const MyTablePage = () => {
 
         ,
         from: {
+            // headerName: 'Start',
+            // field: 'from',
+            // sortable: true,
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     // if (params.node.group) {
+            //     //     const campaignName =
+            //     //         params.node.groupData?.campaignname || params.node.key;
+            //     //     const campaign = campaignMap.get(campaignName);
+            //     //     return campaign && campaign.start
+            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //     //         : '-';
+            //     // }
+            //     // return '';
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+
+            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+            //     }
+            //     return params.data?.from || null;
+            // },
+            // valueFormatter: (params) => {
+            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 // if (params.node.group) {
                 //     const campaignName =
@@ -5556,9 +5815,12 @@ const MyTablePage = () => {
                 // }
                 // return '';
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
@@ -5575,19 +5837,65 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         to: {
+            // headerName: 'End',
+            // field: 'to',
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+            //         return campaign && campaign.end
+            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //             : '-';
+            //     }
+            //     return params.data?.to || null;
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    // const campaign = campaignMap.get(campaignName);
+                    // return campaign && campaign.end
+                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                    //     : '-';
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+                    // console.log(campaignName, "campaignName");
+                    // console.log(campaignId, "campaignId");
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+                    // console.log(campaign, "campaign");
+
                     return campaign && campaign.end
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return params.data?.to || null;
+                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -5952,7 +6260,19 @@ const MyTablePage = () => {
             filter: "agTextColumnFilter",
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu'
+            headerClass: 'hide-menu',
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.adsetid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.adsetid || null;
+            },
         },
         campaignid: {
             headerName: 'CampaignId',
@@ -5961,7 +6281,19 @@ const MyTablePage = () => {
             filter: "agTextColumnFilter",
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu'
+            headerClass: 'hide-menu',
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.campaignid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.campaignid || null;
+            },
         },
         timezone: {
             headerName: 'TimeZone',
@@ -6227,6 +6559,7 @@ const MyTablePage = () => {
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignActualSpend, setCampaignActualSpend] = useState({});
                 const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
 
                 const isGroupRow = !!params?.node?.groupData;
 
@@ -6286,8 +6619,8 @@ const MyTablePage = () => {
                 };
 
                 const handleOk = async () => {
-                    setIsModalVisible(false);
 
+                    setConfirmLoading(true);
                     const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
                     const campaignIdFinal = target?.campaignid;
                     const campaignnameFinal = target?.campaignname;
@@ -6298,6 +6631,8 @@ const MyTablePage = () => {
                         accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
                         campaignname: campaignnameFinal,
                         updatedby: params.context?.userdetails?.email,
+                        budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                     };
 
                     if (!payload.campaignId || !payload.accountNumber) {
@@ -6306,7 +6641,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/update/campaign/budget', payload);
+                        await apiClient.post('/new/update/campaign/budget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -6318,7 +6653,7 @@ const MyTablePage = () => {
                                         ...item,
                                         campaign_budget: {
                                             ...item.campaign_budget,
-                                            daily_budget: payload.budget,
+                                            daily_budget: String(payload.budget),
                                         },
                                     };
                                 }
@@ -6326,9 +6661,12 @@ const MyTablePage = () => {
                             });
                             return updated;
                         })
+                        setConfirmLoading(false);
+                        setIsModalVisible(false);
                         // params.context.setCampaignRefreshTrigger(prev => prev + 1);
                         // params.context.changeRRefrst();
                     } catch (err) {
+                        setConfirmLoading(false);
                         console.error(err);
                         message.error("Failed to update budget");
                     }
@@ -6360,6 +6698,25 @@ const MyTablePage = () => {
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
                                 className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
+                                {confirmLoading && (
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            background: "rgba(255,255,255,0.7)", // dim background
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            zIndex: 1000,
+                                            borderRadius: "8px",
+                                        }}
+                                    >
+                                        <Spin size="large" tip="Saving..." />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                     <div style={{ display: 'flex' }}>
                                         <p>Budget Type:&nbsp;</p>
@@ -6578,7 +6935,7 @@ const MyTablePage = () => {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
                     const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0].campaignid || params.node?.key || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -6622,7 +6979,7 @@ const MyTablePage = () => {
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
                     const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0].campaignid || params.node?.key || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
@@ -6635,7 +6992,7 @@ const MyTablePage = () => {
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return params.data?.to || null;
+                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -7041,7 +7398,14 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            // hide: true,
+            showWhenGrouped: true,
+            minWidth: 170,
+            filter: "agTextColumnFilter",
+            valueGetter: (params) => {
+                if (params.data) return params.data.accountNumber;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.accountNumber || null;
+            },
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -7283,7 +7647,7 @@ const MyTablePage = () => {
             enableSorting: false,
             enableFilter: false,
             suppressMenu: true,
-            hide: !isYesterday(),
+            // hide: !isYesterday(),
             cellRenderer: (params) => {
                 const {
                     // allCampaignData,
@@ -7300,6 +7664,7 @@ const MyTablePage = () => {
                 const [bidAmount, setBidAmount] = useState();
                 const [adsetId, setAdsetId] = useState(null);
                 const [adsetInfo, setAdsetInfo] = useState(null);
+                const [confirmLoading, setConfirmLoading] = useState(false);
                 //   const [, forceRerender] = useState(0);
 
                 const isGroupRow = !!params?.node?.groupData;
@@ -7325,16 +7690,26 @@ const MyTablePage = () => {
                 console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
-                    if (!campaignId || !initialAdsetId || !Array.isArray(allCampaignData)) return;
+                    if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
                     // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
                     // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
-                    const matchedAdset = allCampaignData.find(
-                        (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
-                    );
+                    // const matchedAdset = Camapignlevelstatus.find(
+                    //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+                    // );
+                    // if (matchedAdset) {
+                    //     setAdsetInfo(matchedAdset);
+                    // }
+                    const matchedAdset = Camapignlevelstatus
+                        .find(item =>
+                            String(item.campaign_id) === String(campaignId) &&
+                            String(item.accountNumber) === String(accountNumber)
+                        )?.adsets.find(adset =>
+                            String(adset.adset_id) === String(initialAdsetId)
+                        );
                     if (matchedAdset) {
                         setAdsetInfo(matchedAdset);
                     }
-                }, [campaignId, initialAdsetId, allCampaignData]);
+                }, [campaignId, initialAdsetId, Camapignlevelstatus]);
 
                 const onChangeSpendAndStatus = async () => {
                     try {
@@ -7347,9 +7722,17 @@ const MyTablePage = () => {
 
                         const campaign = params.context.allCampaignData.find(c => c.campaign_id === campaignId);
 
-                        const adset = allCampaignData.find(
-                            (adset) => adset.campaignid === campaignId && adset.adset_id === clickedAdsetId
-                        );
+                        // const adset = allCampaignData.find(
+                        //     (adset) => adset.campaignid === campaignId && adset.adset_id === clickedAdsetId
+                        // );
+
+                        const adset = Camapignlevelstatus
+                            .find(item =>
+                                String(item.campaign_id) === String(campaignId) &&
+                                String(item.accountNumber) === String(accountNumber)
+                            )?.adsets.find(adset =>
+                                String(adset.adset_id) === String(initialAdsetId)
+                            );
 
                         if (adset) {
                             const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
@@ -7373,16 +7756,27 @@ const MyTablePage = () => {
                 }
 
                 const handleOk = async () => {
-                    setIsModalVisible(false);
+                    // setIsModalVisible(false);
                     const campaignname = groupedData?.[0]?.campaignname;
 
                     console.log("Submitting budget change:", groupedData);
 
+                    const campaignActualSpend = Camapignlevelstatus
+                        .find(item =>
+                            String(item.campaign_id) === String(campaignId) &&
+                            String(item.accountNumber) === String(accountNumber)
+                        )?.adsets.find(adset =>
+                            String(adset.adset_id) === String(initialAdsetId)
+                        );
+
                     const payload = {
                         adsetId,
+                        campaignId,
                         accountNumber: accountNumber,
                         campaignname,
-                        updatedby: userdetails?.email
+                        updatedby: userdetails?.email,
+                        budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                     };
 
                     if (
@@ -7400,7 +7794,8 @@ const MyTablePage = () => {
                         !isNaN(bidAmount) &&
                         parseFloat(bidAmount) * 100 >= 1
                     ) {
-                        payload.bidAmount = parseFloat(bidAmount) * 100;
+                        // payload.bidAmount = parseFloat(bidAmount) * 100;
+                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -7413,12 +7808,49 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/update/adset/budget', payload);
-                        message.success("Adset Budget and/or Bid Updated");
-                        setCampaignRefreshTrigger(prev => prev + 1); // ✅ Refresh campaign + adset data
+                        // await apiClient.post('/update/adset/budget', payload);
+                        // message.success("Adset Budget and/or Bid Updated");
+                        // setCampaignRefreshTrigger(prev => prev + 1); // ✅ Refresh campaign + adset data
 
-                        changeRRefrst();
+                        // changeRRefrst();
+                        setConfirmLoading(true);
+                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
+                        message.success("Adset Budget and/or Bid Updated");
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setConfirmLoading(false);
+                            setCamapignlevelstatus(prevStatus =>
+                                prevStatus.map(item =>
+                                    String(item.campaign_id) === String(payload.campaignId) &&
+                                        String(item.accountNumber) === String(payload.accountNumber)
+                                        ? {
+                                            ...item,
+                                            adsets: item.adsets.map(adset =>
+                                                String(adset.adset_id) === String(payload.adsetId)
+                                                    ? {
+                                                        ...adset,
+                                                        ...(payload.budget !== undefined && {
+                                                            budget: {
+                                                                ...adset.budget,
+                                                                daily_budget: String(payload.budget), // ✅ update daily_budget
+                                                                lifetime_budget: null, // optional reset if needed
+                                                            },
+                                                        }),
+                                                        ...(payload.bidAmount !== undefined && {
+                                                            bid_amount: payload.bidAmount, // ✅ update bid_amount
+                                                        }),
+                                                        last_updated_by: payload.updatedby,
+                                                        last_updated_at: new Date().toISOString(),
+                                                    }
+                                                    : adset
+                                            ),
+                                        }
+                                        : item
+                                )
+                            );
+                            setIsModalVisible(false);
+                        }
                     } catch (err) {
+                        setConfirmLoading(false);
                         console.error(err);
                         message.error("Failed to update adset");
                     }
@@ -7462,12 +7894,32 @@ const MyTablePage = () => {
                             <Modal
                                 title={groupedData?.[0]?.campaignname || 'Edit Adset'}
                                 open={isModalVisible}
+                                // confirmLoading={confirmLoading}
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
+                                {confirmLoading && (
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            background: "rgba(255,255,255,0.7)", // dim background
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            zIndex: 1000,
+                                            borderRadius: "8px",
+                                        }}
+                                    >
+                                        <Spin size="large" tip="Saving..." />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                     <div style={{ display: 'flex' }}>
                                         <p style={{ marginBottom: '0px' }} >
@@ -7482,6 +7934,7 @@ const MyTablePage = () => {
                                     <Input
                                         type="number"
                                         value={changeBudget}
+                                        disabled={!hasBudget}
                                         onChange={(e) => onChangeBudget(e.target.value)}
                                         placeholder="Enter budget in USD"
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -7492,6 +7945,7 @@ const MyTablePage = () => {
                                     <Input
                                         type="number"
                                         value={bidAmount}
+                                        disabled={!hasBid}
                                         onChange={(e) => setBidAmount(e.target.value)}
                                         placeholder="Enter bid amount"
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -7511,20 +7965,37 @@ const MyTablePage = () => {
             },
         },
         adsetname: {
-            headerName: 'AdsetName', field: 'adsetname',
-            // resizeble: true,
+            // headerName: 'AdsetName', field: 'adsetname',
+            // // resizeble: true,
+            // sortable: true,
+            // minWidth: 450,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // width: 500,
+            // hide: true,
+            // rowGroup: true,
+            // pinned: 'left',
+            // enableRowGroup: true,
+            headerName: 'AdsetId',
+            field: 'adsetname',
+            resizable: true,
             sortable: true,
-            minWidth: 450,
-            filter: 'agSetColumnFilter',
-            filterParams: {
-                comparator: (a, b) => a.localeCompare(b),
-                suppressAndOrCondition: true,
+            // hide: true,
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.adsetid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.adsetid || null;
             },
-            width: 500,
-            hide: true,
-            rowGroup: true,
-            pinned: 'left',
-            enableRowGroup: true,
         },
         adname: {
             headerName: 'AdName', field: 'adname',
@@ -7672,10 +8143,55 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         from: {
+            // headerName: 'Start',
+            // field: 'from',
+            // sortable: true,
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     // if (params.node.group) {
+            //     //     const campaignName =
+            //     //         params.node.groupData?.campaignname || params.node.key;
+            //     //     const campaign = campaignMap.get(campaignName);
+            //     //     return campaign && campaign.start
+            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //     //         : '-';
+            //     // }
+            //     // return '';
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+
+            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+            //     }
+            //     return params.data?.from || null;
+            // },
+            // valueFormatter: (params) => {
+            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 // if (params.node.group) {
                 //     const campaignName =
@@ -7687,9 +8203,12 @@ const MyTablePage = () => {
                 // }
                 // return '';
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
@@ -7706,19 +8225,65 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         to: {
+            // headerName: 'End',
+            // field: 'to',
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+            //         return campaign && campaign.end
+            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //             : '-';
+            //     }
+            //     return params.data?.to || null;
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    // const campaign = campaignMap.get(campaignName);
+                    // return campaign && campaign.end
+                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                    //     : '-';
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+                    // console.log(campaignName, "campaignName");
+                    // console.log(campaignId, "campaignId");
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+                    // console.log(campaign, "campaign");
+
                     return campaign && campaign.end
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return params.data?.to || null;
+                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -7944,8 +8509,46 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "ROI = (Revenue - Spend) / Spend",
         },
-        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', hide: true },
+        adsetid:
+        {
+            // headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', minWidth: 180,
+            // spanRows: true,
+            // filter: "agTextColumnFilter",
+            // // hide: true,
+            // // rowGroup: true,
+            // // enableRowGroup: true,
+            // // pinned: 'left',
+            // valueGetter: (params) => {
+            //     if (params.data) return params.data.adsetid;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.adsetid || null;
+            // },
+            headerName: 'AdsetId',
+            field: 'adsetid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+        },
+        campaignid: {
+            headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.campaignid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.campaignid || null;
+            },
+        },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
@@ -7953,7 +8556,14 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            // hide: true,
+            showWhenGrouped: true,
+            minWidth: 170,
+            filter: "agTextColumnFilter",
+            valueGetter: (params) => {
+                if (params.data) return params.data.accountNumber;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.accountNumber || null;
+            },
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -8208,38 +8818,71 @@ const MyTablePage = () => {
             hide: true,
         },
         adname: {
-            headerName: 'AdName', field: 'adname',
-            resizeble: true,
+            // headerName: 'AdName', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // // width: 300,
+            // // rowGroup: true, 
+            // // rowGroupIndex: 1, // Level 2
+            // // hide: true,
+            // // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // // showRowGroup: 'adname',
+            // // hide: true,
+            // width: 500,
+            // hide: true,
+            // rowGroup: true,
+            // pinned: 'left',
+            // enableRowGroup: true,
+            headerName: 'AdID', field: 'adname',
+
+            // headerName: 'AdsetId',
+            // field: 'adsetname',
+            resizable: true,
             sortable: true,
-            // width: 300,
-            // rowGroup: true, 
-            // rowGroupIndex: 1, // Level 2
             // hide: true,
-            // filter: 'agSetColumnFilter',
-            filterParams: {
-                comparator: (a, b) => a.localeCompare(b),
-                suppressAndOrCondition: true,
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.adid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.adid || null;
             },
-            // showRowGroup: 'adname',
-            // hide: true,
-            width: 500,
-            hide: true,
-            rowGroup: true,
-            pinned: 'left',
-            enableRowGroup: true,
         },
         adid: {
+            // headerName: 'AdID',
+            // field: 'adid',
+            // // sortable: true,
+            // // minWidth: 200,
+            // // filter: 'agSetColumnFilter',
+            // // hide: true,
+            // // filterParams: {
+            // //     comparator: (a, b) => a.localeCompare(b),
+            // //     suppressAndOrCondition: true,
+            // // },
+            // // suppressMenu: true,    // Suppress the column menu
             headerName: 'AdID',
             field: 'adid',
             // sortable: true,
             // minWidth: 200,
             // filter: 'agSetColumnFilter',
             // hide: true,
-            // filterParams: {
-            //     comparator: (a, b) => a.localeCompare(b),
-            //     suppressAndOrCondition: true,
-            // },
-            // suppressMenu: true,    // Suppress the column menu
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            },
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+            pinned: 'left',
 
         },
         // from:{
@@ -8358,10 +9001,55 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         from: {
+            // headerName: 'Start',
+            // field: 'from',
+            // minWidth: 110,
+            // sortable: true,
+            // valueGetter: (params) => {
+            //     // if (params.node.group) {
+            //     //     const campaignName =
+            //     //         params.node.groupData?.campaignname || params.node.key;
+            //     //     const campaign = campaignMap.get(campaignName);
+            //     //     return campaign && campaign.start
+            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //     //         : '-';
+            //     // }
+            //     // return '';
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+
+            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+            //     }
+            //     return params.data?.from || null;
+            // },
+            // valueFormatter: (params) => {
+            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'Start',
             field: 'from',
-            minWidth: 110,
             sortable: true,
+            minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 // if (params.node.group) {
                 //     const campaignName =
@@ -8373,9 +9061,12 @@ const MyTablePage = () => {
                 // }
                 // return '';
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
@@ -8392,19 +9083,65 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         to: {
+            // headerName: 'End',
+            // field: 'to',
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+            //         return campaign && campaign.end
+            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //             : '-';
+            //     }
+            //     return params.data?.to || null;
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    // const campaign = campaignMap.get(campaignName);
+                    // return campaign && campaign.end
+                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                    //     : '-';
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+                    // console.log(campaignName, "campaignName");
+                    // console.log(campaignId, "campaignId");
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+                    // console.log(campaign, "campaign");
+
                     return campaign && campaign.end
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return params.data?.to || null;
+                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -8630,8 +9367,36 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "ROI = (Revenue - Spend) / Spend",
         },
-        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', hide: true },
-        campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', hide: true },
+        adsetid: {
+            headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu',
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.adsetid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.adsetid || null;
+            },
+        },
+        campaignid: {
+            headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu',
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.campaignid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.campaignid || null;
+            },
+        },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
@@ -9314,7 +10079,14 @@ const MyTablePage = () => {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
-            // hide: true,
+            showWhenGrouped: true,
+            minWidth: 170,
+            filter: "agTextColumnFilter",
+            valueGetter: (params) => {
+                if (params.data) return params.data.accountNumber;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.accountNumber || null;
+            },
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -9347,17 +10119,34 @@ const MyTablePage = () => {
             hide: true
         },
         campaignname: {
-            headerName: 'CampaignName', field: 'campaignname', resizeble: true,
+            // headerName: 'CampaignName', field: 'campaignname', resizeble: true,
+            // // sortable: true,
+            // resizeble: true,
             // sortable: true,
-            resizeble: true,
+            // width: 500,
+            // hide: true,
+            // rowGroup: true,
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // width: 450,
+            // pinned: 'left',// Using the group cell renderer
+            headerName: 'CampaignID',
+            field: 'campaignname',
+            resizable: true,
             sortable: true,
-            width: 500,
-            hide: true,
-            rowGroup: true,
-            pinned: 'left',
-            enableRowGroup: true,
-            width: 450,
-            pinned: 'left',// Using the group cell renderer
+            // hide: true,
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.campaignid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.campaignid || null;
+            },
         },
         cpm: {
             headerName: 'CPM',
@@ -9559,7 +10348,7 @@ const MyTablePage = () => {
             enableSorting: false,
             enableFilter: false,
             suppressMenu: true,
-            hide: !isYesterday(),
+            // hide: !isYesterday(),
             // cellRenderer: (params) => {
             //     const [isModalVisible, setIsModalVisible] = useState(false);
             //     const [groupedData, setGroupedData] = useState([]);
@@ -9589,12 +10378,7 @@ const MyTablePage = () => {
             //             return;
             //         }
 
-            //         // const budget = parseFloat(
-            //         //     campaignActualSpend?.campaign_budget?.daily_budget ||
-            //         //     campaignActualSpend?.campaign_budget?.lifetime_budget || 0
-            //         // ) / 100;
-            //         // onChangeBudget(budget);
-            //         // const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+
             //         const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
 
             //         if (matchedCampaign) {
@@ -9702,12 +10486,14 @@ const MyTablePage = () => {
             //         </div>
             //     );
             // },
+
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignActualSpend, setCampaignActualSpend] = useState({});
                 const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
 
                 const isGroupRow = !!params?.node?.groupData;
 
@@ -9725,15 +10511,15 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                // const { allCampaignData } = params?.context || {};
+                // const { allCampaignData } = params.context;
 
                 // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
-                    if (!campaignId || !rowAccountNumber || !Array.isArray(allCampaignData)) return;
+                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
 
-                    const matched = allCampaignData.find(
+                    const matched = Camapignlevelstatus.find(
                         c =>
-                            String(c.campaignid) === String(campaignId) &&
+                            String(c.campaign_id) === String(campaignId) &&
                             String(c.accountNumber) === String(rowAccountNumber)
                     );
 
@@ -9745,7 +10531,7 @@ const MyTablePage = () => {
                                 matched.campaign_budget.lifetime_budget != null)
                         )
                     );
-                }, [campaignId, rowAccountNumber, allCampaignData]);
+                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
 
                 const onChangeSpendAndStatus = () => {
                     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
@@ -9767,8 +10553,7 @@ const MyTablePage = () => {
                 };
 
                 const handleOk = async () => {
-                    setIsModalVisible(false);
-
+                    setConfirmLoading(true);
                     const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
                     const campaignIdFinal = target?.campaignid;
                     const campaignnameFinal = target?.campaignname;
@@ -9779,6 +10564,8 @@ const MyTablePage = () => {
                         accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
                         campaignname: campaignnameFinal,
                         updatedby: params.context?.userdetails?.email,
+                        budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                     };
 
                     if (!payload.campaignId || !payload.accountNumber) {
@@ -9787,11 +10574,32 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/update/campaign/budget', payload);
+                        await apiClient.post('/new/update/campaign/budget', payload);
                         message.success("Budget Updated Successfully");
-                        params.context.setCampaignRefreshTrigger(prev => prev + 1);
-                        params.context.changeRRefrst();
+                        setCamapignlevelstatus(prev => {
+                            const updated = prev.map(item => {
+                                if (
+                                    String(item.campaign_id) === String(payload.campaignId) &&
+                                    String(item.accountNumber) === String(payload.accountNumber)
+                                ) {
+                                    return {
+                                        ...item,
+                                        campaign_budget: {
+                                            ...item.campaign_budget,
+                                            daily_budget: String(payload.budget),
+                                        },
+                                    };
+                                }
+                                return item;
+                            });
+                            return updated;
+                        })
+                        setConfirmLoading(false);
+                        setIsModalVisible(false);
+                        // params.context.setCampaignRefreshTrigger(prev => prev + 1);
+                        // params.context.changeRRefrst();
                     } catch (err) {
+                        setConfirmLoading(false);
                         console.error(err);
                         message.error("Failed to update budget");
                     }
@@ -9823,6 +10631,25 @@ const MyTablePage = () => {
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
                                 className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
+                                {confirmLoading && (
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            background: "rgba(255,255,255,0.7)", // dim background
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            zIndex: 1000,
+                                            borderRadius: "8px",
+                                        }}
+                                    >
+                                        <Spin size="large" tip="Saving..." />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                     <div style={{ display: 'flex' }}>
                                         <p>Budget Type:&nbsp;</p>
@@ -10008,23 +10835,71 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         from: {
+            // headerName: 'Start',
+            // field: 'from',
+            // sortable: true,
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     //   if (params.node.group) {
+            //     //     const campaignName =
+            //     //       params.node.groupData?.campaignname || params.node.key;
+            //     //     const campaign = campaignMap.get(campaignName);
+            //     //     return campaign && campaign.start
+            //     //       ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //     //       : '-';
+            //     //   }
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+
+            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+            //     }
+            //     return params.data?.from || null;
+            // },
+            // valueFormatter: (params) => {
+            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
-                //   if (params.node.group) {
+                // if (params.node.group) {
                 //     const campaignName =
-                //       params.node.groupData?.campaignname || params.node.key;
+                //         params.node.groupData?.campaignname || params.node.key;
                 //     const campaign = campaignMap.get(campaignName);
                 //     return campaign && campaign.start
-                //       ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //       : '-';
-                //   }
+                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                //         : '-';
+                // }
+                // return '';
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0].campaignid || params.node?.key || "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
@@ -10041,19 +10916,65 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         to: {
+            // headerName: 'End',
+            // field: 'to',
+            // minWidth: 110,
+            // valueGetter: (params) => {
+            //     if (params.node.group) {
+            //         const campaignName =
+            //             params.node.groupData?.campaignname || params.node.key;
+            //         const campaign = campaignMap.get(campaignName);
+            //         return campaign && campaign.end
+            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+            //             : '-';
+            //     }
+            //     return params.data?.to || null;
+            // },
+            // cellClassRules: {
+            //     'hide-leaf-cell': (params) => !params.node.group,
+            // },
+            // suppressMenu: true,
+            // menuTabs: [],
+            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (cellValue == null) return -1;
+
+                    // Convert your cell value string to a Date
+                    const cellDate = new Date(cellValue);
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
             valueGetter: (params) => {
                 if (params.node.group) {
-                    const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                    // const campaignName =
+                    //     params.node.groupData?.campaignname || params.node.key;
+                    // const campaign = campaignMap.get(campaignName);
+                    // return campaign && campaign.end
+                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                    //     : '-';
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+                    // console.log(campaignName, "campaignName");
+                    // console.log(campaignId, "campaignId");
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+                    // console.log(campaign, "campaign");
+
                     return campaign && campaign.end
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                         : '-';
                 }
-                return params.data?.to || null;
+                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
             },
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
@@ -10253,7 +11174,20 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: 'ROI = ((Revenue - Spend) / Spend) * 100',
         },
-        campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        campaignid: {
+            // headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' 
+            headerName: 'CampaignId',
+            field: 'campaignid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+        },
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
@@ -11374,7 +12308,7 @@ const MyTablePage = () => {
 
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/Comment', { accountNumbers: accounts });
+            const { data } = await apiClient.post('/NewComment', { accountNumbers: accounts });
             setCampaignComments(data);     // data already includes all selected accounts’ comments
             setInitialLoading(false);
         } catch {
@@ -11706,14 +12640,14 @@ const MyTablePage = () => {
     };
 
 
-    useEffect(() => {
-        // Ensure it only runs if `refrst` changes after the first render
-        if (hasFetched.current) {
-            fetchCampaignComments();
-        } else {
-            hasFetched.current = true; // Set it to true after first render
-        }
-    }, [refrst]); // Run this effect when refrst changes
+    // useEffect(() => {
+    //     // Ensure it only runs if `refrst` changes after the first render
+    //     if (hasFetched.current) {
+    //         fetchCampaignComments();
+    //     } else {
+    //         hasFetched.current = true; // Set it to true after first render
+    //     }
+    // }, [refrst]); // Run this effect when refrst changes
 
 
     const handleColumnMove = (params, gridId) => {
@@ -13059,6 +13993,7 @@ const MyTablePage = () => {
                                     columnDefs1={columnDefsAdsetLevel.current}
                                     columnDefs2={columnDefsAdLevel.current}
                                     campaignComments={campaignComments}
+                                    setCampaignComments={setCampaignComments}
                                     campaignStatusFilter={campaignStatusFilter}
                                     Camapignlevelstatus={Camapignlevelstatus}
                                     setCamapignlevelstatus={setCamapignlevelstatus}
@@ -13111,6 +14046,7 @@ const MyTablePage = () => {
                                     columnDefs1={columnDefsAdsetLevelDaily}
                                     columnDefs2={columnDefsAdLevelDaily}
                                     campaignComments={campaignComments}
+                                    setCampaignComments={setCampaignComments}
                                     campaignStatusFilter={campaignStatusFilter}
                                     Camapignlevelstatus={Camapignlevelstatus}
                                     setCamapignlevelstatus={setCamapignlevelstatus}

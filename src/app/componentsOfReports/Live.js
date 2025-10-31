@@ -66,7 +66,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
+const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
     console.log("new multiple accounts:", newaccount);
@@ -1765,6 +1765,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         newAccountName={newAccountName}
                         columnDefs={columnDefs}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
                         setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
@@ -1802,6 +1803,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         newAccountName={newAccountName}
                         columnDefs={columnDefs1}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
                         setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
@@ -1840,6 +1842,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         newAccountName={newAccountName}
                         columnDefs={columnDefs2}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
                         setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}

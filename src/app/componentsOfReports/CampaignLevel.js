@@ -3,7 +3,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Badge } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge } from 'antd';
 import { GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
@@ -58,7 +58,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess }) => {
+const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess }) => {
     console.log(columnDefs, "columnDefs");
     console.log("campaign acconts:", newaccount);
     console.log('accountAccess:', accountsAccess);
@@ -67,12 +67,15 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
     const [rowData, setRowData] = useState([]);
+    const newRowDataForFilter = useRef([]);
 
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
     const [isLoading, setLoading] = useState(true);
 
     const [apiStatus, setApiStatus] = useState(false);
+
+    console.log(apiStatus, "apiStatus");
 
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -335,16 +338,17 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
 
                 // find the exact record for this campaign + account (+ ids if present)
                 const rec = campaignComments.find(c =>
-                    c.campaignname === campaignName &&
+                    // c.campaignname === campaignName &&
                     String(c.Account) === String(rowAccount) &&
                     (c.campaignid ? String(c.campaignid) === String(cid) : true)
+                    && c.level === "campaign"
                     // && (c.adsetid ? String(c.adsetid) === String(aid) : true)
                 );
 
                 // derive UI pieces
                 const relatedComment = rec?.comment ?? null;
-                const editedRaw = rec?.editedTime ?? rec?.editedPinTime ?? '';
-                const editedBy = rec?.usercommit ?? rec?.userPin ?? '';
+                const editedRaw = rec?.editedTime ?? '';
+                const editedBy = rec?.usercommit ?? '';
                 const editedPretty = editedRaw
                     ? moment(editedRaw, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
                     : '';
@@ -410,6 +414,8 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                 const [comment, setComment] = useState(relatedComment || '');
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
                 const [pendingAccount, setPendingAccount] = useState(null);   // ✅ which account to update/refresh
+                const [universalOject, setUniversalObject] = React.useState(null)
+                const [confirmLoading, setConfirmLoading] = React.useState(false);
 
                 const setCamapignlevelstatusFromGrid = params.context?.setCamapignlevelstatus;
                 // get override Map from grid context
@@ -434,6 +440,10 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                 //     return st ? st.status === "ACTIVE" : false;
                 // });
 
+                React.useEffect(() => {
+                    setUniversalObject(campaignComments.find(d => d.level === "campaign" && d.campaignid === campaignid && d.Account === rowAccount));
+                    // eslint-disable-next-line react-hooks/exhaustive-deps
+                }, [campaignComments]);
 
                 // set Switch from the right record (campaign_id + accountNumber)
                 useEffect(() => {
@@ -496,8 +506,8 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
 
                 const handlePauseOk = async () => {
                     const desired = nextChecked;                  // true => ACTIVE, false => PAUSED
-                    setSwitchOn(desired);                         // optimistic UI on THIS cell only
-
+                    setIsCampaignModalVisibles(true);
+                    setConfirmLoading(true);
                     try {
                         const token = localStorage.getItem("token");
                         const payload = {
@@ -519,6 +529,8 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                         const newStatus = desired ? "ACTIVE" : "PAUSED";
 
                         if (response.status === 200 || response.status === 201) {
+                            setConfirmLoading(false);
+                            setSwitchOn(desired); // optimistic
                             setCamapignlevelstatus(prevStatus =>
                                 prevStatus.map(item =>
                                     String(item.campaign_id) === String(campaignid) &&
@@ -527,6 +539,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                         : item // keep others as is
                                 )
                             );
+                            setIsCampaignModalVisibles(false);
                         }
 
                         // ✅ Persist status only in the override Map (no rowData update, no parent setState)
@@ -537,10 +550,11 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                         message.success(`Campaign ${newStatus.toLowerCase()}`);
                     } catch (e) {
                         // revert only this switch
+                        setConfirmLoading(false);
                         setSwitchOn(prev => !prev);
                         message.error("Failed to update campaign status");
                     } finally {
-                        setIsCampaignModalVisibles(false);
+                        // setIsCampaignModalVisibles(false);
                         setSelectedCampaign(null);
                         setPendingAccount(null);
                     }
@@ -800,20 +814,52 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                     const updatedPinStatus = !currentPinStatus;
 
                     const body = {
-                        accountNumbers: accountsParam,
+                        accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
-                        adsetid,
                         userPin: userdetails?.email,
-                        comment: comment || ''
+                        comment: comment || '',
+                        level: "campaign"
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('/PinBulk', body)
-                        : await apiClient.post('/UnpinBulk', body);
+                        ? await apiClient.post('/NewPinBulk', body)
+                        : await apiClient.post('/NewUnpinBulk', body);
 
-                    if (resp.status === 200) {
-                        refreshComments(accountsParam);     // your helper already accepts array
+                    if (resp.status === 200 || resp.status === 201) {
+                        // if (newResponse.status === 200 || newResponse.status === 201) {
+                        setCampaignComments(prev => {
+                            const arr = Array.isArray(prev) ? [...prev] : [];
+                            const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                            const match = arr.findIndex(
+                                i =>
+                                    String(i?.campaignid) === String(campaignid) &&
+                                    String(i?.Account) === String(rowAccount) &&
+                                    //   String(i?.adsetid) === String(adsetid) &&
+                                    //   String(i?.ad_id) === String(adid) &&
+                                    String(i?.level) === 'campaign'
+                            );
+
+                            if (match >= 0) {
+                                arr[match] = { ...arr[match], pinned: updatedPinStatus, userPin: userdetails?.email, editedPinTime: timeStamp };
+                            } else {
+                                arr.push({
+                                    campaignid,
+                                    Account: rowAccount,
+                                    //   adsetid,
+                                    //   ad_id: adid,
+                                    level: 'campaign',
+                                    pinned: updatedPinStatus,
+                                    userPin: userdetails?.email,
+                                    editedPinTime: timeStamp
+                                });
+                            }
+
+                            return arr;
+                        });
+                        //   }
+                        // refreshComments(accountsParam);     // your helper already accepts array
                         message.success(updatedPinStatus ? "Pinned for selected accounts" : "Unpinned for selected accounts");
                         setPinned(updatedPinStatus);
                     }
@@ -824,32 +870,100 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
-                        adsetid,
                         comment,
                         usercommit: userdetails?.email,
                         level: "campaign"
                     };
-                    await apiClient.post('http://localhost:8000/Comments/upsert', body);
-                    refreshComments(accountsParam);
+                    const newResponse = await apiClient.post('/Comments/upsert', body);
+                    if (newResponse.status === 200 || newResponse.status === 201) {
+                        setCampaignComments(prev => {
+                            const arr = Array.isArray(prev) ? [...prev] : [];
+                            const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                            const match = arr.findIndex(
+                                i =>
+                                    String(i?.campaignid) === String(campaignid) &&
+                                    String(i?.Account) === String(rowAccount) &&
+                                    // String(i?.adsetid) === String(adsetid) &&
+                                    // String(i?.ad_id) === String(adid) &&
+                                    String(i?.level) === 'campaign'
+                            );
+
+                            if (match >= 0) {
+                                arr[match] = { ...arr[match], comment: comment, usercommit: userdetails?.email, editedTime: timeStamp };
+                            } else {
+                                arr.push({
+                                    campaignid,
+                                    Account: rowAccount,
+                                    // adsetid,
+                                    // ad_id: adid,
+                                    level: 'campaign',
+                                    comment: comment,
+                                    usercommit: userdetails?.email,
+                                    editedTime: timeStamp
+                                });
+                            }
+
+                            return arr;
+                        });
+                    }
+                    // refreshComments(accountsParam);
                     message.success("Comment saved for selected accounts");
                     setIsModalVisibles(false);
                 };
 
                 const handleDelete = async () => {
-                    const body = { accountNumbers: accountsParam, campaignname: campaignName, campaignid, adsetid };
-                    const resp = await apiClient.post('/Comments/bulk-delete', body);
-                    if (resp.status === 200) {
-                        refreshComments(accountsParam);
+                    const body = {
+                        accountNumber: rowAccount,
+                        campaignname: campaignName,
+                        campaignid,
+                        // comment,
+                        usercommit: userdetails?.email,
+                        level: "campaign"
+                    };
+                    const newResponse = await apiClient.post('/Comments/delete', body);
+                    if (newResponse.status === 200 || newResponse.status === 201) {
+                        setCampaignComments(prev => {
+                            const arr = Array.isArray(prev) ? [...prev] : [];
+                            const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                            const match = arr.findIndex(
+                                i =>
+                                    String(i?.campaignid) === String(campaignid) &&
+                                    String(i?.Account) === String(rowAccount) &&
+                                    // String(i?.adsetid) === String(adsetid) &&
+                                    // String(i?.ad_id) === String(adid) &&
+                                    String(i?.level) === 'campaign'
+                            );
+
+                            if (match >= 0) {
+                                arr[match] = { ...arr[match], comment: "", usercommit: userdetails?.email, editedTime: timeStamp };
+                            }
+                            // else {
+                            //     arr.push({
+                            //         campaignid,
+                            //         Account: rowAccount,
+                            //         // adsetid,
+                            //         // ad_id: adid,
+                            //         level: 'campaign',
+                            //         comment: comment,
+                            //         usercommit: userdetails?.email,
+                            //         editedTime: timeStamp
+                            //     });
+                            // }
+
+                            return arr;
+                        });
                         message.success('Comment deleted for selected accounts');
                         setIsModalVisibles(false);
                     }
                 };
 
 
-                const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
+                const PinIcon = ({ universalOject, campaignName, campaignid, adsetid, pinned }) => {
                     return (
                         <Tooltip
-                            title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}
+                            title={pinned ? <CustomTooltipContent editedTime={universalOject?.editedPinTime} usercommit={universalOject?.userPin} /> : null}
                             overlayInnerStyle={{
                                 backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                 color: theme === 'dark' ? '#fff' : '#000',
@@ -894,17 +1008,39 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                             onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
-                            <p>
-                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this campaign?
-                            </p>
-                            <p>Campaign ID: {selectedCampaign}</p>
-                            <p>Campaign Name: {campaignName}</p>
+                            {confirmLoading && (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        background: "rgba(255,255,255,0.7)", // dim background
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        zIndex: 1000,
+                                        borderRadius: "8px",
+                                    }}
+                                >
+                                    <Spin size="large" tip="Saving..." />
+                                </div>
+                            )}
+                            <div>
+                                <p>
+                                    Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this campaign?
+                                </p>
+                                <p>Campaign ID: {selectedCampaign}</p>
+                                <p>Campaign Name: {campaignName}</p>
+                            </div>
                         </Modal>
                         <PinIcon
                             campaignName={campaignName}
                             campaignid={campaignid}
                             adsetid={adsetid}
                             pinned={pinned}
+                            universalOject={universalOject}
                         />
                         {/* <div style={{ marginLeft: '2px' }}>
                             {(() => {
@@ -963,7 +1099,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         )} */}
-                        {relatedComment && (
+                        {universalOject?.comment && (
                             <Tooltip
                                 // title={relatedComment || 'No comment available'}
                                 // title={
@@ -978,9 +1114,9 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                 // }
                                 title={
                                     <div>
-                                        <div>{relatedComment}</div>
+                                        <div>{universalOject?.comment}</div>
                                         <div style={{ opacity: 0.85 }}>
-                                            {editedPretty || 'N/A'}{editedBy ? ` • ${editedBy}` : ''}
+                                            {universalOject?.editedTime || 'N/A'}{universalOject?.usercommit ? ` • ${universalOject?.usercommit}` : ''}
                                         </div>
                                     </div>
                                 }
@@ -1004,7 +1140,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                 />
                             </Tooltip>
                         )}
-                        {!relatedComment && (
+                        {!universalOject?.comment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip
@@ -1412,6 +1548,11 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                     const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
+                    const campaignObjectStatus = Camapignlevelstatus
+                        .find(item =>
+                            String(item.campaign_id) === String(eachData.campaign_id) &&
+                            String(item.accountNumber) === String(eachData.accountNumber)
+                        );
 
                     return {
                         accountNumber: eachData.accountNumber,
@@ -1452,7 +1593,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                         category: category?.category || "",
                         campaignStatus: campaign_date?.status || "",
                         pinned: campaignPinned ? campaignPinned.pinned : false,
-
+                        fbStatus: campaignObjectStatus?.status,
                     };
                 })
                 : null;
@@ -1472,37 +1613,46 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                 maxNetworkHour.current = getMaxHour(mainData);
             }
 
-            const filteredByStatus = campaignStatusFilter && campaignStatusFilter.toLowerCase() !== 'all'
-                ? filteredData.filter(item => {
-                    const campaign = Camapignlevelstatus.find(
-                        c => c?.campaign_id?.toString() === item?.campaignid?.toString()
-                    );
-                    return campaign?.status?.toUpperCase() === campaignStatusFilter?.toUpperCase();
-                })
-                : filteredData;
+            // const filteredByStatus = campaignStatusFilter && campaignStatusFilter.toLowerCase() !== 'all'
+            //     ? filteredData.filter(item => {
+            //         const campaign = Camapignlevelstatus.find(
+            //             c => c?.campaign_id?.toString() === item?.campaignid?.toString()
+            //         );
+            //         return campaign?.status?.toUpperCase() === campaignStatusFilter?.toUpperCase();
+            //     })
+            //     : filteredData;
 
-            setRowData(filteredByStatus);
+            let newFilterData;
+            if(campaignStatusFilter !== "ALL"){
+                newFilterData = filteredData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            }
+            else{
+                newFilterData = filteredData;
+            }
+
+            setRowData(newFilterData);
+            newRowDataForFilter.current = filteredData;
 
             setLiveFixedFooter([{
                 campaignName: 'Total',
                 actions: "",
-                spend: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2)),
-                revenue: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2)),
-                profit: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2)),
-                margin: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) || 1) * 100).toFixed(2)),
-                rpc: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-                cpl: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-                ncpl: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.ncpl || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-                fbleads: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fbleads || 0), 0).toFixed(2)),
-                conversions: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.conversions || 0), 0).toFixed(2)),
-                fmargin: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0) || 1) * 100).toFixed(2)),
-                roi: parseFloat(((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) - filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0) || 1) * 100).toFixed(2)),
-                cpc: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.cpc || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-                cpclinkclicks: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-                fbclicks: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0).toFixed(2)),
-                fblinkclicks: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0).toFixed(2)),
-                impressions: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0).toFixed(2)),
-                ctr: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0) || 1) * 100).toFixed(2))
+                spend: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2)),
+                revenue: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2)),
+                profit: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2)),
+                margin: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) / (newFilterData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) || 1) * 100).toFixed(2)),
+                rpc: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / (newFilterData.length || 1)).toFixed(2)),
+                cpl: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) / (newFilterData.length || 1)).toFixed(2)),
+                ncpl: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.ncpl || 0), 0) / (newFilterData.length || 1)).toFixed(2)),
+                fbleads: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fbleads || 0), 0).toFixed(2)),
+                conversions: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.conversions || 0), 0).toFixed(2)),
+                fmargin: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) / (newFilterData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0) || 1) * 100).toFixed(2)),
+                roi: parseFloat(((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) - newFilterData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) / (newFilterData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0) || 1) * 100).toFixed(2)),
+                cpc: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.cpc || 0), 0) / (newFilterData.length || 1)).toFixed(2)),
+                cpclinkclicks: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) / (newFilterData.length || 1)).toFixed(2)),
+                fbclicks: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0).toFixed(2)),
+                fblinkclicks: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0).toFixed(2)),
+                impressions: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0).toFixed(2)),
+                ctr: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) / (newFilterData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0) || 1) * 100).toFixed(2))
             }]);
 
             newRowData.current = filteredData;
@@ -1750,21 +1900,67 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
         functionCall1();
         setApiStatus(false);
     }
-    useEffect(() => {
-        if (oneTimeFetch.current) {
-            functionCall1();
-            oneTimeFetch.current = false;
-        }
-    }, [oneTimeFetch.current]);
+    // useEffect(() => {
+    //     if (oneTimeFetch.current) {
+    //         functionCall1();
+    //         oneTimeFetch.current = false;
+    //     }
+    // }, [oneTimeFetch.current]);
 
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
+            console.log("test1");
             functionCall1();
+        }
+    }, []);
+
+    useEffect(() => {
+        // functionCall1();
+        console.log(campaignStatusFilter, "campaignStatusFilter");
+        if(campaignStatusFilter !== "ALL"){
+            const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            setRowData(filteredByStatus);
+        }else{
+            setRowData(newRowDataForFilter.current);
         }
     }, [campaignStatusFilter]);
 
     useEffect(() => {
+        console.log(campaignComments, "campaignComments");
+        const mainData = newRowDataForFilter.current;
+        const filterData = mainData && mainData.length > 0 ?
+            mainData.map((eachData) => {
+                const adsetObjectStatus = Camapignlevelstatus
+                    .find(item =>
+                        String(item.campaign_id) === String(eachData.campaign_id) &&
+                        String(item.accountNumber) === String(eachData.accountNumber)
+                    );
+                return (
+                    {
+                        ...eachData,
+                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
+                    }
+                )
+            }) : null;
+        newRowDataForFilter.current = filterData;
+        let newFilterData;
+        if (campaignStatusFilter !== "ALL") {
+            console.log("testing 4444");
+            newFilterData = filterData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+        }
+        else {
+            newFilterData = filterData;
+        }
+
+        setRowData(newFilterData);
+        // newRowDataForFilter.current = filteredData;
+        console.log("testing 4444");
+    }
+        , [Camapignlevelstatus]);
+
+    useEffect(() => {
         if (refreshpage === "Refresh11") {
+            console.log("test2");
             handleReFetchData();
             showCampaignLevel([]);
         }
@@ -2164,7 +2360,8 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                 />
                             </div>
                         </div>
-                    ) : rowData?.length > 0 ? (
+                    ) : rowData?.length > 0 ? 
+                    (
                         // <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
 
 

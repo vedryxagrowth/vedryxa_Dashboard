@@ -3,7 +3,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Badge, Checkbox } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Badge, Spin, Checkbox } from 'antd';
 import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
@@ -58,7 +58,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess }) => {
+const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess }) => {
     console.log(columnDefs, "columnDefs");
     console.log("adset accounts:", newaccount);
     const { theme } = useTokenContext();
@@ -66,6 +66,8 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
     const [rowData, setRowData] = useState([]);
+
+    const newRowDataForFilter = useRef([]);
 
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
@@ -303,28 +305,27 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
 
                 // find the exact comment record for this (campaign+adset+account)
                 const rec = campaignComments.find(c =>
-                    c.campaignname === adsetName &&                       // you store adsetName in campaignname at adset level
+                    // c.campaignname === adsetName &&                       // you store adsetName in campaignname at adset level
                     String(c.Account) === String(rowAccount) &&
                     (c.campaignid ? String(c.campaignid) === String(campaignid) : true) &&
-                    (c.adsetid ? String(c.adsetid) === String(adsetid) : true)
+                    (c.adsetid ? String(c.adsetid) === String(adsetid) : true) &&
+                    (c.level === "adset")
                 );
 
 
                 // comment override first, then backend record
                 const commentOverride = commentMap?.get(statusKey);
-                const relatedComment = commentOverride?.text ?? rec?.comment ?? null;
-                const editedBy = commentOverride?.editedBy ?? rec?.usercommit ?? '';
-                const editedPretty = commentOverride?.editedAt
-                    ? commentOverride.editedAt
+                const relatedComment = rec?.comment ?? null;
+                const editedBy = rec?.usercommit ?? '';
+                const editedPretty = rec?.editedTime
+                    ? rec.editedTime
                     : (rec?.editedTime
                         ? moment(rec.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
                         : '');
 
                 // pin override first, then backend record
                 const pinnedOverride = pinMap?.get(statusKey);
-                const [pinned, setPinned] = useState(
-                    typeof pinnedOverride === 'boolean' ? pinnedOverride : !!rec?.pinned
-                );
+                const [pinned, setPinned] = useState(rec?.pinned ? rec?.pinned : false);
                 // keep in sync if Map changes externally (optional)
                 useEffect(() => {
                     if (typeof pinnedOverride === 'boolean') setPinned(pinnedOverride);
@@ -382,6 +383,8 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                 const [comment, setComment] = useState(relatedComment || '');
                 // const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
                 const [pendingAccount, setPendingAccount] = useState(null);
+                const [universalOject, setUniversalObject] = React.useState(null)
+                const [confirmLoading, setConfirmLoading] = React.useState(false);
 
 
                 // const [switchOn, setSwitchOn] = useState(true); // default to ACTIVE
@@ -436,6 +439,11 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                     return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
                 });
 
+                React.useEffect(() => {
+                    setUniversalObject(campaignComments.find(d => d.level === "adset" && d.campaignid === campaignid && d.adsetid === adsetid && d.Account === rowAccount));
+                    // eslint-disable-next-line react-hooks/exhaustive-deps
+                }, [campaignComments]);
+
                 // Status toggle (per row’s account)
                 const handlePauseClick = (checked) => {
                     setSelectedAdset(adsetid);
@@ -480,7 +488,8 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
 
                 const handlePauseOk = async () => {
                     const desired = nextChecked; // true => ACTIVE
-                    setSwitchOn(desired);        // optimistic (cell only)
+                    setIsAdsetModalVisibles(true);
+                    setConfirmLoading(true);
                     try {
                         const token = localStorage.getItem("token");
                         const payload = {
@@ -491,7 +500,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                             adset_id: adsetid,
                             email: userdetails?.email,
                         };
-                        const response = await apiClient.post(`http://localhost:8000/NewBulkAdsetStatusChange`, payload,
+                        const response = await apiClient.post(`/NewBulkAdsetStatusChange`, payload,
                             { headers: { Authorization: token } }
                         );
 
@@ -500,6 +509,8 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                         // write to override map (stable across tabs)
                         // statusMap?.set(statusKey, newStatus);
                         if (response.status === 200 || response.status === 201) {
+                            setSwitchOn(desired);
+                            setConfirmLoading(false);
                             setCamapignlevelstatus(prevStatus =>
                                 prevStatus.map(item =>
                                     String(item.campaign_id) === String(campaignid) &&
@@ -515,18 +526,20 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                                         : item // keep other campaigns as is
                                 )
                             );
+                            setIsAdsetModalVisibles(false);
                         }
 
                         // also cache on the row so sort/comparator can see it without reading maps
-                        const updatedRow = { ...params.data, __adsetStatus: newStatus };
-                        if (params.api?.applyTransaction) {
-                            params.api.applyTransaction({ update: [updatedRow] });
-                        } else {
-                            params.node.updateData(updatedRow);
-                        }
+                        // const updatedRow = { ...params.data, __adsetStatus: newStatus };
+                        // if (params.api?.applyTransaction) {
+                        //     params.api.applyTransaction({ update: [updatedRow] });
+                        // } else {
+                        //     params.node.updateData(updatedRow);
+                        // }
 
                         message.success(`Adset ${newStatus.toLowerCase()}`);
                     } catch (e) {
+                        setConfirmLoading(false);
                         setSwitchOn(prev => !prev); // revert this cell only
                         message.error("Failed to update adset status");
                     } finally {
@@ -610,32 +623,61 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                     const next = !currentPinStatus;
                     setPinned(next); // optimistic
                     try {
+                        // const body = {
+                        //     accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
+                        //     campaignname: adsetName,
+                        //     campaignid,
+                        //     adsetid,
+                        //     userPin: userdetails?.email,
+                        //     comment: comment || ''
+                        // };
                         const body = {
-                            accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
-                            campaignname: adsetName,
+                            accountNumber: rowAccount,
+                            campaignname: campaignName,
                             campaignid,
                             adsetid,
                             userPin: userdetails?.email,
-                            comment: comment || ''
+                            comment: comment || '',
+                            level: "adset"
                         };
                         const resp = next
-                            ? await apiClient.post('/PinBulk', body)
-                            : await apiClient.post('/UnpinBulk', {
-                                accountNumbers: body.accountNumbers,
-                                campaignname: adsetName,
-                                campaignid,
-                                adsetid
-                            });
+                            ? await apiClient.post('/NewPinBulk', body)
+                            : await apiClient.post('/NewUnpinBulk', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
-                            pinMap?.set(statusKey, next);
-                            const updatedRow = { ...params.data, __adsetPinned: next };
-                            if (params.api?.applyTransaction) {
-                                params.api.applyTransaction({ update: [updatedRow] });
-                            } else {
-                                params.node.updateData(updatedRow);
-                            }
+                            // if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(rowAccount) &&
+                                        String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'adset'
+                                );
+
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], pinned: next, userPin: userdetails?.email, editedPinTime: timeStamp };
+                                } else {
+                                    arr.push({
+                                        campaignid,
+                                        Account: rowAccount,
+                                        adsetid,
+                                        // ad_id: adid,
+                                        level: 'adset',
+                                        pinned: next,
+                                        userPin: userdetails?.email,
+                                        editedPinTime: timeStamp
+                                    });
+                                }
+
+                                return arr;
+                            });
+                            // }
                             message.success(next ? "Pinned" : "Unpinned");
                         } else {
                             setPinned(!next); // revert
@@ -648,10 +690,13 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                 };
 
 
-                const PinIcon = ({ pinned }) => (
+                const PinIcon = ({ universalOject, pinned }) => (
                     <Tooltip
                         title={pinned
-                            ? <div><div>{relatedComment || ''}</div><div style={{ opacity: .85 }}>{editedPretty || 'N/A'}{editedBy ? ` • ${editedBy}` : ''}</div></div>
+                            ? <div style={{ opacity: 0.85 }}>
+                                <div>{universalOject?.userPin || 'N/A'}</div>
+                                <div>{universalOject?.editedPinTime}</div>
+                            </div>
                             : null
                         }
                         overlayInnerStyle={{
@@ -672,20 +717,53 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
 
                 const handleOks = async () => {
                     try {
-                        await apiClient.post('/Comments/bulk-upsert', {
-                            accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
+                        const newResponse = await apiClient.post('/Comments/upsert', {
+                            accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
                             adsetid,
                             comment,
                             usercommit: userdetails?.email,
+                            level: "adset"
                         });
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(rowAccount) &&
+                                        String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'adset'
+                                );
+
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], comment: comment, usercommit: userdetails?.email, editedTime: timeStamp };
+                                } else {
+                                    arr.push({
+                                        campaignid,
+                                        Account: rowAccount,
+                                        adsetid,
+                                        // ad_id: adid,
+                                        level: 'adset',
+                                        comment: comment,
+                                        usercommit: userdetails?.email,
+                                        editedTime: timeStamp
+                                    });
+                                }
+
+                                return arr;
+                            });
+                        }
                         // persist in Map (stable across tabs)
-                        commentMap?.set(statusKey, {
-                            text: comment,
-                            editedBy: userdetails?.email,
-                            editedAt: moment().format("DD-MM-YYYY hh:mm:ss A"),
-                        });
+                        // commentMap?.set(statusKey, {
+                        //     text: comment,
+                        //     editedBy: userdetails?.email,
+                        //     editedAt: moment().format("DD-MM-YYYY hh:mm:ss A"),
+                        // });
                         message.success("Comment saved");
                         setIsModalVisibles(false);
                     } catch (e) {
@@ -695,15 +773,47 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
 
                 const handleDelete = async () => {
                     try {
-                        const resp = await apiClient.post('/Comments/bulk-delete', {
-                            accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
+                        const newResponse = await apiClient.post('/Comments/delete', {
+                            accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
-                            adsetid
+                            adsetid,
+                            // comment,
+                            usercommit: userdetails?.email,
+                            level: "adset"
                         });
-                        if (resp.status === 200) {
-                            // clear local override + UI
-                            commentMap?.delete(statusKey);
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(rowAccount) &&
+                                        String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'adset'
+                                );
+
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], comment: "", usercommit: userdetails?.email, editedTime: timeStamp };
+                                }
+                                // else {
+                                //     arr.push({
+                                //         campaignid,
+                                //         Account: rowAccount,
+                                //         adsetid,
+                                //         // ad_id: adid,
+                                //         level: 'adset',
+                                //         comment: comment,
+                                //         usercommit: userdetails?.email,
+                                //         editedTime: timeStamp
+                                //     });
+                                // }
+
+                                return arr;
+                            });
                             setComment('');
                             message.success('Comment deleted');
                             setIsModalVisibles(false);
@@ -1016,11 +1126,32 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                             onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
-                            <p>
-                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this adset?
-                            </p>
-                            <p>Adset ID: {selectedAdset}</p>
-                            <p>Adset Name: {adsetName}</p>
+                            {confirmLoading && (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        background: "rgba(255,255,255,0.7)", // dim background
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        zIndex: 1000,
+                                        borderRadius: "8px",
+                                    }}
+                                >
+                                    <Spin size="large" tip="Saving..." />
+                                </div>
+                            )}
+                            <div>
+                                <p>
+                                    Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this adset?
+                                </p>
+                                <p>Adset ID: {selectedAdset}</p>
+                                <p>Adset Name: {adsetName}</p>
+                            </div>
                         </Modal>
                         {/* <PinIcon
                             campaignName={campaignName}
@@ -1028,9 +1159,9 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                             adsetid={adsetid}
                             pinned={pinned}
                         /> */}
-                        <PinIcon pinned={pinned} />
+                        <PinIcon pinned={pinned} universalOject={universalOject} />
 
-                        {relatedComment && (
+                        {universalOject?.comment && (
                             <Tooltip
                                 // title={relatedComment || 'No comment available'} 
                                 // title={
@@ -1045,8 +1176,8 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                                 //   }
                                 title={
                                     <div>
-                                        <div>{relatedComment}</div>
-                                        <div style={{ opacity: .85 }}>{editedPretty || 'N/A'}{editedBy ? ` • ${editedBy}` : ''}</div>
+                                        <div>{universalOject?.comment}</div>
+                                        <div style={{ opacity: .85 }}>{universalOject?.editedTime || 'N/A'}{universalOject?.usercommit ? ` • ${universalOject?.usercommit}` : ''}</div>
                                     </div>
                                 }
                                 overlayInnerStyle={{
@@ -1069,7 +1200,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                                 />
                             </Tooltip>
                         )}
-                        {!relatedComment && (
+                        {!universalOject?.comment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip
@@ -1499,11 +1630,19 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                     );
                     const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
                     const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
+                    const adsetObjectStatus = Camapignlevelstatus
+                        .find(item =>
+                            String(item.campaign_id) === String(eachData.campaign_id) &&
+                            String(item.accountNumber) === String(eachData.accountNumber)
+                        )?.adsets.find(adset =>
+                            String(adset.adset_id) === String(eachData.adset_id)
+                        );
                     const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0
                         ? 0
                         : Math.round((spend / fbLClicks) * 100) / 100;
+
 
                     return {
                         // ✅ keep accountNumber on the row
@@ -1543,6 +1682,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                         accountStatus: eachData.accountStatus,
                         cronStatus: eachData.cronStatus,
                         category: category?.category || "",
+                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
                     };
                 })
                 : [];
@@ -1561,64 +1701,75 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
             fbCron.current = getValidField('fbCron');
             revenueCron.current = getValidField('revenueCron');
 
-            const filteredByStatus =
-                !campaignStatusFilter || campaignStatusFilter.toUpperCase() === 'ALL'
-                    ? filteredData
-                    : filteredData.filter(item => {
-                        const raw = getAdsetStatus(item.campaignid, item.adsetid, item.accountNumber); // ✅ include accountNumber if you track per-account
-                        const status = (raw || 'ACTIVE').toUpperCase();
-                        return status === campaignStatusFilter.toUpperCase();
-                    });
+            // const filteredByStatus =
+            //     !campaignStatusFilter || campaignStatusFilter.toUpperCase() === 'ALL'
+            //         ? filteredData
+            //         : filteredData.filter(item => {
+            //             const raw = getAdsetStatus(item.campaignid, item.adsetid, item.accountNumber); // ✅ include accountNumber if you track per-account
+            //             const status = (raw || 'ACTIVE').toUpperCase();
+            //             return status === campaignStatusFilter.toUpperCase();
+            //         });
 
-            setRowData(filteredByStatus);
+            let newFilterData;
+            if (campaignStatusFilter !== "ALL") {
+                newFilterData = filteredData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            }
+            else {
+                newFilterData = filteredData;
+            }
+
+            setRowData(newFilterData);
+            newRowDataForFilter.current = filteredData;
+
+            // setRowData(filteredByStatus);
 
             setLiveFixedFooter([{
                 campaignName: 'Total',
                 actions: "",
-                spend: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.spend || 0), 0).toFixed(2)),
-                revenue: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.revenue || 0), 0).toFixed(2)),
-                profit: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.profit || 0), 0).toFixed(2)),
+                spend: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0).toFixed(2)),
+                revenue: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.revenue || 0), 0).toFixed(2)),
+                profit: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.profit || 0), 0).toFixed(2)),
                 margin: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.profit || 0), 0) /
-                    (filteredByStatus.reduce((a, c) => a + parseFloat(c.revenue || 0), 0) || 1) * 100
+                    newFilterData.reduce((a, c) => a + parseFloat(c.profit || 0), 0) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.revenue || 0), 0) || 1) * 100
                 ).toFixed(2)),
                 rpc: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.rpc || 0), 0) /
-                    (filteredByStatus.length || 1)
+                    newFilterData.reduce((a, c) => a + parseFloat(c.rpc || 0), 0) /
+                    (newFilterData.length || 1)
                 ).toFixed(2)),
                 cpl: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.cpl || 0), 0) /
-                    (filteredByStatus.length || 1)
+                    newFilterData.reduce((a, c) => a + parseFloat(c.cpl || 0), 0) /
+                    (newFilterData.length || 1)
                 ).toFixed(2)),
                 ncpl: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.ncpl || 0), 0) /
-                    (filteredByStatus.length || 1)
+                    newFilterData.reduce((a, c) => a + parseFloat(c.ncpl || 0), 0) /
+                    (newFilterData.length || 1)
                 ).toFixed(2)),
-                fbleads: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.fbleads || 0), 0).toFixed(2)),
-                conversions: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.conversions || 0), 0).toFixed(2)),
+                fbleads: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.fbleads || 0), 0).toFixed(2)),
+                conversions: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.conversions || 0), 0).toFixed(2)),
                 fmargin: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.profit || 0), 0) /
-                    (filteredByStatus.reduce((a, c) => a + parseFloat(c.spend || 0), 0) || 1) * 100
+                    newFilterData.reduce((a, c) => a + parseFloat(c.profit || 0), 0) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0) || 1) * 100
                 ).toFixed(2)),
                 roi: parseFloat((
-                    (filteredByStatus.reduce((a, c) => a + parseFloat(c.revenue || 0), 0) -
-                        filteredByStatus.reduce((a, c) => a + parseFloat(c.spend || 0), 0)) /
-                    (filteredByStatus.reduce((a, c) => a + parseFloat(c.spend || 0), 0) || 1) * 100
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.revenue || 0), 0) -
+                        newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0)) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0) || 1) * 100
                 ).toFixed(2)),
                 cpc: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.cpc || 0), 0) /
-                    (filteredByStatus.length || 1)
+                    newFilterData.reduce((a, c) => a + parseFloat(c.cpc || 0), 0) /
+                    (newFilterData.length || 1)
                 ).toFixed(2)),
                 cpclinkclicks: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.cpclinkclicks || 0), 0) /
-                    (filteredByStatus.length || 1)
+                    newFilterData.reduce((a, c) => a + parseFloat(c.cpclinkclicks || 0), 0) /
+                    (newFilterData.length || 1)
                 ).toFixed(2)),
-                fbclicks: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.fbclicks || 0), 0).toFixed(2)),
-                fblinkclicks: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.fblinkclicks || 0), 0).toFixed(2)),
-                impressions: parseFloat(filteredByStatus.reduce((a, c) => a + parseFloat(c.impressions || 0), 0).toFixed(2)),
+                fbclicks: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.fbclicks || 0), 0).toFixed(2)),
+                fblinkclicks: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.fblinkclicks || 0), 0).toFixed(2)),
+                impressions: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.impressions || 0), 0).toFixed(2)),
                 ctr: parseFloat((
-                    filteredByStatus.reduce((a, c) => a + parseFloat(c.fbclicks || 0), 0) /
-                    (filteredByStatus.reduce((a, c) => a + parseFloat(c.impressions || 0), 0) || 1) * 100
+                    newFilterData.reduce((a, c) => a + parseFloat(c.fbclicks || 0), 0) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.impressions || 0), 0) || 1) * 100
                 ).toFixed(2))
             }]);
 
@@ -1868,16 +2019,62 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
         functionCall1();
         setApiStatus(false);
     }
-    useEffect(() => {
-        if (selectedCampaigns) {
-            functionCall1();
-            oneTimeFetch.current = false;
-        }
-    }, [selectedCampaigns]);
+    // useEffect(() => {
+    //     if (selectedCampaigns) {
+    //         functionCall1();
+    //         oneTimeFetch.current = false;
+    //     }
+    // }, [selectedCampaigns]);
 
     useEffect(() => {
         functionCall1();
-    }, [campaignStatusFilter, campaignComments]);
+    }, [selectedCampaigns]);
+
+    useEffect(() => {
+        // functionCall1();
+        console.log(campaignStatusFilter, "campaignStatusFilter");
+        if (campaignStatusFilter !== "ALL") {
+            const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            setRowData(filteredByStatus);
+        } else {
+            setRowData(newRowDataForFilter.current);
+        }
+    }, [campaignStatusFilter]);
+
+    useEffect(() => {
+        console.log(campaignComments, "campaignComments");
+        const mainData = newRowDataForFilter.current;
+        const filterData = mainData && mainData.length > 0 ?
+            mainData.map((eachData) => {
+                const adsetObjectStatus = Camapignlevelstatus
+                    .find(item =>
+                        String(item.campaign_id) === String(eachData.campaign_id) &&
+                        String(item.accountNumber) === String(eachData.accountNumber)
+                    )?.adsets.find(adset =>
+                        String(adset.adset_id) === String(eachData.adset_id)
+                    );
+                return (
+                    {
+                        ...eachData,
+                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
+                    }
+                )
+            }) : null;
+        newRowDataForFilter.current = filterData;
+        let newFilterData;
+        if (campaignStatusFilter !== "ALL") {
+            console.log("testing 4444");
+            newFilterData = filterData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+        }
+        else {
+            newFilterData = filterData;
+        }
+
+        setRowData(newFilterData);
+        // newRowDataForFilter.current = filteredData;
+        console.log("testing 4444");
+    }
+        , [Camapignlevelstatus]);
 
     useEffect(() => {
         if (refreshpage === "Refresh12") {
