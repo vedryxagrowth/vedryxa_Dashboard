@@ -66,7 +66,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
+const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
     console.log("new multiple accounts:", newaccount);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -1444,7 +1444,9 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         newAccountName={newAccountName}
                         columnDefs={columnDefs}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
+                        setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}
@@ -1476,7 +1478,9 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         newAccountName={newAccountName}
                         columnDefs={columnDefs1}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
+                        setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}
@@ -1510,7 +1514,9 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         newAccountName={newAccountName}
                         columnDefs={columnDefs2}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
+                        setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}

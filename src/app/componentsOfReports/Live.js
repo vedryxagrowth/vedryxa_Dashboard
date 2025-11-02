@@ -66,7 +66,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
+const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
     console.log("new multiple accounts:", newaccount);
@@ -1752,6 +1752,9 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
             <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
                 <Tabs.TabPane key="1">
                     <CampaignLevelReports
+                    allProfitLossArray={allProfitLossArray}
+                    allCampaignData={allCampaignData}
+                        columnStructure={columnStructure}
                         campaignStatusFilter={campaignStatusFilter}
                         startDate={startDate}
                         endDate={endDate}
@@ -1762,7 +1765,9 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         newAccountName={newAccountName}
                         columnDefs={columnDefs}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
+                        setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}
@@ -1785,6 +1790,9 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                 </Tabs.TabPane>
                 <Tabs.TabPane key="2">
                     <AdsetLevelReports
+                    allProfitLossArray={allProfitLossArray}
+                    allCampaignData={allCampaignData}
+                        columnStructure={columnStructure}
                         campaignStatusFilter={campaignStatusFilter}
                         startDate={startDate}
                         endDate={endDate}
@@ -1795,7 +1803,9 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         newAccountName={newAccountName}
                         columnDefs={columnDefs1}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
+                        setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}
@@ -1819,6 +1829,9 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                 </Tabs.TabPane>
                 <Tabs.TabPane key="3">
                     <AdLevelReports
+                    allProfitLossArray={allProfitLossArray}
+                    allCampaignData={allCampaignData}
+                        columnStructure={columnStructure}
                         campaignStatusFilter={campaignStatusFilter}
                         startDate={startDate}
                         endDate={endDate}
@@ -1829,7 +1842,9 @@ const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCa
                         newAccountName={newAccountName}
                         columnDefs={columnDefs2}
                         campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
+                        setCamapignlevelstatus={setCamapignlevelstatus}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}

@@ -3,8 +3,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Badge, Checkbox } from 'antd';
-import {  GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Badge, Spin, Checkbox } from 'antd';
+import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -39,7 +39,7 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
-    "FB_TonicRsoc":"Facebook_TonicRsoc",
+    "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism"
 }
 const selectTimezone = {
@@ -58,21 +58,23 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess}) => {
+const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess }) => {
     console.log(columnDefs, "columnDefs");
     console.log("adset accounts:", newaccount);
-    const {theme} = useTokenContext();
-    const {apiClient} = useTokenContext();
+    const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
     const [rowData, setRowData] = useState([]);
+
+    const newRowDataForFilter = useRef([]);
 
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
     const [isLoading, setLoading] = useState(true);
 
     const [apiStatus, setApiStatus] = useState(false);
-    
+
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -119,31 +121,31 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
     useEffect(() => {
         const api = gridRef.current?.api;
         if (!api) return;
-      
+
         if (inputValue.trim() === '' && selectedAdset.length > 0) {
-          const selectedIds = selectedAdset.map(item => item.adsetid);
-          const selectedOnly = rowData.filter(item => selectedIds.includes(item.adsetid));
-      
-          // ✅ Replace rows
-          api.applyTransaction({ replace: true, data: selectedOnly });
-      
-          // ✅ Reselect those rows
-          setTimeout(() => {
-            api.forEachNode((node) => {
-              if (selectedIds.includes(node.data?.adsetid)) {
-                node.setSelected(true);
-              }
-            });
-          }, 0);
+            const selectedIds = selectedAdset.map(item => item.adsetid);
+            const selectedOnly = rowData.filter(item => selectedIds.includes(item.adsetid));
+
+            // ✅ Replace rows
+            api.applyTransaction({ replace: true, data: selectedOnly });
+
+            // ✅ Reselect those rows
+            setTimeout(() => {
+                api.forEachNode((node) => {
+                    if (selectedIds.includes(node.data?.adsetid)) {
+                        node.setSelected(true);
+                    }
+                });
+            }, 0);
         } else if (inputValue.trim() === '' && selectedAdset.length === 0) {
-          api.applyTransaction({ replace: true, data: rowData });
+            api.applyTransaction({ replace: true, data: rowData });
         }
-    }, [inputValue, selectedAdset, rowData]);  
+    }, [inputValue, selectedAdset, rowData]);
 
     console.log(memorizedRowData, "memorizedRowData");
     console.log(rowData, "rowData");
 
-    useEffect(()=>{
+    useEffect(() => {
         setLiveFixedFooter([
             {
                 campaignName: 'Total',
@@ -167,12 +169,12 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                 ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
             }
         ])
-    },[memorizedRowData]);
+    }, [memorizedRowData]);
 
     const onBtExport1 = () => {
-        console.log(gridRef.current.api,"in")
+        console.log(gridRef.current.api, "in")
         const Details = {
-            network : newRevenuePratner,
+            network: newRevenuePratner,
             account: newaccount,
             dateRange: `From ${startDate} to ${endDate}`,
             type: "Live",
@@ -191,7 +193,7 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                 return params.node.group;
             },
         });
-        const updateDetails = async()=>{
+        const updateDetails = async () => {
             await apiClient.post('/UserExportActivities/', { Details });
         }
         updateDetails();
@@ -242,17 +244,23 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                     return 'Total';
                 }
                 // console.log(params.value, "value");
+                const adsetNameGroup = (() => {
+                    if (params.node.childrenAfterGroup?.length > 0) {
+                        return params.node.childrenAfterGroup[0]?.data?.adsetname || params.node.key;
+                    }
+                    return params.node.key; // fallback to campaignid
+                })();
 
-                const firstColumnValue = params.node.key;  // campaign name
-                const campaignName = params.node.key;
-                const adsetName = params.node.key;
+                const firstColumnValue = adsetNameGroup;  // campaign name
+                const campaignName = adsetNameGroup;
+                const adsetName = adsetNameGroup;
 
                 let campaignid, adsetid;
                 let accountNumberToPassHistoryPage;
 
                 if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0]?.data;  // Safe access with optional chaining
-                
+
                     if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
                         campaignid = firstChild.campaignid ?? null;  // Use null-safe access
                         adsetid = firstChild.adsetid ?? null;
@@ -275,62 +283,61 @@ const AdsetLevelReports = ({campaignStatusFilter, functionCallForCampaigns, cont
                     );
                 }
 
-                 // selected accounts (multi)
-    const accountsParam = Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)];
+                // selected accounts (multi)
+                const accountsParam = Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)];
 
-      // ► the row’s accountNumber (critical for status toggle)
-  const rowAccount = (() => {
-    if (params.node.group && params.node.childrenAfterGroup?.length > 0) {
-      return params.node.childrenAfterGroup[0]?.data?.accountNumber ?? null;
-    }
-    return params.data?.accountNumber ?? null;
-  })();
+                // ► the row’s accountNumber (critical for status toggle)
+                const rowAccount = (() => {
+                    if (params.node.group && params.node.childrenAfterGroup?.length > 0) {
+                        return params.node.childrenAfterGroup[0]?.data?.accountNumber ?? null;
+                    }
+                    return params.data?.accountNumber ?? null;
+                })();
 
-  // stable key per adset-row (account + campaign + adset)
-const statusKey = `${rowAccount}|${campaignid}|${adsetid}`;
+                // stable key per adset-row (account + campaign + adset)
+                const statusKey = `${rowAccount}|${campaignid}|${adsetid}`;
 
-// grab the Maps from grid context
-const statusMap  = params.context?.adsetStatusOverridesRef?.current;   // "ACTIVE" | "PAUSED"
-const pinMap     = params.context?.adsetPinOverridesRef?.current;      // true | false
-const commentMap = params.context?.adsetCommentOverridesRef?.current;  // { text, editedBy, editedAt }
-
-
-  // find the exact comment record for this (campaign+adset+account)
-  const rec = campaignComments.find(c =>
-    c.campaignname === adsetName &&                       // you store adsetName in campaignname at adset level
-    String(c.Account) === String(rowAccount) &&
-    (c.campaignid ? String(c.campaignid) === String(campaignid) : true) &&
-    (c.adsetid    ? String(c.adsetid)    === String(adsetid)    : true)
-  );
+                // grab the Maps from grid context
+                const statusMap = params.context?.adsetStatusOverridesRef?.current;   // "ACTIVE" | "PAUSED"
+                const pinMap = params.context?.adsetPinOverridesRef?.current;      // true | false
+                const commentMap = params.context?.adsetCommentOverridesRef?.current;  // { text, editedBy, editedAt }
 
 
-// comment override first, then backend record
-const commentOverride = commentMap?.get(statusKey);
-const relatedComment  = commentOverride?.text ?? rec?.comment ?? null;
-const editedBy        = commentOverride?.editedBy ?? rec?.usercommit ?? '';
-const editedPretty    = commentOverride?.editedAt
-  ? commentOverride.editedAt
-  : (rec?.editedTime
-      ? moment(rec.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
-      : '');
-
-// pin override first, then backend record
-const pinnedOverride = pinMap?.get(statusKey);
-const [pinned, setPinned] = useState(
-  typeof pinnedOverride === 'boolean' ? pinnedOverride : !!rec?.pinned
-);
-// keep in sync if Map changes externally (optional)
-useEffect(() => {
-  if (typeof pinnedOverride === 'boolean') setPinned(pinnedOverride);
-}, [pinnedOverride]);
+                // find the exact comment record for this (campaign+adset+account)
+                const rec = campaignComments.find(c =>
+                    // c.campaignname === adsetName &&                       // you store adsetName in campaignname at adset level
+                    String(c.Account) === String(rowAccount) &&
+                    (c.campaignid ? String(c.campaignid) === String(campaignid) : true) &&
+                    (c.adsetid ? String(c.adsetid) === String(adsetid) : true) &&
+                    (c.level === "adset")
+                );
 
 
-//   const relatedComment = rec?.comment ?? null;
-//   const editedRaw      = rec?.editedTime ?? rec?.editedPinTime ?? '';
-//   const editedBy       = rec?.usercommit ?? rec?.userPin ?? '';
-//   const editedPretty   = editedRaw
-//     ? moment(editedRaw, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
-//     : '';
+                // comment override first, then backend record
+                const commentOverride = commentMap?.get(statusKey);
+                const relatedComment = rec?.comment ?? null;
+                const editedBy = rec?.usercommit ?? '';
+                const editedPretty = rec?.editedTime
+                    ? rec.editedTime
+                    : (rec?.editedTime
+                        ? moment(rec.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                        : '');
+
+                // pin override first, then backend record
+                const pinnedOverride = pinMap?.get(statusKey);
+                const [pinned, setPinned] = useState(rec?.pinned ? rec?.pinned : false);
+                // keep in sync if Map changes externally (optional)
+                useEffect(() => {
+                    if (typeof pinnedOverride === 'boolean') setPinned(pinnedOverride);
+                }, [pinnedOverride]);
+
+
+                //   const relatedComment = rec?.comment ?? null;
+                //   const editedRaw      = rec?.editedTime ?? rec?.editedPinTime ?? '';
+                //   const editedBy       = rec?.usercommit ?? rec?.userPin ?? '';
+                //   const editedPretty   = editedRaw
+                //     ? moment(editedRaw, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
+                //     : '';
 
 
 
@@ -376,316 +383,448 @@ useEffect(() => {
                 const [comment, setComment] = useState(relatedComment || '');
                 // const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
                 const [pendingAccount, setPendingAccount] = useState(null);
-               
+                const [universalOject, setUniversalObject] = React.useState(null)
+                const [confirmLoading, setConfirmLoading] = React.useState(false);
+
 
                 // const [switchOn, setSwitchOn] = useState(true); // default to ACTIVE
 
-    // keep pin in sync
-//   useEffect(() => { setPinned(!!rec?.pinned); }, [rec?.pinned]);
+                // keep pin in sync
+                //   useEffect(() => { setPinned(!!rec?.pinned); }, [rec?.pinned]);
 
-    // init switch from comments.AdsetLevel per account
-//   useEffect(() => {
-//     const commentForCampaign = campaignComments.find(obj =>
-//       String(obj.campaignid) === String(campaignid) && String(obj.Account) === String(rowAccount)
-//     );
+                // init switch from comments.AdsetLevel per account
+                //   useEffect(() => {
+                //     const commentForCampaign = campaignComments.find(obj =>
+                //       String(obj.campaignid) === String(campaignid) && String(obj.Account) === String(rowAccount)
+                //     );
 
-//     let matchedAdset = null;
-//     if (Array.isArray(commentForCampaign?.AdsetLevel)) {
-//       matchedAdset = commentForCampaign.AdsetLevel.find(a => String(a.adset_id) === String(adsetid));
-//     } else if (commentForCampaign?.AdsetLevel?.adset_id &&
-//                String(commentForCampaign?.AdsetLevel?.adset_id) === String(adsetid)) {
-//       matchedAdset = commentForCampaign.AdsetLevel;
-//     }
+                //     let matchedAdset = null;
+                //     if (Array.isArray(commentForCampaign?.AdsetLevel)) {
+                //       matchedAdset = commentForCampaign.AdsetLevel.find(a => String(a.adset_id) === String(adsetid));
+                //     } else if (commentForCampaign?.AdsetLevel?.adset_id &&
+                //                String(commentForCampaign?.AdsetLevel?.adset_id) === String(adsetid)) {
+                //       matchedAdset = commentForCampaign.AdsetLevel;
+                //     }
 
-//     const isActive = matchedAdset?.status === "ACTIVE";
-//     setSwitchOn(matchedAdset ? isActive : true); // fallback ACTIVE
-//   }, [campaignComments, campaignid, adsetid, rowAccount]);
+                //     const isActive = matchedAdset?.status === "ACTIVE";
+                //     setSwitchOn(matchedAdset ? isActive : true); // fallback ACTIVE
+                //   }, [campaignComments, campaignid, adsetid, rowAccount]);
 
 
-// INIT: prefer override map; then row cache; finally derive from comments
-const [switchOn, setSwitchOn] = useState(() => {
-    const over = statusMap?.get(statusKey); // "ACTIVE" | "PAUSED"
-    if (over === "ACTIVE" || over === "PAUSED") return over === "ACTIVE";
-  
-    if (params.data?.__adsetStatus) return params.data.__adsetStatus === "ACTIVE";
-  
-    // fallback to comments structure
-    const commentForCampaign = campaignComments.find(obj =>
-      String(obj.campaignid) === String(campaignid) &&
-      String(obj.Account) === String(rowAccount)
-    );
-    let matchedAdset = null;
-    if (Array.isArray(commentForCampaign?.AdsetLevel)) {
-      matchedAdset = commentForCampaign.AdsetLevel.find(a => String(a.adset_id) === String(adsetid));
-    } else if (commentForCampaign?.AdsetLevel?.adset_id &&
-               String(commentForCampaign.AdsetLevel.adset_id) === String(adsetid)) {
-      matchedAdset = commentForCampaign.AdsetLevel;
-    }
-    return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
-  });
+                // INIT: prefer override map; then row cache; finally derive from comments
+                const [switchOn, setSwitchOn] = useState(() => {
+                    // const over = statusMap?.get(statusKey); // "ACTIVE" | "PAUSED"
+                    // if (over === "ACTIVE" || over === "PAUSED") return over === "ACTIVE";
 
-   // Status toggle (per row’s account)
-   const handlePauseClick = (checked) => {
-    setSelectedAdset(adsetid);
-    setNextChecked(checked);
-    setPendingAccount(rowAccount);
-    setIsAdsetModalVisibles(true);
-  };
+                    // if (params.data?.__adsetStatus) return params.data.__adsetStatus === "ACTIVE";
 
-//   const handlePauseOk = async () => {
-//     setSwitchOn(nextChecked); // optimistic
-//     try {
-//       const token = localStorage.getItem("token");
-//       const payload = {
-//         status: nextChecked ? "ACTIVE" : "PAUSED",
-//         name: adsetName,
-//         accountNumber: String(pendingAccount),     // ← per row account
-//         campaign_id: campaignid,
-//         adset_id: adsetid,
-//         email: userdetails?.email,
-//       };
-//       const resp = await apiClient.post(`/BulkAdsetStatusChange`, payload, {
-//         headers: { Authorization: token }
-//       });
+                    // // fallback to comments structure
+                    // const commentForCampaign = campaignComments.find(obj =>
+                    //     String(obj.campaignid) === String(campaignid) &&
+                    //     String(obj.Account) === String(rowAccount)
+                    // );
+                    // let matchedAdset = null;
+                    // if (Array.isArray(commentForCampaign?.AdsetLevel)) {
+                    //     matchedAdset = commentForCampaign.AdsetLevel.find(a => String(a.adset_id) === String(adsetid));
+                    // } else if (commentForCampaign?.AdsetLevel?.adset_id &&
+                    //     String(commentForCampaign.AdsetLevel.adset_id) === String(adsetid)) {
+                    //     matchedAdset = commentForCampaign.AdsetLevel;
+                    // }
+                    const campaignForAccount = Camapignlevelstatus.find(obj =>
+                        String(obj.campaign_id) === String(campaignid) &&
+                        String(obj.accountNumber) === String(rowAccount)
+                    );
+                    const arrayOfAdsets = campaignForAccount?.adsets || [];
+                    const matchedAdset = arrayOfAdsets.find(a => String(a.adset_id) === String(adsetid));
+                    return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
+                });
 
-//       if (resp.status === 200 || resp.status === 201) {
-//         // refresh only that account’s comments/status
-//         functionCallForCommnets(pendingAccount);
-//         message.success(`Adset ${nextChecked ? "activated" : "paused"}`);
-//       } else {
-//         console.warn("Unexpected status:", resp.status);
-//       }
-//     } catch (e) {
-//       console.error(e?.response?.data || e.message);
-//       message.error("Failed to update adset status");
-//       setSwitchOn(prev => !prev); // revert
-//     } finally {
-//       setIsAdsetModalVisibles(false);
-//       setSelectedAdset(null);
-//       setPendingAccount(null);
-//     }
-//   };
+                React.useEffect(() => {
+                    setUniversalObject(campaignComments.find(d => d.level === "adset" && d.campaignid === campaignid && d.adsetid === adsetid && d.Account === rowAccount));
+                    // eslint-disable-next-line react-hooks/exhaustive-deps
+                }, [campaignComments]);
 
-const handlePauseOk = async () => {
-    const desired = nextChecked; // true => ACTIVE
-    setSwitchOn(desired);        // optimistic (cell only)
-    try {
-      const token = localStorage.getItem("token");
-      const payload = {
-        status: desired ? "ACTIVE" : "PAUSED",
-        name: adsetName,
-        accountNumber: String(pendingAccount),
-        campaign_id: campaignid,
-        adset_id: adsetid,
-        email: userdetails?.email,
-      };
-      await apiClient.post(`/BulkAdsetStatusChange`, payload,
-        { headers: { Authorization: token } }
-      );
-  
-      const newStatus = desired ? "ACTIVE" : "PAUSED";
-  
-      // write to override map (stable across tabs)
-      statusMap?.set(statusKey, newStatus);
-  
-      // also cache on the row so sort/comparator can see it without reading maps
-      const updatedRow = { ...params.data, __adsetStatus: newStatus };
-      if (params.api?.applyTransaction) {
-        params.api.applyTransaction({ update: [updatedRow] });
-      } else {
-        params.node.updateData(updatedRow);
-      }
-  
-      message.success(`Adset ${newStatus.toLowerCase()}`);
-    } catch (e) {
-      setSwitchOn(prev => !prev); // revert this cell only
-      message.error("Failed to update adset status");
-    } finally {
-      setIsAdsetModalVisibles(false);
-      setSelectedAdset(null);
-      setPendingAccount(null);
-    }
-  };
+                // Status toggle (per row’s account)
+                const handlePauseClick = (checked) => {
+                    setSelectedAdset(adsetid);
+                    setNextChecked(checked);
+                    setPendingAccount(rowAccount);
+                    setIsAdsetModalVisibles(true);
+                };
 
-  const handlePauseCancel = () => {
-    setIsAdsetModalVisibles(false);
-    setSelectedAdset(null);
-    setPendingAccount(null);
-  };
+                //   const handlePauseOk = async () => {
+                //     setSwitchOn(nextChecked); // optimistic
+                //     try {
+                //       const token = localStorage.getItem("token");
+                //       const payload = {
+                //         status: nextChecked ? "ACTIVE" : "PAUSED",
+                //         name: adsetName,
+                //         accountNumber: String(pendingAccount),     // ← per row account
+                //         campaign_id: campaignid,
+                //         adset_id: adsetid,
+                //         email: userdetails?.email,
+                //       };
+                //       const resp = await apiClient.post(`/BulkAdsetStatusChange`, payload, {
+                //         headers: { Authorization: token }
+                //       });
 
-  // ► BULK comment upsert (multi accounts)
-//   const handleOks = async () => {
-//     try {
-//       const body = {
-//         accountNumbers: accountsParam,
-//         campaignname: adsetName,   // you store adsetName under campaignname on comments
-//         campaignid,
-//         adsetid,
-//         comment,
-//         usercommit: userdetails?.email,
-//       };
-//       await apiClient.post('/Comments/bulk-upsert', body);
-//       refreshComments(accountsParam);
-//       message.success("Comment saved for selected accounts");
-//       setIsModalVisibles(false);
-//     } catch (e) {
-//       console.error(e?.response?.data || e.message);
-//       message.error('Failed to save comment');
-//     }
-//   };
+                //       if (resp.status === 200 || resp.status === 201) {
+                //         // refresh only that account’s comments/status
+                //         functionCallForCommnets(pendingAccount);
+                //         message.success(`Adset ${nextChecked ? "activated" : "paused"}`);
+                //       } else {
+                //         console.warn("Unexpected status:", resp.status);
+                //       }
+                //     } catch (e) {
+                //       console.error(e?.response?.data || e.message);
+                //       message.error("Failed to update adset status");
+                //       setSwitchOn(prev => !prev); // revert
+                //     } finally {
+                //       setIsAdsetModalVisibles(false);
+                //       setSelectedAdset(null);
+                //       setPendingAccount(null);
+                //     }
+                //   };
 
-  // ► BULK comment delete
-//   const handleDelete = async () => {
-//     try {
-//       const body = { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid };
-//       const resp = await apiClient.post('/Comments/bulk-delete', body);
-//       if (resp.status === 200) {
-//         refreshComments(accountsParam);
-//         message.success('Comment deleted for selected accounts');
-//         setIsModalVisibles(false);
-//       }
-//     } catch (e) {
-//       console.error(e?.response?.data || e.message);
-//       message.error('Failed to delete comment');
-//     }
-//   };
+                const handlePauseOk = async () => {
+                    const desired = nextChecked; // true => ACTIVE
+                    setIsAdsetModalVisibles(true);
+                    setConfirmLoading(true);
+                    try {
+                        const token = localStorage.getItem("token");
+                        const payload = {
+                            status: desired ? "ACTIVE" : "PAUSED",
+                            name: adsetName,
+                            accountNumber: String(rowAccount),
+                            campaign_id: campaignid,
+                            adset_id: adsetid,
+                            email: userdetails?.email,
+                        };
+                        const response = await apiClient.post(`/NewBulkAdsetStatusChange`, payload,
+                            { headers: { Authorization: token } }
+                        );
 
-  // ► BULK pin/unpin (multi accounts)
-//   const handlePinClick = async (currentPinStatus) => {
-//     const updated = !currentPinStatus;
-//     try {
-//       const body = {
-//         accountNumbers: accountsParam,
-//         campaignname: adsetName,
-//         campaignid,
-//         adsetid,
-//         userPin: userdetails?.email,
-//         comment: comment || ''
-//       };
-//       const resp = updated
-//         ? await apiClient.post('/PinBulk', body)
-//         : await apiClient.post('/UnpinBulk', { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid });
+                        const newStatus = desired ? "ACTIVE" : "PAUSED";
 
-//       if (resp.status === 200) {
-//         refreshComments(accountsParam);
-//         setPinned(updated);
-//         message.success(updated ? "Pinned for selected accounts" : "Unpinned for selected accounts");
-//       }
-//     } catch (e) {
-//       console.error(e?.response?.data || e.message);
-//       message.error("Error while updating pin status");
-//     }
-//   };
+                        // write to override map (stable across tabs)
+                        // statusMap?.set(statusKey, newStatus);
+                        if (response.status === 200 || response.status === 201) {
+                            setSwitchOn(desired);
+                            setConfirmLoading(false);
+                            setCamapignlevelstatus(prevStatus =>
+                                prevStatus.map(item =>
+                                    String(item.campaign_id) === String(campaignid) &&
+                                        String(item.accountNumber) === String(rowAccount)
+                                        ? {
+                                            ...item,
+                                            adsets: item.adsets.map(adset =>
+                                                String(adset.adset_id) === String(adsetid)
+                                                    ? { ...adset, status: newStatus } // ✅ update only that adset's status
+                                                    : adset // keep others as is
+                                            ),
+                                        }
+                                        : item // keep other campaigns as is
+                                )
+                            );
+                            setIsAdsetModalVisibles(false);
+                        }
 
-const handlePinClick = async (currentPinStatus) => {
-    const next = !currentPinStatus;
-    setPinned(next); // optimistic
-    try {
-      const body = {
-        accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
-        campaignname: adsetName,
-        campaignid,
-        adsetid,
-        userPin: userdetails?.email,
-        comment: comment || ''
-      };
-      const resp = next
-        ? await apiClient.post('/PinBulk', body)
-        : await apiClient.post('/UnpinBulk', {
-            accountNumbers: body.accountNumbers,
-            campaignname: adsetName,
-            campaignid,
-            adsetid
-          });
-  
-      if (resp.status === 200 || resp.status === 201) {
-        // persist in Map + row cache
-        pinMap?.set(statusKey, next);
-        const updatedRow = { ...params.data, __adsetPinned: next };
-        if (params.api?.applyTransaction) {
-          params.api.applyTransaction({ update: [updatedRow] });
-        } else {
-          params.node.updateData(updatedRow);
-        }
-        message.success(next ? "Pinned" : "Unpinned");
-      } else {
-        setPinned(!next); // revert
-        message.error("Failed to update pin");
-      }
-    } catch (e) {
-      setPinned(!next); // revert
-      message.error("Error while updating pin status");
-    }
-  };
-  
+                        // also cache on the row so sort/comparator can see it without reading maps
+                        // const updatedRow = { ...params.data, __adsetStatus: newStatus };
+                        // if (params.api?.applyTransaction) {
+                        //     params.api.applyTransaction({ update: [updatedRow] });
+                        // } else {
+                        //     params.node.updateData(updatedRow);
+                        // }
 
-  const PinIcon = ({ pinned }) => (
-    <Tooltip
-      title={pinned
-        ? <div><div>{relatedComment || ''}</div><div style={{opacity:.85}}>{editedPretty || 'N/A'}{editedBy ? ` • ${editedBy}` : ''}</div></div>
-        : null
-      }
-      overlayInnerStyle={{
-        backgroundColor: theme === 'dark' ? '#111' : '#fff',
-        color: theme === 'dark' ? '#fff' : '#000',
-        border: '1px solid #ccc',
-        borderRadius: 6,
-      }}
-    >
-      <button
-        onClick={() => handlePinClick(pinned)}
-        style={{ border:'none', background:'none', cursor:'pointer', fontSize:16 }}
-      >
-        {pinned ? "📌" : "📍"}
-      </button>
-    </Tooltip>
-  );
+                        message.success(`Adset ${newStatus.toLowerCase()}`);
+                    } catch (e) {
+                        setConfirmLoading(false);
+                        setSwitchOn(prev => !prev); // revert this cell only
+                        message.error("Failed to update adset status");
+                    } finally {
+                        setIsAdsetModalVisibles(false);
+                        setSelectedAdset(null);
+                        setPendingAccount(null);
+                    }
+                };
 
-  const handleOks = async () => {
-    try {
-      await apiClient.post('/Comments/bulk-upsert', {
-        accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
-        campaignname: adsetName,
-        campaignid,
-        adsetid,
-        comment,
-        usercommit: userdetails?.email,
-      });
-      // persist in Map (stable across tabs)
-      commentMap?.set(statusKey, {
-        text: comment,
-        editedBy: userdetails?.email,
-        editedAt: moment().format("DD-MM-YYYY hh:mm:ss A"),
-      });
-      message.success("Comment saved");
-      setIsModalVisibles(false);
-    } catch (e) {
-      message.error('Failed to save comment');
-    }
-  };
-  
-  const handleDelete = async () => {
-    try {
-      const resp = await apiClient.post('/Comments/bulk-delete', {
-        accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
-        campaignname: adsetName,
-        campaignid,
-        adsetid
-      });
-      if (resp.status === 200) {
-        // clear local override + UI
-        commentMap?.delete(statusKey);
-        setComment('');
-        message.success('Comment deleted');
-        setIsModalVisibles(false);
-      } else {
-        message.error('Failed to delete comment');
-      }
-    } catch (e) {
-      message.error('Failed to delete comment');
-    }
-  };
-  
+                const handlePauseCancel = () => {
+                    setIsAdsetModalVisibles(false);
+                    setSelectedAdset(null);
+                    setPendingAccount(null);
+                };
+
+                // ► BULK comment upsert (multi accounts)
+                //   const handleOks = async () => {
+                //     try {
+                //       const body = {
+                //         accountNumbers: accountsParam,
+                //         campaignname: adsetName,   // you store adsetName under campaignname on comments
+                //         campaignid,
+                //         adsetid,
+                //         comment,
+                //         usercommit: userdetails?.email,
+                //       };
+                //       await apiClient.post('/Comments/bulk-upsert', body);
+                //       refreshComments(accountsParam);
+                //       message.success("Comment saved for selected accounts");
+                //       setIsModalVisibles(false);
+                //     } catch (e) {
+                //       console.error(e?.response?.data || e.message);
+                //       message.error('Failed to save comment');
+                //     }
+                //   };
+
+                // ► BULK comment delete
+                //   const handleDelete = async () => {
+                //     try {
+                //       const body = { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid };
+                //       const resp = await apiClient.post('/Comments/bulk-delete', body);
+                //       if (resp.status === 200) {
+                //         refreshComments(accountsParam);
+                //         message.success('Comment deleted for selected accounts');
+                //         setIsModalVisibles(false);
+                //       }
+                //     } catch (e) {
+                //       console.error(e?.response?.data || e.message);
+                //       message.error('Failed to delete comment');
+                //     }
+                //   };
+
+                // ► BULK pin/unpin (multi accounts)
+                //   const handlePinClick = async (currentPinStatus) => {
+                //     const updated = !currentPinStatus;
+                //     try {
+                //       const body = {
+                //         accountNumbers: accountsParam,
+                //         campaignname: adsetName,
+                //         campaignid,
+                //         adsetid,
+                //         userPin: userdetails?.email,
+                //         comment: comment || ''
+                //       };
+                //       const resp = updated
+                //         ? await apiClient.post('/PinBulk', body)
+                //         : await apiClient.post('/UnpinBulk', { accountNumbers: accountsParam, campaignname: adsetName, campaignid, adsetid });
+
+                //       if (resp.status === 200) {
+                //         refreshComments(accountsParam);
+                //         setPinned(updated);
+                //         message.success(updated ? "Pinned for selected accounts" : "Unpinned for selected accounts");
+                //       }
+                //     } catch (e) {
+                //       console.error(e?.response?.data || e.message);
+                //       message.error("Error while updating pin status");
+                //     }
+                //   };
+
+                const handlePinClick = async (currentPinStatus) => {
+                    const next = !currentPinStatus;
+                    setPinned(next); // optimistic
+                    try {
+                        // const body = {
+                        //     accountNumbers: Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)],
+                        //     campaignname: adsetName,
+                        //     campaignid,
+                        //     adsetid,
+                        //     userPin: userdetails?.email,
+                        //     comment: comment || ''
+                        // };
+                        const body = {
+                            accountNumber: rowAccount,
+                            campaignname: campaignName,
+                            campaignid,
+                            adsetid,
+                            userPin: userdetails?.email,
+                            comment: comment || '',
+                            level: "adset"
+                        };
+                        const resp = next
+                            ? await apiClient.post('/NewPinBulk', body)
+                            : await apiClient.post('/NewUnpinBulk', body);
+
+                        if (resp.status === 200 || resp.status === 201) {
+                            // persist in Map + row cache
+                            // if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(rowAccount) &&
+                                        String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'adset'
+                                );
+
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], pinned: next, userPin: userdetails?.email, editedPinTime: timeStamp };
+                                } else {
+                                    arr.push({
+                                        campaignid,
+                                        Account: rowAccount,
+                                        adsetid,
+                                        // ad_id: adid,
+                                        level: 'adset',
+                                        pinned: next,
+                                        userPin: userdetails?.email,
+                                        editedPinTime: timeStamp
+                                    });
+                                }
+
+                                return arr;
+                            });
+                            // }
+                            message.success(next ? "Pinned" : "Unpinned");
+                        } else {
+                            setPinned(!next); // revert
+                            message.error("Failed to update pin");
+                        }
+                    } catch (e) {
+                        setPinned(!next); // revert
+                        message.error("Error while updating pin status");
+                    }
+                };
+
+
+                const PinIcon = ({ universalOject, pinned }) => (
+                    <Tooltip
+                        title={pinned
+                            ? <div style={{ opacity: 0.85 }}>
+                                <div>{universalOject?.userPin || 'N/A'}</div>
+                                <div>{universalOject?.editedPinTime}</div>
+                            </div>
+                            : null
+                        }
+                        overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                        }}
+                    >
+                        <button
+                            onClick={() => handlePinClick(pinned)}
+                            style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 16 }}
+                        >
+                            {pinned ? "📌" : "📍"}
+                        </button>
+                    </Tooltip>
+                );
+
+                const handleOks = async () => {
+                    try {
+                        const newResponse = await apiClient.post('/Comments/upsert', {
+                            accountNumber: rowAccount,
+                            campaignname: adsetName,
+                            campaignid,
+                            adsetid,
+                            comment,
+                            usercommit: userdetails?.email,
+                            level: "adset"
+                        });
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(rowAccount) &&
+                                        String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'adset'
+                                );
+
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], comment: comment, usercommit: userdetails?.email, editedTime: timeStamp };
+                                } else {
+                                    arr.push({
+                                        campaignid,
+                                        Account: rowAccount,
+                                        adsetid,
+                                        // ad_id: adid,
+                                        level: 'adset',
+                                        comment: comment,
+                                        usercommit: userdetails?.email,
+                                        editedTime: timeStamp
+                                    });
+                                }
+
+                                return arr;
+                            });
+                        }
+                        // persist in Map (stable across tabs)
+                        // commentMap?.set(statusKey, {
+                        //     text: comment,
+                        //     editedBy: userdetails?.email,
+                        //     editedAt: moment().format("DD-MM-YYYY hh:mm:ss A"),
+                        // });
+                        message.success("Comment saved");
+                        setIsModalVisibles(false);
+                    } catch (e) {
+                        message.error('Failed to save comment');
+                    }
+                };
+
+                const handleDelete = async () => {
+                    try {
+                        const newResponse = await apiClient.post('/Comments/delete', {
+                            accountNumber: rowAccount,
+                            campaignname: adsetName,
+                            campaignid,
+                            adsetid,
+                            // comment,
+                            usercommit: userdetails?.email,
+                            level: "adset"
+                        });
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(rowAccount) &&
+                                        String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'adset'
+                                );
+
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], comment: "", usercommit: userdetails?.email, editedTime: timeStamp };
+                                }
+                                // else {
+                                //     arr.push({
+                                //         campaignid,
+                                //         Account: rowAccount,
+                                //         adsetid,
+                                //         // ad_id: adid,
+                                //         level: 'adset',
+                                //         comment: comment,
+                                //         usercommit: userdetails?.email,
+                                //         editedTime: timeStamp
+                                //     });
+                                // }
+
+                                return arr;
+                            });
+                            setComment('');
+                            message.success('Comment deleted');
+                            setIsModalVisibles(false);
+                        } else {
+                            message.error('Failed to delete comment');
+                        }
+                    } catch (e) {
+                        message.error('Failed to delete comment');
+                    }
+                };
+
 
 
 
@@ -715,10 +854,10 @@ const handlePinClick = async (currentPinStatus) => {
 
                 // const handlePauseOk = async () => {
                 //     setSwitchOn(nextChecked); // update visual switch state
-                  
+
                 //     try {
                 //       const token = localStorage.getItem("token");
-                  
+
                 //       const response = await apiClient.post(`/adsetStatusChange`,
                 //         {
                 //             status: nextChecked ? "ACTIVE" : "PAUSED",
@@ -737,18 +876,18 @@ const handlePinClick = async (currentPinStatus) => {
                 //           }
                 //         }
                 //       );
-                  
+
                 //       if (response.status === 200 || response.status === 201) {
                 //         functionCallForCommnets(newaccount);
                 //         console.log(" Status updated on Facebook:", response.data.status, "Adset ID:", response.data.adset_id);
                 //       } else {
                 //         console.warn(" Backend returned unexpected status:", response.status);
                 //       }
-                  
+
                 //     } catch (error) {
                 //       console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
                 //     }
-                  
+
                 //     setIsAdsetModalVisibles(false);
                 //     setSelectedAdset(null);
                 // };  
@@ -793,23 +932,23 @@ const handlePinClick = async (currentPinStatus) => {
                 //             campaignid: campaignid,
                 //         };
                 //         // console.log(payload);
-                
+
                 //         // Call the backend API to delete the comment
                 //         const response = await apiClient.post('/Comments/delete', payload);
-                
+
                 //         if (response.status === 200  || response.status === 201) {
                 //             // Remove the comment from the local state
                 //             // const updatedComments = campaignComments.filter(
                 //             //     (comment) => comment.campaignname !== firstColumnValue
                 //             // );
                 //             refreshComments(newaccount);
-                
+
                 //             // // Update the state with the updated comments
                 //             // setCampaignComments(updatedComments);
-                
+
                 //             // // Refresh the table or any other UI component
                 //             // // changeRRefrst();
-                
+
                 //             message.success('Comment deleted successfully!');
                 //             setIsModalVisibles(false); // Close the popup
                 //         } else {
@@ -820,7 +959,7 @@ const handlePinClick = async (currentPinStatus) => {
                 //         message.error('Failed to delete the comment. Please try again.');
                 //     }
                 // };
-                
+
 
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
@@ -966,8 +1105,8 @@ const handlePinClick = async (currentPinStatus) => {
                 // };
 
                 return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}> 
-                        <Switch 
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <Switch
                             checked={switchOn}
                             // onClick={(checked) => handlePauseClick(adsetid, checked)} 
                             // onChange={handlePauseClick}
@@ -975,10 +1114,10 @@ const handlePinClick = async (currentPinStatus) => {
                                 e?.stopPropagation?.();
                                 handlePauseClick(checked);
                             }}
-                            size="small" 
+                            size="small"
                             style={{
-                              backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
-                            }} 
+                                backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
+                            }}
                         />
                         <Modal
                             title="Confirm Action"
@@ -987,11 +1126,32 @@ const handlePinClick = async (currentPinStatus) => {
                             onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
-                            <p>
-                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this adset?
-                            </p>
-                            <p>Adset ID: {selectedAdset}</p>
-                            <p>Adset Name: {adsetName}</p>
+                            {confirmLoading && (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        background: "rgba(255,255,255,0.7)", // dim background
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        zIndex: 1000,
+                                        borderRadius: "8px",
+                                    }}
+                                >
+                                    <Spin size="large" tip="Saving..." />
+                                </div>
+                            )}
+                            <div>
+                                <p>
+                                    Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this adset?
+                                </p>
+                                <p>Adset ID: {selectedAdset}</p>
+                                <p>Adset Name: {adsetName}</p>
+                            </div>
                         </Modal>
                         {/* <PinIcon
                             campaignName={campaignName}
@@ -999,9 +1159,9 @@ const handlePinClick = async (currentPinStatus) => {
                             adsetid={adsetid}
                             pinned={pinned}
                         /> */}
-                        <PinIcon pinned={pinned} />
-                     
-                        {relatedComment && (
+                        <PinIcon pinned={pinned} universalOject={universalOject} />
+
+                        {universalOject?.comment && (
                             <Tooltip
                                 // title={relatedComment || 'No comment available'} 
                                 // title={
@@ -1016,14 +1176,14 @@ const handlePinClick = async (currentPinStatus) => {
                                 //   }
                                 title={
                                     <div>
-                                      <div>{relatedComment}</div>
-                                      <div style={{opacity:.85}}>{editedPretty || 'N/A'}{editedBy ? ` • ${editedBy}` : ''}</div>
+                                        <div>{universalOject?.comment}</div>
+                                        <div style={{ opacity: .85 }}>{universalOject?.editedTime || 'N/A'}{universalOject?.usercommit ? ` • ${universalOject?.usercommit}` : ''}</div>
                                     </div>
-                                  }
-                                  overlayInnerStyle={{
+                                }
+                                overlayInnerStyle={{
                                     backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                     color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',   
+                                    border: '1px solid #ccc',
                                     borderRadius: 6,
                                     // fontWeight: 500,
                                 }}
@@ -1040,15 +1200,15 @@ const handlePinClick = async (currentPinStatus) => {
                                 />
                             </Tooltip>
                         )}
-                        {!relatedComment && (
+                        {!universalOject?.comment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
-                        <Tooltip 
+                        <Tooltip
                             title={tooltipText}
                             overlayInnerStyle={{
                                 backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                 color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',   
+                                border: '1px solid #ccc',
                                 borderRadius: 6,
                                 // fontWeight: 500,
                             }}
@@ -1058,19 +1218,19 @@ const handlePinClick = async (currentPinStatus) => {
                                 style={{ cursor: 'pointer', marginLeft: '2px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
-                        <LinkOutlined 
+                        <LinkOutlined
                             onClick={() => {
                                 const url = `/LiveHistory/LiveAdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
                         />
-                        <Tooltip 
+                        <Tooltip
                             title={valueWithCount}
                             overlayInnerStyle={{
                                 backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                 color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',   
+                                border: '1px solid #ccc',
                                 borderRadius: 6,
                                 // fontWeight: 500,
                             }}
@@ -1078,8 +1238,8 @@ const handlePinClick = async (currentPinStatus) => {
                             <span
                                 onClick={() => {
                                     const rowData = params.node.group
-                                    ? params.node.childrenAfterGroup?.[0]?.data
-                                    : params.node.data;
+                                        ? params.node.childrenAfterGroup?.[0]?.data
+                                        : params.node.data;
 
                                     const rowNode = params.api.getRowNode(params.node.id);
 
@@ -1103,7 +1263,7 @@ const handlePinClick = async (currentPinStatus) => {
                             </span>
                         </Tooltip>
                         <Modal
-                             title={
+                            title={
                                 firstColumnValue
                             }
                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
@@ -1112,7 +1272,7 @@ const handlePinClick = async (currentPinStatus) => {
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                    <div style={{ display: 'flex', flexDirection: "column" }}>
                                         <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             Last Edited Time:
                                         </span>
@@ -1123,20 +1283,20 @@ const handlePinClick = async (currentPinStatus) => {
 
                                     </div>
                                     <div>
-                                    <Button
-                                        key="delete"
-                                        type="danger"
-                                        onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
-                                    >
-                                        Delete
-                                    </Button>
-                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
-                                        Cancel
-                                    </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
-                                        Ok
-                                    </Button>
+                                        <Button
+                                            key="delete"
+                                            type="danger"
+                                            onClick={handleDelete}
+                                            style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
+                                        >
+                                            Delete
+                                        </Button>
+                                        <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
+                                            Cancel
+                                        </Button>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                            Ok
+                                        </Button>
                                     </div>
                                 </div>
                             ]}
@@ -1145,7 +1305,7 @@ const handlePinClick = async (currentPinStatus) => {
                                 placeholder="Enter your comments here"
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                style={{color: theme === "dark" ? "white" : "black"}}
+                                style={{ color: theme === "dark" ? "white" : "black" }}
                             />
                         </Modal>
                     </div>
@@ -1155,12 +1315,12 @@ const handlePinClick = async (currentPinStatus) => {
         processCellForClipboard: (params) => {
             if (params.node.group) {
                 console.log("Processing group column for copy..."); // Debugging log
-    
+
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
                     return params.node.key;
                 }
-    
+
                 // ✅ Only copy group name for the first row in the group
                 return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
                     ? params.node.key
@@ -1190,23 +1350,23 @@ const handlePinClick = async (currentPinStatus) => {
 
     const adsetStatusMap = useMemo(() => {
         const map = new Map();
-      
+
         campaignComments.forEach(doc => {
-          if (!doc?.campaignid) return;
-      
-          const push = (entry) => {
-            if (!entry?.adset_id) return;
-            const key = `${doc.campaignid}_${entry.adset_id}`;
-            map.set(key, (entry.status || '').toUpperCase());
-          };
-      
-          if (Array.isArray(doc.AdsetLevel)) {
-            doc.AdsetLevel.forEach(push);
-          } else if (doc.AdsetLevel && typeof doc.AdsetLevel === 'object') {
-            push(doc.AdsetLevel); // legacy single object
-          }
+            if (!doc?.campaignid) return;
+
+            const push = (entry) => {
+                if (!entry?.adset_id) return;
+                const key = `${doc.campaignid}_${entry.adset_id}`;
+                map.set(key, (entry.status || '').toUpperCase());
+            };
+
+            if (Array.isArray(doc.AdsetLevel)) {
+                doc.AdsetLevel.forEach(push);
+            } else if (doc.AdsetLevel && typeof doc.AdsetLevel === 'object') {
+                push(doc.AdsetLevel); // legacy single object
+            }
         });
-      
+
         return map;
     }, [campaignComments]);
 
@@ -1312,7 +1472,7 @@ const handlePinClick = async (currentPinStatus) => {
 
     //         const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
     //         const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
-            
+
 
     //         if (mainData.length > 1) {
     //             timezone.current = mainData[0].accountTimezone;
@@ -1335,7 +1495,7 @@ const handlePinClick = async (currentPinStatus) => {
     //                 const status = (raw || 'ACTIVE').toUpperCase();
     //                 return status === campaignStatusFilter.toUpperCase();
     //                 });
-            
+
     //         setRowData(filteredByStatus);
     //         // newRowData.current = filteredByStatus;          
 
@@ -1387,7 +1547,7 @@ const handlePinClick = async (currentPinStatus) => {
     //         //     }
     //         // ]);
     //         // setRowData(filteredData);
-            
+
     //         console.log(filteredData, "filteredData");
     //         newRowData.current = filteredData;
     //         fetchData.status === 200 && console.log("Success") ;
@@ -1401,208 +1561,228 @@ const handlePinClick = async (currentPinStatus) => {
     //         setLoading(false);
     //    }
     // };
-    
+
     const functionCall1 = async () => {
         try {
-          setLoading(true);
-      
-          // selected campaigns (unchanged)
-          const campaigns = selectedCampaigns.length > 0
-            ? [...new Set(selectedCampaigns.map(adset => adset.campaignid))]
-            : [];
-      
-          const collectionName =
-            newRevenuePratner === "FB_DomainActive"
-              ? "Facebook_DActive_Names"
-              : newtworkCollections[newRevenuePratner];
-      
-          // ✅ multi-account param (common across levels)
-          const accountsParam = Array.isArray(newaccount)
-            ? newaccount.map(String)
-            : [String(newaccount)];
-      
-          // ✅ call the new multi-account endpoint
-          const resp = await apiClient.post(
-            "/AdsetLevelAccounts",
-            {
-              dateStart: startDate,
-              dateEnd: endDate,
-              timezone: newtime,
-              status: tabStatus,       // "Daily" or "Live"
-              network: collectionName,
-              accountNumbers: accountsParam,
-              campaignids: campaigns,
+            setLoading(true);
+
+            // selected campaigns (unchanged)
+            const campaigns = selectedCampaigns.length > 0
+                ? [...new Set(selectedCampaigns.map(adset => adset.campaignid))]
+                : [];
+
+            const collectionName =
+                newRevenuePratner === "FB_DomainActive"
+                    ? "Facebook_DActive_Names"
+                    : newtworkCollections[newRevenuePratner];
+
+            // ✅ multi-account param (common across levels)
+            const accountsParam = Array.isArray(newaccount)
+                ? newaccount.map(String)
+                : [String(newaccount)];
+
+            // ✅ call the new multi-account endpoint
+            const resp = await apiClient.post(
+                "/AdsetLevelAccounts",
+                {
+                    dateStart: startDate,
+                    dateEnd: endDate,
+                    timezone: newtime,
+                    status: tabStatus,       // "Daily" or "Live"
+                    network: collectionName,
+                    accountNumbers: accountsParam,
+                    campaignids: campaigns,
+                }
+            );
+
+            // You had a filter to skip rows where ad_clicks > 0
+            const mainData1 = resp.data || [];
+            const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
+
+            const specifiedTimeZone = selectTimezone[newtime];
+
+            const filteredData = mainData && mainData.length > 0
+                ? mainData.map(eachData => {
+                    const revenueData =
+                        eachData?.estimated_revenue == null || isNaN(eachData.estimated_revenue)
+                            ? 0
+                            : parseFloat(eachData.estimated_revenue).toFixed(2);
+
+                    const profit = (revenueData - eachData.spend).toFixed(2);
+                    const rpc =
+                        !eachData.conversions
+                            ? 0
+                            : Math.round((revenueData / eachData.conversions) * 100) / 100;
+
+                    const cpl =
+                        !eachData.fbLeads
+                            ? 0
+                            : Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+
+                    const ncpl =
+                        !eachData.conversions
+                            ? 0
+                            : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+
+                    const relatedComment = campaignComments.find(
+                        c => c.campaignname === eachData.campaign_name
+                            && String(c.Account) === String(eachData.accountNumber) // ✅ per-account
+                    );
+                    const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
+                    const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
+                    const adsetObjectStatus = Camapignlevelstatus
+                        .find(item =>
+                            String(item.campaign_id) === String(eachData.campaign_id) &&
+                            String(item.accountNumber) === String(eachData.accountNumber)
+                        )?.adsets.find(adset =>
+                            String(adset.adset_id) === String(eachData.adset_id)
+                        );
+                    const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                    const spend = parseFloat(eachData.spend);
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0
+                        ? 0
+                        : Math.round((spend / fbLClicks) * 100) / 100;
+
+
+                    return {
+                        // ✅ keep accountNumber on the row
+                        accountNumber: String(eachData.accountNumber),
+                        campaignname: eachData.campaign_name,
+                        adsetname: eachData.adsetName,
+                        date: eachData[specifiedTimeZone],
+                        'fb-hour': eachData.hour,
+                        'mnet-hour': eachData.updatedHour,
+                        spend: parseFloat(eachData.spend).toFixed(2),
+                        revenue: revenueData ? revenueData : 0,
+                        profit: parseFloat(profit),
+                        fbleads: parseInt(eachData.fbLeads || 0),
+                        conversions: parseInt(eachData.conversions || 0),
+                        cpc: parseFloat(eachData.cpc || 0),
+                        cpclinkclicks: cpcLinkClicks,
+                        fbclicks: parseInt(eachData.fbClicks || 0),
+                        fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
+                        impressions: parseInt(eachData.impressions || 0),
+                        rpc: parseFloat(rpc),
+                        cpl: parseFloat(cpl),
+                        ncpl: parseFloat(ncpl),
+                        adsetid: eachData.adset_id,
+                        campaignid: eachData.campaign_id,
+                        timezone: eachData[newtime],
+                        comment: relatedComment ? relatedComment.comment : null,
+                        adid: "",
+                        adname: "",
+                        actions: '...',
+                        from: campaign_date?.start ? campaign_date?.start : "",
+                        to: campaign_date?.end ? campaign_date?.end : "",
+                        profitloss: "",
+                        M_tq: "",
+                        D_tq: "",
+                        fbCron: eachData.fbCron,
+                        revenueCron: eachData.revenueCron,
+                        accountStatus: eachData.accountStatus,
+                        cronStatus: eachData.cronStatus,
+                        category: category?.category || "",
+                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
+                    };
+                })
+                : [];
+
+            // pick non-Failed cron/status fields across accounts
+            const getValidField = (field) => {
+                for (const item of mainData) {
+                    if (item[field] && item[field].toLowerCase() !== 'failed') return item[field];
+                }
+                return '-';
+            };
+
+            timezone.current = mainData.length ? mainData[0].accountTimezone : "";
+            accountStatus.current = getValidField('accountStatus');
+            cronStatus.current = getValidField('cronStatus');
+            fbCron.current = getValidField('fbCron');
+            revenueCron.current = getValidField('revenueCron');
+
+            // const filteredByStatus =
+            //     !campaignStatusFilter || campaignStatusFilter.toUpperCase() === 'ALL'
+            //         ? filteredData
+            //         : filteredData.filter(item => {
+            //             const raw = getAdsetStatus(item.campaignid, item.adsetid, item.accountNumber); // ✅ include accountNumber if you track per-account
+            //             const status = (raw || 'ACTIVE').toUpperCase();
+            //             return status === campaignStatusFilter.toUpperCase();
+            //         });
+
+            let newFilterData;
+            if (campaignStatusFilter !== "ALL") {
+                newFilterData = filteredData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             }
-          );
-      
-          // You had a filter to skip rows where ad_clicks > 0
-          const mainData1 = resp.data || [];
-          const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
-      
-          const specifiedTimeZone = selectTimezone[newtime];
-      
-          const filteredData = mainData && mainData.length > 0
-            ? mainData.map(eachData => {
-                const revenueData =
-                  eachData?.estimated_revenue == null || isNaN(eachData.estimated_revenue)
-                    ? 0
-                    : parseFloat(eachData.estimated_revenue).toFixed(2);
-      
-                const profit = (revenueData - eachData.spend).toFixed(2);
-                const rpc =
-                  !eachData.conversions
-                    ? 0
-                    : Math.round((revenueData / eachData.conversions) * 100) / 100;
-      
-                const cpl =
-                  !eachData.fbLeads
-                    ? 0
-                    : Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
-      
-                const ncpl =
-                  !eachData.conversions
-                    ? 0
-                    : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-      
-                const relatedComment = campaignComments.find(
-                  c => c.campaignname === eachData.campaign_name
-                    && String(c.Account) === String(eachData.accountNumber) // ✅ per-account
-                );
-                const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
-                const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
-                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-                const spend = parseFloat(eachData.spend);
-                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0
-                  ? 0
-                  : Math.round((spend / fbLClicks) * 100) / 100;
-      
-                return {
-                  // ✅ keep accountNumber on the row
-                  accountNumber: String(eachData.accountNumber),
-                  campaignname: eachData.campaign_name,
-                  adsetname: eachData.adsetName,
-                  date: eachData[specifiedTimeZone],
-                  'fb-hour': eachData.hour,
-                  'mnet-hour': eachData.updatedHour,
-                  spend: parseFloat(eachData.spend).toFixed(2),
-                  revenue: revenueData ? revenueData : 0,
-                  profit: parseFloat(profit),
-                  fbleads: parseInt(eachData.fbLeads || 0),
-                  conversions: parseInt(eachData.conversions || 0),
-                  cpc: parseFloat(eachData.cpc || 0),
-                  cpclinkclicks: cpcLinkClicks,
-                  fbclicks: parseInt(eachData.fbClicks || 0),
-                  fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
-                  impressions: parseInt(eachData.impressions || 0),
-                  rpc: parseFloat(rpc),
-                  cpl: parseFloat(cpl),
-                  ncpl: parseFloat(ncpl),
-                  adsetid: eachData.adset_id,
-                  campaignid: eachData.campaign_id,
-                  timezone: eachData[newtime],
-                  comment: relatedComment ? relatedComment.comment : null,
-                  adid: "",
-                  adname: "",
-                  actions: '...',
-                  from: campaign_date?.start ? campaign_date?.start : "",
-                  to: campaign_date?.end ? campaign_date?.end : "",
-                  profitloss: "",
-                  M_tq: "",
-                  D_tq: "",
-                  fbCron: eachData.fbCron,
-                  revenueCron: eachData.revenueCron,
-                  accountStatus: eachData.accountStatus,
-                  cronStatus: eachData.cronStatus,
-                  category: category?.category || "",
-                };
-              })
-            : [];
-      
-          // pick non-Failed cron/status fields across accounts
-          const getValidField = (field) => {
-            for (const item of mainData) {
-              if (item[field] && item[field].toLowerCase() !== 'failed') return item[field];
+            else {
+                newFilterData = filteredData;
             }
-            return '-';
-          };
-      
-          timezone.current   = mainData.length ? mainData[0].accountTimezone : "";
-          accountStatus.current = getValidField('accountStatus');
-          cronStatus.current    = getValidField('cronStatus');
-          fbCron.current        = getValidField('fbCron');
-          revenueCron.current   = getValidField('revenueCron');
-      
-          const filteredByStatus =
-            !campaignStatusFilter || campaignStatusFilter.toUpperCase() === 'ALL'
-              ? filteredData
-              : filteredData.filter(item => {
-                  const raw = getAdsetStatus(item.campaignid, item.adsetid, item.accountNumber); // ✅ include accountNumber if you track per-account
-                  const status = (raw || 'ACTIVE').toUpperCase();
-                  return status === campaignStatusFilter.toUpperCase();
-                });
-      
-          setRowData(filteredByStatus);
-      
-          setLiveFixedFooter([{
-            campaignName: 'Total',
-            actions: "",
-            spend: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.spend||0),0).toFixed(2)),
-            revenue: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.revenue||0),0).toFixed(2)),
-            profit: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.profit||0),0).toFixed(2)),
-            margin: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.profit||0),0) /
-              (filteredByStatus.reduce((a,c)=>a+parseFloat(c.revenue||0),0) || 1) * 100
-            ).toFixed(2)),
-            rpc: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.rpc||0),0) /
-              (filteredByStatus.length || 1)
-            ).toFixed(2)),
-            cpl: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.cpl||0),0) /
-              (filteredByStatus.length || 1)
-            ).toFixed(2)),
-            ncpl: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.ncpl||0),0) /
-              (filteredByStatus.length || 1)
-            ).toFixed(2)),
-            fbleads: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.fbleads||0),0).toFixed(2)),
-            conversions: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.conversions||0),0).toFixed(2)),
-            fmargin: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.profit||0),0) /
-              (filteredByStatus.reduce((a,c)=>a+parseFloat(c.spend||0),0) || 1) * 100
-            ).toFixed(2)),
-            roi: parseFloat((
-              (filteredByStatus.reduce((a,c)=>a+parseFloat(c.revenue||0),0) -
-               filteredByStatus.reduce((a,c)=>a+parseFloat(c.spend||0),0)) /
-              (filteredByStatus.reduce((a,c)=>a+parseFloat(c.spend||0),0) || 1) * 100
-            ).toFixed(2)),
-            cpc: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.cpc||0),0) /
-              (filteredByStatus.length || 1)
-            ).toFixed(2)),
-            cpclinkclicks: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.cpclinkclicks||0),0) /
-              (filteredByStatus.length || 1)
-            ).toFixed(2)),
-            fbclicks: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.fbclicks||0),0).toFixed(2)),
-            fblinkclicks: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.fblinkclicks||0),0).toFixed(2)),
-            impressions: parseFloat(filteredByStatus.reduce((a,c)=>a+parseFloat(c.impressions||0),0).toFixed(2)),
-            ctr: parseFloat((
-              filteredByStatus.reduce((a,c)=>a+parseFloat(c.fbclicks||0),0) /
-              (filteredByStatus.reduce((a,c)=>a+parseFloat(c.impressions||0),0) || 1) * 100
-            ).toFixed(2))
-          }]);
-      
-          newRowData.current = filteredData;
-          setApiStatus(false);
-          setLoading(false);
+
+            setRowData(newFilterData);
+            newRowDataForFilter.current = filteredData;
+
+            // setRowData(filteredByStatus);
+
+            setLiveFixedFooter([{
+                campaignName: 'Total',
+                actions: "",
+                spend: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0).toFixed(2)),
+                revenue: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.revenue || 0), 0).toFixed(2)),
+                profit: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.profit || 0), 0).toFixed(2)),
+                margin: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.profit || 0), 0) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.revenue || 0), 0) || 1) * 100
+                ).toFixed(2)),
+                rpc: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.rpc || 0), 0) /
+                    (newFilterData.length || 1)
+                ).toFixed(2)),
+                cpl: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.cpl || 0), 0) /
+                    (newFilterData.length || 1)
+                ).toFixed(2)),
+                ncpl: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.ncpl || 0), 0) /
+                    (newFilterData.length || 1)
+                ).toFixed(2)),
+                fbleads: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.fbleads || 0), 0).toFixed(2)),
+                conversions: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.conversions || 0), 0).toFixed(2)),
+                fmargin: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.profit || 0), 0) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0) || 1) * 100
+                ).toFixed(2)),
+                roi: parseFloat((
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.revenue || 0), 0) -
+                        newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0)) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.spend || 0), 0) || 1) * 100
+                ).toFixed(2)),
+                cpc: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.cpc || 0), 0) /
+                    (newFilterData.length || 1)
+                ).toFixed(2)),
+                cpclinkclicks: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.cpclinkclicks || 0), 0) /
+                    (newFilterData.length || 1)
+                ).toFixed(2)),
+                fbclicks: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.fbclicks || 0), 0).toFixed(2)),
+                fblinkclicks: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.fblinkclicks || 0), 0).toFixed(2)),
+                impressions: parseFloat(newFilterData.reduce((a, c) => a + parseFloat(c.impressions || 0), 0).toFixed(2)),
+                ctr: parseFloat((
+                    newFilterData.reduce((a, c) => a + parseFloat(c.fbclicks || 0), 0) /
+                    (newFilterData.reduce((a, c) => a + parseFloat(c.impressions || 0), 0) || 1) * 100
+                ).toFixed(2))
+            }]);
+
+            newRowData.current = filteredData;
+            setApiStatus(false);
+            setLoading(false);
         } catch (error) {
-          console.log(error);
-          setApiStatus(true);
-          setLoading(false);
+            console.log(error);
+            setApiStatus(true);
+            setLoading(false);
         }
     };
-      
+
     const defaultColDef = {
         comparator: (valueA, valueB) => {
             // Default comparator for handling null or undefined values
@@ -1632,32 +1812,32 @@ const handlePinClick = async (currentPinStatus) => {
     };
     // const onGridReady = (params, gridId) => {
     //     gridRef.current = params;
-    
+
     //     params.api.applyColumnState({ 
     //         state: columnDefs || [], 
     //         applyOrder: true 
     //     });
     // };
-    
+
     // // Use useEffect to track changes in toggleStatus
     // useEffect(() => {
     //     if (!gridRef.current) return; // Ensure gridRef exists
-    
+
     //     const gridApi = gridRef.current.api;
-    
+
     //     const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid1');
-    
+
     //     if (toggleStatus) {
     //         gridApi.addEventListener('dragStopped', handleDragStopped);
     //     } else {
     //         gridApi.removeEventListener('dragStopped', handleDragStopped);
     //     }
-    
+
     //     return () => {
     //         gridApi.removeEventListener('dragStopped', handleDragStopped);
     //     };
     // }, [toggleStatus]);
-    
+
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
         params.api.applyColumnState({ state: columnDefs, applyOrder: true });
@@ -1818,7 +1998,7 @@ const handlePinClick = async (currentPinStatus) => {
     const gridOptions = useMemo(() => ({
         onColumnMoved: (params) => {
             // if (toggleStatus) {
-                debouncedHandleColumnMove(params, 'grid1');
+            debouncedHandleColumnMove(params, 'grid1');
             // }
         },
         defaultColDef: {
@@ -1831,7 +2011,7 @@ const handlePinClick = async (currentPinStatus) => {
     document.addEventListener("DOMContentLoaded", function () {
         const gridDiv = document.getElementById("myGrid");
         new agGrid.Grid(gridDiv, gridOptions);
-      
+
         // Set column definitions separately after grid initialization
         gridOptions.api.setColumnDefs(columnDefs);
     });
@@ -1839,16 +2019,62 @@ const handlePinClick = async (currentPinStatus) => {
         functionCall1();
         setApiStatus(false);
     }
+    // useEffect(() => {
+    //     if (selectedCampaigns) {
+    //         functionCall1();
+    //         oneTimeFetch.current = false;
+    //     }
+    // }, [selectedCampaigns]);
+
     useEffect(() => {
-        if(selectedCampaigns){
-            functionCall1();
-            oneTimeFetch.current = false;
-        }
+        functionCall1();
     }, [selectedCampaigns]);
 
-      useEffect(() => {
-            functionCall1();
-        }, [campaignStatusFilter, campaignComments]);
+    useEffect(() => {
+        // functionCall1();
+        console.log(campaignStatusFilter, "campaignStatusFilter");
+        if (campaignStatusFilter !== "ALL") {
+            const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            setRowData(filteredByStatus);
+        } else {
+            setRowData(newRowDataForFilter.current);
+        }
+    }, [campaignStatusFilter]);
+
+    useEffect(() => {
+        // console.log(campaignComments, "campaignComments");
+        const mainData = newRowDataForFilter.current;
+        const filterData = mainData && mainData.length > 0 ?
+            mainData.map((eachData) => {
+                const adsetObjectStatus = Camapignlevelstatus
+                    .find(item =>
+                        String(item.campaign_id) === String(eachData.campaignid) &&
+                        String(item.accountNumber) === String(eachData.accountNumber)
+                    )?.adsets.find(adset =>
+                        String(adset.adset_id) === String(eachData.adsetid)
+                    );
+                return (
+                    {
+                        ...eachData,
+                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
+                    }
+                )
+            }) : null;
+        newRowDataForFilter.current = filterData;
+        let newFilterData;
+        if (campaignStatusFilter !== "ALL") {
+            console.log("testing 4444");
+            newFilterData = filterData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+        }
+        else {
+            newFilterData = filterData;
+        }
+
+        setRowData(newFilterData);
+        // newRowDataForFilter.current = filteredData;
+        console.log("testing 4444");
+    }
+        , [Camapignlevelstatus]);
 
     useEffect(() => {
         if (refreshpage === "Refresh12") {
@@ -1856,7 +2082,7 @@ const handlePinClick = async (currentPinStatus) => {
             showAdsetLevel([]);
         }
     }
-    , [refreshpage]);
+        , [refreshpage]);
 
     // const onCellClickedLive = (event) => {
     //     setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
@@ -1873,16 +2099,16 @@ const handlePinClick = async (currentPinStatus) => {
     // const onRangeSelectionChanged = (params) => {
     //     const selected = [];
     //     const rangeSelections = params.api.getCellRanges();
-    
+
     //     if (rangeSelections) {
     //         rangeSelections.forEach((range) => {
     //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
     //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
     //             const columns = range.columns.map((col) => col.getColId());
-    
+
     //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
     //                 const node = params.api.getDisplayedRowAtIndex(rowIndex);
-    
+
     //                 if (!node.group && node.data) { // ✅ Ensures only data rows are selected
     //                     if (!firstSelectedCell) {
     //                         setFirstSelectedCell({ rowIndex, colId: columns[0] }); // ✅ Ensure first cell is recorded
@@ -1892,22 +2118,22 @@ const handlePinClick = async (currentPinStatus) => {
     //             }
     //         });
     //     }
-    
+
     //     setSelectedCells(selected);
     // };
 
-    
+
     const onCellKeyDown = (params) => {
         if (params.event.ctrlKey && params.event.key === "c") {
             params.event.preventDefault(); // Prevent default copy behavior
-    
+
             // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
             const copiedText = selectedCells
                 .map(({ rowIndex, columns }) =>
                     columns.map((colId) => params.api.getValue(colId, params.api.getDisplayedRowAtIndex(rowIndex))).join("\t")
                 )
                 .join("\n"); // Each row on a new line
-    
+
             navigator.clipboard.writeText(copiedText);
             params.api.copySelectedRangeToClipboard(); // ✅ Restore AG Grid blinking effect
         }
@@ -1930,11 +2156,11 @@ const handlePinClick = async (currentPinStatus) => {
         // console.log(parseInt(index)-1);
         // carouselRef.current.goTo(parseInt(index))
         // localStorage.setItem("activeTab", index);
-        
+
     };
 
     const renderCarouselNav = () => (
-        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop:'15px' }}>
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop: '15px' }}>
             <Tabs
                 activeKey={activeTab}
                 onChange={handleCarouselChange}
@@ -1944,7 +2170,7 @@ const handlePinClick = async (currentPinStatus) => {
                 }))}
                 className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor:  'transparent',
+                    backgroundColor: 'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -1963,12 +2189,12 @@ const handlePinClick = async (currentPinStatus) => {
     const uniqueByAdsetId = (arr) => {
         const map = new Map();
         arr.forEach(obj => {
-          if (!map.has(obj.adsetid)) {
-            map.set(obj.adsetid, obj);
-          }
+            if (!map.has(obj.adsetid)) {
+                map.set(obj.adsetid, obj);
+            }
         });
         return Array.from(map.values());
-      };
+    };
 
     // const onSelectionChanged = (event) => {
     //     const selectedNodes = event.api.getSelectedNodes();
@@ -1992,13 +2218,13 @@ const handlePinClick = async (currentPinStatus) => {
         console.log(selectedAdsets, "selectedAdsets"); // Debugging log
 
         if (selectedRow) {
-        // Make sure getRowId is set up to use adset_id
+            // Make sure getRowId is set up to use adset_id
             const rowNode = gridRef.current.api.getRowNode(selectedRow.adset_id);
 
             // Clear previous selection
             gridRef.current.api.deselectAll();
 
-        // Select the specific row
+            // Select the specific row
             if (rowNode) {
                 rowNode.setSelected(true);
             }
@@ -2006,13 +2232,13 @@ const handlePinClick = async (currentPinStatus) => {
     };
 
     useEffect(() => {
-        if(removeSelectedAdsets === "Remove"){
+        if (removeSelectedAdsets === "Remove") {
             if (gridRef.current) {
                 gridRef.current.api.deselectAll(); // ✅ clears selection in grid
                 // showCampaignLevel([]);             // ✅ manually clears selection data
             }
         }
-    }, [removeSelectedAdsets]); 
+    }, [removeSelectedAdsets]);
 
     // useEffect(() => {
     //     if (gridRef.current?.api) {
@@ -2021,7 +2247,7 @@ const handlePinClick = async (currentPinStatus) => {
     //   }, [rowData]);
 
 
-    
+
     // return(
     //                 <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
     //                     <div style={contentStyle}>
@@ -2123,7 +2349,7 @@ const handlePinClick = async (currentPinStatus) => {
     //                                     paginationPageSizeSelector={[20, 40, 60, 80, 100]}
     //                                     suppressAggFuncInHeader={true}
     //                                     getMainMenuItems={getMainMenuItems}
-    
+
     //                                     // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
     //                                     // onCellKeyDown={onCellKeyDown}
     //                                     // domLayout="normal"
@@ -2147,7 +2373,7 @@ const handlePinClick = async (currentPinStatus) => {
     //                                     suppressCellSelection={true}
     //                                     getRowStyle={(params) => {
     //                                         if (params.node.rowPinned) {
-                                                
+
     //                                             return {
     //                                                 fontWeight: "bold",
     //                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
@@ -2160,12 +2386,12 @@ const handlePinClick = async (currentPinStatus) => {
     //                                         const isSelected = selectedCells.some(
     //                                             (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
     //                                         );
-                                    
+
     //                                         // ✅ Ensure first cell inside a group is highlighted
     //                                         const isFirstSelected = firstSelectedCell &&
     //                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
     //                                             firstSelectedCell.colId === params.column.getId();
-                                    
+
     //                                         return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
     //                                     }}
     //                                     onFilterChanged={(params) => {
@@ -2181,7 +2407,7 @@ const handlePinClick = async (currentPinStatus) => {
     //                                         api.forEachNodeAfterFilterAndSort((node) => {
     //                                             if (node.data && node.data.campaignname) {
     //                                                 const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-                                        
+
     //                                                 // Apply search and filter conditions
     //                                                 if (
     //                                                     normalizedCampaign.startsWith(normalizedInput) ||
@@ -2246,170 +2472,170 @@ const handlePinClick = async (currentPinStatus) => {
     //                 </div>
     // );
 
-        // normalize to array
-const ids = Array.isArray(newaccount)
-? newaccount
-: (newaccount ? [newaccount] : []);
+    // normalize to array
+    const ids = Array.isArray(newaccount)
+        ? newaccount
+        : (newaccount ? [newaccount] : []);
 
     return (
         <div>
-                <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
-                    <div style={contentStyle}>
-                        {isLoading === true ? (
-                            <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
-                                <div className="ag-grid-Loader">
-                                    <Audio
-                                        height="80"
-                                        width="80"
-                                        radius="9"
-                                        color="green"
-                                        ariaLabel="loading"
-                                        wrapperStyle
-                                        wrapperClass
-                                    />
-                                </div>
+            <div style={{ height: "100%", marginBottom: '20px', overflow: "visible" }}>
+                <div style={contentStyle}>
+                    {isLoading === true ? (
+                        <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                            <div className="ag-grid-Loader">
+                                <Audio
+                                    height="80"
+                                    width="80"
+                                    radius="9"
+                                    color="green"
+                                    ariaLabel="loading"
+                                    wrapperStyle
+                                    wrapperClass
+                                />
                             </div>
-                        ) : rowData?.length > 0 ? (
-                            <div 
-                                className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                                // style={{
-                                //     width: '100%',
-                                //     // borderRadius: 12,
-                                //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                                //     padding: 10,
-                                //     height: 'auto',
-                                //     boxShadow:
-                                //     theme === 'dark'
-                                //         ? '0 1px 3px rgba(0,0,0,0.6)'
-                                //         : '0 1px 6px rgba(0,0,0,0.08)',
-                                // }}
-                            >
+                        </div>
+                    ) : rowData?.length > 0 ? (
+                        <div
+                            className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                        // style={{
+                        //     width: '100%',
+                        //     // borderRadius: 12,
+                        //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                        //     padding: 10,
+                        //     height: 'auto',
+                        //     boxShadow:
+                        //     theme === 'dark'
+                        //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                        //         : '0 1px 6px rgba(0,0,0,0.08)',
+                        // }}
+                        >
 
-                                <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                        <Space align="center">
-                                            <div className="blinking-circle-1"></div>
-                                            <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Live</Text>
-                                        </Space>
-                                    </Col>
-                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                            <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
+                                <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                    <Space align="center">
+                                        <div className="blinking-circle-1"></div>
+                                        <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Live</Text>
+                                    </Space>
+                                </Col>
+                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                     </Col> */}
-        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
-            {ids.length <= 1 ? (
-                // Single (or none) → plain text
-                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                Id: {ids[0] ?? "-"}
-                </Text>
-            ) : (
-                // Multiple → only an icon; hover shows selected accounts
-                <Tooltip
-                title={
-                    <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                    {ids.map((id, i) => {
-                        const getAccountObject= accountsAccess.find(item =>  item.accountNumber === id)
-                        return(<div
-                        key={`${id}-${i}`}
-                        style={{
-                            padding: "4px 6px",
-                            borderBottom: "1px solid rgba(0,0,0,0.06)",
-                            fontSize: 12,
-                            color: theme === "dark" ? "#ddd" : "#333"
-                        }}
-                        >
-                        <div>{id}</div>
-                        <div>{getAccountObject?.accountName}</div>
-                        </div>)
-                    })}
-                    </div>
-                }
-                overlayInnerStyle={{
-                    maxWidth: 320,
-                    background: theme === "dark" ? "#1f1f1f" : '#fff',
-                    color: theme === "dark" ? "#fff" : '#000'
-                }}
-                >
-                <Badge count={ids.length} size="small" offset={[0, 2]}>
-                    <NumberOutlined
-                    style={{
-                        fontSize: 18,
-                        cursor: "pointer",
-                        color: theme === "dark" ? "#9ad" : "grey"
-                    }}
-                    />
-                </Badge>
-                </Tooltip>
-            )}
-        </Col>
+                                <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+                                    {ids.length <= 1 ? (
+                                        // Single (or none) → plain text
+                                        <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                                            Id: {ids[0] ?? "-"}
+                                        </Text>
+                                    ) : (
+                                        // Multiple → only an icon; hover shows selected accounts
+                                        <Tooltip
+                                            title={
+                                                <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                                                    {ids.map((id, i) => {
+                                                        const getAccountObject = accountsAccess.find(item => item.accountNumber === id)
+                                                        return (<div
+                                                            key={`${id}-${i}`}
+                                                            style={{
+                                                                padding: "4px 6px",
+                                                                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                                                                fontSize: 12,
+                                                                color: theme === "dark" ? "#ddd" : "#333"
+                                                            }}
+                                                        >
+                                                            <div>{id}</div>
+                                                            <div>{getAccountObject?.accountName}</div>
+                                                        </div>)
+                                                    })}
+                                                </div>
+                                            }
+                                            overlayInnerStyle={{
+                                                maxWidth: 320,
+                                                background: theme === "dark" ? "#1f1f1f" : '#fff',
+                                                color: theme === "dark" ? "#fff" : '#000'
+                                            }}
+                                        >
+                                            <Badge count={ids.length} size="small" offset={[0, 2]}>
+                                                <NumberOutlined
+                                                    style={{
+                                                        fontSize: 18,
+                                                        cursor: "pointer",
+                                                        color: theme === "dark" ? "#9ad" : "grey"
+                                                    }}
+                                                />
+                                            </Badge>
+                                        </Tooltip>
+                                    )}
+                                </Col>
 
-        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-            {ids.length <= 1 && (
-                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                Name: {newAccountName ?? "-"}
-                </Text>
-            ) 
-            }
-        </Col>
+                                <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    {ids.length <= 1 && (
+                                        <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                                            Name: {newAccountName ?? "-"}
+                                        </Text>
+                                    )
+                                    }
+                                </Col>
 
-        <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
-            {ids.length <= 1 ? (
-                // Single → plain text
-                <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
-                </Text>
-            ) : (
-                // Multiple → icon with tooltip of selected account ids + timezones
-                <Tooltip
-                title={
-                    <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                    {ids.map((id, i) => {
-                        const acc = accountsAccess.find(a => a.accountNumber === id);
-                        console.log("timezones:", accountsAccess);
-                        const tz = acc?.timeZone ?? "-";
-                        return (
-                        <div
-                            key={`${id}-${i}`}
-                            style={{
-                            padding: "4px 6px",
-                            borderBottom: "1px solid rgba(0,0,0,0.06)",
-                            fontSize: 12,
-                            color: theme === "dark" ? "#ddd" : "#333"
-                            }}
-                        >
-                            {id} - {tz}
-                        </div>
-                        );
-                    })}
-                    </div>
-                }
-                overlayInnerStyle={{
-                    maxWidth: 320,
-                    background: theme === "dark" ? "#1f1f1f" : "#fff",
-                    color: theme === "dark" ? "#fff" : "#000"
-                }}
-                >
-                <Badge count={ids.length} size="small" offset={[0, 2]}>
-                    <GlobalOutlined
-                    style={{
-                        fontSize: 18,
-                        cursor: "pointer",
-                        color: theme === "dark" ? "#9ad" : "grey"
-                    }}
-                    />
-                </Badge>
-                </Tooltip>
-            )}
-        </Col>
-                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+                                    {ids.length <= 1 ? (
+                                        // Single → plain text
+                                        <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                                            Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
+                                        </Text>
+                                    ) : (
+                                        // Multiple → icon with tooltip of selected account ids + timezones
+                                        <Tooltip
+                                            title={
+                                                <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                                                    {ids.map((id, i) => {
+                                                        const acc = accountsAccess.find(a => a.accountNumber === id);
+                                                        console.log("timezones:", accountsAccess);
+                                                        const tz = acc?.timeZone ?? "-";
+                                                        return (
+                                                            <div
+                                                                key={`${id}-${i}`}
+                                                                style={{
+                                                                    padding: "4px 6px",
+                                                                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                                                                    fontSize: 12,
+                                                                    color: theme === "dark" ? "#ddd" : "#333"
+                                                                }}
+                                                            >
+                                                                {id} - {tz}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            }
+                                            overlayInnerStyle={{
+                                                maxWidth: 320,
+                                                background: theme === "dark" ? "#1f1f1f" : "#fff",
+                                                color: theme === "dark" ? "#fff" : "#000"
+                                            }}
+                                        >
+                                            <Badge count={ids.length} size="small" offset={[0, 2]}>
+                                                <GlobalOutlined
+                                                    style={{
+                                                        fontSize: 18,
+                                                        cursor: "pointer",
+                                                        color: theme === "dark" ? "#9ad" : "grey"
+                                                    }}
+                                                />
+                                            </Badge>
+                                        </Tooltip>
+                                    )}
+                                </Col>
+                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                     </Col> */}
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
-                                    </Col>
-                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                </Col>
+                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ fontWeight: '600' }}>
                                             Cron/Acc status: {cronStatus.current} /{' '}
                                             <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
@@ -2417,37 +2643,37 @@ const ids = Array.isArray(newaccount)
                                             </span>
                                         </Text>
                                     </Col> */}
-                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-                                        <Tooltip
-                                      title={
-                                        <div style={{fontSize:'13px'}}>
-                                            <div>Fb status: {`${fbCron.current?.toLowerCase()}`}</div>
-                                            <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
-                                            <Text style={{color: theme === 'dark' ? '#fff' : '#000'}}>
-                                                Cron status: {cronStatus.current?.toLowerCase()}
-                                                {/* <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
+                                <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                    <Tooltip
+                                        title={
+                                            <div style={{ fontSize: '13px' }}>
+                                                <div>Fb status: {`${fbCron.current?.toLowerCase()}`}</div>
+                                                <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
+                                                <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                                    Cron status: {cronStatus.current?.toLowerCase()}
+                                                    {/* <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
                                                     {accountStatus.current}
                                                 </span> */}
-                                            </Text>
-                                            <div>Account:  
-                                                <span style={{marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
-                                                    {accountStatus.current}
-                                                </span>
+                                                </Text>
+                                                <div>Account:
+                                                    <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
+                                                        {accountStatus.current}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    }
-                                    overlayInnerStyle={{
-                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                        color: theme === 'dark' ? '#fff' : '#000',
-                                        border: '1px solid #ccc',   
-                                        borderRadius: 6,
-                                        // fontWeight: 500,
-                                    }}
-                                        >
-                                            <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
-                                        </Tooltip>
-                                    </Col>
-                                    {/* <Col>
+                                        }
+                                        overlayInnerStyle={{
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #ccc',
+                                            borderRadius: 6,
+                                            // fontWeight: 500,
+                                        }}
+                                    >
+                                        <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
+                                    </Tooltip>
+                                </Col>
+                                {/* <Col>
                                         <Tooltip 
                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                             mouseEnterDelay={0} // Tooltip appears after 1 second
@@ -2455,13 +2681,13 @@ const ids = Array.isArray(newaccount)
                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                         </Tooltip>
                                     </Col> */}
-                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                        {/* <Tooltip title="Export to CSV"> */}
-                                            <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
-                                        {/* </Tooltip> */}
-                                    </Col>
-                                </Row>
-                                <div className='table-container'>
+                                <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                    {/* <Tooltip title="Export to CSV"> */}
+                                    <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
+                                    {/* </Tooltip> */}
+                                </Col>
+                            </Row>
+                            <div className='table-container'>
                                 <AgGridReact
                                     ref={gridRef}
                                     className='custom-grid'
@@ -2473,7 +2699,7 @@ const ids = Array.isArray(newaccount)
                                     suppressRowClickSelection={true}
                                     columnDefs={memorizedColumnDef}
                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-                                    onCellClicked={onCellClickedLive}
+                                    // onCellClicked={onCellClickedLive}
                                     pagination={true}
                                     paginationPageSize={200}
                                     paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
@@ -2504,7 +2730,7 @@ const ids = Array.isArray(newaccount)
                                     suppressCellSelection={true}
                                     getRowStyle={(params) => {
                                         if (params.node.rowPinned) {
-                                            
+
                                             return {
                                                 // fontWeight: "bold",
                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
@@ -2518,12 +2744,12 @@ const ids = Array.isArray(newaccount)
                                         const isSelected = selectedCells.some(
                                             (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
                                         );
-                                
+
                                         // ✅ Ensure first cell inside a group is highlighted
                                         const isFirstSelected = firstSelectedCell &&
                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
                                             firstSelectedCell.colId === params.column.getId();
-                                
+
                                         return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
                                     }}
                                     onFilterChanged={(params) => {
@@ -2539,7 +2765,7 @@ const ids = Array.isArray(newaccount)
                                         api.forEachNodeAfterFilterAndSort((node) => {
                                             if (node.data && node.data.campaignname) {
                                                 const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-                                    
+
                                                 // Apply search and filter conditions
                                                 if (
                                                     normalizedCampaign.startsWith(normalizedInput) ||
@@ -2579,18 +2805,18 @@ const ids = Array.isArray(newaccount)
                                         setLiveFixedFooter(updatedFooter);
                                     }}
                                 />
-                                </div>
-                              
-
                             </div>
-                        ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                            {apiStatus === true ? 
+
+
+                        </div>
+                    ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                        {apiStatus === true ?
                             <Result
-                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                            // icon={<SmileOutlined />}
-                            title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                        extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                        /> : (startDate !== endDate ? <Result
+                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                // icon={<SmileOutlined />}
+                                title={`API failed to fetch the data. Please click retry button to fetch the data`}
+                                extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+                            /> : (startDate !== endDate ? <Result
                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                 icon={<SmileOutlined />}
                                 title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
@@ -2601,10 +2827,10 @@ const ids = Array.isArray(newaccount)
                                 title={`No LiveData for ${newaccount} to ${startDate}`}
                             // extra={<Button type="primary">Next</Button>}
                             />)}
-                        </div>}
-                    </div>
+                    </div>}
                 </div>
-            
+            </div>
+
         </div>
     );
 
