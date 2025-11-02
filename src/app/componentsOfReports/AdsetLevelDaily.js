@@ -1983,16 +1983,16 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
     }, [campaignStatusFilter]);
 
     useEffect(() => {
-        console.log(campaignComments, "campaignComments");
+        // console.log(campaignComments, "campaignComments");
         const mainData = newRowDataForFilter.current;
         const filterData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
                 const adsetObjectStatus = Camapignlevelstatus
                     .find(item =>
-                        String(item.campaign_id) === String(eachData.campaign_id) &&
+                        String(item.campaign_id) === String(eachData.campaignid) &&
                         String(item.accountNumber) === String(eachData.accountNumber)
                     )?.adsets.find(adset =>
-                        String(adset.adset_id) === String(eachData.adset_id)
+                        String(adset.adset_id) === String(eachData.adsetid)
                     );
                 return (
                     {

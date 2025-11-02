@@ -2230,13 +2230,13 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
   }, [campaignStatusFilter]);
 
   useEffect(() => {
-    console.log(campaignComments, "campaignComments");
+    // console.log(campaignComments, "campaignComments");
     const mainData = newRowDataForFilter.current;
     const filterData = mainData && mainData.length > 0 ?
       mainData.map((eachData) => {
         const adsetObjectStatus = Camapignlevelstatus
           .find(item =>
-            String(item.campaign_id) === String(eachData.campaign_id) &&
+            String(item.campaign_id) === String(eachData.campaignid) &&
             String(item.accountNumber) === String(eachData.accountNumber)
           );
         return (

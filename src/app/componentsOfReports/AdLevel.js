@@ -2200,10 +2200,16 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
   }, [campaignStatusFilter]);
 
   useEffect(() => {
+    // console.log(campaignComments, "campaignComments");
+    // console.log(campaignStatusFilter, "campaignStatusFilter");
+    // console.log(campaignComments.filter(ad => ad.level === 'ad'), "campaignComments.filter(ad => ad.level === 'ad')");
     const mainData = newRowDataForFilter.current;
+    // console.log(mainData, "mainData");
     const filterData = mainData && mainData.length > 0 ?
       mainData.map((eachData) => {
-        const getFbStatusKey = campaignComments.find(ad => ad.campaignid === eachData.campaign_id && ad.Account === eachData.accountNumber && ad.adsetid === eachData.adset_id && ad.ad_id === eachData.ad_id && ad.level === 'ad');
+        const getFbStatusKey = campaignComments.find(ad => ad.campaignid === eachData.campaignid && ad.Account === eachData.accountNumber && ad.adsetid === eachData.adsetid && ad.ad_id === eachData.adid && ad.level === 'ad');
+        // console.log(getFbStatusKey, "getFbStatusKey");
+        // console.log(eachData?.adName, "eachData");
         return (
           {
             ...eachData,
