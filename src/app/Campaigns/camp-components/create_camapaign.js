@@ -2085,6 +2085,27 @@ const AdsetComponent = ({
             initialValue={adset.countries || "US"}
           >
             <Select
+              // options={[
+              //   { value: "US", label: "United States", title: "" },
+              //   { value: "GB", label: "United Kingdom", title: "" },
+              //   { value: "AU", label: "Australia", title: "" },
+              //   { value: "IN", label: "India", title: "" },
+              //   { value: "AE", label: "United Arab Emirates", title: "" },
+              //   { value: "CA", label: "Canada", title: "" },
+              //   { value: "DE", label: "Germany", title: "" },
+              //   { value: "FR", label: "France", title: "" },
+              //   { value: "JP", label: "Japan", title: "" },
+              //   { value: "CN", label: "China", title: "" },
+              //   { value: "BR", label: "Brazil", title: "" },
+              //   { value: "ZA", label: "South Africa", title: "" },
+              //   { value: "RU", label: "Russia", title: "" },
+              //   { value: "IT", label: "Italy", title: "" },
+              //   { value: "ES", label: "Spain", title: "" },
+              //   { value: "SG", label: "Singapore", title: "" },
+              //   { value: "NZ", label: "New Zealand", title: "" },
+              //   { value: "MX", label: "Mexico", title: "" },
+              // ]}
+              showSearch
               options={[
                 { value: "US", label: "United States", title: "" },
                 { value: "GB", label: "United Kingdom", title: "" },
@@ -2104,6 +2125,29 @@ const AdsetComponent = ({
                 { value: "SG", label: "Singapore", title: "" },
                 { value: "NZ", label: "New Zealand", title: "" },
                 { value: "MX", label: "Mexico", title: "" },
+                { value: "AT", label: "Austria", title: "" },
+                { value: "BE", label: "Belgium", title: "" },
+                { value: "BG", label: "Bulgaria", title: "" },
+                { value: "HR", label: "Croatia", title: "" },
+                { value: "CY", label: "Cyprus", title: "" },
+                { value: "CZ", label: "Czech Republic", title: "" },
+                { value: "DK", label: "Denmark", title: "" },
+                { value: "EE", label: "Estonia", title: "" },
+                { value: "FI", label: "Finland", title: "" },
+                { value: "GR", label: "Greece", title: "" },
+                { value: "HU", label: "Hungary", title: "" },
+                { value: "IE", label: "Ireland", title: "" },
+                { value: "LV", label: "Latvia", title: "" },
+                { value: "LT", label: "Lithuania", title: "" },
+                { value: "LU", label: "Luxembourg", title: "" },
+                { value: "MT", label: "Malta", title: "" },
+                { value: "NL", label: "Netherlands", title: "" },
+                { value: "PL", label: "Poland", title: "" },
+                { value: "PT", label: "Portugal", title: "" },
+                { value: "RO", label: "Romania", title: "" },
+                { value: "SK", label: "Slovakia", title: "" },
+                { value: "SI", label: "Slovenia", title: "" },
+                { value: "SE", label: "Sweden", title: "" },
               ]}
               // defaultValue={adset.countries || "US"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -3826,7 +3870,7 @@ const CreateCampaignDrawer = ({
     const cleanedDraft = {
       groupId: selectedDraftForShare.groupId,
       Draft_Name: selectedDraftForShare.Draft_Name,
-      Category: selectedDraftForShare.Category,
+      // Category: selectedDraftForShare.Category,
       camapaignlevel: selectedDraftForShare.camapaignlevel,
       adsetlevel_1: selectedDraftForShare.adsetlevel_1,
       createdby: session?.user?.name,
@@ -3948,7 +3992,25 @@ const CreateCampaignDrawer = ({
 
     });
   }, [draftsData, searchText, selectedCategory, selectedObjective, selectedAccount]);
+  const groupedDrafts = useMemo(() => {
+    if (!Array.isArray(filteredDrafts)) return [];
 
+    const groupMap = {};
+
+    filteredDrafts.forEach((draft) => {
+      const groupId = draft.groupId || draft.draftId;
+      if (!groupMap[groupId]) {
+        groupMap[groupId] = {
+          ...draft,
+          accounts: [draft.Account_Number],
+        };
+      } else {
+        groupMap[groupId].accounts.push(draft.Account_Number);
+      }
+    });
+
+    return Object.values(groupMap);
+  }, [filteredDrafts]);
 
   useEffect(() => {
     if (!account || account.length === 0) return;
@@ -4278,7 +4340,7 @@ const CreateCampaignDrawer = ({
 
   const handleConfirm = async () => {
     const newErrors = {
-      input1: popupInputs.input1.trim() ? "" : " Template category is required",
+      // input1: popupInputs.input1.trim() ? "" : " Template category is required",
       input2: popupInputs.input2.trim() ? "" : "Template name is required",
     };
     setErrors(newErrors);
@@ -4309,7 +4371,7 @@ const CreateCampaignDrawer = ({
       for (const data of draftData) {
         const totalDraftData = {
           // id: uuidv4(),
-          Category: popupInputs.input1,
+          // Category: popupInputs.input1,
           Draft_Name: popupInputs.input2,
           ...data,
         };
@@ -4330,7 +4392,7 @@ const CreateCampaignDrawer = ({
           }),
         });
       }
-
+      message.success("Template saved successfully");
       // ✅ ensure non-2xx throws with a message
       // if (!resp.ok) {
       //   const errJson = await resp.json().catch(() => ({}));
@@ -5424,11 +5486,11 @@ const CreateCampaignDrawer = ({
   }
 
   const handleSaveEditedDraft = async () => {
-    const trimmedCat = popupInputs.input1.trim();
+    // const trimmedCat = popupInputs.input1.trim();
     const trimmedName = popupInputs.input2.trim();
 
     const newErrors = {
-      input1: trimmedCat ? "" : "Template category is required",
+      // input1: trimmedCat ? "" : "Template category is required",
       input2: trimmedName ? "" : "Template name is required",
     };
     setErrors(newErrors);
@@ -7505,7 +7567,6 @@ const CreateCampaignDrawer = ({
   };
 
 
-
   return (
     <Modal
       title={
@@ -7700,7 +7761,7 @@ const CreateCampaignDrawer = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
             />
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          {/* <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ marginTop: -20 }}>Categories</span>
             <Select
               placeholder="Filter by Category"
@@ -7712,7 +7773,7 @@ const CreateCampaignDrawer = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Cards */}
@@ -7725,7 +7786,7 @@ const CreateCampaignDrawer = ({
             alignItems: "stretch",
           }}
         >
-          {filteredDrafts.map((draft) => {
+          {groupedDrafts.map((draft) => {
             const cents = draft?.camapaignlevel?.Daily_amount ?? 0;
             const budget = (cents / 100).toLocaleString(undefined, {
               minimumFractionDigits: 0,
@@ -7811,7 +7872,7 @@ const CreateCampaignDrawer = ({
                     width: "100%",
                   }}
                 >
-                  <span style={{ color: "#B4B4B4" }}>Account Number</span>
+                  {/* <span style={{ color: "#B4B4B4" }}>Account Number</span>
                   <div
                     style={{
                       textAlign: "right",
@@ -7836,10 +7897,60 @@ const CreateCampaignDrawer = ({
                         {getAccountDetails(draft?.Account_Number)?.accountName}
                       </div>
                     )}
+                  </div> */}
+                  {draft.accounts.length > 1 ? (<span style={{ color: "#B4B4B4" }}>Accounts</span>) : (<span style={{ color: "#B4B4B4" }}>Account</span>)}
+                  {/* <span style={{ color: "#B4B4B4" }}>Account</span> */}
+                  <div style={{ textAlign: "right" }}>
+                    {draft.accounts.length > 1 ? (
+                      <Tooltip
+                        title={
+                          <div style={{ maxWidth: 250 }}>
+                            {draft.accounts.map((acc) => {
+                              const details = getAccountDetails(acc);
+                              return (
+                                <div
+                                  key={acc}
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    gap: 6,
+                                    borderBottom: "1px solid #eee",
+                                    padding: "2px 0",
+                                  }}
+                                >
+                                  <span>{acc}</span>
+                                  <span style={{ color: "#888" }}>{details?.accountName ?? "-"}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        }
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                          color: theme === "dark" ? "#ffffff" : "#000000",
+                          borderRadius: 6,
+                          padding: "6px 10px",
+                          fontSize: "14px",
+                        }}
+                      >
+                        {/* <MdOutlineNumbers
+                          style={{ fontSize: 16, color: "#91c25f", cursor: "pointer" }}
+                        /> */}
+                        <span>Multiple Accounts</span>
+                      </Tooltip>
+                    ) : (
+                      <div>
+                        <div>{draft.accounts[0]}</div>
+                        {getAccountDetails(draft.accounts[0]) && (
+                          <div style={{ color: "#888", fontSize: 11 }}>
+                            {getAccountDetails(draft.accounts[0])?.accountName}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-
-                  <span style={{ color: "#B4B4B4" }}>Category</span>
+                  {/* <span style={{ color: "#B4B4B4" }}>Category</span>
                   <span
                     title={draft?.Category ?? "-"}
                     style={{
@@ -7853,7 +7964,7 @@ const CreateCampaignDrawer = ({
                   >
                     {draft?.Category ?? "-"}
 
-                  </span>
+                  </span> */}
 
                   <span style={{ color: "#B4B4B4" }}>Objective</span>
                   <span
@@ -8230,25 +8341,69 @@ const CreateCampaignDrawer = ({
                         <Select
                           mode="multiple"
                           allowClear
+                          // options={[
+                          //   { value: "US", label: "United States" },
+                          //   { value: "GB", label: "United Kingdom" },
+                          //   { value: "AU", label: "Australia" },
+                          //   { value: "IN", label: "India" },
+                          //   { value: "AE", label: "United Arab Emirates" },
+                          //   { value: "CA", label: "Canada" },
+                          //   { value: "DE", label: "Germany" },
+                          //   { value: "FR", label: "France" },
+                          //   { value: "JP", label: "Japan" },
+                          //   { value: "CN", label: "China" },
+                          //   { value: "BR", label: "Brazil" },
+                          //   { value: "ZA", label: "South Africa" },
+                          //   { value: "RU", label: "Russia" },
+                          //   { value: "IT", label: "Italy" },
+                          //   { value: "ES", label: "Spain" },
+                          //   { value: "SG", label: "Singapore" },
+                          //   { value: "NZ", label: "New Zealand" },
+                          //   { value: "MX", label: "Mexico" },
+                          // ]}
+                          showSearch
                           options={[
-                            { value: "US", label: "United States" },
-                            { value: "GB", label: "United Kingdom" },
-                            { value: "AU", label: "Australia" },
-                            { value: "IN", label: "India" },
-                            { value: "AE", label: "United Arab Emirates" },
-                            { value: "CA", label: "Canada" },
-                            { value: "DE", label: "Germany" },
-                            { value: "FR", label: "France" },
-                            { value: "JP", label: "Japan" },
-                            { value: "CN", label: "China" },
-                            { value: "BR", label: "Brazil" },
-                            { value: "ZA", label: "South Africa" },
-                            { value: "RU", label: "Russia" },
-                            { value: "IT", label: "Italy" },
-                            { value: "ES", label: "Spain" },
-                            { value: "SG", label: "Singapore" },
-                            { value: "NZ", label: "New Zealand" },
-                            { value: "MX", label: "Mexico" },
+                            { value: "US", label: "United States", title: "" },
+                            { value: "GB", label: "United Kingdom", title: "" },
+                            { value: "AU", label: "Australia", title: "" },
+                            { value: "IN", label: "India", title: "" },
+                            { value: "AE", label: "United Arab Emirates", title: "" },
+                            { value: "CA", label: "Canada", title: "" },
+                            { value: "DE", label: "Germany", title: "" },
+                            { value: "FR", label: "France", title: "" },
+                            { value: "JP", label: "Japan", title: "" },
+                            { value: "CN", label: "China", title: "" },
+                            { value: "BR", label: "Brazil", title: "" },
+                            { value: "ZA", label: "South Africa", title: "" },
+                            { value: "RU", label: "Russia", title: "" },
+                            { value: "IT", label: "Italy", title: "" },
+                            { value: "ES", label: "Spain", title: "" },
+                            { value: "SG", label: "Singapore", title: "" },
+                            { value: "NZ", label: "New Zealand", title: "" },
+                            { value: "MX", label: "Mexico", title: "" },
+                            { value: "AT", label: "Austria", title: "" },
+                            { value: "BE", label: "Belgium", title: "" },
+                            { value: "BG", label: "Bulgaria", title: "" },
+                            { value: "HR", label: "Croatia", title: "" },
+                            { value: "CY", label: "Cyprus", title: "" },
+                            { value: "CZ", label: "Czech Republic", title: "" },
+                            { value: "DK", label: "Denmark", title: "" },
+                            { value: "EE", label: "Estonia", title: "" },
+                            { value: "FI", label: "Finland", title: "" },
+                            { value: "GR", label: "Greece", title: "" },
+                            { value: "HU", label: "Hungary", title: "" },
+                            { value: "IE", label: "Ireland", title: "" },
+                            { value: "LV", label: "Latvia", title: "" },
+                            { value: "LT", label: "Lithuania", title: "" },
+                            { value: "LU", label: "Luxembourg", title: "" },
+                            { value: "MT", label: "Malta", title: "" },
+                            { value: "NL", label: "Netherlands", title: "" },
+                            { value: "PL", label: "Poland", title: "" },
+                            { value: "PT", label: "Portugal", title: "" },
+                            { value: "RO", label: "Romania", title: "" },
+                            { value: "SK", label: "Slovakia", title: "" },
+                            { value: "SI", label: "Slovenia", title: "" },
+                            { value: "SE", label: "Sweden", title: "" },
                           ]}
                           dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
                           className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
@@ -8927,7 +9082,7 @@ const CreateCampaignDrawer = ({
                     }}
                     description={
                       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        <span style={{ color: theme === "dark" ? "#fff" : "#333" }} >Template Category</span>
+                        {/* <span style={{ color: theme === "dark" ? "#fff" : "#333" }} >Template Category</span>
                         <Select
                           placeholder="Select template category"
                           className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
@@ -9011,7 +9166,7 @@ const CreateCampaignDrawer = ({
                               </div>
                             </div>
                           )}
-                        />
+                        /> */}
 
                         {errors.input1 && <div style={{ color: "red", fontSize: 12 }}>{errors.input1}</div>}
 
@@ -9027,6 +9182,8 @@ const CreateCampaignDrawer = ({
                               ? "custom-input-dark"
                               : "custom-input-light"
                           }
+                          style={{ width: 250 }}
+
                         />
                         {errors.input2 && (
                           <div style={{ color: "red", fontSize: 12 }}>

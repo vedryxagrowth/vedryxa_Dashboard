@@ -2489,6 +2489,27 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     style={{ flex: '1 1 140px' }}
                                 >
                                     <Select
+                                        // options={[
+                                        //     { value: "US", label: "United States", title: "" },
+                                        //     { value: "GB", label: "United Kingdom", title: "" },
+                                        //     { value: "AU", label: "Australia", title: "" },
+                                        //     { value: "IN", label: "India", title: "" },
+                                        //     { value: "AE", label: "United Arab Emirates", title: "" },
+                                        //     { value: "CA", label: "Canada", title: "" },
+                                        //     { value: "DE", label: "Germany", title: "" },
+                                        //     { value: "FR", label: "France", title: "" },
+                                        //     { value: "JP", label: "Japan", title: "" },
+                                        //     { value: "CN", label: "China", title: "" },
+                                        //     { value: "BR", label: "Brazil", title: "" },
+                                        //     { value: "ZA", label: "South Africa", title: "" },
+                                        //     { value: "RU", label: "Russia", title: "" },
+                                        //     { value: "IT", label: "Italy", title: "" },
+                                        //     { value: "ES", label: "Spain", title: "" },
+                                        //     { value: "SG", label: "Singapore", title: "" },
+                                        //     { value: "NZ", label: "New Zealand", title: "" },
+                                        //     { value: "MX", label: "Mexico", title: "" }
+                                        // ]}
+                                        showSearch
                                         options={[
                                             { value: "US", label: "United States", title: "" },
                                             { value: "GB", label: "United Kingdom", title: "" },
@@ -2507,7 +2528,30 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "ES", label: "Spain", title: "" },
                                             { value: "SG", label: "Singapore", title: "" },
                                             { value: "NZ", label: "New Zealand", title: "" },
-                                            { value: "MX", label: "Mexico", title: "" }
+                                            { value: "MX", label: "Mexico", title: "" },
+                                            { value: "AT", label: "Austria", title: "" },
+                                            { value: "BE", label: "Belgium", title: "" },
+                                            { value: "BG", label: "Bulgaria", title: "" },
+                                            { value: "HR", label: "Croatia", title: "" },
+                                            { value: "CY", label: "Cyprus", title: "" },
+                                            { value: "CZ", label: "Czech Republic", title: "" },
+                                            { value: "DK", label: "Denmark", title: "" },
+                                            { value: "EE", label: "Estonia", title: "" },
+                                            { value: "FI", label: "Finland", title: "" },
+                                            { value: "GR", label: "Greece", title: "" },
+                                            { value: "HU", label: "Hungary", title: "" },
+                                            { value: "IE", label: "Ireland", title: "" },
+                                            { value: "LV", label: "Latvia", title: "" },
+                                            { value: "LT", label: "Lithuania", title: "" },
+                                            { value: "LU", label: "Luxembourg", title: "" },
+                                            { value: "MT", label: "Malta", title: "" },
+                                            { value: "NL", label: "Netherlands", title: "" },
+                                            { value: "PL", label: "Poland", title: "" },
+                                            { value: "PT", label: "Portugal", title: "" },
+                                            { value: "RO", label: "Romania", title: "" },
+                                            { value: "SK", label: "Slovakia", title: "" },
+                                            { value: "SI", label: "Slovenia", title: "" },
+                                            { value: "SE", label: "Sweden", title: "" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}

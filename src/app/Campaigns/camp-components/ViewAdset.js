@@ -42,38 +42,38 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
     const token = localStorage.getItem("token");
     console.log(viewadsetlevel);
     const defaultDate = viewadsetlevel?.start_time
-    ? dayjs(viewadsetlevel?.start_time) // Parse ISO date using Day.js
-    : null;
+        ? dayjs(viewadsetlevel?.start_time) // Parse ISO date using Day.js
+        : null;
 
-  const [date, setDate] = useState(defaultDate);
+    const [date, setDate] = useState(defaultDate);
     console.log(date);
 
     useEffect(() => {
         if (viewadsetlevel) {
-        //   setSelectedPublishers(viewadsetlevel.publisher_platforms || []);
-        //   setSelectedPositions(viewadsetlevel.position || ["feed"]);
-          form.setFieldsValue({
-            positions: viewadsetlevel.position || ["feed"],
-            AdsetName: viewadsetlevel?.AdsetName,
-            optimization_goal: viewadsetlevel?.optimization_goal,
-            billing_event: viewadsetlevel?.billing_event,
-            DailyAdd_amount: viewadsetlevel?.Daily_amount ? (viewadsetlevel?.Daily_amount) / 100 : null,
-            // start_time: viewadsetlevel?.start_time,
-            action_source: viewadsetlevel?.action_source,
-            custom_event_type: viewadsetlevel?.custom_event_type,
-            pixel_id: viewadsetlevel?.pixel_id,
-            bid_amount: (viewadsetlevel?.bid_amount) / 100,
-            countries: viewadsetlevel?.countries,
-            Min_Age: viewadsetlevel?.Min_Age,
-            Max_Age: viewadsetlevel?.Max_Age,
-            Gender: viewadsetlevel?.Gender,
-            publisher_platforms: viewadsetlevel?.publisher_platforms,
-            device_platforms: viewadsetlevel?.device_platforms,
-            Language: viewadsetlevel?.locales,
-            placements: viewadsetlevel?.placements,
-          });
+            //   setSelectedPublishers(viewadsetlevel.publisher_platforms || []);
+            //   setSelectedPositions(viewadsetlevel.position || ["feed"]);
+            form.setFieldsValue({
+                positions: viewadsetlevel.position || ["feed"],
+                AdsetName: viewadsetlevel?.AdsetName,
+                optimization_goal: viewadsetlevel?.optimization_goal,
+                billing_event: viewadsetlevel?.billing_event,
+                DailyAdd_amount: viewadsetlevel?.Daily_amount ? (viewadsetlevel?.Daily_amount) / 100 : null,
+                // start_time: viewadsetlevel?.start_time,
+                action_source: viewadsetlevel?.action_source,
+                custom_event_type: viewadsetlevel?.custom_event_type,
+                pixel_id: viewadsetlevel?.pixel_id,
+                bid_amount: (viewadsetlevel?.bid_amount) / 100,
+                countries: viewadsetlevel?.countries,
+                Min_Age: viewadsetlevel?.Min_Age,
+                Max_Age: viewadsetlevel?.Max_Age,
+                Gender: viewadsetlevel?.Gender,
+                publisher_platforms: viewadsetlevel?.publisher_platforms,
+                device_platforms: viewadsetlevel?.device_platforms,
+                Language: viewadsetlevel?.locales,
+                placements: viewadsetlevel?.placements,
+            });
         }
-      }, [viewadsetlevel, form]);
+    }, [viewadsetlevel, form]);
 
     const initialValue = {
         AdsetName: viewadsetlevel?.AdsetName,
@@ -102,13 +102,13 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
             <Card style={{ width: "100%" }} className="editcard">
                 <Form form={form} layout="vertical" initialValues={initialValue}>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-                        
+
                         <Form.Item
                             name="AdsetName"
                             label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
                             style={{ flex: "1 1 20%" }}
                         >
-                            <Input disabled style={{ width: "100%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                            <Input disabled style={{ width: "100%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                         </Form.Item>
                         <Form.Item
                             name="optimization_goal"
@@ -189,7 +189,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
                             style={{ flex: "1 1 20%" }}
                         >
-                            <Input disabled style={{ width: "100%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                            <Input disabled style={{ width: "100%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                         </Form.Item>
                         <Form.Item
                             name="DailyAdd_amount"
@@ -206,7 +206,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             label={<span style={{ color: "#B4B4B4" }}>Bid amount</span>}
                             style={{ flex: "1 1 15%" }}
                         >
-                            <Input type="number" placeholder="$" disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                            <Input type="number" placeholder="$" disabled className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                         </Form.Item>
                     </div>
                     <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
@@ -218,25 +218,69 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         >
                             <Select
                                 disabled
+                                // options={[
+                                //     { value: "US", label: "United States" },
+                                //     { value: "GB", label: "United Kingdom" },
+                                //     { value: "AU", label: "Australia" },
+                                //     { value: "IN", label: "India" },
+                                //     { value: "AE", label: "United Arab Emirates" },
+                                //     { value: "CA", label: "Canada" },
+                                //     { value: "DE", label: "Germany" },
+                                //     { value: "FR", label: "France" },
+                                //     { value: "JP", label: "Japan" },
+                                //     { value: "CN", label: "China" },
+                                //     { value: "BR", label: "Brazil" },
+                                //     { value: "ZA", label: "South Africa" },
+                                //     { value: "RU", label: "Russia" },
+                                //     { value: "IT", label: "Italy" },
+                                //     { value: "ES", label: "Spain" },
+                                //     { value: "SG", label: "Singapore" },
+                                //     { value: "NZ", label: "New Zealand" },
+                                //     { value: "MX", label: "Mexico" }
+                                // ]}
+                                showSearch
                                 options={[
-                                    { value: "US", label: "United States" },
-                                    { value: "GB", label: "United Kingdom" },
-                                    { value: "AU", label: "Australia" },
-                                    { value: "IN", label: "India" },
-                                    { value: "AE", label: "United Arab Emirates" },
-                                    { value: "CA", label: "Canada" },
-                                    { value: "DE", label: "Germany" },
-                                    { value: "FR", label: "France" },
-                                    { value: "JP", label: "Japan" },
-                                    { value: "CN", label: "China" },
-                                    { value: "BR", label: "Brazil" },
-                                    { value: "ZA", label: "South Africa" },
-                                    { value: "RU", label: "Russia" },
-                                    { value: "IT", label: "Italy" },
-                                    { value: "ES", label: "Spain" },
-                                    { value: "SG", label: "Singapore" },
-                                    { value: "NZ", label: "New Zealand" },
-                                    { value: "MX", label: "Mexico" }
+                                    { value: "US", label: "United States", title: "" },
+                                    { value: "GB", label: "United Kingdom", title: "" },
+                                    { value: "AU", label: "Australia", title: "" },
+                                    { value: "IN", label: "India", title: "" },
+                                    { value: "AE", label: "United Arab Emirates", title: "" },
+                                    { value: "CA", label: "Canada", title: "" },
+                                    { value: "DE", label: "Germany", title: "" },
+                                    { value: "FR", label: "France", title: "" },
+                                    { value: "JP", label: "Japan", title: "" },
+                                    { value: "CN", label: "China", title: "" },
+                                    { value: "BR", label: "Brazil", title: "" },
+                                    { value: "ZA", label: "South Africa", title: "" },
+                                    { value: "RU", label: "Russia", title: "" },
+                                    { value: "IT", label: "Italy", title: "" },
+                                    { value: "ES", label: "Spain", title: "" },
+                                    { value: "SG", label: "Singapore", title: "" },
+                                    { value: "NZ", label: "New Zealand", title: "" },
+                                    { value: "MX", label: "Mexico", title: "" },
+                                    { value: "AT", label: "Austria", title: "" },
+                                    { value: "BE", label: "Belgium", title: "" },
+                                    { value: "BG", label: "Bulgaria", title: "" },
+                                    { value: "HR", label: "Croatia", title: "" },
+                                    { value: "CY", label: "Cyprus", title: "" },
+                                    { value: "CZ", label: "Czech Republic", title: "" },
+                                    { value: "DK", label: "Denmark", title: "" },
+                                    { value: "EE", label: "Estonia", title: "" },
+                                    { value: "FI", label: "Finland", title: "" },
+                                    { value: "GR", label: "Greece", title: "" },
+                                    { value: "HU", label: "Hungary", title: "" },
+                                    { value: "IE", label: "Ireland", title: "" },
+                                    { value: "LV", label: "Latvia", title: "" },
+                                    { value: "LT", label: "Lithuania", title: "" },
+                                    { value: "LU", label: "Luxembourg", title: "" },
+                                    { value: "MT", label: "Malta", title: "" },
+                                    { value: "NL", label: "Netherlands", title: "" },
+                                    { value: "PL", label: "Poland", title: "" },
+                                    { value: "PT", label: "Portugal", title: "" },
+                                    { value: "RO", label: "Romania", title: "" },
+                                    { value: "SK", label: "Slovakia", title: "" },
+                                    { value: "SI", label: "Slovenia", title: "" },
+                                    { value: "SE", label: "Sweden", title: "" },
                                 ]}
                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -351,7 +395,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                             { key: "right_hand_column", label: "Facebook Right Column" },
                                             { key: "instant_article", label: "Facebook Instant Articles" },
                                             { key: "biz_disco_feed", label: "Facebook Business Explore" },
-                                          
+
                                             { key: "stream", label: "Instagram Stream" },
                                             { key: "story_i", label: "Instagram Stories" },
                                             { key: "explore", label: "Instagram Explore" },
@@ -360,11 +404,11 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                             { key: "profile_feed-i", label: "Instagram Profile Feed" },
                                             { key: "ig_search", label: "Instagram Search" },
                                             { key: "profile_reels", label: "Instagram Profile Reels" },
-                                          
+
                                             { key: "messenger_home", label: "Messenger Home" },
                                             { key: "story_m", label: "Messenger Stories" },
                                             { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-                                          
+
                                             { key: "classic", label: "Audience Network Classic" },
                                             { key: "rewarded_video", label: "Audience Network Rewarded Video" }
                                         ]}
