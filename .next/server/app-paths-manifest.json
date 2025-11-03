@@ -1,7 +1,3 @@
 {
-  "/LiveHistory/LiveAdsetHistory/[AdsetName]/page": "app/LiveHistory/LiveAdsetHistory/[AdsetName]/page.js",
-  "/Campaigns/page": "app/Campaigns/page.js",
-  "/Dashboard/page": "app/Dashboard/page.js",
-  "/Creatives/page": "app/Creatives/page.js",
-  "/Reports/page": "app/Reports/page.js"
+  "/Campaigns/page": "app/Campaigns/page.js"
 }
