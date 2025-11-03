@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useMemo } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined,PaperClipOutlined,DeleteOutlined  } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, PaperClipOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -520,7 +520,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     useEffect(() => {
         if (visible && Object.keys(selectedDraftToEdit).length === 0) {
             form.resetFields();          // Reset form fields to their initialValues
-            form.setFieldsValue({MediaContent: []}); // Reset MediaContent field 
+            form.setFieldsValue({ MediaContent: [] }); // Reset MediaContent field 
             setWebsiteURL('');           // Clear website URL
             setSelectedFiles([]);        // Clear selected files
             setCampaignName('');         // Clear campaign name
@@ -600,8 +600,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             case 'FB_DomainActive':
                 return <DActiveUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         }
-        
-    },[network, accountis, onReturnUrl])
+
+    }, [network, accountis, onReturnUrl])
 
 
 
@@ -625,8 +625,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
         console.log(values, "values");
         console.log(options, "options");
         const formatted = options.map(opt => ({
-          value: opt.value,
-          label: opt.label || opt.children
+            value: opt.value,
+            label: opt.label || opt.children
         }));
         setSelectedPositions(formatted);
     };
@@ -696,7 +696,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
         setSelectedFilesFromMedia([]);
         setSelectedPublishers(draft?.adsetlevel?.publisher_platforms || []);
         setIsManual(draft?.adsetlevel?.placements === "manual" ? "manual" : false);
-        draft?.addlevel?.ads?.length > 0 ? setSelectedOption("creative"): setSelectedOption("upload");
+        draft?.addlevel?.ads?.length > 0 ? setSelectedOption("creative") : setSelectedOption("upload");
         // setSelectedOption("creative");
     }
 
@@ -731,10 +731,10 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
         console.log("selectedDraftToEdit", selectedDraftToEdit);
         console.log(selectedDraftToEdit && Object.keys(selectedDraftToEdit).length > 0);
         // console.log("selectedDraftToEdit", selectedDraftToEdit.length > 0);
-        if(selectedDraftToEdit && Object.keys(selectedDraftToEdit).length > 0) {
+        if (selectedDraftToEdit && Object.keys(selectedDraftToEdit).length > 0) {
             setFormValuesFromDraft(selectedDraftToEdit);
         }
-    },[selectedDraftToEdit]);
+    }, [selectedDraftToEdit]);
 
     useEffect(() => {
         // Update the form field value for Website_URL whenever websiteURL changes
@@ -869,7 +869,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
         const uploadFilesSequentially = async (selectedFiles) => {
             const mediaHashArray = [];
-        
+
             for (const file of selectedFiles) {
                 try {
                     const fileType = file.type;
@@ -877,7 +877,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                         onError("Unsupported file type");
                         continue;
                     }
-        
+
                     if (file?.url) {
                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
@@ -888,29 +888,29 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     Authorization: localStorage.getItem("token"),
                                 },
                             });
-        
+
                             const uploadFile = await response.blob();
                             if (!(uploadFile instanceof Blob)) {
                                 console.error("The fetched file is not a Blob:", uploadFile);
                                 continue;
                             }
-        
+
                             formData.append("file", uploadFile, file.name);
                             // console.log(formData);
-        
+
                             let fbResponse;
-                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
+                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg")) {
                                 formData.append('file', uploadFile, file.name);
                                 formData.append('access_token', token);
                                 const fileName = file.name.split('/').pop();
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-                                
-        
+
+
                                 if (fbResponse.status === 200) {
                                     onSuccess("ok", response);
                                     mediaHashArray.push({
@@ -928,11 +928,11 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -943,12 +943,12 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
                                     // console.log(videoid);
                                     // console.log(uri);
-        
+
                                     onSuccess("ok", fbResponse);
                                     mediaHashArray.push({
                                         filename: file?.url,
@@ -970,18 +970,18 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             const fileId = `${uniqueId}_${file.name}`;
                             const editedImage = editedImages[fileId];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-        
+
                             console.log(file.originFileObj.name);
-        
+
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
                             } else {
                                 formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
                             }
-        
+
                             // console.log(formData);
                             let response, fbResponse;
-        
+
                             if (file.type.startsWith('image/')) {
                                 response = await axios.post(
                                     'https://www.testapi.adsgoat.in/upload',
@@ -993,16 +993,16 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         },
                                     }
                                 );
-        
+
                                 if (!response.data.imageUrl) {
                                     onError("Error: Image URL not returned from custom API");
                                     console.error("Image upload to custom API failed, imageUrl missing");
                                     continue;
                                 }
-        
+
                                 // console.log("Custom API response imageUrl:", response);
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                     formData,
@@ -1010,7 +1010,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 );
 
                                 // console.log("Facebook API response:", fbResponse.data);
-        
+
                                 if (response.status === 200 && fbResponse.status === 200) {
                                     onSuccess("ok", response);
                                     mediaHashArray.push({
@@ -1032,25 +1032,25 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         },
                                     }
                                 );
-        
+
                                 if (response.status !== 200) {
                                     onError("error", response);
                                     console.error("Video upload to custom API failed");
                                     continue;
                                 }
-        
+
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/advideos`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -1061,10 +1061,10 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-        
+
                                     onSuccess("ok", fbResponse);
                                     mediaHashArray.push({
                                         filename: response.data.imageUrl,
@@ -1083,7 +1083,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                     onError("error", error);
                 }
             }
-        
+
             // console.log("All media files uploaded successfully:", mediaHashArray);
             return mediaHashArray;
         };
@@ -1253,10 +1253,10 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                         onError("Unsupported file type");
                         continue;
                     }
-        
+
                     if (file?.url) {
                         updatedImages.push({
-                            uid: file.uid || `-${index+1}`,
+                            uid: file.uid || `-${index + 1}`,
                             name: file?.name,
                             status: 'done',
                             type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
@@ -1271,16 +1271,16 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             // console.log(editedImages[fileId], "file");
                             const editedImage = editedImages[file.name];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-        
+
                             console.log(file.originFileObj.name);
-        
+
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
                             } else {
                                 formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
                             }
                             let response, fbResponse;
-        
+
                             if (file.type.startsWith('image/')) {
                                 response = await axios.post(
                                     'https://www.testapi.adsgoat.in/upload',
@@ -1294,12 +1294,12 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 );
                                 if (response.status == 200) {
                                     updatedImages.push({
-                                        uid: file.uid || `-${index+1}`,
+                                        uid: file.uid || `-${index + 1}`,
                                         name: fileId,
                                         status: 'done',
                                         type: `${response.data.imageUrl.endsWith(".jpg") || response.data.imageUrl.endsWith(".png") || response.data.imageUrl.endsWith(".jpeg") ? response.data.imageUrl.endsWith(".jpg") ? "image/jpg" : response.data.imageUrl.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
                                         url: response.data.imageUrl,
-                                    }); 
+                                    });
                                 }
                             } else if (file.type.startsWith('video/')) {
                                 response = await axios.post(
@@ -1312,10 +1312,10 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         },
                                     }
                                 );
-                                if( response.status !== 200) {
+                                if (response.status !== 200) {
                                     // updatedImages.push({filename: response.data.imageUrl});
                                     updatedImages.push({
-                                        uid: file.uid || `-${index+1}`,
+                                        uid: file.uid || `-${index + 1}`,
                                         name: fileId,
                                         status: 'done',
                                         type: `${response.data.imageUrl.endsWith(".jpg") || response.data.imageUrl.endsWith(".png") || response.data.imageUrl.endsWith(".jpeg") ? response.data.imageUrl.endsWith(".jpg") ? "image/jpg" : response.data.imageUrl.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
@@ -1334,7 +1334,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             console.log("Form Values before customRequest:", formValues);
             console.log("Selected Files before customRequest:", selectedFiles);
             console.log("Updated Images before customRequest:", updatedImages);
-            
+
             setLoading(false); // 
 
             // console.log("Add Level Data:", moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),);
@@ -1398,15 +1398,15 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
             console.log(draftData, "data1");
 
-            try{
-                if((Object.keys(selectedDraftToEdit).length > 0) && selectedDraftToEdit?.id) {
+            try {
+                if ((Object.keys(selectedDraftToEdit).length > 0) && selectedDraftToEdit?.id) {
                     const updatedDraft = await axios.put(`https://www.testapi.adsgoat.in/api/drafts/${encodeURIComponent(session?.user?.email)}/${selectedDraftToEdit.id}`, draftData, {
                         headers: {
-                          "Content-Type": "application/json",
-                          'Authorization': localStorage.getItem("token"),
+                            "Content-Type": "application/json",
+                            'Authorization': localStorage.getItem("token"),
                         }
                     })
-                    if(updatedDraft.status === 200 || updatedDraft.status === 201) {
+                    if (updatedDraft.status === 200 || updatedDraft.status === 201) {
                         message.success("Draft updated successfully");
                         setLoading(false); // Stop the spinner
                         setFormValues({}); // Reset form values
@@ -1418,14 +1418,14 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                         setIsManual(false); // Reset manual mode
                     }
 
-                }else{
+                } else {
                     const newDraft = await axios.post(`https://www.testapi.adsgoat.in/api/drafts?email=${encodeURIComponent(session?.user?.email)}&userName=${session.user.name}`, draftData, {
                         headers: {
-                          "Content-Type": "application/json",
-                          'Authorization': localStorage.getItem("token"),
+                            "Content-Type": "application/json",
+                            'Authorization': localStorage.getItem("token"),
                         }
                     })
-                    if(newDraft.status === 200 || newDraft.status === 201) {
+                    if (newDraft.status === 200 || newDraft.status === 201) {
                         message.success("Draft created successfully");
                         setLoading(false); // Stop the spinner
                         setFormValues({}); // Reset form values
@@ -1437,9 +1437,9 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                         setIsManual(false); // Reset manual mode
                     }
                 }
-                
 
-            }catch(error) {
+
+            } catch (error) {
                 console.error("Error:", error);
                 message.error("An error occurred during the draft creation process.");
             }
@@ -1468,12 +1468,12 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
     function extractValuesByPartialLabel(dataArray, labelName) {
         return dataArray
-          .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
-          .map(item => {
-            if (item.value.includes('story_')) return 'story';
-            if (item.value.includes('profile_feed-')) return 'profile_feed';
-            return item.value;
-          });
+            .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
+            .map(item => {
+                if (item.value.includes('story_')) return 'story';
+                if (item.value.includes('profile_feed-')) return 'profile_feed';
+                return item.value;
+            });
     }
 
     const postData = async (values) => {
@@ -1496,7 +1496,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                         Description: values.Description,
                         Caption: values.Caption,
                         Website_URL: values.Website_URL,
-                        
+
                         // urlParameters: values.urlParameters
                     };
                 } else if (media.videoid) {
@@ -1594,7 +1594,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                 setSelectedFiles([]);
                 onClose();
                 setSelectedPositions([]);
-                isManual !== "manual" && setIsManual(false); 
+                isManual !== "manual" && setIsManual(false);
             } else {
                 console.error('Failed to submit form data');
             }
@@ -1610,24 +1610,24 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
-          ...file,
-          uid: file.uid || `-${Date.now()}`,
-          source: "media",
+            ...file,
+            uid: file.uid || `-${Date.now()}`,
+            source: "media",
         }));
-      
+
         setSelectedFiles(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      
+
         // 👇 Update selectedFilesFromMedia — preserve + append
         setSelectedFilesFromMedia(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      };
+    };
 
     const currentDate = dayjs();
     console.log(moment(), "currentDate")
@@ -1707,18 +1707,18 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
     const selectedFilesData = (data) => {
         console.log("Selected Files Data:", data);
-        setSelectedFiles(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFiles(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
                 url: file?.url,
             })
         })]);
-        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
@@ -1726,10 +1726,10 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             })
         })]);
         setOpenCreativesDrawer(false);
-        
+
         if (data.length > 0) {
             const currentMediaContent = form.getFieldValue("MediaContent") || [];
-        
+
             const newFiles = data.map((file, index) => ({
                 uid: file.uid || `-${index + 1}`,
                 name: file?.name,
@@ -1737,15 +1737,15 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                 type: file?.url?.endsWith(".jpg")
                     ? "image/jpg"
                     : file?.url?.endsWith(".jpeg")
-                    ? "image/jpeg"
-                    : file?.url?.endsWith(".png")
-                    ? "image/png"
-                    : "video/",
+                        ? "image/jpeg"
+                        : file?.url?.endsWith(".png")
+                            ? "image/png"
+                            : "video/",
                 url: file?.url,
             }));
-        
+
             const updatedMediaContent = [...currentMediaContent, ...newFiles];
-        
+
             form.setFieldsValue({ MediaContent: updatedMediaContent });
             form.validateFields(["MediaContent"]);
         }
@@ -1765,7 +1765,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     const handleRemove = (fileToRemove) => {
         setSelectedFilesFromMedia(prev => prev.filter(file => file.uid !== fileToRemove.uid));
         setSelectedFiles(prev =>
-          prev.filter(file => file.uid !== fileToRemove.uid)
+            prev.filter(file => file.uid !== fileToRemove.uid)
         );
     };
 
@@ -1790,12 +1790,12 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             },
                         ]}
                         style={{ flex: 0.2 }}>
-                        <Input placeholder='Enter draft name'  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                        <Input placeholder='Enter draft name' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                     </Form.Item>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
                         onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}  >
                         <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
-                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000'}}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
                                 <Form.Item
                                     name="Account_Number"
                                     label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
@@ -1806,7 +1806,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     //     },
                                     // ]}
                                     style={{ flex: 0.2 }}>
-                                    <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                    <Input value={accountNumber} onChange={Accountchange} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="Name"
@@ -1964,7 +1964,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     // ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input   className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="optimization_goal"
@@ -2020,12 +2020,12 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     style={{ flex: '1 1 150px' }}
                                     initialValue={currentDate}
                                 >
-                                    <DatePicker showTime 
-    //                                 onChange={(value, dateString) => {
-    //     console.log("Local Time:", dateString)
-    //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-    //   }}
-                                    style={{ width: '100%' }} />
+                                    <DatePicker showTime
+                                        //                                 onChange={(value, dateString) => {
+                                        //     console.log("Local Time:", dateString)
+                                        //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                                        //   }}
+                                        style={{ width: '100%' }} />
                                 </Form.Item>
                                 <Form.Item
                                     name="action_source"
@@ -2083,7 +2083,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     // ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input   className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
@@ -2170,25 +2170,69 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     style={{ flex: '1 1 150px' }}
                                 >
                                     <Select
+                                        // options={[
+                                        //     { value: "US", label: "United States" },
+                                        //     { value: "GB", label: "United Kingdom" },
+                                        //     { value: "AU", label: "Australia" },
+                                        //     { value: "IN", label: "India" },
+                                        //     { value: "AE", label: "United Arab Emirates" },
+                                        //     { value: "CA", label: "Canada" },
+                                        //     { value: "DE", label: "Germany" },
+                                        //     { value: "FR", label: "France" },
+                                        //     { value: "JP", label: "Japan" },
+                                        //     { value: "CN", label: "China" },
+                                        //     { value: "BR", label: "Brazil" },
+                                        //     { value: "ZA", label: "South Africa" },
+                                        //     { value: "RU", label: "Russia" },
+                                        //     { value: "IT", label: "Italy" },
+                                        //     { value: "ES", label: "Spain" },
+                                        //     { value: "SG", label: "Singapore" },
+                                        //     { value: "NZ", label: "New Zealand" },
+                                        //     { value: "MX", label: "Mexico" }
+                                        // ]}
+                                        showSearch
                                         options={[
-                                            { value: "US", label: "United States" },
-                                            { value: "GB", label: "United Kingdom" },
-                                            { value: "AU", label: "Australia" },
-                                            { value: "IN", label: "India" },
-                                            { value: "AE", label: "United Arab Emirates" },
-                                            { value: "CA", label: "Canada" },
-                                            { value: "DE", label: "Germany" },
-                                            { value: "FR", label: "France" },
-                                            { value: "JP", label: "Japan" },
-                                            { value: "CN", label: "China" },
-                                            { value: "BR", label: "Brazil" },
-                                            { value: "ZA", label: "South Africa" },
-                                            { value: "RU", label: "Russia" },
-                                            { value: "IT", label: "Italy" },
-                                            { value: "ES", label: "Spain" },
-                                            { value: "SG", label: "Singapore" },
-                                            { value: "NZ", label: "New Zealand" },
-                                            { value: "MX", label: "Mexico" }
+                                            { value: "US", label: "United States", title: "" },
+                                            { value: "GB", label: "United Kingdom", title: "" },
+                                            { value: "AU", label: "Australia", title: "" },
+                                            { value: "IN", label: "India", title: "" },
+                                            { value: "AE", label: "United Arab Emirates", title: "" },
+                                            { value: "CA", label: "Canada", title: "" },
+                                            { value: "DE", label: "Germany", title: "" },
+                                            { value: "FR", label: "France", title: "" },
+                                            { value: "JP", label: "Japan", title: "" },
+                                            { value: "CN", label: "China", title: "" },
+                                            { value: "BR", label: "Brazil", title: "" },
+                                            { value: "ZA", label: "South Africa", title: "" },
+                                            { value: "RU", label: "Russia", title: "" },
+                                            { value: "IT", label: "Italy", title: "" },
+                                            { value: "ES", label: "Spain", title: "" },
+                                            { value: "SG", label: "Singapore", title: "" },
+                                            { value: "NZ", label: "New Zealand", title: "" },
+                                            { value: "MX", label: "Mexico", title: "" },
+                                            { value: "AT", label: "Austria", title: "" },
+                                            { value: "BE", label: "Belgium", title: "" },
+                                            { value: "BG", label: "Bulgaria", title: "" },
+                                            { value: "HR", label: "Croatia", title: "" },
+                                            { value: "CY", label: "Cyprus", title: "" },
+                                            { value: "CZ", label: "Czech Republic", title: "" },
+                                            { value: "DK", label: "Denmark", title: "" },
+                                            { value: "EE", label: "Estonia", title: "" },
+                                            { value: "FI", label: "Finland", title: "" },
+                                            { value: "GR", label: "Greece", title: "" },
+                                            { value: "HU", label: "Hungary", title: "" },
+                                            { value: "IE", label: "Ireland", title: "" },
+                                            { value: "LV", label: "Latvia", title: "" },
+                                            { value: "LT", label: "Lithuania", title: "" },
+                                            { value: "LU", label: "Luxembourg", title: "" },
+                                            { value: "MT", label: "Malta", title: "" },
+                                            { value: "NL", label: "Netherlands", title: "" },
+                                            { value: "PL", label: "Poland", title: "" },
+                                            { value: "PT", label: "Portugal", title: "" },
+                                            { value: "RO", label: "Romania", title: "" },
+                                            { value: "SK", label: "Slovakia", title: "" },
+                                            { value: "SI", label: "Slovenia", title: "" },
+                                            { value: "SE", label: "Sweden", title: "" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2286,7 +2330,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 <Form.Item
                                     label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                                     name="placements"
-                                    // rules={[{ required: true, message: 'Please select a mode!' }]}
+                                // rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
                                     <Select placeholder="Select a mode" onChange={handleModeChange}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -2372,29 +2416,29 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
-                                    <div style={{display:'flex', flexDirection:'column'}}>
-                                        <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
-                                            style={{ flex: 1 }}
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <Form.Item
+                                                label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
+                                                style={{ flex: 1 }}
                                             >
-                                            <Select
-                                                // defaultValue="upload"
-                                                value={selectedOption}
-                                                onChange={(value) => {
-                                                setSelectedOption(value);
-                                                form.validateFields(["MediaContent"]); // Revalidate when switching source
-                                                }}
-                                                style={{ marginBottom: 16 }}
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                            >
-                                                <Option value="upload">Upload</Option>
-                                                <Option value="creative">Creative library</Option>
-                                            </Select>
+                                                <Select
+                                                    // defaultValue="upload"
+                                                    value={selectedOption}
+                                                    onChange={(value) => {
+                                                        setSelectedOption(value);
+                                                        form.validateFields(["MediaContent"]); // Revalidate when switching source
+                                                    }}
+                                                    style={{ marginBottom: 16 }}
+                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                >
+                                                    <Option value="upload">Upload</Option>
+                                                    <Option value="creative">Creative library</Option>
+                                                </Select>
                                             </Form.Item>
 
                                             <Form.Item
-                                            name="MediaContent"
+                                                name="MediaContent"
                                             // rules={[
                                             //     {
                                             //     validator: async () => {
@@ -2411,55 +2455,55 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             >
                                                 <div>
                                                     {/* Upload UI */}
-                                                    <div  className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                    <div className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
                                                         <Upload
                                                             beforeUpload={() => false}
                                                             onChange={(info) => {
-                                                            const newFiles = info.fileList.map((file) => ({
-                                                                ...file,
-                                                                uid: file.uid || `-${Date.now()}`,
-                                                                source: "media",
-                                                                thumbUrl:
-                                                                file.thumbUrl ||
-                                                                (file.originFileObj
-                                                                    ? URL.createObjectURL(file.originFileObj)
-                                                                    : undefined),
-                                                            }));
+                                                                const newFiles = info.fileList.map((file) => ({
+                                                                    ...file,
+                                                                    uid: file.uid || `-${Date.now()}`,
+                                                                    source: "media",
+                                                                    thumbUrl:
+                                                                        file.thumbUrl ||
+                                                                        (file.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : undefined),
+                                                                }));
 
-                                                            setSelectedFiles((prev) => {
-                                                                const existingUids = new Set(prev.map((f) => f.uid));
-                                                                const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                                const updated = [...prev, ...filteredNewFiles];
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFiles((prev) => {
+                                                                    const existingUids = new Set(prev.map((f) => f.uid));
+                                                                    const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                    const updated = [...prev, ...filteredNewFiles];
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
 
-                                                            setSelectedFilesFromMedia((prev) => {
-                                                                const existingUids = new Set(prev.map((f) => f.uid));
-                                                                const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                                const updated = [...prev, ...filteredNewFiles];
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFilesFromMedia((prev) => {
+                                                                    const existingUids = new Set(prev.map((f) => f.uid));
+                                                                    const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                    const updated = [...prev, ...filteredNewFiles];
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
                                                             }}
                                                             onRemove={(fileToRemove) => {
-                                                            setSelectedFilesFromMedia((prev) => {
-                                                                const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFilesFromMedia((prev) => {
+                                                                    const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
 
-                                                            setSelectedFiles((prev) => {
-                                                                const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFiles((prev) => {
+                                                                    const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
 
-                                                            return true;
+                                                                return true;
                                                             }}
                                                             multiple
                                                             maxCount={10}
@@ -2467,86 +2511,86 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined />} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select files</Button>
+                                                            <Button icon={<UploadOutlined />} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>Select files</Button>
                                                         </Upload>
                                                     </div>
 
                                                     {/* Creative Library UI */}
                                                     {selectedOption === "creative" && (
-                                                    <div>
-                                                        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
-                                                        Select files
-                                                        </Button>
+                                                        <div>
+                                                            <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>
+                                                                Select files
+                                                            </Button>
 
-                                                        {selectedFilesFromCreatives?.length > 0 && (
-                                                        <div style={{ marginTop: "10px" }}>
-                                                            {selectedFilesFromCreatives.map((file, index) => (
-                                                            <div
-                                                                key={index}
-                                                                style={{
-                                                                display: "flex",
-                                                                alignItems: "center",
-                                                                marginBottom: 8,
-                                                                }}
-                                                            >
-                                                                {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                                                {/* <Tooltip title={file.name}> */}
-                                                                {file.type?.startsWith("image/") && (
-                                                                    <img
-                                                                        src={
-                                                                        file.originFileObj
-                                                                            ? URL.createObjectURL(file.originFileObj)
-                                                                            : file.url
-                                                                        }
-                                                                        alt="preview"
-                                                                        style={{
-                                                                        width: 40,
-                                                                        height: 40,
-                                                                        objectFit: "cover",
-                                                                        borderRadius: 4,
-                                                                        marginLeft: 8,
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                                <span
-                                                                    style={{
-                                                                    maxWidth: 160,
-                                                                    overflow: "hidden",
-                                                                    textOverflow: "ellipsis",
-                                                                    whiteSpace: "nowrap",
-                                                                    paddingLeft: 8,
-                                                                    color: theme === 'dark' ? '#fff' : '#000',
-                                                                    }}
-                                                                >
-                                                                    {file.name}
-                                                                </span>
-                                                                {/* </Tooltip> */}
+                                                            {selectedFilesFromCreatives?.length > 0 && (
+                                                                <div style={{ marginTop: "10px" }}>
+                                                                    {selectedFilesFromCreatives.map((file, index) => (
+                                                                        <div
+                                                                            key={index}
+                                                                            style={{
+                                                                                display: "flex",
+                                                                                alignItems: "center",
+                                                                                marginBottom: 8,
+                                                                            }}
+                                                                        >
+                                                                            {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                                                            {/* <Tooltip title={file.name}> */}
+                                                                            {file.type?.startsWith("image/") && (
+                                                                                <img
+                                                                                    src={
+                                                                                        file.originFileObj
+                                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                                            : file.url
+                                                                                    }
+                                                                                    alt="preview"
+                                                                                    style={{
+                                                                                        width: 40,
+                                                                                        height: 40,
+                                                                                        objectFit: "cover",
+                                                                                        borderRadius: 4,
+                                                                                        marginLeft: 8,
+                                                                                    }}
+                                                                                />
+                                                                            )}
+                                                                            <span
+                                                                                style={{
+                                                                                    maxWidth: 160,
+                                                                                    overflow: "hidden",
+                                                                                    textOverflow: "ellipsis",
+                                                                                    whiteSpace: "nowrap",
+                                                                                    paddingLeft: 8,
+                                                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                                                }}
+                                                                            >
+                                                                                {file.name}
+                                                                            </span>
+                                                                            {/* </Tooltip> */}
 
-                                                                
 
-                                                                <DeleteOutlined
-                                                                onClick={() => {
-                                                                    const updated = selectedFilesFromCreatives.filter(
-                                                                    (f) => f.uid !== file.uid
-                                                                    );
-                                                                    setSelectedFilesFromCreatives(updated);
-                                                                    setSelectedFiles((prev) =>
-                                                                    prev.filter((f) => f.uid !== file.uid)
-                                                                    );
-                                                                    form.setFieldsValue({ MediaContent: updated });
-                                                                    form.validateFields(["MediaContent"]);
-                                                                }}
-                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-                                                                />
-                                                            </div>
-                                                            ))}
+
+                                                                            <DeleteOutlined
+                                                                                onClick={() => {
+                                                                                    const updated = selectedFilesFromCreatives.filter(
+                                                                                        (f) => f.uid !== file.uid
+                                                                                    );
+                                                                                    setSelectedFilesFromCreatives(updated);
+                                                                                    setSelectedFiles((prev) =>
+                                                                                        prev.filter((f) => f.uid !== file.uid)
+                                                                                    );
+                                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                                    form.validateFields(["MediaContent"]);
+                                                                                }}
+                                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                            />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        )}
-                                                    </div>
                                                     )}
                                                 </div>
-                                        </Form.Item>
-                                    </div>
+                                            </Form.Item>
+                                        </div>
 
                                         <Form.Item
                                             name="page_id"
@@ -2560,19 +2604,19 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             // ]}
                                             style={{ flex: 3, marginLeft: "1%" }}
                                         >
-                                            <Input style={{ width: "45%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                            <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                         </Form.Item>
                                     </div>
                                     <Form.Item
                                         name="AddName"
                                         initialValue={campaignName}
                                         label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
-                                        // rules={[
-                                        //     {
-                                        //         required: true,
-                                        //         message: "Please select an option!",
-                                        //     },
-                                        // ]}
+                                    // rules={[
+                                    //     {
+                                    //         required: true,
+                                    //         message: "Please select an option!",
+                                    //     },
+                                    // ]}
                                     >
                                         <Input
                                             style={{ width: "60%" }}
@@ -2669,13 +2713,13 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         labelCol={{ style: { width: '100%' } }}  // Makes the label full width
                                         wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
                                         name="Website_URL"
-                                        // rules={[
-                                        //     {
-                                        //         required: true,
-                                        //         message: "Please select Website_URL!",
-                                        //     },
-                                        // ]}
-                                        // required
+                                    // rules={[
+                                    //     {
+                                    //         required: true,
+                                    //         message: "Please select Website_URL!",
+                                    //     },
+                                    // ]}
+                                    // required
                                     >
                                         <TextArea
                                             placeholder="Website_URL"
@@ -2736,129 +2780,129 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 </div>
 
                                 <div style={{ flex: "30%" }}>
-                                        {selectedFiles && selectedFiles.length > 0 ? (
-                                            selectedFiles.map((file, index) => (
-                                                <Badge
-                                                    count={
-                                                        (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) ? 
-                                                        null:
+                                    {selectedFiles && selectedFiles.length > 0 ? (
+                                        selectedFiles.map((file, index) => (
+                                            <Badge
+                                                count={
+                                                    (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) ?
+                                                        null :
                                                         <EditOutlined
                                                             style={{ fontSize: '25px', color: '#fff' }}
                                                             onClick={() => handleEditClick(file)} // Edit icon click handler
                                                         />
-                                                    }
-                                                    style={{
-                                                        backgroundColor: '#52c41a',
-                                                        borderRadius: '50%',
-                                                        position: 'absolute',
-                                                        top: '5px',
-                                                        right: '5px',
-                                                        zIndex: 10,
-                                                        cursor: 'pointer',
-                                                    }}
-                                                    offset={[5, 5]}
-                                                    key={index}
-                                                >
-                                                    <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
-                                                            <div className="ad-heading">
-                                                                <div className="img">
-                                                                    {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
-                                                                        <img
-                                                                            src={file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="40"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                        />
-                                                                    ) : file?.url?.endsWith('.mp4') ? (
-                                                                        <video
-                                                                            src={file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="30"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
-                                                                        />
-                                                                    ) : 
+                                                }
+                                                style={{
+                                                    backgroundColor: '#52c41a',
+                                                    borderRadius: '50%',
+                                                    position: 'absolute',
+                                                    top: '5px',
+                                                    right: '5px',
+                                                    zIndex: 10,
+                                                    cursor: 'pointer',
+                                                }}
+                                                offset={[5, 5]}
+                                                key={index}
+                                            >
+                                                <div key={index} className="container-ad-preview">
+                                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
+                                                        <div className="ad-heading">
+                                                            <div className="img">
+                                                                {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
+                                                                {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
+                                                                    <img
+                                                                        src={file?.url}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="40"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                    />
+                                                                ) : file?.url?.endsWith('.mp4') ? (
+                                                                    <video
+                                                                        src={file?.url}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="30"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                        muted // Muted to prevent sound on preview
+                                                                    />
+                                                                ) :
                                                                     file?.type?.startsWith('image/') ? (
                                                                         <img
-                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name] : file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
                                                                             alt="page id"
                                                                             width="40"
                                                                             height="40"
                                                                             style={{ objectFit: 'cover' }}
-                                                                        />
-                                                                    ) 
-                                                                    : 
-                                                                    (
-                                                                        <video
-                                                                            src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="30"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
                                                                         />
                                                                     )
+                                                                        :
+                                                                        (
+                                                                            <video
+                                                                                src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                                alt="page id"
+                                                                                width="40"
+                                                                                height="30"
+                                                                                style={{ objectFit: 'cover' }}
+                                                                                muted // Muted to prevent sound on preview
+                                                                            />
+                                                                        )
                                                                     // null
-                                                                    }
-                                                                </div>
+                                                                }
+                                                            </div>
 
-                                                                <div className="title">
-                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
-                                                                        {addName}
-                                                                        {/* </div>                                                            <div className="sub">
+                                                            <div className="title">
+                                                                <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" && "white" }}>
+                                                                    {addName}
+                                                                    {/* </div>                                                            <div className="sub">
                                                                         Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
-                                                                        <div className="sub">
-                                                                            {imagehash?.pageName ? (
-                                                                                <>
-                                                                                    {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                                </>
-                                                                            ) : (
-                                                                                <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                            )}
-                                                                        </div>
+                                                                    <div className="sub">
+                                                                        {imagehash?.pageName ? (
+                                                                            <>
+                                                                                {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                            </>
+                                                                        ) : (
+                                                                            <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                        )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="close">
-                                                                    <CloseOutlined style={{ fontSize: "20px" }} />
-                                                                </div>
-                                                                <div className="moreoptions">
-                                                                    <MoreOutlined style={{ fontSize: "20px" }} />
-                                                                </div>
                                                             </div>
-                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
-                                                                {primaryText}
+                                                            <div className="close">
+                                                                <CloseOutlined style={{ fontSize: "20px" }} />
                                                             </div>
-                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
-                                                                        <img
-                                                                            src={file?.url}
-                                                                            alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        />
-                                                                    ) : file?.url?.endsWith('.mp4') ? (
-                                                                        <video
-                                                                        controls
+                                                            <div className="moreoptions">
+                                                                <MoreOutlined style={{ fontSize: "20px" }} />
+                                                            </div>
+                                                        </div>
+                                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" && "white" }}>
+                                                            {primaryText}
+                                                        </div>
+                                                        <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
+                                                                <img
+                                                                    src={file?.url}
+                                                                    alt="ad content"
+                                                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                />
+                                                            ) : file?.url?.endsWith('.mp4') ? (
+                                                                <video
+                                                                    controls
+                                                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                >
+                                                                    <source src={file?.url} />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            )
+                                                                :
+                                                                file?.type?.startsWith('image/') ? (
+                                                                    <img
+                                                                        src={editedImages[file?.name] ? editedImages[file?.name] : file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
+                                                                        alt="ad content"
                                                                         // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        >
-                                                                            <source src={file?.url} />
-                                                                            Your browser does not support the video tag.
-                                                                        </video>
-                                                                    ) 
-                                                                    :
-                                                                    file?.type?.startsWith('image/') ? (
-                                                                        <img
-                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
-                                                                            alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        />
-                                                                    ) : 
+                                                                    />
+                                                                ) :
                                                                     (
                                                                         <video
                                                                             controls
@@ -2869,42 +2913,42 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                                             Your browser does not support the video tag.
                                                                         </video>
                                                                     )
-                                                                    // null
-                                                                    }
-                                                            </div>
+                                                                // null
+                                                            }
+                                                        </div>
 
-                                                            <div className="ad-cta">
-                                                                <div className="details">
-                                                                    <div className="link" style={{color : theme === "dark" && "white"}}>{caption}</div>
-                                                                    <div className="title" style={{color : theme === "dark" && "white"}}>{headline}</div>
-                                                                    <div className="desc" style={{color : theme === "dark" && "white"}}>{description}</div>
-                                                                </div>
-                                                                <div className="ad-button">
-                                                                    <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
-                                                                </div>
+                                                        <div className="ad-cta">
+                                                            <div className="details">
+                                                                <div className="link" style={{ color: theme === "dark" && "white" }}>{caption}</div>
+                                                                <div className="title" style={{ color: theme === "dark" && "white" }}>{headline}</div>
+                                                                <div className="desc" style={{ color: theme === "dark" && "white" }}>{description}</div>
                                                             </div>
-                                                            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-                                                                {websiteURL}
-                                                            </a>                                                <div className="icons">
-                                                                <div className="like"  style={{color : theme === "dark" && "white"}}>
-                                                                    <LikeOutlined style={{ fontSize: "20px" }} />
-                                                                    Like
-                                                                </div>
-                                                                <div className="comment" style={{color : theme === "dark" && "white"}}>
-                                                                    <CommentOutlined style={{ fontSize: "20px" }} />
-                                                                    Comment
-                                                                </div>
-                                                                <div className="share" style={{color : theme === "dark" && "white"}}>
-                                                                    <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                                    Share
-                                                                </div>
+                                                            <div className="ad-button">
+                                                                <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>Learn More</button>
+                                                            </div>
+                                                        </div>
+                                                        <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                            {websiteURL}
+                                                        </a>                                                <div className="icons">
+                                                            <div className="like" style={{ color: theme === "dark" && "white" }}>
+                                                                <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                Like
+                                                            </div>
+                                                            <div className="comment" style={{ color: theme === "dark" && "white" }}>
+                                                                <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                Comment
+                                                            </div>
+                                                            <div className="share" style={{ color: theme === "dark" && "white" }}>
+                                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                Share
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </Badge>
+                                                </div>
+                                            </Badge>
 
-                                            ))
-                                        ) : null
+                                        ))
+                                    ) : null
                                         // (
                                         //     <div className="container-ad-preview">
                                         //         <div className="ad-preview">
@@ -2964,8 +3008,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         //         </div>
                                         //     </div>
                                         // )
-                                        }
-                                    </div>
+                                    }
+                                </div>
 
                             </div>
 
@@ -3034,15 +3078,15 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             </div>
                         )}
                     </Form.Item> */}
-                    <Form.Item label=" "><Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit" onClick={()=> {console.log(form, "form Values value")}}>Save</Button></Form.Item>
+                    <Form.Item label=" "><Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} htmlType="submit" onClick={() => { console.log(form, "form Values value") }}>Save</Button></Form.Item>
 
                     {isImgEditorShown && currentFile && (
-                            <FabricCanvas
-                                fileId={currentFile.name} // Pass a unique identifier
-                                initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
-                                closeCanvasModal={closeCanvasModal}
-                                onSaveEditedImage={handleSaveEditedImage}
-                            />
+                        <FabricCanvas
+                            fileId={currentFile.name} // Pass a unique identifier
+                            initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
+                            closeCanvasModal={closeCanvasModal}
+                            onSaveEditedImage={handleSaveEditedImage}
+                        />
                     )}
 
                     {/* {isImgEditorShown && currentFile && (

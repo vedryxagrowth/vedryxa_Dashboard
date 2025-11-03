@@ -702,7 +702,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 20%" }}
             >
-              <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
             <Form.Item
@@ -746,7 +746,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               style={{ flex: "1 1 15%" }}
               initialValue={currentDate}
             >
-              <DatePicker dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}/>
+              <DatePicker dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''} />
             </Form.Item>
 
             <Form.Item
@@ -791,7 +791,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 20%" }}
             >
-              <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
             <Form.Item
@@ -799,7 +799,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
               style={{ flex: "1 1 15%" }}
             >
-              <Input type="number" placeholder="$"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+              <Input type="number" placeholder="$" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
             {initialValue.bid_amount > 0 && (
@@ -845,25 +845,69 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               style={{ flex: "1 1 20%" }}
             >
               <Select
+                // options={[
+                //   { value: "US", label: "United States" },
+                //   { value: "GB", label: "United Kingdom" },
+                //   { value: "AU", label: "Australia" },
+                //   { value: "IN", label: "India" },
+                //   { value: "AE", label: "United Arab Emirates" },
+                //   { value: "CA", label: "Canada" },
+                //   { value: "DE", label: "Germany" },
+                //   { value: "FR", label: "France" },
+                //   { value: "JP", label: "Japan" },
+                //   { value: "CN", label: "China" },
+                //   { value: "BR", label: "Brazil" },
+                //   { value: "ZA", label: "South Africa" },
+                //   { value: "RU", label: "Russia" },
+                //   { value: "IT", label: "Italy" },
+                //   { value: "ES", label: "Spain" },
+                //   { value: "SG", label: "Singapore" },
+                //   { value: "NZ", label: "New Zealand" },
+                //   { value: "MX", label: "Mexico" }
+                // ]}
+                showSearch
                 options={[
-                  { value: "US", label: "United States" },
-                  { value: "GB", label: "United Kingdom" },
-                  { value: "AU", label: "Australia" },
-                  { value: "IN", label: "India" },
-                  { value: "AE", label: "United Arab Emirates" },
-                  { value: "CA", label: "Canada" },
-                  { value: "DE", label: "Germany" },
-                  { value: "FR", label: "France" },
-                  { value: "JP", label: "Japan" },
-                  { value: "CN", label: "China" },
-                  { value: "BR", label: "Brazil" },
-                  { value: "ZA", label: "South Africa" },
-                  { value: "RU", label: "Russia" },
-                  { value: "IT", label: "Italy" },
-                  { value: "ES", label: "Spain" },
-                  { value: "SG", label: "Singapore" },
-                  { value: "NZ", label: "New Zealand" },
-                  { value: "MX", label: "Mexico" }
+                  { value: "US", label: "United States", title: "" },
+                  { value: "GB", label: "United Kingdom", title: "" },
+                  { value: "AU", label: "Australia", title: "" },
+                  { value: "IN", label: "India", title: "" },
+                  { value: "AE", label: "United Arab Emirates", title: "" },
+                  { value: "CA", label: "Canada", title: "" },
+                  { value: "DE", label: "Germany", title: "" },
+                  { value: "FR", label: "France", title: "" },
+                  { value: "JP", label: "Japan", title: "" },
+                  { value: "CN", label: "China", title: "" },
+                  { value: "BR", label: "Brazil", title: "" },
+                  { value: "ZA", label: "South Africa", title: "" },
+                  { value: "RU", label: "Russia", title: "" },
+                  { value: "IT", label: "Italy", title: "" },
+                  { value: "ES", label: "Spain", title: "" },
+                  { value: "SG", label: "Singapore", title: "" },
+                  { value: "NZ", label: "New Zealand", title: "" },
+                  { value: "MX", label: "Mexico", title: "" },
+                  { value: "AT", label: "Austria", title: "" },
+                  { value: "BE", label: "Belgium", title: "" },
+                  { value: "BG", label: "Bulgaria", title: "" },
+                  { value: "HR", label: "Croatia", title: "" },
+                  { value: "CY", label: "Cyprus", title: "" },
+                  { value: "CZ", label: "Czech Republic", title: "" },
+                  { value: "DK", label: "Denmark", title: "" },
+                  { value: "EE", label: "Estonia", title: "" },
+                  { value: "FI", label: "Finland", title: "" },
+                  { value: "GR", label: "Greece", title: "" },
+                  { value: "HU", label: "Hungary", title: "" },
+                  { value: "IE", label: "Ireland", title: "" },
+                  { value: "LV", label: "Latvia", title: "" },
+                  { value: "LT", label: "Lithuania", title: "" },
+                  { value: "LU", label: "Luxembourg", title: "" },
+                  { value: "MT", label: "Malta", title: "" },
+                  { value: "NL", label: "Netherlands", title: "" },
+                  { value: "PL", label: "Poland", title: "" },
+                  { value: "PT", label: "Portugal", title: "" },
+                  { value: "RO", label: "Romania", title: "" },
+                  { value: "SK", label: "Slovakia", title: "" },
+                  { value: "SI", label: "Slovenia", title: "" },
+                  { value: "SE", label: "Sweden", title: "" },
                 ]}
                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -929,9 +973,9 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 20%" }}
             >
-              <Select mode="multiple" placeholder="Select Language" options={localesdata.map(option => ({ label: option.name, value: option.key }))} 
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}/>
+              <Select mode="multiple" placeholder="Select Language" options={localesdata.map(option => ({ label: option.name, value: option.key }))}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'} />
             </Form.Item>
             <Form.Item
               label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
@@ -939,8 +983,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               rules={[{ required: true, message: 'Please select a mode!' }]}
             >
               <Select placeholder="Select a mode" onChange={handleModeChange}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                 <Option value="Advance">Advance</Option>
                 <Option value="manual">Manual</Option>
 
@@ -955,9 +999,9 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   rules={[{ required: true, message: "Please select an option!" }]}
                   style={{ flex: "1 1 20%" }}
                 >
-                  <Select mode="multiple" placeholder="Select Platforms" options={publisherOptions?.map(option => ({ label: option.label, value: option.value }))} 
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}/>
+                  <Select mode="multiple" placeholder="Select Platforms" options={publisherOptions?.map(option => ({ label: option.label, value: option.value }))}
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'} />
                 </Form.Item>
 
                 <Form.Item
@@ -969,9 +1013,9 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   <Select mode="multiple" placeholder="Select Positions" options={positionOptions[platform]?.map((position) => ({
                     label: position.label,
                     value: position.key
-                  }))} 
-                  dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                  className={theme === 'dark' ? 'dark-theme' : 'light-theme'}/>
+                  }))}
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'} />
                 </Form.Item>
 
                 <Form.Item
@@ -997,8 +1041,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
 
           <Form.Item>
             <Space>
-              <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">Submit</Button>
-              <Button className="dark-icon-button" onClick={handleClear}   style={{color: theme === "dark" ? "white" : "#000"}}>Clear</Button>
+              <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} htmlType="submit">Submit</Button>
+              <Button className="dark-icon-button" onClick={handleClear} style={{ color: theme === "dark" ? "white" : "#000" }}>Clear</Button>
             </Space>
           </Form.Item>
         </Form>

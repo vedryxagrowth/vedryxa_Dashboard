@@ -11,6 +11,30 @@
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/Dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Dashboard/page.css",
+      "static/chunks/app/Dashboard/page.js"
+    ],
+    "/LiveHistory/LiveAdsetHistory/[AdsetName]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/LiveHistory/LiveAdsetHistory/[AdsetName]/page.css",
+      "static/chunks/app/LiveHistory/LiveAdsetHistory/[AdsetName]/page.js"
+    ],
+    "/Campaigns/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Campaigns/page.css",
+      "static/chunks/app/Campaigns/page.js"
+    ],
+    "/Creatives/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Creatives/page.css",
+      "static/chunks/app/Creatives/page.js"
     ]
   }
 }
