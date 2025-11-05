@@ -4413,7 +4413,8 @@ const MyTablePage = () => {
                         !isNaN(bidAmount) &&
                         parseFloat(bidAmount) * 100 >= 1
                     ) {
-                        payload.bidAmount = parseFloat(bidAmount) * 100;
+                        // payload.bidAmount = parseFloat(bidAmount) * 100;
+                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100); 
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -7256,7 +7257,8 @@ const MyTablePage = () => {
                         !isNaN(bidAmount) &&
                         parseFloat(bidAmount) * 100 >= 1
                     ) {
-                        payload.bidAmount = parseFloat(bidAmount) * 100;
+                        // payload.bidAmount = parseFloat(bidAmount) * 100;
+                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100); 
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
