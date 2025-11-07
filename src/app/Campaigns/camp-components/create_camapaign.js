@@ -6472,7 +6472,7 @@ const CreateCampaignDrawer = ({
           optimization_goal: values.adsets[i].optimization_goal,
           billing_event: values.adsets[i].billing_event,
           start_time: moment(values.adsets[i].DatePicker.$d)
-            .tz(imagehash.timeZone)
+            .tz(newImageHash.timeZone)
             .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
           action_source: values.adsets[i].action_source,
           custom_event_type: values.adsets[i].custom_event_type,

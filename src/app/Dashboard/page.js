@@ -1022,7 +1022,9 @@ const Dashboard = () => {
     // };
     const [time, setTime] = useState('UTC');
 
-    const [agencyNameReport, setAgencyNameReport] = useState([]);
+    const [newagencyNameReport, setAgencyNameReport] = useState([]);
+
+    const agencyNameReport = useMemo(() => newagencyNameReport, [newagencyNameReport]);
 
     const [byAccountNumber, setByAccountNumber] = useState([]);
     const [hovered, setHovered] = useState(false);
@@ -1066,16 +1068,24 @@ const Dashboard = () => {
         datesByDate: [], spendByDate: [], revenueByDate: [], profitByDate: [], marginByDate: [], ncplByDate: [], ctrByDate: [], cpcByDate: [], conversionsByDate: [], leadsByDate: [],
     });
 
-    const [rowData, setRowData] = useState([]);
-    const [top5Campaigns, setTop5Campaigns] = useState([]);
-    const [top5RevenueCampaigns, setTop5RevenueCampaigns] = useState([]);
-    const [top5ProfitCampaigns, setTop5ProfitCampaigns] = useState([]);
-    const [overAllProfitCampaigns, setOverAllProfitCampaigns] = useState([]);
-    const [overAllLossCampaigns, setOverAllLossCampaigns] = useState([]);
+    const [newrowData, setRowData] = useState([]);
+    const rowData = useMemo(() => newrowData, [newrowData]);
+    const [newtop5Campaigns, setTop5Campaigns] = useState([]);
+    const top5Campaigns = useMemo(() => newtop5Campaigns, [newtop5Campaigns]);
+    const [newtop5RevenueCampaigns, setTop5RevenueCampaigns] = useState([]);
+    const top5RevenueCampaigns = useMemo(() => newtop5RevenueCampaigns, [newtop5RevenueCampaigns]);
+    const [newtop5ProfitCampaigns, setTop5ProfitCampaigns] = useState([]);
+    const top5ProfitCampaigns = useMemo(() => newtop5ProfitCampaigns, [newtop5ProfitCampaigns]);
+    const [newoverAllProfitCampaigns, setOverAllProfitCampaigns] = useState([]);
+    const overAllProfitCampaigns = useMemo(() => newoverAllProfitCampaigns, [newoverAllProfitCampaigns]);
+    const [newoverAllLossCampaigns, setOverAllLossCampaigns] = useState([]);
+    const overAllLossCampaigns = useMemo(() => newoverAllLossCampaigns, [newoverAllLossCampaigns]);
     const [selectedDates, setSelectedDates] = useState(defaultDates);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [domainWiseData, setDomainWiseData] = useState([]);
+    const [newdomainWiseData, setDomainWiseData] = useState([]);
+    const domainWiseData = useMemo(() => newdomainWiseData, [newdomainWiseData]);
+
     const { apiClient } = useTokenContext();
     const [networksWithStatus, setNetworksWithStatus] = useState([]);
 
@@ -1774,6 +1784,8 @@ const Dashboard = () => {
                         specifiedDate: dateKey,
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
+                        impressions: obj.impressions ? parseInt(obj.impressions):0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                             ? obj.ad_clicks
@@ -1793,6 +1805,8 @@ const Dashboard = () => {
                     entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
                     entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                    entry.fbClicks += obj.fbClicks !== null && obj.fbClicks !== undefined ? parseInt(obj.fbClicks) : 0;
+                    entry.impressions += obj.impressions !== null && obj.impressions !== undefined ? parseInt(obj.impressions) : 0;
                     entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                         ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
                             ? parseInt(obj?.ad_clicks)
@@ -1980,11 +1994,11 @@ const Dashboard = () => {
         function groupDataByBMNameAndAgencyName(data, dateField) {
             console.log(dateField);
             const DomainGroupedData = data?.reduce((acc, obj) => {
-                const { spend, estimated_revenue, BMName, AgencyName } = obj;
+                const { spend, estimated_revenue, BMName, AgencyName, accountNumber, revenuePartner } = obj;
                 const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
 
                 // Create a unique key for grouping by domain, specifiedDate, and accountNumber
-                const key = `${specifiedDate}-${BMName}-${AgencyName}`;
+                const key = `${specifiedDate}-${BMName}-${AgencyName}-${accountNumber}`;
 
                 if (!acc[key]) {
                     acc[key] = {
@@ -1993,6 +2007,8 @@ const Dashboard = () => {
                         AgencyName,
                         spend: 0,
                         estimated_revenue: 0,
+                        accountNumber,
+                        accountName: userdetails?.adAccounts[revenuePartnerNames[revenuePartner]]?.find(each => each.accountNumber === accountNumber)?.accountName
                     };
                 }
 
@@ -2337,6 +2353,88 @@ const Dashboard = () => {
         return 0;
     };
 
+    const avgNCPL = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { conversions, spend } = params.data;
+            if (conversions !== 0) {
+                const RPC = spend / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { conversions, spend } = params.node.aggData;
+            if (conversions !== 0) {
+                const RPC = spend / conversions;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
+    const avgCpc = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            // console.log(params.data);
+            const { spend, fbLeads } = params.data;
+            if (spend !== 0) {
+                const RPC = spend / fbLeads;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            // console.log(params.node?.aggData);
+            const { spend, fbLeads } = params.node.aggData;
+            if (spend !== 0) {
+                const RPC = spend / fbLeads;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
+    const avgCtr = (params) => {
+        console.log(params);
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            // console.log(params.data);
+            const { fbClicks, impressions } = params.data;
+            if (impressions !== 0) {
+                const RPC = fbClicks / impressions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            // console.log(params.node?.aggData);
+            const { fbClicks, impressions } = params.node.aggData;
+            if (impressions !== 0) {
+                const RPC = fbClicks / impressions;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
     const avgCpl = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
@@ -2368,6 +2466,14 @@ const Dashboard = () => {
         headerName: 'Account number',
         minWidth: 300,
         sortable: true,
+        filterValueGetter: (params) => {
+    if (params.node.group) {
+      // Use the group key (campaign name)
+      return params.node.key;
+    }
+    // For leaf rows, use the campaign_name or any field
+    return params.data?.campaign_name || '';
+  },
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -2460,6 +2566,14 @@ const Dashboard = () => {
         headerName: 'Account number',
         minWidth: 200,
         sortable: true,
+        filterValueGetter: (params) => {
+    if (params.node.group) {
+      // Use the group key (campaign name)
+      return params.node.key;
+    }
+    // For leaf rows, use the campaign_name or any field
+    return params.data?.campaign_name || '';
+  },
         //  cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
         // autoHeight: true,
         cellRendererParams: {
@@ -2525,6 +2639,15 @@ const Dashboard = () => {
         sortable: true,
         cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
         autoHeight: true,
+        filter: "agTextColumnFilter",
+        filterValueGetter: (params) => {
+    if (params.node.group) {
+      // Use the group key (campaign name)
+      return params.node.key;
+    }
+    // For leaf rows, use the campaign_name or any field
+    return params.data?.campaign_name || '';
+  },
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -2615,7 +2738,166 @@ const Dashboard = () => {
         }
     };
 
-    const [columnDefs] = useState([
+    const onFilterChanged = (params) => {
+        // recalculates aggregates from the current filtered rows
+        params.api.refreshClientSideRowModel('aggregate');
+        // optionally refresh cells so footers/rendering update
+        params.api.refreshCells({ force: true });
+    };
+
+    // const [columnDefs] = useState([
+    //     {
+    //         headerName: 'Project name',
+    //         field: "revenuePartner",
+    //         resizable: true,
+    //         sortable: true,
+    //         width: 100,
+    //         hide: true,
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         minWidth: 108,
+    //     }, // Group by Network
+    //     {
+    //         field: "holder",
+    //         resizable: true,
+    //         sortable: true,
+    //         width: 100,
+    //         hide: true, // Hide column as it's grouped
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     }, // Group by Holder
+    //     {
+    //         field: 'accountNumber',
+    //         colId: 'accountNumber',
+    //         headerName: 'Account number',
+    //         resizable: true,
+    //         width: 150,
+    //         sortable: true,
+    //         hide: true, // Hide column as it's grouped
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     },
+    //     {
+    //         field: 'specifiedDate', headerName: 'Date',
+    //         minWidth: 115,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: 'agDateColumnFilter',
+    //         valueGetter: params => {
+    //             const dateStr = params.data?.specifiedDate;
+    //             if (!dateStr) return null;
+    //             const [y, m, d] = dateStr.split('-').map(Number);
+    //             return new Date(y, m - 1, d);
+    //         },
+    //         valueFormatter: params => {
+    //             const d = params.value;
+    //             return d ? d.toLocaleDateString() : '';
+    //         }
+    //     },
+    //     {
+    //         headerName: 'User',
+    //         field: "mediaBuyerName",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agTextColumnFilter",
+    //     }, // Display Media Buyer name
+    //     {
+    //         field: "spend",
+    //         aggFunc: spender,
+    //         // valueFormatter: currencyFormatter,
+    //         valueFormatter: params => {
+    //             console.log('display value type:', typeof params.value, params.value);
+    //             return `$${parseFloat(params.value || 0).toFixed(2)}`;
+    //         },
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Spend column
+    //     {
+    //         headerName: 'Revenue',
+    //         field: "estimated_revenue",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Revenue column
+    //     {
+    //         field: "profit",
+    //         aggFunc: spender,
+    //         cellClassRules: {
+    //             'font-red': p => p.value < 0,
+    //             'font-green': params => params.value > 0,
+    //         },
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //     }, // Custom aggregation for Profit
+    //     {
+    //         field: 'rpc',
+    //         headerName: 'RPC',
+    //         valueGetter: avgRpcCpl,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 95,
+    //         filter: "agNumberColumnFilter",
+    //         // valueFormatter: rpcCplFormatter,
+    //     },
+    //     {
+    //         field: 'cpl',
+    //         headerName: 'CPL',
+    //         valueGetter: avgCpl,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 95,
+    //         filter: "agNumberColumnFilter",
+    //         // valueFormatter: rpcCplFormatter,
+    //     },
+    //     {
+    //         field: 'conversions',
+    //         headerName: 'Conv',
+    //         aggFunc: spender,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //         // valueFormatter: rpcCplFormatter,
+    //     },
+    //     {
+    //         field: 'fbLeads',
+    //         headerName: 'Fb leads',
+    //         aggFunc: spender,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //         // valueFormatter: rpcCplFormatter,
+    //     },
+
+    // ]);
+    const columnDefs = [
         {
             headerName: 'Project name',
             field: "revenuePartner",
@@ -2638,9 +2920,12 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         }, // Group by Holder
         {
-            field: 'accountNumber', headerName: 'Account number',
+            field: 'accountNumber',
+            colId: 'accountNumber',
+            headerName: 'Account number',
             resizable: true,
             width: 150,
             sortable: true,
@@ -2650,6 +2935,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         },
         {
             field: 'specifiedDate', headerName: 'Date',
@@ -2657,6 +2943,17 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: 'agDateColumnFilter',
+            valueGetter: params => {
+                const dateStr = params.data?.specifiedDate;
+                if (!dateStr) return null;
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+            valueFormatter: params => {
+                const d = params.value;
+                return d ? d.toLocaleDateString() : '';
+            }
         },
         {
             headerName: 'User',
@@ -2665,15 +2962,21 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agTextColumnFilter",
         }, // Display Media Buyer name
         {
             field: "spend",
             aggFunc: spender,
-            valueFormatter: currencyFormatter,
+            // valueFormatter: currencyFormatter,
+            valueFormatter: params => {
+                console.log('display value type:', typeof params.value, params.value);
+                return `$${parseFloat(params.value || 0).toFixed(2)}`;
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
         }, // Summing Spend column
         {
             headerName: 'Revenue',
@@ -2684,6 +2987,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2697,6 +3001,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
         }, // Custom aggregation for Profit
         {
             field: 'rpc',
@@ -2706,6 +3011,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 95,
+            filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
         {
@@ -2716,8 +3022,31 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 95,
+            filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
+        {
+            field: 'ncpl',
+            headerName: 'NCPL',
+            valueGetter: avgNCPL,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        // {
+        //     field: 'ctr',
+        //     headerName: 'CTR',
+        //     valueGetter: avgCtr,
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        //     minWidth: 95,
+        //     filter: "agNumberColumnFilter",
+        //     // valueFormatter: rpcCplFormatter,
+        // },
         {
             field: 'conversions',
             headerName: 'Conv',
@@ -2726,6 +3055,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
         {
@@ -2736,11 +3066,11 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
 
-    ]);
-
+    ]
     const items = [
         { key: '1', label: 'Profit', content: 'Content for Profit Accounts' },
         { key: '2', label: 'Loss', content: 'Content for Loss Accounts' },
@@ -2955,7 +3285,99 @@ const Dashboard = () => {
         </StickyBox>
     ));
 
-    const [columnDefs1] = useState([
+    // const [columnDefs1] = useState([
+    //     {
+    //         headerName: "Account number",
+    //         field: "accountNumber",
+    //         resizable: true,
+    //         sortable: true,
+    //         hide: true, // Hide column as it's grouped
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+
+
+    //     }, // Group by Network
+    //     {
+    //         field: 'specifiedDate', headerName: 'Date',
+    //         suppressMenu: true,
+    //         minWidth: 108,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: 'agDateColumnFilter',
+    //         valueGetter: params => {
+    //             const dateStr = params.data?.specifiedDate;
+    //             if (!dateStr) return null;
+    //             const [y, m, d] = dateStr.split('-').map(Number);
+    //             return new Date(y, m - 1, d);
+    //         },
+    //         valueFormatter: params => {
+    //             const d = params.value;
+    //             return d ? d.toLocaleDateString() : '';
+    //         }
+    //     },
+    //     {
+    //         field: "spend",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Spend column
+    //     {
+    //         headerName: 'Revenue',
+    //         field: "estimated_revenue",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Revenue column
+    //     {
+    //         field: "profit",
+    //         aggFunc: spender,
+    //         sort: 'desc',
+    //         cellClassRules: {
+    //             'font-red': p => p.value < 0,
+    //             'font-green': params => params.value > 0,
+    //         },
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agNumberColumnFilter",
+    //     },
+    //     {
+    //         headerName: 'Project name',
+    //         field: "revenuePartner",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agTextColumnFilter",
+    //     }, // Group by Holder
+    //     {
+    //         field: "holder",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agTextColumnFilter",
+    //     },
+    //     {
+    //         field: "mediaBuyerName", headerName: 'User',
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         minWidth: 108,
+    //         filter: "agTextColumnFilter",
+    //     },
+    // ]);
+    const columnDefs1 = [
         {
             headerName: "Account number",
             field: "accountNumber",
@@ -2973,6 +3395,17 @@ const Dashboard = () => {
             minWidth: 108,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: 'agDateColumnFilter',
+            valueGetter: params => {
+                const dateStr = params.data?.specifiedDate;
+                if (!dateStr) return null;
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+            valueFormatter: params => {
+                const d = params.value;
+                return d ? d.toLocaleDateString() : '';
+            }
         },
         {
             field: "spend",
@@ -2982,6 +3415,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
         }, // Summing Spend column
         {
             headerName: 'Revenue',
@@ -2992,6 +3426,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
         }, // Summing Revenue column
         {
             field: "profit",
@@ -3006,6 +3441,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
         },
         {
             headerName: 'Project name',
@@ -3014,6 +3450,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agTextColumnFilter",
         }, // Group by Holder
         {
             field: "holder",
@@ -3021,6 +3458,7 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agTextColumnFilter",
         },
         {
             field: "mediaBuyerName", headerName: 'User',
@@ -3028,11 +3466,108 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agTextColumnFilter",
         },
-    ]);
+    ]
 
+    // const [columnDefs2] = useState([
+    //     {
+    //         field: 'campaign_name', headerName: 'Campaign name', minWidth: 430, suppressAutoSize: true,
+    //         resizable: true,
+    //         sortable: true,
+    //         hide: true, // Hide column as it's grouped
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         filter: "agTextColumnFilter",
+    //     },
+    //     {
+    //         field: "accountNumber", minWidth: 170, headerName: "Account number",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
 
-    const [columnDefs2] = useState([
+    //     }, // Group by Network
+    //     {
+    //         field: 'Date',
+    //         minWidth: 112,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: 'agDateColumnFilter',
+    //         valueGetter: params => {
+    //             const dateStr = params.data?.Date;
+    //             if (!dateStr) return null;
+    //             const [y, m, d] = dateStr.split('-').map(Number);
+    //             return new Date(y, m - 1, d);
+    //         },
+    //         valueFormatter: params => {
+    //             const d = params.value;
+    //             return d ? d.toLocaleDateString() : '';
+    //         }
+    //     },
+    //     {
+    //         field: "spend",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 108,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Spend column
+    //     {
+    //         headerName: 'Revenue',
+    //         field: "estimated_revenue",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 108,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Revenue column
+    //     {
+    //         field: "profit",
+    //         aggFunc: spender,
+    //         cellClassRules: {
+    //             'font-red': p => p.value < 0,
+    //             'font-green': params => params.value > 0,
+    //         },
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 108,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     },
+    //     {
+    //         headerName: 'Project name',
+    //         field: "revenuePartner",
+    //         minWidth: 150,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     }, // Group by Holder
+    //     {
+    //         field: "holder",
+    //         minWidth: 125,// Group by MediaBuyerName,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     },
+    //     {
+    //         field: "mediaBuyerName", headerName: 'User',
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     },
+    // ]);
+    const columnDefs2 = [
         {
             field: 'campaign_name', headerName: 'Campaign name', minWidth: 430, suppressAutoSize: true,
             resizable: true,
@@ -3040,12 +3575,14 @@ const Dashboard = () => {
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
+            filter: "agTextColumnFilter",
         },
         {
             field: "accountNumber", minWidth: 170, headerName: "Account number",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
 
         }, // Group by Network
         {
@@ -3054,6 +3591,17 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: 'agDateColumnFilter',
+            valueGetter: params => {
+                const dateStr = params.data?.Date;
+                if (!dateStr) return null;
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+            valueFormatter: params => {
+                const d = params.value;
+                return d ? d.toLocaleDateString() : '';
+            }
         },
         {
             field: "spend",
@@ -3063,6 +3611,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         }, // Summing Spend column
         {
             headerName: 'Revenue',
@@ -3073,6 +3622,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         }, // Summing Revenue column
         {
             field: "profit",
@@ -3086,6 +3636,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         },
         {
             headerName: 'Project name',
@@ -3094,6 +3645,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         }, // Group by Holder
         {
             field: "holder",
@@ -3101,6 +3653,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         },
         {
             field: "mediaBuyerName", headerName: 'User',
@@ -3108,9 +3661,112 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         },
-    ]);
-    const [columnDefs3] = useState([
+    ]
+    // const [columnDefs3] = useState([
+    //     {
+    //         field: 'domain', minWidth: 200, suppressAutoSize: true,
+    //         resizable: true,
+    //         sortable: true,
+    //         hide: true, // Hide column as it's grouped
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         filter: "agTextColumnFilter",
+    //     },
+    //     {
+    //         field: "accountNumber", minWidth: 180, headerName: 'Account number',
+    //         resizable: true,
+    //         sortable: true,
+    //         hide: true, // Hide column as it's grouped
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+
+    //     }, // Group by Network
+    //     {
+    //         field: 'specifiedDate', headerName: "Date",
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: 'agDateColumnFilter',
+    //         valueGetter: params => {
+    //             const dateStr = params.data?.specifiedDate;
+    //             if (!dateStr) return null;
+    //             const [y, m, d] = dateStr.split('-').map(Number);
+    //             return new Date(y, m - 1, d);
+    //         },
+    //         valueFormatter: params => {
+    //             const d = params.value;
+    //             return d ? d.toLocaleDateString() : '';
+    //         }
+    //     },
+    //     {
+    //         field: "spend",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Spend column
+    //     {
+    //         headerName: 'Revenue',
+    //         field: "estimated_revenue",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Revenue column
+    //     {
+    //         field: "profit",
+    //         aggFunc: spender,
+    //         cellClassRules: {
+    //             'font-red': p => p.value < 0,
+    //             'font-green': params => params.value > 0,
+    //         },
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     },
+    //     {
+    //         headerName: 'Project name',
+    //         field: "revenuePartner",
+    //         minWidth: 180,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     }, // Group by Holder
+    //     {
+    //         field: "Holder",
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     },
+    //     {
+    //         field: "MediaBuyerName", headerName: 'User',
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     },
+    // ]);
+    const columnDefs3 = [
         {
             field: 'domain', minWidth: 200, suppressAutoSize: true,
             resizable: true,
@@ -3118,6 +3774,7 @@ const Dashboard = () => {
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
+            filter: "agTextColumnFilter",
         },
         {
             field: "accountNumber", minWidth: 180, headerName: 'Account number',
@@ -3129,6 +3786,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
 
         }, // Group by Network
         {
@@ -3137,6 +3795,17 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: 'agDateColumnFilter',
+            valueGetter: params => {
+                const dateStr = params.data?.specifiedDate;
+                if (!dateStr) return null;
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+            valueFormatter: params => {
+                const d = params.value;
+                return d ? d.toLocaleDateString() : '';
+            }
         },
         {
             field: "spend",
@@ -3146,6 +3815,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         }, // Summing Spend column
         {
             headerName: 'Revenue',
@@ -3156,6 +3826,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         }, // Summing Revenue column
         {
             field: "profit",
@@ -3169,6 +3840,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         },
         {
             headerName: 'Project name',
@@ -3177,6 +3849,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         }, // Group by Holder
         {
             field: "Holder",
@@ -3184,6 +3857,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         },
         {
             field: "MediaBuyerName", headerName: 'User',
@@ -3191,9 +3865,10 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         },
-    ]);
-    const [columnDefs4] = useState([
+    ]
+    const columnDefs4 = [
         {
             field: 'BMName', minWidth: 200, suppressAutoSize: true, headerName: 'BM name',
             resizable: true,
@@ -3204,6 +3879,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
         },
         {
             field: "AgencyName", minWidth: 180, headerName: 'Agency name',
@@ -3212,17 +3888,55 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
             // hide: true, // Hide column as it's grouped
             // rowGroup: true,
             // enableRowGroup: true,
 
         }, // Group by Network
         {
+            field: "accountNumber", minWidth: 180, headerName: 'Account number',
+            resizable: true,
+            sortable: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
+
+        },
+        {
+            field: "accountName", minWidth: 180, headerName: 'Account name',
+            resizable: true,
+            sortable: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            filter: "agTextColumnFilter",
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
+
+        },
+        {
             field: 'specifiedDate', headerName: "Date",
             minWidth: 125,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: 'agDateColumnFilter',
+            valueGetter: params => {
+                const dateStr = params.data?.specifiedDate;
+                if (!dateStr) return null;
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+            valueFormatter: params => {
+                const d = params.value;
+                return d ? d.toLocaleDateString() : '';
+            }
         },
         {
             field: "spend",
@@ -3232,6 +3946,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         }, // Summing Spend column
         {
             headerName: 'Revenue',
@@ -3242,6 +3957,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         }, // Summing Revenue column
         {
             field: "profit",
@@ -3255,8 +3971,89 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
         }
-    ]);
+    ]
+    // const [columnDefs4] = useState([
+    //     {
+    //         field: 'BMName', minWidth: 200, suppressAutoSize: true, headerName: 'BM name',
+    //         resizable: true,
+    //         sortable: true,
+    //         hide: true, // Hide column as it's grouped
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //     },
+    //     {
+    //         field: "AgencyName", minWidth: 180, headerName: 'Agency name',
+    //         resizable: true,
+    //         sortable: true,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agTextColumnFilter",
+    //         // hide: true, // Hide column as it's grouped
+    //         // rowGroup: true,
+    //         // enableRowGroup: true,
+
+    //     }, // Group by Network
+    //     {
+    //         field: 'specifiedDate', headerName: "Date",
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: 'agDateColumnFilter',
+    //         valueGetter: params => {
+    //             const dateStr = params.data?.specifiedDate;
+    //             if (!dateStr) return null;
+    //             const [y, m, d] = dateStr.split('-').map(Number);
+    //             return new Date(y, m - 1, d);
+    //         },
+    //         valueFormatter: params => {
+    //             const d = params.value;
+    //             return d ? d.toLocaleDateString() : '';
+    //         }
+    //     },
+    //     {
+    //         field: "spend",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Spend column
+    //     {
+    //         headerName: 'Revenue',
+    //         field: "estimated_revenue",
+    //         aggFunc: spender,
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     }, // Summing Revenue column
+    //     {
+    //         field: "profit",
+    //         aggFunc: spender,
+    //         cellClassRules: {
+    //             'font-red': p => p.value < 0,
+    //             'font-green': params => params.value > 0,
+    //         },
+    //         valueFormatter: currencyFormatter,
+    //         minWidth: 125,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu',
+    //         filter: "agNumberColumnFilter",
+    //     }
+    // ]);
 
     const autoGroupColumnDefOverAllReport = {
         headerName: 'Group', // Display name for the grouped column
@@ -3286,6 +4083,15 @@ const Dashboard = () => {
         cellRendererParams: {
             suppressCount: true, // Suppress row count in the grouped column
         },
+        filter: "agTextColumnFilter",
+        filterValueGetter: (params) => {
+    if (params.node.group) {
+      // Use the group key (campaign name)
+      return params.node.key;
+    }
+    // For leaf rows, use the campaign_name or any field
+    return params.data?.domain || '';
+  },
     };
     const autoGroupColumnDefAgency = {
         headerName: 'BM name', // Display name for the grouped column
@@ -3295,6 +4101,15 @@ const Dashboard = () => {
         cellRendererParams: {
             suppressCount: true, // Suppress row count in the grouped column
         },
+        filter: "agTextColumnFilter",
+        filterValueGetter: (params) => {
+    if (params.node.group) {
+      // Use the group key (campaign name)
+      return params.node.key;
+    }
+    // For leaf rows, use the campaign_name or any field
+    return params.data?.BMName || '';
+  },
     };
 
     //   const [columnDefs2] = useState([
@@ -3463,6 +4278,95 @@ const Dashboard = () => {
             },
         },
     });
+
+    const cardHeight = "95px"; // fixed height
+    const cardBg = theme === "dark" ? "#333" : "";
+    const valueStyle = { color: theme === "dark" ? "#ffffff" : "#3f8600" };
+
+    const metrics = [
+        { key: "revenue", label: "Revenue", color: "#00C853", prefix: "$", value: data.length > 0 ? revenue1.current : 0 },
+        { key: "profit", label: "Profit", color: "#26A69A", prefix: "$", value: data.length > 0 ? profit1.current : 0 },
+        { key: "spend", label: "Amount Spent", color: "#3F51B5", prefix: "$", value: data.length > 0 ? spend1.current : 0 },
+        { key: "leads", label: "Leads", color: "#FFC107", value: data.length > 0 ? leads1.current : 0 },
+        { key: "conversions", label: "Conversions", color: "#673AB7", value: data.length > 0 ? conversions1.current : 0 },
+        { key: "ncpl", label: "NCPL", color: "#AED581", value: data.length > 0 ? ncpl1.current : 0 },
+        { key: "cpl", label: "CPL", color: "#FF9800", value: data.length > 0 ? (cpl1.current !== Infinity ? cpl1.current : 0) : 0 },
+        { key: "ctr", label: "CTR", color: "#2196F3", value: data.length > 0 ? ctr1.current : 0 },
+        { key: "cpc", label: "CPC", color: "#F44336", value: data.length > 0 ? cpc1.current : 0 },
+        { key: "rpc", label: "RPC", color: "#00ACC1", value: data.length > 0 ? rpc1.current : 0 },
+    ];
+
+    const onCellClicked = (params) => {
+        
+        const field = params.colDef.field || params.node.field;
+
+        if (field === 'accountNumber') {
+            const accountNumberToPassToReports = params.value;
+            console.log(params.node);
+            const groupedData = params.node.allLeafChildren
+                ? params.node.allLeafChildren.map(childNode => childNode.data)
+                : [params.node.data];
+
+            // Ensure groupedData has at least one element
+            // if (groupedData.length === 0) {
+            //     return '';
+            // }
+
+            // Safeguard against undefined or missing properties
+            const firstGroupedItem = groupedData[0] || {};
+            const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
+                ? revenuePartnerNames[firstGroupedItem.revenuePartner]
+                : 'Unknown Partner';
+
+            const data = {
+                network: revenuePartnerNameToPassToReports,
+                accountNumber: accountNumberToPassToReports,
+                time: time,
+                startDate: startDate,
+                endDate: endDate,
+                accountName: userdetails?.adAccounts[revenuePartnerNameToPassToReports]?.find(each => each.accountNumber === accountNumberToPassToReports)?.accountName
+            };
+            const queryString = new URLSearchParams(data).toString();
+            const url = `/Reports?${queryString}`;
+
+            // Open the URL in a new tab
+            window.open(url, '_blank', 'noopener,noreferrer');
+            console.log('Clicked accountNumber:', params.value, params.node);
+        }
+        // if(field === "campaign_name"){
+        //     const accountNumberToPassToReports = params.value;
+        //     console.log(params.node);
+        //     const groupedData = params.node.allLeafChildren
+        //         ? params.node.allLeafChildren.map(childNode => childNode.data)
+        //         : [params.node.data];
+
+        //     // Ensure groupedData has at least one element
+        //     // if (groupedData.length === 0) {
+        //     //     return '';
+        //     // }
+
+        //     // Safeguard against undefined or missing properties
+        //     const firstGroupedItem = groupedData[0] || {};
+        //     const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
+        //         ? revenuePartnerNames[firstGroupedItem.revenuePartner]
+        //         : 'Unknown Partner';
+
+        //     const data = {
+        //         network: revenuePartnerNameToPassToReports,
+        //         accountNumber: accountNumberToPassToReports,
+        //         time: time,
+        //         startDate: startDate,
+        //         endDate: endDate,
+        //         accountName: userdetails?.adAccounts[revenuePartnerNameToPassToReports]?.find(each => each.accountNumber === accountNumberToPassToReports)?.accountName
+        //     };
+        //     const queryString = new URLSearchParams(data).toString();
+        //     const url = `/Reports?${queryString}`;
+
+        //     // Open the URL in a new tab
+        //     window.open(url, '_blank', 'noopener,noreferrer');
+        //     console.log('Clicked accountNumber:', params.value, params.node);
+        // }
+    };
 
 
     // console.log(rowData?.map(each=> each.profit > 0));
@@ -3722,7 +4626,7 @@ const Dashboard = () => {
                                             />
                                         </Col>
 
-                                        <Col span={6}>
+                                        <Col span={7}>
                                             <Select
                                                 mode="multiple"
                                                 showSearch
@@ -3760,7 +4664,7 @@ const Dashboard = () => {
                                             />
                                         </Col>
 
-                                        <Col span={8}>
+                                        <Col span={7}>
                                             <ConfigProvider
                                                 locale={locale}
                                                 theme={{
@@ -3921,7 +4825,7 @@ const Dashboard = () => {
                                 </Card>
 
                                 <div className='Dashboard-Details-1' >
-                                    <Row gutter={24} style={{ marginTop: '5px' }} justify="space-between">
+                                    {/* <Row gutter={24} style={{ marginTop: '5px' }} justify="space-between">
                                         <Col flex="1">
                                             <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
                                                 <Statistic
@@ -4157,6 +5061,51 @@ const Dashboard = () => {
                                                     valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
                                             </Card>
                                         </Col>
+                                    </Row> */}
+                                    <Row className="metrics-row" gutter={[8, 8]}>
+                                        {metrics.map((m) => (
+                                            <Col
+                                                key={m.key}
+                                                className="metrics-col"
+                                                xs={24}
+                                                sm={12}
+                                                md={8}
+                                            >
+                                                <Card
+                                                    className="metrics-card"
+                                                    style={{
+                                                        backgroundColor: cardBg,
+                                                        height: cardHeight,
+                                                        borderRadius: 12,
+                                                        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                                                    }}
+                                                    bodyStyle={{ padding: 0 }}
+                                                >
+                                                    <div style={{ width: "100%" }}>
+                                                        <Statistic
+                                                            title={
+                                                                <div className="metrics-title" style={{ display: "flex", alignItems: "center" }}>
+                                                                    <span
+                                                                        style={{
+                                                                            display: "inline-block",
+                                                                            height: 12,
+                                                                            width: 12,
+                                                                            backgroundColor: m.color,
+                                                                            borderRadius: "50%",
+                                                                            marginRight: 8,
+                                                                        }}
+                                                                    />
+                                                                    <span style={{ color: m.color, fontWeight: 600 }}>{m.label}</span>
+                                                                </div>
+                                                            }
+                                                            value={m.value} // ✅ fixed: must be number/string, not JSX
+                                                            prefix={m.prefix}
+                                                            valueStyle={valueStyle}
+                                                        />
+                                                    </div>
+                                                </Card>
+                                            </Col>
+                                        ))}
                                     </Row>
                                 </div>
 
@@ -4585,6 +5534,7 @@ const Dashboard = () => {
                                                         suppressClipboardPaste: false,
                                                         enableRangeSelection: true,
                                                     }}
+                                                    // onFilterChanged={onFilterChanged}
 
                                                     autoGroupColumnDef={autoGroupColumnDefOverAllReport}
                                                     rowGroupPanelShow="always"
@@ -4592,6 +5542,8 @@ const Dashboard = () => {
                                                     groupIncludeFooter={true}
                                                     groupIncludeTotalFooter={true}
                                                     getRowHeight={() => 32} // ✅ consistent row height
+                                                    // groupAggFiltering ={true}
+                                                    onCellClicked={onCellClicked}
                                                 />
                                             </div>
                                         </div>
@@ -4667,6 +5619,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefProfit}
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -4700,6 +5653,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefLoss}
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -4743,6 +5697,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefProfit}
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -4786,6 +5741,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefProfit}
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -4829,6 +5785,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefProfit}
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>
@@ -4905,6 +5862,7 @@ const Dashboard = () => {
                                                         groupIncludeTotalFooter={true}
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -4939,6 +5897,7 @@ const Dashboard = () => {
                                                         groupIncludeTotalFooter={true}
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -4973,6 +5932,7 @@ const Dashboard = () => {
                                                         groupIncludeTotalFooter={true}
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5007,6 +5967,7 @@ const Dashboard = () => {
                                                         groupIncludeTotalFooter={true}
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5041,6 +6002,7 @@ const Dashboard = () => {
                                                         groupIncludeTotalFooter={true}
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>
@@ -5113,10 +6075,12 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeTotalFooter={true}
                                                         autoGroupColumnDef={autoGroupColumnDefDomain}
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5151,6 +6115,7 @@ const Dashboard = () => {
                                                         groupIncludeTotalFooter={true}
                                                         autoGroupColumnDef={autoGroupColumnDefAgency}
                                                         getRowHeight={() => 32}
+                                                        onCellClicked={onCellClicked}
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>

@@ -2463,7 +2463,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
     let newFilterData;
     if (campaignStatusFilter !== "ALL") {
       console.log("testing 4444");
-      newFilterData = filterData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+      newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       console.log(newFilterData.filter(item => item.fbStatus?.toUpperCase() === "PAUSED"));
     }
     else {
