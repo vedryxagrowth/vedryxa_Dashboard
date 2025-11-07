@@ -2220,7 +2220,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
     newRowDataForFilter.current = filterData;
     let newFilterData;
     if (campaignStatusFilter !== "ALL") {
-      newFilterData = filterData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+      newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
     }
     else {
       newFilterData = filterData;

@@ -2005,7 +2005,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
         let newFilterData;
         if (campaignStatusFilter !== "ALL") {
             console.log("testing 4444");
-            newFilterData = filterData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
         }
         else {
             newFilterData = filterData;
