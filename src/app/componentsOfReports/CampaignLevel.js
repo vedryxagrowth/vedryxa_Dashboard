@@ -921,7 +921,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                         usercommit: userdetails?.email,
                         level: "campaign"
                     };
-                    const newResponse = await apiClient.post('/Comments/delete', body);
+                    const newResponse = await apiClient.post('/New/Comments/delete', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];

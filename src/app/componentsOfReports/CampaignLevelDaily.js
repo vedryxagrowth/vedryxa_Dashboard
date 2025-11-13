@@ -1289,7 +1289,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
         const handleDelete = async () => {
           try {
             const newResponse = await apiClient.post(
-              '/Comments/delete',
+              '/New/Comments/delete',
               {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
