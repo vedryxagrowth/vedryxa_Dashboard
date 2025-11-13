@@ -1215,7 +1215,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
         const handleDelete = async () => {
           try {
             const response = await apiClient.post(
-              '/Comments/delete',
+              '/New/Comments/delete',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,

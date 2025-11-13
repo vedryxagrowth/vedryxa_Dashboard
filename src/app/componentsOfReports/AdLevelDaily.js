@@ -1290,7 +1290,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
 
         const handleDelete = async () => {
           try {
-            const newResponse = await apiClient.post('/Comments/delete', {
+            const newResponse = await apiClient.post('/New/Comments/delete', {
               accountNumber: rowAccount,
               campaignname: adName,
               campaignid,

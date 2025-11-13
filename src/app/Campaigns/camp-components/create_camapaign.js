@@ -20,6 +20,7 @@ import {
   Breadcrumb,
   Popconfirm,
   Checkbox,
+  Switch
 } from "antd";
 import {
   PlusOutlined,
@@ -39,6 +40,7 @@ import {
   ExclamationCircleOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
+  InfoCircleOutlined
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -1112,6 +1114,86 @@ const AdsetComponent = ({
   console.log(adset, "adset in adset component");
   console.log(defaultUrlData, "defaultUrlData in adset component");
 
+  const Bid_strategy_values = [
+    {
+      value: "LOWEST_COST_WITHOUT_CAP",
+      label: "Highest Volume",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_BID_CAP",
+      label: "Bid Cap",
+      title: "",
+    },
+    {
+      value: "COST_CAP",
+      label: "Cost per Result Goal",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_MIN_ROAS",
+      label: "ROAS Goal",
+      title: "",
+    },
+  ];
+
+  const bidStrategy = Form.useWatch("Bid_strategy", form);
+  const Special_categories = Form.useWatch("Special_categories", form);
+  console.log(Special_categories);
+
+  const adsetLocationCountry = Form.useWatch(["adsets", index, "countries"], form);
+
+  console.log(adsetLocationCountry);
+
+  const allCountries = [
+    { value: "US", label: "United States" },
+    { value: "GB", label: "United Kingdom" },
+    { value: "AU", label: "Australia" },
+    { value: "IN", label: "India" },
+    { value: "AE", label: "United Arab Emirates" },
+    { value: "CA", label: "Canada" },
+    { value: "DE", label: "Germany" },
+    { value: "FR", label: "France" },
+    { value: "JP", label: "Japan" },
+    { value: "CN", label: "China" },
+    { value: "BR", label: "Brazil" },
+    { value: "ZA", label: "South Africa" },
+    { value: "RU", label: "Russia" },
+    { value: "IT", label: "Italy" },
+    { value: "ES", label: "Spain" },
+    { value: "SG", label: "Singapore" },
+    { value: "NZ", label: "New Zealand" },
+    { value: "MX", label: "Mexico" },
+    { value: "AT", label: "Austria" },
+    { value: "BE", label: "Belgium" },
+    { value: "BG", label: "Bulgaria" },
+    { value: "HR", label: "Croatia" },
+    { value: "CY", label: "Cyprus" },
+    { value: "CZ", label: "Czech Republic" },
+    { value: "DK", label: "Denmark" },
+    { value: "EE", label: "Estonia" },
+    { value: "FI", label: "Finland" },
+    { value: "GR", label: "Greece" },
+    { value: "HU", label: "Hungary" },
+    { value: "IE", label: "Ireland" },
+    { value: "LV", label: "Latvia" },
+    { value: "LT", label: "Lithuania" },
+    { value: "LU", label: "Luxembourg" },
+    { value: "MT", label: "Malta" },
+    { value: "NL", label: "Netherlands" },
+    { value: "PL", label: "Poland" },
+    { value: "PT", label: "Portugal" },
+    { value: "RO", label: "Romania" },
+    { value: "SK", label: "Slovakia" },
+    { value: "SI", label: "Slovenia" },
+    { value: "SE", label: "Sweden" },
+  ];
+
+  const campaignCountries = Form.useWatch("countries", form) || [];
+  const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
+
+  console.log(campaignCountries);
+
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
     setWebsiteURL(text);
@@ -1223,17 +1305,65 @@ const AdsetComponent = ({
   //     // setSelectedPositions([]); // Clear positions when publisher selection changes
   // };
 
+  // const handlePublisherChange = (value) => {
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [adset.id]: value,
+  //   }));
+
+  //   // Optionally reset selected positions for this adset
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [adset.id]: [], // clear when publishers change
+  //   }));
+  // };
+
   const handlePublisherChange = (value) => {
+    // 🧠 Start with the new selection
+    let updated = [...value];
+
+    // ⚙️ Meta-style dependencies
+    // Messenger and Audience Network require Facebook
+    // if (updated.includes("messenger") && !updated.includes("facebook")) {
+    //   updated.push("facebook");
+    // }
+    if (updated.includes("audience_network") && !updated.includes("facebook")) {
+      updated.push("facebook");
+    }
+
+    // 🧹 If Facebook is removed but required by others, re-add it
+    if (
+      !updated.includes("facebook") &&
+      (
+        // updated.includes("messenger") || 
+        updated.includes("audience_network"))
+    ) {
+      updated.push("facebook");
+    }
+
+    // ✅ Update state for publishers
     setSelectedPublishers((prev) => ({
       ...prev,
-      [adset.id]: value,
+      [adset.id]: updated,
     }));
 
-    // Optionally reset selected positions for this adset
+    // // ✅ Reset selected positions when publishers change
     setSelectedPositions((prev) => ({
       ...prev,
-      [adset.id]: [], // clear when publishers change
+      [adset.id]: [],
     }));
+
+
+
+    // ✅ Preserve only valid positions
+    //   setSelectedPublishers((prev) => ({
+    //   ...prev,
+    //   // current: updated,       // 👈 keeps UI happy
+    //   [adset.id]: updated,    // 👈 keeps adset mapping
+    // }));
+
+    // ✅ Also update form value if you’re syncing with AntD Form
+    form?.setFieldValue(["adsets", index, "platforms"], updated);
   };
 
   const handleCancelForURLBuilder = () => {
@@ -1451,12 +1581,71 @@ const AdsetComponent = ({
     setOpenCreativesDrawer(false);
   };
 
+  // function needsBeneficiaryAndPayer(targetCountries = []) {
+  const EU_AND_ASSOCIATED = [
+    // EU 27
+    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT",
+    "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+    // EU territories & regions
+    "AX", "PT-20", "DE-BS", "IT-CO", "ES-CN", "GF", "GP", "DE-HL", "IT-LI", "PT-30",
+    "MQ", "YT", "ES-ML", "GR-MA", "RE", "FR-MF"
+  ];
+  //   return targetCountries.some(c => EU_AND_ASSOCIATED.includes(c));
+  // }
+  //   const EU_AND_ASSOCIATED = [
+  //   // ... your list ...
+  //   "MQ", "YT", "ES-ML", "GR-MA", "RE", "FR-MF"
+  // ];
+
+  function needsBeneficiaryAndPayer(targetCountries) {
+    if (!targetCountries) return false;
+
+    // Normalize to an array:
+    let countries = targetCountries;
+
+    // If a comma/semicolon/space-separated string (common when reading form values)
+    if (typeof targetCountries === 'string') {
+      countries = targetCountries
+        .split(/[,;]\s*|\s+/)   // split by comma, semicolon or whitespace
+        .map(s => s.trim())
+        .filter(Boolean);
+    } else if (!Array.isArray(targetCountries)) {
+      // If it's an object (e.g., {0: 'IN', 1: 'DE'}) try to get values and flatten
+      if (typeof targetCountries === 'object' && targetCountries !== null) {
+        countries = Object.values(targetCountries).flat().map(String).map(s => s.trim()).filter(Boolean);
+      } else {
+        // unknown type — bail out safely
+        return false;
+      }
+    }
+
+    // Finally, do the check
+    return Array.isArray(countries) && countries.some(c => EU_AND_ASSOCIATED.includes(String(c)));
+  }
+
+  const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
+  console.log(BeneficiaryAndPayer);
+
   // useEffect(() => {
   //   setNewSelectedPageId(pageidList || []);
   //   setNewSelectedPixelId(pixelIdList || []);
   //   setNewPageIdList(page_id_list || []);
   //   setNewPixelIdList(pixel_id_list || []);
   // }, [page_id_list, pixel_id_list, pageidList, pixelIdList, form]);
+
+  useEffect(() => {
+    if (hasCountries) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            Min_Age: "18",
+            Max_Age: "65",
+            Gender: "0",
+          },
+        },
+      });
+    }
+  }, [hasCountries, index, form]);
 
   useEffect(() => {
     const creatives = selectedFilesFromCreatives?.[adset.id];
@@ -1533,6 +1722,53 @@ const AdsetComponent = ({
   //         [adset.id]: selectedPublishers?.[adset.id] || []
   //     }));
   // }, [selectedPublishers, adset.id, index]);
+
+  // useEffect(() => {
+  //   // Get current adset country value
+  //   const current = form.getFieldValue(["adsets", index, "countries"]);
+
+  //   // 🧠 If campaign-level countries exist
+  //   if (campaignCountries.length > 0) {
+  //     // If current value is not one of the allowed campaign countries → set to first one
+  //     if (!campaignCountries.includes(current)) {
+  //       form.setFieldValue(["adsets", index, "countries"], campaignCountries[0]);
+  //     }
+  //   } 
+  //   // 🧠 If campaign-level countries don't exist
+  //   else {
+  //     // If current value is invalid or empty → default to first allCountry
+  //     if (!allCountries.some(c => c.value === current)) {
+  //       form.setFieldValue(["adsets", index, "countries"], allCountries[0].value);
+  //     }
+  //   }
+  // }, [campaignCountries, form, index, allCountries]);
+
+  useEffect(() => {
+    // Get current adset country value
+    const current = form.getFieldValue(["adsets", index, "countries"]);
+
+    if (campaignCountries.length > 0) {
+      // 🧠 CASE 1: Campaign-level countries exist
+      // ✅ Keep previous value if it’s still part of new campaignCountries
+      if (campaignCountries.includes(current)) {
+        // Do nothing — current is still valid
+        return;
+      }
+
+      // ❌ If not valid or empty, fallback to the first campaign country
+      form.setFieldValue(["adsets", index, "countries"], campaignCountries[0]);
+    } else {
+      // 🧠 CASE 2: No campaign-level countries exist
+      // ✅ Keep current if it’s part of all countries
+      const isValid = allCountries.some((c) => c.value === current);
+
+      if (!isValid) {
+        // ❌ Not valid — default to first available
+        form.setFieldValue(["adsets", index, "countries"], allCountries[0].value);
+      }
+    }
+  }, [campaignCountries, form, index, allCountries]);
+
 
   return (
     <Collapse
@@ -1693,7 +1929,7 @@ const AdsetComponent = ({
           </Form.Item>
           <Form.Item
             name={["adsets", index, "DatePicker"]}
-            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+            label={<span style={{ color: "#B4B4B4" }}>Start Time (IST)</span>}
             rules={[
               {
                 required: true,
@@ -2017,7 +2253,7 @@ const AdsetComponent = ({
             <Form.Item
               name={["adsets", index, "bid_amount"]}
               label={
-                <span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>
+                <span style={{ color: "#B4B4B4" }}>{Bid_strategy_values.find(item => item.value === bidStrategy)?.label}</span>
               }
               rules={[
                 {
@@ -2072,7 +2308,7 @@ const AdsetComponent = ({
           Targeting
         </span>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-          <Form.Item
+          {/* <Form.Item
             name={["adsets", index, "countries"]}
             label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
             rules={[
@@ -2154,8 +2390,234 @@ const AdsetComponent = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
+          </Form.Item> */}
+          {/* ✅ FIXED VERSION */}
+          {/* <Form.Item
+  // Outer wrapper: dependency trigger
+  // shouldUpdate={(prev, curr) => prev.countries !== curr.countries}
+  shouldUpdate={(prev, curr) =>
+    JSON.stringify(prev.countries) !== JSON.stringify(curr.countries)
+  }
+  noStyle
+>
+  {({ getFieldValue }) => {
+    const campaignCountries = getFieldValue("countries") || [];
+
+    const allCountries = [
+      { value: "US", label: "United States" },
+      { value: "GB", label: "United Kingdom" },
+      { value: "AU", label: "Australia" },
+      { value: "IN", label: "India" },
+      { value: "AE", label: "United Arab Emirates" },
+      { value: "CA", label: "Canada" },
+      { value: "DE", label: "Germany" },
+      { value: "FR", label: "France" },
+      { value: "JP", label: "Japan" },
+      { value: "CN", label: "China" },
+      { value: "BR", label: "Brazil" },
+      { value: "ZA", label: "South Africa" },
+      { value: "RU", label: "Russia" },
+      { value: "IT", label: "Italy" },
+      { value: "ES", label: "Spain" },
+      { value: "SG", label: "Singapore" },
+      { value: "NZ", label: "New Zealand" },
+      { value: "MX", label: "Mexico" },
+      { value: "AT", label: "Austria" },
+      { value: "BE", label: "Belgium" },
+      { value: "BG", label: "Bulgaria" },
+      { value: "HR", label: "Croatia" },
+      { value: "CY", label: "Cyprus" },
+      { value: "CZ", label: "Czech Republic" },
+      { value: "DK", label: "Denmark" },
+      { value: "EE", label: "Estonia" },
+      { value: "FI", label: "Finland" },
+      { value: "GR", label: "Greece" },
+      { value: "HU", label: "Hungary" },
+      { value: "IE", label: "Ireland" },
+      { value: "LV", label: "Latvia" },
+      { value: "LT", label: "Lithuania" },
+      { value: "LU", label: "Luxembourg" },
+      { value: "MT", label: "Malta" },
+      { value: "NL", label: "Netherlands" },
+      { value: "PL", label: "Poland" },
+      { value: "PT", label: "Portugal" },
+      { value: "RO", label: "Romania" },
+      { value: "SK", label: "Slovakia" },
+      { value: "SI", label: "Slovenia" },
+      { value: "SE", label: "Sweden" },
+    ];
+
+    const filteredOptions = campaignCountries.length
+      ? allCountries.filter((c) => campaignCountries.includes(c.value))
+      : allCountries;
+
+    return (
+      <Form.Item
+        // 👇 Inner item is the actual field
+        name={["adsets", index, "countries"]}
+        label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+        rules={[
+          {
+            required: true,
+            message: "Please select an option!",
+          },
+        ]}
+        style={{ flex: "140px" }}
+        initialValue={adset.countries || ["US"]}
+      >
+        <Select
+          showSearch
+          // mode="multiple"
+          allowClear
+          placeholder={
+            campaignCountries.length
+              ? "Select from campaign countries"
+              : "Select any country"
+          }
+          // ✅ Only disable when campaign countries exist but are empty (rare)
+          disabled={campaignCountries && campaignCountries.length < 0}
+          options={filteredOptions}
+          dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+          className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+        />
+      </Form.Item>
+    );
+  }}
+</Form.Item> */}
+          {/* ✅ FINAL VERSION WITH useWatch */}
+          <Form.Item noStyle>
+            <Form.Item
+              name={["adsets", index, "countries"]}
+              label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+              rules={[{ required: true, message: "Please select at least one country!" }]}
+              style={{ flex: "140px" }}
+              initialValue={
+                campaignCountries.length > 0
+                  ? [campaignCountries[0]]
+                  : [allCountries[0].value]
+              }
+            >
+              <Select
+                allowClear
+                showSearch
+                placeholder={
+                  campaignCountries.length
+                    ? "Select from campaign countries"
+                    : "Select any country"
+                }
+                options={
+                  campaignCountries.length > 0
+                    ? allCountries.filter((c) => campaignCountries.includes(c.value))
+                    : allCountries
+                }
+                getPopupContainer={(trigger) => trigger.parentNode}
+                dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            </Form.Item>
           </Form.Item>
-          <Form.Item
+
+
+          {/* {
+            BeneficiaryAndPayer && (
+              <Form.Item
+            name={["adsets", index, "Beneficiary"]}
+            label={<span style={{ color: "#B4B4B4" }}>Beneficiary</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please fill the input!",
+              },
+            ]}
+            style={{ flex: "1 1 150px" }}
+            // initialValue={adset.Min_Age || "18"}
+          >
+            <Input/>
+          </Form.Item>
+            )
+          } */}
+
+          {BeneficiaryAndPayer && (
+            <>
+              {/* 🌿 Beneficiary field with Switch in label */}
+              <Form.Item
+                label={
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}>
+                      <InfoCircleOutlined
+                        style={{
+                          color: theme === "dark" ? "#bbb" : "#888",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Tooltip>
+
+                    {/* ✅ Switch controls visibility of Payer field */}
+                    <Form.Item
+                      noStyle
+                      name={["adsets", index, "showPayer"]}
+                      valuePropName="checked"
+                    >
+                      <Switch size="small" />
+                    </Form.Item>
+                  </div>
+                }
+                name={["adsets", index, "Beneficiary"]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please fill the input!",
+                  },
+                ]}
+                style={{ flex: "1 1 150px" }}
+              >
+                <Input />
+              </Form.Item>
+
+              {/* ✅ Conditionally render Payer field when switch is ON */}
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, curr) =>
+                  prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
+                }
+              >
+                {({ getFieldValue }) =>
+                  getFieldValue(["adsets", index, "showPayer"]) ? (
+                    <Form.Item
+                      name={["adsets", index, "Payer"]}
+                      label={
+                        // <span style={{ color: "#B4B4B4" }}>Payer</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ color: "#B4B4B4" }}>Payer</span>
+                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}>
+                            <InfoCircleOutlined
+                              style={{
+                                color: theme === "dark" ? "#bbb" : "#888",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </Tooltip>
+                        </div>
+                      }
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please fill the input!",
+                        },
+                      ]}
+                      style={{ flex: "1 1 150px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+            </>
+          )}
+
+
+          {/* <Form.Item
             name={["adsets", index, "Min_Age"]}
             label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
             rules={[
@@ -2228,7 +2690,91 @@ const AdsetComponent = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
+          </Form.Item> */}
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) =>
+              prev?.adsets?.[index]?.countries !== curr?.adsets?.[index]?.countries
+            }
+          >
+            {({ getFieldValue }) => {
+              const selectedCountries = getFieldValue(["adsets", index, "countries"]);
+              const isDisabled = Array.isArray(selectedCountries) && selectedCountries.length > 0;
+
+              return (
+                <>
+                  {/* 🔹 Min Age */}
+                  <Form.Item
+                    name={["adsets", index, "Min_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Min_Age || "18"}
+                  >
+                    <Select
+                      disabled={isDisabled}
+                      options={[
+                        { value: "18", label: "18", title: "" },
+                        { value: "25", label: "25", title: "", disabled: hasCountries },
+                        { value: "35", label: "35", title: "", disabled: hasCountries },
+                        { value: "40", label: "40", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Max Age */}
+                  <Form.Item
+                    name={["adsets", index, "Max_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Max_Age || "65"}
+                  >
+                    <Select
+                      disabled={isDisabled}
+                      options={[
+                        { value: "20", label: "20", title: "", disabled: hasCountries },
+                        { value: "30", label: "30", title: "", disabled: hasCountries },
+                        { value: "65", label: "65+", title: "" },
+                        { value: "80", label: "80", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Gender */}
+                  <Form.Item
+                    name={["adsets", index, "Gender"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Gender</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Gender || "0"}
+                  >
+                    <Select
+                      disabled={isDisabled}
+                      options={[
+                        { value: "0", label: "All", title: "" },
+                        { value: "1", label: "Male", title: "", disabled: hasCountries },
+                        { value: "2", label: "Female", title: "", disabled: hasCountries },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+                </>
+              );
+            }}
           </Form.Item>
+
           <Form.Item
             name={["adsets", index, "Language"]}
             label={<span style={{ color: "#B4B4B4" }}>Language</span>}
@@ -2386,6 +2932,75 @@ const AdsetComponent = ({
                 >
                   <Form.Item
                     name={["adsets", index, "platforms"]}
+                    label={
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ color: "#B4B4B4" }}>Platforms</span>
+
+                        {(() => {
+                          // 🧭 Define dependency rules once
+                          const dependencyRules = {
+                            messenger: "Messenger requires Facebook",
+                            audience_network: "Audience Network requires Facebook",
+                          };
+
+                          // ✅ Fix: use per-adset array
+                          const currentSelection = Array.isArray(selectedPublishers?.[adset.id])
+                            ? selectedPublishers[adset.id]
+                            : [];
+
+                          // 🧩 Filter platforms that have dependency messages
+                          const selectedWithDeps = currentSelection.filter(
+                            (p) => dependencyRules[p]
+                          );
+
+                          if (selectedWithDeps.length === 0) return null;
+
+                          const tooltipText = (
+                            <div style={{ maxWidth: 260, lineHeight: 1.4 }}>
+                              <b>Platform Dependencies:</b>
+                              <br />
+                              {selectedWithDeps.map((p) => (
+                                <div key={p}>• {dependencyRules[p]}</div>
+                              ))}
+                              (Meta doesn’t allow these to run alone)
+                            </div>
+                          );
+
+                          return (
+                            <Tooltip placement="top" title={tooltipText}>
+                              <InfoCircleOutlined
+                                style={{
+                                  color: theme === "dark" ? "#bbb" : "#888",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            </Tooltip>
+                          );
+                        })()}
+                      </div>
+                    }
+                    style={{ flex: 1, minWidth: "210px" }}
+                    rules={[{ required: true, message: "Please select at least one platform!" }]}
+                  >
+                    <Select
+                      mode="multiple"
+                      placeholder="Select Platforms"
+                      onChange={handlePublisherChange}
+                      value={selectedPublishers?.[adset.id] || []} // ✅ per adset
+                      dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    >
+                      {publisherOptions.map((option) => (
+                        <Option key={option.value} value={option.value} title={null}>
+                          {option.label}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+
+
+                  {/* <Form.Item
+                    name={["adsets", index, "platforms"]}
                     label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
                     rules={[
                       { required: true, message: "Please select an option!" },
@@ -2412,9 +3027,9 @@ const AdsetComponent = ({
                         </Option>
                       ))}
                     </Select>
-                  </Form.Item>
+                  </Form.Item> */}
 
-                  <Form.Item
+                  {/* <Form.Item
                     name={["adsets", index, "positions"]}
                     label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
                     rules={[
@@ -2445,7 +3060,229 @@ const AdsetComponent = ({
                           </Option>
                         ))}
                     </Select>
+                  </Form.Item> */}
+
+                  {/* <Form.Item
+  name={["adsets", index, "positions"]}
+  label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+  style={{ flex: 2, minWidth: "215px" }}
+  rules={[
+    { required: true, message: "Please select at least one position!" },
+    {
+      // ⚙️ Added Meta dependency validation rule
+      validator: (_, value = []) => {
+        if (!Array.isArray(value)) return Promise.resolve();
+
+        // 📘 Dependency rules (from Meta documentation)
+        const deps = {
+          story_f: ["feed", "story_i"], // Facebook Story → requires Feed or Instagram Story
+          marketplace: ["feed"],
+          right_hand_column: ["feed"],
+          search: ["feed"],
+          facebook_reels: ["feed"],
+          profile_feed_f: ["feed"],
+          classic: ["feed"], // Audience Network → requires Feed
+        };
+
+        // 🧩 Validate each selected position
+        for (const pos of value) {
+          const required = deps[pos];
+          if (required && !required.some((r) => value.includes(r))) {
+            return Promise.reject(
+              new Error(
+                `⚠️ “${pos}” requires ${required.join(" or ")} to be selected.`
+              )
+            );
+          }
+        }
+        return Promise.resolve();
+      },
+    },
+  ]}
+>
+  <Select
+    mode="multiple"
+    placeholder="Select Positions"
+    value={(selectedPositions?.[adset.id] || []).map((pos) => pos.key)} // ✅ unchanged
+    onChange={handlePositionChange}
+    dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+    className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+  >
+    {Array.isArray(selectedPublishers?.[adset.id]) &&
+      selectedPublishers[adset.id].length > 0 &&
+      getPositionOptions().map((position) => (
+        <Option
+          key={`${position.key}_${position.label}`}
+          value={position.key}
+          title={null}
+        >
+          {position.label}
+        </Option>
+      ))}
+  </Select>
+</Form.Item> */}
+
+                  {/* <Form.Item
+                    name={["adsets", index, "positions"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                    style={{ flex: 2, minWidth: "215px" }}
+                    rules={[
+                      { required: true, message: "Please select at least one position!" },
+                      // {
+                      //   // ⚙️ Full Meta dependency validation rule
+                      //   validator: (_, value = []) => {
+                      //     if (!Array.isArray(value)) return Promise.resolve();
+
+                      //     // 📘 Dependency rules for all Meta platforms (FULL)
+                      //     const deps = {
+                      //       // 🔹 Facebook dependencies
+                      //       story_f: ["feed", "story_i"], // Facebook Story → requires Feed or IG Story
+                      //       marketplace: ["feed"],
+                      //       right_hand_column: ["feed"],
+                      //       search: ["feed"],
+                      //       facebook_reels: ["feed"],
+                      //       profile_feed_f: ["feed"],
+                      //       instant_article: ["feed"],
+                      //       biz_disco_feed: ["feed"],
+                      //       instream_video: ["feed"],
+
+                      //       // 🔹 Instagram dependencies
+                      //       story_i: ["stream", "story_f"], // IG Story → requires Stream or FB Story
+                      //       explore_home: ["explore"],
+                      //       reels: ["stream"],
+                      //       profile_feed_i: ["stream"],
+
+                      //       // 🔹 Messenger dependencies
+                      //       messenger_home: ["feed"], // ✅ requires Facebook Feed
+                      //       story_m: ["messenger_home", "feed"], // ✅ requires Messenger Home + Feed
+                      //       sponsored_messages: ["messenger_home", "feed"], // ✅ requires Messenger Home + Feed
+
+                      //       // 🔹 Audience Network dependencies
+                      //       classic: ["feed"], // ✅ requires Facebook Feed
+                      //       rewarded_video: ["feed"], // ✅ requires Facebook Feed
+                      //       instream_video_an: ["feed"], // ✅ requires Facebook Feed (optional naming)
+                      //     };
+
+                      //     // 🔍 Create a lookup map for key → label
+                      //     const labelMap = {};
+                      //     Object.entries(positionOptions).forEach(([platform, arr]) => {
+                      //       arr.forEach((item) => {
+                      //         labelMap[item.key] = item.label;
+                      //       });
+                      //     });
+
+                      //     // 🧩 Validate each selected position
+                      //     for (const pos of value) {
+                      //       const required = deps[pos];
+                      //       if (required && !required.some((r) => value.includes(r))) {
+                      //         // Convert required keys → readable labels
+                      //         const missingLabels = required.map((r) => labelMap[r] || r);
+                      //         const posLabel = labelMap[pos] || pos;
+
+                      //         return Promise.reject(
+                      //           new Error(
+                      //             `⚠️ "${posLabel}" requires "${missingLabels.join(" and ")}" to be selected.`
+                      //           )
+                      //         );
+                      //       }
+                      //     }
+
+                      //     return Promise.resolve();
+                      //   },
+                      // },
+                      {
+                        validator: (_, value = []) => {
+                          if (!Array.isArray(value)) return Promise.resolve();
+
+                          // 📘 All dependency rules
+                          const deps = {
+                            // 🔹 Facebook dependencies
+                            story_f: ["feed", "story_i"], // Requires both
+                            marketplace: ["feed"],
+                            right_hand_column: ["feed"],
+                            search: ["feed"],
+                            facebook_reels: ["feed"],
+                            profile_feed_f: ["feed"],
+                            instant_article: ["feed"],
+                            biz_disco_feed: ["feed"],
+                            instream_video: ["feed"],
+
+                            // 🔹 Instagram dependencies
+                            story_i: ["stream", "story_f"], // Requires both
+                            explore_home: ["explore"],
+                            reels: ["stream"],
+                            profile_feed_i: ["stream"],
+
+                            // 🔹 Messenger dependencies
+                            messenger_home: ["feed"],
+                            story_m: ["messenger_home", "feed"], // Requires both
+                            sponsored_messages: ["messenger_home", "feed"], // Requires both
+
+                            // 🔹 Audience Network dependencies
+                            classic: ["feed"],
+                            rewarded_video: ["feed"],
+                            instream_video_an: ["feed"],
+                          };
+
+                          // 🔍 Build key → label map for readable errors
+                          const labelMap = {};
+                          Object.entries(positionOptions).forEach(([platform, arr]) => {
+                            arr.forEach((item) => {
+                              labelMap[item.key] = item.label;
+                            });
+                          });
+
+                          // 🧩 Validate each selected position
+                          for (const pos of value) {
+                            const required = deps[pos];
+                            if (required && !required.every((r) => value.includes(r))) {
+                              // Find which required ones are missing
+                              const missing = required.filter((r) => !value.includes(r));
+                              const missingLabels = missing.map((r) => labelMap[r] || r);
+                              const posLabel = labelMap[pos] || pos;
+
+                              // Format message naturally (comma-separated + “and”)
+                              const missingText =
+                                missingLabels.length > 1
+                                  ? `${missingLabels.slice(0, -1).join(", ")} and ${missingLabels[missingLabels.length - 1]
+                                  }`
+                                  : missingLabels[0];
+
+                              return Promise.reject(
+                                new Error(`⚠️ "${posLabel}" requires "${missingText}" to be selected.`)
+                              );
+                            }
+                          }
+
+                          return Promise.resolve();
+                        },
+                      }
+                    ]}
+                  >
+                    <Select
+                      mode="multiple"
+                      placeholder="Select Positions"
+                      value={(selectedPositions?.[adset.id] || []).map((pos) => pos.key)}
+                      onChange={handlePositionChange}
+                      dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    >
+                      {Array.isArray(selectedPublishers?.[adset.id]) &&
+                        selectedPublishers[adset.id].length > 0 &&
+                        getPositionOptions().map((position) => (
+                          <Option
+                            key={`${position.key}_${position.label}`}
+                            value={position.key}
+                            title={null}
+                          >
+                            {position.label}
+                          </Option>
+                        ))}
+                    </Select>
                   </Form.Item>
+
+
+
 
                   <Form.Item
                     name={["adsets", index, "device_platforms"]}
@@ -2468,7 +3305,186 @@ const AdsetComponent = ({
                       className={`${theme === "dark" ? "dark-theme" : "light-theme"
                         } green-border-select`}
                     />
+                  </Form.Item> */}
+                  {/* 🔹 POSITIONS */}
+                  <Form.Item
+                    name={["adsets", index, "positions"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                    style={{ flex: 2, minWidth: "215px" }}
+                    rules={[
+                      { required: true, message: "Please select at least one position!" },
+                      {
+                        // ✅ Meta-compliant dependency validator
+                        validator: (_, value = []) => {
+                          if (!Array.isArray(value)) return Promise.resolve();
+
+                          // 📘 Dependencies (from Facebook official Marketing API)
+                          const deps = {
+                            // 🔹 Facebook
+                            story_f: ["feed", "story_i"], // Facebook Story → requires Feed or IG Story (mobile)
+                            marketplace: ["feed"],
+                            search: ["feed"],
+                            profile_feed_f: ["feed"],
+                            notification: ["feed"],
+                            right_hand_column: ["feed"],
+                            facebook_reels_overlay: ["feed"],
+                            instream_video: ["feed"], // can be standalone for specific objectives only
+
+                            // 🔹 Instagram
+                            // story_i: [], // ✅ independent
+                            explore_home: ["explore"], // explore home → requires explore
+                            // reels: [], // ✅ standalone
+                            // stream: [], // ✅ default
+                            // profile_feed_i: [], // ✅ standalone
+                            // ig_search: [], // ✅ standalone
+                            // profile_reels: [], // ✅ standalone
+
+                            // 🔹 Messenger
+                            story_m: ["feed", "story_i"], // Messenger Story → requires FB Feed or IG Story (mobile)
+                            sponsored_messages: ["__exclusive__"], // must be isolated
+
+                            // 🔹 Audience Network
+                            classic: ["feed"], // requires FB Feed
+                            rewarded_video: ["feed"], // requires FB Feed
+
+                            // 🔹 Threads
+                            threads_stream: ["stream"], // requires Instagram Stream
+                          };
+
+                          // 🔍 Build readable label map
+                          const labelMap = {};
+                          Object.entries(positionOptions).forEach(([platform, arr]) => {
+                            arr.forEach((item) => {
+                              labelMap[item.key] = item.label;
+                            });
+                          });
+
+                          // 🧩 Validate exclusivity first (sponsored_messages)
+                          if (value.includes("sponsored_messages") && value.length > 1) {
+                            return Promise.reject(
+                              new Error(
+                                `⚠️ "Messenger Sponsored Messages" cannot be combined with other placements. Remove the other Platforms except Messenger`
+                              )
+                            );
+                          }
+
+                          // 🧩 Validate dependencies
+                          for (const pos of value) {
+                            const required = deps[pos];
+                            if (!required || required.includes("__exclusive__")) continue;
+
+                            // Require at least one (OR) dependency, not all
+                            if (!required.some((r) => value.includes(r))) {
+                              const missingLabels = required.map((r) => labelMap[r] || r);
+                              const posLabel = labelMap[pos] || pos;
+
+                              const missingText =
+                                missingLabels.length > 1
+                                  ? missingLabels.join(" or ")
+                                  : missingLabels[0];
+
+                              return Promise.reject(
+                                new Error(`⚠️ "${posLabel}" requires "${missingText}" to be selected.`)
+                              );
+                            }
+                          }
+
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                  >
+                    <Select
+                      mode="multiple"
+                      placeholder="Select Positions"
+                      value={(selectedPositions?.[adset.id] || []).map((pos) => pos.key)}
+                      onChange={handlePositionChange}
+                      dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    >
+                      {Array.isArray(selectedPublishers?.[adset.id]) &&
+                        selectedPublishers[adset.id].length > 0 &&
+                        getPositionOptions().map((position) => (
+                          <Option
+                            key={`${position.key}_${position.label}`}
+                            value={position.key}
+                            title={null}
+                          >
+                            {position.label}
+                          </Option>
+                        ))}
+                    </Select>
                   </Form.Item>
+
+
+                  {/* 🔹 DEVICE VALIDATION */}
+                  <Form.Item
+                    name={["adsets", index, "device_platforms"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                    style={{ flex: 1, minWidth: "215px" }}
+                    rules={[
+                      { required: true, message: "Please select at least one device!" },
+                      {
+                        // ✅ Soft dependency validator (platform + position awareness)
+                        validator: (_, devices = []) => {
+                          if (!Array.isArray(devices)) return Promise.resolve();
+
+                          const selectedPos = form.getFieldValue(["adsets", index, "positions"]) || [];
+
+                          // Positions that are mobile-only
+                          const mobileOnly = [
+                            "story_f",
+                            "story_i",
+                            "story_m",
+                            "facebook_reels",
+                            "facebook_reels_overlay",
+                            "instant_article",
+                            "profile_reels",
+                            "rewarded_video",
+                            "classic",
+                          ];
+
+                          // Positions that are desktop-only
+                          const desktopOnly = ["right_hand_column"];
+
+                          // If only mobile placements exist → warn if desktop chosen
+                          const hasMobileOnly = selectedPos.some((p) => mobileOnly.includes(p));
+                          const hasDesktopOnly = selectedPos.some((p) => desktopOnly.includes(p));
+
+                          if (hasMobileOnly && devices.includes("desktop") && !devices.includes("mobile")) {
+                            return Promise.reject(
+                              new Error(
+                                `⚠️ Selected positions are mobile-only. Please include "Mobile" in devices.`
+                              )
+                            );
+                          }
+
+                          if (hasDesktopOnly && devices.includes("mobile") && !devices.includes("desktop")) {
+                            return Promise.reject(
+                              new Error(
+                                `⚠️ "Facebook Right Column" is desktop-only. Please include "Desktop" device.`
+                              )
+                            );
+                          }
+
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                  >
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      placeholder="Select Devices"
+                      options={[
+                        { value: "mobile", label: "Mobile", title: "" },
+                        { value: "desktop", label: "Desktop", title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
                 </div>
               ) : null;
             }}
@@ -6268,6 +7284,8 @@ const CreateCampaignDrawer = ({
     const campaignData = await MultipleAdsestsFetching(formValues);
     console.log("Campaign Data before adding category:", campaignData);
     // campaignData.Category = selectedCategory;
+    //abcd
+
     try {
       if (campaignData) {
         // console.log("Campaign Data:", campaignData);
@@ -6514,6 +7532,12 @@ const CreateCampaignDrawer = ({
             position: values.adsets[i].positions,
             device_platforms: values.adsets[i].device_platforms,
           }),
+          ...(values.adsets[i].Beneficiary
+            ? { beneficiary: values.adsets[i].Beneficiary }
+            : {}),
+          ...(values.adsets[i].Beneficiary
+            ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+            : {}),
           buying_type: "AUCTION",
           addlevel: addLevelData,
         };
