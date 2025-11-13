@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -22,6 +22,9 @@ import locale from 'antd/es/date-picker/locale/en_US';
 import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
+import { MdOutlineCancel } from "react-icons/md";
+import { TiTickOutline } from "react-icons/ti";
+ 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
     "FB_MnetBing": "Facebook_MnetBing",
@@ -625,6 +628,20 @@ const MyTablePage = () => {
     };
 
 
+    useEffect(() => {
+        const stored = JSON.parse(localStorage.getItem("selectedAccounts") || "[]");
+        if (stored.length > 0) {
+            setSelectedValue(stored);
+        }
+    }, []);
+
+    // 🔹 Auto-save when selectedValue changes
+    useEffect(() => {
+        localStorage.setItem("selectedAccounts", JSON.stringify(selectedValue));
+    }, [selectedValue]);
+
+
+
 
     const handleOk = () => {
         if (!newColumnName || !formula) {
@@ -702,6 +719,7 @@ const MyTablePage = () => {
             aggFunc: (params) => params.rowNode.group ? customAggFunc(params, lowerCaseFormula) : null,
             cellStyle: { backgroundColor: "skyblue" },
             headerCellStyle: { backgroundColor: "skyblue", color: "black" },
+            headerTooltip: formula,
         };
 
         setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
@@ -710,6 +728,10 @@ const MyTablePage = () => {
         columnDefs1.current = [...columnDefs1.current, newColumnDef];
         columnDefs2.current = [...columnDefs2.current, newColumnDef];
         columnDefs3.current = [...columnDefs3.current, newColumnDef];
+        columnDefsAdsetLevel.current = [...columnDefsAdsetLevel.current, newColumnDef]
+        columnDefsAdsetLevelDaily.current = [...columnDefsAdsetLevelDaily.current, newColumnDef]
+        columnDefsAdLevelDaily.current = [...columnDefsAdLevelDaily.current, newColumnDef]
+        columnDefsAdLevel.current = [...columnDefsAdLevel.current, newColumnDef]
 
         setNewColumnName("");
         setFormula("");
@@ -12796,24 +12818,50 @@ const MyTablePage = () => {
     // };
 
     // value will be an array of accountNumbers (strings)
-    const handleChange1 = (values) => {
-        const uniq = Array.from(new Set(values.map(String)));
-        setSelectedValue(uniq);
+    const handleChange1 = (newValues) => {
+        setSelectedValue((prevSelected) => {
+            // Keep existing selections outside current search
+            const prev = new Set(prevSelected.map(String));
+            const filteredSet = new Set(filteredAccounts.map(a => String(a.accountNumber)));
+
+            // Remove only accounts that belong to current search list
+            for (const val of filteredSet) {
+                if (prev.has(val)) prev.delete(val);
+            }
+
+            // Add currently selected (visible) accounts
+            for (const val of newValues) {
+                prev.add(String(val));
+            }
+
+            const finalSelected = Array.from(prev);
+
+            // ✅ Persist new state to localStorage
+            localStorage.setItem("selectedAccounts", JSON.stringify(finalSelected));
+
+            // ✅ Notify parent or other logic
+            onChangeSelect(finalSelected);
+            setAccountChanged(true);
+
+            return finalSelected;
+        });
+
         userPickedRef.current = true;
 
-        // Preserve your accountName behavior using the last picked item (if needed)
-        const last = values[values.length - 1];
+        // ✅ Preserve account name behavior using last picked item
+        const last = newValues[newValues.length - 1];
         if (last) {
             const findAccount = (data, accountNumber) =>
-                Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
+                Object.values(data).flat().find(
+                    (item) => String(item.accountNumber) === String(accountNumber)
+                ) || null;
 
             const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
             if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
         }
-
-        onChangeSelect(values);     // now passing array
-        setAccountChanged(true);
     };
+
+
 
     const filteredAccounts = useMemo(() => {
         const q = searchText.trim().toLowerCase();
@@ -12869,26 +12917,48 @@ const MyTablePage = () => {
 
         return (
             <div>
-                {/* All Accounts toggle (active only) */}
-                <Checkbox
-                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
-                    indeterminate={
-                        selectedValue.length > 0 && selectedValue.length < activeAccounts.length
-                    }
-                    checked={selectedValue.length === activeAccounts.length}
-                    onChange={(e) => {
-                        if (e.target.checked) {
-                            handleChange1(activeAccounts.map(acc => String(acc.accountNumber)));
-                        } else {
-                            handleChange1([]);
-                        }
-                    }}
-                >
-                    <h5 style={{ color: theme === "dark" ? "#fff" : "#333", fontSize: '14px' }}> All Accounts</h5>
-                </Checkbox>
 
+                <div style={{ display: "flex", gap: 10 }}>
+                    <Checkbox
+                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                        indeterminate={
+                            selectedValue.length > 0 && selectedValue.length < activeAccounts.length
+                        }
+                        checked={selectedValue.length === activeAccounts.length}
+                        onChange={(e) => {
+                            if (e.target.checked) {
+                                handleChange1(activeAccounts.map(acc => String(acc.accountNumber)));
+                            } else {
+                                handleChange1([]);
+                            }
+                        }}
+                    >
+                        <h5 style={{ color: theme === "dark" ? "#fff" : "#333", fontSize: '14px' }}> All Accounts</h5>
+                    </Checkbox>
+                    <TiTickOutline
+                        style={{
+                            fontSize: 20,
+                            color: "#52c41a",
+                            cursor: "pointer",
+                        }}
+                        title="Select All Active Accounts"
+                        onClick={onClickButton}
+                    />
+                    <MdOutlineCancel
+                        style={{
+                            fontSize: 20,
+                            color: "#ff4d4f",
+                            cursor: "pointer",
+                        }}
+                        title="Unselect All"
+                        onClick={async () => {
+                            handleChange1([]);
+                            await onClickButton();
+                        }}
+                    />
+                </div>
                 {/* Individual account checkboxes */}
-                <Checkbox.Group
+                {/* <Checkbox.Group
                     options={filteredAccounts.map((account) => ({
                         value: String(account.accountNumber),
                         label: (
@@ -12918,12 +12988,66 @@ const MyTablePage = () => {
                         ),
                     }))}
                     value={selectedValue}
-                    onChange={handleChange1}
+                    // onChange={handleChange1}
+                    onChange={(checkedList) => handleChange1(checkedList)}
+
+                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                /> */}
+                <Checkbox.Group
+                    options={filteredAccounts.map((account) => ({
+                        value: String(account.accountNumber),
+                        label: (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '5px 10px',
+                                    borderBottom: '1px solid #ddd',
+                                }}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+                                    {isOpen && (
+                                        <span style={{ fontSize: 12, color: 'gray' }}>
+                                            {account.accountName || ''}
+                                        </span>
+                                    )}
+                                </div>
+                                <span style={{ textAlign: 'right', marginLeft: 10 }}>
+                                    {account.status === 'Active' ? (
+                                        <CheckCircleFilled
+                                            style={{ color: '#91C25F', fontSize: 15 }}
+                                            className="black-icon-active-1"
+                                        />
+                                    ) : (
+                                        <CloseCircleFilled
+                                            style={{ color: '#EC7117', fontSize: 15 }}
+                                            className="black-icon-pause-1"
+                                        />
+                                    )}
+                                </span>
+                            </div>
+                        ),
+                    }))}
+
+                    // ✅ Show checked only for visible accounts
+                    value={selectedValue.filter((v) =>
+                        filteredAccounts.some(
+                            (acc) => String(acc.accountNumber) === String(v)
+                        )
+                    )}
+
+                    // ✅ Send only visible checked list to handler
+                    onChange={(checkedList) => handleChange1(checkedList)}
+
                     className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
                 />
+
             </div>
         );
     };
+
 
 
     // Create option with conditional rendering of additional info
@@ -13520,7 +13644,7 @@ const MyTablePage = () => {
                             showSearch
                             onSearch={setSearchText}
                             searchValue={searchText}
-                            placeholder="Select Account"
+                            placeholder="Select Accounts"
                             // Keep the visible state you already have
                             open={isOpen}
                             onDropdownVisibleChange={handleDropdownVisibleChange}
@@ -13537,7 +13661,7 @@ const MyTablePage = () => {
                             dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             style={{
-                                width: '250px',
+                                width: '290px',
                                 whiteSpace: 'nowrap',
                                 color: theme === 'dark' ? 'white' : undefined,
                                 overflow: 'hidden',

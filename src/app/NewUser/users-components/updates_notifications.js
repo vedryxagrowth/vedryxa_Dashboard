@@ -77,12 +77,13 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
           formDataToSend.append('description', formData.description);
           formDataToSend.append('email', userdetails?.email);
           formDataToSend.append('network', selectedNetwork);
+          formDataToSend.append('networks', JSON.stringify(selectedNetwork));
 
           if (formData.image) {
             formDataToSend.append('image', formData.image);
           }
 
-          const res = await fetch('https://prodapis.adsgoat.in/api/notifications/update', {
+          const res = await fetch('https://prodapis.adsgoat.in/api/notifications/update/new', {
             method: 'POST',
             body: formDataToSend
           });
@@ -224,6 +225,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
               className={theme === 'dark' ? 'custom-select-dark' : ''}
               dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
               title={''}
+              mode="multiple"
             >
               {networkOptions.map((option) => (
                 <Option key={option.value} value={option.value} title={''}>
