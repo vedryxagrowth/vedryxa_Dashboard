@@ -83,7 +83,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             formDataToSend.append('image', formData.image);
           }
 
-          const res = await fetch('https://prodapis.adsgoat.in/api/notifications/update/new', {
+          const res = await fetch('https://prodapis.adsgoat.in/api/notifications/updatenew', {
             method: 'POST',
             body: formDataToSend
           });

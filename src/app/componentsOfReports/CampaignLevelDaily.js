@@ -44,7 +44,8 @@ const newtworkCollections = {
   "FB_Sedo": "Facebook_Sedo",
   "FB_Inmobi": "Facebook_Inmobi",
   "FB_TonicRsoc": "Facebook_TonicRsoc",
-  "FB_InuvoPrism": "Facebook_InuvoPrismDaily"
+  "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
+  "FB_CodeFuel": "Facebook_CodeFuel_Daily"
 }
 const selectTimezone = {
   UTC: 'UTCDate',
@@ -91,6 +92,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
   const [apiStatus, setApiStatus] = useState(false);
 
   const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+  const [leafCampaigns, setLeafCampaigns] = useState([]);
 
   // let fbCron = useRef();
 
@@ -160,11 +162,37 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
     const selectedNodes = event.api.getSelectedNodes();
     const selectedData = selectedNodes.map(node => node.data);
 
-    // Store selection persistently
+
     setSelectedCampaigns(selectedData);
 
-    // Keep your existing functionality
+
     showCampaignLevel(selectedData);
+    console.log(selectedData);
+
+    const leafCampaignsData = selectedNodes
+      .filter(node => !node.group && node.data)
+      .map(node => ({
+        campaignid: node.data.campaignid,
+        campaignname: node.data.campaignname,
+        accountNumber: node.data.accountNumber,
+        fbStatus: node.data.fbStatus,
+        level: "campaign",
+      }))
+      .filter(item => item.campaignid && item.campaignname);
+
+
+    const uniqueLeafCampaigns = Array.from(
+      new Map(
+        leafCampaignsData.map(item => [`${item.campaignid}_${item.accountNumber}`, item])
+      ).values()
+    );
+
+
+    setLeafCampaigns(uniqueLeafCampaigns);
+
+    console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
+
+
   };
 
   useEffect(() => {
@@ -1218,7 +1246,86 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
             setPendingAccount(null);
           }
         };
+        const handleSmartCampaignStatusClick = async () => {
+          const desiredStatus = nextChecked ? "ACTIVE" : "PAUSED";
 
+          // 🌟 CASE 1 → Only one campaign selected  
+          if (!leafCampaigns || leafCampaigns.length <= 1) {
+            handlePauseOk();   // <-- SAME as PIN fallback
+            return;
+          }
+
+          // 🌟 CASE 2 → MULTIPLE campaigns → Bulk update
+          const listToUpdate = leafCampaigns.filter(item =>
+            String(item.fbStatus).toUpperCase() !== desiredStatus
+          );
+
+          if (listToUpdate.length === 0) {
+            message.info("All selected campaigns already have this status.");
+            return;
+          }
+
+          try {
+            message.loading({
+              content: desiredStatus === "ACTIVE"
+                ? "Activating selected campaigns..."
+                : "Pausing selected campaigns...",
+              key: "campaignBulk",
+            });
+
+            const token = localStorage.getItem("token");
+
+            const results = await Promise.allSettled(
+              listToUpdate.map(item =>
+                apiClient.post(
+                  `/BulkCampaignStatusChange`,
+                  {
+                    status: desiredStatus,
+                    id: item.identifier,
+                    campaign_id: item.campaignid,
+                    accountNumber: String(item.accountNumber),
+                    adset_id: "",
+                    name: item.campaignname,
+                    email: userdetails?.email
+                  },
+                  { headers: { Authorization: token } }
+                )
+              )
+            );
+
+            const successCount = results.filter(r => r.status === "fulfilled").length;
+            const failedCount = results.length - successCount;
+
+            // 🔥 Update UI locally — exactly like your single campaign version
+            setCamapignlevelstatus(prev => {
+              const arr = [...prev];
+              listToUpdate.forEach(update => {
+                const idx = arr.findIndex(
+                  c =>
+                    String(c.campaign_id) === String(update.campaignid) &&
+                    String(c.accountNumber) === String(update.accountNumber)
+                );
+
+                if (idx !== -1) {
+                  arr[idx] = { ...arr[idx], status: desiredStatus };
+                }
+              });
+              return arr;
+            });
+
+            message.success({
+              content: `${successCount} updated, ${failedCount} failed`,
+              key: "campaignBulk",
+              duration: 3,
+            });
+
+            setIsCampaignModalVisibles(false);
+
+          } catch (e) {
+            console.error("Bulk campaign status error:", e);
+            message.error("Failed to update selected campaigns.");
+          }
+        };
         const handlePauseCancel = () => {
           setIsCampaignModalVisibles(false);
           setSelectedCampaign(null);
@@ -1356,6 +1463,74 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
           }
         };
 
+        const handleSmartCommentSubmit = async () => {
+          if (leafCampaigns && leafCampaigns.length > 1) {
+            try {
+              message.loading({ content: 'Saving comments for selected campaigns...', key: 'bulkComment' });
+
+              const items = leafCampaigns.map(item => ({
+                accountNumber: item.accountNumber,
+                campaignname: item.campaignname,
+                campaignid: item.campaignid,
+                comment,
+                usercommit: userdetails?.email,
+                level: item.level,
+              }));
+              console.log('Sending items:', items);
+
+              const resp = await apiClient.post(
+                '/Comments/upsertBulk',
+                { items, usercommit: userdetails?.email },
+                authHeaders
+              );
+
+              if (resp.status === 200 || resp.status === 201) {
+                setCampaignComments(prev => {
+                  const arr = Array.isArray(prev) ? [...prev] : [];
+                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                  leafCampaigns.forEach(item => {
+                    const match = arr.findIndex(
+                      i =>
+                        String(i?.campaignid) === String(item.campaignid) &&
+                        String(i?.Account) === String(item.accountNumber) &&
+                        String(i?.level) === 'campaign'
+                    );
+
+                    if (match >= 0) {
+                      arr[match] = { ...arr[match], comment, usercommit: userdetails?.email, editedTime: timeStamp };
+                    } else {
+                      arr.push({
+                        campaignid: item.campaignid,
+                        Account: item.accountNumber,
+                        level: 'campaign',
+                        comment,
+                        usercommit: userdetails?.email,
+                        editedTime: timeStamp,
+                      });
+                    }
+                  });
+
+                  return arr;
+                });
+
+                message.success({
+                  content: `${leafCampaigns.length} comment(s) saved successfully`,
+                  key: 'bulkComment',
+                  duration: 3,
+                });
+
+                setIsModalVisibles(false);
+              }
+            } catch (error) {
+              console.error('Bulk comment error:', error);
+              message.error('Error while saving comments for selected campaigns.');
+            }
+            return;
+          }
+          handleOks();
+        };
+
         const handleCancels = () => setIsModalVisibles(false);
 
         // 📌 Pin / Unpin (BULK, per campaign + optional adset)
@@ -1469,7 +1644,139 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
             message.error('Error while updating pin status.');
           }
         };
+        const handleSmartPinClick = async (cName, cId, aId, currentPinStatus) => {
+          const updatedPinStatus = !currentPinStatus;
 
+          // ✅ If multiple checkboxes selected
+          if (leafCampaigns && leafCampaigns.length > 1) {
+            try {
+              if (updatedPinStatus) {
+                // 🔹 Multi-PIN flow
+                message.loading({ content: 'Pinning selected campaigns...', key: 'smartPin' });
+
+                const results = await Promise.allSettled(
+                  leafCampaigns.map(item =>
+                    apiClient.post(
+                      '/NewPinBulk',
+                      {
+                        accountNumber: item.accountNumber,
+                        campaignname: item.campaignname,
+                        campaignid: item.campaignid,
+                        userPin: userdetails?.email,
+                        level: item.level,
+                      },
+                      authHeaders
+                    )
+                  )
+                );
+
+                const successCount = results.filter(r => r.status === 'fulfilled' && (r.value?.status === 200 || r.value?.status === 201)).length;
+                const failureCount = results.length - successCount;
+
+                // ✅ Update UI instantly (same as single-pin)
+                setCampaignComments(prev => {
+                  const arr = Array.isArray(prev) ? [...prev] : [];
+                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                  leafCampaigns.forEach(item => {
+                    const match = arr.findIndex(
+                      i =>
+                        String(i?.campaignid) === String(item.campaignid) &&
+                        String(i?.Account) === String(item.accountNumber) &&
+                        String(i?.level) === 'campaign'
+                    );
+
+                    if (match >= 0) {
+                      arr[match] = { ...arr[match], pinned: true, userPin: userdetails?.email, editedPinTime: timeStamp };
+                    } else {
+                      arr.push({
+                        campaignid: item.campaignid,
+                        Account: item.accountNumber,
+                        level: 'campaign',
+                        pinned: true,
+                        userPin: userdetails?.email,
+                        editedPinTime: timeStamp,
+                      });
+                    }
+                  });
+
+                  return arr;
+                });
+
+                message.success({
+                  content: `${successCount} campaign(s) pinned, ${failureCount} failed`,
+                  key: 'smartPin',
+                  duration: 3,
+                });
+              } else {
+                // 🔹 Multi-UNPIN flow
+                message.loading({ content: 'Unpinning selected campaigns...', key: 'smartUnpin' });
+
+                const results = await Promise.allSettled(
+                  leafCampaigns.map(item =>
+                    apiClient.post(
+                      '/NewUnpinBulk',
+                      {
+                        accountNumber: item.accountNumber,
+                        campaignname: item.campaignname,
+                        campaignid: item.campaignid,
+                        userPin: userdetails?.email,
+                        level: item.level,
+                      },
+                      authHeaders
+                    )
+                  )
+                );
+
+                const successCount = results.filter(r => r.status === 'fulfilled' && (r.value?.status === 200 || r.value?.status === 201)).length;
+                const failureCount = results.length - successCount;
+
+                // ✅ Update UI instantly for unpin
+                setCampaignComments(prev => {
+                  const arr = Array.isArray(prev) ? [...prev] : [];
+                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                  leafCampaigns.forEach(item => {
+                    const match = arr.findIndex(
+                      i =>
+                        String(i?.campaignid) === String(item.campaignid) &&
+                        String(i?.Account) === String(item.accountNumber) &&
+                        String(i?.level) === 'campaign'
+                    );
+
+                    if (match >= 0) {
+                      arr[match] = { ...arr[match], pinned: false, userPin: userdetails?.email, editedPinTime: timeStamp };
+                    } else {
+                      arr.push({
+                        campaignid: item.campaignid,
+                        Account: item.accountNumber,
+                        level: 'campaign',
+                        pinned: false,
+                        userPin: userdetails?.email,
+                        editedPinTime: timeStamp,
+                      });
+                    }
+                  });
+
+                  return arr;
+                });
+
+                message.success({
+                  content: `${successCount} campaign(s) unpinned, ${failureCount} failed`,
+                  key: 'smartUnpin',
+                  duration: 3,
+                });
+              }
+            } catch (error) {
+              console.error('Bulk Pin/Unpin Error:', error);
+              message.error('Failed to update selected campaigns.');
+            }
+            return;
+          }
+
+          // ✅ Otherwise, use your existing single-pin logic
+          handlePinClick(cName, cId, aId, currentPinStatus);
+        };
         const PinIcon = ({ universalOject, campaignName, campaignid, adsetid, pinned }) => (
           <Tooltip
             title={
@@ -1493,7 +1800,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
             }}
           >
             <button
-              onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+              onClick={() => handleSmartPinClick(campaignName, campaignid, adsetid, pinned)}
               style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 16 }}
             >
               {pinned ? '📌' : '📍'}
@@ -1518,7 +1825,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
               title="Confirm Action"
               open={isCampaignModalVisibles}
               className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-              onOk={handlePauseOk}
+              onOk={handleSmartCampaignStatusClick}
               onCancel={handlePauseCancel}
             >
               {confirmLoading && (
@@ -1663,7 +1970,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                     <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                       Cancel
                     </Button>
-                    <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                    <Button key="ok" onClick={handleSmartCommentSubmit} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
                       Ok
                     </Button>
                   </div>

@@ -44,7 +44,8 @@ const newtworkCollections = {
   "FB_Sedo": "Facebook_Sedo",
   "FB_Inmobi": "Facebook_Inmobi",
   "FB_TonicRsoc": "Facebook_TonicRsoc",
-  "FB_InuvoPrism": "Facebook_InuvoPrism"
+  "FB_InuvoPrism": "Facebook_InuvoPrism",
+  "FB_CodeFuel": "Facebook_AD_Daily"
 }
 const selectTimezone = {
   UTC: 'UTCDate',
@@ -107,6 +108,8 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
     );
   }
   ), [dailyData, inputValue, theme]);
+  const [selectedAd, setSelectedAd] = useState([]);
+  const [leafCampaigns, setLeafCampaigns] = useState([])
 
   useEffect(() => {
     // const groupedTQMap = new Map();
@@ -192,7 +195,39 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
     }
     updateDetails();
   };
+  const onSelectionChanged = (event) => {
+    const selectedNodes = event.api.getSelectedNodes();
+    const selectedData = selectedNodes.map(node => node.data);
 
+    // Store selection persistently
+    setSelectedAd(selectedData);
+
+    const leafCampaignsData = selectedNodes
+      .filter(node => !node.group && node.data)
+      .map(node => ({
+        campaignid: node.data.campaignid,
+        campaignname: node.data.campaignname,
+        accountNumber: node.data.accountNumber,
+        adsetid: node.data.adsetid,
+        adsetname: node.data.adsetname,
+        adid: node.data.adid,
+        adName: node.data.adname,
+        fbStatus: node.data.fbStatus,
+        level: "ad",
+      }))
+      .filter(item => item.campaignid && item.campaignname);
+
+    // ✅ Remove duplicates by campaignid + accountNumber
+    const uniqueLeafCampaigns = Array.from(
+      new Map(
+        leafCampaignsData.map(item => [`${item.campaignid}_${item.accountNumber}`, item])
+      ).values()
+    );
+
+    // ✅ Store clean, unique campaigns
+    setLeafCampaigns(uniqueLeafCampaigns);
+    console.log("✅ Selected unique Ads:", uniqueLeafCampaigns);
+  };
   // const autoGroupColumnDef = {
   //     headerName: 'Ad name',
   //     minWidth: 450,
@@ -835,6 +870,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
     headerName: 'Ad name',
     minWidth: 450,
     pinned: 'left',
+
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
@@ -873,6 +909,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
     // ✅ use AG Grid group renderer (like Adlevel.js)
     cellRenderer: "agGroupCellRenderer",
     cellRendererParams: {
+      checkbox: true,
       suppressCount: false,
       innerRenderer: (params) => {
         if (params.node.footer) return 'Total';
@@ -1122,6 +1159,103 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
             setSelectedAdid(null);
           }
         };
+        const handleSmartAdStatusClick = async () => {
+          const desired = nextChecked ? "ACTIVE" : "PAUSED";
+
+        
+          if (!leafCampaigns || leafCampaigns.length <= 1) {
+            handlePauseOk();   
+            return;
+          }
+
+          
+          const listToUpdate = leafCampaigns.filter(item =>
+            String(item.fbStatus).toUpperCase() !== desired
+          );
+
+          if (listToUpdate.length === 0) {
+            message.info("All selected ads already have this status.");
+            return;
+          }
+
+          try {
+            message.loading({
+              content: desired === "ACTIVE"
+                ? "Activating selected ads..."
+                : "Pausing selected ads...",
+              key: "bulkAdStatus"
+            });
+
+            const results = await Promise.allSettled(
+              listToUpdate.map(item =>
+                apiClient.post("/NewAdStatusChange", {
+                  status: desired,
+                  name: item.adName,
+                  campaign_id: item.campaignid,
+                  adset_id: item.adsetid,
+                  ad_id: item.adid,
+                  accountNumber: item.accountNumber,
+                  email: userdetails?.email
+                })
+              )
+            );
+
+            const successCount = results.filter(r => r.status === "fulfilled").length;
+            const failedCount = results.length - successCount;
+
+            const now = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+            // 🌟 Update UI state for all ads
+            setCampaignComments(prev => {
+              const arr = [...prev];
+
+              listToUpdate.forEach(update => {
+                const idx = arr.findIndex(
+                  i =>
+                    String(i.campaignid) === String(update.campaignid) &&
+                    String(i.Account) === String(update.accountNumber) &&
+                    String(i.adsetid) === String(update.adsetid) &&
+                    String(i.ad_id) === String(update.adid) &&
+                    String(i.level) === "ad"
+                );
+
+                if (idx >= 0) {
+                  arr[idx] = {
+                    ...arr[idx],
+                    fbStatus: desired,
+                    statusUpdatedAt: now,
+                    statusUpdatedBy: userdetails?.email
+                  };
+                } else {
+                  arr.push({
+                    campaignid: update.campaignid,
+                    Account: update.accountNumber,
+                    adsetid: update.adsetid,
+                    ad_id: update.adid,
+                    level: "ad",
+                    fbStatus: desired,
+                    statusUpdatedAt: now,
+                    statusUpdatedBy: userdetails?.email
+                  });
+                }
+              });
+
+              return arr;
+            });
+
+            message.success({
+              content: `${successCount} ads updated, ${failedCount} failed`,
+              key: "bulkAdStatus",
+              duration: 3
+            });
+
+            setIsAdidModalVisibles(false);
+
+          } catch (err) {
+            console.error("Bulk Ad Status Error:", err);
+            message.error("Failed to update selected ads.");
+          }
+        };
 
         const handlePinClick = async (_campName, campid, asetid, current) => {
           const next = !current;
@@ -1224,6 +1358,100 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
             message.error('Error while updating pin status');
           }
         };
+        const handleSmartAdPinClick = async (_campName, campid, asetid, current) => {
+          const next = !current;
+
+          // If multiple ads selected
+          if (leafCampaigns && leafCampaigns.length > 1) {
+            try {
+              message.loading({
+                content: next ? "Pinning selected ads..." : "Unpinning selected ads...",
+                key: "adPin"
+              });
+
+              const endpoint = next ? "/NewPinBulk" : "/NewUnpinBulk";
+
+              // Make bulk API calls
+              const results = await Promise.allSettled(
+                leafCampaigns.map(item =>
+                  apiClient.post(
+                    endpoint,
+                    {
+                      accountNumber: item.accountNumber,
+                      campaignname: item.adName,
+                      campaignid: item.campaignid,
+                      adsetid: item.adsetid,
+                      ad_id: item.adid,
+                      userPin: userdetails?.email,
+                      level: "ad"
+                    },
+                    authHeaders
+                  )
+                )
+              );
+
+              const successCount = results.filter(
+                r => r.status === "fulfilled" && (r.value?.status === 200 || r.value?.status === 201)
+              ).length;
+
+              const failureCount = results.length - successCount;
+
+              // Update UI (same structure as your single pin logic)
+              setCampaignComments(prev => {
+                const list = Array.isArray(prev) ? [...prev] : [];
+                const ts = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+                leafCampaigns.forEach(item => {
+                  const index = list.findIndex(
+                    i =>
+                      String(i?.campaignid) === String(item.campaignid) &&
+                      String(i?.Account) === String(item.accountNumber) &&
+                      String(i?.adsetid) === String(item.adsetid) &&
+                      String(i?.ad_id) === String(item.adid) &&
+                      String(i?.level) === "ad"
+                  );
+
+                  if (index >= 0) {
+                    list[index] = {
+                      ...list[index],
+                      pinned: next,
+                      userPin: userdetails?.email,
+                      editedPinTime: ts
+                    };
+                  } else {
+                    list.push({
+                      campaignid: item.campaignid,
+                      Account: item.accountNumber,
+                      adsetid: item.adsetid,
+                      ad_id: item.adid,
+                      level: "ad",
+                      pinned: next,
+                      userPin: userdetails?.email,
+                      editedPinTime: ts
+                    });
+                  }
+                });
+
+                return list;
+              });
+
+              message.success({
+                content: `${successCount} ad(s) ${next ? "pinned" : "unpinned"}, ${failureCount} failed`,
+                key: "adPin",
+                duration: 3
+              });
+
+            } catch (error) {
+              console.error("❌ Ad Bulk Pin Error:", error);
+              message.error("Failed to update selected ads.");
+            }
+
+            return; // Important: Stop here
+          }
+
+          // If only 1 ad selected → use your existing single logic
+          handlePinClick(_campName, campid, asetid,current);
+        };
 
         const handleOks = async () => {
           try {
@@ -1281,11 +1509,99 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
             //   editedAt: moment().format('DD-MM-YYYY hh:mm:ss A'),
             // });
             // message.success(relatedComment ? 'Comment updated' : 'Comment added');
+             message.success(relatedComment ? "Comment updated successfully!" : "New comment added successfully!");
             setIsModalVisibles(false);
             // refreshThisCell();
           } catch {
             message.error('Error while submitting the comment');
           }
+        };
+        const handleSmartAdCommentSubmit = async () => {
+          // MULTIPLE ads selected
+          if (leafCampaigns && leafCampaigns.length > 1) {
+            try {
+              message.loading({
+                content: 'Saving comments for selected ads...',
+                key: 'bulkAdComment'
+              });
+
+              // Build bulk items list
+              const items = leafCampaigns.map(item => ({
+                accountNumber: item.accountNumber,
+                campaignname: item.adName,
+                campaignid: item.campaignid,
+                adsetid: item.adsetid,
+                ad_id: item.adid,
+                comment,
+                usercommit: userdetails?.email,
+                level: "ad",
+              }));
+
+              console.log("Sending AD items:", items);
+
+              // Call bulk API
+              const resp = await apiClient.post(
+                '/Comments/upsertBulk',
+                { items, usercommit: userdetails?.email }
+              );
+
+              if (resp.status === 200 || resp.status === 201) {
+                // Update UI state instantly
+                setCampaignComments(prev => {
+                  const arr = Array.isArray(prev) ? [...prev] : [];
+                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                  leafCampaigns.forEach(item => {
+                    const match = arr.findIndex(
+                      i =>
+                        String(i?.campaignid) === String(item.campaignid) &&
+                        String(i?.Account) === String(item.accountNumber) &&
+                        String(i?.adsetid) === String(item.adsetid) &&
+                        String(i?.ad_id) === String(item.adid) &&
+                        String(i?.level) === 'ad'
+                    );
+
+                    if (match >= 0) {
+                      arr[match] = {
+                        ...arr[match],
+                        comment,
+                        usercommit: userdetails?.email,
+                        editedTime: timeStamp
+                      };
+                    } else {
+                      arr.push({
+                        campaignid: item.campaignid,
+                        Account: item.accountNumber,
+                        adsetid: item.adsetid,
+                        ad_id: item.adid,
+                        level: 'ad',
+                        comment,
+                        usercommit: userdetails?.email,
+                        editedTime: timeStamp,
+                      });
+                    }
+                  });
+
+                  return arr;
+                });
+
+                message.success({
+                  content: `${leafCampaigns.length} ad comment(s) saved successfully`,
+                  key: 'bulkAdComment',
+                  duration: 3,
+                });
+
+                setIsModalVisibles(false);
+              }
+            } catch (err) {
+              console.error(" Bulk Ad Comment Error:", err);
+              message.error("Error while saving comments for selected ads.");
+            }
+            return;
+          }
+
+          // SINGLE ad → fallback
+          handleOks();
         };
 
         const handleDelete = async () => {
@@ -1560,7 +1876,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
             >
               <button
                 onMouseDown={(e) => e.stopPropagation()}
-                onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+                onClick={() => handleSmartAdPinClick(campaignName, campaignid, adsetid, pinned)}
                 style={{
                   border: "none",
                   background: "none",
@@ -1590,7 +1906,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
               title="Confirm Action"
               open={isAdidModalVisibles}
               className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-              onOk={handlePauseOk}
+              onOk={handleSmartAdStatusClick}
               onCancel={handlePauseCancel}
             >
               {confirmLoading && (
@@ -1716,7 +2032,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
                     <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                       Cancel
                     </Button>
-                    <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                    <Button key="ok" onClick={handleSmartAdCommentSubmit} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
                       Ok
                     </Button>
                   </div>
@@ -1814,7 +2130,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
           accountNumbers: accountsParam,
           timezone: newtime,
           status: 'Daily',                  // "Daily" | "Live"
-          network: newRevenuePratner === "FB_Mnet" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
+          network: newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
           adsetids: adsets,
           campaignids: campaigns
         }
@@ -2744,8 +3060,13 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
                   paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                   groupDisplayType='multipleColumns'
                   suppressAggFuncInHeader={true}
+                  suppressCellSelection={true}
                   groupSuppressBlankHeader={true}
                   defaultColDef={defaultColDef}
+                  rowSelection='multiple'
+                  onSelectionChanged={onSelectionChanged}
+                  groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                  suppressRowClickSelection={true}
                   // groupIncludeFooter={true}
                   // groupIncludeTotalFooter={true}
                   autoGroupColumnDef={autoGroupColumnDef}

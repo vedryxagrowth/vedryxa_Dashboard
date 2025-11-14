@@ -1414,7 +1414,7 @@ useEffect(() => {
         <div style={{ height: "100%" }}>
             {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} />}
             <DynamicNewaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} AccountsData={AccountsData} />
-            <DynamicEdituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
+            <DynamicEdituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} AccountsData={AccountsData} onClose={onCloseDrawer} />
             <DynamicEditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} AccountsData={AccountsData} />
             <DynamicEditNetworkAccess editeddata={networkAccessData} visible={networkAccessDrawerkVisible} onClose={onCloseDrawer} />
             <DynamicEditUrlBuilder editeddata={urlBuilderAccessData} visible={urlBuliderAccessDrawerkVisible} onClose={onCloseDrawer} />

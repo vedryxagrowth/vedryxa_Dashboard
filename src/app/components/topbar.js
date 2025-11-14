@@ -30,7 +30,7 @@ import {
   // UserOutlined,
   LaptopOutlined
 } from '@ant-design/icons';
-import { Bell, Edit3Icon, Moon, Sun, StickyNote, View, Eye } from 'lucide-react';
+import { Bell, Edit3Icon, Moon, Sun, StickyNote, View, Eye, MoonIcon } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 import soundFile from "../../../public/notification_sounds.mp3";
@@ -52,6 +52,7 @@ import { message, Popconfirm } from 'antd';
 
 
 import { useGlobalLoading } from "../layout";
+import { CalculateOutlined, StickyNote2Outlined } from '@mui/icons-material';
 
 const socket = io("https://prodapis.adsgoat.in");
 
@@ -1340,6 +1341,20 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
 
 
+              {userdetails?.role !== "Revenue_Partner" && <button style={{
+                padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
+                  "transparent"
+              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+                <CalculateOutlined size={20} style={{ marginRight: '10px' }} />
+              </button>}
+
+               {userdetails?.role !== "Revenue_Partner" && <button style={{
+                padding: '0px', margin: '0px',
+                backgroundColor: theme === "dark" &&
+                  "transparent"
+              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+                <TfiWorld size={20} style={{ marginRight: '10px' }} />
+              </button>}
 
               {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef} style={{ marginRight: "0px", paddingRight: '0px' }}>
                 <div className="cursor-pointer" style={{ paddingRight: '0px' }}>
@@ -1370,27 +1385,16 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
                   "transparent"
               }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <SlNotebook size={20} style={{ marginLeft: '5px' }} />
+                <StickyNote2Outlined size={20} style={{ marginRight: '10px' ,marginLeft:'10px'}} />
               </button>}
 
-              {userdetails?.role !== "Revenue_Partner" && <button style={{
-                padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
-                  "transparent"
-              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
-                <CalculatorOutlined style={{ fontSize: '20px', padding: '0px', margin: '0px', marginLeft: '10px' }} />
-              </button>}
-              {userdetails?.role !== "Revenue_Partner" && <button style={{
-                padding: '0px', margin: '0px',
-                backgroundColor: theme === "dark" &&
-                  "transparent"
-              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
-                <TfiWorld size={20} style={{ marginLeft: '10px' }} />
-              </button>}
+
+             
 
               <button
                 onClick={toggleTheme}
                 style={{
-                  padding: '0px', margin: '0px', marginLeft: '10px', backgroundColor: theme === "dark" &&
+                  padding: '0px', margin: '0px', marginRight: '10px', backgroundColor: theme === "dark" &&
                     "transparent"
                 }}
                 className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
@@ -1398,7 +1402,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 {darkMode ? (
                   <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }} />
                 ) : (
-                  <Moon className="icon moon-icon" style={{ width: "20px", height: "20px", }} />
+                  <MoonIcon size={20}  className="icon moon-icon" style={{ width: "20px", height: "20px",fontSize:'20px' }} />
                 )}
               </button>
               <h2

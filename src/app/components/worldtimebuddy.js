@@ -25,10 +25,8 @@ const { useToken } = theme;
 
 
 export default function WorldTimeBuddy() {
-  const { token } = useToken();
   const { theme } = useTokenContext();
-
-
+  const token =localStorage.getItem("token")
   const [timezones, setTimezones] = useState([]);
   const [selectedTimezones, setSelectedTimezones] = useState(["Europe/London", "Asia/Kolkata"]);
   const [favorites, setFavorites] = useState([]);
@@ -47,11 +45,11 @@ export default function WorldTimeBuddy() {
     const fetchZones = async () => {
       try {
         setLoading(true);
-        const res = await fetch("https://prodapis.adsgoat.in/New/GetTimezones", {
+        const res = await fetch("http://localhost:8000/New/GetTimezones", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": localStorage.getItem("token") 
+            "Authorization": token
           }
         });
         const apiData = await res.json();  

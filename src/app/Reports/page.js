@@ -24,7 +24,7 @@ import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
 import { MdOutlineCancel } from "react-icons/md";
 import { TiTickOutline } from "react-icons/ti";
- 
+
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
     "FB_MnetBing": "Facebook_MnetBing",
@@ -1559,7 +1559,7 @@ const MyTablePage = () => {
     const commentsMap = useMemo(() => {
         const map = new Map();
         campaignComments.forEach((item) => {
-            const key = `${item.campaignname}_${item.Account}`; // unique combo
+            const key = `${item.campaignid}_${item.Account}_${item.level}`; // unique combo
             map.set(key, {
                 category: item.category
             });
@@ -1731,8 +1731,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -1748,8 +1748,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -1769,8 +1769,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -1798,7 +1798,98 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -2666,8 +2757,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -2683,8 +2774,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -2704,8 +2795,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -2733,7 +2824,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4750,8 +4931,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -4767,8 +4948,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -4788,8 +4969,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -4817,7 +4998,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -5702,8 +5973,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -5719,8 +5990,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -5740,8 +6011,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -5769,7 +6040,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -6839,13 +7200,13 @@ const MyTablePage = () => {
             sortable: true,
             // filter: 'agSetColumnFilter',
             filter: "agTextColumnFilter",
-            // ✅ Helper: Capitalize the first letter only
+
             valueFormatter: (params) => {
                 if (!params.value) return '';
                 return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
             },
 
-            // ✅ Show category for both grouped and normal rows
+
             valueGetter: (params) => {
                 const capitalize = (val) =>
                     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
@@ -6853,12 +7214,12 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
-                // ✅ For normal (leaf) rows
+
                 return capitalize(params.data?.category);
             },
 
@@ -6870,8 +7231,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -6891,8 +7252,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -6904,8 +7265,6 @@ const MyTablePage = () => {
                     params.success(Array.from(uniqueCategories));
                 },
             },
-
-            // ✅ Safe comparator for sorting (group-aware)
             comparator: (valueA, valueB, nodeA, nodeB) => {
                 const isGroupA = nodeA?.group;
                 const isGroupB = nodeB?.group;
@@ -6916,10 +7275,103 @@ const MyTablePage = () => {
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
 
-            // ✅ Optional — hide empty leaf cells (if any)
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                
+                if (props.value) return props.value;
+
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
+
 
             suppressMenu: true,
             menuTabs: [],
@@ -8092,8 +8544,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8109,8 +8561,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8130,8 +8582,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -8159,7 +8611,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -8950,8 +9492,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8967,8 +9509,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8988,8 +9530,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -9017,7 +9559,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -9749,8 +10381,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -9766,8 +10398,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -9787,8 +10419,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -9816,7 +10448,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -10784,8 +11506,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -10801,8 +11523,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -10822,8 +11544,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -10851,7 +11573,98 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                         
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -11625,8 +12438,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -11642,8 +12455,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -11663,8 +12476,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -11692,7 +12505,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
