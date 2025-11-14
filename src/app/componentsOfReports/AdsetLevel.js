@@ -40,7 +40,9 @@ const newtworkCollections = {
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
-    "FB_InuvoPrism": "Facebook_InuvoPrism"
+    "FB_InuvoPrism": "Facebook_InuvoPrism",
+    "FB_CodeFuel": "Facebook_CodeFuel"
+ 
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -116,6 +118,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
         );
     }
     ) : [], [rowData, inputValue, theme]);
+    const [leafCampaigns, setLeafCampaigns] = useState([]);
 
     // useEffect to show selected campaigns after clearing search
     useEffect(() => {
@@ -199,7 +202,38 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
         updateDetails();
 
     };
+    const onSelectionChanged = (event) => {
+        const selectedNodes = event.api.getSelectedNodes();
+        const selectedData = selectedNodes.map(node => node.data);
+        // Store selection persistently
+        setSelectedAdset(selectedData);
+        // Keep your existing functionality
+        showAdsetLevel(uniqueByAdsetId(selectedData));
+        const leafCampaignsData = selectedNodes
+            .filter(node => !node.group && node.data)
+            .map(node => ({
+                campaignid: node.data.campaignid,
+                campaignname: node.data.campaignname,
+                accountNumber: node.data.accountNumber,
+                adsetid: node.data.adsetid,
+                adsetname: node.data.adsetname,
+                fbStatus: node.data.fbStatus,
+                level: "adset",
+            }))
+            .filter(item => item.campaignid && item.campaignname);
 
+        // ✅ Remove duplicates by campaignid + accountNumber
+        const uniqueLeafCampaigns = Array.from(
+            new Map(
+                leafCampaignsData.map(item => [`${item.campaignid}_${item.accountNumber}`, item])
+            ).values()
+        );
+
+        // ✅ Store clean, unique campaigns
+        setLeafCampaigns(uniqueLeafCampaigns);
+        console.log("✅ Selected unique Adsets:", uniqueLeafCampaigns);
+
+    };
     const autoGroupColumnDefLive = {
         headerName: 'Adset name',
         minWidth: 450,
@@ -548,7 +582,84 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                         setPendingAccount(null);
                     }
                 };
+                const handleSmartAdsetStatusClick = async (currentStatus) => {
+                    const desired = nextChecked ? "ACTIVE" : "PAUSED";
 
+                    // 🌟 If only ONE adset → fallback to your existing single function
+                    if (!leafCampaigns || leafCampaigns.length <= 1) {
+                        handlePauseOk();  // <-- SAME like pin fallback
+                        return;
+                    }
+
+                    // 🌟 MULTIPLE adsets → do bulk update
+                    const listToUpdate = leafCampaigns.filter(item =>
+                        String(item.fbStatus).toUpperCase() !== desired
+                    );
+
+                    if (listToUpdate.length === 0) {
+                        message.info("All selected adsets already have this status.");
+                        return;
+                    }
+
+                    try {
+                        message.loading({
+                            content: desired === "ACTIVE"
+                                ? "Activating selected adsets..."
+                                : "Pausing selected adsets...",
+                            key: "bulkStatus"
+                        });
+
+                        const results = await Promise.allSettled(
+                            listToUpdate.map(item =>
+                                apiClient.post("/NewBulkAdsetStatusChange", {
+                                    status: desired,
+                                    name: item.adsetname,
+                                    campaign_id: item.campaignid,
+                                    adset_id: item.adsetid,
+                                    accountNumber: item.accountNumber,
+                                    email: userdetails?.email
+                                })
+                            )
+                        );
+
+                        const successCount = results.filter(r => r.status === "fulfilled").length;
+                        const failedCount = results.length - successCount;
+
+                        // UI update
+                        const newStatus = desired;
+                        setCamapignlevelstatus(prev => {
+                            const arr = [...prev];
+                            listToUpdate.forEach(update => {
+                                const idx = arr.findIndex(
+                                    c =>
+                                        String(c.campaign_id) === String(update.campaignid) &&
+                                        String(c.accountNumber) === String(update.accountNumber)
+                                );
+
+                                if (idx !== -1) {
+                                    arr[idx].adsets = arr[idx].adsets.map(a =>
+                                        String(a.adset_id) === String(update.adsetid)
+                                            ? { ...a, status: newStatus }
+                                            : a
+                                    );
+                                }
+                            });
+                            return arr;
+                        });
+
+                        message.success({
+                            content: `${successCount} updated, ${failedCount} failed`,
+                            key: "bulkStatus",
+                            duration: 3
+                        });
+
+                        setIsAdsetModalVisibles(false);
+
+                    } catch (error) {
+                        console.error("Bulk update error:", error);
+                        message.error("Failed to update selected adsets.");
+                    }
+                };
                 const handlePauseCancel = () => {
                     setIsAdsetModalVisibles(false);
                     setSelectedAdset(null);
@@ -688,7 +799,84 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                         message.error("Error while updating pin status");
                     }
                 };
+                const handleSmartAdsetPinClick = async (currentPinStatus) => {
+                    const next = !currentPinStatus;
 
+                    // If multiple adsets selected
+                    if (leafCampaigns && leafCampaigns.length > 1) {
+                        try {
+                            message.loading({ content: next ? 'Pinning selected adsets...' : 'Unpinning selected adsets...', key: 'adsetPin' });
+
+                            const endpoint = next ? '/NewPinBulk' : '/NewUnpinBulk';
+
+                            // Bulk API calls
+                            const results = await Promise.allSettled(
+                                leafCampaigns.map(item =>
+                                    apiClient.post(
+                                        endpoint,
+                                        {
+                                            accountNumber: item.accountNumber,
+                                            campaignname: item.adsetname,
+                                            campaignid: item.campaignid,
+                                            adsetid: item.adsetid,
+                                            userPin: userdetails?.email,
+                                            level: item.level,
+                                        },
+
+                                    )
+                                )
+                            );
+
+                            const successCount = results.filter(r => r.status === 'fulfilled' && (r.value?.status === 200 || r.value?.status === 201)).length;
+                            const failureCount = results.length - successCount;
+
+                            // ✅ Update UI instantly (like your single version)
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                leafCampaigns.forEach(item => {
+                                    const match = arr.findIndex(
+                                        i =>
+                                            String(i?.campaignid) === String(item.campaignid) &&
+                                            String(i?.Account) === String(item.accountNumber) &&
+                                            String(i?.adsetid) === String(item.adsetid) &&
+                                            String(i?.level) === 'adset'
+                                    );
+
+                                    if (match >= 0) {
+                                        arr[match] = { ...arr[match], pinned: next, userPin: userdetails?.email, editedPinTime: timeStamp };
+                                    } else {
+                                        arr.push({
+                                            campaignid: item.campaignid,
+                                            Account: item.accountNumber,
+                                            adsetid: item.adsetid,
+                                            level: 'adset',
+                                            pinned: next,
+                                            userPin: userdetails?.email,
+                                            editedPinTime: timeStamp,
+                                        });
+                                    }
+                                });
+
+                                return arr;
+                            });
+
+                            message.success({
+                                content: `${successCount} adset(s) ${next ? 'pinned' : 'unpinned'}, ${failureCount} failed`,
+                                key: 'adsetPin',
+                                duration: 3,
+                            });
+                        } catch (error) {
+                            console.error('❌ Adset Bulk Pin Error:', error);
+                            message.error('Failed to update selected adsets.');
+                        }
+                        return;
+                    }
+
+                    // ✅ Fallback to single adset pin logic
+                    handlePinClick(currentPinStatus);
+                };
 
                 const PinIcon = ({ universalOject, pinned }) => (
                     <Tooltip
@@ -707,7 +895,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                         }}
                     >
                         <button
-                            onClick={() => handlePinClick(pinned)}
+                            onClick={() => handleSmartAdsetPinClick(pinned)}
                             style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 16 }}
                         >
                             {pinned ? "📌" : "📍"}
@@ -770,7 +958,83 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                         message.error('Failed to save comment');
                     }
                 };
+                const handleSmartAdsetCommentSubmit = async () => {
+                    // ✅ If multiple adsets are selected
+                    if (leafCampaigns && leafCampaigns.length > 1) {
+                        try {
+                            message.loading({ content: 'Saving comments for selected adsets...', key: 'bulkAdsetComment' });
 
+                            // Prepare bulk data
+                            const items = leafCampaigns.map(item => ({
+                                accountNumber: item.accountNumber,
+                                campaignname: item.adsetname,
+                                campaignid: item.campaignid,
+                                adsetid: item.adsetid,
+                                comment,
+                                usercommit: userdetails?.email,
+                                level: "adset",
+                            }));
+
+                            console.log('🟢 Sending adset items:', items);
+
+                            // ✅ Call your bulk endpoint
+                            const resp = await apiClient.post(
+                                '/Comments/upsertBulk',
+                                { items, usercommit: userdetails?.email },
+
+                            );
+
+                            if (resp.status === 200 || resp.status === 201) {
+                                // ✅ Update state instantly
+                                setCampaignComments(prev => {
+                                    const arr = Array.isArray(prev) ? [...prev] : [];
+                                    const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+
+                                    leafCampaigns.forEach(item => {
+                                        const match = arr.findIndex(
+                                            i =>
+                                                String(i?.campaignid) === String(item.campaignid) &&
+                                                String(i?.Account) === String(item.accountNumber) &&
+                                                String(i?.adsetid) === String(item.adsetid) &&
+                                                String(i?.level) === 'adset'
+                                        );
+
+                                        if (match >= 0) {
+                                            arr[match] = { ...arr[match], comment, usercommit: userdetails?.email, editedTime: timeStamp };
+                                        } else {
+                                            arr.push({
+                                                campaignid: item.campaignid,
+                                                Account: item.accountNumber,
+                                                adsetid: item.adsetid,
+                                                level: 'adset',
+                                                comment,
+                                                usercommit: userdetails?.email,
+                                                editedTime: timeStamp,
+                                            });
+                                        }
+                                    });
+
+                                    return arr;
+                                });
+
+                                message.success({
+                                    content: `${leafCampaigns.length} adset comment(s) saved successfully`,
+                                    key: 'bulkAdsetComment',
+                                    duration: 3,
+                                });
+
+                                setIsModalVisibles(false);
+                            }
+                        } catch (error) {
+                            console.error('❌ Bulk Adset Comment Error:', error);
+                            message.error('Error while saving comments for selected adsets.');
+                        }
+                        return;
+                    }
+
+                    // ✅ If only one adset is selected → use your current single logic
+                    handleOks();
+                };
                 const handleDelete = async () => {
                     try {
                         const newResponse = await apiClient.post('/New/Comments/delete', {
@@ -1123,7 +1387,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                             title="Confirm Action"
                             open={isAdsetModalVisibles}
                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                            onOk={handlePauseOk}
+                            onOk={handleSmartAdsetStatusClick}
                             onCancel={handlePauseCancel}
                         >
                             {confirmLoading && (
@@ -1268,7 +1532,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                             }
                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             visible={isModalVisibles}
-                            onOk={handleOks} // Default Ok button functionality
+                            onOk={handleSmartAdsetCommentSubmit} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
@@ -1294,7 +1558,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                                         <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                             Cancel
                                         </Button>
-                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                        <Button key="ok" onClick={handleSmartAdsetCommentSubmit} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
                                             Ok
                                         </Button>
                                     </div>
@@ -2203,14 +2467,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
     //     showAdsetLevel(uniqueByAdsetId(selectedData));
     // };
 
-    const onSelectionChanged = (event) => {
-        const selectedNodes = event.api.getSelectedNodes();
-        const selectedData = selectedNodes.map(node => node.data);
-        // Store selection persistently
-        setSelectedAdset(selectedData);
-        // Keep your existing functionality
-        showAdsetLevel(uniqueByAdsetId(selectedData));
-    };
+
 
     const restoreSelection = () => {
         const selectedRow = selectedAdsets[0];
@@ -2229,6 +2486,7 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                 rowNode.setSelected(true);
             }
         }
+
     };
 
     useEffect(() => {

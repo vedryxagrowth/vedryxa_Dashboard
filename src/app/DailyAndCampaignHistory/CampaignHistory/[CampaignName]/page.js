@@ -557,8 +557,8 @@ export default function CampaignAndAccount({ params }) {
         const mainData = fetchData.data;
         setCampaignName(mainData[0]?.campaign_name);
         console.log(mainData);
-        setCampaignId(mainData[0].campaign_id);
-        setAdsetID(mainData[0].adset_id);
+        setCampaignId(mainData[0]?.campaign_id);
+        setAdsetID(mainData[0]?.adset_id);
         const specifiedTimeZone = selectTimezone[timeZone];
         // const sortedArray = mainData?.sort((a, b) => new Date(a[specifiedTimeZone]) - new Date(b[specifiedTimeZone]));
         // console.log(sortedArray, "sort");

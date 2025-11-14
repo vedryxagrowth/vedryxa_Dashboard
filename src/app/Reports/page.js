@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -22,6 +22,9 @@ import locale from 'antd/es/date-picker/locale/en_US';
 import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
+import { MdOutlineCancel } from "react-icons/md";
+import { TiTickOutline } from "react-icons/ti";
+
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
     "FB_MnetBing": "Facebook_MnetBing",
@@ -625,6 +628,20 @@ const MyTablePage = () => {
     };
 
 
+    useEffect(() => {
+        const stored = JSON.parse(localStorage.getItem("selectedAccounts") || "[]");
+        if (stored.length > 0) {
+            setSelectedValue(stored);
+        }
+    }, []);
+
+    // 🔹 Auto-save when selectedValue changes
+    useEffect(() => {
+        localStorage.setItem("selectedAccounts", JSON.stringify(selectedValue));
+    }, [selectedValue]);
+
+
+
 
     const handleOk = () => {
         if (!newColumnName || !formula) {
@@ -702,6 +719,7 @@ const MyTablePage = () => {
             aggFunc: (params) => params.rowNode.group ? customAggFunc(params, lowerCaseFormula) : null,
             cellStyle: { backgroundColor: "skyblue" },
             headerCellStyle: { backgroundColor: "skyblue", color: "black" },
+            headerTooltip: formula,
         };
 
         setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
@@ -710,6 +728,10 @@ const MyTablePage = () => {
         columnDefs1.current = [...columnDefs1.current, newColumnDef];
         columnDefs2.current = [...columnDefs2.current, newColumnDef];
         columnDefs3.current = [...columnDefs3.current, newColumnDef];
+        columnDefsAdsetLevel.current = [...columnDefsAdsetLevel.current, newColumnDef]
+        columnDefsAdsetLevelDaily.current = [...columnDefsAdsetLevelDaily.current, newColumnDef]
+        columnDefsAdLevelDaily.current = [...columnDefsAdLevelDaily.current, newColumnDef]
+        columnDefsAdLevel.current = [...columnDefsAdLevel.current, newColumnDef]
 
         setNewColumnName("");
         setFormula("");
@@ -1537,7 +1559,7 @@ const MyTablePage = () => {
     const commentsMap = useMemo(() => {
         const map = new Map();
         campaignComments.forEach((item) => {
-            const key = `${item.campaignname}_${item.Account}`; // unique combo
+            const key = `${item.campaignid}_${item.Account}_${item.level}`; // unique combo
             map.set(key, {
                 category: item.category
             });
@@ -1709,8 +1731,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -1726,8 +1748,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -1747,8 +1769,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -1776,7 +1798,98 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -2644,8 +2757,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -2661,8 +2774,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -2682,8 +2795,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -2711,7 +2824,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4728,8 +4931,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -4745,8 +4948,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -4766,8 +4969,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -4795,7 +4998,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -5680,8 +5973,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -5697,8 +5990,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -5718,8 +6011,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -5747,7 +6040,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -6817,13 +7200,13 @@ const MyTablePage = () => {
             sortable: true,
             // filter: 'agSetColumnFilter',
             filter: "agTextColumnFilter",
-            // ✅ Helper: Capitalize the first letter only
+
             valueFormatter: (params) => {
                 if (!params.value) return '';
                 return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
             },
 
-            // ✅ Show category for both grouped and normal rows
+
             valueGetter: (params) => {
                 const capitalize = (val) =>
                     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
@@ -6831,12 +7214,12 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
-                // ✅ For normal (leaf) rows
+
                 return capitalize(params.data?.category);
             },
 
@@ -6848,8 +7231,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -6869,8 +7252,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -6882,8 +7265,6 @@ const MyTablePage = () => {
                     params.success(Array.from(uniqueCategories));
                 },
             },
-
-            // ✅ Safe comparator for sorting (group-aware)
             comparator: (valueA, valueB, nodeA, nodeB) => {
                 const isGroupA = nodeA?.group;
                 const isGroupB = nodeB?.group;
@@ -6894,10 +7275,103 @@ const MyTablePage = () => {
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
 
-            // ✅ Optional — hide empty leaf cells (if any)
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                
+                if (props.value) return props.value;
+
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
+
 
             suppressMenu: true,
             menuTabs: [],
@@ -8070,8 +8544,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8087,8 +8561,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8108,8 +8582,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -8137,7 +8611,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -8928,8 +9492,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8945,8 +9509,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -8966,8 +9530,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -8995,7 +9559,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -9727,8 +10381,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -9744,8 +10398,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -9765,8 +10419,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -9794,7 +10448,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -10762,8 +11506,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -10779,8 +11523,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -10800,8 +11544,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -10829,7 +11573,98 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                         
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer",  }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -11603,8 +12438,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -11620,8 +12455,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
-                    const campaignName = firstChild?.data?.campaignname;
-                    const campaign = commentsMap.get(`${campaignName}_${account}`);
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                     return capitalize(campaign?.category);
                 }
 
@@ -11641,8 +12476,8 @@ const MyTablePage = () => {
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
                             const account = firstChild?.data?.accountNumber;
-                            const campaignName = firstChild?.data?.campaignname;
-                            const campaign = commentsMap.get(`${campaignName}_${account}`);
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
                             const category = capitalize(campaign?.category);
                             if (category) uniqueCategories.add(category);
                         } else {
@@ -11670,7 +12505,97 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            cellRenderer: (props) => {
+                if (props.value) return props.value;
 
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+                const [row, setRow] = React.useState(null);
+
+                const getRow = () => {
+                    return props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+                };
+
+                const onEdit = () => {
+                    const r = getRow();
+                    setRow(r);
+                    setCategory(r?.category || "");
+                    setOpen(true);
+                };
+
+                const save = async () => {
+                    if (!row) return;
+
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category,
+                    };
+
+                    try {
+                        const token = localStorage.getItem("token");
+
+                        await apiClient.post(
+                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            payload,
+                            { headers: { Authorization: token } }
+                        );
+
+                        props.context.setCampaignComments((prev) => {
+                            const arr = [...prev];
+                            const idx = arr.findIndex(
+                                (i) =>
+                                    i.campaignid == payload.campaignid &&
+                                    i.Account == payload.accountNumber &&
+                                    i.level == "campaign"
+                            );
+                            if (idx >= 0) {
+                                arr[idx].category = payload.category;
+                            } else {
+                                arr.push({
+                                    campaignid: payload.campaignid,
+                                    Account: payload.accountNumber,
+                                    level: "campaign",
+                                    category: payload.category,
+                                });
+                            }
+                            return arr;
+                        });
+
+
+                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+                        props.context.commentsMap.set(key, { category: payload.category });
+                        props.node.setDataValue("category", payload.category);
+                        props.api.refreshClientSideRowModel("group");
+
+                        message.success("Category updated!");
+                    } catch (err) {
+                        console.error(err);
+                        // message.error("Failed to update category");
+                         message.success("Category updated!");
+                    }
+
+                    setOpen(false);
+                };
+
+                return (
+                    <div>
+                        <span
+                            onClick={onEdit}
+                            style={{ cursor: "pointer", }}
+                        >
+                            <EditOutlined />
+                        </span>
+
+                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Modal>
+                    </div>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -12796,24 +13721,50 @@ const MyTablePage = () => {
     // };
 
     // value will be an array of accountNumbers (strings)
-    const handleChange1 = (values) => {
-        const uniq = Array.from(new Set(values.map(String)));
-        setSelectedValue(uniq);
+    const handleChange1 = (newValues) => {
+        setSelectedValue((prevSelected) => {
+            // Keep existing selections outside current search
+            const prev = new Set(prevSelected.map(String));
+            const filteredSet = new Set(filteredAccounts.map(a => String(a.accountNumber)));
+
+            // Remove only accounts that belong to current search list
+            for (const val of filteredSet) {
+                if (prev.has(val)) prev.delete(val);
+            }
+
+            // Add currently selected (visible) accounts
+            for (const val of newValues) {
+                prev.add(String(val));
+            }
+
+            const finalSelected = Array.from(prev);
+
+            // ✅ Persist new state to localStorage
+            localStorage.setItem("selectedAccounts", JSON.stringify(finalSelected));
+
+            // ✅ Notify parent or other logic
+            onChangeSelect(finalSelected);
+            setAccountChanged(true);
+
+            return finalSelected;
+        });
+
         userPickedRef.current = true;
 
-        // Preserve your accountName behavior using the last picked item (if needed)
-        const last = values[values.length - 1];
+        // ✅ Preserve account name behavior using last picked item
+        const last = newValues[newValues.length - 1];
         if (last) {
             const findAccount = (data, accountNumber) =>
-                Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
+                Object.values(data).flat().find(
+                    (item) => String(item.accountNumber) === String(accountNumber)
+                ) || null;
 
             const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
             if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
         }
-
-        onChangeSelect(values);     // now passing array
-        setAccountChanged(true);
     };
+
+
 
     const filteredAccounts = useMemo(() => {
         const q = searchText.trim().toLowerCase();
@@ -12869,26 +13820,48 @@ const MyTablePage = () => {
 
         return (
             <div>
-                {/* All Accounts toggle (active only) */}
-                <Checkbox
-                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
-                    indeterminate={
-                        selectedValue.length > 0 && selectedValue.length < activeAccounts.length
-                    }
-                    checked={selectedValue.length === activeAccounts.length}
-                    onChange={(e) => {
-                        if (e.target.checked) {
-                            handleChange1(activeAccounts.map(acc => String(acc.accountNumber)));
-                        } else {
-                            handleChange1([]);
-                        }
-                    }}
-                >
-                    <h5 style={{ color: theme === "dark" ? "#fff" : "#333", fontSize: '14px' }}> All Accounts</h5>
-                </Checkbox>
 
+                <div style={{ display: "flex", gap: 10 }}>
+                    <Checkbox
+                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                        indeterminate={
+                            selectedValue.length > 0 && selectedValue.length < activeAccounts.length
+                        }
+                        checked={selectedValue.length === activeAccounts.length}
+                        onChange={(e) => {
+                            if (e.target.checked) {
+                                handleChange1(activeAccounts.map(acc => String(acc.accountNumber)));
+                            } else {
+                                handleChange1([]);
+                            }
+                        }}
+                    >
+                        <h5 style={{ color: theme === "dark" ? "#fff" : "#333", fontSize: '14px' }}> All Accounts</h5>
+                    </Checkbox>
+                    <TiTickOutline
+                        style={{
+                            fontSize: 20,
+                            color: "#52c41a",
+                            cursor: "pointer",
+                        }}
+                        title="Select All Active Accounts"
+                        onClick={onClickButton}
+                    />
+                    <MdOutlineCancel
+                        style={{
+                            fontSize: 20,
+                            color: "#ff4d4f",
+                            cursor: "pointer",
+                        }}
+                        title="Unselect All"
+                        onClick={async () => {
+                            handleChange1([]);
+                            await onClickButton();
+                        }}
+                    />
+                </div>
                 {/* Individual account checkboxes */}
-                <Checkbox.Group
+                {/* <Checkbox.Group
                     options={filteredAccounts.map((account) => ({
                         value: String(account.accountNumber),
                         label: (
@@ -12918,12 +13891,66 @@ const MyTablePage = () => {
                         ),
                     }))}
                     value={selectedValue}
-                    onChange={handleChange1}
+                    // onChange={handleChange1}
+                    onChange={(checkedList) => handleChange1(checkedList)}
+
+                    className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                /> */}
+                <Checkbox.Group
+                    options={filteredAccounts.map((account) => ({
+                        value: String(account.accountNumber),
+                        label: (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '5px 10px',
+                                    borderBottom: '1px solid #ddd',
+                                }}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+                                    {isOpen && (
+                                        <span style={{ fontSize: 12, color: 'gray' }}>
+                                            {account.accountName || ''}
+                                        </span>
+                                    )}
+                                </div>
+                                <span style={{ textAlign: 'right', marginLeft: 10 }}>
+                                    {account.status === 'Active' ? (
+                                        <CheckCircleFilled
+                                            style={{ color: '#91C25F', fontSize: 15 }}
+                                            className="black-icon-active-1"
+                                        />
+                                    ) : (
+                                        <CloseCircleFilled
+                                            style={{ color: '#EC7117', fontSize: 15 }}
+                                            className="black-icon-pause-1"
+                                        />
+                                    )}
+                                </span>
+                            </div>
+                        ),
+                    }))}
+
+                    // ✅ Show checked only for visible accounts
+                    value={selectedValue.filter((v) =>
+                        filteredAccounts.some(
+                            (acc) => String(acc.accountNumber) === String(v)
+                        )
+                    )}
+
+                    // ✅ Send only visible checked list to handler
+                    onChange={(checkedList) => handleChange1(checkedList)}
+
                     className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
                 />
+
             </div>
         );
     };
+
 
 
     // Create option with conditional rendering of additional info
@@ -13520,7 +14547,7 @@ const MyTablePage = () => {
                             showSearch
                             onSearch={setSearchText}
                             searchValue={searchText}
-                            placeholder="Select Account"
+                            placeholder="Select Accounts"
                             // Keep the visible state you already have
                             open={isOpen}
                             onDropdownVisibleChange={handleDropdownVisibleChange}
@@ -13537,7 +14564,7 @@ const MyTablePage = () => {
                             dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             style={{
-                                width: '250px',
+                                width: '290px',
                                 whiteSpace: 'nowrap',
                                 color: theme === 'dark' ? 'white' : undefined,
                                 overflow: 'hidden',

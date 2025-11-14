@@ -6,7 +6,7 @@ import axios from 'axios';
 import { Add } from '@mui/icons-material';
 import { useTokenContext } from '../../components/parent';
 
-const Edituseraccesses = ({ editeddata, visible, onClose }) => {
+const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
     // console.log(editeddata, "heyy edit-useraccess page")
     console.log(editeddata, "editeddata");
     const userAccess = editeddata?.adAccounts;
@@ -36,6 +36,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     const [selectedNetworks, setSelectedNetworks] = useState([]);
     const [editeddatas, setEditeddatas] = useState(null);
     var token = localStorage.getItem("token")
+    const [form] = Form.useForm();
     useEffect(() => {
         if (userAccess !== null && userAccess !== undefined) {
             setAdditionalAccounts(Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })))
@@ -229,29 +230,29 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // }, [selectedNetworks, token]);
 
     useEffect(() => {
-        if(userdetails?.role !== "Special_User"){
+        if (userdetails?.role !== "Special_User") {
             const fetchNetworks = async () => {
-            try {
-                const res = await axios.get("https://prodapis.adsgoat.in/networks", {
-                    headers: {
-                        Authorization: token,
-                    },
-                });
+                try {
+                    const res = await axios.get("https://prodapis.adsgoat.in/networks", {
+                        headers: {
+                            Authorization: token,
+                        },
+                    });
 
-                const networks = Array.isArray(res.data) ? res.data : [];
-                const filteredNetworks = networks.filter(
-                    (n) => !selectedNetworks.includes(n)
-                );
+                    const networks = Array.isArray(res.data) ? res.data : [];
+                    const filteredNetworks = networks.filter(
+                        (n) => !selectedNetworks.includes(n)
+                    );
 
-                setAvailableNetworks(filteredNetworks);
-            } catch (err) {
-                console.error("Error fetching networks:", err);
-            }
-        };
+                    setAvailableNetworks(filteredNetworks);
+                } catch (err) {
+                    console.error("Error fetching networks:", err);
+                }
+            };
 
-        fetchNetworks();
-        }else{
-            const networks  = []
+            fetchNetworks();
+        } else {
+            const networks = []
             for (const [network, value] of Object.entries(userdetails?.adAccounts)) {
                 networks.push(network)
             }
@@ -273,7 +274,97 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     //     newAccounts.splice(index, 1);
     //     setAdditionalAccounts(newAccounts);
     // };
+    const validateAllAccountsBeforeSubmit = async () => {
+        for (const acc of additionalAccounts) {
+
+            if (!acc.network) {
+                message.error("Please select a network for all accounts");
+                return false;
+            }
+
+            const selectedNetwork = acc.network.trim();
+
+            for (const id of acc.inputs) {
+                const accountNumber = id?.trim();
+
+                if (!accountNumber) {
+                    message.error("Account ID cannot be empty");
+                    return false;
+                }
+
+                if (accountNumber.toLowerCase() === "all") continue;
+
+
+
+                const localMatch = AccountsData.find(
+                    item => String(item.accountNumber).trim() === accountNumber
+                );
+
+                if (localMatch) {
+                    const localNetwork = String(localMatch.Network).trim();
+
+                    if (localNetwork === selectedNetwork) {
+
+                        continue;
+                    } else {
+
+                        message.error(
+                            `Account ${accountNumber} is present in network ${localNetwork}. Please check.`
+                        );
+                        return false;
+                    }
+                }
+
+
+
+                let apiList = [];
+                try {
+                    const res = await axios.get("https://prodapis.adsgoat.in/allaccounts", {
+                        headers: { Authorization: token }
+                    });
+                    apiList = res.data || [];
+                } catch (err) {
+                    console.error("API validation failed:", err);
+                    message.error("Error validating account. Please try again.");
+                    return false;
+                }
+
+                const apiMatch = apiList.find(
+                    item => String(item.accountNumber).trim() === accountNumber
+                );
+
+                if (apiMatch) {
+                    const apiNetwork = String(apiMatch.Network).trim();
+
+                    if (apiNetwork === selectedNetwork) {
+
+                        message.error(
+                            `Account ${accountNumber} exists in this network but you don't have access.`
+                        );
+                        return false;
+                    } else {
+
+                        message.error(
+                            `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`
+                        );
+                        return false;
+                    }
+                }
+
+
+
+                message.error(
+                    `Account ${accountNumber} does NOT exist in any network. Please add.`
+                );
+                return false;
+            }
+        }
+
+        return true;
+    };
     const submitForm = async (values) => {
+        const isValid = await validateAllAccountsBeforeSubmit();
+        if (!isValid) return;
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to submit?',
@@ -378,6 +469,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         >
             <Form
                 layout="vertical"
+                form={form}
                 onFinish={submitForm}
                 initialValues={initialValues}
                 key={initialValues?.userName}
@@ -493,15 +585,15 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                     </Select.Option>
                                 ))} */}
                                 {availableNetworks
-  .filter(
-    (network) =>
-      !selectedNetworks.includes(network) || network === account.network
-  )
-  .map((network) => (
-    <Select.Option key={network} value={network}>
-      {network}
-    </Select.Option>
-  ))}
+                                    .filter(
+                                        (network) =>
+                                            !selectedNetworks.includes(network) || network === account.network
+                                    )
+                                    .map((network) => (
+                                        <Select.Option key={network} value={network}>
+                                            {network}
+                                        </Select.Option>
+                                    ))}
                             </Select>
                             <div
                                 style={{
@@ -570,7 +662,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     </div>
                 ))}
 
-                <Form.Item name="adAccounts">
+                {/* <Form.Item name="adAccounts">
                     <div>
                         {formAccounts.map((account, accountIndex) => (
                             <div key={accountIndex}>
@@ -579,7 +671,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                         placeholder="Select a network"
                                         style={{
                                             width: '120px', marginRight: '8px',
-                                            backgroundColor: theme === 'dark' && '#333', // Background color
+                                            backgroundColor: theme === 'dark' && '#333', 
                                             color: theme === 'dark' && '#fff',
                                         }}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -626,12 +718,148 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                             </div>
                         ))}
                     </div>
-                    <Button type="dashed" style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> {/* Wrap icon in a span */}
+                    <Button type="dashed" style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> 
                         <PlusOutlined className="black-icon" />
                     </span>}>
                         Add Project
                     </Button>
-                </Form.Item>
+                </Form.Item> */}
+                <Form.List name="adAccounts">
+                    {(projectFields) => (
+                        <div>
+                            {projectFields.map((projField, projIndex) => (
+                                <div
+                                    key={projField.key}
+                                    style={{
+                                        marginBottom: 12,
+                                        borderBottom: "1px dashed #eee",
+                                        paddingBottom: 12,
+                                    }}
+                                >
+                                    <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                                        {/* Network Select */}
+                                        <Form.Item
+                                            name={[projField.name, "network"]}
+                                            fieldKey={[projField.fieldKey, "network"]}
+                                            rules={[{ required: true, message: "Select network" }]}
+                                            style={{ margin: 0, minWidth: 140 }}
+                                        >
+                                            <Select
+                                                placeholder="Select Network"
+                                                style={{ width: 140 }}
+                                                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                                                value={additionalAccounts[projIndex]?.network}
+                                                onChange={(val) => handleNetworkChange(projIndex, val)}
+                                            >
+                                                {availableNetworks
+                                                    .filter(
+                                                        (network) =>
+                                                            !selectedNetworks.includes(network) ||
+                                                            network === additionalAccounts[projIndex]?.network
+                                                    )
+                                                    .map((network) => (
+                                                        <Select.Option key={network} value={network}>
+                                                            {network}
+                                                        </Select.Option>
+                                                    ))}
+                                            </Select>
+                                        </Form.Item>
+
+                                        {/* Nested Inputs */}
+                                        <div style={{ flex: 1 }}>
+                                            <Form.List name={[projField.name, "inputs"]}>
+                                                {(inputFields) => (
+                                                    <>
+                                                        {inputFields.map((inputField, inputIndex) => (
+                                                            <div
+                                                                key={inputField.key}
+                                                                style={{
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    gap: 8,
+                                                                    marginBottom: 8,
+                                                                }}
+                                                                onMouseDown={(e) => e.stopPropagation()}
+                                                            >
+                                                                <Form.Item
+                                                                    name={[inputField.name]}
+                                                                    fieldKey={[inputField.fieldKey]}
+                                                                    rules={[
+                                                                        { required: true, message: "Enter Account ID" },
+                                                                    ]}
+                                                                    style={{ margin: 0, flex: 1 }}
+                                                                >
+                                                                    <Input
+                                                                        placeholder="Enter Account ID"
+                                                                        value={
+                                                                            additionalAccounts[projIndex]?.inputs[inputIndex]
+                                                                        }
+                                                                        onChange={(e) =>
+                                                                            handleInputChange(
+                                                                                projIndex,
+                                                                                inputIndex,
+                                                                                e.target.value
+                                                                            )
+                                                                        }
+
+                                                                    />
+                                                                </Form.Item>
+
+                                                                {/* Remove Input */}
+                                                                {inputIndex > 0 && (
+                                                                    <Button
+                                                                        type="text"
+                                                                        danger
+                                                                        onClick={() =>
+                                                                            handleRemoveInput(projIndex, inputIndex)
+                                                                        }
+                                                                    >
+                                                                        Remove
+                                                                    </Button>
+                                                                )}
+
+                                                                {/* Add Input */}
+                                                                {inputIndex ===
+                                                                    additionalAccounts[projIndex].inputs.length - 1 && (
+                                                                        <Button
+                                                                            type="text"
+                                                                            onClick={() => handleAddInput(projIndex)}
+                                                                        >
+                                                                            <PlusOutlined />
+                                                                        </Button>
+                                                                    )}
+                                                            </div>
+                                                        ))}
+
+                                                        {/* If no inputs */}
+                                                        {additionalAccounts[projIndex]?.inputs.length === 0 && (
+                                                            <Button onClick={() => handleAddInput(projIndex)}>
+                                                                Add Input
+                                                            </Button>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </Form.List>
+                                        </div>
+
+                                        {/* Remove Project */}
+                                        <Button danger onClick={() => handleRemoveAccount(projIndex)}>
+                                            Remove
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Add New Project */}
+                            <Form.Item style={{ marginTop: 8 }}>
+                                <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined />}>
+                                    Add Project
+                                </Button>
+                            </Form.Item>
+                        </div>
+                    )}
+                </Form.List>
+
 
                 <Form.Item>
                     <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} htmlType="submit">

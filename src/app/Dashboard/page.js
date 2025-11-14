@@ -31,6 +31,7 @@ const revenuePartnerNames = {
     "Sedo": "FB_Sedo",
     "Tonic_Rsoc": "FB_TonicRsoc",
     "Inuvo_Prism": "FB_InuvoPrism",
+    "Code_Fuel": "FB_CodeFuel"
 };
 
 
@@ -48,7 +49,8 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
-    "FB_InuvoPrism": "Facebook_InuvoPrismDaily"
+    "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
+    "FB_CodeFuel": "Facebook_CodeFuel_Daily"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -1435,6 +1437,9 @@ const Dashboard = () => {
                     newKey = "Facebook_Mnet_Daily"
                 } else if (key === "FB_InuvoPrism") {
                     newKey = "Facebook_InuvoPrismDaily"
+                }
+                else if (key === "FB_CodeFuel"){
+                    newKey = "Facebook_CodeFuel_Daily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 

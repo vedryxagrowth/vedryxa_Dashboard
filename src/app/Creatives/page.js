@@ -114,6 +114,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const uploadPrefix = `${selectedKey}/${selectedAccountNumber}/`;
     var token = localStorage.getItem("token")
     const [networksWithStatus, setNetworksWithStatus] = useState([]);
+    const [highlightedFolders, setHighlightedFolders] = useState([]);
     useEffect(() => {
         const fetchNetworksData = async () => {
             try {
@@ -1281,6 +1282,60 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
         return { x, y };
     };
+   
+    const downloadBlob = (blob, filename) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename || "download";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    };
+    const downloadFile = async (fileUrl, filename) => {
+        const safeName = filename || fileUrl.split("/").pop();
+        try {
+            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(fileUrl)}`;
+            const res = await fetch(proxyUrl);
+
+            if (res.ok) {
+                const blob = await res.blob();
+                if (blob.size > 0) {
+                    downloadBlob(blob, safeName);
+                    return { ok: true };
+                }
+            }
+
+            console.warn("Proxy failed or returned empty blob → fallback to direct");
+        } catch (err) {
+            console.warn("Proxy crashed → fallback to direct", err);
+        }
+        try {
+            const res2 = await fetch(fileUrl);
+
+            if (!res2.ok) throw new Error("Direct fetch failed: " + res2.status);
+
+            const blob2 = await res2.blob();
+            if (blob2.size === 0) throw new Error("Empty blob");
+
+            downloadBlob(blob2, safeName);
+            return { ok: true };
+
+        } catch (err) {
+            console.error("Direct download failed:", safeName, err);
+            return { ok: false };
+        }
+    };
+
+    
+   
+   
+
+
+
+
+
 
     return (
         <div
@@ -1558,7 +1613,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                     {isActive ? (
                                                         <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
                                                     ) : (
-                                                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }}  className='black-icon-pause-1'/>
+                                                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
                                                     )}
                                                     <span>{option.label}</span>
                                                 </div>
@@ -1723,7 +1778,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     </Badge>
                                 )}
                             </Button>
-                        ) :( "" )
+                        ) : ("")
                             // <Button
                             //     onClick={showDrawer}
                             //     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1998,6 +2053,26 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                         prev.filter((img) => img.uid !== image.uid)
                                                     );
                                                 }
+                                                setHighlightedFolders(prev => {
+                                                    const uid = image.uid;
+                                                    if (!uid) return prev;
+                                                    const folderKey = uid.substring(0, uid.lastIndexOf("/") + 1);
+
+                                                    if (e.target.checked) {
+
+                                                        return [...new Set([...prev, folderKey])];
+                                                    }
+                                                    const selectedNow = checkboxSelected.filter(f => f.uid !== uid);
+                                                    const hasOtherFilesInSameFolder = selectedNow.some(f =>
+                                                        f.uid.startsWith(folderKey)
+                                                    );
+
+                                                    if (hasOtherFilesInSameFolder) {
+                                                        return prev;
+                                                    }
+                                                    return prev.filter(k => k !== folderKey);
+                                                });
+
                                             }}
                                             style={{
                                                 position: 'absolute',
@@ -2021,6 +2096,19 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 height: '100%',
                                                 position: 'relative',
                                                 cursor: 'pointer',
+                                                backgroundColor:
+                                                    highlightedFolders.includes(image.uid)
+                                                        ? 'rgba(145, 194, 95, 0.20)'
+                                                        : hoveredImage === image.uid
+                                                            ? 'rgba(145, 194, 95, 0.15)'
+                                                            : 'transparent',
+
+                                                border:
+                                                    highlightedFolders.includes(image.uid)
+                                                        ? '2px solid #91C25F'
+                                                        : '1px solid transparent',
+
+
                                             }}
 
                                             onClick={(e) => {
@@ -2491,6 +2579,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         {/* Right-click on Trash item */}
                         {isTrashView && (contextMenu.selectedList?.length > 0 || contextMenu.target) && (
                             <>
+
                                 <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
                                     {contextMenu.selectedList?.length > 0
                                         ? `${contextMenu.selectedList.length} selected`
@@ -2581,6 +2670,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                         {/* MULTI SELECT context (not in Trash) */}
                         {!isTrashView && contextMenu.selectedList?.length > 1 && (
+
                             <>
                                 <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
                                     {contextMenu.selectedList.length} selected
@@ -2678,6 +2768,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                 {contextMenu.isFolder ? (
                                     <>
+
+
                                         <div style={{ padding: '8px 12px' }} onClick={() => {
                                             handleFolderClick(contextMenu.target.name);
                                             setSelectedImages([]);
@@ -2726,6 +2818,32 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     </>
                                 ) : (
                                     <>
+                                       
+                                        <div
+                                            style={{ padding: '8px 12px', cursor: 'pointer' }}
+                                            onClick={async () => {
+                                                try {
+                                                    const target = contextMenu.target;
+                                                    setContextMenu({ ...contextMenu, visible: false });
+                                                    const url = target?.url;
+                                                    const name = target?.name || (target?.uid?.split('/').pop() || 'file');
+                                                    if (!url) {
+                                                        message.error("File URL unavailable for download");
+                                                        return;
+                                                    }
+                                                    message.info(`Downloading ${name}...`);
+                                                    const res = await downloadFile(url, name);
+                                                    if (res.ok) message.success(`Downloaded ${name}`);
+                                                    else message.error(`Failed to download ${name}`);
+                                                } catch (err) {
+                                                    console.error(err);
+                                                    message.error("Download failed");
+                                                }
+                                            }}
+                                        >
+                                            ⬇️ Download
+                                        </div>
+
                                         <div>
                                             {/* Edit div */}
                                             <div
