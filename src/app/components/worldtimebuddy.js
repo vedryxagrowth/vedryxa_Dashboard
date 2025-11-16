@@ -45,7 +45,7 @@ export default function WorldTimeBuddy() {
     const fetchZones = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:8000/New/GetTimezones", {
+        const res = await fetch("https://prodapis.adsgoat.in/New/GetTimezones", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
