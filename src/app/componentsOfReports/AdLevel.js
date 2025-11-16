@@ -861,18 +861,18 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
         fbStatus: node.data.fbStatus,
         level: "ad",
       }))
-      .filter(item => item.campaignid && item.campaignname);
+      .filter(item => item.adid && item.adName);
 
     // ✅ Remove duplicates by campaignid + accountNumber
     const uniqueLeafCampaigns = Array.from(
       new Map(
-        leafCampaignsData.map(item => [`${item.campaignid}_${item.accountNumber}`, item])
+        leafCampaignsData.map(item => [`${item.adid}_${item.accountNumber}`, item])
       ).values()
     );
 
     // ✅ Store clean, unique campaigns
     setLeafCampaigns(uniqueLeafCampaigns);
-    console.log("✅ Selected unique Ads:", uniqueLeafCampaigns);
+    console.log("Selected unique Ads:", uniqueLeafCampaigns);
   };
   const autoGroupColumnDefLive = {
     headerName: 'Ad name',
@@ -1593,7 +1593,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                   return arr;
                 });
               }
-              message.success("Campaign pinned!");
+              message.success("pinned!");
             } else {
               const newResponse = await apiClient.post(
                 '/NewUnpinBulk',
@@ -1641,7 +1641,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                   return arr;
                 });
               }
-              message.success("Campaign unpinned!");
+              message.success("unpinned!");
             }
             // optional: refreshComments(accKey);
           } catch (error) {

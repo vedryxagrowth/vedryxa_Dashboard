@@ -232,18 +232,18 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                 fbStatus: node.data.fbStatus,
                 level: "adset",
             }))
-            .filter(item => item.campaignid && item.campaignname);
+            .filter(item => item.adsetid && item.adsetname);
 
         // ✅ Remove duplicates by campaignid + accountNumber
         const uniqueLeafCampaigns = Array.from(
             new Map(
-                leafCampaignsData.map(item => [`${item.campaignid}_${item.accountNumber}`, item])
+                leafCampaignsData.map(item => [`${item.adsetid}_${item.accountNumber}`, item])
             ).values()
         );
 
         // ✅ Store clean, unique campaigns
         setLeafCampaigns(uniqueLeafCampaigns);
-        console.log("✅ Selected unique Adsets:", uniqueLeafCampaigns);
+        console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
     };
 
     const autoGroupColumnDef = {
