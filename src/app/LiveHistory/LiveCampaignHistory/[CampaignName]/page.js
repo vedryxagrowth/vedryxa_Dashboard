@@ -1,17 +1,16 @@
 "use client"
-import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import { Audio } from 'react-loader-spinner';
-import moment from 'moment-timezone';
-import 'ag-grid-enterprise';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { useTokenContext } from '../../../components/parent';
-import { Line } from 'react-chartjs-2';
-import { Chart, registerables } from 'chart.js';
-import debounce from 'lodash.debounce';
+import React, { useRef, useEffect, useMemo, useState, useCallback } from "react";
+import { AgGridReact } from "ag-grid-react";
+import { Audio } from "react-loader-spinner";
+import moment from "moment-timezone";
+import "ag-grid-enterprise";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import { useTokenContext } from "../../../components/parent";
+import { Line } from "react-chartjs-2";
+import { Chart, registerables } from "chart.js";
+import debounce from "lodash.debounce";
 import {
-  Spin,
   Row,
   Col,
   Select,
@@ -20,491 +19,433 @@ import {
   Modal,
   message,
   Tooltip,
-  Skeleton
-} from 'antd';
-import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
+  Skeleton,
+} from "antd";
+import { ReloadOutlined, EditOutlined, BarChartOutlined } from "@ant-design/icons";
 
-Chart.register(...registerables);
+Chart.register(...registerables); // safe to call once at module level
 
 const { Option } = Select;
 
 const datasetColorMap = {
-  Spend: 'rgba(75, 192, 192, 1)',
-  Revenue: 'rgba(54, 162, 235, 1)',
-  RPC: 'rgba(255, 99, 132, 1)',
-  CPL: 'rgba(255, 159, 64, 1)',
-  Profit: 'rgba(255, 206, 86, 1)',
-  Margin: 'rgba(153, 102, 255, 1)',
+  Spend: "rgba(75, 192, 192, 1)",
+  Revenue: "rgba(54, 162, 235, 1)",
+  RPC: "rgba(255, 99, 132, 1)",
+  CPL: "rgba(255, 159, 64, 1)",
+  Profit: "rgba(255, 206, 86, 1)",
+  Margin: "rgba(153, 102, 255, 1)",
+};
+
+const safeGetLocal = (key, fallback) => {
+  try {
+    if (typeof window === "undefined") return fallback;
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const safeSetLocal = (key, value) => {
+  try {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
 };
 
 const MnetLiveCampaignHistory = ({ params }) => {
-  const { userdetails, apiClient, theme } = useTokenContext();
-
-  // refs
-  const gridRef = useRef();
-  const timeZoneToDisplay = useRef();
-
-  // basic states
+  const { userdetails, apiClient, theme } = useTokenContext() || {};
+  const gridRef = useRef(null);
   const [CampaignName, setCampaignName] = useState("");
   const [searchText, setSearchText] = useState("");
   const [selectedCells, setSelectedCells] = useState([]);
   const [firstSelectedCell, setFirstSelectedCell] = useState(null);
   const [rowData, setRowData] = useState([]);
   const [isLoading, setLoading] = useState(true);
-  const [isTrue, setTrue] = useState(false);
-  const [input, setInput] = useState();
-  const [account, setAccount] = useState();
-  const [time, setTime] = useState('UTC');
-  const [fetchvalue, setValue] = useState([]);
-  const [dateStart1, setDateStart1] = useState();
-  const [endDate1, setEndDate1] = useState();
   const [hovered, setHovered] = useState(false);
-
-  const [isGraphVisible, setIsGraphVisible] = useState(() => {
-    try {
-      const stored = typeof window !== 'undefined' && localStorage.getItem('isGraphVisible');
-      return stored ? JSON.parse(stored) : false;
-    } catch {
-      return false;
-    }
-  });
-
+  const [isGraphVisible, setIsGraphVisible] = useState(() => safeGetLocal("isGraphVisible", false));
   const [columns, setColumns] = useState([]);
   const [comment, setComment] = useState("");
   const [isModalVisibles, setIsModalVisibles] = useState(false);
   const [campaignComments, setCampaignComments] = useState([]);
   const [campaignid, setCampaignId] = useState("");
   const [adsetid, setAdsetID] = useState("");
-
-  // clearer naming: columnDefsState is the actual columnDefs object array passed to AG Grid
   const [columnDefsState, setColumnDefsState] = useState([]);
-
-  const [decode, setDebounc] = useState("");
   const [chartData, setChartData] = useState({
     dates: [],
     sortedData: [],
     sortedMarginData: [],
     rpcDate: [],
     hoursDate: [],
-    hours: [],
     spend: [],
     revenue: [],
     profit: [],
-    margin: []
+    margin: [],
   });
-
   const [copied, setCopied] = useState(false);
-  const paramsData = (params.CampaignName || '').split("-");
-  const decodedStringFromParams = paramsData[0] || '';
-  const CampaignId = paramsData[0] || '';
-  const accountNumber = paramsData[1] || '';
-  const timeZone = paramsData[2] || '';
-  const network = paramsData[3] || '';
 
-  // helper: copy decoded campaign name
-  const handleCopy = () => {
-    navigator.clipboard.writeText(CampaignName || decodedStringFromParams || '')
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch(() => setCopied(false));
-  };
+  // params parsing
+  const paramsData = (params?.CampaignName || "").split("-");
+  const decodedStringFromParams = paramsData[0] || "";
+  const CampaignId = paramsData[0] || "";
+  const accountNumber = paramsData[1] || "";
+  const timeZone = paramsData[2] || "";
+  const network = paramsData[3] || "";
 
-  // hide keys for chart legend toggling
-  const [hiddenKeys, setHiddenKeys] = useState(['Spend', 'Revenue', 'RPC', 'CPL', 'Margin']);
+  // hidden keys for legend toggling
+  const [hiddenKeys, setHiddenKeys] = useState(["Spend", "Revenue", "RPC", "CPL", "Margin"]);
   const toggleLegend = (label) => {
-    setHiddenKeys(prev => prev.includes(label) ? prev.filter(k => k !== label) : [...prev, label]);
+    setHiddenKeys((prev) => (prev.includes(label) ? prev.filter((k) => k !== label) : [...prev, label]));
   };
 
-  // chart datasets (safe defaults)
-  const datasets = Object.keys(datasetColorMap).map(label => ({
-    label,
-    data: chartData[label.toLowerCase()] || [],
-    borderColor: datasetColorMap[label],
-    hidden: hiddenKeys.includes(label),
-    tension: 0.3,
-    pointRadius: 5,
-    pointHoverRadius: 8,
-    pointBackgroundColor: datasetColorMap[label],
-    pointHoverBackgroundColor: datasetColorMap[label],
-  }));
-
-  // column structure keys — used as allowed keys / base order
-  const columnStructure = [
-    "date_n", "date_f", "hour_n", "hour_f", "date", "M_tq", "D_tq",
-    "campaignname", "adsetname", "adname", "spend", "revenue", "profit",
-    "margin", "rpc", "cpl", "ncpl", "fbleads", "filteration", "conversions",
-    "fmargin", "roi", "cpc", "fbclicks", "impressions", "ctr", "fblinkclicks",
-    "cpclinkclicks",
-  ];
-
-  // Aggregation helpers (simplified and safer - ensure numeric)
-  const spender = (params) => {
-    const total = (params.values || []).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
-    return Math.round(total * 100) / 100;
+  // small helpers
+  const handleCopy = () => {
+    try {
+      const text = CampaignName || decodedStringFromParams || "";
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        });
+      }
+    } catch {}
   };
 
-  const newSpender = (params) => {
-    const total = (params.values || []).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
-    return Number((Math.round(total * 100) / 100).toFixed(2));
-  };
+  // column structure baseline
+  const columnStructure = useMemo(
+    () => [
+      "date_n", "date_f", "hour_n", "hour_f", "date", "M_tq", "D_tq",
+      "campaignname", "adsetname", "adname", "spend", "revenue", "profit",
+      "margin", "rpc", "cpl", "ncpl", "fbleads", "filteration", "conversions",
+      "fmargin", "roi", "cpc", "fbclicks", "impressions", "ctr", "fblinkclicks",
+      "cpclinkclicks",
+    ],
+    []
+  );
 
-  const cpcSpender = (params) => {
-    const total = (params.values || []).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
-    const count = (params.values || []).length || 1;
-    return Number((total / count).toFixed(2));
-  };
+  // comparators & aggs
+  const defaultComparator = useCallback((a, b) => {
+    if (a == null && b == null) return 0;
+    if (a == null) return 1;
+    if (b == null) return -1;
+    if (typeof a === "number" && typeof b === "number") return a - b;
+    if (typeof a === "string" && typeof b === "string") return a.localeCompare(b);
+    return a < b ? -1 : a > b ? 1 : 0;
+  }, []);
 
-  // safer comparators
-  const defaultComparator = (valueA, valueB) => {
-    if (valueA == null && valueB == null) return 0;
-    if (valueA == null) return 1;
-    if (valueB == null) return -1;
-    if (typeof valueA === 'number' && typeof valueB === 'number') return valueA - valueB;
-    if (typeof valueA === 'string' && typeof valueB === 'string') return valueA.localeCompare(valueB);
-    return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-  };
+  const spender = useCallback((params) => {
+    try {
+      return (params.values || []).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
+    } catch { return 0; }
+  }, []);
 
-  // columnDefsObject: keep the existing logic but guard types and fix formatters
+  const newSpender = useCallback((params) => {
+    try {
+      const total = (params.values || []).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
+      return Number(total.toFixed(2));
+    } catch { return 0; }
+  }, []);
+
+  const cpcSpender = useCallback((params) => {
+    try {
+      const total = (params.values || []).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
+      const count = (params.values || []).length || 1;
+      return Number((total / count).toFixed(2));
+    } catch { return 0; }
+  }, []);
+
+  // column defs object (memoized)
   const columnDefsObject = useMemo(() => ({
     M_tq: {
-      headerName: 'M_TQ',
-      field: 'M_tq',
-      valueFormatter: params => {
-        const val = Number(params.value);
-        return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+      headerName: "M_TQ",
+      field: "M_tq",
+      valueFormatter: (p) => {
+        const v = Number(p.value);
+        return isNaN(v) ? "0.00" : v.toFixed(2);
       },
       suppressMenu: true,
       sortable: true,
       hide: true,
     },
     D_tq: {
-      headerName: 'D_TQ',
-      field: 'D_tq',
-      valueFormatter: params => {
-        const val = Number(params.value);
-        return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+      headerName: "D_TQ",
+      field: "D_tq",
+      valueFormatter: (p) => {
+        const v = Number(p.value);
+        return isNaN(v) ? "0.00" : v.toFixed(2);
       },
       suppressMenu: true,
       sortable: true,
       hide: true,
     },
-    date_n: {
-      headerName: 'Date_N',
-      field: 'date_n',
-      minWidth: 100,
-      resizable: true,
-      sortable: true,
-      hide: true,
-      rowGroup: true,
-      enableRowGroup: true,
-      pinned: 'left',
-      sort: 'desc',
-      suppressMenu: true,
-    },
-    date: {
-      headerName: 'Date',
-      field: 'date',
-      suppressMenu: true,
-      hide: true,
-    },
+    date_n: { headerName: "Date_N", field: "date_n", minWidth: 100, resizable: true, sortable: true, hide: true, rowGroup: true, enableRowGroup: true, pinned: "left", sort: "desc", suppressMenu: true },
+    date: { headerName: "Date", field: "date", suppressMenu: true, hide: true },
     campaignname: {
-      headerName: 'CampaignName', field: 'campaignname', minWidth: 250, hide: true,
+      headerName: "CampaignName",
+      field: "campaignname",
+      minWidth: 250,
+      hide: true,
       cellStyle: { whiteSpace: "normal", lineHeight: "1.5" },
       autoHeight: true,
       suppressMenu: true,
-      cellRenderer: params => {
-        if (!params.value) return '';
-        if (typeof params.value === 'string' && params.value.includes("Copied!")) {
+      cellRenderer: (p) => {
+        if (!p?.value) return "";
+        if (typeof p.value === "string" && p.value.includes("Copied!")) {
           return (
             <span>
-              {params.value.replace("Copied!", "")}
+              {p.value.replace("Copied!", "")}
               <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
             </span>
           );
         }
-        return params.value;
-      }
-    },
-    adsetname: {
-      headerName: 'Adset-Name', field: 'adsetname', minWidth: 250, cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, autoHeight: true, suppressMenu: true, hide: true
-    },
-    adname: {
-      headerName: 'Ad-Name', field: 'adname', width: 250, hide: true, cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, autoHeight: true, suppressMenu: true,
-      cellRenderer: params => {
-        if (!params.value) return '';
-        if (typeof params.value === 'string' && params.value.includes("Copied!")) {
-          return (
-            <span>
-              {params.value.replace("Copied!", "")}
-              <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
-            </span>
-          );
-        }
-        return params.value;
-      }
-    },
-    hour_n: { headerName: 'Hour_N', field: "hour_n", comparator: defaultComparator, minWidth: 90, suppressMenu: true },
-    hour_f: { headerName: 'Hour_F', field: "hour_f", comparator: defaultComparator, minWidth: 80, suppressMenu: true },
-    date_f: {
-      headerName: 'Date_F', field: 'date_f', minWidth: 150, resizable: true, sortable: true,
-      valueFormatter: params => {
-        if (params.node?.group) return "";
-        if (params.node?.rowPinned) return '';
-        try {
-          const v = params.value;
-          return `${v} (${moment(v).format('ddd')})`;
-        } catch {
-          return params.value;
-        }
+        return p.value;
       },
-      suppressMenu: true
+    },
+    adsetname: { headerName: "Adset-Name", field: "adsetname", minWidth: 250, cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, autoHeight: true, suppressMenu: true, hide: true },
+    adname: {
+      headerName: "Ad-Name",
+      field: "adname",
+      width: 250,
+      hide: true,
+      cellStyle: { whiteSpace: "normal", lineHeight: "1.5" },
+      autoHeight: true,
+      suppressMenu: true,
+      cellRenderer: (p) => {
+        if (!p?.value) return "";
+        if (typeof p.value === "string" && p.value.includes("Copied!")) {
+          return (
+            <span>
+              {p.value.replace("Copied!", "")}
+              <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
+            </span>
+          );
+        }
+        return p.value;
+      },
+    },
+    hour_n: { headerName: "Hour_N", field: "hour_n", comparator: defaultComparator, minWidth: 90, suppressMenu: true },
+    hour_f: { headerName: "Hour_F", field: "hour_f", comparator: defaultComparator, minWidth: 80, suppressMenu: true },
+    date_f: {
+      headerName: "Date_F",
+      field: "date_f",
+      minWidth: 150,
+      resizable: true,
+      sortable: true,
+      valueFormatter: (p) => {
+        if (p.node?.group) return "";
+        if (p.node?.rowPinned) return "";
+        try {
+          const v = p.value;
+          return `${v} (${moment(v).format("ddd")})`;
+        } catch { return p.value; }
+      },
+      suppressMenu: true,
     },
     spend: {
-      headerName: 'Spend', field: 'spend', minWidth: 105, aggFunc: spender, comparator: (a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0),
-      filter: true, valueFormatter: params => {
-        const v = parseFloat(params.value || 0);
-        return isNaN(v) ? '' : `$${v.toFixed(2)}`;
-      }, suppressMenu: true
+      headerName: "Spend",
+      field: "spend",
+      minWidth: 105,
+      aggFunc: spender,
+      comparator: (a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0),
+      filter: true,
+      valueFormatter: (p) => {
+        const v = parseFloat(p.value || 0);
+        return isNaN(v) ? "" : `$${v.toFixed(2)}`;
+      },
+      suppressMenu: true,
     },
     revenue: {
-      headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, filter: true,
-      valueParser: params => parseFloat(params.newValue) || 0,
+      headerName: "Revenue",
+      field: "revenue",
+      minWidth: 105,
+      aggFunc: spender,
+      filter: true,
+      valueParser: (p) => parseFloat(p.newValue) || 0,
       comparator: (a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0),
-      valueFormatter: params => {
-        const v = parseFloat(params.value || 0);
-        return isNaN(v) ? '' : `$${v.toFixed(2)}`;
-      }, suppressMenu: true
+      valueFormatter: (p) => {
+        const v = parseFloat(p.value || 0);
+        return isNaN(v) ? "" : `$${v.toFixed(2)}`;
+      },
+      suppressMenu: true,
     },
     profit: {
-      headerName: 'Profit', field: 'profit', minWidth: 90, aggFunc: spender,
-      cellClassRules: { 'font-red': p => parseFloat(p.value) < 0, 'font-green': p => parseFloat(p.value) > 0 },
+      headerName: "Profit",
+      field: "profit",
+      minWidth: 90,
+      aggFunc: spender,
+      cellClassRules: { "font-red": (p) => parseFloat(p.value) < 0, "font-green": (p) => parseFloat(p.value) > 0 },
       comparator: (a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0),
-      valueFormatter: params => params.value != null ? `${(Math.round((parseFloat(params.value || 0)) * 100) / 100).toFixed(2)}` : '',
+      valueFormatter: (p) => (p.value != null ? `${(Math.round((parseFloat(p.value || 0)) * 100) / 100).toFixed(2)}` : ""),
       suppressMenu: true,
     },
     margin: {
-      headerName: 'Margin', field: 'margin', minWidth: 105,
-      valueGetter: params => {
-        // margin = ((revenue - spend) / revenue) * 100
-        const revenue = parseFloat(params.data?.revenue || params.node?.aggData?.revenue || 0) || 0;
-        const spend = parseFloat(params.data?.spend || params.node?.aggData?.spend || 0) || 0;
-        if (!revenue) return '0%';
+      headerName: "Margin",
+      field: "margin",
+      minWidth: 105,
+      valueGetter: (p) => {
+        const revenue = parseFloat(p.data?.revenue || p.node?.aggData?.revenue || 0) || 0;
+        const spend = parseFloat(p.data?.spend || p.node?.aggData?.spend || 0) || 0;
+        if (!revenue) return "0%";
         const val = ((revenue - spend) / revenue) * 100;
         return `${(Math.round(val * 100) / 100).toFixed(2)}%`;
       },
       comparator: (a, b) => {
-        const numA = parseFloat(String(a).replace('%', '')) || 0;
-        const numB = parseFloat(String(b).replace('%', '')) || 0;
+        const numA = parseFloat(String(a).replace("%", "")) || 0;
+        const numB = parseFloat(String(b).replace("%", "")) || 0;
         return numA - numB;
       },
-      valueFormatter: params => {
-        const raw = params.value || '0%';
-        return typeof raw === 'string' ? raw : `${Number(raw).toFixed(2)}%`;
-      }, suppressMenu: true
+      valueFormatter: (p) => {
+        const raw = p.value || "0%";
+        return typeof raw === "string" ? raw : `${Number(raw).toFixed(2)}%`;
+      },
+      suppressMenu: true,
     },
     rpc: {
-      headerName: 'RPC', minWidth: 80, field: 'rpc', cellStyle: { fontWeight: 'bold' },
-      valueGetter: params => {
-        const revenue = parseFloat(params.data?.revenue || params.node?.aggData?.revenue || 0) || 0;
-        const conversions = parseFloat(params.data?.conversions || params.node?.aggData?.conversions || 0) || 0;
+      headerName: "RPC",
+      minWidth: 80,
+      field: "rpc",
+      cellStyle: { fontWeight: "bold" },
+      valueGetter: (p) => {
+        const revenue = parseFloat(p.data?.revenue || p.node?.aggData?.revenue || 0) || 0;
+        const conversions = parseFloat(p.data?.conversions || p.node?.aggData?.conversions || 0) || 0;
         if (!conversions) return 0;
         return Number((revenue / conversions).toFixed(2));
       },
       comparator: (a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0),
-      valueFormatter: params => {
-        const v = parseFloat(params.value || 0);
-        return isNaN(v) ? '' : `$${v.toFixed(2)}`;
-      }, suppressMenu: true
+      valueFormatter: (p) => {
+        const v = parseFloat(p.value || 0);
+        return isNaN(v) ? "" : `$${v.toFixed(2)}`;
+      },
+      suppressMenu: true,
     },
     cpl: {
-      headerName: 'CPL', minWidth: 80, field: 'cpl',
-      valueGetter: params => {
-        const fbleads = parseFloat(params.data?.fbleads || params.node?.aggData?.fbleads || 0) || 0;
-        const spend = parseFloat(params.data?.spend || params.node?.aggData?.spend || 0) || 0;
+      headerName: "CPL",
+      minWidth: 80,
+      field: "cpl",
+      valueGetter: (p) => {
+        const fbleads = parseFloat(p.data?.fbleads || p.node?.aggData?.fbleads || 0) || 0;
+        const spend = parseFloat(p.data?.spend || p.node?.aggData?.spend || 0) || 0;
         if (!fbleads) return 0;
         return Number((spend / fbleads).toFixed(2));
       },
       comparator: (a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0),
-      valueFormatter: params => {
-        const v = parseFloat(params.value || 0);
-        return isNaN(v) ? '' : `$${v.toFixed(2)}`;
-      }, suppressMenu: true
+      valueFormatter: (p) => {
+        const v = parseFloat(p.value || 0);
+        return isNaN(v) ? "" : `$${v.toFixed(2)}`;
+      },
+      suppressMenu: true,
     },
-    ncpl: { headerName: 'NCPL', field: 'ncpl', valueGetter: params => {
-      const spend = parseFloat(params.data?.spend || params.node?.aggData?.spend || 0) || 0;
-      const conversions = parseFloat(params.data?.conversions || params.node?.aggData?.conversions || 0) || 0;
+    ncpl: { headerName: "NCPL", field: "ncpl", valueGetter: (p) => {
+      const spend = parseFloat(p.data?.spend || p.node?.aggData?.spend || 0) || 0;
+      const conversions = parseFloat(p.data?.conversions || p.node?.aggData?.conversions || 0) || 0;
       if (!conversions) return 0;
       return Number((spend / conversions).toFixed(2));
     }, comparator: defaultComparator, minWidth: 80, suppressMenu: true },
-    fbleads: { headerName: 'FBLeads', field: 'fbleads', minWidth: 105, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
-    conversions: { headerName: 'Conv', field: 'conversions', minWidth: 85, aggFunc: newSpender, comparator: defaultComparator, suppressMenu: true },
-    fmargin: {
-      headerName: 'FMargin', field: 'fmargin',
-      valueGetter: params => {
-        // Fmargin = profit / revenue * 100  (original had revenue? adjusting: using profit / revenue)
-        const profit = parseFloat(params.data?.profit || params.node?.aggData?.profit || 0) || 0;
-        const revenue = parseFloat(params.data?.revenue || params.node?.aggData?.revenue || 0) || 0;
-        if (!revenue) return '0%';
-        const val = (profit / revenue) * 100;
-        return `${(Math.round(val * 100) / 100).toFixed(2)}%`;
-      }, comparator: defaultComparator, valueFormatter: params => `${params.value}`, minWidth: 95, suppressMenu: true
-    },
-    roi: {
-      headerName: 'ROI', field: 'roi',
-      valueGetter: params => {
-        const revenue = parseFloat(params.data?.revenue || params.node?.aggData?.revenue || 0) || 0;
-        const spend = parseFloat(params.data?.spend || params.node?.aggData?.spend || 0) || 0;
-        if (!spend) return '0%';
-        const val = ((revenue - spend) / spend) * 100;
-        return `${(Math.round(val * 100) / 100).toFixed(2)}%`;
-      },
-      comparator: defaultComparator, valueFormatter: params => `${params.value}`, minWidth: 90, suppressMenu: true
-    },
-    cpc: {
-      headerName: 'CPC', field: 'cpc', aggFunc: cpcSpender, comparator: defaultComparator, minWidth: 85, suppressMenu: true
-    },
-    cpclinkclicks: {
-      headerName: 'CPC_LC', field: 'cpclinkclicks', valueGetter: params => {
-        const spend = parseFloat(params.data?.spend || params.node?.aggData?.spend || 0) || 0;
-        const fblink = parseFloat(params.data?.fblinkclicks || params.node?.aggData?.fblinkclicks || 0) || 0;
-        if (!fblink) return 0;
-        return Number((spend / fblink).toFixed(2));
-      }, comparator: defaultComparator, minWidth: 85, suppressMenu: true
-    },
-    fbclicks: { headerName: 'FB_LC', field: 'fbclicks', minWidth: 90, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
-    fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', minWidth: 90, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
-    impressions: { headerName: 'IMP', field: 'impressions', minWidth: 90, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
-    ctr: {
-      headerName: 'CTR', field: 'ctr', valueGetter: params => {
-        const impressions = parseFloat(params.data?.impressions || params.node?.aggData?.impressions || 0) || 0;
-        const fbclicks = parseFloat(params.data?.fbclicks || params.node?.aggData?.fbclicks || 0) || 0;
-        if (!impressions) return '0%';
-        const val = (fbclicks / impressions) * 100;
-        return `${(Math.round(val * 100) / 100).toFixed(2)}%`;
-      }, comparator: defaultComparator, valueFormatter: params => `${params.value}`, minWidth: 80, suppressMenu: true
-    },
-    filteration: {
-      headerName: "Filteration", field: 'filteration', width: 115,
-      valueFormatter: params => params.value ? `${params.value}%` : '0%',
-      suppressMenu: true,
-      hide: true
-    }
-  }), []);
+    fbleads: { headerName: "FBLeads", field: "fbleads", minWidth: 105, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
+    conversions: { headerName: "Conv", field: "conversions", minWidth: 85, aggFunc: newSpender, comparator: defaultComparator, suppressMenu: true },
+    fmargin: { headerName: "FMargin", field: "fmargin", valueGetter: (p) => {
+      const profit = parseFloat(p.data?.profit || p.node?.aggData?.profit || 0) || 0;
+      const revenue = parseFloat(p.data?.revenue || p.node?.aggData?.revenue || 0) || 0;
+      if (!revenue) return "0%";
+      const val = (profit / revenue) * 100;
+      return `${(Math.round(val * 100) / 100).toFixed(2)}%`;
+    }, comparator: defaultComparator, valueFormatter: (p) => `${p.value}`, minWidth: 95, suppressMenu: true },
+    roi: { headerName: "ROI", field: "roi", valueGetter: (p) => {
+      const revenue = parseFloat(p.data?.revenue || p.node?.aggData?.revenue || 0) || 0;
+      const spend = parseFloat(p.data?.spend || p.node?.aggData?.spend || 0) || 0;
+      if (!spend) return "0%";
+      const val = ((revenue - spend) / spend) * 100;
+      return `${(Math.round(val * 100) / 100).toFixed(2)}%`;
+    }, comparator: defaultComparator, valueFormatter: (p) => `${p.value}`, minWidth: 90, suppressMenu: true },
+    cpc: { headerName: "CPC", field: "cpc", aggFunc: cpcSpender, comparator: defaultComparator, minWidth: 85, suppressMenu: true },
+    cpclinkclicks: { headerName: "CPC_LC", field: "cpclinkclicks", valueGetter: (p) => {
+      const spend = parseFloat(p.data?.spend || p.node?.aggData?.spend || 0) || 0;
+      const fblink = parseFloat(p.data?.fblinkclicks || p.node?.aggData?.fblinkclicks || 0) || 0;
+      if (!fblink) return 0;
+      return Number((spend / fblink).toFixed(2));
+    }, comparator: defaultComparator, minWidth: 85, suppressMenu: true },
+    fbclicks: { headerName: "FB_LC", field: "fbclicks", minWidth: 90, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
+    fblinkclicks: { headerName: "FB_LC", field: "fblinkclicks", minWidth: 90, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
+    impressions: { headerName: "IMP", field: "impressions", minWidth: 90, aggFunc: spender, comparator: defaultComparator, suppressMenu: true },
+    ctr: { headerName: "CTR", field: "ctr", valueGetter: (p) => {
+      const impressions = parseFloat(p.data?.impressions || p.node?.aggData?.impressions || 0) || 0;
+      const fbclicks = parseFloat(p.data?.fbclicks || p.node?.aggData?.fbclicks || 0) || 0;
+      if (!impressions) return "0%";
+      const val = (fbclicks / impressions) * 100;
+      return `${(Math.round(val * 100) / 100).toFixed(2)}%`;
+    }, comparator: defaultComparator, valueFormatter: (p) => `${p.value}`, minWidth: 80, suppressMenu: true },
+    filteration: { headerName: "Filteration", field: "filteration", width: 115, valueFormatter: (p) => (p.value ? `${p.value}%` : "0%"), suppressMenu: true, hide: true },
+  }), [defaultComparator, spender, newSpender, cpcSpender]);
 
-  const getColumnDefs = useCallback(order => {
-    return (order || []).map(k => columnDefsObject[k]).filter(Boolean);
+  const getColumnDefs = useCallback((order) => {
+    return (order || []).map((k) => columnDefsObject[k]).filter(Boolean);
   }, [columnDefsObject]);
 
-  const dateOptions = [
+  const dateOptions = useMemo(() => [
     "All", "Today", "Yesterday", "Last 7 Days", "Last 15 Days", "Last 20 Days",
     "Last 25 Days", "Last 30 Days", "Last 60 Days", "Last 90 Days", "This Month", "Last Month",
-  ];
+  ], []);
 
   const [selectedValue, setSelectedValue] = useState("All");
   const [filteredData, setFilteredData] = useState([]);
   const [domainFixedFooter, setDomainFixedFooter] = useState([]);
 
-  // handle range selection
-  const handleChange = (value) => {
-    setSelectedValue(value);
-    const today = moment();
-    const startOfMonth = moment().startOf("month");
-    const endOfMonth = moment().endOf("month");
-    const startOfLastMonth = moment().subtract(1, "month").startOf("month");
-    const endOfLastMonth = moment().subtract(1, "month").endOf("month");
-
-    const dynamicDaysFilter = (days) =>
-      rowData.filter((item) =>
-        moment(item.date).isBetween(
-          moment().subtract(days, "days"),
-          today,
-          undefined,
-          "[]"
-        )
-      );
-
-    const filterLogic = {
-      All: () => rowData,
-      Today: () => rowData.filter((item) => item.date === today.format("YYYY-MM-DD")),
-      Yesterday: () =>
-        rowData.filter(
-          (item) => item.date === today.clone().subtract(1, "days").format("YYYY-MM-DD")
-        ),
-      "Last 7 Days": () => dynamicDaysFilter(7),
-      "Last 15 Days": () => dynamicDaysFilter(15),
-      "Last 20 Days": () => dynamicDaysFilter(20),
-      "Last 25 Days": () => dynamicDaysFilter(25),
-      "Last 30 Days": () => dynamicDaysFilter(30),
-      "Last 60 Days": () => dynamicDaysFilter(60),
-      "Last 90 Days": () => dynamicDaysFilter(90),
-      "This Month": () =>
-        rowData.filter((item) =>
-          moment(item.date).isBetween(startOfMonth, endOfMonth, undefined, "[]")
-        ),
-      "Last Month": () =>
-        rowData.filter((item) =>
-          moment(item.date).isBetween(startOfLastMonth, endOfLastMonth, undefined, "[]")
-        ),
-    };
-
-    const filtered = (filterLogic[value] && filterLogic[value]()) || rowData;
-    setFilteredData(filtered);
-  };
-
-  const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+  // token local guard
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   // fetch comments
-  const functionCallForCommnets = async (accountNumberParam) => {
+  const functionCallForCommnets = useCallback(async (accountNumberParam) => {
+    if (!apiClient) return;
     try {
-      const commentFetch = await apiClient.get(`/New/Comments/${accountNumberParam}/${"campaignid"}/${CampaignId}/${"campaign"}`);
-      const campaignComments = commentFetch.data || [];
-      setCampaignComments(campaignComments);
-      if (campaignComments.length > 0) {
-        const comment = campaignComments[0];
-        setComment(comment?.comment ? comment?.comment : "");
-      } else {
-        setComment("");
-      }
+      const res = await apiClient.get(`/New/Comments/${accountNumberParam}/campaignid/${CampaignId}/campaign`);
+      const data = res?.data || [];
+      setCampaignComments(data);
+      setComment(data[0]?.comment || "");
     } catch (err) {
       setComment("");
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiClient, CampaignId]);
 
   // fetch user's column structure
-  const functionCallForUserColumnStructure = async () => {
+  const functionCallForUserColumnStructure = useCallback(async () => {
+    if (!apiClient || !userdetails?.email) {
+      setColumns(columnStructure);
+      setColumnDefsState(getColumnDefs(columnStructure));
+      return;
+    }
     try {
       const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails?.email}`);
       const mainData = fetchData?.data || {};
-      const filteredData = (mainData.historyStructure || []).filter(each => each !== "actions");
-      setColumns(filteredData);
-      setColumnDefsState(getColumnDefs(filteredData));
+      const filteredData = (mainData.historyStructure || []).filter((each) => each !== "actions");
+      const final = filteredData.length ? filteredData : columnStructure;
+      setColumns(final);
+      setColumnDefsState(getColumnDefs(final));
     } catch (err) {
-      // fallback - use defaults
       setColumns(columnStructure);
       setColumnDefsState(getColumnDefs(columnStructure));
     }
-  };
+  }, [apiClient, userdetails, columnStructure, getColumnDefs]);
 
   // main data fetch
-  const functionCall = async () => {
+  const functionCall = useCallback(async () => {
+    if (!apiClient) return;
     try {
+      setLoading(true);
       const fetchData = await apiClient.get(`/New/LiveCampaignHistory?CampaignId=${CampaignId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
-      const raw = (fetchData?.data || []).filter(obj => !("ad_clicks" in obj));
+      const raw = (fetchData?.data || []).filter((obj) => !("ad_clicks" in obj));
       if (!raw || raw.length === 0) {
         setRowData([]);
         setFilteredData([]);
         setLoading(false);
         return;
       }
-
       const mainData = raw;
       setCampaignName(mainData[0]?.campaign_name || decodedStringFromParams);
       setCampaignId(mainData[0]?.campaign_id || CampaignId);
-      setAdsetID(mainData[0]?.adset_id || '');
+      setAdsetID(mainData[0]?.adset_id || "");
 
-      const filteredData = mainData.map(eachData => {
+      const mapped = mainData.map((eachData) => {
         const revenueData = Number(eachData.estimated_revenue) || 0;
         const spend = Number(eachData.spend) || 0;
         const profit = Number((revenueData - spend).toFixed(2));
@@ -514,7 +455,6 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const ncpl = eachData.conversions ? Number((eachData.spend / (eachData.conversions || 1)).toFixed(2)) : 0;
         const fbLClicks = parseInt(eachData.fbLinkClicks, 10) || 0;
         const cpcLinkClicks = fbLClicks === 0 ? 0 : Number((spend / fbLClicks).toFixed(2));
-
         return {
           date: eachData[`${timeZone}Date`],
           date_n: eachData[`${timeZone}Date`],
@@ -547,125 +487,117 @@ const MnetLiveCampaignHistory = ({ params }) => {
         };
       });
 
-      setRowData(filteredData);
-      setFilteredData(filteredData);
-      setValue(mainData);
+      setRowData(mapped);
+      setFilteredData(mapped);
       setLoading(false);
 
-      // prepare chart / summary data:
-      const parseDate = d => new Date(d);
-      const highestDate = filteredData.reduce((max, item) => {
-        const itemDate = parseDate(item.date);
-        return itemDate > max ? itemDate : max;
-      }, new Date(0));
-
-      const last10 = filteredData
-        .filter(item => {
+      // summary and chart calculations - wrapped in try/catch to avoid crash if data shape unexpected
+      try {
+        const parseDate = (d) => new Date(d);
+        const highestDate = mapped.reduce((max, item) => {
           const itemDate = parseDate(item.date);
-          const timeDiff = highestDate - itemDate;
-          const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
-          return daysDiff >= 0 && daysDiff <= 10;
-        })
-        .sort((a, b) => parseDate(a.date) - parseDate(b.date));
+          return itemDate > max ? itemDate : max;
+        }, new Date(0));
 
-      const dates = last10.map(d => d.date || '');
-      const spend = last10.map(d => d.spend || 0);
-      const revenue = last10.map(d => d.revenue || 0);
-      const profit = last10.map(d => d.profit || 0);
-      const rpc = last10.map(d => d.rpc || 0);
-      const cpl = last10.map(d => d.cpl || 0);
-      const margin = last10.map(d => parseFloat(String(d.margin).replace('%', '')) || 0);
+        const last10 = mapped
+          .filter((item) => {
+            const itemDate = parseDate(item.date);
+            const timeDiff = highestDate - itemDate;
+            const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+            return daysDiff >= 0 && daysDiff <= 10;
+          })
+          .sort((a, b) => parseDate(a.date) - parseDate(b.date));
 
-      // Hours (today)
-      const todayStr = moment.tz('UTC').format('YYYY-MM-DD');
-      const hoursDate = filteredData
-        .filter(item => item.date === todayStr)
-        .map(item => ({ date: item.date, hour: item?.timezone?.split(" ")[1]?.split(":")[0], margin: parseFloat(String(item.margin).replace('%', '')) || 0 }))
-        .sort((a, b) => b.margin - a.margin)
-        .slice(0, 5);
+        const dates = last10.map((d) => d.date || "");
+        const spend = last10.map((d) => d.spend || 0);
+        const revenue = last10.map((d) => d.revenue || 0);
+        const profit = last10.map((d) => d.profit || 0);
+        const rpc = last10.map((d) => d.rpc || 0);
+        const cpl = last10.map((d) => d.cpl || 0);
+        const margin = last10.map((d) => parseFloat(String(d.margin).replace("%", "")) || 0);
 
-      const rpcDate = filteredData
-        .filter(item => item.date === todayStr)
-        .map(item => ({ date: item.date, hour: item?.timezone?.split(" ")[1]?.split(":")[0], rpc: item.rpc || 0 }))
-        .sort((a, b) => b.rpc - a.rpc)
-        .slice(0, 5);
+        const todayStr = moment.tz("UTC").format("YYYY-MM-DD");
+        const hoursDate = mapped
+          .filter((item) => item.date === todayStr)
+          .map((item) => ({ date: item.date, hour: item?.timezone?.split(" ")[1]?.split(":")[0], margin: parseFloat(String(item.margin).replace("%", "")) || 0 }))
+          .sort((a, b) => b.margin - a.margin)
+          .slice(0, 5);
 
-      // aggregated hour frequency for last 10 days (rpc)
-      const filteredArray = filteredData
-        .map(item => ({
-          date: moment(item?.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
-          hour: moment(item?.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
-          rpc: Number(item.rpc || 0)
-        }))
-        .filter(item => {
-          const today = moment();
-          const tenDaysAgo = today.clone().subtract(10, 'days');
-          return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
-        });
+        const rpcDate = mapped
+          .filter((item) => item.date === todayStr)
+          .map((item) => ({ date: item.date, hour: item?.timezone?.split(" ")[1]?.split(":")[0], rpc: item.rpc || 0 }))
+          .sort((a, b) => b.rpc - a.rpc)
+          .slice(0, 5);
 
-      const aggregatedData = filteredArray.reduce((acc, item) => {
-        const key = item.hour;
-        if (!acc[key]) acc[key] = { ...item, count: 0, totalRpc: 0 };
-        acc[key].count += 1;
-        acc[key].totalRpc += Number(item.rpc || 0);
-        return acc;
-      }, {});
+        const filteredArray = mapped
+          .map((item) => ({
+            date: moment(item?.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
+            hour: moment(item?.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
+            rpc: Number(item.rpc || 0),
+          }))
+          .filter((item) => {
+            const today = moment();
+            const tenDaysAgo = today.clone().subtract(10, "days");
+            return moment(item.date).isBetween(tenDaysAgo, today, null, "[]");
+          });
 
-      const sortedData = Object.values(aggregatedData).filter(it => it.count > 0).sort((a, b) => b.count - a.count).slice(0, 5);
+        const aggregatedData = filteredArray.reduce((acc, item) => {
+          const key = item.hour;
+          if (!acc[key]) acc[key] = { ...item, count: 0, totalRpc: 0 };
+          acc[key].count += 1;
+          acc[key].totalRpc += Number(item.rpc || 0);
+          return acc;
+        }, {});
 
-      // aggregated margin similarly
-      const filteredArrayForMargin = filteredData
-        .map(item => ({
-          date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
-          hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
-          margin: typeof item.margin === 'string' && item.margin.includes('%') ? parseFloat(item.margin.replace('%', '')) : (Number(item.margin) || 0)
-        }))
-        .filter(item => {
-          const today = moment();
-          const tenDaysAgo = today.clone().subtract(10, 'days');
-          return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
-        });
+        const sortedData = Object.values(aggregatedData).filter((it) => it.count > 0).sort((a, b) => b.count - a.count).slice(0, 5);
 
-      const aggregatedMarginData = filteredArrayForMargin.reduce((acc, item) => {
-        const key = item.hour;
-        if (!acc[key]) acc[key] = { ...item, count: 0, totalMargin: 0 };
-        acc[key].count += 1;
-        acc[key].totalMargin += Number(item.margin || 0);
-        return acc;
-      }, {});
+        const filteredArrayForMargin = mapped
+          .map((item) => ({
+            date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
+            hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
+            margin: typeof item.margin === "string" && item.margin.includes("%") ? parseFloat(item.margin.replace("%", "")) : (Number(item.margin) || 0),
+          }))
+          .filter((item) => {
+            const today = moment();
+            const tenDaysAgo = today.clone().subtract(10, "days");
+            return moment(item.date).isBetween(tenDaysAgo, today, null, "[]");
+          });
 
-      const sortedMarginData = Object.values(aggregatedMarginData).filter(it => it.count > 0).sort((a, b) => b.count - a.count).slice(0, 5);
+        const aggregatedMarginData = filteredArrayForMargin.reduce((acc, item) => {
+          const key = item.hour;
+          if (!acc[key]) acc[key] = { ...item, count: 0, totalMargin: 0 };
+          acc[key].count += 1;
+          acc[key].totalMargin += Number(item.margin || 0);
+          return acc;
+        }, {});
 
-      setChartData({
-        dates, sortedData, sortedMarginData, rpcDate, hoursDate, spend, revenue, profit, margin, rpc, cpl
-      });
+        const sortedMarginData = Object.values(aggregatedMarginData).filter((it) => it.count > 0).sort((a, b) => b.count - a.count).slice(0, 5);
 
-      setTrue(false);
-
+        setChartData({ dates, sortedData, sortedMarginData, rpcDate, hoursDate, spend, revenue, profit, margin, rpc, cpl });
+      } catch (err) {
+        // keep chart data empty on failure
+        setChartData((cd) => ({ ...cd }));
+      }
     } catch (err) {
       console.error("Error fetching LiveCampaignHistory:", err);
       setRowData([]);
       setFilteredData([]);
       setLoading(false);
     }
-  };
+  }, [apiClient, CampaignId, accountNumber, timeZone, network, decodedStringFromParams]);
 
-  // debounced calls
-  const debouncedFunctionCallForUserColumnStructure = useCallback(debounce(async () => {
-    await functionCallForUserColumnStructure();
-  }, 200), [userdetails]);
+  // debounced wrappers
+  const debouncedFunctionCallForUserColumnStructure = useCallback(debounce(functionCallForUserColumnStructure, 200), [functionCallForUserColumnStructure]);
+  const debouncedFunctionCall = useCallback(debounce(functionCall, 200), [functionCall]);
 
-  const debouncedFunctionCall = useCallback(debounce(async () => {
-    await functionCall();
-  }, 200), [CampaignId, accountNumber, timeZone, network, apiClient]);
-
+  // update footer when filteredData changes
   useEffect(() => {
-    setDomainFixedFooter([{
-      adsetName: 'Total',
+    const footer = [{
+      adsetName: "Total",
       spend: (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.spend || 0)), 0) || 0),
       revenue: (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.revenue || 0)), 0) || 0),
       profit: (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.profit || 0)), 0) || 0),
-      margin: `${((filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.profit || 0)), 0) || 0) / (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.revenue || 0)), 0) || 1) * 100).toFixed(2)}%`,
+      margin: `${(((filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.profit || 0)), 0) || 0) / (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.revenue || 0)), 0) || 1) * 100)).toFixed(2)}%`,
       rpc: (filteredData?.length ? (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.rpc || 0)), 0) / filteredData.length) : 0),
       cpl: (filteredData?.length ? (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.cpl || 0)), 0) / filteredData.length) : 0),
       ncpl: (filteredData?.length ? (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.ncpl || 0)), 0) / filteredData.length) : 0),
@@ -679,176 +611,177 @@ const MnetLiveCampaignHistory = ({ params }) => {
       fblinkclicks: filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.fblinkclicks || 0)), 0),
       impressions: filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0),
       ctr: `${(filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.fbclicks || 0)), 0) / (filteredData?.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0) || 1) * 100).toFixed(2)}%`
-    }]);
+    }];
+    setDomainFixedFooter(footer);
   }, [filteredData]);
 
-  // initial data load (when userdetails ready)
+  // initial data load
   useEffect(() => {
-    if (userdetails?.adAccounts) {
-      const mainFunctionCall = async () => {
-        await functionCallForCommnets(accountNumber);
-        await debouncedFunctionCallForUserColumnStructure();
-        await debouncedFunctionCall();
-      };
-      mainFunctionCall();
-    }
-  }, [userdetails, accountNumber, debouncedFunctionCallForUserColumnStructure, debouncedFunctionCall]);
+    if (!userdetails?.adAccounts) return;
+    const main = async () => {
+      await functionCallForCommnets(accountNumber);
+      debouncedFunctionCallForUserColumnStructure();
+      debouncedFunctionCall();
+    };
+    main();
+    // we intentionally omit debounced functions from deps to avoid re-creating them unnecessarily
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userdetails, accountNumber]);
 
-  // onGridReady
+  // handle column move saving
   const handleColumnMove = async (params) => {
     try {
       const columnState = params.columnApi.getColumnState();
       const fieldOrder = columnState.map(col => col.colId);
-      const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-adsetnname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
+      const newFieldOrder = fieldOrder.filter(item => item && columnStructure.includes(item));
       setColumns(newFieldOrder);
       setColumnDefsState(getColumnDefs(newFieldOrder));
-      await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
+      if (apiClient && userdetails?.email) {
+        await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
+      }
     } catch (err) {
-      console.error('Error saving column order', err);
+      console.error("Error saving column order", err);
     }
   };
-
   const debouncedHandleColumnMove = useCallback(debounce(handleColumnMove, 600), [apiClient, userdetails, columnStructure]);
 
+  // onGridReady
   const onGridReady = (params) => {
     gridRef.current = params;
-    if (Array.isArray(columnDefsState) && columnDefsState.length) {
-      try {
-        params.columnApi.applyColumnState({ state: columnDefsState.map(col => ({ colId: col.field || col.headerName, ...col })), applyOrder: true });
-      } catch {
-        // ignore if state not compatible
+    try {
+      // apply column state if available
+      if (Array.isArray(columnDefsState) && columnDefsState.length) {
+        const state = columnDefsState.map(col => {
+          // use field (col.field) as colId, fallback to headerName if absent
+          const colId = col.field || col.headerName;
+          const shallow = { colId, ...col };
+          return shallow;
+        });
+        params.columnApi.applyColumnState({ state, applyOrder: true });
       }
+    } catch (err) {
+      // ignore incompatibility
     }
-    // attach dragStopped once
-    params.api.removeEventListener?.('dragStopped', debouncedHandleColumnMove);
-    params.api.addEventListener('dragStopped', debouncedHandleColumnMove);
+    // attach dragStopped (safe attach)
+    try {
+      params.api.removeEventListener?.("dragStopped", debouncedHandleColumnMove);
+      params.api.addEventListener?.("dragStopped", debouncedHandleColumnMove);
+    } catch {}
   };
 
-  // cell click (copy campaign name, multi selection tracking)
+  // onCellClicked
   const onCellClicked = (params) => {
-    if (params.column.getColId() === "campaignname" && params.value) {
-      navigator.clipboard.writeText(params.value).then(() => {
-        const originalValue = params.value;
-        const copiedText = `${originalValue} Copied!`;
-        params.node.setDataValue("campaignname", copiedText);
-        setTimeout(() => {
-          params.node.setDataValue("campaignname", originalValue);
-        }, 1500);
-      }).catch(err => console.error("Copy failed:", err));
-    }
-
-    if (params.event?.shiftKey || params.event?.ctrlKey) {
-      setSelectedCells(prev => {
-        // add unique
-        const exists = prev.some(c => c.rowIndex === params.node.rowIndex && c.colId === params.column.getId());
-        return exists ? prev : [...prev, { rowIndex: params.node.rowIndex, colId: params.column.getId() }];
-      });
-    } else {
-      setFirstSelectedCell({ rowIndex: params.node.rowIndex, colId: params.column.getId() });
-      setSelectedCells([{ rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
-    }
+    try {
+      if (params.column.getColId() === "campaignname" && params.value) {
+        navigator.clipboard?.writeText?.(params.value).then(() => {
+          const originalValue = params.value;
+          params.node.setDataValue("campaignname", `${originalValue} Copied!`);
+          setTimeout(() => params.node.setDataValue("campaignname", originalValue), 1500);
+        }).catch(() => {});
+      }
+      if (params.event?.shiftKey || params.event?.ctrlKey) {
+        setSelectedCells(prev => {
+          const exists = prev.some(c => c.rowIndex === params.node.rowIndex && c.colId === params.column.getId());
+          return exists ? prev : [...prev, { rowIndex: params.node.rowIndex, colId: params.column.getId() }];
+        });
+      } else {
+        setFirstSelectedCell({ rowIndex: params.node.rowIndex, colId: params.column.getId() });
+        setSelectedCells([{ rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+      }
+    } catch (err) { console.error(err); }
   };
 
-  // keyboard copy using AG Grid native copy function
+  // onCellKeyDown
   const onCellKeyDown = (params) => {
-    if (params.event.ctrlKey && params.event.key === "c") {
-      params.event.preventDefault();
-      try {
+    try {
+      if (params.event.ctrlKey && params.event.key === "c") {
+        params.event.preventDefault();
         params.api.copySelectedRangeToClipboard();
-      } catch (err) {
-        console.error('Copy through AG Grid failed', err);
       }
-    }
+    } catch (err) { console.error("Copy through AG Grid failed", err); }
   };
 
   // reload handler
-  const handleReload = () => {
+  const handleReload = async () => {
     setLoading(true);
-    (async () => {
+    try {
       await functionCallForCommnets(accountNumber);
       await functionCallForUserColumnStructure();
       await functionCall();
-    })();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const sendEditedCommentToAPI = async () => {
-    try {
-      const response = await apiClient.post('/Comments/upsert', {
-        accountNumber: accountNumber,
-        campaignname: CampaignName,
-        campaignid: CampaignId,
-        comment: comment,
-        usercommit: userdetails?.email,
-        level: "campaign"
-      });
-      if (response.status === 200 || response.status === 201) {
-        await functionCallForCommnets(accountNumber);
-      }
-      return response.data;
-    } catch (error) {
-      console.error('Error sending edited comment to server:', error);
-      throw error;
+    if (!apiClient) throw new Error("Missing apiClient");
+    const response = await apiClient.post("/Comments/upsert", {
+      accountNumber,
+      campaignname: CampaignName,
+      campaignid: CampaignId,
+      comment,
+      usercommit: userdetails?.email,
+      level: "campaign",
+    });
+    if (response.status === 200 || response.status === 201) {
+      await functionCallForCommnets(accountNumber);
     }
+    return response.data;
   };
 
   const handleOks = async () => {
     try {
-      if (typeof comment === 'string' && comment.trim() !== '') {
+      if (typeof comment === "string" && comment.trim() !== "") {
         await sendEditedCommentToAPI();
-        setComment(comment);
         message.success("Comment saved!");
         setIsModalVisibles(false);
       } else {
         message.warning("Comment cannot be empty.");
       }
-    } catch (error) {
-      console.error('Error while submitting comment:', error);
+    } catch (err) {
+      console.error(err);
       message.error("Error while submitting the comment.");
     }
   };
 
   const handleDelete = async () => {
     try {
+      if (!apiClient) throw new Error("Missing apiClient");
       const payload = {
-        accountNumber: accountNumber,
+        accountNumber,
         campaignname: CampaignName,
         campaignid: CampaignId,
-        comment: comment,
+        comment,
         usercommit: userdetails?.email,
-        level: "campaign"
+        level: "campaign",
       };
-      const response = await apiClient.post('/Comments/delete', payload);
+      const response = await apiClient.post("/Comments/delete", payload);
       if (response.status === 200) {
-        if (campaignComments.length > 0) {
-          const objectToUpdate = campaignComments[0];
-          setCampaignComments([{ ...objectToUpdate, comment: "", editedTime: "" }]);
-        } else {
-          setCampaignComments([]);
-        }
+        setCampaignComments((prev) => (prev[0] ? [{ ...prev[0], comment: "", editedTime: "" }] : []));
         setComment("");
-        message.success('Comment deleted successfully!');
+        message.success("Comment deleted successfully!");
         setIsModalVisibles(false);
       } else {
-        message.error('Failed to delete the comment. Please try again.');
+        message.error("Failed to delete the comment. Please try again.");
       }
-    } catch (error) {
-      console.error('Error deleting the comment:', error);
-      message.error('Failed to delete the comment. Please try again.');
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to delete the comment. Please try again.");
     }
   };
 
-  const handleCancels = () => {
-    setIsModalVisibles(false);
-  };
+  const handleCancels = () => setIsModalVisibles(false);
 
   const onClickBarChart = () => {
-    setIsGraphVisible(prev => {
-      try { localStorage.setItem('isGraphVisible', JSON.stringify(!prev)); } catch {}
+    setIsGraphVisible((prev) => {
+      safeSetLocal("isGraphVisible", !prev);
       return !prev;
     });
   };
 
-  // default column def for AG Grid
+  // default col def
   const defaultColDef = useMemo(() => ({
     sortable: true,
     resizable: true,
@@ -857,36 +790,86 @@ const MnetLiveCampaignHistory = ({ params }) => {
     flex: 1,
     minWidth: 180,
     comparator: defaultComparator,
-  }), []);
+  }), [defaultComparator]);
 
-  // helper color map for chart ticks
-  const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
-    return color;
-  };
-  const colorMap = {};
-  const getColorForValue = (value) => {
-    if (!colorMap[value]) colorMap[value] = getRandomColor();
-    return colorMap[value];
+  // grid theme
+  const gridThemeClass = theme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine";
+
+  // Force re-render of AG Grid when columnDefsState changes to avoid blank grid in some browsers
+  const gridKey = useMemo(() => {
+    try {
+      return `grid-${JSON.stringify(columnDefsState.map(c => c.field || c.headerName || c.colId))}`;
+    } catch {
+      return `grid-${Date.now()}`;
+    }
+  }, [columnDefsState]);
+
+  // date range filter handler
+  const handleChange = (value) => {
+    setSelectedValue(value);
+    const today = moment();
+    const startOfMonth = moment().startOf("month");
+    const endOfMonth = moment().endOf("month");
+    const startOfLastMonth = moment().subtract(1, "month").startOf("month");
+    const endOfLastMonth = moment().subtract(1, "month").endOf("month");
+
+    const dynamicDaysFilter = (days) =>
+      rowData.filter((item) =>
+        moment(item.date).isBetween(
+          moment().subtract(days, "days"),
+          today,
+          undefined,
+          "[]"
+        )
+      );
+
+    const filterLogic = {
+      All: () => rowData,
+      Today: () => rowData.filter((item) => item.date === today.format("YYYY-MM-DD")),
+      Yesterday: () => rowData.filter((item) => item.date === today.clone().subtract(1, "days").format("YYYY-MM-DD")),
+      "Last 7 Days": () => dynamicDaysFilter(7),
+      "Last 15 Days": () => dynamicDaysFilter(15),
+      "Last 20 Days": () => dynamicDaysFilter(20),
+      "Last 25 Days": () => dynamicDaysFilter(25),
+      "Last 30 Days": () => dynamicDaysFilter(30),
+      "Last 60 Days": () => dynamicDaysFilter(60),
+      "Last 90 Days": () => dynamicDaysFilter(90),
+      "This Month": () => rowData.filter((item) => moment(item.date).isBetween(startOfMonth, endOfMonth, undefined, "[]")),
+      "Last Month": () => rowData.filter((item) => moment(item.date).isBetween(startOfLastMonth, endOfLastMonth, undefined, "[]")),
+    };
+
+    const filtered = (filterLogic[value] && filterLogic[value]()) || rowData;
+    setFilteredData(filtered);
   };
 
-  // modal: get last edited info
-  const editUserANdTime = campaignComments.find(comment => comment.campaignname === decodedStringFromParams && comment.Account === accountNumber) || null;
+  // editUserAndTime (last edit)
+  const editUserANdTime = campaignComments.find((c) => c.campaignname === decodedStringFromParams && c.Account === accountNumber) || null;
+
+  // datasets for chart
+  const datasets = useMemo(() => Object.keys(datasetColorMap).map((label) => ({
+    label,
+    data: chartData[label.toLowerCase()] || [],
+    borderColor: datasetColorMap[label],
+    hidden: hiddenKeys.includes(label),
+    tension: 0.3,
+    pointRadius: 5,
+    pointHoverRadius: 8,
+    pointBackgroundColor: datasetColorMap[label],
+    pointHoverBackgroundColor: datasetColorMap[label],
+  })), [chartData, hiddenKeys]);
 
   // render
-  const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-
   return (
-    <Row style={{ display: 'flex', flexDirection: 'column' }}>
-      {isLoading === false &&
-        <Col style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <div style={{ width: '120px' }}>
+    <Row style={{ display: "flex", flexDirection: "column" }}>
+      {isLoading === false && (
+        <Col style={{ width: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+          <div style={{ width: "120px" }}>
             <p>Timezone: <span>{timeZone}</span></p>
           </div>
-        </Col>}
-      <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        </Col>
+      )}
+
+      <Col style={{ display: "flex", justifyContent: "flex-end" }}>
         <Button
           type="default"
           icon={<BarChartOutlined />}
@@ -894,17 +877,17 @@ const MnetLiveCampaignHistory = ({ params }) => {
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           style={{
-            border: '3px solid #91C25F',
-            color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
-            backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
-            borderRadius: '999px',
+            border: "3px solid #91C25F",
+            color: theme === "dark" ? "#fff" : (isGraphVisible || hovered ? "#fff" : "#555"),
+            backgroundColor: isGraphVisible || hovered ? "#91C25F" : "transparent",
+            borderRadius: "999px",
             fontWeight: 500,
-            padding: '0 12px',
-            height: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            transition: 'all 0.2s ease-in-out',
+            padding: "0 12px",
+            height: "32px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            transition: "all 0.2s ease-in-out",
           }}
         >
           Chart
@@ -913,26 +896,26 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
       {isGraphVisible && (
         <div style={{
-          width: '100%', borderRadius: 12,
-          backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-          padding: 15, height: 'auto'
+          width: "100%", borderRadius: 12,
+          backgroundColor: theme === "dark" ? "#1E1E1E" : "#e6e6e6",
+          padding: 15, height: "auto"
         }}>
-          <Col style={{ height: '400px', marginBottom: '20px' }}>
-            {chartData.dates.length === 0 ? (
-              <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <div style={{ padding: '24px' }}>
-                  <Skeleton active paragraph={{ rows: 20 }} />
+          <Col style={{ height: "400px", marginBottom: "20px" }}>
+            {(!chartData?.dates || chartData.dates.length === 0) ? (
+              <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <div style={{ padding: "24px" }}>
+                  <Skeleton active paragraph={{ rows: 6 }} />
                 </div>
               </div>
             ) : (
               <>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent: 'center' }}>
-                  {Object.keys(datasetColorMap).map(label => {
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "12px", justifyContent: "center" }}>
+                  {Object.keys(datasetColorMap).map((label) => {
                     const isVisible = !hiddenKeys.includes(label);
                     return (
-                      <div key={label} onClick={() => toggleLegend(label)} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '6px', fontSize: '13px', color: theme === 'dark' ? '#fff' : '#000' }}>
-                        <div style={{ width: '16px', height: '16px', borderRadius: '4px', backgroundColor: datasetColorMap[label], display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px' }}>
-                          {isVisible ? '✔' : ''}
+                      <div key={label} onClick={() => toggleLegend(label)} style={{ display: "flex", alignItems: "center", cursor: "pointer", gap: "6px", fontSize: "13px", color: theme === "dark" ? "#fff" : "#000" }}>
+                        <div style={{ width: "16px", height: "16px", borderRadius: "4px", backgroundColor: datasetColorMap[label], display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "11px" }}>
+                          {isVisible ? "✔" : ""}
                         </div>
                         {label}
                       </div>
@@ -940,7 +923,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                   })}
                 </div>
 
-                <Row style={{ height: '400px', marginTop: '20px' }}>
+                <Row style={{ height: "400px", marginTop: "20px" }}>
                   <Line
                     data={{
                       labels: chartData.dates || [],
@@ -952,7 +935,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                       plugins: {
                         legend: { display: false },
                         tooltip: {
-                          mode: 'index',
+                          mode: "index",
                           intersect: true,
                           displayColors: true,
                           callbacks: {
@@ -960,7 +943,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                               const index = tooltipItem.dataIndex;
                               const dataset = tooltipItem.dataset;
                               const value = dataset.data[index];
-                              const datasetLabel = dataset.label || '';
+                              const datasetLabel = dataset.label || "";
                               return `${datasetLabel}: ${value}`;
                             },
                           },
@@ -973,18 +956,18 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             color: (context) => {
                               const index = context.index;
                               const label = chartData?.dates?.[index];
-                              return getColorForValue(label);
+                              return "#000"; // keep simple for cross-browser; color functions sometimes cause issues
                             },
                           },
-                          grid: { color: theme === 'dark' ? '#444' : '#e0e0e0' },
+                          grid: { color: theme === "dark" ? "#444" : "#e0e0e0" },
                         },
                         y: {
                           beginAtZero: true,
                           ticks: {
-                            callback: value => Number(value).toFixed(2),
-                            color: theme === 'dark' ? '#fff' : '#000',
+                            callback: (value) => Number(value).toFixed(2),
+                            color: theme === "dark" ? "#fff" : "#000",
                           },
-                          grid: { color: theme === 'dark' ? '#444' : '#e0e0e0' },
+                          grid: { color: theme === "dark" ? "#444" : "#e0e0e0" },
                         },
                       },
                     }}
@@ -997,71 +980,71 @@ const MnetLiveCampaignHistory = ({ params }) => {
         </div>
       )}
 
-      <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
-        <div style={{ width: '20%', marginLeft: '1%' }}>
+      <Col style={{ display: "flex", width: "100%", marginLeft: "0%", gap: "8px", flexWrap: "wrap" }}>
+        <div style={{ width: "20%", minWidth: 180 }}>
           <p>Top 5 Rpc today</p>
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-            <thead><tr><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Rpc</th></tr></thead>
+          <table style={{ width: "100%", borderCollapse: "collapse", border: "2px solid #888" }}>
+            <thead><tr><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Hour</th><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Rpc</th></tr></thead>
             <tbody>
-              {chartData.rpcDate.filter(item => item.date === moment.tz('UTC').format('YYYY-MM-DD')).sort((a, b) => b.rpc - a.rpc).slice(0, 5).map((item, index) => (
-                <tr key={index}><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td></tr>
+              {chartData.rpcDate.filter(item => item.date === moment.tz("UTC").format("YYYY-MM-DD")).sort((a, b) => b.rpc - a.rpc).slice(0, 5).map((item, index) => (
+                <tr key={index}><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{item.hour}</td><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{item.rpc}</td></tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div style={{ marginLeft: "1%", width: '20%' }}>
+        <div style={{ width: "20%", minWidth: 180 }}>
           <p>Top 5 margin today</p>
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-            <thead><tr><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th></tr></thead>
+          <table style={{ width: "100%", borderCollapse: "collapse", border: "2px solid #888" }}>
+            <thead><tr><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Hour</th><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Margin</th></tr></thead>
             <tbody>
-              {chartData.hoursDate.filter(item => item.date === moment.tz('UTC').format('YYYY-MM-DD')).sort((a, b) => b.margin - a.margin).slice(0, 5).map((item, index) => (
-                <tr key={index}><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td></tr>
+              {chartData.hoursDate.filter(item => item.date === moment.tz("UTC").format("YYYY-MM-DD")).sort((a, b) => b.margin - a.margin).slice(0, 5).map((item, index) => (
+                <tr key={index}><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{item.hour}</td><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{item.margin}</td></tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div style={{ marginLeft: "1%", width: '25%' }}>
+        <div style={{ width: "25%", minWidth: 220 }}>
           <p>Top 5 repeated hours with Rpc (Last 10 days)</p>
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-            <thead><tr><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>RPC</th><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th></tr></thead>
+          <table style={{ width: "100%", borderCollapse: "collapse", border: "2px solid #888" }}>
+            <thead><tr><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Hour</th><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>RPC</th><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Times Repeated</th></tr></thead>
             <tbody>
               {chartData.sortedData.map((item, index) => {
                 const totalRpc = item.totalRpc || 0;
                 const count = item.count || 1;
-                return (<tr key={index}><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}</td><td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td></tr>);
+                return (<tr key={index}><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{item.hour}:00</td><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{count > 0 ? (totalRpc / count).toFixed(2) : "N/A"}</td><td style={{ border: "1px solid #888", padding: "8px" }}>{item.count}</td></tr>);
               })}
             </tbody>
           </table>
         </div>
 
-        <div style={{ marginLeft: "1%", width: '25%' }}>
+        <div style={{ width: "25%", minWidth: 220 }}>
           <p>Top 5 repeated hours margin (Last 10 days)</p>
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-            <thead><tr><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Average Margin</th><th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th></tr></thead>
+          <table style={{ width: "100%", borderCollapse: "collapse", border: "2px solid #888" }}>
+            <thead><tr><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Hour</th><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Average Margin</th><th style={{ fontWeight: "normal", border: "1px solid #888", padding: "3px" }}>Times Repeated</th></tr></thead>
             <tbody>
               {chartData.sortedMarginData.map((item, index) => {
                 const totalMargin = item.totalMargin || 0;
                 const count = item.count || 1;
-                return (<tr key={index}><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td><td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}</td><td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td></tr>);
+                return (<tr key={index}><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{item.hour}:00</td><td style={{ fontWeight: "normal", border: "1px solid #888", padding: "8px" }}>{count > 0 ? (totalMargin / count).toFixed(2) : "N/A"}</td><td style={{ border: "1px solid #888", padding: "8px" }}>{item.count}</td></tr>);
               })}
             </tbody>
           </table>
         </div>
       </Col>
 
-      <Col style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-        <Col style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-          <Select placeholder="Select a range" value={selectedValue} onChange={handleChange} style={{ width: "170px", borderRadius: '8px', color: theme === 'dark' ? '#fff' : '#000' }} dropdownClassName={theme === 'dark' && "custom-dropdown"} allowClear>
-            {dateOptions.map((option, index) => (<Option key={index} value={option}>{option}</Option>))}
+      <Col style={{ display: "flex", justifyContent: "flex-end", marginTop: "10px" }}>
+        <Col style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
+          <Select placeholder="Select a range" value={selectedValue} onChange={handleChange} style={{ width: "170px", borderRadius: "8px", color: theme === "dark" ? "#fff" : "#000" }} dropdownClassName={theme === "dark" && "custom-dropdown"} allowClear>
+            {dateOptions.map((option, idx) => (<Option key={idx} value={option}>{option}</Option>))}
           </Select>
 
-          <Input type="text" placeholder="Search..." value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ borderRadius: 8, border: '1px solid #4CAF50', marginLeft: "5px", color: theme === 'dark' ? '#fff' : '#000', backgroundColor: theme === 'dark' ? '#000' : '#fff', fontWeight: 500, width: 170 }} />
+          <Input type="text" placeholder="Search..." value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ borderRadius: 8, border: "1px solid #4CAF50", marginLeft: "5px", color: theme === "dark" ? "#fff" : "#000", backgroundColor: theme === "dark" ? "#000" : "#fff", fontWeight: 500, width: 170 }} />
 
-          <Button type="default" icon={<ReloadOutlined />} style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#91C25F', border: 'solid 0px' }} onClick={handleReload} />
+          <Button type="default" icon={<ReloadOutlined />} style={{ width: "35px", height: "33px", marginLeft: "5px", backgroundColor: "#91C25F", border: "solid 0px" }} onClick={handleReload} />
 
-          <EditOutlined onClick={() => setIsModalVisibles(true)} style={{ marginLeft: '3px', marginRight: '3px', color: comment ? '#91C25F' : 'gray', cursor: 'pointer', fontSize: '27px' }} title={comment ? 'Edit Comment' : 'Add Comment'} />
+          <EditOutlined onClick={() => setIsModalVisibles(true)} style={{ marginLeft: "3px", marginRight: "3px", color: comment ? "#91C25F" : "gray", cursor: "pointer", fontSize: "27px" }} title={comment ? "Edit Comment" : "Add Comment"} />
         </Col>
       </Col>
 
@@ -1073,25 +1056,27 @@ const MnetLiveCampaignHistory = ({ params }) => {
             </div>
           </div>
         ) : (
-          <div style={{ width: '100%', borderRadius: 12, backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6', padding: 10 }}>
+          <div style={{ width: "100%", borderRadius: 12, backgroundColor: theme === "dark" ? "#1E1E1E" : "#e6e6e6", padding: 10 }}>
             <Col>
-              <div style={{ width: '100%', display: 'flex' }}>
-                <Tooltip title={copied ? 'Copied!' : 'Click to copy'}>
-                  <p style={{ cursor: 'pointer', marginRight: '5px' }} onClick={handleCopy}>{CampaignName || decodedStringFromParams}</p>
+              <div style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <Tooltip title={copied ? "Copied!" : "Click to copy"}>
+                  <p style={{ cursor: "pointer", marginRight: "5px" }} onClick={handleCopy}>{CampaignName || decodedStringFromParams}</p>
                 </Tooltip>
+
                 {((campaignComments.length > 0) && (campaignComments[0]?.comment)) && (
                   <Tooltip title={campaignComments[0]?.comment}>
-                    <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px', cursor: 'pointer', marginBottom: '15px' }}>({campaignComments[0]?.comment})</p>
+                    <p style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "300px", cursor: "pointer", marginBottom: "15px" }}>({campaignComments[0]?.comment})</p>
                   </Tooltip>
                 )}
               </div>
             </Col>
 
-            <div className={`ag-theme-alpine ag-container ${gridThemeClass}`} style={{ width: '100%' }}>
+            <div className={`ag-theme-alpine ag-container ${gridThemeClass}`} style={{ width: "100%", height: 450, borderRadius: 8, padding: 6 }}>
               <AgGridReact
+                key={gridKey}
                 rowHeight={30}
                 rowData={filteredData}
-                columnDefs={columnDefsState}
+                columnDefs={columnDefsState && columnDefsState.length ? columnDefsState : getColumnDefs(columns.length ? columns : columnStructure)}
                 quickFilterText={searchText}
                 defaultColDef={defaultColDef}
                 pinnedBottomRowData={domainFixedFooter}
@@ -1106,9 +1091,10 @@ const MnetLiveCampaignHistory = ({ params }) => {
                   suppressClipboardPaste: false,
                   enableRangeSelection: true,
                   groupSelectsChildren: true,
+                  suppressReactUi: true, // improves stability for complex grids
                 }}
-                getRowStyle={params => params.node.rowPinned ? { backgroundColor: theme === 'dark' ? '#000' : '#fff', color: theme === 'dark' ? '#fff' : '#000', height: '30px' } : null}
-                getCellStyle={params => {
+                getRowStyle={params => params.node.rowPinned ? { backgroundColor: theme === "dark" ? "#000" : "#fff", color: theme === "dark" ? "#fff" : "#000", height: "30px" } : null}
+                getCellStyle={(params) => {
                   const isSelected = selectedCells.some(cell => cell.rowIndex === params.node.rowIndex && cell.colId === params.column.getId());
                   const isFirstSelected = firstSelectedCell && firstSelectedCell.rowIndex === params.node.rowIndex && firstSelectedCell.colId === params.column.getId();
                   return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
@@ -1117,40 +1103,42 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 suppressAggFuncInHeader={true}
                 groupSuppressBlankHeader={true}
                 onFilterChanged={(params) => {
-                  const api = params.api;
-                  const newFiltered = [];
-                  api.forEachNodeAfterFilterAndSort(node => {
-                    if (!node.rowPinned && node.data) newFiltered.push(node.data);
-                  });
+                  try {
+                    const api = params.api;
+                    const newFiltered = [];
+                    api.forEachNodeAfterFilterAndSort(node => {
+                      if (!node.rowPinned && node.data) newFiltered.push(node.data);
+                    });
 
-                  const totalRevenue = newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.revenue || 0)), 0);
-                  const totalProfit = newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.profit || 0)), 0);
-                  const totalSpend = newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.spend || 0)), 0);
+                    const totalRevenue = newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.revenue || 0)), 0);
+                    const totalProfit = newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.profit || 0)), 0);
+                    const totalSpend = newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.spend || 0)), 0);
 
-                  const updatedFooter = [{
-                    adsetName: 'Total',
-                    spend: totalSpend.toFixed(2),
-                    revenue: totalRevenue.toFixed(2),
-                    profit: totalProfit.toFixed(2),
-                    margin: totalRevenue ? `${((totalProfit / totalRevenue) * 100).toFixed(2)}%` : '0%',
-                    rpc: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.rpc || 0)), 0) / newFiltered.length) : 0).toFixed(2),
-                    cpl: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.cpl || 0)), 0) / newFiltered.length) : 0).toFixed(2),
-                    ncpl: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.ncpl || 0)), 0) / newFiltered.length) : 0).toFixed(2),
-                    fbleads: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fbleads || 0)), 0),
-                    conversions: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.conversions || 0)), 0),
-                    fmargin: totalSpend ? `${((totalProfit / totalSpend) * 100).toFixed(2)}%` : '0%',
-                    roi: totalSpend ? `${(((totalRevenue - totalSpend) / totalSpend) * 100).toFixed(2)}%` : '0%',
-                    cpc: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.cpc || 0)), 0) / newFiltered.length) : 0).toFixed(2),
-                    fbclicks: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fbclicks || 0)), 0),
-                    cpclinkclicks: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.cpclinkclicks || 0)), 0) / newFiltered.length) : 0).toFixed(2),
-                    fblinkclicks: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fblinkclicks || 0)), 0),
-                    impressions: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0),
-                    ctr: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0) ? `${((newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fbclicks || 0)), 0) / newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0)) * 100).toFixed(2)}%` : '0%'
-                  }];
+                    const updatedFooter = [{
+                      adsetName: "Total",
+                      spend: totalSpend.toFixed(2),
+                      revenue: totalRevenue.toFixed(2),
+                      profit: totalProfit.toFixed(2),
+                      margin: totalRevenue ? `${((totalProfit / totalRevenue) * 100).toFixed(2)}%` : "0%",
+                      rpc: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.rpc || 0)), 0) / newFiltered.length) : 0).toFixed(2),
+                      cpl: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.cpl || 0)), 0) / newFiltered.length) : 0).toFixed(2),
+                      ncpl: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.ncpl || 0)), 0) / newFiltered.length) : 0).toFixed(2),
+                      fbleads: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fbleads || 0)), 0),
+                      conversions: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.conversions || 0)), 0),
+                      fmargin: totalSpend ? `${((totalProfit / totalSpend) * 100).toFixed(2)}%` : "0%",
+                      roi: totalSpend ? `${(((totalRevenue - totalSpend) / totalSpend) * 100).toFixed(2)}%` : "0%",
+                      cpc: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.cpc || 0)), 0) / newFiltered.length) : 0).toFixed(2),
+                      fbclicks: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fbclicks || 0)), 0),
+                      cpclinkclicks: (newFiltered.length ? (newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.cpclinkclicks || 0)), 0) / newFiltered.length) : 0).toFixed(2),
+                      fblinkclicks: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fblinkclicks || 0)), 0),
+                      impressions: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0),
+                      ctr: newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0) ? `${((newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.fbclicks || 0)), 0) / newFiltered.reduce((acc, curr) => acc + (parseFloat(curr?.impressions || 0)), 0)) * 100).toFixed(2)}%` : "0%"
+                    }];
 
-                  if (JSON.stringify(domainFixedFooter) !== JSON.stringify(updatedFooter)) {
-                    setDomainFixedFooter(updatedFooter);
-                  }
+                    if (JSON.stringify(domainFixedFooter) !== JSON.stringify(updatedFooter)) {
+                      setDomainFixedFooter(updatedFooter);
+                    }
+                  } catch (err) { console.error(err); }
                 }}
               />
             </div>
@@ -1160,18 +1148,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
       <Modal
         title={CampaignName || decodedStringFromParams}
-        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+        // support both antd v4 (visible) and v5+ (open)
         visible={isModalVisibles}
+        open={isModalVisibles}
         onOk={handleOks}
         onCancel={handleCancels}
         footer={[
           <div key="footer" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-            <div style={{ display: 'flex', flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
               <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight: "bold" }}>Last Edited Time:</span>
               <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight: "bold" }}>{campaignComments?.length > 0 ? campaignComments[0]?.editedTime : ""}</span>
             </div>
             <div>
-              <Button key="delete" danger onClick={handleDelete} style={{ marginRight: 'auto', border: "1px solid #e3e3da" }}>Delete</Button>
+              <Button key="delete" danger onClick={handleDelete} style={{ marginRight: "auto", border: "1px solid #e3e3da" }}>Delete</Button>
               <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>Cancel</Button>
               <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>Ok</Button>
             </div>
@@ -1185,6 +1175,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
 };
 
 export default MnetLiveCampaignHistory;
+
+          
 
 
 // "use client"
