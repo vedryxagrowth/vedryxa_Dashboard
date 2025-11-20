@@ -66,7 +66,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess }) => {
+const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
     console.log("new multiple accounts:", newaccount);
@@ -1402,7 +1402,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
 
     const renderCarouselNav = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{ padding: '4px 5px' }}>
-            <Row align="middle"  justify="space-between">
+            <Row align="middle" justify="space-between">
                 <Col flex="auto">
                     <Tabs
                         activeKey={activeTab}
@@ -1432,9 +1432,9 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         onClickRefresh={onClickRefresh}
                         onStatusFilterChange={handleStatusFilterChange}
                         campaignStatusLabel={campaignStatusLabels}
-                         accountsFromReports={newaccount}
-                         network={newRevenuePratner}
-                         time={newtime}
+                        accountsFromReports={newaccount}
+                        network={newRevenuePratner}
+                        time={newtime}
                     />
                     {/* <Space size={2}>
                 <Input
@@ -1752,8 +1752,8 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
             <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
                 <Tabs.TabPane key="1">
                     <CampaignLevelReports
-                    allProfitLossArray={allProfitLossArray}
-                    allCampaignData={allCampaignData}
+                        allProfitLossArray={allProfitLossArray}
+                        allCampaignData={allCampaignData}
                         columnStructure={columnStructure}
                         campaignStatusFilter={campaignStatusFilter}
                         startDate={startDate}
@@ -1768,6 +1768,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
                         setCamapignlevelstatus={setCamapignlevelstatus}
+                        commentsMap={commentsMap}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}
@@ -1790,8 +1791,8 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                 </Tabs.TabPane>
                 <Tabs.TabPane key="2">
                     <AdsetLevelReports
-                    allProfitLossArray={allProfitLossArray}
-                    allCampaignData={allCampaignData}
+                        allProfitLossArray={allProfitLossArray}
+                        allCampaignData={allCampaignData}
                         columnStructure={columnStructure}
                         campaignStatusFilter={campaignStatusFilter}
                         startDate={startDate}
@@ -1806,6 +1807,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
                         setCamapignlevelstatus={setCamapignlevelstatus}
+                        commentsMap={commentsMap}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}
@@ -1829,8 +1831,8 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                 </Tabs.TabPane>
                 <Tabs.TabPane key="3">
                     <AdLevelReports
-                    allProfitLossArray={allProfitLossArray}
-                    allCampaignData={allCampaignData}
+                        allProfitLossArray={allProfitLossArray}
+                        allCampaignData={allCampaignData}
                         columnStructure={columnStructure}
                         campaignStatusFilter={campaignStatusFilter}
                         startDate={startDate}
@@ -1845,6 +1847,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         setCampaignComments={setCampaignComments}
                         Camapignlevelstatus={Camapignlevelstatus}
                         setCamapignlevelstatus={setCamapignlevelstatus}
+                        commentsMap={commentsMap}
                         changeRRefrst={changeRRefrst}
                         debouncedHandleColumnMove={debouncedHandleColumnMove}
                         userdetails={userdetails}

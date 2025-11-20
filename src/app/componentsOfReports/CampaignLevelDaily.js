@@ -5,9 +5,10 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge } from 'antd';
-import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
+import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
 import 'ag-grid-enterprise';
@@ -64,7 +65,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess }) => {
+const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
   const { theme } = useTokenContext();
   const { apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -93,6 +94,13 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
 
   const [selectedCampaigns, setSelectedCampaigns] = useState([]);
   const [leafCampaigns, setLeafCampaigns] = useState([]);
+  const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
+  const [comment, setComment] = useState("");
+  const [isBulkStatusModalVisible, setIsBulkStatusModalVisible] = useState(false);
+  const [bulkStatusAction, setBulkStatusAction] = useState(null);
+  const [confirmBulkLoading, setConfirmBulkLoading] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState("");
 
   // let fbCron = useRef();
 
@@ -175,6 +183,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
         campaignid: node.data.campaignid,
         campaignname: node.data.campaignname,
         accountNumber: node.data.accountNumber,
+        category: node.data.category,
         fbStatus: node.data.fbStatus,
         level: "campaign",
       }))
@@ -1016,7 +1025,293 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
   //             }
   //         }
   //     };
+  const handleBulkSmartPin = async (action) => {
 
+    if (!leafCampaigns || leafCampaigns.length === 0) {
+      message.warning("Select at least one campaign");
+      return;
+    }
+
+    const data = leafCampaigns.map(item => ({
+      accountNumber: item.accountNumber,
+      campaignid: item.campaignid,
+      campaignname: item.campaignname,
+      level: item.level,
+      userPin: userdetails?.email
+    }));
+
+    message.loading(`${action === "pin" ? "Pinning" : "Unpinning"} selected campaigns...`, 0);
+
+    let apiUrl = "";
+
+    if (action === "pin") {
+      apiUrl = "/SmartPinBulk";
+    } else if (action === "unpin") {
+      apiUrl = "/SmartUnpinBulk";
+    }
+
+    const res = await apiClient.post(apiUrl, {
+      items: data
+    });
+
+    message.destroy();
+    message.success(res.data.message);
+
+    const timeStamp = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+    // Update local state
+    setCampaignComments((prev) => {
+      const arr = [...prev];
+
+      data.forEach(item => {
+        const index = arr.findIndex(
+          i =>
+            i.campaignid == item.campaignid &&
+            i.Account == item.accountNumber &&
+            i.level === item.level
+        );
+
+        if (index >= 0) {
+          arr[index] = {
+            ...arr[index],
+            pinned: action === "pin",
+            userPin: userdetails?.email,
+            editedPinTime: timeStamp
+          };
+        } else {
+          arr.push({
+            campaignid: item.campaignid,
+            Account: item.accountNumber,   
+            level: "campaign",            
+            pinned: action === "pin",
+            userPin: userdetails?.email,
+            editedPinTime: timeStamp
+          });
+        }
+
+      });
+
+      return arr;
+    });
+  };
+
+  const handleSmartCommentSubmit = async () => {
+    try {
+      message.loading({
+        content: 'Saving comments for selected campaigns...',
+        key: 'bulkComment'
+      });
+
+      const items = leafCampaigns.map(item => ({
+        accountNumber: item.accountNumber,
+        campaignname: item.campaignname,
+        campaignid: item.campaignid,
+        comment,
+        usercommit: userdetails?.email,
+        level: item.level,
+      }));
+
+      const resp = await apiClient.post(
+        '/Comments/upsertBulk',
+        { items, usercommit: userdetails?.email }
+      );
+
+      if (resp.status === 200 || resp.status === 201) {
+        const timeStamp = moment().tz('Asia/Kolkata')
+          .format('YYYY-MM-DD hh:mm:ss A');
+
+        setCampaignComments(prev => {
+          const arr = [...prev];
+
+          leafCampaigns.forEach(item => {
+            const idx = arr.findIndex(
+              i =>
+                i.campaignid == item.campaignid &&
+                i.Account == item.accountNumber &&
+                i.level === 'campaign'
+            );
+
+            if (idx >= 0) {
+              arr[idx] = {
+                ...arr[idx],
+                comment,
+                usercommit: userdetails?.email,
+                editedTime: timeStamp
+              };
+            } else {
+              arr.push({
+                campaignid: item.campaignid,
+                Account: item.accountNumber,
+                level: 'campaign',
+                comment,
+                usercommit: userdetails?.email,
+                editedTime: timeStamp
+              });
+            }
+          });
+
+          return arr;
+        });
+
+        message.success({
+          content: `${leafCampaigns.length} comment(s) saved successfully`,
+          key: 'bulkComment',
+          duration: 3
+        });
+        setIsBulkCommentModalVisible(false);
+      }
+    } catch (error) {
+      console.error('Bulk comment error:', error);
+      message.error('Error while saving comments for selected campaigns.');
+    }
+  };
+  const handleBulkStatusSubmit = async () => {
+    try {
+      setConfirmBulkLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const filteredItems = leafCampaigns.filter(item =>
+        bulkStatusAction === "ACTIVE"
+          ? item.fbStatus === "PAUSED"
+          : item.fbStatus === "ACTIVE"
+      )
+        .map(item => ({
+          status: bulkStatusAction,
+          campaign_id: item.campaignid,
+          accountNumber: String(item.accountNumber),
+          name: item.campaignname,
+          email: userdetails?.email,
+        }));
+
+
+      if (filteredItems.length === 0) {
+        message.info("No campaigns need updating.");
+        setIsBulkStatusModalVisible(false);
+        setConfirmBulkLoading(false);
+        return;
+      }
+
+
+      const resp = await apiClient.post(
+        "/BulkCampaignStatusChangeMany",
+        { items: filteredItems },
+        { headers: { Authorization: token } }
+      );
+
+
+      if (resp.status === 200 || resp.status === 201) {
+        setCamapignlevelstatus(prev => {
+          const arr = [...prev];
+
+          filteredItems.forEach(update => {
+            const idx = arr.findIndex(
+              c =>
+                String(c.campaign_id) === String(update.campaign_id) &&
+                String(c.accountNumber) === String(update.accountNumber)
+            );
+
+            if (idx !== -1) {
+              arr[idx] = { ...arr[idx], status: bulkStatusAction };
+            }
+          });
+
+          return arr;
+        });
+
+        message.success(
+          `${filteredItems.length} campaign(s) updated to ${bulkStatusAction.toLowerCase()}`
+        );
+      }
+
+    } catch (e) {
+      console.error(e);
+      message.error("Bulk campaign update failed.");
+    } finally {
+      setIsBulkStatusModalVisible(false);
+      setConfirmBulkLoading(false);
+    }
+  };
+
+  const openBulkCategoryModal = () => {
+    setBulkOpen(true);
+    setBulkCategory("");
+  };
+  const saveBulkCategory = async () => {
+    if (!bulkCategory.trim()) {
+      message.warning("Enter category");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    const items = leafCampaigns
+      .filter(item => !item.category || item.category.trim() === "")
+      .map(item => ({
+        accountNumber: item.accountNumber,
+        campaignid: item.campaignid,
+        level: "campaign",
+        campaignname: item.campaignname,
+      }));
+
+    if (items.length === 0) {
+      message.info("All selected campaigns already have a category. Nothing to update.");
+      setBulkOpen(false);
+      return;
+    }
+
+    try {
+      message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+      await apiClient.post(
+        "/BulkUpdateCategory",
+        { items, category: bulkCategory },
+        { headers: { Authorization: token } }
+      );
+      setCampaignComments(prev => {
+        const arr = [...prev];
+        setLeafCampaigns(prev =>
+          prev.map(item =>
+            (!item.category || item.category.trim() === "")
+              ? { ...item, category: bulkCategory }
+              : item
+          )
+        )
+        items.forEach(item => {
+          const idx = arr.findIndex(
+            i =>
+              String(i.campaignid) === String(item.campaignid) &&
+              String(i.Account) === String(item.accountNumber) &&
+              i.level === "campaign"
+          );
+
+          if (idx >= 0) {
+            arr[idx].category = bulkCategory;
+          } else {
+            arr.push({
+              campaignid: item.campaignid,
+              Account: item.accountNumber,
+              level: "campaign",
+              category: bulkCategory
+            });
+          }
+        });
+
+        return arr;
+      });
+      leafCampaigns.forEach(item => {
+        const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+        commentsMap.set(key, { category: bulkCategory });
+      });
+
+      message.success({ content: "Category updated!", key: "bulkCategory" });
+
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to update category");
+    }
+
+    setBulkOpen(false);
+  };
   const autoGroupColumnDef = {
     headerName: 'Campaign name',
     minWidth: 450,
@@ -1025,22 +1320,60 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
     unSortIcon: true,
     headerClass: 'ag-center-header',
 
-    comparator: (campaignA, campaignB) => {
-      if (!campaignA) return 1;
-      if (!campaignB) return -1;
+    // comparator: (campaignA, campaignB) => {
+    //   if (!campaignA) return 1;
+    //   if (!campaignB) return -1;
 
-      const getPinStatusForCampaign = (campaignName) => {
-        const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-        return relatedComment ? relatedComment.pinned : false;
-      };
+    //   const getPinStatusForCampaign = (campaignName) => {
+    //     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //     return relatedComment ? relatedComment.pinned : false;
+    //   };
 
-      const isPinnedA = getPinStatusForCampaign(campaignA);
-      const isPinnedB = getPinStatusForCampaign(campaignB);
+    //   const isPinnedA = getPinStatusForCampaign(campaignA);
+    //   const isPinnedB = getPinStatusForCampaign(campaignB);
 
-      if (isPinnedA !== isPinnedB) {
-        return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
-      }
-      return campaignA.localeCompare(campaignB);
+    //   if (isPinnedA !== isPinnedB) {
+    //     return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
+    //   }
+    //   return campaignA.localeCompare(campaignB);
+    // },
+
+    comparator: (groupKeyA, groupKeyB, nodeA, nodeB) => {
+
+      // get first leaf row of group A
+      const leafA = nodeA.allLeafChildren?.[0]?.data;
+      const leafB = nodeB.allLeafChildren?.[0]?.data;
+
+      // safety
+      if (!leafA) return 1;
+      if (!leafB) return -1;
+
+      const campaignidA = leafA.campaignid;
+      const accountA = leafA.accountNumber;
+      const campaignidB = leafB.campaignid;
+      const accountB = leafB.accountNumber;
+
+      // find pinned record for A
+      const recA = campaignComments.find(c =>
+        String(c.Account) === String(accountA) &&
+        String(c.campaignid) === String(campaignidA) &&
+        c.level === "campaign"
+      );
+
+      const recB = campaignComments.find(c =>
+        String(c.Account) === String(accountB) &&
+        String(c.campaignid) === String(campaignidB) &&
+        c.level === "campaign"
+      );
+
+      const pinnedA = recA?.pinned ?? false;
+      const pinnedB = recB?.pinned ?? false;
+
+      // 1️⃣ PINNED FIRST when sorting ASC
+      if (pinnedA !== pinnedB) return pinnedA ? -1 : 1;
+
+      // 2️⃣ fallback: alphabetical by group key
+      return String(groupKeyA).localeCompare(String(groupKeyB));
     },
 
     cellRendererParams: {
@@ -1081,10 +1414,11 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
 
         // 🎯 pick this row's record (campaign + account [+ids])
         const rec = campaignComments.find(c =>
-          c.campaignname === campaignName &&
+          // c.campaignname === campaignName &&
           String(c.Account) === String(rowAccount) &&
-          (c.campaignid ? String(c.campaignid) === String(campaignid) : true) &&
-          (c.adsetid ? String(c.adsetid) === String(adsetid) : true)
+          (c.campaignid ? String(c.campaignid) === String(campaignid) : true)
+          && c.level === "campaign"
+          // && (c.adsetid ? String(c.adsetid) === String(aid) : true)
         );
 
         const relatedComment = rec?.comment ?? null;
@@ -1533,7 +1867,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
 
         const handleCancels = () => setIsModalVisibles(false);
 
-        // 📌 Pin / Unpin (BULK, per campaign + optional adset)
+        //  Pin / Unpin (BULK, per campaign + optional adset)
         const handlePinClick = async (cName, cId, aId, currentPinStatus) => {
           const updatedPinStatus = !currentPinStatus;
           try {
@@ -1800,7 +2134,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
             }}
           >
             <button
-              onClick={() => handleSmartPinClick(campaignName, campaignid, adsetid, pinned)}
+              onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
               style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 16 }}
             >
               {pinned ? '📌' : '📍'}
@@ -1825,7 +2159,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
               title="Confirm Action"
               open={isCampaignModalVisibles}
               className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-              onOk={handleSmartCampaignStatusClick}
+              onOk={handlePauseOk}
               onCancel={handlePauseCancel}
             >
               {confirmLoading && (
@@ -1970,7 +2304,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                     <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                       Cancel
                     </Button>
-                    <Button key="ok" onClick={handleSmartCommentSubmit} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                    <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
                       Ok
                     </Button>
                   </div>
@@ -2650,6 +2984,204 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                     <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
                   </Space>
                 </Col>
+                {leafCampaigns?.length > 1 && (
+                  <Col>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        padding: "6px 0",
+                      }}
+                    >
+                      {/* active & pause */}
+                      <Tooltip
+                        title={
+                          <div style={{ display: "flex", gap: "14px" }}>
+                            <span
+                              style={{ cursor: "pointer", fontSize: "18px", color: "green" }}
+                              onClick={() => {
+                                setBulkStatusAction("ACTIVE");
+                                setIsBulkStatusModalVisible(true);
+                              }}
+                            >
+                              ▶️
+                            </span>
+                            <span
+                              style={{ cursor: "pointer", fontSize: "18px", color: "red" }}
+                              onClick={() => {
+                                setBulkStatusAction("PAUSED");
+                                setIsBulkStatusModalVisible(true);
+                              }}
+                            >
+                              ⏸️
+                            </span>
+                          </div>
+                        }
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                          color: theme === "dark" ? "#ffffff" : "#000000",
+                          borderRadius: 6,
+                          padding: "6px 10px",
+                          fontSize: "14px",
+                        }}
+                      >
+                        <RxSwitch size={20} />
+
+                      </Tooltip>
+
+                      <Modal
+                        title="Confirm Bulk Status Change"
+                        open={isBulkStatusModalVisible}
+                        onCancel={() => setIsBulkStatusModalVisible(false)}
+                        confirmLoading={confirmBulkLoading}
+                        onOk={handleBulkStatusSubmit}
+                        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                      >
+                        {confirmBulkLoading && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              background: "rgba(255,255,255,0.7)",
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              zIndex: 1000,
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Spin size="large" tip="Saving..." />
+                          </div>
+                        )}
+
+                        <p>
+                          Are you sure you want to set status to{" "}
+                          <b style={{ color: bulkStatusAction === "ACTIVE" ? "green" : "red" }}>
+                            {bulkStatusAction}
+                          </b>{" "}
+                          for <b>{leafCampaigns.length}</b> campaigns?
+                        </p>
+                      </Modal>
+                      {/* pin & unpin */}
+                      <Tooltip
+                        title={
+                          <div style={{ display: "flex", gap: "14px" }}>
+                            <span
+                              style={{ cursor: "pointer", fontSize: "18px" }}
+                              onClick={() => handleBulkSmartPin("pin")}
+                            >
+                              📌
+                            </span>
+                            <span
+                              style={{ cursor: "pointer", fontSize: "18px" }}
+                              onClick={() => handleBulkSmartPin("unpin")}
+                            >
+                              📍
+                            </span>
+                          </div>
+                        }
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                          color: theme === "dark" ? "#ffffff" : "#000000",
+                          borderRadius: 6,
+                          padding: "6px 10px",
+                          fontSize: "14px",
+                        }}
+                      >
+                        <button
+                          style={{
+                            border: "none",
+                            background: "none",
+                            cursor: "pointer",
+                            fontSize: "18px",
+                          }}
+                        >
+                          <PushpinOutlined size={20} />
+                        </button>
+                      </Tooltip>
+                      {/*  comment */}
+                      <Tooltip title="Bulk Comment" overlayInnerStyle={{
+                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                        color: theme === "dark" ? "#ffffff" : "#000000",
+                        borderRadius: 6,
+                        padding: "6px 10px",
+                        fontSize: "14px",
+                      }}>
+                        <MessageOutlined
+                          onClick={() => setIsBulkCommentModalVisible(true)}
+                          style={{
+                            fontSize: "15px",
+                            cursor: "pointer"
+                          }}
+                        />
+                      </Tooltip>
+                      <Modal
+                        title="Bulk Comment"
+                        open={isBulkCommentModalVisible}
+                        onCancel={() => setIsBulkCommentModalVisible(false)}
+                        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                        footer={[
+                          <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
+                            Cancel
+                          </Button>,
+                          <Button
+                            key="ok"
+                            style={{ backgroundColor: "#91C25F" }}
+                            onClick={() => {
+                              handleSmartCommentSubmit();
+                              setIsBulkCommentModalVisible(false);
+                            }}
+                          >
+                            Ok
+                          </Button>
+                        ]}
+                      >
+                        <Input.TextArea
+                          placeholder="Enter comments"
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          rows={4}
+                        />
+                      </Modal>
+
+                      {/* Category */}
+                      <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                        color: theme === "dark" ? "#ffffff" : "#000000",
+                        borderRadius: 6,
+                        padding: "6px 10px",
+                        fontSize: "14px",
+                      }}>
+                        <EditOutlined
+                          onClick={openBulkCategoryModal}
+                          style={{
+                            fontSize: "15px",
+                            cursor: "pointer",
+                            marginLeft: '5px'
+                          }}
+                        />
+                      </Tooltip>
+                      <Modal
+                        open={bulkOpen}
+                        title="Edit Category"
+                        onOk={saveBulkCategory}
+                        onCancel={() => setBulkOpen(false)}
+                        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                      >
+                        <Input
+                          placeholder="Enter category"
+                          value={bulkCategory}
+                          onChange={e => setBulkCategory(e.target.value)}
+                        />
+                      </Modal>
+                    </div>
+                  </Col>
+                )}
+
                 {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                         </Col> */}
