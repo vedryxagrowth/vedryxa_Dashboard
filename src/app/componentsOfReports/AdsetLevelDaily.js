@@ -5,9 +5,10 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
+import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
 import 'ag-grid-enterprise';
@@ -64,7 +65,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess }) => {
+const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -111,6 +112,13 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
     }
     ), [dailyData, inputValue, theme]);
     const [leafCampaigns, setLeafCampaigns] = useState([]);
+    const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
+    const [comment, setComment] = useState("");
+    const [isBulkStatusModalVisible, setIsBulkStatusModalVisible] = useState(false);
+    const [bulkStatusAction, setBulkStatusAction] = useState(null);
+    const [confirmBulkLoading, setConfirmBulkLoading] = useState(false);
+    const [bulkOpen, setBulkOpen] = useState(false);
+    const [bulkCategory, setBulkCategory] = useState("");
 
     // useEffect to show selected campaigns after clearing search
     useEffect(() => {
@@ -227,6 +235,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                 campaignid: node.data.campaignid,
                 campaignname: node.data.campaignname,
                 accountNumber: node.data.accountNumber,
+                category: node.data.category,
                 adsetid: node.data.adsetid,
                 adsetname: node.data.adsetname,
                 fbStatus: node.data.fbStatus,
@@ -234,18 +243,313 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
             }))
             .filter(item => item.adsetid && item.adsetname);
 
-        // ✅ Remove duplicates by campaignid + accountNumber
         const uniqueLeafCampaigns = Array.from(
             new Map(
                 leafCampaignsData.map(item => [`${item.adsetid}_${item.accountNumber}`, item])
             ).values()
         );
 
-        // ✅ Store clean, unique campaigns
+
         setLeafCampaigns(uniqueLeafCampaigns);
         console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
     };
+    const handleBulkSmartPinAdset = async (action) => {
+        if (!leafCampaigns || leafCampaigns.length === 0) {
+            message.warning("Select at least one adset");
+            return;
+        }
 
+        const data = leafCampaigns.map(item => ({
+            accountNumber: item.accountNumber,
+            campaignid: item.campaignid,
+            adsetid: item.adsetid,
+            level: "adset",
+            userPin: userdetails?.email
+        }));
+
+        message.loading(
+            `${action === "pin" ? "Pinning" : "Unpinning"} selected adsets...`,
+            0
+        );
+
+        const apiUrl =
+            action === "pin"
+                ? "/SmartPinBulk"
+                : "/SmartUnpinBulk";
+
+        const res = await apiClient.post(apiUrl, { items: data });
+
+        message.destroy();
+        message.success(res.data.message);
+
+        const timeStamp = moment()
+            .tz("Asia/Kolkata")
+            .format("YYYY-MM-DD hh:mm:ss A");
+
+        setCampaignComments((prev) => {
+            const arr = [...prev];
+
+            data.forEach(item => {
+                const index = arr.findIndex(
+                    i =>
+                        String(i.campaignid) === String(item.campaignid) &&
+                        String(i.Account) === String(item.accountNumber) &&
+                        String(i.adsetid) === String(item.adsetid) &&
+                        i.level === "adset"
+                );
+
+                if (index >= 0) {
+                    arr[index] = {
+                        ...arr[index],
+                        pinned: action === "pin",
+                        userPin: userdetails?.email,
+                        editedPinTime: timeStamp
+                    };
+                }
+                else {
+                    arr.push({
+                        campaignid: item.campaignid,
+                        Account: item.accountNumber,   
+                        adsetid: item.adsetid,        
+                        level: "adset",               
+                        pinned: action === "pin",
+                        userPin: userdetails?.email,
+                        editedPinTime: timeStamp
+                    });
+                }
+
+            });
+
+            return arr;
+        });
+    };
+    const handleSmartCommentSubmitAdset = async () => {
+        try {
+            message.loading({
+                content: 'Saving comments for selected adsets...',
+                key: 'bulkCommentAdset'
+            });
+
+            const items = leafCampaigns.map(item => ({
+                accountNumber: item.accountNumber,
+                campaignid: item.campaignid,
+                adsetid: item.adsetid,
+                comment,
+                usercommit: userdetails?.email,
+                level: "adset"
+            }));
+
+            const resp = await apiClient.post(
+                '/Comments/upsertBulk',
+                { items }
+            );
+
+            if (resp.status === 200 || resp.status === 201) {
+                const timeStamp = moment().tz('Asia/Kolkata')
+                    .format('YYYY-MM-DD hh:mm:ss A');
+
+                setCampaignComments(prev => {
+                    const arr = [...prev];
+
+                    leafCampaigns.forEach(item => {
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(item.campaignid) &&
+                                String(i.Account) === String(item.accountNumber) &&
+                                String(i.adsetid) === String(item.adsetid) &&
+                                i.level === 'adset'
+                        );
+
+                        if (idx >= 0) {
+                            arr[idx] = {
+                                ...arr[idx],
+                                comment,
+                                usercommit: userdetails?.email,
+                                editedTime: timeStamp
+                            };
+                        } else {
+                            arr.push({
+                                campaignid: item.campaignid,
+                                Account: item.accountNumber,
+                                adsetid: item.adsetid,
+                                level: 'adset',
+                                comment,
+                                usercommit: userdetails?.email,
+                                editedTime: timeStamp
+                            });
+                        }
+                    });
+
+                    return arr;
+                });
+
+                message.success({
+                    content: `${leafCampaigns.length} comment(s) saved successfully`,
+                    key: 'bulkCommentAdset',
+                    duration: 3
+                });
+
+                setIsBulkCommentModalVisible(false);
+            }
+
+        } catch (error) {
+            console.error('Bulk adset comment error:', error);
+            message.error('Error while saving comments for selected adsets.');
+        }
+    };
+    const handleBulkAdsetStatusSubmit = async () => {
+        try {
+            setConfirmBulkLoading(true);
+
+            const token = localStorage.getItem("token");
+
+
+            const filteredItems = leafCampaigns.filter(item =>
+                bulkStatusAction === "ACTIVE"
+                    ? item.fbStatus === "PAUSED"
+                    : item.fbStatus === "ACTIVE"
+            )
+                .map(item => ({
+                    status: bulkStatusAction,
+                    campaign_id: item.campaignid,
+                    adset_id: item.adsetid,
+                    accountNumber: String(item.accountNumber),
+                    name: item.adsetname,
+                    email: userdetails?.email
+                }));
+
+            if (filteredItems.length === 0) {
+                message.info("No adsets need updating.");
+                setIsBulkStatusModalVisible(false);
+                setConfirmBulkLoading(false);
+                return;
+            }
+
+            const resp = await apiClient.post(
+                "/BulkAdsetStatusChangeMany",
+                { items: filteredItems },
+                { headers: { Authorization: token } }
+            );
+
+            if (resp.status === 200 || resp.status === 201) {
+                setCamapignlevelstatus(prev => {
+                    let arr = [...prev];
+
+                    filteredItems.forEach(update => {
+                        const { campaign_id, adset_id, accountNumber, status } = update;
+
+                        arr = arr.map(item =>
+                            String(item.campaign_id) === String(campaign_id) &&
+                                String(item.accountNumber) === String(accountNumber)
+                                ? {
+                                    ...item,
+                                    adsets: (item.adsets || []).map(adset =>
+                                        String(adset.adset_id) === String(adset_id)
+                                            ? { ...adset, status }
+                                            : adset
+                                    )
+                                }
+                                : item
+                        );
+                    });
+
+                    return arr;
+                });
+
+                message.success(
+                    `${filteredItems.length} adset(s) updated to ${bulkStatusAction.toLowerCase()}`
+                );
+            }
+
+        } catch (e) {
+            message.error("Bulk adset update failed.");
+            console.error(e);
+        } finally {
+            setIsBulkStatusModalVisible(false);
+            setConfirmBulkLoading(false);
+        }
+    };
+
+
+    const openBulkCategoryModal = () => {
+        setBulkOpen(true);
+        setBulkCategory("");
+    };
+    const saveBulkCategory = async () => {
+        if (!bulkCategory.trim()) {
+            message.warning("Enter category");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+        const items = leafCampaigns
+            .filter(item => !item.category || item.category.trim() === "")
+            .map(item => ({
+                accountNumber: item.accountNumber,
+                campaignid: item.campaignid,
+                level: "campaign",
+                campaignname: item.campaignname,
+            }));
+
+        if (items.length === 0) {
+            message.info("All selected campaigns already have a category. Nothing to update.");
+            setBulkOpen(false);
+            return;
+        }
+
+        try {
+            message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+            await apiClient.post(
+                "/BulkUpdateCategory",
+                { items, category: bulkCategory },
+                { headers: { Authorization: token } }
+            );
+            setCampaignComments(prev => {
+                const arr = [...prev];
+                setLeafCampaigns(prev =>
+                    prev.map(item =>
+                        (!item.category || item.category.trim() === "")
+                            ? { ...item, category: bulkCategory }
+                            : item
+                    )
+                )
+                items.forEach(item => {
+                    const idx = arr.findIndex(
+                        i =>
+                            String(i.campaignid) === String(item.campaignid) &&
+                            String(i.Account) === String(item.accountNumber) &&
+                            i.level === "campaign"
+                    );
+
+                    if (idx >= 0) {
+                        arr[idx].category = bulkCategory;
+                    } else {
+                        arr.push({
+                            campaignid: item.campaignid,
+                            Account: item.accountNumber,
+                            level: "campaign",
+                            category: bulkCategory
+                        });
+                    }
+                });
+
+                return arr;
+            });
+            leafCampaigns.forEach(item => {
+                const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+                commentsMap.set(key, { category: bulkCategory });
+            });
+
+            message.success({ content: "Category updated!", key: "bulkCategory" });
+
+        } catch (err) {
+            console.error(err);
+            message.error("Failed to update category");
+        }
+
+        setBulkOpen(false);
+    };
     const autoGroupColumnDef = {
         headerName: 'Adset name',
         minWidth: 450,
@@ -276,21 +580,63 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
         //     return campaignA.localeCompare(campaignB);
         // },
 
-        comparator: (a, b, nodeA, nodeB) => {
-            const pickPinned = (node) => {
-                const d = node?.group && node.childrenAfterGroup?.length
-                    ? node.childrenAfterGroup[0]?.data
-                    : node?.data;
-                if (!d) return false;
-                // prefer fast local cache set by the cell
-                if (typeof d.__adsetPinned === 'boolean') return d.__adsetPinned;
-                // optional fallback to backend record if present on row
-                return !!d.pinned;
-            };
-            const pa = pickPinned(nodeA);
-            const pb = pickPinned(nodeB);
-            if (pa !== pb) return pa ? -1 : 1;
-            return String(a || '').localeCompare(String(b || ''));
+        // comparator: (a, b, nodeA, nodeB) => {
+        //     const pickPinned = (node) => {
+        //         const d = node?.group && node.childrenAfterGroup?.length
+        //             ? node.childrenAfterGroup[0]?.data
+        //             : node?.data;
+        //         if (!d) return false;
+        //         // prefer fast local cache set by the cell
+        //         if (typeof d.__adsetPinned === 'boolean') return d.__adsetPinned;
+        //         // optional fallback to backend record if present on row
+        //         return !!d.pinned;
+        //     };
+        //     const pa = pickPinned(nodeA);
+        //     const pb = pickPinned(nodeB);
+        //     if (pa !== pb) return pa ? -1 : 1;
+        //     return String(a || '').localeCompare(String(b || ''));
+        // },
+
+        comparator: (groupKeyA, groupKeyB, nodeA, nodeB) => {
+
+            // get first leaf row of group A
+            const leafA = nodeA.allLeafChildren?.[0]?.data;
+            const leafB = nodeB.allLeafChildren?.[0]?.data;
+
+            // safety
+            if (!leafA) return 1;
+            if (!leafB) return -1;
+
+            const campaignidA = leafA.campaignid;
+            const accountA = leafA.accountNumber;
+            const adsetidA = leafA.adsetid;
+            const campaignidB = leafB.campaignid;
+            const accountB = leafB.accountNumber;
+            const adsetidB = leafB.adsetid;
+
+            // find pinned record for A
+            const recA = campaignComments.find(c =>
+                String(c.Account) === String(accountA) &&
+                String(c.campaignid) === String(campaignidA) &&
+                String(c.adsetid) === String(adsetidA) &&
+                c.level === "adset"
+            );
+
+            const recB = campaignComments.find(c =>
+                String(c.Account) === String(accountB) &&
+                String(c.campaignid) === String(campaignidB) &&
+                String(c.adsetid) === String(adsetidB) &&
+                c.level === "adset"
+            );
+
+            const pinnedA = recA?.pinned ?? false;
+            const pinnedB = recB?.pinned ?? false;
+
+            // 1️⃣ PINNED FIRST when sorting ASC
+            if (pinnedA !== pinnedB) return pinnedA ? -1 : 1;
+
+            // 2️⃣ fallback: alphabetical by group key
+            return String(groupKeyA).localeCompare(String(groupKeyB));
         },
 
         cellRendererParams: {
@@ -965,7 +1311,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                     }
                 };
                 const handleSmartAdsetCommentSubmit = async () => {
-                    // ✅ If multiple adsets are selected
+
                     if (leafCampaigns && leafCampaigns.length > 1) {
                         try {
                             message.loading({ content: 'Saving comments for selected adsets...', key: 'bulkAdsetComment' });
@@ -1185,7 +1531,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                     >
                         <button
                             onMouseDown={(e) => e.stopPropagation()}
-                            onClick={() => handleSmartAdsetPinClick(pinned)}
+                            onClick={() => handlePinClick(pinned)}
                             style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 16 }}
                         >
                             {pinned ? "📌" : "📍"}
@@ -1484,7 +1830,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                             title="Confirm Action"
                             open={isAdsetModalVisibles}
                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                            onOk={handleSmartAdsetStatusClick}
+                            onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
                             {confirmLoading && (
@@ -1698,7 +2044,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                                         <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                             Cancel
                                         </Button>
-                                        <Button key="ok" onClick={handleSmartAdsetCommentSubmit} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
                                             Ok
                                         </Button>
                                     </div>
@@ -2362,6 +2708,204 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                                         <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
                                     </Space>
                                 </Col>
+                                {leafCampaigns?.length > 1 && (
+                                    <Col>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "5px",
+                                                padding: "6px 0",
+                                            }}
+                                        >
+                                            {/* active & pause */}
+                                            <Tooltip
+                                                title={
+                                                    <div style={{ display: "flex", gap: "14px" }}>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px", color: "green" }}
+                                                            onClick={() => {
+                                                                setBulkStatusAction("ACTIVE");
+                                                                setIsBulkStatusModalVisible(true);
+                                                            }}
+                                                        >
+                                                            ▶️
+                                                        </span>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px", color: "red" }}
+                                                            onClick={() => {
+                                                                setBulkStatusAction("PAUSED");
+                                                                setIsBulkStatusModalVisible(true);
+                                                            }}
+                                                        >
+                                                            ⏸️
+                                                        </span>
+                                                    </div>
+                                                }
+                                                overlayInnerStyle={{
+                                                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                                    borderRadius: 6,
+                                                    padding: "6px 10px",
+                                                    fontSize: "14px",
+                                                }}
+                                            >
+                                                <RxSwitch size={20} />
+
+                                            </Tooltip>
+                                            <Modal
+                                                title="Confirm Bulk Status Change"
+                                                open={isBulkStatusModalVisible}
+                                                onCancel={() => setIsBulkStatusModalVisible(false)}
+                                                confirmLoading={confirmBulkLoading}
+                                                onOk={handleBulkAdsetStatusSubmit}
+                                                className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                                            >
+                                                {confirmBulkLoading && (
+                                                    <div
+                                                        style={{
+                                                            position: "absolute",
+                                                            top: 0,
+                                                            left: 0,
+                                                            right: 0,
+                                                            bottom: 0,
+                                                            background: "rgba(255,255,255,0.7)",
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                            zIndex: 1000,
+                                                            borderRadius: "8px",
+                                                        }}
+                                                    >
+                                                        <Spin size="large" tip="Saving..." />
+                                                    </div>
+                                                )}
+
+                                                <p>
+                                                    Are you sure you want to set status to{" "}
+                                                    <b style={{ color: bulkStatusAction === "ACTIVE" ? "green" : "red" }}>
+                                                        {bulkStatusAction}
+                                                    </b>{" "}
+                                                    for <b>{leafCampaigns.length}</b> campaigns?
+                                                </p>
+                                            </Modal>
+
+                                            {/* pin & unpin */}
+                                            <Tooltip
+                                                title={
+                                                    <div style={{ display: "flex", gap: "14px" }}>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px" }}
+                                                            onClick={() => handleBulkSmartPinAdset("pin")}
+                                                        >
+                                                            📌
+                                                        </span>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px" }}
+                                                            onClick={() => handleBulkSmartPinAdset("unpin")}
+                                                        >
+                                                            📍
+                                                        </span>
+                                                    </div>
+                                                }
+                                                overlayInnerStyle={{
+                                                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                                    borderRadius: 6,
+                                                    padding: "6px 10px",
+                                                    fontSize: "14px",
+                                                }}
+                                            >
+                                                <button
+                                                    style={{
+                                                        border: "none",
+                                                        background: "none",
+                                                        cursor: "pointer",
+                                                        fontSize: "18px",
+                                                    }}
+                                                >
+                                                    <PushpinOutlined size={20} />
+                                                </button>
+                                            </Tooltip>
+                                            {/*  comment */}
+                                            <Tooltip title="Bulk Comment" overlayInnerStyle={{
+                                                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                                borderRadius: 6,
+                                                padding: "6px 10px",
+                                                fontSize: "14px",
+                                            }}>
+                                                <MessageOutlined
+                                                    onClick={() => setIsBulkCommentModalVisible(true)}
+                                                    style={{
+                                                        fontSize: "15px",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                            <Modal
+                                                title="Bulk Comment"
+                                                open={isBulkCommentModalVisible}
+                                                className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                                                onCancel={() => setIsBulkCommentModalVisible(false)}
+                                                footer={[
+                                                    <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
+                                                        Cancel
+                                                    </Button>,
+                                                    <Button
+                                                        key="ok"
+                                                        style={{ backgroundColor: "#91C25F" }}
+                                                        onClick={() => {
+                                                            handleSmartCommentSubmitAdset();
+                                                            setIsBulkCommentModalVisible(false);
+                                                        }}
+                                                    >
+                                                        Ok
+                                                    </Button>
+                                                ]}
+                                            >
+                                                <Input.TextArea
+                                                    placeholder="Enter comments"
+                                                    value={comment}
+                                                    onChange={(e) => setComment(e.target.value)}
+                                                    rows={4}
+                                                />
+                                            </Modal>
+
+                                            {/* Category */}
+                                            <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                                                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                                borderRadius: 6,
+                                                padding: "6px 10px",
+                                                fontSize: "14px",
+                                            }}>
+                                                <EditOutlined
+                                                    onClick={openBulkCategoryModal}
+                                                    style={{
+                                                        fontSize: "15px",
+                                                        cursor: "pointer",
+                                                        marginLeft: '5px'
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                            <Modal
+                                                open={bulkOpen}
+                                                title="Edit Category"
+                                                className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                                                onOk={saveBulkCategory}
+                                                onCancel={() => setBulkOpen(false)}
+                                            >
+                                                <Input
+                                                    placeholder="Enter category"
+                                                    value={bulkCategory}
+                                                    onChange={e => setBulkCategory(e.target.value)}
+                                                />
+                                            </Modal>
+                                        </div>
+                                    </Col>
+                                )}
+
                                 {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                         </Col> */}

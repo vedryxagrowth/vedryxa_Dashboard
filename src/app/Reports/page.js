@@ -628,17 +628,17 @@ const MyTablePage = () => {
     };
 
 
-    useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem("selectedAccounts") || "[]");
-        if (stored.length > 0) {
-            setSelectedValue(stored);
-        }
-    }, []);
+    // useEffect(() => {
+    //     const stored = JSON.parse(localStorage.getItem("selectedAccounts") || "[]");
+    //     if (stored.length > 0) {
+    //         setSelectedValue(stored);
+    //     }
+    // }, []);
 
-    // 🔹 Auto-save when selectedValue changes
-    useEffect(() => {
-        localStorage.setItem("selectedAccounts", JSON.stringify(selectedValue));
-    }, [selectedValue]);
+
+    // useEffect(() => {
+    //     localStorage.setItem("selectedAccounts", JSON.stringify(selectedValue));
+    // }, [selectedValue]);
 
 
 
@@ -1799,12 +1799,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
-                
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -1833,12 +1833,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -1861,15 +1861,12 @@ const MyTablePage = () => {
 
 
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -1879,12 +1876,12 @@ const MyTablePage = () => {
                     <div>
                         <span
                             onClick={onEdit}
-                            style={{ cursor: "pointer",  }}
+                            style={{ cursor: "pointer", }}
                         >
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -2825,11 +2822,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -2858,12 +2856,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -2883,18 +2881,13 @@ const MyTablePage = () => {
                             }
                             return arr;
                         });
-
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -2904,12 +2897,12 @@ const MyTablePage = () => {
                     <div>
                         <span
                             onClick={onEdit}
-                            style={{ cursor: "pointer",  }}
+                            style={{ cursor: "pointer", }}
                         >
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -4658,7 +4651,7 @@ const MyTablePage = () => {
                         parseFloat(bidAmount) * 100 >= 1
                     ) {
                         // payload.bidAmount = parseFloat(bidAmount) * 100;
-                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100); 
+                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -4999,11 +4992,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -5032,12 +5026,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -5057,18 +5051,13 @@ const MyTablePage = () => {
                             }
                             return arr;
                         });
-
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -5078,12 +5067,12 @@ const MyTablePage = () => {
                     <div>
                         <span
                             onClick={onEdit}
-                            style={{ cursor: "pointer",  }}
+                            style={{ cursor: "pointer", }}
                         >
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -5277,7 +5266,7 @@ const MyTablePage = () => {
             field: 'date',
             minWidth: 110,
             sortable: true,
-            sort: "asc",
+            // sort: "asc",
             filter: "agDateColumnFilter",
             suppressMenu: true,
             menuTabs: [],
@@ -6041,11 +6030,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -6074,12 +6064,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -6099,18 +6089,13 @@ const MyTablePage = () => {
                             }
                             return arr;
                         });
-
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -6125,7 +6110,7 @@ const MyTablePage = () => {
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -6321,7 +6306,7 @@ const MyTablePage = () => {
             field: 'date',
             minWidth: 110,
             sortable: true,
-            sort: "asc",
+            // sort: "asc",
             filter: "agDateColumnFilter",
             suppressMenu: true,
             menuTabs: [],
@@ -7141,7 +7126,7 @@ const MyTablePage = () => {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
             },
-            suppressMenu: true,    // Suppress the column menu
+            suppressMenu: true,
 
         },
         adname: {
@@ -7280,12 +7265,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
-                
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -7314,12 +7299,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -7342,15 +7327,12 @@ const MyTablePage = () => {
 
 
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -7360,12 +7342,12 @@ const MyTablePage = () => {
                     <div>
                         <span
                             onClick={onEdit}
-                            style={{ cursor: "pointer",  }}
+                            style={{ cursor: "pointer", }}
                         >
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -7509,7 +7491,7 @@ const MyTablePage = () => {
             field: 'date',
             minWidth: 110,
             sortable: true,
-            sort: "asc",
+            // sort: "asc",
             filter: "agDateColumnFilter",
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -8269,7 +8251,7 @@ const MyTablePage = () => {
                         parseFloat(bidAmount) * 100 >= 1
                     ) {
                         // payload.bidAmount = parseFloat(bidAmount) * 100;
-                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100); 
+                        payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -8612,11 +8594,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -8645,12 +8628,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -8671,17 +8654,13 @@ const MyTablePage = () => {
                             return arr;
                         });
 
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -8696,7 +8675,7 @@ const MyTablePage = () => {
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -8886,7 +8865,7 @@ const MyTablePage = () => {
         date: {
             headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
             filter: "agDateColumnFilter",
-            sort: "asc",
+            // sort: "asc",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -9560,11 +9539,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -9593,12 +9573,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -9618,18 +9598,13 @@ const MyTablePage = () => {
                             }
                             return arr;
                         });
-
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -9644,7 +9619,7 @@ const MyTablePage = () => {
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -9834,7 +9809,7 @@ const MyTablePage = () => {
         date: {
             headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
             filter: "agDateColumnFilter",
-            sort: "asc",
+            // sort: "asc",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -10449,11 +10424,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -10482,12 +10458,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -10507,20 +10483,14 @@ const MyTablePage = () => {
                             }
                             return arr;
                         });
-
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
-                    }
+                        message.error("Failed to update category");
 
+                    }
                     setOpen(false);
                 };
 
@@ -10528,12 +10498,12 @@ const MyTablePage = () => {
                     <div>
                         <span
                             onClick={onEdit}
-                            style={{ cursor: "pointer",  }}
+                            style={{ cursor: "pointer", }}
                         >
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -11574,11 +11544,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -11607,12 +11578,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -11632,19 +11603,13 @@ const MyTablePage = () => {
                             }
                             return arr;
                         });
-
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
-                         
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -11654,12 +11619,12 @@ const MyTablePage = () => {
                     <div>
                         <span
                             onClick={onEdit}
-                            style={{ cursor: "pointer",  }}
+                            style={{ cursor: "pointer", }}
                         >
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -12506,11 +12471,12 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
             cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
-                const [open, setOpen] = React.useState(false);
-                const [category, setCategory] = React.useState("");
-                const [row, setRow] = React.useState(null);
+                const [open, setOpen] = useState(false);
+                const [category, setCategory] = useState("");
+                const [row, setRow] = useState(null);
 
                 const getRow = () => {
                     return props.node.group
@@ -12539,12 +12505,12 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "https://prodapis.adsgoat.in/UpdateCategory",
+                            "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
 
-                        props.context.setCampaignComments((prev) => {
+                        setCampaignComments((prev) => {
                             const arr = [...prev];
                             const idx = arr.findIndex(
                                 (i) =>
@@ -12565,17 +12531,13 @@ const MyTablePage = () => {
                             return arr;
                         });
 
-
                         const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        props.context.commentsMap.set(key, { category: payload.category });
-                        props.node.setDataValue("category", payload.category);
-                        props.api.refreshClientSideRowModel("group");
-
-                        message.success("Category updated!");
+                        commentsMap.set(key, { category: payload.category });
+                        message.success("Category updated");
                     } catch (err) {
                         console.error(err);
-                        // message.error("Failed to update category");
-                         message.success("Category updated!");
+                        message.error("Failed to update category");
+
                     }
 
                     setOpen(false);
@@ -12590,7 +12552,7 @@ const MyTablePage = () => {
                             <EditOutlined />
                         </span>
 
-                        <Modal open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
                         </Modal>
                     </div>
@@ -13418,7 +13380,14 @@ const MyTablePage = () => {
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
         setNetworksData(accountsAccess);
-        setRevenuePartner(value);
+        setRevenuePartner(value)
+        setSelectedValue([]);
+        localStorage.getItem(" ")
+        onChangeSelect([]);
+        setAccountChanged(true);
+        setAccountName("");
+        setSearchText("");
+        setIsOpen(false);
 
         // ⏰ set timezone
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
@@ -15024,6 +14993,7 @@ const MyTablePage = () => {
                                     campaignStatusFilter={campaignStatusFilter}
                                     Camapignlevelstatus={Camapignlevelstatus}
                                     setCamapignlevelstatus={setCamapignlevelstatus}
+                                    commentsMap={commentsMap}
                                     changeRRefrst={resetColumnStructure}
                                     debouncedHandleColumnMove={debouncedHandleColumnMove}
                                     userdetails={userdetails}
@@ -15077,6 +15047,7 @@ const MyTablePage = () => {
                                     campaignStatusFilter={campaignStatusFilter}
                                     Camapignlevelstatus={Camapignlevelstatus}
                                     setCamapignlevelstatus={setCamapignlevelstatus}
+                                    commentsMap={commentsMap}
                                     changeRRefrst={resetColumnStructure}
                                     debouncedHandleColumnMove={debouncedHandleColumnMove}
                                     userdetails={userdetails}
