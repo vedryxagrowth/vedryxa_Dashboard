@@ -155,7 +155,7 @@ const App = () => {
   );
   var token = localStorage.getItem("token")
   const [networksWithStatus, setNetworksWithStatus] = useState([]);
-  const [activeTab, setActiveTab] = useState("1");
+  const [activeTab, setActiveTab] = useState("2");
   const [campaignStatusFilter, setCampaignStatusFilter] = useState("all");
   const [selectedEditMultipleAdsetData, setSelectedEditMultipleAdsetData] =
     useState(null);
@@ -350,7 +350,7 @@ const App = () => {
 
 
   const items = [
-    { key: "1", label: "Old", content: "Content for Live data" },
+    // { key: "1", label: "Old", content: "Content for Live data" },
     { key: "2", label: "New", content: "Content for Daily data" },
   ];
 
@@ -3382,19 +3382,22 @@ const App = () => {
         }
         size="small"
         extra={
-          <Button
-            onClick={showDrawer}
-            icon={<PlusOutlined className="black-icon" />}
-            style={{
-              backgroundColor: "#91C25F",
-              color: "#000",
-              border: "none",
-              border: "#4caf50",
-            }}
-          >
-            New Campaign
-          </Button>
+          userdetails?.email !== "careers@adsgoat.in" && (
+            <Button
+              onClick={showDrawer}
+              icon={<PlusOutlined className="black-icon" />}
+              style={{
+                backgroundColor: "#91C25F",
+                color: "#000",
+                border: "none",
+                border: "#4caf50",
+              }}
+            >
+              New Campaign
+            </Button>
+          )
         }
+        
       >
         {/* Entire filter section in one single aligned row */}
         <Row
@@ -3763,7 +3766,7 @@ const App = () => {
             </Dropdown>
 
             {/* 🔹 Total Daily Spend */}
-            <span
+            {/* <span
               style={{
                 backgroundColor: "transparent",
                 padding: "5px 14px",
@@ -3774,7 +3777,22 @@ const App = () => {
               }}
             >
               Budget: ${totalDailySpend}
-            </span>
+            </span> */}
+            {userdetails?.email !== "careers@adsgoat.in" && (
+  <span
+    style={{
+      backgroundColor: "transparent",
+      padding: "5px 14px",
+      borderRadius: "8px",
+      fontSize: "14px",
+      color: theme === "dark" ? "#fff" : "#000",
+      border: "1px solid #4caf50",
+    }}
+  >
+    Budget: ${totalDailySpend}
+  </span>
+)}
+
 
             {/* 🔹 Refresh Button */}
             <Button
@@ -3976,7 +3994,7 @@ const App = () => {
           onChange={handleTabChange}
           renderTabBar={() => <></>}
         >
-          <Tabs.TabPane key="1">
+          {/* <Tabs.TabPane key="1">
             {loading ? (
               <Skeleton
                 active
@@ -4046,7 +4064,7 @@ const App = () => {
               />
             )
             }
-          </Tabs.TabPane>
+          </Tabs.TabPane> */}
           <Tabs.TabPane key="2">
             {loadingForMultipleAdsets ? (
               <Skeleton
