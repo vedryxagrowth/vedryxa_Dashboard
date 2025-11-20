@@ -3038,12 +3038,12 @@ const AdsetComponent = ({
 
   useEffect(() => {
     if (adset?.addlevel) {
-      setCaption(adset?.addlevel[0].Caption || "");
-      setPrimaryText(adset?.addlevel[0].message || "");
+      setCaption(adset?.addlevel[0]?.Caption || "");
+      setPrimaryText(adset?.addlevel[0]?.message || "");
       setAddName(adset?.AdsetName);
-      setHeadline(adset?.addlevel[0].headline || "");
-      setDescription(adset?.addlevel[0].Description || "");
-      setWebsiteURL(adset?.addlevel[0].Website_URL || "");
+      setHeadline(adset?.addlevel[0]?.headline || "");
+      setDescription(adset?.addlevel[0]?.Description || "");
+      setWebsiteURL(adset?.addlevel[0]?.Website_URL || "");
     }
   }, [adset]);
 
