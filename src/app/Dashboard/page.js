@@ -1,6 +1,7 @@
 // pages/dashboard.js
 "use client"
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { redirect } from "next/navigation";
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
@@ -967,6 +968,10 @@ const Dashboard = () => {
             <RevenuePartnerDashboard />
         )
     };
+
+    if(userdetails?.email == "careers@adsgoat.in"){
+        redirect("/Campaigns")
+    }
 
     const transformData = (data) => {
         return Object.fromEntries(
