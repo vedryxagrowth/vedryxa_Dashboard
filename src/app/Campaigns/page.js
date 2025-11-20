@@ -190,7 +190,7 @@ const App = () => {
         });
         setNetworksWithStatus(res.data);
       } catch (error) {
-        console.error('Error fetching networksData:', error);
+        console.error('Error to fetching networksData:', error);
       }
     };
     fetchNetworksData();
