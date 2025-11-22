@@ -56,7 +56,7 @@ const newtworkCollections = {
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 import { generate } from '@ant-design/colors'; // For dynamic color generation
-import { CheckCircleFilled, CloseCircleFilled, CloseCircleOutlined, ReloadOutlined } from "@ant-design/icons";
+import { CheckCircleFilled, CloseCircleFilled, CloseCircleOutlined, ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 import locale from 'antd/es/date-picker/locale/en_US';
 const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
@@ -969,7 +969,7 @@ const Dashboard = () => {
         )
     };
 
-    if(userdetails?.email == "careers@adsgoat.in"){
+    if (userdetails?.email == "careers@adsgoat.in") {
         redirect("/Campaigns")
     }
 
@@ -1366,20 +1366,7 @@ const Dashboard = () => {
         }
     }
 
-    function getAverageEstimatedCpc(fullData) {
-        // Filter items that have a valid 'cpc' value
-        const validCpcItems = fullData?.filter(item => item.cpc);
 
-        // Calculate the total sum of 'cpc'
-        const total = validCpcItems?.reduce((sum, item) => {
-            return sum + parseFloat(item.cpc);
-        }, 0);
-
-        // Calculate the average, and round to 2 decimal places
-        const average = validCpcItems?.length > 0 ? (total / validCpcItems?.length) : 0;
-
-        return Math.round(average * 100) / 100;
-    }
 
     function getTotalFbClicks(fullData) {
         const total = fullData?.reduce((sum, item) => {
@@ -1392,6 +1379,22 @@ const Dashboard = () => {
 
         // Round the final total to 2 decimal places
         return total;
+    }
+
+    function getAverageEstimatedCpc(fullData) {
+        // // Filter items that have a valid 'cpc' value
+        // const validCpcItems = fullData?.filter(item => item.cpc);
+
+        // // Calculate the total sum of 'cpc'
+        // const total = validCpcItems?.reduce((sum, item) => {
+        //     return sum + parseFloat(item.cpc);
+        // }, 0);
+
+        // // Calculate the average, and round to 2 decimal places
+        // const average = validCpcItems?.length > 0 ? (total / validCpcItems?.length) : 0;
+
+        // return Math.round(average * 100) / 100;
+        return Math.round((getTotalEstimatedSpend(fullData) / getTotalFbClicks(fullData)) * 100) / 100;
     }
 
     function getTotalImpressions(fullData) {
@@ -1443,7 +1446,7 @@ const Dashboard = () => {
                 } else if (key === "FB_InuvoPrism") {
                     newKey = "Facebook_InuvoPrismDaily"
                 }
-                else if (key === "FB_CodeFuel"){
+                else if (key === "FB_CodeFuel") {
                     newKey = "Facebook_CodeFuel_Daily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
@@ -1509,7 +1512,7 @@ const Dashboard = () => {
         console.log(collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC")
         function groupByCampaignAndDate(data) {
             return data?.reduce((acc, obj) => {
-                const campaignKey = obj?.campaign_name;
+                const campaignKey = obj?.campaign_id;
                 const dateKey = obj[`${time}Date`]; // directly access the specifiedDate field from the object
                 const accountNumber = obj?.accountNumber;
                 // Create a combined key for grouping by both campaign_name and specifiedDate
@@ -1523,10 +1526,13 @@ const Dashboard = () => {
                     acc.push({
                         key, // Unique key for grouping
                         campaign_name: obj?.campaign_name,
+                        campaign_id: obj?.campaign_id,
                         Date: dateKey,
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj?.estimated_revenue ? parseFloat(obj?.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj?.fbLeads) : 0,
+                        fbClicks: obj.fbClicks ? parseInt(obj?.fbClicks) : 0,
+                        impressions: obj.impressions ? parseInt(obj?.impressions) : 0,
                         conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                             ? obj.ad_clicks
                                 ? parseInt(obj?.ad_clicks)
@@ -1545,6 +1551,8 @@ const Dashboard = () => {
                     entry.spend += obj?.spend !== null && obj?.spend !== undefined ? parseFloat(obj?.spend) : 0;
                     entry.estimated_revenue += obj?.estimated_revenue !== null && obj?.estimated_revenue !== undefined ? parseFloat(obj?.estimated_revenue) : 0;
                     entry.fbLeads += obj?.fbLeads !== null && obj?.fbLeads !== undefined ? parseInt(obj?.fbLeads) : 0;
+                    entry.fbClicks += obj?.fbClicks !== null && obj?.fbClicks !== undefined ? parseInt(obj?.fbClicks) : 0;
+                    entry.impressions += obj?.impressions !== null && obj?.impressions !== undefined ? parseInt(obj?.impressions) : 0;
                     entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                         ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
                             ? parseInt(obj?.ad_clicks)
@@ -1719,6 +1727,7 @@ const Dashboard = () => {
         const top5ProfitCampaignsByDate = getTopFiveProfitCampaignsByDate(groupByCampaignAndDate(responseData));
         const overallProfitCampaignsByDate = getAllProfitableCampaignsByDate(groupByCampaignAndDate(responseData));
         const overallLossCampaignsByDate = getAllUnprofitableCampaignsByDate(groupByCampaignAndDate(responseData));
+        // console.log(top5ProfitCampaignsByDate);
 
 
         setTop5Campaigns(top5SpendCampaignsByDate);
@@ -1795,7 +1804,7 @@ const Dashboard = () => {
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
-                        impressions: obj.impressions ? parseInt(obj.impressions):0,
+                        impressions: obj.impressions ? parseInt(obj.impressions) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                             ? obj.ad_clicks
@@ -1831,7 +1840,10 @@ const Dashboard = () => {
                 // Calculate profit after grouping
                 account.profit = account.estimated_revenue - account.spend,
                     account.rpc = parseFloat(((account.estimated_revenue / account.conversions) * 100) / 100).toFixed(2),
-                    account.cpl = parseFloat(((account.spend / account.fbLeads) * 100) / 100).toFixed(2) || 0
+                    account.cpl = parseFloat(((account.spend / account.fbLeads) * 100) / 100).toFixed(2) || 0,
+                    account.cpc = parseFloat(((account.spend / account.fbClicks) * 100) / 100).toFixed(2) || 0,
+                    account.ctr = parseFloat((((account.fbClicks / account.impressions) * 100) * 100) / 100).toFixed(2) || 0
+
                 return account;
             });
         }
@@ -1966,7 +1978,7 @@ const Dashboard = () => {
         function groupDataByDomainAndAccount(data, dateField) {
             console.log(dateField);
             const DomainGroupedData = data?.reduce((acc, obj) => {
-                const { domain, accountNumber, spend, estimated_revenue, revenuePartner, MediaBuyerName, Holder } = obj;
+                const { domain, accountNumber, spend, estimated_revenue, ...rest } = obj;
                 const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
 
                 // Create a unique key for grouping by domain, specifiedDate, and accountNumber
@@ -1977,17 +1989,25 @@ const Dashboard = () => {
                         specifiedDate,
                         domain,
                         accountNumber,
-                        revenuePartner,   // Store the revenuePartner for the group
-                        MediaBuyerName,   // Store the MediaBuyerName for the group
-                        Holder,           // Store the Holder for the group
-                        spend: 0,
-                        estimated_revenue: 0,
+                        spend: obj.spend ? parseFloat(obj.spend) : 0,
+                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0, //new
+                        impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
+                        revenuePartner: obj.revenuePartner,
+                        mediaBuyerName: obj.MediaBuyerName,
+                        holder: obj.Holder,
                     };
                 }
 
                 // Sum the fields (spend, estimated_revenue) based on the new grouping
                 acc[key].spend += spend;
                 acc[key].estimated_revenue += estimated_revenue;
+                acc[key].fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                acc[key].conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                acc[key].fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0; // new
+                acc[key].impressions += obj.impressions ? parseInt(obj.impressions) : 0; // new
 
                 return acc;
             }, {});
@@ -2015,8 +2035,12 @@ const Dashboard = () => {
                         specifiedDate,
                         BMName,
                         AgencyName,
-                        spend: 0,
-                        estimated_revenue: 0,
+                        spend: obj.spend ? parseFloat(obj.spend) : 0,
+                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0, //new
+                        impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
                         accountNumber,
                         accountName: userdetails?.adAccounts[revenuePartnerNames[revenuePartner]]?.find(each => each.accountNumber === accountNumber)?.accountName
                     };
@@ -2025,6 +2049,10 @@ const Dashboard = () => {
                 // Sum the fields (spend, estimated_revenue) based on the new grouping
                 acc[key].spend += spend;
                 acc[key].estimated_revenue += estimated_revenue;
+                acc[key].fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                acc[key].conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                acc[key].fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0; // new
+                acc[key].impressions += obj.impressions ? parseInt(obj.impressions) : 0; // new
 
                 return acc;
             }, {});
@@ -2182,23 +2210,56 @@ const Dashboard = () => {
 
     // Example state updating functions from previous example for reference:
 
+    // const debouncedUpdateSelectedItems = useCallback(
+    //     debounce((category, checkedValues) => {
+    //         setSelectedItems((prevSelected) => ({
+    //             ...prevSelected,  // Spread the previous selected items to retain selections for other categories
+    //             [category]: checkedValues.map(value => ({
+    //                 accountNumber: value  // Store the accountNumber in the selected items array for the category
+    //             }))
+    //         }));
+    //         //   setSkeletonLoading(false); // Optionally stop loading
+    //     }, 1000), // Adjust debounce time (1000ms in this example)
+    //     []
+    // );
     const debouncedUpdateSelectedItems = useCallback(
         debounce((category, checkedValues) => {
-            setSelectedItems((prevSelected) => ({
-                ...prevSelected,  // Spread the previous selected items to retain selections for other categories
-                [category]: checkedValues.map(value => ({
-                    accountNumber: value  // Store the accountNumber in the selected items array for the category
-                }))
-            }));
-            //   setSkeletonLoading(false); // Optionally stop loading
-        }, 1000), // Adjust debounce time (1000ms in this example)
-        []
+
+            setSelectedItems(prev => {
+                const fullList = transformedData[category] || [];
+
+                // 1Find previously selected items that were NOT visible in filtered results
+                const previouslySelected = prev[category] || [];
+
+                const hiddenItems = previouslySelected.filter(item =>
+                    !filteredDataForCategory[category].some(f =>
+                        f.accountNumber.toString() === item.accountNumber.toString()
+                    )
+                );
+
+                // 2 Build updated selection from checkedValues + hiddenItems
+                const updatedSelected = [
+                    ...hiddenItems,
+                    ...fullList.filter(item =>
+                        checkedValues.includes(item.accountNumber.toString())
+                    )
+                ];
+
+                return {
+                    ...prev,
+                    [category]: updatedSelected
+                };
+            });
+
+        }, 200),
+        [transformedData]
     );
 
     const handleGroupChange = (checkedValues, category) => {
         setSkeletonLoading(true);
         // Call the debounced function to update the state
         debouncedUpdateSelectedItems(category, checkedValues);
+        setSearchValue('');
     };
 
     const handleSelectAllChange = (isChecked, category) => {
@@ -2214,6 +2275,16 @@ const Dashboard = () => {
         // setSkeletonLoading(false); // Optionally stop loading
     };
 
+    const filteredDataForCategory = {};
+    firstSelectValues.forEach(category => {
+        filteredDataForCategory[category] =
+            transformedData[category]?.filter(item =>
+            // item.accountNumber?.toString().toLowerCase().includes(searchValue)
+            (item.accountNumber?.toString().toLowerCase().includes(searchValue) ||
+                item.accountName?.toLowerCase().includes(searchValue))
+            ) || [];
+    });
+
     // Render checkboxes for categories dynamically based on the first Select values
     const renderInnerSelects = (theme) => {
         return firstSelectValues.map((category) => {
@@ -2222,7 +2293,9 @@ const Dashboard = () => {
 
             // Filter transformedData based on search query
             const filteredData = transformedData[category]?.filter(item =>
-                item.accountNumber?.toString().toLowerCase().includes(searchValue)
+            // item.accountNumber?.toString().toLowerCase().includes(searchValue)
+            (item.accountNumber?.toString().toLowerCase().includes(searchValue) ||
+                item.accountName?.toLowerCase().includes(searchValue))
             ) || [];
             console.log(`Transformed data for category ${category}:`, transformedData[category]);
 
@@ -2390,6 +2463,60 @@ const Dashboard = () => {
         return 0;
     };
 
+    const avgCTR = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { fbClicks, impressions } = params.data;
+            if (impressions !== 0) {
+                const RPC = (fbClicks / impressions) * 100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { fbClicks, impressions } = params.node.aggData;
+            if (impressions !== 0) {
+                const RPC = (fbClicks / impressions) * 100;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
+    const avgCPC = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { fbClicks, spend } = params.data;
+            if (fbClicks !== 0) {
+                const RPC = spend / fbClicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { fbClicks, spend } = params.node.aggData;
+            if (fbClicks !== 0) {
+                const RPC = spend / fbClicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
     const avgCpc = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
@@ -2465,6 +2592,9 @@ const Dashboard = () => {
             const { spend, fbLeads } = params.node.aggData;
             if (spend !== 0) {
                 const RPC = spend / fbLeads;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
                 return Number(RPC.toFixed(2));
             }
         }
@@ -2476,14 +2606,15 @@ const Dashboard = () => {
         headerName: 'Account number',
         minWidth: 300,
         sortable: true,
+        filter: "agTextColumnFilter",
         filterValueGetter: (params) => {
-    if (params.node.group) {
-      // Use the group key (campaign name)
-      return params.node.key;
-    }
-    // For leaf rows, use the campaign_name or any field
-    return params.data?.campaign_name || '';
-  },
+            if (params.node.group) {
+                // Use the group key (campaign name)
+                return params.node.key;
+            }
+            // For leaf rows, use the campaign_name or any field
+            return params.data?.accountNumber || '';
+        },
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -2576,14 +2707,15 @@ const Dashboard = () => {
         headerName: 'Account number',
         minWidth: 200,
         sortable: true,
+        filter: "agTextColumnFilter",
         filterValueGetter: (params) => {
-    if (params.node.group) {
-      // Use the group key (campaign name)
-      return params.node.key;
-    }
-    // For leaf rows, use the campaign_name or any field
-    return params.data?.campaign_name || '';
-  },
+            if (params.node.group) {
+                // Use the group key (campaign name)
+                return params.node.key;
+            }
+            // For leaf rows, use the campaign_name or any field
+            return params.data?.accountNumber || '';
+        },
         //  cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
         // autoHeight: true,
         cellRendererParams: {
@@ -2651,13 +2783,13 @@ const Dashboard = () => {
         autoHeight: true,
         filter: "agTextColumnFilter",
         filterValueGetter: (params) => {
-    if (params.node.group) {
-      // Use the group key (campaign name)
-      return params.node.key;
-    }
-    // For leaf rows, use the campaign_name or any field
-    return params.data?.campaign_name || '';
-  },
+            if (params.node.group) {
+                // Use the group key (campaign name)
+                return params.node.key;
+            }
+            // For leaf rows, use the campaign_name or any field
+            return params.data?.campaign_name || '';
+        },
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -2665,7 +2797,7 @@ const Dashboard = () => {
                     return 'Total';
                 }
 
-                const firstColumnValue = params.node.key; // campaign name
+
                 const campaignName = params.node.key;
                 const groupedData = params.node.allLeafChildren
                     ? params.node.allLeafChildren.map(childNode => childNode.data)
@@ -2678,6 +2810,7 @@ const Dashboard = () => {
 
                 // Safeguard against undefined or missing properties
                 const firstGroupedItem = groupedData[0] || {};
+                const firstColumnValue = groupedData[0]?.campaign_name || params.node.key; // campaign name
                 const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
                     ? revenuePartnerNames[firstGroupedItem.revenuePartner]
                     : 'Unknown Partner';
@@ -2701,14 +2834,38 @@ const Dashboard = () => {
 
                                 // // Convert data to query string
                                 // const queryString = new URLSearchParams(data).toString();
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignNameToPass.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassToReports}-${time}-${collectionName}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignName}-${accountNumberToPassToReports}-${time}-${collectionName}`;
                                 console.log(url);
 
                                 // Open the URL in a new tab
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                         >
-                            {valueWithCount}
+                            <Tooltip
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }}
+                                title={(() => {
+                                    const [text, setText] = React.useState("Copy");
+                                    const handleCopy = (e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard.writeText(valueWithCount);
+                                        setText("Copied");
+                                        setTimeout(() => setText("Copy"), 1000);
+                                    };
+                                    return (
+                                        <span style={{ cursor: "pointer" }} onClick={handleCopy}>
+                                            {text}
+                                        </span>
+                                    );
+                                })()}
+                            >
+                                {valueWithCount}
+                            </Tooltip>
+
                         </span>
                     </div>
                 );
@@ -3046,6 +3203,29 @@ const Dashboard = () => {
             filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
+        {
+            field: 'cpc',
+            headerName: 'CPC',
+            valueGetter: avgCPC,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ctr',
+            headerName: 'CTR',
+            valueGetter: avgCTR,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+
         // {
         //     field: 'ctr',
         //     headerName: 'CTR',
@@ -3076,6 +3256,28 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbClicks',
+            headerName: 'Fb clicks',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 105,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'impressions',
+            headerName: 'Imp',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
             filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
@@ -3454,6 +3656,117 @@ const Dashboard = () => {
             filter: "agNumberColumnFilter",
         },
         {
+            field: 'rpc',
+            headerName: 'RPC',
+            valueGetter: avgRpcCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpl',
+            headerName: 'CPL',
+            valueGetter: avgCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ncpl',
+            headerName: 'NCPL',
+            valueGetter: avgNCPL,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpc',
+            headerName: 'CPC',
+            valueGetter: avgCPC,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ctr',
+            headerName: 'CTR',
+            valueGetter: avgCTR,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+
+        // {
+        //     field: 'ctr',
+        //     headerName: 'CTR',
+        //     valueGetter: avgCtr,
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        //     minWidth: 95,
+        //     filter: "agNumberColumnFilter",
+        //     // valueFormatter: rpcCplFormatter,
+        // },
+        {
+            field: 'conversions',
+            headerName: 'Conv',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbLeads',
+            headerName: 'Fb leads',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbClicks',
+            headerName: 'Fb clicks',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'impressions',
+            headerName: 'Imp',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             headerName: 'Project name',
             field: "revenuePartner",
             suppressMenu: true,
@@ -3578,14 +3891,28 @@ const Dashboard = () => {
     //     },
     // ]);
     const columnDefs2 = [
+        // {
+        //     field: 'campaign_name', headerName: 'Campaign name', minWidth: 430, suppressAutoSize: true,
+        //     resizable: true,
+        //     sortable: true,
+        //     // hide: true, // Hide column as it's grouped
+        //     // rowGroup: true,
+        //     // enableRowGroup: true,
+        //     filter: "agTextColumnFilter",
+        // },
         {
-            field: 'campaign_name', headerName: 'Campaign name', minWidth: 430, suppressAutoSize: true,
-            resizable: true,
+            // headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' 
+            headerName: 'Campaign name',
+            field: 'campaign_id',
             sortable: true,
-            hide: true, // Hide column as it's grouped
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 500,
+            hide: true,
             rowGroup: true,
             enableRowGroup: true,
-            filter: "agTextColumnFilter",
         },
         {
             field: "accountNumber", minWidth: 170, headerName: "Account number",
@@ -3647,6 +3974,117 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             filter: "agNumberColumnFilter",
+        },
+        {
+            field: 'rpc',
+            headerName: 'RPC',
+            valueGetter: avgRpcCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpl',
+            headerName: 'CPL',
+            valueGetter: avgCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ncpl',
+            headerName: 'NCPL',
+            valueGetter: avgNCPL,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpc',
+            headerName: 'CPC',
+            valueGetter: avgCPC,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ctr',
+            headerName: 'CTR',
+            valueGetter: avgCTR,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+
+        // {
+        //     field: 'ctr',
+        //     headerName: 'CTR',
+        //     valueGetter: avgCtr,
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        //     minWidth: 95,
+        //     filter: "agNumberColumnFilter",
+        //     // valueFormatter: rpcCplFormatter,
+        // },
+        {
+            field: 'conversions',
+            headerName: 'Conv',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbLeads',
+            headerName: 'Fb leads',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbClicks',
+            headerName: 'Fb clicks',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'impressions',
+            headerName: 'Imp',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
         },
         {
             headerName: 'Project name',
@@ -3853,6 +4291,117 @@ const Dashboard = () => {
             filter: "agNumberColumnFilter",
         },
         {
+            field: 'rpc',
+            headerName: 'RPC',
+            valueGetter: avgRpcCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpl',
+            headerName: 'CPL',
+            valueGetter: avgCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ncpl',
+            headerName: 'NCPL',
+            valueGetter: avgNCPL,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpc',
+            headerName: 'CPC',
+            valueGetter: avgCPC,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ctr',
+            headerName: 'CTR',
+            valueGetter: avgCTR,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+
+        // {
+        //     field: 'ctr',
+        //     headerName: 'CTR',
+        //     valueGetter: avgCtr,
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        //     minWidth: 95,
+        //     filter: "agNumberColumnFilter",
+        //     // valueFormatter: rpcCplFormatter,
+        // },
+        {
+            field: 'conversions',
+            headerName: 'Conv',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbLeads',
+            headerName: 'Fb leads',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbClicks',
+            headerName: 'Fb clicks',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'impressions',
+            headerName: 'Imp',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             headerName: 'Project name',
             field: "revenuePartner",
             minWidth: 180,
@@ -3982,7 +4531,118 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
             filter: "agNumberColumnFilter",
-        }
+        },
+        {
+            field: 'rpc',
+            headerName: 'RPC',
+            valueGetter: avgRpcCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpl',
+            headerName: 'CPL',
+            valueGetter: avgCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ncpl',
+            headerName: 'NCPL',
+            valueGetter: avgNCPL,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpc',
+            headerName: 'CPC',
+            valueGetter: avgCPC,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'ctr',
+            headerName: 'CTR',
+            valueGetter: avgCTR,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+
+        // {
+        //     field: 'ctr',
+        //     headerName: 'CTR',
+        //     valueGetter: avgCtr,
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        //     minWidth: 95,
+        //     filter: "agNumberColumnFilter",
+        //     // valueFormatter: rpcCplFormatter,
+        // },
+        {
+            field: 'conversions',
+            headerName: 'Conv',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbLeads',
+            headerName: 'Fb leads',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fbClicks',
+            headerName: 'Fb clicks',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 108,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'impressions',
+            headerName: 'Imp',
+            aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
     ]
     // const [columnDefs4] = useState([
     //     {
@@ -4095,13 +4755,13 @@ const Dashboard = () => {
         },
         filter: "agTextColumnFilter",
         filterValueGetter: (params) => {
-    if (params.node.group) {
-      // Use the group key (campaign name)
-      return params.node.key;
-    }
-    // For leaf rows, use the campaign_name or any field
-    return params.data?.domain || '';
-  },
+            if (params.node.group) {
+                // Use the group key (campaign name)
+                return params.node.key;
+            }
+            // For leaf rows, use the campaign_name or any field
+            return params.data?.domain || '';
+        },
     };
     const autoGroupColumnDefAgency = {
         headerName: 'BM name', // Display name for the grouped column
@@ -4113,13 +4773,13 @@ const Dashboard = () => {
         },
         filter: "agTextColumnFilter",
         filterValueGetter: (params) => {
-    if (params.node.group) {
-      // Use the group key (campaign name)
-      return params.node.key;
-    }
-    // For leaf rows, use the campaign_name or any field
-    return params.data?.BMName || '';
-  },
+            if (params.node.group) {
+                // Use the group key (campaign name)
+                return params.node.key;
+            }
+            // For leaf rows, use the campaign_name or any field
+            return params.data?.BMName || '';
+        },
     };
 
     //   const [columnDefs2] = useState([
@@ -4289,7 +4949,7 @@ const Dashboard = () => {
         },
     });
 
-    const cardHeight = "95px"; // fixed height
+    const cardHeight = "70px"; // fixed height
     const cardBg = theme === "dark" ? "#333" : "";
     const valueStyle = { color: theme === "dark" ? "#ffffff" : "#3f8600" };
 
@@ -4307,7 +4967,7 @@ const Dashboard = () => {
     ];
 
     const onCellClicked = (params) => {
-        
+
         const field = params.colDef.field || params.node.field;
 
         if (field === 'accountNumber') {
@@ -4377,6 +5037,8 @@ const Dashboard = () => {
         //     console.log('Clicked accountNumber:', params.value, params.node);
         // }
     };
+
+
 
 
     // console.log(rowData?.map(each=> each.profit > 0));
@@ -5072,7 +5734,7 @@ const Dashboard = () => {
                                             </Card>
                                         </Col>
                                     </Row> */}
-                                    <Row className="metrics-row" gutter={[8, 8]}>
+                                    {/* <Row className="metrics-row" gutter={[8, 8]}>
                                         {metrics.map((m) => (
                                             <Col
                                                 key={m.key}
@@ -5116,7 +5778,31 @@ const Dashboard = () => {
                                                 </Card>
                                             </Col>
                                         ))}
-                                    </Row>
+                                    </Row> */}
+                                    <div className="metrics-container">
+    <div className="metrics-grid">
+        {metrics.map((m, i) => (
+            <Card className="metric-card" key={i} bordered={false}
+            style={{
+        backgroundColor: theme === "dark" ? "#2F2F2F" : "white"
+    }}>
+                <div className="metric-title" style={{ color: m.color }}>
+                    <span className="dot" style={{ backgroundColor: m.color }}></span>
+                    {m.label}
+                </div>
+
+                <div className="metric-value"
+                 style={{
+            color: theme === "dark" ? "#fff" : "#3A9100"  // <-- VALUE COLOR HERE
+        }}
+                >
+                    {m.prefix ? m.prefix + " " : ""}{m.value}
+                </div>
+            </Card>
+        ))}
+    </div>
+</div>
+
                                 </div>
 
                                 <div
@@ -5154,7 +5840,6 @@ const Dashboard = () => {
                                         {/* Tab 1 */}
                                         <Tabs.TabPane key="1">
                                             <div>
-                                                {/* Custom Legend */}
                                                 <div
                                                     style={{
                                                         display: 'flex',
@@ -5554,6 +6239,7 @@ const Dashboard = () => {
                                                     getRowHeight={() => 32} // ✅ consistent row height
                                                     // groupAggFiltering ={true}
                                                     onCellClicked={onCellClicked}
+                                                    onFilterChanged={onFilterChanged}
                                                 />
                                             </div>
                                         </div>
@@ -5630,6 +6316,7 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5664,6 +6351,7 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5708,6 +6396,7 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5752,6 +6441,7 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5796,6 +6486,7 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>
@@ -5873,6 +6564,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5908,6 +6600,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5943,6 +6636,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -5978,6 +6672,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -6013,6 +6708,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>
@@ -6091,6 +6787,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefDomain}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -6126,6 +6823,7 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefAgency}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>
