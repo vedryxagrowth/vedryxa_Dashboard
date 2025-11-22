@@ -4047,286 +4047,94 @@ select:focus,
 
 
 /*  */
-.metrics-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
 
-  /* Enable container queries */
-  container-type: inline-size;
-  container-name: metrics-container;
+/* responsive only by container width */
+.metrics-container {
+    width: 100%;
+    container-type: inline-size;
+    margin-top: 10px;
 }
 
-.metrics-col {
-  box-sizing: border-box;
-  flex: 0 0 auto;
+/* Default: all 10 cards in ONE row */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 12px;
 }
 
-.metrics-card {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 8px 8px;
-  box-sizing: border-box;
-
-  /* Base: smallest defaults */
-  --title-size: 9px;
-  --value-size: 12px;
-  --prefix-size: 12px;
-  --value-weight: 400;
+/* AntD Card override */
+.metric-card {
+    /* background: #f5f5f5 !important; */
+    border-radius: 12px !important;
+    padding: 0 !important; /* remove outer padding */
+    height: auto !important; /* prevent tall cards */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: start;
+    
 }
 
-.metrics-card .ant-statistic-title {
-  font-size: var(--title-size);
-  line-height: 1.05;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* REMOVE AntD default padding inside card */
+.metric-card .ant-card-body {
+    padding: 10px !important; /* adjust this to make card height smaller/larger */
 }
 
-.metrics-card .ant-statistic-content {
-  margin-top: 6px;
+/* TITLE */
+.metric-title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    font-weight: 600;
+    font-size: var(--title-size, 13px);
+    white-space: nowrap;
+    padding-left: var(--title-size, 13px);
 }
 
-.metrics-card .ant-statistic-content-value {
-  font-size: var(--value-size);
-  line-height: 1.05;
-  font-weight: var(--value-weight);
-  white-space: nowrap;
+/* DOT */
+.metric-title .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
 }
 
-.metrics-card .ant-statistic-content-prefix {
-  margin-right: 6px;
-  font-size: var(--prefix-size);
+/* VALUE */
+.metric-value {
+    margin-top: 6px;
+    font-weight: 400;
+    white-space: nowrap;
+    font-size: var(--value-size, 18px);
+    padding-left: var(--value-size, 13px);
 }
 
-/* ---------------------------
-     Container-based scaling
-     --------------------------- */
-
-/* Very small container */
-@container metrics-container (max-width: 360px) {
-  .metrics-card {
-    --title-size: 7px;
-    --value-size: 10px;
-    --prefix-size: 10px;
-    --value-weight: 400;
-    padding: 6px 6px;
-  }
-}
-
-/* Small container */
-@container metrics-container (min-width: 361px) and (max-width: 599px) {
-  .metrics-card {
-    --title-size: 10px;
-    --value-size: 13px;
-    --prefix-size: 13px;
-    --value-weight: 400;
-    padding: 8px 8px;
-  }
-}
-
-/* Medium container */
-@container metrics-container (min-width: 600px) and (max-width: 899px) {
-  .metrics-card {
-    --title-size: 12px;
-    --value-size: 15px;
-    --prefix-size: 15px;
-    --value-weight: 400;
-    padding: 10px 10px;
-  }
-}
-
-/* Large container (single-row start) */
-@container metrics-container (min-width: 900px) and (max-width: 1199px) {
-  .metrics-card {
-    --title-size: 14px;
-    --value-size: 17px;
-    --prefix-size: 17px;
-    --value-weight: 400;
-    padding: 12px 12px;
-  }
-
-  .metrics-col {
-    flex: 1 1 0%;
-    max-width: none;
-  }
-}
-
-/* Extra-large container */
-@container metrics-container (min-width: 1200px) {
-  .metrics-card {
-    --title-size: 16px;
-    --value-size: 19px;
-    --prefix-size: 19px;
-    --value-weight: 400;
-    padding: 14px 14px;
-  }
-
-  .metrics-col {
-    flex: 1 1 0%;
-    max-width: none;
-  }
-}
-
-/* ---------------------------
-     Fallback for browsers without container queries
-     --------------------------- */
-@supports not (container-type: inline-size) {
-  @media (max-width: 360px) {
-    .metrics-card {
-      --title-size: 7px;
-      --value-size: 10px;
-      --prefix-size: 10px;
+/* ------------------------------
+   Container Shrinks → EXACT 5 cards per row (2 rows)
+-------------------------------- */
+@container (max-width: 1150px) {
+    .metrics-grid {
+        grid-template-columns: repeat(5, 1fr); /* always 5 per row */
     }
-  }
+}
 
-  @media (min-width: 361px) and (max-width: 599px) {
-    .metrics-card {
-      --title-size: 10px;
-      --value-size: 13px;
-      --prefix-size: 13px;
+/* Smaller → reduce font size */
+@container (max-width: 800px) {
+    .metric-card {
+        --title-size: 13px;
+        --value-size: 17px;
     }
-  }
+}
 
-  @media (min-width: 600px) and (max-width: 899px) {
-    .metrics-card {
-      --title-size: 12px;
-      --value-size: 15px;
-      --prefix-size: 15px;
+@container (max-width: 600px) {
+    .metric-card {
+        --title-size: 12px;
+        --value-size: 16px;
     }
-  }
+}
 
-  @media (min-width: 900px) and (max-width: 1199px) {
-    .metrics-card {
-      --title-size: 14px;
-      --value-size: 17px;
-      --prefix-size: 17px;
+@container (max-width: 450px) {
+    .metric-card {
+        --title-size: 11px;
+        --value-size: 15px;
     }
-
-    .metrics-col {
-      flex: 1 1 0%;
-      max-width: none;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .metrics-card {
-      --title-size: 16px;
-      --value-size: 19px;
-      --prefix-size: 19px;
-    }
-
-    .metrics-col {
-      flex: 1 1 0%;
-      max-width: none;
-    }
-  }
 }
-
-.metrics-row {
-  container-type: inline-size;
-  container-name: metrics-container;
-}
-
-/* Card base */
-.metrics-card {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  padding-left: clamp(6px, 1.2vw, 14px);
-  padding-right: clamp(6px, 1.2vw, 14px);
-  padding-top: 6px;
-  padding-bottom: 6px;
-
-  /* keep your responsive CSS variables present */
-  --title-size: 12px;
-  --value-size: 20px;
-  --prefix-size: 20px;
-  --value-weight: 400;
-}
-
-/* MAKE THE STATISTIC A PREDICTABLE FLEX COLUMN WITH A FIXED GAP */
-/* This gap is the consistent spacing you asked for */
-.metrics-card .ant-statistic {
-  display: flex !important;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 10px;
-  /* <-- consistent gap between title and value row */
-  margin: 0 !important;
-  /* remove default margins */
-  padding: 0 !important;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Title: remove margins and use the CSS variable */
-.metrics-card .ant-statistic-title {
-  margin: 0 !important;
-  padding: 0;
-  font-size: var(--title-size);
-  line-height: 1.05;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Value row is a single horizontal flex row so prefix+value are always inline */
-.metrics-card .ant-statistic-content {
-  display: inline-flex !important;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 4px;
-  /* small gap between prefix and value */
-  flex-wrap: nowrap;
-  /* never wrap */
-  white-space: nowrap;
-  margin: 0 !important;
-  /* override any AntD spacing */
-  padding: 0;
-}
-
-/* Prefix and value styling (use your variables so they scale) */
-.metrics-card .ant-statistic-content-prefix {
-  display: inline-flex;
-  align-items: baseline;
-  font-size: var(--prefix-size);
-  line-height: 1;
-  margin: 0;
-}
-
-/* Ensure value uses the same baseline and sizing everywhere */
-.metrics-card .ant-statistic-content-value {
-  display: inline-flex;
-  align-items: baseline;
-  font-size: var(--value-size);
-  line-height: 1.05;
-  font-weight: var(--value-weight);
-  white-space: nowrap;
-  margin: 0;
-  padding: 0;
-}
-
-/* Optional: make sure empty/absent prefix doesn't change spacing —
-   this ensures the value position stays identical even when prefix missing */
-.metrics-card .ant-statistic-content-prefix:empty {
-  display: inline-block;
-  width: 1ch;
-  /* tiny placeholder so layout is consistent; adjust if needed */
-}
-
-/* Final polish */
-.metrics-card .ant-statistic {
-  display: block;
-  width: 100%;
-}
-
-.metrics-card .ant-statistic-content-value {
-  letter-spacing: -0.3px;
-}
-
-/*  */
