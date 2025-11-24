@@ -3382,7 +3382,8 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                   {/* </Tooltip> */}
                 </Col>
               </Row>
-              <div className='table-container'> <AgGridReact
+              <div className='table-container'> 
+                <AgGridReact
                 ref={gridRef1}
                 context={context}
                 className='custom-grid'
@@ -3405,8 +3406,12 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                 // groupIncludeTotalFooter={true}
                 autoGroupColumnDef={autoGroupColumnDef}
                 onSelectionChanged={onSelectionChanged}
+                enableCharts={true}
+                enableRangeSelection={true}
+                                      
                 onGridReady={(params) => {
                   gridRef1.current = params.api; // Store grid API
+                  window.__top5 = params.api;
                   restoreGridState(gridRef1.current); // Restore state when grid is ready
                   onGridReady(params, 'grid2', gridRef1);
                   if (params.columnApi) {

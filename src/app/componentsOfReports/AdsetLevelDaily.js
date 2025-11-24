@@ -3108,8 +3108,12 @@ const Daily = ({ campaignStatusFilter, functionCallForCommnets, context, functio
                                     // groupIncludeTotalFooter={true}
                                     autoGroupColumnDef={autoGroupColumnDef}
                                     onSelectionChanged={onSelectionChanged}
+                                    enableCharts={true}
+                                        enableRangeSelection={true}
+                                       
                                     onGridReady={(params) => {
                                         gridRef1.current = params.api; // Store grid API
+                                        window.__top5 = params.api;
                                         restoreGridState(gridRef1.current); // Restore state when grid is ready
                                         onGridReady(params, 'grid2', gridRef1);
                                         if (params.columnApi) {
