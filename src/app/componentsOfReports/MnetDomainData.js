@@ -426,6 +426,14 @@ const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                             columnDefs={memorizeddomainColumnDefs}
                                             // defaultColDef={defaultColDef}
                                             suppressAggFuncInHeader={true}
+                                            enableCharts={true}
+                            enableRangeSelection={true}
+                            onGridReady={(params) => {
+                                // keep the debug global
+                                window.__top5 = params.api;
+                                // call your existing handler passing the grid id and ref
+                              }}
+                          
                                             pinnedBottomRowData={domainFixedFooter}
                                             getRowStyle={(params) => {
                                                 if (params.node.rowPinned) {

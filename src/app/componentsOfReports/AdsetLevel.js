@@ -3487,7 +3487,16 @@ const AdsetLevelReports = ({ campaignStatusFilter, functionCallForCampaigns, con
                                     // groupIncludeFooter={rowData.length > 0 ? true : false}
                                     onSelectionChanged={onSelectionChanged}
                                     autoGroupColumnDef={autoGroupColumnDefLive}
-                                    onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                                    enableCharts={true}
+                                        enableRangeSelection={true}
+                                        onGridReady={(params) => {
+                                            // keep the debug global
+                                            window.__top5 = params.api;
+                                            // call your existing handler passing the grid id and ref
+                                            onGridReady(params, 'grid1', gridRef);
+                                          }}
+
+                                    // onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
                                     gridOptions={{
                                         ...gridOptions,
                                         ensureDomOrder: false,

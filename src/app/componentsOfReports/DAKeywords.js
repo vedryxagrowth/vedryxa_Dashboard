@@ -972,7 +972,16 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                             // groupIncludeFooter={true}
                             // groupIncludeTotalFooter={true}
                             autoGroupColumnDef={autoGroupColumnDef3}
-                            onGridReady={(params) => onGridReady(params, 'grid4', gridRef3)}
+                            enableCharts={true}
+                            enableRangeSelection={true}
+                            onGridReady={(params) => {
+                                // keep the debug global
+                                window.__top5 = params.api;
+                                // call your existing handler passing the grid id and ref
+                                onGridReady(params, 'grid4', gridRef3);
+                              }}
+                              
+                            // onGridReady={(params) => onGridReady(params, 'grid4', gridRef3)}
                             gridOptions={{
                                 ...gridOptions5,
                                 ensureDomOrder: false,

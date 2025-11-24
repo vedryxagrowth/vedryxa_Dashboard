@@ -510,6 +510,13 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
                             defaultColDef={defaultColDef}
                             autoGroupColumnDef={autoGroupColumnDefDomain}
                             onCellKeyDown={onCellKeyDown}
+                            enableCharts={true}
+                            enableRangeSelection={true}
+                            onGridReady={(params) => {
+                                // keep the debug global
+                                window.__top5 = params.api;
+                                // call your existing handler passing the grid id and ref
+                              }}
                             // onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
                             // gridOptions={gridOptions4}
                             gridOptions={{
