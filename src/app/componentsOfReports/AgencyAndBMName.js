@@ -449,6 +449,16 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                             }}
                             suppressAggFuncInHeader={true}
                             pinnedBottomRowData={BMNameFixedFooter}
+                            enableCharts={true}
+                                        enableRangeSelection={true}
+                                  
+                            onGridReady={(params) => {
+                                // keep the debug global
+                                window.__top5 = params.api;
+                                // call your existing handler passing the grid id and ref
+                              }}
+
+                                        
     
                             // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
                             onCellKeyDown={onCellKeyDown}

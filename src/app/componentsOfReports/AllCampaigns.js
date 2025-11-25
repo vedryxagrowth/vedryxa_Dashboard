@@ -1376,8 +1376,12 @@ const AllCampaigns = ({ campaignStatusFilter, handleChangeInput, handleBlur, onC
                                 groupDisplayType={null}
                                 suppressAggFuncInHeader={true}
                                 groupRowRenderer={GroupRowRenderer}
+                                enableCharts={true}
+                                        enableRangeSelection={true}
+                                    
                                 onGridReady={(params) => {
                                     onGridReady(params, 'grid3', gridRef2);
+                                    window.__top5 = params.api;
                                     params.api.refreshCells(); // Refresh cells to apply the theme dynamically
                                 }}
 

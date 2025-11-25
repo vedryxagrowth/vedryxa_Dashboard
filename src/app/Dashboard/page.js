@@ -6239,6 +6239,9 @@ const Dashboard = () => {
                                                     getRowHeight={() => 32} // ✅ consistent row height
                                                     // groupAggFiltering ={true}
                                                     onCellClicked={onCellClicked}
+                                                    enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                     onFilterChanged={onFilterChanged}
                                                 />
                                             </div>
@@ -6316,6 +6319,9 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6351,6 +6357,9 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6396,6 +6405,9 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6441,6 +6453,9 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6486,6 +6501,9 @@ const Dashboard = () => {
                                                         domLayout="auto"
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6536,13 +6554,16 @@ const Dashboard = () => {
                                                 <Tabs.TabPane key="1">
                                                     <AgGridReact
                                                         className="custom-grid"
-                                                        domLayout="auto"
+                                                        domLayout="autoHeight"
                                                         rowData={top5Campaigns}
                                                         columnDefs={columnDefs2}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
                                                         defaultColDef={{
                                                             ...defaultColDef,
                                                             wrapText: true,
                                                             autoHeight: true,
+                                                            enableCharts: true, 
                                                             cellStyle: {
                                                                 whiteSpace: 'normal',
                                                                 lineHeight: '1.4',
@@ -6564,6 +6585,8 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
+
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6579,6 +6602,7 @@ const Dashboard = () => {
                                                             ...defaultColDef,
                                                             wrapText: true,
                                                             autoHeight: true,
+                                                            enableCharts: true, 
                                                             cellStyle: {
                                                                 whiteSpace: 'normal',
                                                                 lineHeight: '1.4',
@@ -6600,6 +6624,10 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
+
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6636,6 +6664,9 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6672,6 +6703,9 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6708,6 +6742,9 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6787,6 +6824,9 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefDomain}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>
@@ -6823,6 +6863,9 @@ const Dashboard = () => {
                                                         autoGroupColumnDef={autoGroupColumnDefAgency}
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
+                                                        enableCharts={true}
+                                                        enableRangeSelection={true}
+                                                        onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
                                                     />
                                                 </Tabs.TabPane>

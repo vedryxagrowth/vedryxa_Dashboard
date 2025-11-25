@@ -5145,8 +5145,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -5209,8 +5209,8 @@ const MyTablePage = () => {
                     // return campaign && campaign.end
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
@@ -6187,8 +6187,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -6251,8 +6251,8 @@ const MyTablePage = () => {
                     // return campaign && campaign.end
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
@@ -7393,8 +7393,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -7437,8 +7437,8 @@ const MyTablePage = () => {
                     // return campaign && campaign.end
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
@@ -8752,8 +8752,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -8816,8 +8816,8 @@ const MyTablePage = () => {
                     // return campaign && campaign.end
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
@@ -9698,8 +9698,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -9762,8 +9762,8 @@ const MyTablePage = () => {
                     // return campaign && campaign.end
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
@@ -11705,7 +11705,7 @@ const MyTablePage = () => {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
                     const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.campaignid || params?.node?.key || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.campaignid || params.node?.key || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -11769,7 +11769,7 @@ const MyTablePage = () => {
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
                     const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params?.node?.key || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");

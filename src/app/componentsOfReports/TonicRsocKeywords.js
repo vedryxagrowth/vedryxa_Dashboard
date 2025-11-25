@@ -910,7 +910,15 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                             // groupIncludeFooter={true}
                             // groupIncludeTotalFooter={true}
                             autoGroupColumnDef={autoGroupColumnDef3}
-                            onGridReady={(params) => onGridReady(params, 'grid5', gridRef5)}
+                            enableCharts={true}
+                            enableRangeSelection={true}
+                            onGridReady={(params) => {
+                                // keep the debug global
+                                window.__top5 = params.api;
+                                // call your existing handler passing the grid id and ref
+                                onGridReady(params, 'grid10', gridRef5);
+                              }}
+                            // onGridReady={(params) => onGridReady(params, 'grid5', gridRef5)}
                             gridOptions={{
                                 ...gridOptions3,
                                 ensureDomOrder: false,
