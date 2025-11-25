@@ -2849,7 +2849,7 @@ const Dashboard = () => {
                                     borderRadius: 6,
                                 }}
                                 title={(() => {
-                                    const [text, setText] = React.useState("Copy");
+                                    const [text, setText] = React.useState("Click to Copy");
                                     const handleCopy = (e) => {
                                         e.stopPropagation();
                                         navigator.clipboard.writeText(valueWithCount);

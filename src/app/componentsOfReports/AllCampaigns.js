@@ -1397,6 +1397,7 @@ const AllCampaigns = ({ campaignStatusFilter, handleChangeInput, handleBlur, onC
                                 gridOptions={{
                                     ...gridOptions2,
                                     ensureDomOrder: false,
+                                    enableCharts: true,
                                     suppressRowClickSelection: true,
                                     suppressClipboardPaste: true,
                                     enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection

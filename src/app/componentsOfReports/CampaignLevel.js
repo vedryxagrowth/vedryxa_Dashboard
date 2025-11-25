@@ -3,10 +3,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge } from 'antd';
-import { GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import { Space } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Dropdown, Tooltip, Space, Menu } from 'antd';
+import { GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -61,16 +59,17 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     console.log(columnDefs, "columnDefs");
     console.log("campaign acconts:", newaccount);
     console.log('accountAccess:', accountsAccess);
-    const { theme } = useTokenContext();
-    const { apiClient } = useTokenContext();
+    const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
     const [rowData, setRowData] = useState([]);
     const newRowDataForFilter = useRef([]);
+
+    const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
 
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
@@ -512,7 +511,15 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
-
+        filter: "agTextColumnFilter",
+        filterValueGetter: (params) => {
+            if (params.node.group) {
+                // Use the group key (campaign name)
+                return params.node.key;
+            }
+            // For leaf rows, use the campaign_name or any field
+            return params.data?.campaignname || '';
+        },
         // valueGetter: (params) => {
         //     const leaf = params.node.allLeafChildren?.[0]?.data;
         //     const campaignid = leaf?.campaignid;
@@ -2180,7 +2187,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
             //     : filteredData;
 
             let newFilterData;
-            if (campaignStatusFilter !== "ALL") {
+            if (campaignStatusFilter !== "All") {
                 newFilterData = filteredData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             }
             else {
@@ -2474,7 +2481,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
     useEffect(() => {
         // functionCall1();
         console.log(campaignStatusFilter, "campaignStatusFilter");
-        if (campaignStatusFilter !== "ALL") {
+        if (campaignStatusFilter !== "All") {
             const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             setRowData(filteredByStatus);
         } else {
@@ -2501,7 +2508,7 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
             }) : null;
         newRowDataForFilter.current = filterData;
         let newFilterData;
-        if (campaignStatusFilter !== "ALL") {
+        if (campaignStatusFilter !== "All") {
             console.log("testing 4444");
             newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
         }
@@ -2691,6 +2698,9 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
         }
     }, [removeSelectedCampaigns]);
 
+    const onChangeStatusUpdate = (key) => {
+
+    }
 
 
     // return(
@@ -2940,250 +2950,296 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                 />
                             </div>
                         </div>
-                    ) : rowData?.length > 0 ?
-                        (
-                            // <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                    ) : newRowDataForFilter.current?.length > 0 ?
+                        <div>
+                            <Row className="header-row" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
+                                <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                    <Space align="center">
+                                        <div className="blinking-circle-1"></div>
+                                        <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Live</Text>
+                                    </Space>
+                                </Col>
 
-
-
-                            <div
-                                className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                            // style={{
-                            //     width: '100%',
-                            //     // borderRadius: 12,
-                            //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                            //     padding: 10,
-                            //     height: 'auto',
-                            //     boxShadow:
-                            //     theme === 'dark'
-                            //         ? '0 1px 3px rgba(0,0,0,0.6)'
-                            //         : '0 1px 6px rgba(0,0,0,0.08)',
-                            // }}
-                            >
-                                <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                        <Space align="center">
-                                            <div className="blinking-circle-1"></div>
-                                            <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Live</Text>
-                                        </Space>
-                                    </Col>
-
-                                    {leafCampaigns?.length > 1 && (
-                                        <Col>
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: "5px",
-                                                    padding: "6px 0",
-                                                }}
-                                            >
-                                                {/* active & pause */}
-                                                <Tooltip
-                                                    title={
-                                                        <div style={{ display: "flex", gap: "14px" }}>
-                                                            <span
-                                                                style={{ cursor: "pointer", fontSize: "18px", color: "green" }}
-                                                                onClick={() => {
-                                                                    setBulkStatusAction("ACTIVE");
-                                                                    setIsBulkStatusModalVisible(true);
-                                                                }}
-                                                            >
-                                                                ▶️
-                                                            </span>
-                                                            <span
-                                                                style={{ cursor: "pointer", fontSize: "18px", color: "red" }}
-                                                                onClick={() => {
-                                                                    setBulkStatusAction("PAUSED");
-                                                                    setIsBulkStatusModalVisible(true);
-                                                                }}
-                                                            >
-                                                                ⏸️
-                                                            </span>
-                                                        </div>
-                                                    }
-                                                    overlayInnerStyle={{
-                                                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                                                        color: theme === "dark" ? "#ffffff" : "#000000",
-                                                        borderRadius: 6,
-                                                        padding: "6px 10px",
-                                                        fontSize: "14px",
-                                                    }}
-                                                >
-                                                    <RxSwitch size={20} />
-
-                                                </Tooltip>
-
-                                                <Modal
-                                                    title="Confirm Bulk Status Change"
-                                                    open={isBulkStatusModalVisible}
-                                                    onCancel={() => setIsBulkStatusModalVisible(false)}
-                                                    confirmLoading={confirmBulkLoading}
-                                                    onOk={handleBulkStatusSubmit}
-                                                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                                                >
-                                                    {confirmBulkLoading && (
-                                                        <div
-                                                            style={{
-                                                                position: "absolute",
-                                                                top: 0,
-                                                                left: 0,
-                                                                right: 0,
-                                                                bottom: 0,
-                                                                background: "rgba(255,255,255,0.7)",
-                                                                display: "flex",
-                                                                justifyContent: "center",
-                                                                alignItems: "center",
-                                                                zIndex: 1000,
-                                                                borderRadius: "8px",
-                                                            }}
-                                                        >
-                                                            <Spin size="large" tip="Saving..." />
-                                                        </div>
-                                                    )}
-
-                                                    <p>
-                                                        Are you sure you want to set status to{" "}
-                                                        <b style={{ color: bulkStatusAction === "ACTIVE" ? "green" : "red" }}>
-                                                            {bulkStatusAction}
-                                                        </b>{" "}
-                                                        for <b>{leafCampaigns.length}</b> campaigns?
-                                                    </p>
-                                                </Modal>
-                                                {/* pin & unpin */}
-                                                <Tooltip
-                                                    title={
-                                                        <div style={{ display: "flex", gap: "14px" }}>
-                                                            <span
-                                                                style={{ cursor: "pointer", fontSize: "18px" }}
-                                                                onClick={() => handleBulkSmartPin("pin")}
-                                                            >
-                                                                📌
-                                                            </span>
-                                                            <span
-                                                                style={{ cursor: "pointer", fontSize: "18px" }}
-                                                                onClick={() => handleBulkSmartPin("unpin")}
-                                                            >
-                                                                📍
-                                                            </span>
-                                                        </div>
-                                                    }
-                                                    overlayInnerStyle={{
-                                                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                                                        color: theme === "dark" ? "#ffffff" : "#000000",
-                                                        borderRadius: 6,
-                                                        padding: "6px 10px",
-                                                        fontSize: "14px",
-                                                    }}
-                                                >
-                                                    <button
-                                                        style={{
-                                                            border: "none",
-                                                            background: "none",
-                                                            cursor: "pointer",
-                                                            fontSize: "18px",
-                                                        }}
-                                                    >
-                                                        <PushpinOutlined size={20} />
-                                                    </button>
-                                                </Tooltip>
-                                                {/*  comment */}
-                                                <Tooltip title="Bulk Comment" overlayInnerStyle={{
-                                                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                                                    color: theme === "dark" ? "#ffffff" : "#000000",
-                                                    borderRadius: 6,
-                                                    padding: "6px 10px",
-                                                    fontSize: "14px",
-                                                }}>
-                                                    <MessageOutlined
-                                                        onClick={() => setIsBulkCommentModalVisible(true)}
-                                                        style={{
-                                                            fontSize: "15px",
-                                                            cursor: "pointer"
-                                                        }}
-                                                    />
-                                                </Tooltip>
-                                                <Modal
-                                                    title="Bulk Comment"
-                                                    open={isBulkCommentModalVisible}
-                                                    onCancel={() => setIsBulkCommentModalVisible(false)}
-                                                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                                                    footer={[
-                                                        <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
-                                                            Cancel
-                                                        </Button>,
-                                                        <Button
-                                                            key="ok"
-                                                            style={{ backgroundColor: "#91C25F" }}
-                                                            onClick={() => {
-                                                                handleSmartCommentSubmit();
-                                                                setIsBulkCommentModalVisible(false);
-                                                            }}
-                                                        >
-                                                            Ok
-                                                        </Button>
-                                                    ]}
-                                                >
-                                                    <Input.TextArea
-                                                        placeholder="Enter comments"
-                                                        value={comment}
-                                                        onChange={(e) => setComment(e.target.value)}
-                                                        rows={4}
-                                                    />
-                                                </Modal>
-
-                                                {/* Category */}
-                                                <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
-                                                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                                                    color: theme === "dark" ? "#ffffff" : "#000000",
-                                                    borderRadius: 6,
-                                                    padding: "6px 10px",
-                                                    fontSize: "14px",
-                                                }}>
-                                                    <EditOutlined
-                                                        onClick={openBulkCategoryModal}
-                                                        style={{
-                                                            fontSize: "15px",
-                                                            cursor: "pointer",
-                                                            marginLeft: '5px'
-                                                        }}
-                                                    />
-                                                </Tooltip>
-                                                <Modal
-                                                    open={bulkOpen}
-                                                    title="Edit Category"
-                                                    onOk={saveBulkCategory}
-                                                    onCancel={() => setBulkOpen(false)}
-                                                    className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                                                >
-                                                    <Input
-                                                        placeholder="Enter category"
-                                                        value={bulkCategory}
-                                                        onChange={e => setBulkCategory(e.target.value)}
-                                                    />
-                                                </Modal>
-                                            </div>
-                                        </Col>
-                                    )}
-
-
-                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
-                                    </Col> */}
-                                    <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
-                                        {ids.length <= 1 ? (
-                                            // Single (or none) → plain text
-                                            <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                                                Id: {ids[0] ?? "-"}
-                                            </Text>
-                                        ) : (
-                                            // Multiple → only an icon; hover shows selected accounts
+                                {leafCampaigns?.length > 1 && (
+                                    <Col>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "5px",
+                                                padding: "6px 0",
+                                            }}
+                                        >
+                                            {/* active & pause */}
                                             <Tooltip
                                                 title={
-                                                    <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                                                        {ids.map((id, i) => {
-                                                            const getAccountObject = accountsAccess.find(item => item.accountNumber === id)
-                                                            return (<div
+                                                    <div style={{ display: "flex", gap: "14px" }}>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px", color: "green" }}
+                                                            onClick={() => {
+                                                                setBulkStatusAction("ACTIVE");
+                                                                setIsBulkStatusModalVisible(true);
+                                                            }}
+                                                        >
+                                                            ▶️
+                                                        </span>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px", color: "red" }}
+                                                            onClick={() => {
+                                                                setBulkStatusAction("PAUSED");
+                                                                setIsBulkStatusModalVisible(true);
+                                                            }}
+                                                        >
+                                                            ⏸️
+                                                        </span>
+                                                    </div>
+                                                }
+                                                overlayInnerStyle={{
+                                                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                                    borderRadius: 6,
+                                                    padding: "6px 10px",
+                                                    fontSize: "14px",
+                                                }}
+                                            >
+                                                <RxSwitch size={20} />
+
+                                            </Tooltip>
+
+                                            <Modal
+                                                title="Confirm Bulk Status Change"
+                                                open={isBulkStatusModalVisible}
+                                                onCancel={() => setIsBulkStatusModalVisible(false)}
+                                                confirmLoading={confirmBulkLoading}
+                                                onOk={handleBulkStatusSubmit}
+                                                className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                                            >
+                                                {confirmBulkLoading && (
+                                                    <div
+                                                        style={{
+                                                            position: "absolute",
+                                                            top: 0,
+                                                            left: 0,
+                                                            right: 0,
+                                                            bottom: 0,
+                                                            background: "rgba(255,255,255,0.7)",
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                            zIndex: 1000,
+                                                            borderRadius: "8px",
+                                                        }}
+                                                    >
+                                                        <Spin size="large" tip="Saving..." />
+                                                    </div>
+                                                )}
+
+                                                <p>
+                                                    Are you sure you want to set status to{" "}
+                                                    <b style={{ color: bulkStatusAction === "ACTIVE" ? "green" : "red" }}>
+                                                        {bulkStatusAction}
+                                                    </b>{" "}
+                                                    for <b>{leafCampaigns.length}</b> campaigns?
+                                                </p>
+                                            </Modal>
+                                            {/* pin & unpin */}
+                                            <Tooltip
+                                                title={
+                                                    <div style={{ display: "flex", gap: "14px" }}>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px" }}
+                                                            onClick={() => handleBulkSmartPin("pin")}
+                                                        >
+                                                            📌
+                                                        </span>
+                                                        <span
+                                                            style={{ cursor: "pointer", fontSize: "18px" }}
+                                                            onClick={() => handleBulkSmartPin("unpin")}
+                                                        >
+                                                            📍
+                                                        </span>
+                                                    </div>
+                                                }
+                                                overlayInnerStyle={{
+                                                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                                    borderRadius: 6,
+                                                    padding: "6px 10px",
+                                                    fontSize: "14px",
+                                                }}
+                                            >
+                                                <button
+                                                    style={{
+                                                        border: "none",
+                                                        background: "none",
+                                                        cursor: "pointer",
+                                                        fontSize: "18px",
+                                                    }}
+                                                >
+                                                    <PushpinOutlined size={20} />
+                                                </button>
+                                            </Tooltip>
+                                            {/*  comment */}
+                                            <Tooltip title="Bulk Comment" overlayInnerStyle={{
+                                                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                                borderRadius: 6,
+                                                padding: "6px 10px",
+                                                fontSize: "14px",
+                                            }}>
+                                                <MessageOutlined
+                                                    onClick={() => setIsBulkCommentModalVisible(true)}
+                                                    style={{
+                                                        fontSize: "15px",
+                                                        cursor: "pointer"
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                            <Modal
+                                                title="Bulk Comment"
+                                                open={isBulkCommentModalVisible}
+                                                onCancel={() => setIsBulkCommentModalVisible(false)}
+                                                className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                                                footer={[
+                                                    <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
+                                                        Cancel
+                                                    </Button>,
+                                                    <Button
+                                                        key="ok"
+                                                        style={{ backgroundColor: "#91C25F" }}
+                                                        onClick={() => {
+                                                            handleSmartCommentSubmit();
+                                                            setIsBulkCommentModalVisible(false);
+                                                        }}
+                                                    >
+                                                        Ok
+                                                    </Button>
+                                                ]}
+                                            >
+                                                <Input.TextArea
+                                                    placeholder="Enter comments"
+                                                    value={comment}
+                                                    onChange={(e) => setComment(e.target.value)}
+                                                    rows={4}
+                                                />
+                                            </Modal>
+
+                                            {/* Category */}
+                                            <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                                                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                                borderRadius: 6,
+                                                padding: "6px 10px",
+                                                fontSize: "14px",
+                                            }}>
+                                                <EditOutlined
+                                                    onClick={openBulkCategoryModal}
+                                                    style={{
+                                                        fontSize: "15px",
+                                                        cursor: "pointer",
+                                                        marginLeft: '5px'
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                            <Modal
+                                                open={bulkOpen}
+                                                title="Edit Category"
+                                                onOk={saveBulkCategory}
+                                                onCancel={() => setBulkOpen(false)}
+                                                className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                                            >
+                                                <Input
+                                                    placeholder="Enter category"
+                                                    value={bulkCategory}
+                                                    onChange={e => setBulkCategory(e.target.value)}
+                                                />
+                                            </Modal>
+                                        </div>
+                                    </Col>
+                                )}
+
+
+                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
+                                    </Col> */}
+                                <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+                                    {ids.length <= 1 ? (
+                                        // Single (or none) → plain text
+                                        <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                                            Id: {ids[0] ?? "-"}
+                                        </Text>
+                                    ) : (
+                                        // Multiple → only an icon; hover shows selected accounts
+                                        <Tooltip
+                                            title={
+                                                <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                                                    {ids.map((id, i) => {
+                                                        const getAccountObject = accountsAccess.find(item => item.accountNumber === id)
+                                                        return (<div
+                                                            key={`${id}-${i}`}
+                                                            style={{
+                                                                padding: "4px 6px",
+                                                                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                                                                fontSize: 12,
+                                                                color: theme === "dark" ? "#ddd" : "#333"
+                                                            }}
+                                                        >
+                                                            <div>{id}</div>
+                                                            <div>{getAccountObject?.accountName}</div>
+                                                        </div>)
+                                                    })}
+                                                </div>
+                                            }
+                                            overlayInnerStyle={{
+                                                maxWidth: 320,
+                                                background: theme === "dark" ? "#1f1f1f" : '#fff',
+                                                color: theme === "dark" ? "#fff" : '#000'
+                                            }}
+                                        >
+                                            <Badge count={ids.length} size="small" offset={[0, 2]}>
+                                                <NumberOutlined
+                                                    style={{
+                                                        fontSize: 18,
+                                                        cursor: "pointer",
+                                                        color: theme === "dark" ? "#9ad" : "grey"
+                                                    }}
+                                                />
+                                            </Badge>
+                                        </Tooltip>
+                                    )}
+                                </Col>
+                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
+                                    </Col> */}
+                                <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    {ids.length <= 1 && (
+                                        <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                                            Name: {newAccountName ?? "-"}
+                                        </Text>
+                                    )
+                                    }
+                                </Col>
+
+                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
+                                    </Col> */}
+                                <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+                                    {ids.length <= 1 ? (
+                                        // Single → plain text
+                                        <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                                            Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
+                                        </Text>
+                                    ) : (
+                                        // Multiple → icon with tooltip of selected account ids + timezones
+                                        <Tooltip
+                                            title={
+                                                <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                                                    {ids.map((id, i) => {
+                                                        const acc = accountsAccess.find(a => a.accountNumber === id);
+                                                        console.log("timezones:", accountsAccess);
+                                                        const tz = acc?.timeZone ?? "-";
+                                                        return (
+                                                            <div
                                                                 key={`${id}-${i}`}
                                                                 style={{
                                                                     padding: "4px 6px",
@@ -3192,100 +3248,134 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                                                     color: theme === "dark" ? "#ddd" : "#333"
                                                                 }}
                                                             >
-                                                                <div>{id}</div>
-                                                                <div>{getAccountObject?.accountName}</div>
-                                                            </div>)
-                                                        })}
-                                                    </div>
-                                                }
-                                                overlayInnerStyle={{
-                                                    maxWidth: 320,
-                                                    background: theme === "dark" ? "#1f1f1f" : '#fff',
-                                                    color: theme === "dark" ? "#fff" : '#000'
-                                                }}
-                                            >
-                                                <Badge count={ids.length} size="small" offset={[0, 2]}>
-                                                    <NumberOutlined
-                                                        style={{
-                                                            fontSize: 18,
-                                                            cursor: "pointer",
-                                                            color: theme === "dark" ? "#9ad" : "grey"
-                                                        }}
-                                                    />
-                                                </Badge>
-                                            </Tooltip>
-                                        )}
-                                    </Col>
-                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
-                                    </Col> */}
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        {ids.length <= 1 && (
-                                            <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                                                Name: {newAccountName ?? "-"}
-                                            </Text>
-                                        )
-                                        }
-                                    </Col>
+                                                                {id} - {tz}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            }
+                                            overlayInnerStyle={{
+                                                maxWidth: 320,
+                                                background: theme === "dark" ? "#1f1f1f" : "#fff",
+                                                color: theme === "dark" ? "#fff" : "#000"
+                                            }}
+                                        >
+                                            <Badge count={ids.length} size="small" offset={[0, 2]}>
+                                                <GlobalOutlined
+                                                    style={{
+                                                        fontSize: 18,
+                                                        cursor: "pointer",
+                                                        color: theme === "dark" ? "#9ad" : "grey"
+                                                    }}
+                                                />
+                                            </Badge>
+                                        </Tooltip>
+                                    )}
+                                </Col>
 
-                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
-                                    </Col> */}
-                                    <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
-                                        {ids.length <= 1 ? (
-                                            // Single → plain text
-                                            <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                                                Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
-                                            </Text>
-                                        ) : (
-                                            // Multiple → icon with tooltip of selected account ids + timezones
-                                            <Tooltip
-                                                title={
-                                                    <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                                                        {ids.map((id, i) => {
-                                                            const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                            console.log("timezones:", accountsAccess);
-                                                            const tz = acc?.timeZone ?? "-";
-                                                            return (
-                                                                <div
-                                                                    key={`${id}-${i}`}
+
+                                <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                </Col>
+                                <Col>
+                                    <Dropdown
+                                        overlay={
+                                            <Menu
+                                                onClick={({ key }) =>
+                                                    // onStatusFilterChange && 
+                                                    // onStatusFilterChange(key)
+                                                    setcampaignStatusLabel(key)
+                                                } // <-- Add this line
+                                                items={[
+                                                    {
+                                                        key: 'All',
+                                                        label: (
+                                                            <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                                <span
                                                                     style={{
-                                                                        padding: "4px 6px",
-                                                                        borderBottom: "1px solid rgba(0,0,0,0.06)",
-                                                                        fontSize: 12,
-                                                                        color: theme === "dark" ? "#ddd" : "#333"
+                                                                        width: '6px',
+                                                                        height: '6px',
+                                                                        borderRadius: '50%',
+                                                                        backgroundColor: '#122F6E',
+                                                                        marginRight: '6px',
                                                                     }}
-                                                                >
-                                                                    {id} - {tz}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                }
-                                                overlayInnerStyle={{
-                                                    maxWidth: 320,
-                                                    background: theme === "dark" ? "#1f1f1f" : "#fff",
-                                                    color: theme === "dark" ? "#fff" : "#000"
-                                                }}
-                                            >
-                                                <Badge count={ids.length} size="small" offset={[0, 2]}>
-                                                    <GlobalOutlined
-                                                        style={{
-                                                            fontSize: 18,
-                                                            cursor: "pointer",
-                                                            color: theme === "dark" ? "#9ad" : "grey"
-                                                        }}
-                                                    />
-                                                </Badge>
-                                            </Tooltip>
-                                        )}
-                                    </Col>
+                                                                ></span>
+                                                                All
+                                                            </span>
+                                                        ),
+                                                    },
+                                                    {
+                                                        key: 'Active',
+                                                        label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    width: '6px',
+                                                                    height: '6px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: 'green',
+                                                                    marginRight: '6px',
+                                                                }}
+                                                            ></span>
+                                                            Active
 
+                                                        </span>
+                                                    },
+                                                    {
+                                                        key: 'Paused', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    width: '6px',
+                                                                    height: '6px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: 'red',
+                                                                    marginRight: '6px',
+                                                                }}
+                                                            ></span>
+                                                            Paused
 
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
-                                    </Col>
-                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                        </span>
+                                                    },
+                                                    {
+                                                        key: 'Archived', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    width: '6px',
+                                                                    height: '6px',
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: 'orange',
+                                                                    marginRight: '6px',
+                                                                }}
+                                                            ></span>
+                                                            Archived
+
+                                                        </span>
+                                                    },
+                                                ]}
+                                            />
+                                        }
+                                        trigger={['click']}
+                                    >
+                                        <Button
+                                            type="default"
+                                            style={{
+                                                borderRadius: 8,
+                                                background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                                                border: '1px solid #4CAF50',
+                                                color: theme === 'dark' ? '#95de64' : '#389e0d',
+                                                fontWeight: 500,
+                                                marginRight: '5px'
+                                            }}
+                                        >
+                                            <Space size={2}>
+                                                <FilterOutlined />
+                                                {campaignStatusFilter}
+                                                <DownOutlined style={{ fontSize: 10 }} />
+                                            </Space>
+                                        </Button>
+                                    </Dropdown>
+                                </Col>
+
+                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ fontWeight: '600' }}>
                                             Cron/Acc status: {cronStatus.current} /{' '}
                                             <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
@@ -3293,37 +3383,37 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                             </span>
                                         </Text>
                                     </Col> */}
-                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-                                        <Tooltip
-                                            title={
-                                                <div style={{ fontSize: '13px' }}>
-                                                    <div>Fb status: {`${fbCron.current?.toLowerCase()}`}</div>
-                                                    <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
-                                                    <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
-                                                        Cron status: {cronStatus.current?.toLowerCase()}
-                                                        {/* <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
+                                <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                    <Tooltip
+                                        title={
+                                            <div style={{ fontSize: '13px' }}>
+                                                <div>Fb status: {`${fbCron.current?.toLowerCase()}`}</div>
+                                                <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
+                                                <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                                    Cron status: {cronStatus.current?.toLowerCase()}
+                                                    {/* <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
                                                         {accountStatus.current}
                                                     </span> */}
-                                                    </Text>
-                                                    <div>Account:
-                                                        <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
-                                                            {accountStatus.current}
-                                                        </span>
-                                                    </div>
+                                                </Text>
+                                                <div>Account:
+                                                    <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
+                                                        {accountStatus.current}
+                                                    </span>
                                                 </div>
-                                            }
-                                            overlayInnerStyle={{
-                                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                                color: theme === 'dark' ? '#fff' : '#000',
-                                                border: '1px solid #ccc',
-                                                borderRadius: 6,
-                                                // fontWeight: 500,
-                                            }}
-                                        >
-                                            <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
-                                        </Tooltip>
-                                    </Col>
-                                    {/* <Col>
+                                            </div>
+                                        }
+                                        overlayInnerStyle={{
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #ccc',
+                                            borderRadius: 6,
+                                            // fontWeight: 500,
+                                        }}
+                                    >
+                                        <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
+                                    </Tooltip>
+                                </Col>
+                                {/* <Col>
                                         <Tooltip 
                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                             mouseEnterDelay={0} // Tooltip appears after 1 second
@@ -3331,158 +3421,190 @@ const CampaignLevelReports = ({ campaignStatusFilter, functionCallForCommnets, c
                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                         </Tooltip>
                                     </Col> */}
-                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                        {/* <Tooltip title="Export to CSV"> */}
-                                        <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
-                                        {/* </Tooltip> */}
-                                    </Col>
-                                </Row>
-                                <div className='table-container'>
-                                    <AgGridReact
-                                        ref={gridRef}
-                                        suppressReactUi={true}
-                                        rowHeight={30}
-                                        className='custom-grid'
-                                        context={context}
-                                        rowData={memorizedRowData}
-                                        rowSelection='multiple'
-                                        columnDefs={memorizedColumnDef}
-                                        defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-                                        onCellClicked={onCellClickedLive}
-                                        pagination={true}
-                                        paginationPageSize={200}
-                                        paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
-                                        suppressAggFuncInHeader={true}
-                                        getMainMenuItems={getMainMenuItems}
-                                        groupSelectsChildren={true} // ✅ Selects all children when a group is selected
-                                        suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
-                                        // rowSelection="multiple"
+                                <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                    {/* <Tooltip title="Export to CSV"> */}
+                                    <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
+                                    {/* </Tooltip> */}
+                                </Col>
+                            </Row>
+                            {rowData.length > 0 ?
+                                (
+                                    // <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
 
-                                        // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                                        // onCellKeyDown={onCellKeyDown}
-                                        // domLayout="normal"
-                                        // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
-                                        // groupIncludeFooter={rowData.length > 0 ? true : false}
-                                        // onRowSelected={onRowSelected}
-                                        onSelectionChanged={onSelectionChanged}
-                                        autoGroupColumnDef={autoGroupColumnDefLive}
-                                        onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                                        gridOptions={{
-                                            ...gridOptions,
-                                            ensureDomOrder: false,
-                                            suppressRowClickSelection: true,
-                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                            groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
-                                        }}
-                                        frameworkComponents={{ GroupCellRenderer }}
-                                        groupDisplayType='multipleColumns'
-                                        // rowGroupPanelShow='always'
-                                        // onFilterChanged={onFilterChanged} // Use the custom filter handler
-                                        pinnedBottomRowData={liveFixedFooter}
-                                        suppressCellSelection={true}
-                                        getRowStyle={(params) => {
-                                            if (params.node.rowPinned) {
 
-                                                return {
-                                                    // fontWeight: "bold",
-                                                    backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
-                                                    color: theme === "dark" ? "#fff" : "#000",
-                                                    height: '30px'
-                                                };
-                                            }
-                                            return null; // Keep other row styles unchanged
-                                        }}
-                                        getCellStyle={(params) => {
-                                            const isSelected = selectedCells.some(
-                                                (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                                            );
 
-                                            // ✅ Ensure first cell inside a group is highlighted
-                                            const isFirstSelected = firstSelectedCell &&
-                                                firstSelectedCell.rowIndex === params.node.rowIndex &&
-                                                firstSelectedCell.colId === params.column.getId();
+                                    <div
+                                        className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    // style={{
+                                    //     width: '100%',
+                                    //     // borderRadius: 12,
+                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                    //     padding: 10,
+                                    //     height: 'auto',
+                                    //     boxShadow:
+                                    //     theme === 'dark'
+                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                    // }}
+                                    >
+                                        <div className='table-container'>
+                                            <AgGridReact
+                                                ref={gridRef}
+                                                suppressReactUi={true}
+                                                rowHeight={30}
+                                                className='custom-grid'
+                                                context={context}
+                                                rowData={memorizedRowData}
+                                                rowSelection='multiple'
+                                                columnDefs={memorizedColumnDef}
+                                                defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                                                onCellClicked={onCellClickedLive}
+                                                pagination={true}
+                                                paginationPageSize={200}
+                                                paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                                                suppressAggFuncInHeader={true}
+                                                getMainMenuItems={getMainMenuItems}
+                                                groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                                                suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
+                                                // rowSelection="multiple"
 
-                                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                                        }}
-                                        onFilterChanged={(params) => {
-                                            const api = params.api;
-                                            const filteredData = [];
-                                            // api.forEachNodeAfterFilterAndSort((node) => {
-                                            //     if (!node.rowPinned) {
-                                            //         filteredData.push(node.data);
-                                            //     }
-                                            // });
-                                            const normalizedInput = inputValue.trim().toLowerCase();
+                                                // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                                // onCellKeyDown={onCellKeyDown}
+                                                // domLayout="normal"
+                                                // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                                                // groupIncludeFooter={rowData.length > 0 ? true : false}
+                                                // onRowSelected={onRowSelected}
+                                                onSelectionChanged={onSelectionChanged}
+                                                autoGroupColumnDef={autoGroupColumnDefLive}
+                                                onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                                                gridOptions={{
+                                                    ...gridOptions,
+                                                    ensureDomOrder: false,
+                                                    enableCharts: true,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                                                }}
+                                                frameworkComponents={{ GroupCellRenderer }}
+                                                groupDisplayType='multipleColumns'
+                                                // rowGroupPanelShow='always'
+                                                // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                                                pinnedBottomRowData={liveFixedFooter}
+                                                suppressCellSelection={true}
+                                                getRowStyle={(params) => {
+                                                    if (params.node.rowPinned) {
 
-                                            api.forEachNodeAfterFilterAndSort((node) => {
-                                                if (node.data && node.data.campaignname) {
-                                                    const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-
-                                                    // Apply search and filter conditions
-                                                    if (
-                                                        normalizedCampaign.startsWith(normalizedInput) ||
-                                                        normalizedCampaign.includes(normalizedInput) ||
-                                                        normalizedCampaign.endsWith(normalizedInput)
-                                                    ) {
-                                                        filteredData.push(node.data);
+                                                        return {
+                                                            // fontWeight: "bold",
+                                                            backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                                                            color: theme === "dark" ? "#fff" : "#000",
+                                                            height: '30px'
+                                                        };
                                                     }
-                                                }
-                                            });
+                                                    return null; // Keep other row styles unchanged
+                                                }}
+                                                getCellStyle={(params) => {
+                                                    const isSelected = selectedCells.some(
+                                                        (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                                    );
 
-                                            const updatedFooter = [
-                                                {
-                                                    // [`${newtime}Date`]: 'Totals',
-                                                    campaignName: 'Total',
-                                                    actions: "",
-                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                                                    margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                                                    rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                                                    cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                                                    ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                                                    fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                                                    conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                                                    fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                                                    roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                                                    cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                                                    cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                                                    fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                                                    fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
-                                                },
-                                            ];
+                                                    // ✅ Ensure first cell inside a group is highlighted
+                                                    const isFirstSelected = firstSelectedCell &&
+                                                        firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                                        firstSelectedCell.colId === params.column.getId();
 
-                                            setLiveFixedFooter(updatedFooter);
-                                        }}
-                                    />
-                                </div>
-                            </div>
+                                                    return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                                }}
+                                                onFilterChanged={(params) => {
+                                                    const api = params.api;
+                                                    const filteredData = [];
+                                                    // api.forEachNodeAfterFilterAndSort((node) => {
+                                                    //     if (!node.rowPinned) {
+                                                    //         filteredData.push(node.data);
+                                                    //     }
+                                                    // });
+                                                    const normalizedInput = inputValue.trim().toLowerCase();
+
+                                                    api.forEachNodeAfterFilterAndSort((node) => {
+                                                        if (node.data && node.data.campaignname) {
+                                                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                                                            // Apply search and filter conditions
+                                                            if (
+                                                                normalizedCampaign.startsWith(normalizedInput) ||
+                                                                normalizedCampaign.includes(normalizedInput) ||
+                                                                normalizedCampaign.endsWith(normalizedInput)
+                                                            ) {
+                                                                filteredData.push(node.data);
+                                                            }
+                                                        }
+                                                    });
+
+                                                    const updatedFooter = [
+                                                        {
+                                                            // [`${newtime}Date`]: 'Totals',
+                                                            campaignName: 'Total',
+                                                            actions: "",
+                                                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                                                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                                                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                                                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                                                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                                                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                                                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                                                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                        },
+                                                    ];
+
+                                                    setLiveFixedFooter(updatedFooter);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
 
 
 
-                            // </div>
-                        ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                            {apiStatus === true ?
-                                <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    // icon={<SmileOutlined />}
-                                    title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                                    extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                                /> : (startDate !== endDate ? <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                /> : <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No LiveData for ${newaccount} to ${startDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                />)}
-                        </div>}
+                                    // </div>
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {apiStatus === true ?
+                                        <Result
+                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            // icon={<SmileOutlined />}
+                                            title={`API failed to fetch the data. Please click retry button to fetch the data`}
+                                            extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+                                        /> : (startDate !== endDate ? <Result
+                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            icon={<SmileOutlined />}
+                                            title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+                                        // extra={<Button type="primary">Next</Button>}
+                                        /> : <Result
+                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            icon={<SmileOutlined />}
+                                            title={`No LiveData for ${newaccount} to ${startDate}`}
+                                        // extra={<Button type="primary">Next</Button>}
+                                        />)}
+                                </div>}
+                        </div>
+                        :
+                        <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                            <Result
+                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                icon={<SmileOutlined />}
+                                title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+                            // extra={<Button type="primary">Next</Button>}
+                            />
+                        </div>
+                    }
                 </div>
             </div>
 

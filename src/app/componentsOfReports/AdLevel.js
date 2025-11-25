@@ -3,10 +3,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import { Space } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Space, Tooltip, Menu, Dropdown } from 'antd';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -60,17 +58,18 @@ const selectTimezone = {
   CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
+const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
   console.log(campaignComments);
-  const { theme } = useTokenContext();
-  const { apiClient } = useTokenContext();
+  const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
   const [rowData, setRowData] = useState([]);
 
   const newRowDataForFilter = useRef([]);
+
+  const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
 
   const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
@@ -937,8 +936,8 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
             campaignid: item.campaignid,
             Account: item.accountNumber,
             adsetid: item.adsetid,
-            ad_id: item.ad_id,     
-            level: "ad",            
+            ad_id: item.ad_id,
+            level: "ad",
             pinned: action === "pin",
             userPin: userdetails?.email,
             editedPinTime: timeStamp
@@ -1192,6 +1191,15 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
+    filter: "agTextColumnFilter",
+    filterValueGetter: (params) => {
+      if (params.node.group) {
+        // Use the group key (campaign name)
+        return params.node.key;
+      }
+      // For leaf rows, use the campaign_name or any field
+      return params.data?.adname || '';
+    },
 
     // 🔁 Comparator now respects pin overrides so rows re-order immediately
     // comparator: (campaignA, campaignB, nodeA, nodeB) => {
@@ -1244,6 +1252,8 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
       // get first leaf row of group A
       const leafA = nodeA.allLeafChildren?.[0]?.data;
       const leafB = nodeB.allLeafChildren?.[0]?.data;
+      // const leafA = nodeA?.allLeafChildren?.[0]?.data ?? nodeA?.data ?? null;
+      // const leafB = nodeB?.allLeafChildren?.[0]?.data ?? nodeB?.data ?? null;
 
       // safety
       if (!leafA) return 1;
@@ -2525,7 +2535,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
       }
 
       let newFilterData;
-      if (campaignStatusFilter !== "ALL") {
+      if (campaignStatusFilter !== "All") {
         newFilterData = filteredData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       }
       else {
@@ -2856,7 +2866,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
   useEffect(() => {
     // functionCall1();
     console.log(campaignStatusFilter, "campaignStatusFilter");
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       setRowData(filteredByStatus);
     } else {
@@ -2884,7 +2894,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
       }) : null;
     newRowDataForFilter.current = filterData;
     let newFilterData;
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
     }
     else {
@@ -3260,23 +3270,9 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                 />
               </div>
             </div>
-          ) : rowData?.length > 0 ? (
-            <div
-              className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-            // style={{
-            //     width: '100%',
-            //     // borderRadius: 12,
-            //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-            //     padding: 10,
-            //     height: '100%',
-            //     boxShadow:
-            //     theme === 'dark'
-            //         ? '0 1px 3px rgba(0,0,0,0.6)'
-            //         : '0 1px 6px rgba(0,0,0,0.08)',
-            // }}
-            >
-
-              <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
+          ) : newRowDataForFilter.current?.length > 0 ? (
+            <div>
+              <Row className="header-row" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                 <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                   <Space align="center">
                     <div className="blinking-circle-1"></div>
@@ -3598,6 +3594,105 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                 <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                   <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                 </Col>
+
+                <Col>
+                  <Dropdown
+                    overlay={
+                      <Menu
+                        onClick={({ key }) =>
+                          // onStatusFilterChange && 
+                          // onStatusFilterChange(key)
+                          setcampaignStatusLabel(key)
+                        } // <-- Add this line
+                        items={[
+                          {
+                            key: 'All',
+                            label: (
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#122F6E',
+                                    marginRight: '6px',
+                                  }}
+                                ></span>
+                                All
+                              </span>
+                            ),
+                          },
+                          {
+                            key: 'Active',
+                            label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'green',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Active
+
+                            </span>
+                          },
+                          {
+                            key: 'Paused', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'red',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Paused
+
+                            </span>
+                          },
+                          {
+                            key: 'Archived', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'orange',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Archived
+
+                            </span>
+                          },
+                        ]}
+                      />
+                    }
+                    trigger={['click']}
+                  >
+                    <Button
+                      type="default"
+                      style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                        border: '1px solid #4CAF50',
+                        color: theme === 'dark' ? '#95de64' : '#389e0d',
+                        fontWeight: 500,
+                        marginRight: '5px'
+                      }}
+                    >
+                      <Space size={2}>
+                        <FilterOutlined />
+                        {campaignStatusFilter}
+                        <DownOutlined style={{ fontSize: 10 }} />
+                      </Space>
+                    </Button>
+                  </Dropdown>
+                </Col>
+
                 {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ fontWeight: '600' }}>
                                             Cron/Acc status: {cronStatus.current} /{' '}
@@ -3650,146 +3745,162 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                   {/* </Tooltip> */}
                 </Col>
               </Row>
-              <div className='table-container'>
-                <AgGridReact
-                  ref={gridRef}
-                  rowHeight={30}
-                  className='custom-grid'
-                  rowData={memorizedRowData}
-                  rowSelection='multiple'
-                  columnDefs={memorizedColumnDef}
-                  defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-                  // onCellClicked={onCellClickedLive}
-                  onSelectionChanged={onSelectionChanged}
-                  groupSelectsChildren={true} // ✅ Selects all children when a group is selected
-                  suppressRowClickSelection={true}
-                  context={context}
-                  pagination={true}
-                  paginationPageSize={200}
-                  paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
-                  suppressAggFuncInHeader={true}
-                  getMainMenuItems={getMainMenuItems}
+              {rowData?.length > 0 ?
+                <div
+                  className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                >
 
-                  // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                  // onCellKeyDown={onCellKeyDown}
-                  // domLayout="normal"
-                  // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
-                  // groupIncludeFooter={rowData.length > 0 ? true : false}
-                  autoGroupColumnDef={autoGroupColumnDefLive}
-                  onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                  gridOptions={{
-                    ...gridOptions,
-                    ensureDomOrder: false,
-                    suppressRowClickSelection: true,
-                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                    groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
-                  }}
-                  frameworkComponents={{ GroupCellRenderer }}
-                  groupDisplayType='multipleColumns'
-                  // rowGroupPanelShow='always'
-                  // onFilterChanged={onFilterChanged} // Use the custom filter handler
-                  pinnedBottomRowData={liveFixedFooter}
-                  suppressCellSelection={true}
-                  getRowStyle={(params) => {
-                    if (params.node.rowPinned) {
 
-                      return {
-                        // fontWeight: "bold",
-                        backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
-                        color: theme === "dark" ? "#fff" : "#000",
-                        height: '30px'
-                      };
-                    }
-                    return null; // Keep other row styles unchanged
-                  }}
-                  getCellStyle={(params) => {
-                    const isSelected = selectedCells.some(
-                      (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                    );
+                  <div className='table-container'>
+                    <AgGridReact
+                      ref={gridRef}
+                      rowHeight={30}
+                      className='custom-grid'
+                      rowData={memorizedRowData}
+                      rowSelection='multiple'
+                      columnDefs={memorizedColumnDef}
+                      defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                      // onCellClicked={onCellClickedLive}
+                      onSelectionChanged={onSelectionChanged}
+                      groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                      suppressRowClickSelection={true}
+                      context={context}
+                      pagination={true}
+                      paginationPageSize={200}
+                      paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                      suppressAggFuncInHeader={true}
+                      getMainMenuItems={getMainMenuItems}
 
-                    // ✅ Ensure first cell inside a group is highlighted
-                    const isFirstSelected = firstSelectedCell &&
-                      firstSelectedCell.rowIndex === params.node.rowIndex &&
-                      firstSelectedCell.colId === params.column.getId();
+                      // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                      // onCellKeyDown={onCellKeyDown}
+                      // domLayout="normal"
+                      // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                      // groupIncludeFooter={rowData.length > 0 ? true : false}
+                      autoGroupColumnDef={autoGroupColumnDefLive}
+                      onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                      gridOptions={{
+                        ...gridOptions,
+                        ensureDomOrder: false,
+                        enableCharts: true,
+                        suppressRowClickSelection: true,
+                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                        groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                      }}
+                      frameworkComponents={{ GroupCellRenderer }}
+                      groupDisplayType='multipleColumns'
+                      // rowGroupPanelShow='always'
+                      // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                      pinnedBottomRowData={liveFixedFooter}
+                      suppressCellSelection={true}
+                      getRowStyle={(params) => {
+                        if (params.node.rowPinned) {
 
-                    return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                  }}
-                  onFilterChanged={(params) => {
-                    const api = params.api;
-                    const filteredData = [];
-                    // api.forEachNodeAfterFilterAndSort((node) => {
-                    //     if (!node.rowPinned) {
-                    //         filteredData.push(node.data);
-                    //     }
-                    // });
-                    const normalizedInput = inputValue.trim().toLowerCase();
-
-                    api.forEachNodeAfterFilterAndSort((node) => {
-                      if (node.data && node.data.campaignname) {
-                        const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-
-                        // Apply search and filter conditions
-                        if (
-                          normalizedCampaign.startsWith(normalizedInput) ||
-                          normalizedCampaign.includes(normalizedInput) ||
-                          normalizedCampaign.endsWith(normalizedInput)
-                        ) {
-                          filteredData.push(node.data);
+                          return {
+                            // fontWeight: "bold",
+                            backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                            color: theme === "dark" ? "#fff" : "#000",
+                            height: '30px'
+                          };
                         }
-                      }
-                    });
+                        return null; // Keep other row styles unchanged
+                      }}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                          (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                        );
 
-                    const updatedFooter = [
-                      {
-                        // [`${newtime}Date`]: 'Totals',
-                        campaignName: 'Total',
-                        actions: "",
-                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                        revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                        margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                        rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                        cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                        ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                        fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                        conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                        fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                        roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                        cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                        cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                        fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                        fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                        impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
-                      },
-                    ];
+                        // ✅ Ensure first cell inside a group is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                          firstSelectedCell.rowIndex === params.node.rowIndex &&
+                          firstSelectedCell.colId === params.column.getId();
 
-                    setLiveFixedFooter(updatedFooter);
-                  }}
-                />
-              </div>
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                      }}
+                      onFilterChanged={(params) => {
+                        const api = params.api;
+                        const filteredData = [];
+                        // api.forEachNodeAfterFilterAndSort((node) => {
+                        //     if (!node.rowPinned) {
+                        //         filteredData.push(node.data);
+                        //     }
+                        // });
+                        const normalizedInput = inputValue.trim().toLowerCase();
+
+                        api.forEachNodeAfterFilterAndSort((node) => {
+                          if (node.data && node.data.campaignname) {
+                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                            // Apply search and filter conditions
+                            if (
+                              normalizedCampaign.startsWith(normalizedInput) ||
+                              normalizedCampaign.includes(normalizedInput) ||
+                              normalizedCampaign.endsWith(normalizedInput)
+                            ) {
+                              filteredData.push(node.data);
+                            }
+                          }
+                        });
+
+                        const updatedFooter = [
+                          {
+                            // [`${newtime}Date`]: 'Totals',
+                            campaignName: 'Total',
+                            actions: "",
+                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                          },
+                        ];
+
+                        setLiveFixedFooter(updatedFooter);
+                      }}
+                    />
+                  </div>
 
 
+                </div>
+                : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                  {apiStatus === true ?
+                    <Result
+                      className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                      // icon={<SmileOutlined />}
+                      title={`API failed to fetch the data. Please click retry button to fetch the data`}
+                      extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+                    /> : (startDate !== endDate ? <Result
+                      className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                      icon={<SmileOutlined />}
+                      title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+                    // extra={<Button type="primary">Next</Button>}
+                    /> : <Result
+                      className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                      icon={<SmileOutlined />}
+                      title={`No LiveData for ${newaccount} to ${startDate}`}
+                    // extra={<Button type="primary">Next</Button>}
+                    />)}
+                </div>}
             </div>
           ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-            {apiStatus === true ?
-              <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                // icon={<SmileOutlined />}
-                title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-              /> : (startDate !== endDate ? <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                icon={<SmileOutlined />}
-                title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
-              // extra={<Button type="primary">Next</Button>}
-              /> : <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                icon={<SmileOutlined />}
-                title={`No LiveData for ${newaccount} to ${startDate}`}
-              // extra={<Button type="primary">Next</Button>}
-              />)}
+            <Result
+              className={theme === 'dark' ? 'dark-result' : 'light-result'}
+              icon={<SmileOutlined />}
+              title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+            // extra={<Button type="primary">Next</Button>}
+            />
           </div>}
         </div>
       </div>

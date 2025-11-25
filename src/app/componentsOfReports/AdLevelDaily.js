@@ -4,10 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import { Space } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge, Tooltip, Space, Menu, Dropdown } from 'antd';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -15,10 +13,6 @@ import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../components/parent';
-
-// const CampaignLevelReports = React.lazy(() => import('./CampaignLevel'));
-// const AdsetLevelReports = React.lazy(() => import('./AdsetLevel'));
-// const AdLevelReports = React.lazy(() => import('./AdLevel'));
 
 const contentStyle = {
   margin: "10px",
@@ -65,14 +59,15 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
-  const { theme } = useTokenContext();
-  const { apiClient } = useTokenContext();
+const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
+  const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
   const [dailyData, setdailyData] = useState([]);
 
   const newRowDataForFilter = useRef([]);
+
+  const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
 
   const [dailyFixedFooter, setDailyFixedFooter] = useState([]);
 
@@ -237,643 +232,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
     setLeafCampaigns(uniqueLeafCampaigns);
     console.log("Selected unique Ads:", uniqueLeafCampaigns);
   };
-  // const autoGroupColumnDef = {
-  //     headerName: 'Ad name',
-  //     minWidth: 450,
-  //     pinned: 'left',
-  //     sortable: true, // Enable sorting
-  //     unSortIcon: true,
-  //     headerClass: 'ag-center-header',
-  //     // filter: 'agTextColumnFilter',      // Enable string filter
-  //     // floatingFilter: false,              // Optional: show quick filter below header
-  //     // suppressMenu: false,
-  //     // showRowGroup: 'adname',
-  //     // field: 'adname',
-  //     // suppressCellSelection: true,
 
-  //     comparator: (campaignA, campaignB) => {
-  //         if (!campaignA) return 1;
-  //         if (!campaignB) return -1;
-
-  //         // Function to get the 'pinned' status of a campaign
-  //         const getPinStatusForCampaign = (campaignName) => {
-  //             const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-  //             return relatedComment ? relatedComment.pinned : false;
-  //         };
-
-  //         // Prioritize pinned campaigns first (pinned campaigns should come to the top)
-  //         const isPinnedA = getPinStatusForCampaign(campaignA);
-  //         const isPinnedB = getPinStatusForCampaign(campaignB);
-
-  //         if (isPinnedA !== isPinnedB) {
-  //             return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
-  //         }
-
-  //         // If both campaigns have the same pinned status, fallback to alphabetical sorting
-  //         return campaignA.localeCompare(campaignB);
-  //     },
-
-  //     cellRendererParams: {
-  //         suppressCount: false,
-  //         innerRenderer: (params) => {
-  //             if (params.node.footer) {
-  //                 return 'Total';
-  //             }
-
-  //             const firstColumnValue = params.node.key;  // campaign name
-  //             // const campaignName = params.node.key;
-  //             const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
-  //             const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
-
-
-  //             let campaignid, adsetid, adid;
-
-  //             if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
-  //                 const firstChild = params.node.childrenAfterGroup[0].data;
-  //                 campaignid = firstChild.campaignid;
-  //                 adsetid = firstChild.adsetid;
-  //                 adid = firstChild.adid;
-  //             } else if (params.data) {
-  //                 campaignid = params.data.campaignid;
-  //                 adsetid = params.data.adsetid;
-  //                 adid = params.data.adid;
-  //             } else {
-  //                 console.error('Missing campaignid or adsetid for campaign:', campaignName);
-  //                 return (
-  //                     <div style={{ color: 'red' }}>
-  //                         Error: campaignid or adsetid missing for {campaignName}
-  //                     </div>
-  //                 );
-  //             }
-  //             const getEditedUserAndTime = (campaignName, newaccount) => {
-  //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-  //                 // console.log(relatedStatus, "relatedStatus");
-  //                 const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
-  //                 // console.log(relatedStatusTrue);
-  //                 return relatedStatusEditedTime;
-  //             }
-
-  //             const getPinEditedUserAndTime = (campaignName, newaccount) => {
-  //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-  //                 return relatedStatus ? relatedStatus : null;
-  //             };
-
-  //             const getStatusForCampaign = (campaignName, newaccount) => {
-  //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-  //                 // console.log(relatedStatus, "relatedStatus");
-  //                 const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
-  //                 // console.log(relatedStatusTrue);
-  //                 return relatedStatusTrue;
-  //             }
-
-  //             const getCommentForCampaign = (campaignName) => {
-  //                 const relatedComment = campaignComments.find(comment => comment.campaignname === adName);
-  //                 return relatedComment ? relatedComment.comment : null;
-  //             };
-
-  //             const getPinStatusForCampaign = (campaignName) => {
-  //                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-  //                 return relatedComment ? relatedComment.pinned : false;
-  //             };
-
-  //             const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
-  //             const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
-  //             const relatedStatus = getStatusForCampaign(campaignName, newaccount);
-  //             const relatedComment = getCommentForCampaign(campaignName);
-  //             // const isStarred = getStarredForCampaign(campaignName);
-  //             const valueWithCount = `${firstColumnValue}`;
-
-  //             const [tooltipText, setTooltipText] = useState("Click to Copy");
-  //             const [isModalVisibles, setIsModalVisibles] = useState(false);
-
-  //             const [isAdidModalVisibles, setIsAdidModalVisibles] = useState(false);
-  //             const [selectedAdid, setSelectedAdid] = useState(null); // store adid when switch clicked
-  //             // const [switchOn, setSwitchOn] = useState(false); // control toggle state
-  //             const [switchStates, setSwitchStates] = useState({}); // { adid1: true, adid2: false }
-  //             const [nextChecked, setNextChecked] = useState(false); // what user clicked
-
-  //             const [comment, setComment] = useState(relatedComment || '');
-  //             // const [starred, setStarred] = useState(isStarred);
-  //             const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
-
-  //              // Update switch state from AdLevel
-  //             //  useEffect(() => {
-  //             //     const matchedComment = campaignComments.find(
-  //             //     (item) =>
-  //             //         item.campaignid === campaignid &&
-  //             //         item.adsetid === adsetid &&
-  //             //         item.AdLevel?.ad_id === adid
-  //             //     );
-
-  //             //     if (matchedComment?.AdLevel?.status) {
-  //             //         setSwitchOn(matchedComment.AdLevel.status === "ACTIVE");
-  //             //     } else {
-  //             //         // Default to ACTIVE if AdLevel doesn't exist
-  //             //         setSwitchOn(true);
-  //             //       }
-  //             // }, [campaignComments, campaignid, adsetid, adid]);
-
-  //             useEffect(() => {
-  //                 if (!adid) return;
-
-  //                 // Search by campaignid only, not adsetid
-  //                 const matchedComment = campaignComments.find(
-  //                     (item) =>
-  //                     item.campaignid === campaignid &&
-  //                     Array.isArray(item.AdLevel) &&
-  //                     item.AdLevel.some(ad => ad.ad_id === adid)
-  //                 );
-
-  //                 // const matchedComment = campaignComments.find(
-  //                 //   (item) =>
-  //                 //     item.campaignid === campaignid &&
-  //                 //     item.adsetid === adsetid &&
-  //                 //     Array.isArray(item.AdLevel) &&
-  //                 //     item.AdLevel.find(ad => ad.ad_id === adid)
-  //                 // );
-
-  //                 const adEntry = matchedComment?.AdLevel?.find(ad => ad.ad_id === adid);
-  //                 const isActive = adEntry?.status === "ACTIVE";
-
-  //                 if (matchedComment && adEntry) {
-  //                     setSwitchStates((prev) => ({
-  //                       ...prev,
-  //                       [adid]: isActive
-  //                     }));
-  //                 }else {
-  //                     // fallback to true (assume ACTIVE) if no comment in DB
-  //                     setSwitchStates((prev) => ({
-  //                       ...prev,
-  //                       [adid]: true
-  //                     }));
-  //                 }
-  //             }, [campaignComments, campaignid, adsetid, adid]);
-
-  //             const handlePauseClick = (adid, checked) => {
-  //                 setSelectedAdid(adid); 
-  //                 setNextChecked(checked); // user’s toggle intent
-  //                 setIsAdidModalVisibles(true);
-  //             };
-
-  //             const handlePauseOk = async () => {
-  //                 if (!selectedAdid) {
-  //                     console.warn("No ad selected.");
-  //                     return;
-  //                 }
-
-  //                 // update visual switch state for selected ad
-  //                 setSwitchStates((prev) => ({
-  //                     ...prev,
-  //                     [selectedAdid]: nextChecked
-  //                 }));
-
-  //                 // setSwitchOn(nextChecked); // update visual switch state
-
-  //                 try {
-  //                   const token = localStorage.getItem("token");
-
-  //                   const response = await apiClient.post(`/adStatusChange`,
-  //                     {
-  //                         status: nextChecked ? "ACTIVE" : "PAUSED",
-  //                         id: params.data?.identifier,             
-  //                         ad_id: selectedAdid,                              
-  //                         name: campaignName,
-  //                         accountNumber: newaccount,
-  //                         revenuePartner: params.data?.revenuePartner || "",
-  //                         campaign_id: campaignid,
-  //                         adset_id: adsetid,
-  //                         email: userdetails?.email,
-  //                     },
-  //                     {
-  //                       headers: {
-  //                         Authorization: token
-  //                       }
-  //                     }
-  //                   );
-
-  //                   if (response.status === 200 || response.status === 201) {
-  //                     functionCallForCommnets(newaccount)
-  //                     console.log(" Status updated on Facebook:", response.data.status, "Ad ID:", response.data.ad_id);
-  //                   } else {
-  //                     console.warn(" Backend returned unexpected status:", response.status);
-  //                   }
-
-  //                 } catch (error) {
-  //                   console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
-  //                 }
-
-  //                 setIsAdidModalVisibles(false);
-  //                 setSelectedAdid(null);
-  //             };
-
-  //             const handlePauseCancel = () => {
-  //                 setIsAdidModalVisibles(false);
-  //                 setSelectedAdid(null);
-  //             };
-
-
-  //             const copyToClipboard = () => {
-  //                 navigator.clipboard.writeText(firstColumnValue)
-  //                     .then(() => {
-  //                         setTooltipText("Copied!");
-  //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
-  //                     })
-  //                     .catch(() => {
-  //                         console.error('Failed to copy to clipboard');
-  //                     });
-  //             };
-
-  //             const handleEditClick = () => {
-  //                 setIsModalVisibles(true);
-  //             };
-
-  //             const sendNewCommentToAPI = async (logData) => {
-  //                 try {
-  //                     const response = await apiClient.post('/Comments', {
-  //                         commentsdatas: logData,
-  //                     });
-  //                     // console.log('Response from server:', response.data);
-  //                 } catch (error) {
-  //                     console.error('Error sending data to server:', error);
-  //                 }
-  //             };
-
-  //             const sendEditedCommentToAPI = async (logData) => {
-  //                 try {
-  //                     const response = await apiClient.post('/Comments/edit', {
-  //                         campaignname: logData.campaignname,
-  //                         comment: logData.comment,
-  //                         Account: logData.Account,
-  //                         adsetid: logData.adsetid,
-  //                         campaignid: logData.campaignid,
-  //                         status: true
-  //                     });
-  //                     // console.log('Response from server (edited comment):', response.data);
-  //                     return response.data;
-  //                 } catch (error) {
-  //                     console.error('Error sending edited comment to server:', error);
-  //                     throw error;
-  //                 }
-  //             };
-
-  //             const handleDelete = async () => {
-  //                 try {
-  //                     // Prepare the payload for the API call
-  //                     const payload = {
-  //                         campaignname: firstColumnValue,
-  //                         Account: newaccount,
-  //                         adsetid: adsetid,
-  //                         campaignid: campaignid,
-  //                     };
-
-  //                     // Call the backend API to delete the comment
-  //                     const response = await apiClient.post('/Comments/delete', payload);
-
-  //                     if (response.status === 200 || response.status === 201) {
-  //                         // Remove the comment from the local state
-  //                         // const updatedComments = campaignComments.filter(
-  //                         //     (comment) => comment.campaignname !== firstColumnValue
-  //                         // );
-
-  //                         // // Update the state with the updated comments
-  //                         // setCampaignComments(updatedComments);
-  //                         refreshComments(newaccount);
-
-  //                         // Refresh the table or any other UI component
-  //                         // changeRRefrst();
-
-  //                         message.success('Comment deleted successfully!');
-  //                         setIsModalVisibles(false); // Close the popup
-  //                     } else {
-  //                         message.error('Failed to delete the comment. Please try again.');
-  //                     }
-  //                 } catch (error) {
-  //                     console.error('Error deleting the comment:', error);
-  //                     message.error('Failed to delete the comment. Please try again.');
-  //                 }
-  //             };
-
-  //             const handleOks = async () => {
-  //                 try {
-  //                     const logData = {
-  //                         Account: newaccount,
-  //                         usercommit: userdetails?.email,
-  //                         campaignname: firstColumnValue,
-  //                         comment: comment,
-  //                         campaignid: campaignid,
-  //                         adsetid: adsetid
-  //                     };
-
-  //                     if (relatedComment) {
-  //                         await sendEditedCommentToAPI(logData);
-  //                         refreshComments(newaccount);
-  //                         message.success("Comment updated successfully!");
-  //                     } else {
-  //                         await sendNewCommentToAPI(logData);
-  //                         refreshComments(newaccount);
-  //                         message.success("New comment added successfully!");
-  //                     }
-
-
-  //                     setIsModalVisibles(false);
-  //                 } catch (error) {
-  //                     console.error('Error while submitting comment:', error);
-  //                     message.error("Error while submitting the comment.");
-  //                 }
-  //             };
-
-  //             const handleCancels = () => {
-  //                 setIsModalVisibles(false);
-  //             };
-
-  //             const CustomTooltipContent = ({ editedTime, usercommit }) => (
-  //                 <div style={{ padding: '5px', borderRadius: '5px' }}>
-  //                     <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
-  //                     <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
-  //                 </div>
-  //             );
-
-  //             const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
-  //                 const updatedPinStatus = !currentPinStatus;
-
-  //                 try {
-  //                     let response;
-  //                     if (updatedPinStatus) {
-  //                         response = await apiClient.post('/Pin', {
-  //                             campaignname: campaignName,
-  //                             Account: newaccount,
-  //                             campaignid: campaignid,
-  //                             adsetid: adsetid,
-  //                             userPin: userdetails?.email,
-  //                             comment: comment || ''
-  //                         });
-  //                         // changeRRefrst();
-  //                         if(response.status ===200 || response.status === 201){
-  //                             refreshComments(newaccount);
-  //                         }
-
-  //                         message.success("Campaign pinned!");
-  //                     } else {
-  //                         response = await apiClient.post('/Unpin', {
-  //                             campaignname: campaignName,
-  //                             Account: newaccount,
-  //                             campaignid: campaignid,
-  //                             adsetid: adsetid
-  //                         });
-  //                         // changeRRefrst();
-  //                         if(response.status ===200 || response.status === 201){
-  //                             refreshComments(newaccount);
-  //                         }
-
-  //                         message.success("Campaign unpinned!");
-  //                     }
-
-  //                     // Update campaignComments with the new pinned status and edited user/time
-  //                     // const updatedComments = campaignComments.map(cmt =>
-  //                     //     cmt.campaignname === campaignName
-  //                     //         ? {
-  //                     //             ...cmt,
-  //                     //             pinned: updatedPinStatus,
-  //                     //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-  //                     //             userPin: userdetails?.email
-  //                     //         }
-  //                     //         : cmt
-  //                     // );
-
-  //                     // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
-  //                     //     updatedComments.push({
-  //                     //         campaignname: campaignName,
-  //                     //         pinned: updatedPinStatus,
-  //                     //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-  //                     //         userPin: userdetails?.email
-  //                     //     });
-  //                     // }
-  //                     // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
-  //                     // setCampaignComments(sortedComments);
-  //                     setPinned(updatedPinStatus);
-  //                 } catch (error) {
-  //                     console.error('Error toggling pin status', error);
-  //                     message.error('Error while updating pin status.');
-  //                 }
-  //             };
-
-  //             const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
-  //                 return (
-  //                     <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
-  //                         <button
-  //                             onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
-  //                             style={{
-  //                                 border: "none",
-  //                                 background: "none",
-  //                                 cursor: "pointer",
-  //                                 fontSize: "16px",
-  //                             }}
-  //                         >
-  //                             {pinned ? "📌" : "📍"}
-  //                         </button>
-  //                     </Tooltip>
-  //                 );
-  //             };
-
-  //             return (
-  //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-  //                     <Switch 
-  //                         // checked={switchOn}
-  //                         checked={!!switchStates[adid]}
-  //                         onClick={(checked) => handlePauseClick(adid, checked)}
-  //                         size="small" 
-  //                         style={{
-  //                           backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9',
-  //                         }} 
-  //                     />
-  //                     <Modal
-  //                         title="Confirm Action"
-  //                         open={isAdidModalVisibles}
-  //                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-  //                         onOk={handlePauseOk}
-  //                         onCancel={handlePauseCancel}
-  //                     >
-  //                         <p>
-  //                             Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?
-  //                         </p>
-  //                         <p>Ad ID: {selectedAdid}</p>
-  //                     </Modal>
-  //                     <PinIcon
-  //                         campaignName={campaignName}
-  //                         campaignid={campaignid}
-  //                         adsetid={adsetid}
-  //                         // pinned={getPinStatusForCampaign(campaignName)}
-  //                         pinned={pinned}
-  //                     />
-  //                     {/* <div style={{ marginLeft: '2px' }}>
-  //                         {(() => {
-  //                             // Find the matching campaign in the Camapignlevelstatus array
-  //                             const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
-
-  //                             if (campaignStatus) {
-  //                                 const { status, start, end } = campaignStatus;
-
-  //                                 // Tooltip content with start and end dates
-  //                                 const tooltipContent = (
-  //                                     <div>
-  //                                         <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
-  //                                         <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
-  //                                     </div>
-  //                                 );
-
-  //                                 if (status === 'PAUSED') {
-  //                                     return (
-  //                                         <Tooltip title={tooltipContent}>
-  //                                             <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} className='black-icon-pause' />
-  //                                         </Tooltip>
-  //                                     );
-  //                                 } else if (status === 'ACTIVE') {
-  //                                     return (
-  //                                         <Tooltip title={tooltipContent}>
-  //                                             <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active'/>
-  //                                         </Tooltip>
-  //                                     );
-  //                                 } else {
-  //                                     // Default for unknown status
-  //                                     return (
-  //                                         <Tooltip title={tooltipContent}>
-  //                                             <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-  //                                         </Tooltip>
-  //                                     );
-  //                                 }
-  //                             } else {
-  //                                 // Fallback if no matching campaign is found
-  //                                 return (
-  //                                     <Tooltip title="No campaign data available">
-  //                                         <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-  //                                     </Tooltip>
-  //                                 );
-  //                             }
-  //                         })()}
-  //                     </div> */}
-  //                     {relatedComment ? (
-  //                         <Tooltip
-  //                             // title={relatedComment || 'No comment available'}
-  //                             title={
-  //                                 <div>
-  //                                   <div>{relatedComment || 'No comment available'}</div>
-  //                                   <div>
-  //                                     {editUserANdTime
-  //                                       ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
-  //                                       : ""}
-  //                                   </div>
-  //                                 </div>
-  //                             }
-  //                             overlayInnerStyle={{
-  //                                 backgroundColor: theme === 'dark' ? '#111' : '#fff',
-  //                                 color: theme === 'dark' ? '#fff' : '#000',
-  //                                 border: '1px solid #ccc',   
-  //                                 borderRadius: 6,
-  //                                 // fontWeight: 500,
-  //                             }}
-  //                         >
-  //                             <MessageOutlined
-  //                             className={theme === "dark" ? "black-icon-comment" : 'Message'}
-  //                             style={{
-  //                                 cursor: 'pointer',
-  //                                 marginLeft: '10px',
-  //                                 marginRight: '10px',
-  //                                 color: '#4CAF50'
-  //                             }}
-  //                             onClick={handleEditClick} // Open modal directly on click
-  //                             />
-  //                         </Tooltip>
-  //                     ) : (
-  //                         <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
-  //                     )}
-  //                     <Tooltip 
-  //                         title={tooltipText}
-  //                         overlayInnerStyle={{
-  //                             backgroundColor: theme === 'dark' ? '#111' : '#fff',
-  //                             color: theme === 'dark' ? '#fff' : '#000',
-  //                             border: '1px solid #ccc',   
-  //                             borderRadius: 6,
-  //                             // fontWeight: 500,
-  //                         }}
-  //                     >
-  //                         <CopyOutlined
-  //                             onClick={copyToClipboard}
-  //                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
-  //                         />
-  //                     </Tooltip>
-  //                     <LinkOutlined 
-  //                         onClick={() => {
-  //                             const url = `/DailyAndCampaignHistory/AdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-  //                             window.open(url, '_blank', 'noopener,noreferrer');
-  //                         }}
-  //                         style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
-  //                     />
-  //                     <Tooltip 
-  //                         title={valueWithCount}
-  //                         overlayInnerStyle={{
-  //                             backgroundColor: theme === 'dark' ? '#111' : '#fff',
-  //                             color: theme === 'dark' ? '#fff' : '#000',
-  //                             border: '1px solid #ccc',   
-  //                             borderRadius: 6,
-  //                             // fontWeight: 500,
-  //                         }}
-  //                     >
-  //                         <span
-  //                             // onClick={() => {
-  //                             //     const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-  //                             //     window.open(url, '_blank', 'noopener,noreferrer');
-  //                             // }}
-  //                         >
-  //                             {valueWithCount}
-  //                         </span>
-  //                     </Tooltip>
-  //                     <Modal
-  //                         title={firstColumnValue}
-  //                         visible={isModalVisibles}
-  //                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-  //                         onOk={handleOks} // Default Ok button functionality
-  //                         onCancel={handleCancels} // Default Cancel button functionality
-  //                         footer={[
-  //                             <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-  //                                 <div style={{display:'flex', flexDirection:"column"}}>
-  //                                     <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
-  //                                         Last Edited Time:
-  //                                     </span>
-  //                                     <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
-  //                                         {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
-  //                                     </span>
-
-  //                                 </div>
-  //                                 <div>
-  //                                 <Button
-  //                                     key="delete"
-  //                                     type="danger"
-  //                                     onClick={handleDelete}
-  //                                     style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
-  //                                 >
-  //                                     Delete
-  //                                 </Button>
-  //                                 <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
-  //                                     Cancel
-  //                                 </Button>
-  //                                 <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
-  //                                     Ok
-  //                                 </Button>
-  //                                 </div>
-  //                             </div>
-  //                         ]}
-  //                     >
-  //                         <Input.TextArea
-  //                             placeholder="Enter your comments here"
-  //                             value={comment}
-  //                             onChange={(e) => setComment(e.target.value)}
-  //                         />
-  //                     </Modal>
-  //                 </div>
-  //             );
-  //         }
-  //     }
-  // };
   const handleBulkSmartPinAd = async (action) => {
     if (!leafCampaigns || leafCampaigns.length === 0) {
       message.warning("Select at least one ad");
@@ -1188,6 +547,15 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
+    filter: "agTextColumnFilter",
+    filterValueGetter: (params) => {
+      if (params.node.group) {
+        // Use the group key (campaign name)
+        return params.node.key;
+      }
+      // For leaf rows, use the campaign_name or any field
+      return params.data?.adname || '';
+    },
 
     // comparator: (campaignA, campaignB) => {
     //   if (!campaignA) return 1;
@@ -2783,7 +2151,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
       const fullData = filteredData?.length > 0 ? [...filteredData] : [];
 
       let newFilterData;
-      if (campaignStatusFilter !== "ALL") {
+      if (campaignStatusFilter !== "All") {
         newFilterData = fullData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       }
       else {
@@ -3109,7 +2477,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
   useEffect(() => {
     // functionCall1();
     console.log(campaignStatusFilter, "campaignStatusFilter");
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       setdailyData(filteredByStatus);
     } else {
@@ -3135,7 +2503,7 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
       }) : [];
     newRowDataForFilter.current = filterData;
     let newFilterData;
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       console.log("testing 4444");
       newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       console.log(newFilterData.filter(item => item.fbStatus?.toUpperCase() === "PAUSED"));
@@ -3194,31 +2562,10 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
                 />
               </div>
             </div>
-          ) : dailyData?.filter((each) => {
-            const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
-            const normalizedInput = inputValue.trim().toLowerCase();
-            return (
-              normalizedCampaign.startsWith(normalizedInput) ||
-              normalizedCampaign.includes(normalizedInput) ||
-              normalizedCampaign.endsWith(normalizedInput)
-            );
-          }
-          )?.length > 0 ? (
-            <div
-              className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-            // style={{
-            //     width: '100%',
-            //     // borderRadius: 12,
-            //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-            //     padding: 10,
-            //     height: 'auto',
-            //     boxShadow:
-            //     theme === 'dark'
-            //         ? '0 1px 3px rgba(0,0,0,0.6)'
-            //         : '0 1px 6px rgba(0,0,0,0.08)',
-            // }}
-            >
-              <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
+          ) : newRowDataForFilter.current?.length > 0 ?
+            <div>
+              <div>
+                <Row className="header-row" style={{ width: '100%', height:"100%",display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
                 <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                   <Space align="center" className='daily-contaier'>
                     <div className="blinking-circle"></div>
@@ -3538,6 +2885,103 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col> */}
+                <Col>
+                  <Dropdown
+                    overlay={
+                      <Menu
+                        onClick={({ key }) =>
+                          // onStatusFilterChange && 
+                          // onStatusFilterChange(key)
+                          setcampaignStatusLabel(key)
+                        } // <-- Add this line
+                        items={[
+                          {
+                            key: 'All',
+                            label: (
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#122F6E',
+                                    marginRight: '6px',
+                                  }}
+                                ></span>
+                                All
+                              </span>
+                            ),
+                          },
+                          {
+                            key: 'Active',
+                            label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'green',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Active
+
+                            </span>
+                          },
+                          {
+                            key: 'Paused', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'red',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Paused
+
+                            </span>
+                          },
+                          {
+                            key: 'Archived', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'orange',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Archived
+
+                            </span>
+                          },
+                        ]}
+                      />
+                    }
+                    trigger={['click']}
+                  >
+                    <Button
+                      type="default"
+                      style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                        border: '1px solid #4CAF50',
+                        color: theme === 'dark' ? '#95de64' : '#389e0d',
+                        fontWeight: 500,
+                        marginRight: '5px'
+                      }}
+                    >
+                      <Space size={2}>
+                        <FilterOutlined />
+                        {campaignStatusFilter}
+                        <DownOutlined style={{ fontSize: 10 }} />
+                      </Space>
+                    </Button>
+                  </Dropdown>
+                </Col>
 
                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                   < Tooltip
@@ -3601,176 +3045,203 @@ const Daily = ({ context, campaignStatusFilter, functionCallForCommnets, functio
                   {/* </Tooltip> */}
                 </Col>
               </Row>
-              <div className='table-container'>
-                <AgGridReact
-                  ref={gridRef1}
-                  rowHeight={30}
-                  className='custom-grid'
-                  rowData={memorizedDailyData}
-                  columnDefs={memorizedColumnDef1}
-                  onCellClicked={onCellClicked}
-                  context={context}
-                  pagination={true}
-                  paginationPageSize={200}
-                  paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
-                  groupDisplayType='multipleColumns'
-                  suppressAggFuncInHeader={true}
-                  suppressCellSelection={true}
-                  groupSuppressBlankHeader={true}
-                  defaultColDef={defaultColDef}
-                  rowSelection='multiple'
-                  onSelectionChanged={onSelectionChanged}
-                  groupSelectsChildren={true} // ✅ Selects all children when a group is selected
-                  suppressRowClickSelection={true}
-                  // groupIncludeFooter={true}
-                  // groupIncludeTotalFooter={true}
-                  autoGroupColumnDef={autoGroupColumnDef}
-                  onGridReady={(params) => {
-                    gridRef1.current = params.api; // Store grid API
-                    restoreGridState(gridRef1.current); // Restore state when grid is ready
-                    onGridReady(params, 'grid2', gridRef1);
-                    if (params.columnApi) {
-                      params.columnApi.autoSizeAllColumns();
-                    }
-                  }}
-                  gridOptions={{
-                    ...gridOptions1,
-                    ensureDomOrder: false,
-                    suppressRowClickSelection: true,
-                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                  }}
-                  getMainMenuItems={getMainMenuItems}
-                  pinnedBottomRowData={dailyFixedFooter}
-
-                  // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                  onCellKeyDown={onCellKeyDown}
-                  getRowStyle={params => {
-                    if (params.node.rowPinned) {
-                      return {
-                        // fontWeight: 'bold',
-                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                        color: theme === "dark" ? '#fff' : '#000',
-                        height: '30px'         // Text color should contrast with the background
-                      };
-                    }
-
-                    return null;
-                  }}
-                  getCellStyle={(params) => {
-                    const isSelected = selectedCells.some(
-                      (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                    );
-
-                    // ✅ Ensure first cell inside a group is highlighted
-                    const isFirstSelected = firstSelectedCell &&
-                      firstSelectedCell.rowIndex === params.node.rowIndex &&
-                      firstSelectedCell.colId === params.column.getId();
-
-                    return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                  }}
-                  onFilterChanged={(params) => {
-                    const api = params.api;
-                    const filteredData = [];
-                    // api.forEachNodeAfterFilterAndSort((node) => {
-                    //     if (!node.rowPinned) {
-                    //         filteredData.push(node.data);
-                    //     }
-                    // });
-                    const normalizedInput = inputValue.trim().toLowerCase();
-
-                    api.forEachNodeAfterFilterAndSort((node) => {
-                      // Check if node.data exists and has a valid campaignname
-                      if (node.data && node.data.campaignname) {
-                        const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-
-                        // Apply both search and AG-Grid filters
-                        if (
-                          normalizedCampaign.startsWith(normalizedInput) ||
-                          normalizedCampaign.includes(normalizedInput) ||
-                          normalizedCampaign.endsWith(normalizedInput)
-                        ) {
-                          filteredData.push(node.data);
-                        }
-                      }
-                    });
-
-                    // Step 1: Group rows by adname
-                    // const groupedTQMap = new Map();
-
-                    // filteredData.forEach((row) => {
-                    // if (!groupedTQMap.has(row.adname)) {
-                    //     groupedTQMap.set(row.adname, 0);
-                    // }
-                    // const currentTQ = groupedTQMap.get(row.adname);
-                    // groupedTQMap.set(row.adname, currentTQ + (isNaN(row.tq) ? 0 : Number(row.tq)));
-                    // });
-
-                    // Step 2: Compute average of grouped totals
-                    // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
-                    // const averageGroupedTQ = groupedTQMap.size > 0 ? (totalGroupedSum / groupedTQMap.size).toFixed(2) : "0.00";
-
-                    const updatedFooter = [
-                      {
-                        // [`${newtime}Date`]: 'Totals',
-                        campaignName: 'Total',
-                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                        revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                        margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                        rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                        cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                        ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                        fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                        conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                        fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                        roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                        cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                        cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                        fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                        fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                        impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
-                        // tq: averageGroupedTQ,
-                        M_tq: (() => {
-                          const nonZero = filteredData.filter(d => parseFloat(d?.M_tq) > 0);
-                          const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq || 0), 0);
-                          return parseFloat((total / (nonZero.length || 1)).toFixed(2));
-                        })(),
-                        D_tq: (() => {
-                          const nonZero = filteredData.filter(d => parseFloat(d?.D_tq) > 0);
-                          const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq || 0), 0);
-                          return parseFloat((total / (nonZero.length || 1)).toFixed(2));
-                        })(),
-                      },
-                    ];
-
-                    setDailyFixedFooter(updatedFooter);
-                  }}
-                />
               </div>
+              
+              {dailyData?.length > 0 ? (<div
+                className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+              // style={{
+              //     width: '100%',
+              //     // borderRadius: 12,
+              //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+              //     padding: 10,
+              //     height: 'auto',
+              //     boxShadow:
+              //     theme === 'dark'
+              //         ? '0 1px 3px rgba(0,0,0,0.6)'
+              //         : '0 1px 6px rgba(0,0,0,0.08)',
+              // }}
+              >
 
+                <div className='table-container'>
+                  <AgGridReact
+                    ref={gridRef1}
+                    rowHeight={30}
+                    className='custom-grid'
+                    rowData={memorizedDailyData}
+                    columnDefs={memorizedColumnDef1}
+                    onCellClicked={onCellClicked}
+                    context={context}
+                    pagination={true}
+                    paginationPageSize={200}
+                    paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                    groupDisplayType='multipleColumns'
+                    suppressAggFuncInHeader={true}
+                    suppressCellSelection={true}
+                    groupSuppressBlankHeader={true}
+                    defaultColDef={defaultColDef}
+                    rowSelection='multiple'
+                    onSelectionChanged={onSelectionChanged}
+                    groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                    suppressRowClickSelection={true}
+                    // groupIncludeFooter={true}
+                    // groupIncludeTotalFooter={true}
+                    autoGroupColumnDef={autoGroupColumnDef}
+                    onGridReady={(params) => {
+                      gridRef1.current = params.api; // Store grid API
+                      restoreGridState(gridRef1.current); // Restore state when grid is ready
+                      onGridReady(params, 'grid2', gridRef1);
+                      if (params.columnApi) {
+                        params.columnApi.autoSizeAllColumns();
+                      }
+                    }}
+                    gridOptions={{
+                      ...gridOptions1,
+                      ensureDomOrder: false,
+                      enableCharts: true,
+                      suppressRowClickSelection: true,
+                      suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                      enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                    }}
+                    getMainMenuItems={getMainMenuItems}
+                    pinnedBottomRowData={dailyFixedFooter}
+
+                    // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                    onCellKeyDown={onCellKeyDown}
+                    getRowStyle={params => {
+                      if (params.node.rowPinned) {
+                        return {
+                          // fontWeight: 'bold',
+                          backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                          color: theme === "dark" ? '#fff' : '#000',
+                          height: '30px'         // Text color should contrast with the background
+                        };
+                      }
+
+                      return null;
+                    }}
+                    getCellStyle={(params) => {
+                      const isSelected = selectedCells.some(
+                        (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                      );
+
+                      // ✅ Ensure first cell inside a group is highlighted
+                      const isFirstSelected = firstSelectedCell &&
+                        firstSelectedCell.rowIndex === params.node.rowIndex &&
+                        firstSelectedCell.colId === params.column.getId();
+
+                      return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                    }}
+                    onFilterChanged={(params) => {
+                      const api = params.api;
+                      const filteredData = [];
+                      // api.forEachNodeAfterFilterAndSort((node) => {
+                      //     if (!node.rowPinned) {
+                      //         filteredData.push(node.data);
+                      //     }
+                      // });
+                      const normalizedInput = inputValue.trim().toLowerCase();
+
+                      api.forEachNodeAfterFilterAndSort((node) => {
+                        // Check if node.data exists and has a valid campaignname
+                        if (node.data && node.data.campaignname) {
+                          const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                          // Apply both search and AG-Grid filters
+                          if (
+                            normalizedCampaign.startsWith(normalizedInput) ||
+                            normalizedCampaign.includes(normalizedInput) ||
+                            normalizedCampaign.endsWith(normalizedInput)
+                          ) {
+                            filteredData.push(node.data);
+                          }
+                        }
+                      });
+
+                      // Step 1: Group rows by adname
+                      // const groupedTQMap = new Map();
+
+                      // filteredData.forEach((row) => {
+                      // if (!groupedTQMap.has(row.adname)) {
+                      //     groupedTQMap.set(row.adname, 0);
+                      // }
+                      // const currentTQ = groupedTQMap.get(row.adname);
+                      // groupedTQMap.set(row.adname, currentTQ + (isNaN(row.tq) ? 0 : Number(row.tq)));
+                      // });
+
+                      // Step 2: Compute average of grouped totals
+                      // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
+                      // const averageGroupedTQ = groupedTQMap.size > 0 ? (totalGroupedSum / groupedTQMap.size).toFixed(2) : "0.00";
+
+                      const updatedFooter = [
+                        {
+                          // [`${newtime}Date`]: 'Totals',
+                          campaignName: 'Total',
+                          spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                          revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                          profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                          margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                          rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                          cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                          ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                          fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                          conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                          fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                          roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                          cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                          cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                          fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                          fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                          impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                          ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                          // tq: averageGroupedTQ,
+                          M_tq: (() => {
+                            const nonZero = filteredData.filter(d => parseFloat(d?.M_tq) > 0);
+                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq || 0), 0);
+                            return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                          })(),
+                          D_tq: (() => {
+                            const nonZero = filteredData.filter(d => parseFloat(d?.D_tq) > 0);
+                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq || 0), 0);
+                            return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                          })(),
+                        },
+                      ];
+
+                      setDailyFixedFooter(updatedFooter);
+                    }}
+                  />
+                </div>
+
+              </div>
+              ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                {apiStatus === true ?
+                  <Result
+                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                    // icon={<SmileOutlined />}
+                    title={`API failed to fetch the data. Please click retry button to fetch the data`}
+                    extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+                  /> :
+                  (startDate !== endDate ? <Result
+                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                    icon={<SmileOutlined />}
+                    title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
+                  // extra={<Button type="primary">Next</Button>}
+                  /> : <Result
+                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                    icon={<SmileOutlined />}
+                    title={`No DailyData for ${newaccount} to ${startDate}`}
+                  // extra={<Button type="primary">Next</Button>}
+                  />)}
+              </div>}
             </div>
-          ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-            {apiStatus === true ?
+            : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
               <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                // icon={<SmileOutlined />}
-                title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-              /> :
-              (startDate !== endDate ? <Result
                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
                 icon={<SmileOutlined />}
                 title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
               // extra={<Button type="primary">Next</Button>}
-              /> : <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                icon={<SmileOutlined />}
-                title={`No DailyData for ${newaccount} to ${startDate}`}
-              // extra={<Button type="primary">Next</Button>}
-              />)}
-          </div>}
+              />
+            </div>}
       </div>
     </div>
   );

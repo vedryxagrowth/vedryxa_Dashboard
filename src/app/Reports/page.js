@@ -57,7 +57,7 @@ const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAd
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 
 const MyTablePage = () => {
-    const { userdetails } = useTokenContext();
+    const { userdetails, theme, apiClient } = useTokenContext();
     const params = new URLSearchParams(window.location.search);
 
     const networkFromDashboard = params.get('network');
@@ -66,9 +66,6 @@ const MyTablePage = () => {
     const startDateFromDashboard = params.get('startDate');
     const endDateFromDashboard = params.get('endDate');
     const accountNameFromDashboard = params.get('accountName');
-
-    const { theme } = useTokenContext();
-    const { apiClient } = useTokenContext();
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             {/* <Flex align="center" gap="middle">
@@ -130,7 +127,7 @@ const MyTablePage = () => {
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
-    // console.log(storedData, "storedData");
+    console.log(storedData, "storedData");
 
     const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate : yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
@@ -1715,7 +1712,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -1779,7 +1776,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -2738,7 +2736,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -2802,7 +2800,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -4908,7 +4907,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -4972,7 +4971,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -5692,6 +5692,7 @@ const MyTablePage = () => {
             field: 'keyword',
             resizable: true,
             sortable: true,
+            filter: "agTextColumnFilter",
             // hide: false,    
         },
         cpm: {
@@ -5946,7 +5947,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -6010,7 +6011,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -7247,7 +7249,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
             comparator: (valueA, valueB, nodeA, nodeB) => {
@@ -8510,7 +8513,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -8574,7 +8577,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -9156,6 +9160,7 @@ const MyTablePage = () => {
             field: 'keyword',
             resizable: true,
             sortable: true,
+            filter: "agTextColumnFilter",
             // hide: false,    
         },
         cpm: {
@@ -9455,7 +9460,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -9519,7 +9524,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -10340,7 +10346,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -10404,7 +10410,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -11460,7 +11467,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -11524,7 +11531,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -11696,8 +11704,8 @@ const MyTablePage = () => {
                 if (params.node.group) {
                     // const campaignName =
                     //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0].campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.campaignid || params?.node?.key || "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
@@ -11760,8 +11768,8 @@ const MyTablePage = () => {
                     // return campaign && campaign.end
                     //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
                     //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data.campaignid || params.node?.key || "";
+                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params?.node?.key || "";
                     // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
@@ -12387,7 +12395,7 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
 
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
@@ -12451,7 +12459,8 @@ const MyTablePage = () => {
                         }
                     });
 
-                    params.success(Array.from(uniqueCategories));
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
                 },
             },
 
@@ -13376,18 +13385,33 @@ const MyTablePage = () => {
 
     // whenever network changes
     const onChangeSelectRevenue = (value) => {
-        const accountsForAccess = adAccounts[value];
-        const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+        // userPickedRef.current = true;
+        // const accountsForAccess = adAccounts[value];
+        // const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
-        setNetworksData(accountsAccess);
-        setRevenuePartner(value)
-        setSelectedValue([]);
-        localStorage.getItem(" ")
+        // setNetworksData(accountsAccess);
+        // setRevenuePartner(value)
+        // setSelectedValue([]);
+        // localStorage.getItem(" ")
+        // onChangeSelect([]);
+        // setAccountChanged(true);
+        // setAccountName("");
+        // setSearchText("");
+        // setIsOpen(false);
+        localStorage.removeItem("selectedAccounts");
+
+
+        setAccount("");
+        setAccountName("");
+        setSelectedValue([])
         onChangeSelect([]);
         setAccountChanged(true);
-        setAccountName("");
         setSearchText("");
         setIsOpen(false);
+        const accountsForAccess = adAccounts[value];
+        const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+        setNetworksData(accountsAccess);
+        setRevenuePartner(value)
 
         // ⏰ set timezone
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"

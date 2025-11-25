@@ -1278,6 +1278,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
     //     onClickRemoveSelectedAdsets,
     //     onClickRemoveSelectedAds,
     // ]);
+    // use this style for every small badge/button inside the tab label
     const carouselItems = useMemo(() => {
         const baseTabStyle = {
             display: 'flex',
@@ -1356,7 +1357,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         )}
                     </div>
                 ),
-                content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
+                content: <div>{`Content for Adset data (${selectedAdsets.length} selected).`}</div>,
             },
             {
                 key: '3',
@@ -1399,7 +1400,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         theme,
     ]);
 
-
+    
     const renderCarouselNav = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{ padding: '4px 5px' }}>
             <Row align="middle" justify="space-between">
@@ -1436,314 +1437,10 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         network={newRevenuePratner}
                         time={newtime}
                     />
-                    {/* <Space size={2}>
-                <Input
-                  placeholder="Search campaigns..."
-                  prefix={<SearchOutlined />}
-                  allowClear
-                  style={{
-                    borderRadius: 8,
-                    background: theme === 'dark' ? '#2a2a2a' : '#fff',
-                    border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
-                    color: theme === 'dark' ? '#fff' : '#000',
-                    fontWeight: 500,
-                    width: 200,
-                  }}
-                />
-      
-                <Dropdown
-                  overlay={
-                    <Menu
-                      items={[
-                        { key: 'active', label: 'Active' },
-                        { key: 'pause', label: 'Paused' },
-                      ]}
-                    />
-                  }
-                  trigger={['click']}
-                >
-                  <Button
-                    type="default"
-                    style={{
-                      borderRadius: 8,
-                      background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                      border: '1px solid #52c41a',
-                      color: theme === 'dark' ? '#95de64' : '#389e0d',
-                      fontWeight: 500,
-                    }}
-                  >
-                    <Space size={2}>
-                      <FilterOutlined />
-                      Filters
-                      <DownOutlined style={{ fontSize: 10 }} />
-                    </Space>
-                  </Button>
-                </Dropdown>
-      
-                <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
-                    <Button
-                        type="default"
-                        icon={<FaRobot style={{ fontSize: 20 }} />}
-                        disabled
-                        style={{
-                        borderRadius: 8,
-                        background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-                        border: '1px solid #95de64',
-                        color: theme === 'dark' ? '#52c41a' : '#389e0d',
-                        fontWeight: 500,
-                        cursor: 'not-allowed',
-                        }}
-                    >
-                        AI Assistant
-                    </Button>
-                </Tooltip>
-
-                <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
-                <Button
-                    type="default"
-                    icon={<SettingOutlined />}
-                    disabled
-                    style={{
-                    borderRadius: 8,
-                    background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
-                    border: '1px solid #91d5ff',
-                    color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
-                    fontWeight: 500,
-                    cursor: 'not-allowed',
-                    }}
-                >
-                    Rules
-                </Button>
-                </Tooltip>
-              </Space> */}
                 </Col>
             </Row>
         </StickyBox>
     );
-    // return(
-    //                 <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
-    //                     <div style={contentStyle}>
-    //                         {isLoading === true ? (
-    //                             <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
-    //                                 <div className="ag-grid-Loader">
-    //                                     <Audio
-    //                                         height="80"
-    //                                         width="80"
-    //                                         radius="9"
-    //                                         color="green"
-    //                                         ariaLabel="loading"
-    //                                         wrapperStyle
-    //                                         wrapperClass
-    //                                     />
-    //                                 </div>
-    //                             </div>
-    //                         ) : rowData?.filter((each) => {
-    //                             const normalizedCampaign = each.campaignname.trim().toLowerCase();
-    //                             const normalizedInput = inputValue.trim().toLowerCase();
-    //                             return (
-    //                                 normalizedCampaign.startsWith(normalizedInput) ||
-    //                                 normalizedCampaign.includes(normalizedInput) ||
-    //                                 normalizedCampaign.endsWith(normalizedInput)
-    //                             );
-    //                         }
-    //                         )?.length > 0 ? (
-    //                             <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-
-    //                                 <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-    //                                         <Space align="center">
-    //                                             <div className="blinking-circle-1"></div>
-    //                                             <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Live</Text>
-    //                                         </Space>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
-    //                                     </Col>
-    //                                     {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600' }}>
-    //                                             Cron/Acc status: {cronStatus.current} /{' '}
-    //                                             <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-    //                                                 {accountStatus.current}
-    //                                             </span>
-    //                                         </Text>
-    //                                     </Col> */}
-    //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-    //                                         <Tooltip
-    //                                         title={
-    //                                             <>
-    //                                                 <div>FbAcc Status: {`${fbCron.current}`}</div>
-    //                                                 <div>RevAcc Status: {`${revenueCron.current}`}</div>
-    //                                                 <Text style={{ fontWeight: '600', color: "white" }}>
-    //                                                     Cron/Acc status: {cronStatus.current} /{' '}
-    //                                                     <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-    //                                                         {accountStatus.current}
-    //                                                     </span>
-    //                                                 </Text>
-    //                                             </>
-    //                                         }
-    //                                         >
-    //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
-    //                                         </Tooltip>
-    //                                     </Col>
-    //                                     {/* <Col>
-    //                                         <Tooltip 
-    //                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
-    //                                             mouseEnterDelay={0} // Tooltip appears after 1 second
-    //                                         >
-    //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
-    //                                         </Tooltip>
-    //                                     </Col> */}
-    //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-    //                                         <Tooltip title="Export to CSV">
-    //                                             <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
-    //                                         </Tooltip>
-    //                                     </Col>
-    //                                 </Row>
-
-    //                                 <AgGridReact
-    //                                     ref={gridRef}
-    //                                     rowData={memorizedRowData}
-    //                                     rowSelection='multiple'
-    //                                     columnDefs={memorizedColumnDef}
-    //                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-    //                                     onCellClicked={onCellClickedLive}
-    //                                     pagination={true}
-    //                                     paginationPageSize={100}
-    //                                     paginationPageSizeSelector={[20, 40, 60, 80, 100]}
-    //                                     suppressAggFuncInHeader={true}
-    //                                     getMainMenuItems={getMainMenuItems}
-
-    //                                     // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-    //                                     // onCellKeyDown={onCellKeyDown}
-    //                                     // domLayout="normal"
-    //                                     // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
-    //                                     // groupIncludeFooter={rowData.length > 0 ? true : false}
-    //                                     autoGroupColumnDef={autoGroupColumnDefLive}
-    //                                     onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-    //                                     gridOptions={{
-    //                                         ...gridOptions,
-    //                                         ensureDomOrder: false,
-    //                                         suppressRowClickSelection: true,
-    //                                         suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-    //                                         enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-    //                                         groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
-    //                                     }}
-    //                                     frameworkComponents={{ GroupCellRenderer }}
-    //                                     groupDisplayType='multipleColumns'
-    //                                     // rowGroupPanelShow='always'
-    //                                     // onFilterChanged={onFilterChanged} // Use the custom filter handler
-    //                                     pinnedBottomRowData={liveFixedFooter}
-    //                                     suppressCellSelection={true}
-    //                                     getRowStyle={(params) => {
-    //                                         if (params.node.rowPinned) {
-
-    //                                             return {
-    //                                                 fontWeight: "bold",
-    //                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
-    //                                                 color: theme === "dark" ? "#fff" : "#000",
-    //                                             };
-    //                                         }
-    //                                         return null; // Keep other row styles unchanged
-    //                                     }}
-    //                                     getCellStyle={(params) => {
-    //                                         const isSelected = selectedCells.some(
-    //                                             (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-    //                                         );
-
-    //                                         // ✅ Ensure first cell inside a group is highlighted
-    //                                         const isFirstSelected = firstSelectedCell &&
-    //                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
-    //                                             firstSelectedCell.colId === params.column.getId();
-
-    //                                         return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-    //                                     }}
-    //                                     onFilterChanged={(params) => {
-    //                                         const api = params.api;
-    //                                         const filteredData = [];
-    //                                         // api.forEachNodeAfterFilterAndSort((node) => {
-    //                                         //     if (!node.rowPinned) {
-    //                                         //         filteredData.push(node.data);
-    //                                         //     }
-    //                                         // });
-    //                                         const normalizedInput = inputValue.trim().toLowerCase();
-
-    //                                         api.forEachNodeAfterFilterAndSort((node) => {
-    //                                             if (node.data && node.data.campaignname) {
-    //                                                 const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-
-    //                                                 // Apply search and filter conditions
-    //                                                 if (
-    //                                                     normalizedCampaign.startsWith(normalizedInput) ||
-    //                                                     normalizedCampaign.includes(normalizedInput) ||
-    //                                                     normalizedCampaign.endsWith(normalizedInput)
-    //                                                 ) {
-    //                                                     filteredData.push(node.data);
-    //                                                 }
-    //                                             }
-    //                                         });
-
-    //                                         const updatedFooter = [
-    //                                             {
-    //                                                 // [`${newtime}Date`]: 'Totals',
-    //                                                 campaignName: 'Total',
-    //                                                 actions: "",
-    //                                                 spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-    //                                                 revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-    //                                                 profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-    //                                                 margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-    //                                                 rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-    //                                                 cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-    //                                                 ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-    //                                                 fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-    //                                                 conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-    //                                                 fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-    //                                                 roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-    //                                                 cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-    //                                                 cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-    //                                                 fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-    //                                                 fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-    //                                                 impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-    //                                                 ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
-    //                                             },
-    //                                         ];
-
-    //                                         setLiveFixedFooter(updatedFooter);
-    //                                     }}
-    //                                 />
-
-    //                             </div>
-    //                         ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-    //                             {apiStatus === true ? 
-    //                             <Result
-    //                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
-    //                             // icon={<SmileOutlined />}
-    //                             title={`API failed to fetch the data. Please click retry button to fetch the data`}
-    //                         extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-    //                         /> : (startDate !== endDate ? <Result
-    //                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
-    //                                 icon={<SmileOutlined />}
-    //                                 title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
-    //                             // extra={<Button type="primary">Next</Button>}
-    //                             /> : <Result
-    //                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
-    //                                 icon={<SmileOutlined />}
-    //                                 title={`No LiveData for ${newaccount} to ${startDate}`}
-    //                             // extra={<Button type="primary">Next</Button>}
-    //                             />)}
-    //                         </div>}
-    //                     </div>
-    //                 </div>
-    // );
-
     return (
         <div>
             <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`} style={{ marginBottom: '0px' }}>
