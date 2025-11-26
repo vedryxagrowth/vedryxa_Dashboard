@@ -4,7 +4,7 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Space, Tooltip, Menu, Dropdown } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -58,7 +58,7 @@ const selectTimezone = {
   CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
+const AdLevelReports = ({ context, functionCallForCommnets, activeTab,  startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
   console.log(campaignComments);
@@ -82,7 +82,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
 
   const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
   const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
-  const [activeTab, setActiveTab] = useState("1");
+  // const [activeTab, setActiveTab] = useState("1");
 
   const timezone = useRef();
 
@@ -284,40 +284,113 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
     });
   };
 
+  // const handleBulkCommentSubmitAd = async () => {
+  //   try {
+  //     message.loading({ content: "Saving comments for ads...", key: "bulkCommentAd" });
+  //     const items = leafCampaigns.map(item => ({
+  //       accountNumber: item.accountNumber,
+  //       campaignid: item.campaignid,
+  //       adsetid: item.adsetid,
+  //       ad_id: item.adid,
+  //       comment,
+  //       usercommit: userdetails?.email,
+  //       level: "ad"
+  //     }));
+
+  //     const resp = await apiClient.post(
+  //       "/Comments/upsertBulkNew",
+  //       { items }
+  //     );
+
+  //     if (resp.status === 200 || resp.status === 201) {
+  //       const timeStamp = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+  //       setCampaignComments(prev => {
+  //         const arr = [...prev];
+
+  //         items.forEach(item => {
+  //           const idx = arr.findIndex(
+  //             i =>
+  //               String(i.campaignid) === String(item.campaignid) &&
+  //               String(i.Account) === String(item.accountNumber) &&
+  //               String(i.adsetid) === String(item.adsetid) &&
+  //               String(i.ad_id) === String(item.ad_id) &&
+  //               i.level === "ad"
+  //           );
+
+  //           if (idx >= 0) {
+  //             arr[idx] = {
+  //               ...arr[idx],
+  //               comment,
+  //               usercommit: userdetails?.email,
+  //               editedTime: timeStamp
+  //             };
+  //           } else {
+  //             arr.push({
+  //               ...item,
+  //               editedTime: timeStamp
+  //             });
+  //           }
+  //         });
+
+  //         return arr;
+  //       });
+
+  //       message.success({
+  //         content: `${items.length} ads updated`,
+  //         key: "bulkCommentAd",
+  //         duration: 3
+  //       });
+
+  //       setIsBulkCommentModalVisible(false);
+  //     }
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     message.error("Bulk ad comment failed");
+  //   }
+  // };
+  
   const handleBulkCommentSubmitAd = async () => {
     try {
-      message.loading({ content: "Saving comments for ads...", key: "bulkCommentAd" });
+      message.loading({
+        content: 'Saving comments for selected adsets...',
+        key: 'bulkCommentAdset'
+      });
+ 
       const items = leafCampaigns.map(item => ({
         accountNumber: item.accountNumber,
         campaignid: item.campaignid,
         adsetid: item.adsetid,
         ad_id: item.adid,
         comment,
+        campaignname: item.adName,
         usercommit: userdetails?.email,
         level: "ad"
       }));
-
+ 
       const resp = await apiClient.post(
-        "/Comments/upsertBulk",
+        '/Comments/upsertBulkNew',
         { items }
       );
-
+ 
       if (resp.status === 200 || resp.status === 201) {
-        const timeStamp = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
-
+        const timeStamp = moment().tz('Asia/Kolkata')
+          .format('YYYY-MM-DD hh:mm:ss A');
+ 
         setCampaignComments(prev => {
           const arr = [...prev];
-
-          items.forEach(item => {
+ 
+          leafCampaigns.forEach(item => {
             const idx = arr.findIndex(
               i =>
                 String(i.campaignid) === String(item.campaignid) &&
                 String(i.Account) === String(item.accountNumber) &&
                 String(i.adsetid) === String(item.adsetid) &&
-                String(i.ad_id) === String(item.ad_id) &&
-                i.level === "ad"
+                String(i.ad_id) === String(item.adid) &&
+                i.level === 'ad'
             );
-
+ 
             if (idx >= 0) {
               arr[idx] = {
                 ...arr[idx],
@@ -327,29 +400,37 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
               };
             } else {
               arr.push({
-                ...item,
+                campaignid: item.campaignid,
+                Account: item.accountNumber,
+                adsetid: item.adsetid,
+                ad_id: item.adid,
+                campaignname: item.adName,
+                level: 'ad',
+                comment,
+                usercommit: userdetails?.email,
                 editedTime: timeStamp
               });
             }
           });
-
+ 
           return arr;
         });
-
+ 
         message.success({
-          content: `${items.length} ads updated`,
-          key: "bulkCommentAd",
+          content: `${leafCampaigns.length} comment(s) saved successfully`,
+          key: 'bulkCommentAdset',
           duration: 3
         });
-
+ 
         setIsBulkCommentModalVisible(false);
       }
-
-    } catch (err) {
-      console.error(err);
-      message.error("Bulk ad comment failed");
+ 
+    } catch (error) {
+      console.error('Bulk adset comment error:', error);
+      message.error('Error while saving comments for selected adsets.');
     }
   };
+
   const handleBulkAdStatusSubmit = async () => {
     try {
       setConfirmBulkLoading(true);
@@ -2190,12 +2271,15 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
     setApiStatus(false);
   }
   useEffect(() => {
+    if (activeTab === "3") {
+      functionCall1();
+    }
     // if(selectedAdsets){
     // console.log("test2");
-    functionCall1();
+    // functionCall1();
     // oneTimeFetch.current = false;
     // }
-  }, [selectedAdsets, selectedCampaigns]);
+  }, [selectedAdsets, selectedCampaigns, activeTab]);
 
   useEffect(() => {
     // functionCall1();
@@ -2308,10 +2392,10 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
     }
   };
 
-  const handleTabChange = (key) => {
-    console.log("Switched to Tab:", key); // Debugging log
-    setActiveTab(key);
-  };
+  // const handleTabChange = (key) => {
+  //   console.log("Switched to Tab:", key); // Debugging log
+  //   setActiveTab(key);
+  // };
 
   const items = [
     { key: '1', label: 'Campaigns', content: 'Content for Campaign data' },
@@ -2319,41 +2403,41 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
     { key: '3', label: 'Ad', content: 'Content for Ad data' }
   ];
 
-  const handleCarouselChange = (index) => {
-    setActiveTab(index);
-    // console.log(index);
-    // console.log(parseInt(index)-1);
-    // carouselRef.current.goTo(parseInt(index))
-    // localStorage.setItem("activeTab", index);
+  // const handleCarouselChange = (index) => {
+  //   setActiveTab(index);
+  //   // console.log(index);
+  //   // console.log(parseInt(index)-1);
+  //   // carouselRef.current.goTo(parseInt(index))
+  //   // localStorage.setItem("activeTab", index);
 
-  };
+  // };
 
-  const renderCarouselNav = () => (
-    <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop: '15px' }}>
-      <Tabs
-        activeKey={activeTab}
-        onChange={handleCarouselChange}
-        items={items.map((item) => ({
-          key: item.key,
-          label: item.label,
-        }))}
-        className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
-        style={{
-          backgroundColor: 'transparent',
-          padding: '0',
-          marginBottom: '0',
-        }}
-        tabBarStyle={{
-          fontSize: '12px',
-          padding: '0',
-          height: '30px',
-          lineHeight: '30px',
-          marginBottom: '-1px',
-          borderBottom: 'none',
-        }}
-      />
-    </StickyBox>
-  );
+  // const renderCarouselNav = () => (
+  //   <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop: '15px' }}>
+  //     <Tabs
+  //       activeKey={activeTab}
+  //       onChange={handleCarouselChange}
+  //       items={items.map((item) => ({
+  //         key: item.key,
+  //         label: item.label,
+  //       }))}
+  //       className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+  //       style={{
+  //         backgroundColor: 'transparent',
+  //         padding: '0',
+  //         marginBottom: '0',
+  //       }}
+  //       tabBarStyle={{
+  //         fontSize: '12px',
+  //         padding: '0',
+  //         height: '30px',
+  //         lineHeight: '30px',
+  //         marginBottom: '-1px',
+  //         borderBottom: 'none',
+  //       }}
+  //     />
+  //   </StickyBox>
+  // );
 
 
 
@@ -2655,7 +2739,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
                           fontSize: "14px",
                         }}
                       >
-                        <RxSwitch size={20} />
+                        <RxSwitch size={20} style={{color: theme === "dark" ? "white" : "black"}} />
 
                       </Tooltip>
                       <Modal
@@ -2729,7 +2813,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
                             fontSize: "18px",
                           }}
                         >
-                          <PushpinOutlined size={20} />
+                          <PushpinOutlined size={20} style={{color: theme === "dark" ? "white" : "black"}} />
                         </button>
                       </Tooltip>
                       {/*  comment */}
@@ -2740,11 +2824,12 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
                         padding: "6px 10px",
                         fontSize: "14px",
                       }}>
-                        <MessageOutlined
+                        <EditOutlined
                           onClick={() => setIsBulkCommentModalVisible(true)}
                           style={{
                             fontSize: "15px",
-                            cursor: "pointer"
+                            cursor: "pointer",
+                            color: theme === "dark" ? "white" : "black"
                           }}
                         />
                       </Tooltip>
@@ -2778,19 +2863,20 @@ const AdLevelReports = ({ context, functionCallForCommnets, startDate, endDate, 
                       </Modal>
 
                       {/* Category */}
-                      <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                      <Tooltip title="Bulk add category" overlayInnerStyle={{
                         backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                         color: theme === "dark" ? "#ffffff" : "#000000",
                         borderRadius: 6,
                         padding: "6px 10px",
                         fontSize: "14px",
                       }}>
-                        <EditOutlined
+                        <PlusOutlined
                           onClick={openBulkCategoryModal}
                           style={{
                             fontSize: "15px",
                             cursor: "pointer",
-                            marginLeft: '5px'
+                            marginLeft: '5px',
+                            color: theme === "dark" ? "white" : "black"
                           }}
                         />
                       </Tooltip>

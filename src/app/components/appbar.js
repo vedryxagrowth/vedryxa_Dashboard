@@ -230,13 +230,13 @@ const Appbar = ({ children, usersDataForLogin }) => {
         };
     }, []);
     const menuItems = [
-        usersDataForLogin[0]?.email !== "careers@adsgoat.in" && getItem('Dashboard', '/Dashboard', <AppstoreOutlined className={pathname === '/Dashboard' && 'black-icon'}/>, 'Dashboard'),
-        usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <BarChartOutlined  className={pathname === '/Reports' && 'black-icon'}/>, 'Reports'),
-        usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PictureOutlined  className={pathname === '/Creatives' && 'black-icon'}/>, 'Creatives'),
+        usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && getItem('Dashboard', '/Dashboard', <AppstoreOutlined className={pathname === '/Dashboard' && 'black-icon'}/>, 'Dashboard'),
+        usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <BarChartOutlined  className={pathname === '/Reports' && 'black-icon'}/>, 'Reports'),
+        usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PictureOutlined  className={pathname === '/Creatives' && 'black-icon'}/>, 'Creatives'),
         usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <LineChartOutlined  className={pathname === '/Campaigns' && 'black-icon'}/>, 'Campaigns'),
         // getItem('Users', '/Users', <ContainerOutlined />),
-        usersDataForLogin[0]?.email !== "careers@adsgoat.in" && (usersDataForLogin[0]?.role === 'Admin' || usersDataForLogin[0]?.role === 'Special_User') && getItem('User Role', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>, 'NewUser'),
-        usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role === 'Admin' && getItem('User History', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>, 'Activities'),
+        usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && (usersDataForLogin[0]?.role === 'Admin' || usersDataForLogin[0]?.role === 'Special_User') && getItem('User Role', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>, 'NewUser'),
+        usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role === 'Admin' && getItem('User History', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>, 'Activities'),
     ].filter(Boolean);
     console.log(`menuitems:${menuItems} ,${pathname}`)
 

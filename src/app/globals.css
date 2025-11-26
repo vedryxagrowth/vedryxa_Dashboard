@@ -3938,11 +3938,17 @@ select:focus,
   .inputat400px {
     width: 100px !important;
   }
+  .inputatInsideTable{
+    width: 70px !important;
+  }
 }
 
 @media (min-width: 500px) {
   .inputat400px {
     width: 190px !important;
+  }
+  .inputatInsideTable{
+    width: 140px !important;
   }
 }
 

@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge, Tooltip, Space, Menu, Dropdown } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -59,7 +59,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
+const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
   const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -68,6 +68,10 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, sta
   const newRowDataForFilter = useRef([]);
 
   const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
+
+  const [insideInput, setInsideInput] = useState("");
+
+  console.log(insideInput);
 
   const [dailyFixedFooter, setDailyFixedFooter] = useState([]);
 
@@ -104,6 +108,45 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, sta
     );
   }
   ), [dailyData, inputValue, theme]);
+  //   const memorizedDailyData = useMemo(() => {
+  //   let filtered = newRowDataForFilter.current || [];
+
+  //   const normalizedInput = inputValue.trim().toLowerCase();
+  //   const normalizedInside = insideInput.trim().toLowerCase();
+
+  //   // 1️⃣ FIRST FILTER → by inputValue (only adname)
+  //   if (normalizedInput) {
+  //     filtered = filtered.filter((each) => {
+  //       const adname = (each?.adname || "").trim().toLowerCase();
+  //       return (
+  //         adname.startsWith(normalizedInput) ||
+  //         adname.includes(normalizedInput) ||
+  //         adname.endsWith(normalizedInput)
+  //       );
+  //     });
+  //   }
+
+  //   // 2️⃣ SECOND FILTER → by insideInput (all fields)
+  //   if (normalizedInside) {
+  //     filtered = filtered.filter((each) => {
+  //       const adname = (each?.adname || "").trim().toLowerCase();
+  //       const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+  //       const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+  //       const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
+  //       const adId = (each?.adid || "").toString().trim().toLowerCase();
+
+  //       return (
+  //         adname.includes(normalizedInside) ||
+  //         accountNumber.includes(normalizedInside) ||
+  //         campaignId.includes(normalizedInside) ||
+  //         adsetId.includes(normalizedInside) ||
+  //         adId.includes(normalizedInside)
+  //       );
+  //     });
+  //   }
+
+  //   return filtered;
+  // }, [newRowDataForFilter, inputValue, insideInput]);
   const [selectedAd, setSelectedAd] = useState([]);
   const [leafCampaigns, setLeafCampaigns] = useState([])
   const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
@@ -305,40 +348,113 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, sta
     });
   };
 
+  // const handleBulkCommentSubmitAd = async () => {
+  //   try {
+  //     message.loading({ content: "Saving comments for ads...", key: "bulkCommentAd" });
+  //     const items = leafCampaigns.map(item => ({
+  //       accountNumber: item.accountNumber,
+  //       campaignid: item.campaignid,
+  //       adsetid: item.adsetid,
+  //       ad_id: item.adid,
+  //       comment,
+  //       usercommit: userdetails?.email,
+  //       level: "ad"
+  //     }));
+
+  //     const resp = await apiClient.post(
+  //       "/Comments/upsertBulk",
+  //       { items }
+  //     );
+
+  //     if (resp.status === 200 || resp.status === 201) {
+  //       const timeStamp = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+  //       setCampaignComments(prev => {
+  //         const arr = [...prev];
+
+  //         items.forEach(item => {
+  //           const idx = arr.findIndex(
+  //             i =>
+  //               String(i.campaignid) === String(item.campaignid) &&
+  //               String(i.Account) === String(item.accountNumber) &&
+  //               String(i.adsetid) === String(item.adsetid) &&
+  //               String(i.ad_id) === String(item.ad_id) &&
+  //               i.level === "ad"
+  //           );
+
+  //           if (idx >= 0) {
+  //             arr[idx] = {
+  //               ...arr[idx],
+  //               comment,
+  //               usercommit: userdetails?.email,
+  //               editedTime: timeStamp
+  //             };
+  //           } else {
+  //             arr.push({
+  //               ...item,
+  //               editedTime: timeStamp
+  //             });
+  //           }
+  //         });
+
+  //         return arr;
+  //       });
+
+  //       message.success({
+  //         content: `${items.length} ads updated`,
+  //         key: "bulkCommentAd",
+  //         duration: 3
+  //       });
+
+  //       setIsBulkCommentModalVisible(false);
+  //     }
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     message.error("Bulk ad comment failed");
+  //   }
+  // };
+
   const handleBulkCommentSubmitAd = async () => {
     try {
-      message.loading({ content: "Saving comments for ads...", key: "bulkCommentAd" });
+      message.loading({
+        content: 'Saving comments for selected adsets...',
+        key: 'bulkCommentAdset'
+      });
+ 
       const items = leafCampaigns.map(item => ({
         accountNumber: item.accountNumber,
         campaignid: item.campaignid,
         adsetid: item.adsetid,
         ad_id: item.adid,
         comment,
+        campaignname: item.adName,
         usercommit: userdetails?.email,
         level: "ad"
       }));
-
+ 
       const resp = await apiClient.post(
-        "/Comments/upsertBulk",
+        '/Comments/upsertBulkNew',
         { items }
       );
-
+ 
       if (resp.status === 200 || resp.status === 201) {
-        const timeStamp = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
-
+        const timeStamp = moment().tz('Asia/Kolkata')
+          .format('YYYY-MM-DD hh:mm:ss A');
+ 
         setCampaignComments(prev => {
           const arr = [...prev];
-
-          items.forEach(item => {
+ 
+          leafCampaigns.forEach(item => {
             const idx = arr.findIndex(
               i =>
                 String(i.campaignid) === String(item.campaignid) &&
                 String(i.Account) === String(item.accountNumber) &&
                 String(i.adsetid) === String(item.adsetid) &&
-                String(i.ad_id) === String(item.ad_id) &&
-                i.level === "ad"
+                String(i.ad_id) === String(item.adid) &&
+                i.level === 'ad'
             );
-
+ 
             if (idx >= 0) {
               arr[idx] = {
                 ...arr[idx],
@@ -348,29 +464,37 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, sta
               };
             } else {
               arr.push({
-                ...item,
+                campaignid: item.campaignid,
+                Account: item.accountNumber,
+                adsetid: item.adsetid,
+                ad_id: item.adid,
+                campaignname: item.adName,
+                level: 'ad',
+                comment,
+                usercommit: userdetails?.email,
                 editedTime: timeStamp
               });
             }
           });
-
+ 
           return arr;
         });
-
+ 
         message.success({
-          content: `${items.length} ads updated`,
-          key: "bulkCommentAd",
+          content: `${leafCampaigns.length} comment(s) saved successfully`,
+          key: 'bulkCommentAdset',
           duration: 3
         });
-
+ 
         setIsBulkCommentModalVisible(false);
       }
-
-    } catch (err) {
-      console.error(err);
-      message.error("Bulk ad comment failed");
+ 
+    } catch (error) {
+      console.error('Bulk adset comment error:', error);
+      message.error('Error while saving comments for selected adsets.');
     }
   };
+  
   const handleBulkAdStatusSubmit = async () => {
     try {
       setConfirmBulkLoading(true);
@@ -2468,11 +2592,14 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, sta
   }
 
   useEffect(() => {
+    if (activeTab === "3") {
+      functionCall2();
+    }
     // if(selectedAdsets){
-    functionCall2();
+    // functionCall2();
     // oneTimeFetch.current = false;
     // }
-  }, [selectedAdsets, selectedCampaigns]);
+  }, [selectedAdsets, selectedCampaigns, activeTab]);
 
   useEffect(() => {
     // functionCall1();
@@ -2565,473 +2692,497 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, sta
           ) : newRowDataForFilter.current?.length > 0 ?
             <div>
               <div>
-                <Row className="header-row" style={{ width: '100%', height:"100%",display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
-                <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                  <Space align="center" className='daily-contaier'>
-                    <div className="blinking-circle"></div>
-                    <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
-                  </Space>
-                </Col>
-                {leafCampaigns?.length > 1 && (
-                  <Col>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        padding: "6px 0",
-                      }}
-                    >
-                      {/* active & pause */}
-                      <Tooltip
-                        title={
-                          <div style={{ display: "flex", gap: "14px" }}>
-                            <span
-                              style={{ cursor: "pointer", fontSize: "18px", color: "green" }}
-                              onClick={() => {
-                                setBulkStatusAction("ACTIVE");
-                                setIsBulkStatusModalVisible(true);
-                              }}
-                            >
-                              ▶️
-                            </span>
-                            <span
-                              style={{ cursor: "pointer", fontSize: "18px", color: "red" }}
-                              onClick={() => {
-                                setBulkStatusAction("PAUSED");
-                                setIsBulkStatusModalVisible(true);
-                              }}
-                            >
-                              ⏸️
-                            </span>
-                          </div>
-                        }
-                        overlayInnerStyle={{
-                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                          color: theme === "dark" ? "#ffffff" : "#000000",
-                          borderRadius: 6,
-                          padding: "6px 10px",
-                          fontSize: "14px",
+                <Row className="header-row" style={{ width: '100%', height: "100%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
+                  <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                    <Space align="center" className='daily-contaier'>
+                      <div className="blinking-circle"></div>
+                      <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
+                    </Space>
+                  </Col>
+                  {leafCampaigns?.length > 1 && (
+                    <Col>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "5px",
+                          padding: "6px 0",
                         }}
                       >
-                        <RxSwitch size={20} />
-
-                      </Tooltip>
-                      <Modal
-                        title="Confirm Bulk Status Change"
-                        open={isBulkStatusModalVisible}
-                        onCancel={() => setIsBulkStatusModalVisible(false)}
-                        confirmLoading={confirmBulkLoading}
-                        onOk={handleBulkAdStatusSubmit}
-                        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                      >
-                        {confirmBulkLoading && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              background: "rgba(255,255,255,0.7)",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              zIndex: 1000,
-                              borderRadius: "8px",
-                            }}
-                          >
-                            <Spin size="large" tip="Saving..." />
-                          </div>
-                        )}
-
-                        <p>
-                          Are you sure you want to set status to{" "}
-                          <b style={{ color: bulkStatusAction === "ACTIVE" ? "green" : "red" }}>
-                            {bulkStatusAction}
-                          </b>{" "}
-                          for <b>{leafCampaigns.length}</b> campaigns?
-                        </p>
-                      </Modal>
-
-                      {/* pin & unpin */}
-                      <Tooltip
-                        title={
-                          <div style={{ display: "flex", gap: "14px" }}>
-                            <span
-                              style={{ cursor: "pointer", fontSize: "18px" }}
-                              onClick={() => handleBulkSmartPinAd("pin")}
-                            >
-                              📌
-                            </span>
-                            <span
-                              style={{ cursor: "pointer", fontSize: "18px" }}
-                              onClick={() => handleBulkSmartPinAd("unpin")}
-                            >
-                              📍
-                            </span>
-                          </div>
-                        }
-                        overlayInnerStyle={{
-                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                          color: theme === "dark" ? "#ffffff" : "#000000",
-                          borderRadius: 6,
-                          padding: "6px 10px",
-                          fontSize: "14px",
-                        }}
-                      >
-                        <button
-                          style={{
-                            border: "none",
-                            background: "none",
-                            cursor: "pointer",
-                            fontSize: "18px",
+                        {/* active & pause */}
+                        <Tooltip
+                          title={
+                            <div style={{ display: "flex", gap: "14px" }}>
+                              <span
+                                style={{ cursor: "pointer", fontSize: "18px", color: "green" }}
+                                onClick={() => {
+                                  setBulkStatusAction("ACTIVE");
+                                  setIsBulkStatusModalVisible(true);
+                                }}
+                              >
+                                ▶️
+                              </span>
+                              <span
+                                style={{ cursor: "pointer", fontSize: "18px", color: "red" }}
+                                onClick={() => {
+                                  setBulkStatusAction("PAUSED");
+                                  setIsBulkStatusModalVisible(true);
+                                }}
+                              >
+                                ⏸️
+                              </span>
+                            </div>
+                          }
+                          overlayInnerStyle={{
+                            backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                            color: theme === "dark" ? "#ffffff" : "#000000",
+                            borderRadius: 6,
+                            padding: "6px 10px",
+                            fontSize: "14px",
                           }}
                         >
-                          <PushpinOutlined size={20} />
-                        </button>
-                      </Tooltip>
-                      {/*  comment */}
-                      <Tooltip title="Bulk Comment" overlayInnerStyle={{
-                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                        color: theme === "dark" ? "#ffffff" : "#000000",
-                        borderRadius: 6,
-                        padding: "6px 10px",
-                        fontSize: "14px",
-                      }}>
-                        <MessageOutlined
-                          onClick={() => setIsBulkCommentModalVisible(true)}
-                          style={{
-                            fontSize: "15px",
-                            cursor: "pointer"
-                          }}
-                        />
-                      </Tooltip>
-                      <Modal
-                        title="Bulk Comment"
-                        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                        open={isBulkCommentModalVisible}
-                        onCancel={() => setIsBulkCommentModalVisible(false)}
-                        footer={[
-                          <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
-                            Cancel
-                          </Button>,
-                          <Button
-                            key="ok"
-                            style={{ backgroundColor: "#91C25F" }}
-                            onClick={() => {
-                              handleBulkCommentSubmitAd();
-                              setIsBulkCommentModalVisible(false);
-                            }}
-                          >
-                            Ok
-                          </Button>
-                        ]}
-                      >
-                        <Input.TextArea
-                          placeholder="Enter comments"
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                          rows={4}
-                        />
-                      </Modal>
+                          <RxSwitch size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
 
-                      {/* Category */}
-                      <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
-                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                        color: theme === "dark" ? "#ffffff" : "#000000",
-                        borderRadius: 6,
-                        padding: "6px 10px",
-                        fontSize: "14px",
-                      }}>
-                        <EditOutlined
-                          onClick={openBulkCategoryModal}
-                          style={{
-                            fontSize: "15px",
-                            cursor: "pointer",
-                            marginLeft: '5px'
-                          }}
-                        />
-                      </Tooltip>
-                      <Modal
-                        open={bulkOpen}
-                        title="Edit Category"
-                        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                        onOk={saveBulkCategory}
-                        onCancel={() => setBulkOpen(false)}
-                      >
-                        <Input
-                          placeholder="Enter category"
-                          value={bulkCategory}
-                          onChange={e => setBulkCategory(e.target.value)}
-                        />
-                      </Modal>
-                    </div>
-                  </Col>
-                )}
-                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
-                                        </Col> */}
-                <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
-                  {ids.length <= 1 ? (
-                    // Single (or none) → plain text
-                    <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                      Id: {ids[0] ?? "-"}
-                    </Text>
-                  ) : (
-                    // Multiple → only an icon; hover shows selected accounts
-                    <Tooltip
-                      title={
-                        <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                          {ids.map((id, i) => {
-                            const getAccountObject = accountsAccess.find(item => item.accountNumber === id)
-                            return (<div
-                              key={`${id}-${i}`}
+                        </Tooltip>
+                        <Modal
+                          title="Confirm Bulk Status Change"
+                          open={isBulkStatusModalVisible}
+                          onCancel={() => setIsBulkStatusModalVisible(false)}
+                          confirmLoading={confirmBulkLoading}
+                          onOk={handleBulkAdStatusSubmit}
+                          className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                        >
+                          {confirmBulkLoading && (
+                            <div
                               style={{
-                                padding: "4px 6px",
-                                borderBottom: "1px solid rgba(0,0,0,0.06)",
-                                fontSize: 12,
-                                color: theme === "dark" ? "#ddd" : "#333",
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background: "rgba(255,255,255,0.7)",
                                 display: "flex",
-                                flexDirection: "column"
+                                justifyContent: "center",
+                                alignItems: "center",
+                                zIndex: 1000,
+                                borderRadius: "8px",
                               }}
                             >
-                              <div>{id}</div>
-                              <div>{getAccountObject?.accountName}</div>
-                            </div>)
-                          })}
-                        </div>
-                      }
-                      overlayInnerStyle={{
-                        maxWidth: 320,
-                        background: theme === "dark" ? "#1f1f1f" : '#fff',
-                        color: theme === "dark" ? "#fff" : '#000'
-                      }}
-                    >
-                      <Badge count={ids.length} size="small" offset={[0, 2]}>
-                        <NumberOutlined
-                          style={{
-                            fontSize: 18,
-                            cursor: "pointer",
-                            color: theme === "dark" ? "#9ad" : "grey"
+                              <Spin size="large" tip="Saving..." />
+                            </div>
+                          )}
+
+                          <p>
+                            Are you sure you want to set status to{" "}
+                            <b style={{ color: bulkStatusAction === "ACTIVE" ? "green" : "red" }}>
+                              {bulkStatusAction}
+                            </b>{" "}
+                            for <b>{leafCampaigns.length}</b> campaigns?
+                          </p>
+                        </Modal>
+
+                        {/* pin & unpin */}
+                        <Tooltip
+                          title={
+                            <div style={{ display: "flex", gap: "14px" }}>
+                              <span
+                                style={{ cursor: "pointer", fontSize: "18px" }}
+                                onClick={() => handleBulkSmartPinAd("pin")}
+                              >
+                                📌
+                              </span>
+                              <span
+                                style={{ cursor: "pointer", fontSize: "18px" }}
+                                onClick={() => handleBulkSmartPinAd("unpin")}
+                              >
+                                📍
+                              </span>
+                            </div>
+                          }
+                          overlayInnerStyle={{
+                            backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                            color: theme === "dark" ? "#ffffff" : "#000000",
+                            borderRadius: 6,
+                            padding: "6px 10px",
+                            fontSize: "14px",
                           }}
-                        />
-                      </Badge>
-                    </Tooltip>
+                        >
+                          <button
+                            style={{
+                              border: "none",
+                              background: "none",
+                              cursor: "pointer",
+                              fontSize: "18px",
+                            }}
+                          >
+                            <PushpinOutlined size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
+                          </button>
+                        </Tooltip>
+                        {/*  comment */}
+                        <Tooltip title="Bulk comment" overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                          color: theme === "dark" ? "#ffffff" : "#000000",
+                          borderRadius: 6,
+                          padding: "6px 10px",
+                          fontSize: "14px",
+                        }}>
+                          <EditOutlined
+                            onClick={() => setIsBulkCommentModalVisible(true)}
+                            style={{
+                              fontSize: "15px",
+                              cursor: "pointer",
+                              color: theme === "dark" ? "white" : "black"
+                            }}
+                          />
+                        </Tooltip>
+                        <Modal
+                          title="Bulk comment"
+                          className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                          open={isBulkCommentModalVisible}
+                          onCancel={() => setIsBulkCommentModalVisible(false)}
+                          footer={[
+                            <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
+                              Cancel
+                            </Button>,
+                            <Button
+                              key="ok"
+                              style={{ backgroundColor: "#91C25F" }}
+                              onClick={() => {
+                                handleBulkCommentSubmitAd();
+                                setIsBulkCommentModalVisible(false);
+                              }}
+                            >
+                              Ok
+                            </Button>
+                          ]}
+                        >
+                          <Input.TextArea
+                            placeholder="Enter comments"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            rows={4}
+                          />
+                        </Modal>
+
+                        {/* Category */}
+                        <Tooltip title="Bulk add category" overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                          color: theme === "dark" ? "#ffffff" : "#000000",
+                          borderRadius: 6,
+                          padding: "6px 10px",
+                          fontSize: "14px",
+                        }}>
+                          <PlusOutlined
+                            onClick={openBulkCategoryModal}
+                            style={{
+                              fontSize: "15px",
+                              cursor: "pointer",
+                              marginLeft: '5px',
+                              color: theme === "dark" ? "white" : "black"
+                            }}
+                          />
+                        </Tooltip>
+                        <Modal
+                          open={bulkOpen}
+                          title="Edit Category"
+                          className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                          onOk={saveBulkCategory}
+                          onCancel={() => setBulkOpen(false)}
+                        >
+                          <Input
+                            placeholder="Enter category"
+                            value={bulkCategory}
+                            onChange={e => setBulkCategory(e.target.value)}
+                          />
+                        </Modal>
+                      </div>
+                    </Col>
                   )}
-                </Col>
-
-                <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                  {ids.length <= 1 && (
-                    <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                      Name: {newAccountName ?? "-"}
-                    </Text>
-                  )
-                  }
-                </Col>
-
-                <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
-                  {ids.length <= 1 ? (
-                    // Single → plain text
-                    <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                      Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
-                    </Text>
-                  ) : (
-                    // Multiple → icon with tooltip of selected account ids + timezones
-                    <Tooltip
-                      title={
-                        <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
-                          {ids.map((id, i) => {
-                            const acc = accountsAccess.find(a => a.accountNumber === id);
-                            console.log("timezones:", accountsAccess);
-                            const tz = acc?.timeZone ?? "-";
-                            return (
-                              <div
+                  {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
+                                        </Col> */}
+                  <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+                    {ids.length <= 1 ? (
+                      // Single (or none) → plain text
+                      <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                        Id: {ids[0] ?? "-"}
+                      </Text>
+                    ) : (
+                      // Multiple → only an icon; hover shows selected accounts
+                      <Tooltip
+                        title={
+                          <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                            {ids.map((id, i) => {
+                              const getAccountObject = accountsAccess.find(item => item.accountNumber === id)
+                              return (<div
                                 key={`${id}-${i}`}
                                 style={{
                                   padding: "4px 6px",
                                   borderBottom: "1px solid rgba(0,0,0,0.06)",
                                   fontSize: 12,
-                                  color: theme === "dark" ? "#ddd" : "#333"
+                                  color: theme === "dark" ? "#ddd" : "#333",
+                                  display: "flex",
+                                  flexDirection: "column"
                                 }}
                               >
-                                {id} - {tz}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      }
-                      overlayInnerStyle={{
-                        maxWidth: 320,
-                        background: theme === "dark" ? "#1f1f1f" : "#fff",
-                        color: theme === "dark" ? "#fff" : "#000"
-                      }}
-                    >
-                      <Badge count={ids.length} size="small" offset={[0, 2]}>
-                        <GlobalOutlined
-                          style={{
-                            fontSize: 18,
-                            cursor: "pointer",
-                            color: theme === "dark" ? "#9ad" : "grey"
-                          }}
-                        />
-                      </Badge>
-                    </Tooltip>
-                  )}
-                </Col>
-                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                <div>{id}</div>
+                                <div>{getAccountObject?.accountName}</div>
+                              </div>)
+                            })}
+                          </div>
+                        }
+                        overlayInnerStyle={{
+                          maxWidth: 320,
+                          background: theme === "dark" ? "#1f1f1f" : '#fff',
+                          color: theme === "dark" ? "#fff" : '#000'
+                        }}
+                      >
+                        <Badge count={ids.length} size="small" offset={[0, 2]}>
+                          <NumberOutlined
+                            style={{
+                              fontSize: 18,
+                              cursor: "pointer",
+                              color: theme === "dark" ? "#9ad" : "grey"
+                            }}
+                          />
+                        </Badge>
+                      </Tooltip>
+                    )}
+                  </Col>
+
+                  <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                    {ids.length <= 1 && (
+                      <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                        Name: {newAccountName ?? "-"}
+                      </Text>
+                    )
+                    }
+                  </Col>
+
+                  <Col xs={24} sm={24} md={8} style={{ flex: "1 1 auto" }}>
+                    {ids.length <= 1 ? (
+                      // Single → plain text
+                      <Text style={{ color: theme === "dark" ? "white" : undefined }}>
+                        Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
+                      </Text>
+                    ) : (
+                      // Multiple → icon with tooltip of selected account ids + timezones
+                      <Tooltip
+                        title={
+                          <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
+                            {ids.map((id, i) => {
+                              const acc = accountsAccess.find(a => a.accountNumber === id);
+                              console.log("timezones:", accountsAccess);
+                              const tz = acc?.timeZone ?? "-";
+                              return (
+                                <div
+                                  key={`${id}-${i}`}
+                                  style={{
+                                    padding: "4px 6px",
+                                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                                    fontSize: 12,
+                                    color: theme === "dark" ? "#ddd" : "#333"
+                                  }}
+                                >
+                                  {id} - {tz}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        }
+                        overlayInnerStyle={{
+                          maxWidth: 320,
+                          background: theme === "dark" ? "#1f1f1f" : "#fff",
+                          color: theme === "dark" ? "#fff" : "#000"
+                        }}
+                      >
+                        <Badge count={ids.length} size="small" offset={[0, 2]}>
+                          <GlobalOutlined
+                            style={{
+                              fontSize: 18,
+                              cursor: "pointer",
+                              color: theme === "dark" ? "#9ad" : "grey"
+                            }}
+                          />
+                        </Badge>
+                      </Tooltip>
+                    )}
+                  </Col>
+                  {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col> */}
-                <Col>
-                  <Dropdown
-                    overlay={
-                      <Menu
-                        onClick={({ key }) =>
-                          // onStatusFilterChange && 
-                          // onStatusFilterChange(key)
-                          setcampaignStatusLabel(key)
-                        } // <-- Add this line
-                        items={[
-                          {
-                            key: 'All',
-                            label: (
-                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+
+                  {/* <Col>
+                    <Input
+                      placeholder="Search..."
+                      // prefix={<SearchOutlined />}
+                      onChange={(value)=> setInsideInput(value.target.value)}
+                      // onBlur={handleBlur}
+                      value={insideInput}
+                      allowClear
+                      className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
+                      style={{
+                        borderRadius: 8,
+                        border: '1px solid #91C25F',
+                        // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                        // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                        color: theme === 'dark' ? '#fff' : '#000',
+                        fontWeight: 500,
+                        width: 120,
+                        marginRight: '8px'
+                      }}
+                    />
+                  </Col> */}
+                  <Col>
+                    <Dropdown
+                      overlay={
+                        <Menu
+                          onClick={({ key }) =>
+                            // onStatusFilterChange && 
+                            // onStatusFilterChange(key)
+                            setcampaignStatusLabel(key)
+                          } // <-- Add this line
+                          items={[
+                            {
+                              key: 'All',
+                              label: (
+                                <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                  <span
+                                    style={{
+                                      width: '6px',
+                                      height: '6px',
+                                      borderRadius: '50%',
+                                      backgroundColor: '#122F6E',
+                                      marginRight: '6px',
+                                    }}
+                                  ></span>
+                                  All
+                                </span>
+                              ),
+                            },
+                            {
+                              key: 'Active',
+                              label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
                                 <span
                                   style={{
                                     width: '6px',
                                     height: '6px',
                                     borderRadius: '50%',
-                                    backgroundColor: '#122F6E',
+                                    backgroundColor: 'green',
                                     marginRight: '6px',
                                   }}
                                 ></span>
-                                All
+                                Active
+
                               </span>
-                            ),
-                          },
-                          {
-                            key: 'Active',
-                            label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                              <span
-                                style={{
-                                  width: '6px',
-                                  height: '6px',
-                                  borderRadius: '50%',
-                                  backgroundColor: 'green',
-                                  marginRight: '6px',
-                                }}
-                              ></span>
-                              Active
+                            },
+                            {
+                              key: 'Paused', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'red',
+                                    marginRight: '6px',
+                                  }}
+                                ></span>
+                                Paused
 
-                            </span>
-                          },
-                          {
-                            key: 'Paused', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                              <span
-                                style={{
-                                  width: '6px',
-                                  height: '6px',
-                                  borderRadius: '50%',
-                                  backgroundColor: 'red',
-                                  marginRight: '6px',
-                                }}
-                              ></span>
-                              Paused
+                              </span>
+                            },
+                            {
+                              key: 'Archived', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'orange',
+                                    marginRight: '6px',
+                                  }}
+                                ></span>
+                                Archived
 
-                            </span>
-                          },
-                          {
-                            key: 'Archived', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                              <span
-                                style={{
-                                  width: '6px',
-                                  height: '6px',
-                                  borderRadius: '50%',
-                                  backgroundColor: 'orange',
-                                  marginRight: '6px',
-                                }}
-                              ></span>
-                              Archived
+                              </span>
+                            },
+                          ]}
+                        />
+                      }
+                      trigger={['click']}
+                    >
+                      <Button
+                        type="default"
+                        style={{
+                          borderRadius: 8,
+                          background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                          border: '1px solid #4CAF50',
+                          color: theme === 'dark' ? '#95de64' : '#389e0d',
+                          fontWeight: 500,
+                          marginRight: '5px'
+                        }}
+                      >
+                        <Space size={2}>
+                          <FilterOutlined />
+                          {campaignStatusFilter}
+                          <DownOutlined style={{ fontSize: 10 }} />
+                        </Space>
+                      </Button>
+                    </Dropdown>
+                  </Col>
 
+                  <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                    < Tooltip
+                      title={
+                        <div style={{ fontSize: '13px' }}>
+                          {fbCron.current !== '-' && <div>Fb status: {fbCron.current?.toLowerCase()}</div>}
+                          {revenueCron.current !== '-' && <div>Rev status: {revenueCron.current?.toLowerCase()}</div>}
+                          {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
+                            <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                              Cron status: {cronStatus.current?.toLowerCase()}
+                            </Text>
+                          )}
+                          {accountStatus.current && <div>
+                            Account:  <span
+                              style={{
+                                marginLeft: '3px',
+                                color:
+                                  accountStatus.current === 'Active'
+                                    ? '#91C25F'
+                                    : accountStatus.current === 'Inactive'
+                                      ? '#EC7117'
+                                      : 'gray',
+                                // fontWeight: 'bold',
+                              }}
+                            >
+                              {accountStatus.current}
                             </span>
-                          },
-                        ]}
-                      />
-                    }
-                    trigger={['click']}
-                  >
-                    <Button
-                      type="default"
-                      style={{
-                        borderRadius: 8,
-                        background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                        border: '1px solid #4CAF50',
-                        color: theme === 'dark' ? '#95de64' : '#389e0d',
-                        fontWeight: 500,
-                        marginRight: '5px'
+                          </div>}
+                        </div>
+                      }
+                      overlayInnerStyle={{
+                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#000',
+                        border: '1px solid #ccc',
+                        borderRadius: 6,
+                        // fontWeight: 500,
                       }}
                     >
-                      <Space size={2}>
-                        <FilterOutlined />
-                        {campaignStatusFilter}
-                        <DownOutlined style={{ fontSize: 10 }} />
-                      </Space>
-                    </Button>
-                  </Dropdown>
-                </Col>
-
-                <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-                  < Tooltip
-                    title={
-                      <div style={{ fontSize: '13px' }}>
-                        {fbCron.current !== '-' && <div>Fb status: {fbCron.current?.toLowerCase()}</div>}
-                        {revenueCron.current !== '-' && <div>Rev status: {revenueCron.current?.toLowerCase()}</div>}
-                        {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
-                          <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
-                            Cron status: {cronStatus.current?.toLowerCase()}
-                          </Text>
-                        )}
-                        {accountStatus.current && <div>
-                          Account:  <span
-                            style={{
-                              marginLeft: '3px',
-                              color:
-                                accountStatus.current === 'Active'
-                                  ? '#91C25F'
-                                  : accountStatus.current === 'Inactive'
-                                    ? '#EC7117'
-                                    : 'gray',
-                              // fontWeight: 'bold',
-                            }}
-                          >
-                            {accountStatus.current}
-                          </span>
-                        </div>}
-                      </div>
-                    }
-                    overlayInnerStyle={{
-                      backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                      color: theme === 'dark' ? '#fff' : '#000',
-                      border: '1px solid #ccc',
-                      borderRadius: 6,
-                      // fontWeight: 500,
-                    }}
-                  >
-                    <InfoCircleOutlined
-                      style={{
-                        fontSize: '18px',
-                        cursor: 'pointer',
-                        marginRight: '10px',
-                        color: "#91C25F",
-                      }}
-                      className="black-icon-info"
-                    />
-                  </Tooltip>
-                </Col>
-                {/* <Col>
+                      <InfoCircleOutlined
+                        style={{
+                          fontSize: '18px',
+                          cursor: 'pointer',
+                          marginRight: '10px',
+                          color: "#91C25F",
+                        }}
+                        className="black-icon-info"
+                      />
+                    </Tooltip>
+                  </Col>
+                  {/* <Col>
                                             <Tooltip 
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
@@ -3039,14 +3190,14 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, sta
                                                 <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                             </Tooltip>
                                         </Col> */}
-                <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                  {/* <Tooltip title="Export to CSV"> */}
-                  <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={() => onBtExport(gridRef1, "Daily")} />
-                  {/* </Tooltip> */}
-                </Col>
-              </Row>
+                  <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                    {/* <Tooltip title="Export to CSV"> */}
+                    <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={() => onBtExport(gridRef1, "Daily")} />
+                    {/* </Tooltip> */}
+                  </Col>
+                </Row>
               </div>
-              
+
               {dailyData?.length > 0 ? (<div
                 className={`ag-theme-alpine ag-container ${gridThemeClass}`}
               // style={{

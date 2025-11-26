@@ -969,7 +969,7 @@ const Dashboard = () => {
         )
     };
 
-    if (userdetails?.email == "careers@adsgoat.in") {
+    if (userdetails?.email == "careers@adsgoat.in" || userdetails?.role === 'Network_Partner') {
         redirect("/Campaigns")
     }
 

@@ -92,7 +92,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
     const oneTimeFetch = useRef(true);
 
     const [apiStatus, setApiStatus] = useState(false);
-    const [activeTab, setActiveTab] = useState(localStorage.getItem("DailyActiveTab") && localStorage.getItem("DailyActiveTab") !== "undefined" && localStorage.getItem("DailyActiveTab") !== "null" ? localStorage.getItem("DailyActiveTab") : "1");
+    const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") && localStorage.getItem("activeTab") !== "undefined" && localStorage.getItem("activeTab") !== "null" ? localStorage.getItem("activeTab") : "1");
 
     const [selectedCampaigns, setSelectedCampaigns] = useState([]);
 
@@ -1330,86 +1330,6 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                 </Col>
 
                 <Col>
-                    {/* <Space size={2}>
-                <Input
-                  placeholder="Search campaigns..."
-                  prefix={<SearchOutlined />}
-                  allowClear
-                  style={{
-                    borderRadius: 8,
-                    background: theme === 'dark' ? '#2a2a2a' : '#fff',
-                    border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
-                    color: theme === 'dark' ? '#fff' : '#000',
-                    fontWeight: 500,
-                    width: 200,
-                  }}
-                />
-      
-                <Dropdown
-                  overlay={
-                    <Menu
-                      items={[
-                        { key: 'active', label: 'Active' },
-                        { key: 'pause', label: 'Paused' },
-                      ]}
-                    />
-                  }
-                  trigger={['click']}
-                >
-                  <Button
-                    type="default"
-                    style={{
-                      borderRadius: 8,
-                      background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                      border: '1px solid #52c41a',
-                      color: theme === 'dark' ? '#95de64' : '#389e0d',
-                      fontWeight: 500,
-                    }}
-                  >
-                    <Space size={2}>
-                      <FilterOutlined />
-                      Filters
-                      <DownOutlined style={{ fontSize: 10 }} />
-                    </Space>
-                  </Button>
-                </Dropdown>
-      
-                <Tooltip title="🍳 This feature is cooking—almost ready to serve 😜">
-                    <Button
-                        type="default"
-                        icon={<FaRobot style={{ fontSize: 20 }} />}
-                        disabled
-                        style={{
-                        borderRadius: 8,
-                        background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-                        border: '1px solid #95de64',
-                        color: theme === 'dark' ? '#52c41a' : '#389e0d',
-                        fontWeight: 500,
-                        cursor: 'not-allowed',
-                        }}
-                    >
-                        AI Assistant
-                    </Button>
-                </Tooltip>
-
-                <Tooltip title="🍳 This feature is cooking—almost ready to serve 😜">
-                <Button
-                    type="default"
-                    icon={<SettingOutlined />}
-                    disabled
-                    style={{
-                    borderRadius: 8,
-                    background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
-                    border: '1px solid #91d5ff',
-                    color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
-                    fontWeight: 500,
-                    cursor: 'not-allowed',
-                    }}
-                >
-                    Rules
-                </Button>
-                </Tooltip>
-              </Space> */}
                     <SearchFilters
                         theme={theme}
                         handleChangeInput={handleChangeInput}
@@ -1488,6 +1408,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         userdetails={userdetails}
                         refreshComments={refreshComments}
                         refreshpage={`${refreshpage}${activeTab}`}
+                        activeTab={activeTab}
                         getMainMenuItems={getMainMenuItems}
                         toggleStatus={toggleStatus}
                         handleChangeToggle={handleChangeToggle}
@@ -1525,6 +1446,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         userdetails={userdetails}
                         refreshComments={refreshComments}
                         refreshpage={`${refreshpage}${activeTab}`}
+                        activeTab={activeTab}
                         getMainMenuItems={getMainMenuItems}
                         toggleStatus={toggleStatus}
                         handleChangeToggle={handleChangeToggle}

@@ -4,7 +4,7 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Badge, Spin, Checkbox, Tooltip, Space, Menu, Dropdown } from 'antd';
-import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
+import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -59,7 +59,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -80,7 +80,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
 
     const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
     const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
-    const [activeTab, setActiveTab] = useState("1");
+    // const [activeTab, setActiveTab] = useState("1");
 
     const timezone = useRef();
 
@@ -320,7 +320,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulk',
+                '/Comments/upsertBulkNew',
                 { items }
             );
 
@@ -2428,8 +2428,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
     // }, [selectedCampaigns]);
 
     useEffect(() => {
-        functionCall1();
-    }, [selectedCampaigns]);
+        if (activeTab === "2") {
+            functionCall1();
+        }
+    }, [selectedCampaigns, activeTab]);
 
     useEffect(() => {
         // functionCall1();
@@ -2540,10 +2542,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
         }
     };
 
-    const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
-        setActiveTab(key);
-    };
+    // const handleTabChange = (key) => {
+    //     console.log("Switched to Tab:", key); // Debugging log
+    //     setActiveTab(key);
+    // };
 
     const items = [
         { key: '1', label: 'Campaigns', content: 'Content for Campaign data' },
@@ -2551,41 +2553,41 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
         { key: '3', label: 'Ad', content: 'Content for Ad data' }
     ];
 
-    const handleCarouselChange = (index) => {
-        setActiveTab(index);
-        // console.log(index);
-        // console.log(parseInt(index)-1);
-        // carouselRef.current.goTo(parseInt(index))
-        // localStorage.setItem("activeTab", index);
+    // const handleCarouselChange = (index) => {
+    //     setActiveTab(index);
+    //     // console.log(index);
+    //     // console.log(parseInt(index)-1);
+    //     // carouselRef.current.goTo(parseInt(index))
+    //     // localStorage.setItem("activeTab", index);
 
-    };
+    // };
 
-    const renderCarouselNav = () => (
-        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop: '15px' }}>
-            <Tabs
-                activeKey={activeTab}
-                onChange={handleCarouselChange}
-                items={items.map((item) => ({
-                    key: item.key,
-                    label: item.label,
-                }))}
-                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
-                style={{
-                    backgroundColor: 'transparent',
-                    padding: '0',
-                    marginBottom: '0',
-                }}
-                tabBarStyle={{
-                    fontSize: '12px',
-                    padding: '0',
-                    height: '30px',
-                    lineHeight: '30px',
-                    marginBottom: '-1px',
-                    borderBottom: 'none',
-                }}
-            />
-        </StickyBox>
-    );
+    // const renderCarouselNav = () => (
+    //     <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop: '15px' }}>
+    //         <Tabs
+    //             activeKey={activeTab}
+    //             onChange={handleCarouselChange}
+    //             items={items.map((item) => ({
+    //                 key: item.key,
+    //                 label: item.label,
+    //             }))}
+    //             className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+    //             style={{
+    //                 backgroundColor: 'transparent',
+    //                 padding: '0',
+    //                 marginBottom: '0',
+    //             }}
+    //             tabBarStyle={{
+    //                 fontSize: '12px',
+    //                 padding: '0',
+    //                 height: '30px',
+    //                 lineHeight: '30px',
+    //                 marginBottom: '-1px',
+    //                 borderBottom: 'none',
+    //             }}
+    //         />
+    //     </StickyBox>
+    // );
 
     const uniqueByAdsetId = (arr) => {
         const map = new Map();
@@ -2715,7 +2717,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
                                                     fontSize: "14px",
                                                 }}
                                             >
-                                                <RxSwitch size={20} />
+                                                <RxSwitch size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
 
                                             </Tooltip>
                                             <Modal
@@ -2789,27 +2791,28 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
                                                         fontSize: "18px",
                                                     }}
                                                 >
-                                                    <PushpinOutlined size={20} />
+                                                    <PushpinOutlined size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
                                                 </button>
                                             </Tooltip>
                                             {/*  comment */}
-                                            <Tooltip title="Bulk Comment" overlayInnerStyle={{
+                                            <Tooltip title="Bulk comment" overlayInnerStyle={{
                                                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                                                 color: theme === "dark" ? "#ffffff" : "#000000",
                                                 borderRadius: 6,
                                                 padding: "6px 10px",
                                                 fontSize: "14px",
                                             }}>
-                                                <MessageOutlined
+                                                <EditOutlined
                                                     onClick={() => setIsBulkCommentModalVisible(true)}
                                                     style={{
                                                         fontSize: "15px",
-                                                        cursor: "pointer"
+                                                        cursor: "pointer",
+                                                        color: theme === "dark" ? "white" : "black"
                                                     }}
                                                 />
                                             </Tooltip>
                                             <Modal
-                                                title="Bulk Comment"
+                                                title="Bulk comment"
                                                 open={isBulkCommentModalVisible}
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
@@ -2838,19 +2841,20 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, functionCallForC
                                             </Modal>
 
                                             {/* Category */}
-                                            <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                                            <Tooltip title="Bulk add category" overlayInnerStyle={{
                                                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                                                 color: theme === "dark" ? "#ffffff" : "#000000",
                                                 borderRadius: 6,
                                                 padding: "6px 10px",
                                                 fontSize: "14px",
                                             }}>
-                                                <EditOutlined
+                                                <PlusOutlined
                                                     onClick={openBulkCategoryModal}
                                                     style={{
                                                         fontSize: "15px",
                                                         cursor: "pointer",
-                                                        marginLeft: '5px'
+                                                        marginLeft: '5px',
+                                                        color: theme === "dark" ? "white" : "black"
                                                     }}
                                                 />
                                             </Tooltip>

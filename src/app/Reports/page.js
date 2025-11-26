@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -76,7 +76,7 @@ const MyTablePage = () => {
             </div>
         </div>;
     }
-    if (userdetails?.role === "Revenue_Partner") {
+    if (userdetails?.role === "Revenue_Partner" || userdetails?.role === "Network_Partner") {
         redirect("/Dashboard");
     }
 
@@ -328,15 +328,19 @@ const MyTablePage = () => {
 
     const [isTrue, setTrue] = useState(false);
 
-    const [account, setAccount] = useState((accountNumberFromDashboard ? accountNumberFromDashboard : (storedData ? storedData?.account : accountsForAccess[0].accountNumber)));
+    const [account, setAccount] = useState((accountNumberFromDashboard ? accountNumberFromDashboard : (storedData ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
     const [time, setTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
 
-    const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? accountNumberFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.account : accountsForAccess[0].accountNumber)));
+    const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [accountNumberFromDashboard] : (storedData ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
+
+
+    console.log(newaccount)
 
     const [accountName, setAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
+    console.log(newAccountName);
     const [newtime, setNewTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
 
     const [pageSize, setPageSize] = useState(1);
@@ -423,6 +427,9 @@ const MyTablePage = () => {
     };
 
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
+
+
+    console.log(initialOne, "initialData");
 
     // track if the user already changed selection
     const userPickedRef = useRef(false);
@@ -1802,6 +1809,7 @@ const MyTablePage = () => {
 
                 const [open, setOpen] = useState(false);
                 const [category, setCategory] = useState("");
+
                 const [row, setRow] = useState(null);
 
                 const getRow = () => {
@@ -1876,7 +1884,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -2898,7 +2906,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -5069,7 +5077,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -6109,7 +6117,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -7271,9 +7279,39 @@ const MyTablePage = () => {
                 if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
+                const isGroupRow = !!props?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? props?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : props?.data?.campaignid;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? props?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : props?.data?.accountNumber;
+
                 const [open, setOpen] = useState(false);
                 const [category, setCategory] = useState("");
                 const [row, setRow] = useState(null);
+
+                useEffect(() => {
+                    if (!campaignId || !rowAccountNumber) return;
+                    // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                    // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+                    // const matchedAdset = Camapignlevelstatus.find(
+                    //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+                    // );
+                    const matchedAdset = campaignComments
+                        .find(item =>
+                            String(item.campaignid) === String(campaignId) &&
+                            String(item.Account) === String(rowAccountNumber) &&
+                            String(item.level) === "campaign"
+                        );
+                    if (matchedAdset) {
+                        setCategory(matchedAdset?.category || "");
+                    }
+                }, [campaignComments]);
 
                 const getRow = () => {
                     return props.node.group
@@ -7347,7 +7385,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -8676,7 +8714,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -9622,7 +9660,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -10507,7 +10545,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -11629,7 +11667,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -12558,7 +12596,7 @@ const MyTablePage = () => {
                             onClick={onEdit}
                             style={{ cursor: "pointer", }}
                         >
-                            <EditOutlined />
+                            <PlusOutlined />
                         </span>
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
@@ -13161,7 +13199,7 @@ const MyTablePage = () => {
             // setInitialLoading(true);
             setAllCampaignsStatus(false);
             const fetchData = await apiClient.get(
-                `/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
+                `/AllCampaigns?accountNumber=${newaccount}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
             );
             setAllProfitLossArray(fetchData?.data);
             setAllCampaignsStatus(true);
@@ -13200,11 +13238,11 @@ const MyTablePage = () => {
     const functionCallForCommnets = async (accountOrAccounts) => {
         setCommentsStatus(false);
         // const accounts = Array.isArray(accountOrAccounts) ? accountOrAccounts.map(String) : [String(accountOrAccounts)];
-        const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
+        // const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/NewComment', { accountNumbers: accounts });
+            const { data } = await apiClient.post('/NewComment', { accountNumbers: accountOrAccounts });
             setCampaignComments(data);     // data already includes all selected accounts’ comments
             setInitialLoading(false);
         } catch {
@@ -13219,15 +13257,16 @@ const MyTablePage = () => {
 
     const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
-        // console.log("accountOrAccounts", accountOrAccounts);
+        console.log("accountOrAccounts", accountOrAccounts);
         // console.log(storedData);
 
-        const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
+        // const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         // console.log("accounts", accounts);
+        console.log(newaccount)
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accounts });
+            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accountOrAccounts });
             setCamapignlevelstatus(data);
             setInitialLoading(false);
         } catch {
@@ -13315,27 +13354,27 @@ const MyTablePage = () => {
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
-    useEffect(() => {
-        const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData) || [];
-        if (!preferredArr.length) return;
+    // useEffect(() => {
+    //     const preferredArr = deriveInitialArray(accountNumberFromDashboard, storedData, networksData) || [];
+    //     if (!preferredArr.length) return;
 
-        // normalize (stringify, dedupe, sort) to avoid ref/order churn
-        const toNorm = (arr) =>
-            Array.from(new Set((arr || []).map(String))).filter(Boolean).sort();
+    //     // normalize (stringify, dedupe, sort) to avoid ref/order churn
+    //     const toNorm = (arr) =>
+    //         Array.from(new Set((arr || []).map(String))).filter(Boolean).sort();
 
-        const normPreferred = toNorm(preferredArr);
-        const normSelected = toNorm(selectedValue);
+    //     const normPreferred = toNorm(preferredArr);
+    //     const normSelected = toNorm(selectedValue);
 
-        const same =
-            normPreferred.length === normSelected.length &&
-            normPreferred.every((v, i) => v === normSelected[i]);
+    //     const same =
+    //         normPreferred.length === normSelected.length &&
+    //         normPreferred.every((v, i) => v === normSelected[i]);
 
-        // ✅ Only set if user hasn't manually picked AND content actually differs
-        if (!userPickedRef.current && !same) {
-            setSelectedValue(normPreferred);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [accountNumberFromDashboard, storedData?.account, networksData]);
+    //     // ✅ Only set if user hasn't manually picked AND content actually differs
+    //     if (!userPickedRef.current && !same) {
+    //         setSelectedValue(normPreferred);
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
     useEffect(() => {
         if (campaignsStatus && commentsStatus && columnStructureStatus && allCampaignsStatus) {
@@ -13356,7 +13395,8 @@ const MyTablePage = () => {
     // }, []);
 
     useEffect(() => {
-        functionCall(selectedValue);  // pass the array
+        console.log(newaccount)
+        functionCall(newaccount);  // pass the array
     }, []);
 
 
@@ -13376,15 +13416,16 @@ const MyTablePage = () => {
     // }
 
     // ✅ run once on mount (for default network)
-    useEffect(() => {
-        const defaultNetwork = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0];
-        if (defaultNetwork) {
-            onChangeSelectRevenue(defaultNetwork);
-        }
-    }, []);
+    // useEffect(() => {
+    //     const defaultNetwork = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0];
+    //     if (defaultNetwork) {
+    //         onChangeSelectRevenue(defaultNetwork);
+    //     }
+    // }, []);
 
     // whenever network changes
     const onChangeSelectRevenue = (value) => {
+        console.log(value);
         // userPickedRef.current = true;
         // const accountsForAccess = adAccounts[value];
         // const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -13398,10 +13439,10 @@ const MyTablePage = () => {
         // setAccountName("");
         // setSearchText("");
         // setIsOpen(false);
-        localStorage.removeItem("selectedAccounts");
+        // localStorage.removeItem("selectedAccounts");
 
 
-        setAccount("");
+        // setAccount("");
         setAccountName("");
         setSelectedValue([])
         onChangeSelect([]);
@@ -13409,9 +13450,15 @@ const MyTablePage = () => {
         setSearchText("");
         setIsOpen(false);
         const accountsForAccess = adAccounts[value];
+        console.log(accountsForAccess);
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+        console.log(accountsAccess);
         setNetworksData(accountsAccess);
         setRevenuePartner(value)
+        setNewAccount([String(accountsAccess[0].accountNumber)])
+        setAccount([String(accountsAccess[0].accountNumber)])
+        setAccountName((accountsAccess[0].accountName))
+        setnewAccountName((accountsAccess[0].accountName))
 
         // ⏰ set timezone
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
@@ -13459,7 +13506,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
-        // console.log(storedData, "storedData");
+        console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);
@@ -13715,46 +13762,56 @@ const MyTablePage = () => {
 
     // value will be an array of accountNumbers (strings)
     const handleChange1 = (newValues) => {
-        setSelectedValue((prevSelected) => {
-            // Keep existing selections outside current search
-            const prev = new Set(prevSelected.map(String));
-            const filteredSet = new Set(filteredAccounts.map(a => String(a.accountNumber)));
+        // setSelectedValue((prevSelected) => {
+        //     // Keep existing selections outside current search
+        //     const prev = new Set(prevSelected.map(String));
+        //     const filteredSet = new Set(filteredAccounts.map(a => String(a.accountNumber)));
 
-            // Remove only accounts that belong to current search list
-            for (const val of filteredSet) {
-                if (prev.has(val)) prev.delete(val);
-            }
+        //     // Remove only accounts that belong to current search list
+        //     for (const val of filteredSet) {
+        //         if (prev.has(val)) prev.delete(val);
+        //     }
 
-            // Add currently selected (visible) accounts
-            for (const val of newValues) {
-                prev.add(String(val));
-            }
+        //     // Add currently selected (visible) accounts
+        //     for (const val of newValues) {
+        //         prev.add(String(val));
+        //     }
 
-            const finalSelected = Array.from(prev);
+        //     const finalSelected = Array.from(prev);
 
-            // ✅ Persist new state to localStorage
-            localStorage.setItem("selectedAccounts", JSON.stringify(finalSelected));
+        //     // ✅ Persist new state to localStorage
+        //     localStorage.setItem("selectedAccounts", JSON.stringify(finalSelected));
 
-            // ✅ Notify parent or other logic
-            onChangeSelect(finalSelected);
-            setAccountChanged(true);
+        //     // ✅ Notify parent or other logic
+        //     onChangeSelect(finalSelected);
+        //     setAccountChanged(true);
 
-            return finalSelected;
-        });
+        //     return finalSelected;
+        // });
 
-        userPickedRef.current = true;
+        // userPickedRef.current = true;
 
-        // ✅ Preserve account name behavior using last picked item
-        const last = newValues[newValues.length - 1];
-        if (last) {
-            const findAccount = (data, accountNumber) =>
-                Object.values(data).flat().find(
-                    (item) => String(item.accountNumber) === String(accountNumber)
-                ) || null;
+        // // ✅ Preserve account name behavior using last picked item
+        // const last = newValues[newValues.length - 1];
+        // if (last) {
+        //     const findAccount = (data, accountNumber) =>
+        //         Object.values(data).flat().find(
+        //             (item) => String(item.accountNumber) === String(accountNumber)
+        //         ) || null;
 
-            const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
-            if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
-        }
+        //     const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
+        //     if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
+        // }
+        // console.log(newValues);
+        // console.log(newValues);
+        setAccount(newValues);
+        // setNewAccount(newValues);
+        const accountsNames = newValues.map(item => {
+  const found = accountsAccess.find(acc => acc.accountNumber === item);
+  return found ? found.accountName : null;
+});
+        setAccountName(accountsNames)
+        setnewAccountName(accountsNames)
     };
 
 
@@ -13818,9 +13875,9 @@ const MyTablePage = () => {
                     <Checkbox
                         className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
                         indeterminate={
-                            selectedValue.length > 0 && selectedValue.length < activeAccounts.length
+                            account.length > 0 && account.length < activeAccounts.length
                         }
-                        checked={selectedValue.length === activeAccounts.length}
+                        checked={account.length === activeAccounts.length}
                         onChange={(e) => {
                             if (e.target.checked) {
                                 handleChange1(activeAccounts.map(acc => String(acc.accountNumber)));
@@ -13847,9 +13904,20 @@ const MyTablePage = () => {
                             cursor: "pointer",
                         }}
                         title="Unselect All"
-                        onClick={async () => {
+                        // onClick={async () => {
+                        //     handleChange1([]);
+                        //     setaccount([]);
+                        //     setAccount([]);
+                        //     await onClickButton();
+                        // }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
                             handleChange1([]);
-                            await onClickButton();
+                            // setaccount([]);
+                            // setAccount([]);
+                            // schedule toggle so state setters run first
+                            // setTimeout(() => onClickButton(), 1500);
                         }}
                     />
                 </div>
@@ -13883,7 +13951,7 @@ const MyTablePage = () => {
                             </div>
                         ),
                     }))}
-                    value={selectedValue}
+                    value={account}
                     // onChange={handleChange1}
                     onChange={(checkedList) => handleChange1(checkedList)}
 
@@ -13928,7 +13996,7 @@ const MyTablePage = () => {
                     }))}
 
                     // ✅ Show checked only for visible accounts
-                    value={selectedValue.filter((v) =>
+                    value={account.filter((v) =>
                         filteredAccounts.some(
                             (acc) => String(acc.accountNumber) === String(v)
                         )
@@ -14123,9 +14191,9 @@ const MyTablePage = () => {
     }
 
     useEffect(() => {
-        const accounts = Array.isArray(selectedValue)
-            ? selectedValue
-            : String(selectedValue || '').split(',').map(s => s.trim()).filter(Boolean);
+        const accounts = Array.isArray(newaccount)
+            ? newaccount
+            : String(newaccount || '').split(',').map(s => s.trim()).filter(Boolean);
 
         if (!accounts.length) {
             setRecDataByAccount({});
@@ -14194,7 +14262,7 @@ const MyTablePage = () => {
                 setInitialLoading(false);
             }
         })();
-    }, [selectedValue]);
+    }, [newaccount]);
     const aiItems = useMemo(() => {
         if (aiLoading) {
             return [
@@ -14547,11 +14615,11 @@ const MyTablePage = () => {
 
                             // 👇 Show first account + count
                             value={
-                                selectedValue.length === 0
+                                newaccount?.length === 0
                                     ? undefined
-                                    : selectedValue.length === 1
-                                        ? selectedValue[0] // just that account number
-                                        : `${selectedValue[0]}, +${selectedValue.length - 1} more`
+                                    : newaccount?.length === 1
+                                        ? newaccount[0] // just that account number
+                                        : `${newaccount[0]}, +${newaccount?.length - 1} more`
                             }
 
                             dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
@@ -15004,7 +15072,7 @@ const MyTablePage = () => {
                                     allCampaignData={allCampaignData}
                                     allProfitLossArray={allProfitLossArray}
                                     // newaccount={newaccount}
-                                    newaccount={Array.isArray(selectedValue) ? selectedValue : [selectedValue]}
+                                    newaccount={newaccount}
                                     newtime={newtime}
                                     newRevenuePratner={newRevenuePratner}
                                     inputValue={inputValue}
@@ -15058,7 +15126,7 @@ const MyTablePage = () => {
                                     startDate={newStartDate}
                                     endDate={newendDate}
                                     // newaccount={newaccount}
-                                    newaccount={Array.isArray(selectedValue) ? selectedValue : [selectedValue]}
+                                    newaccount={newaccount}
                                     newtime={newtime}
                                     newRevenuePratner={newRevenuePratner}
                                     inputValue={inputValue}

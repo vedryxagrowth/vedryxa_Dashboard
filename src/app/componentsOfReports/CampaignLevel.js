@@ -4,7 +4,7 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Dropdown, Tooltip, Space, Menu } from 'antd';
-import { GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
+import { GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -63,6 +63,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     console.log(columnDefs, "columnDefs");
     console.log("campaign acconts:", newaccount);
     console.log('accountAccess:', accountsAccess);
+    console.log(campaignComments);
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -303,7 +304,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulk',
+                '/Comments/upsertBulkNew',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -454,7 +455,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "http://localhost:8000/BulkUpdateCategory",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -2166,8 +2167,10 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
 
             if (mainData.length > 1) {
-                timezone.current = mainData[0].accountTimezone;
-                accountStatus.current = mainData[0].accountStatus;
+                const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
+                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                timezone.current = findRevenueObject.accountTimezone;
+                accountStatus.current = findRevenueObject.accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
 
                 fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
@@ -3002,7 +3005,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                     fontSize: "14px",
                                                 }}
                                             >
-                                                <RxSwitch size={20} />
+                                                <RxSwitch size={20} style={{color: theme === "dark" ? "white" : "black"}} />
 
                                             </Tooltip>
 
@@ -3045,7 +3048,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             {/* pin & unpin */}
                                             <Tooltip
                                                 title={
-                                                    <div style={{ display: "flex", gap: "14px" }}>
+                                                    <div style={{ display: "flex", gap: "14px", color: theme === "dark" ? "white" : "black" }}>
                                                         <span
                                                             style={{ cursor: "pointer", fontSize: "18px" }}
                                                             onClick={() => handleBulkSmartPin("pin")}
@@ -3076,27 +3079,28 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                         fontSize: "18px",
                                                     }}
                                                 >
-                                                    <PushpinOutlined size={20} />
+                                                    <PushpinOutlined size={20} style={{color: theme === "dark" ? "white" : "black"}} />
                                                 </button>
                                             </Tooltip>
                                             {/*  comment */}
-                                            <Tooltip title="Bulk Comment" overlayInnerStyle={{
+                                            <Tooltip title="Bulk comment" overlayInnerStyle={{
                                                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                                                 color: theme === "dark" ? "#ffffff" : "#000000",
                                                 borderRadius: 6,
                                                 padding: "6px 10px",
                                                 fontSize: "14px",
                                             }}>
-                                                <MessageOutlined
+                                                <EditOutlined
                                                     onClick={() => setIsBulkCommentModalVisible(true)}
                                                     style={{
                                                         fontSize: "15px",
-                                                        cursor: "pointer"
+                                                        cursor: "pointer",
+                                                        color: theme === "dark" ? "white" : "black"
                                                     }}
                                                 />
                                             </Tooltip>
                                             <Modal
-                                                title="Bulk Comment"
+                                                title="Bulk comment"
                                                 open={isBulkCommentModalVisible}
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
@@ -3125,19 +3129,20 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             </Modal>
 
                                             {/* Category */}
-                                            <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                                            <Tooltip title="Bulk add category" overlayInnerStyle={{
                                                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                                                 color: theme === "dark" ? "#ffffff" : "#000000",
                                                 borderRadius: 6,
                                                 padding: "6px 10px",
                                                 fontSize: "14px",
                                             }}>
-                                                <EditOutlined
+                                                <PlusOutlined
                                                     onClick={openBulkCategoryModal}
                                                     style={{
                                                         fontSize: "15px",
                                                         cursor: "pointer",
-                                                        marginLeft: '5px'
+                                                        marginLeft: '5px',
+                                                        color: theme === "dark" ? "white" : "black"
                                                     }}
                                                 />
                                             </Tooltip>
@@ -3227,7 +3232,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                     {ids.length <= 1 ? (
                                         // Single → plain text
                                         <Text style={{ color: theme === "dark" ? "white" : undefined }}>
-                                            Time zone: {ids[0] ? `${timezone.current ?? "-"}` : "-"}
+                                            Time zone: {timezone.current}
+                                            {/* {ids[0] ? `${timezone.current ?? "-"}` : "-"} */}
                                         </Text>
                                     ) : (
                                         // Multiple → icon with tooltip of selected account ids + timezones

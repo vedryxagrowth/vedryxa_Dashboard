@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge, Menu, Dropdown, Tooltip, Space } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined } from '@ant-design/icons';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -63,7 +63,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -349,7 +349,7 @@ const Daily = ({ functionCallForCommnets, context, functionCallForCampaigns, sta
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulk',
+                '/Comments/upsertBulkNew',
                 { items }
             );
 
@@ -2589,8 +2589,11 @@ const Daily = ({ functionCallForCommnets, context, functionCallForCampaigns, sta
     // }, [selectedCampaigns]);
 
     useEffect(() => {
-        functionCall2();
-    }, [selectedCampaigns]);
+        if (activeTab === "2") {
+            functionCall2();
+        }
+
+    }, [selectedCampaigns, activeTab]);
 
     useEffect(() => {
         // functionCall1();
@@ -2746,7 +2749,7 @@ const Daily = ({ functionCallForCommnets, context, functionCallForCampaigns, sta
                                                     fontSize: "14px",
                                                 }}
                                             >
-                                                <RxSwitch size={20} />
+                                                <RxSwitch size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
 
                                             </Tooltip>
                                             <Modal
@@ -2820,7 +2823,7 @@ const Daily = ({ functionCallForCommnets, context, functionCallForCampaigns, sta
                                                         fontSize: "18px",
                                                     }}
                                                 >
-                                                    <PushpinOutlined size={20} />
+                                                    <PushpinOutlined size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
                                                 </button>
                                             </Tooltip>
                                             {/*  comment */}
@@ -2831,11 +2834,12 @@ const Daily = ({ functionCallForCommnets, context, functionCallForCampaigns, sta
                                                 padding: "6px 10px",
                                                 fontSize: "14px",
                                             }}>
-                                                <MessageOutlined
+                                                <EditOutlined
                                                     onClick={() => setIsBulkCommentModalVisible(true)}
                                                     style={{
                                                         fontSize: "15px",
-                                                        cursor: "pointer"
+                                                        cursor: "pointer",
+                                                        color: theme === "dark" ? "white" : "black"
                                                     }}
                                                 />
                                             </Tooltip>
@@ -2869,19 +2873,20 @@ const Daily = ({ functionCallForCommnets, context, functionCallForCampaigns, sta
                                             </Modal>
 
                                             {/* Category */}
-                                            <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                                            <Tooltip title="Bulk Add category" overlayInnerStyle={{
                                                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                                                 color: theme === "dark" ? "#ffffff" : "#000000",
                                                 borderRadius: 6,
                                                 padding: "6px 10px",
                                                 fontSize: "14px",
                                             }}>
-                                                <EditOutlined
+                                                <PlusOutlined
                                                     onClick={openBulkCategoryModal}
                                                     style={{
                                                         fontSize: "15px",
                                                         cursor: "pointer",
-                                                        marginLeft: '5px'
+                                                        marginLeft: '5px',
+                                                        color: theme === "dark" ? "white" : "black"
                                                     }}
                                                 />
                                             </Tooltip>

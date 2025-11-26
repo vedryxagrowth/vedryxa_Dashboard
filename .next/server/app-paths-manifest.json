@@ -1,24 +1,6 @@
 {
-<<<<<<< HEAD
-  "/Dashboard/page": "app/Dashboard/page.js",
-=======
-  "/_not-found/page": "app/_not-found/page.js",
-  "/Dashboard/page": "app/Dashboard/page.js",
-<<<<<<< HEAD
-=======
-  "/KeywordHistory/page": "app/KeywordHistory/page.js",
-  "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": "app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js",
-  "/LiveHistory/LiveAdsetHistory/page": "app/LiveHistory/LiveAdsetHistory/page.js",
-  "/KeywordHistory/[CampaignName]/page": "app/KeywordHistory/[CampaignName]/page.js",
-  "/LiveHistory/page": "app/LiveHistory/page.js",
-  "/LiveHistory/LiveCampaignHistory/page": "app/LiveHistory/LiveCampaignHistory/page.js",
-  "/LiveHistory/LiveAdsetHistory/[AdsetName]/page": "app/LiveHistory/LiveAdsetHistory/[AdsetName]/page.js",
-  "/LiveHistory/LiveAdHistory/[AdName]/page": "app/LiveHistory/LiveAdHistory/[AdName]/page.js",
-  "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": "app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js",
-  "/page": "app/page.js",
+  "/Campaigns/page": "app/Campaigns/page.js",
   "/NewUser/page": "app/NewUser/page.js",
-  "/Users/page": "app/Users/page.js",
->>>>>>> DevUi
->>>>>>> DevUi
+  "/Dashboard/page": "app/Dashboard/page.js",
   "/Reports/page": "app/Reports/page.js"
 }
