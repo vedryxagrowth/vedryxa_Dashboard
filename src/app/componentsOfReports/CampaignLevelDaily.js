@@ -4,10 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge } from 'antd';
-import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import { Space } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge, Space, Tooltip, Menu, Dropdown } from 'antd';
+import { GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';;
 import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -65,13 +63,16 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
-  const { theme } = useTokenContext();
-  const { apiClient } = useTokenContext();
+const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+  const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
   const [dailyData, setdailyData] = useState([]);
   const newRowDataForFilter = useRef([]);
+
+  const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
+
+  const [insideInput, setInsideInput] = useState("");
 
   const [dailyFixedFooter, setDailyFixedFooter] = useState([]);
 
@@ -115,17 +116,57 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
   const accountStatus = useRef('-');
 
   const memorizedColumnDef1 = useMemo(() => columnDefs.current, [columnDefs.current]);
-  console.log(memorizedColumnDef1, "1111");
-  const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
-    const normalizedCampaign = each.campaignname.trim().toLowerCase();
+  // console.log(memorizedColumnDef1, "1111");
+  // const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
+  //   const normalizedCampaign = each.campaignname.trim().toLowerCase();
+  //   const normalizedInput = inputValue.trim().toLowerCase();
+  //   return (
+  //     normalizedCampaign.startsWith(normalizedInput) ||
+  //     normalizedCampaign.includes(normalizedInput) ||
+  //     normalizedCampaign.endsWith(normalizedInput)
+  //   );
+  // }
+  // ), [dailyData, inputValue, theme]);
+
+  const memorizedDailyData = useMemo(() => {
+    let filtered = dailyData || [];
+
     const normalizedInput = inputValue.trim().toLowerCase();
-    return (
-      normalizedCampaign.startsWith(normalizedInput) ||
-      normalizedCampaign.includes(normalizedInput) ||
-      normalizedCampaign.endsWith(normalizedInput)
-    );
-  }
-  ), [dailyData, inputValue, theme]);
+    const normalizedInside = insideInput.trim().toLowerCase();
+
+    // 1️⃣ FIRST FILTER → by inputValue (only adname)
+    if (normalizedInput) {
+      filtered = filtered.filter((each) => {
+        const campaignname = (each?.campaignname || "").trim().toLowerCase();
+        const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+        const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+        return (
+          campaignname.startsWith(normalizedInput) ||
+          campaignname.includes(normalizedInput) ||
+          campaignname.endsWith(normalizedInput) ||
+          accountNumber.includes(normalizedInput) ||
+          campaignId.includes(normalizedInput) 
+        );
+      });
+    }
+
+    // 2️⃣ SECOND FILTER → by insideInput (all fields)
+    if (normalizedInside) {
+      filtered = filtered.filter((each) => {
+        const campaignname = (each?.campaignname || "").trim().toLowerCase();
+        const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+        const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+
+        return (
+          campaignname.includes(normalizedInside) ||
+          accountNumber.includes(normalizedInside) ||
+          campaignId.includes(normalizedInside) 
+        );
+      });
+    }
+
+    return filtered;
+  }, [dailyData, inputValue, insideInput]);
 
   // useEffect to show selected campaigns after clearing search
   useEffect(() => {
@@ -166,6 +207,16 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
   //     showCampaignLevel(selectedData);
   // };
 
+  const uniqueByCampaignId = (arr) => {
+    const map = new Map();
+    arr.forEach(obj => {
+      if (!map.has(obj.campaignid)) {
+        map.set(obj.campaignid, obj);
+      }
+    });
+    return Array.from(map.values());
+  };
+
   const onSelectionChanged = (event) => {
     const selectedNodes = event.api.getSelectedNodes();
     const selectedData = selectedNodes.map(node => node.data);
@@ -174,7 +225,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
     setSelectedCampaigns(selectedData);
 
 
-    showCampaignLevel(selectedData);
+    showCampaignLevel(uniqueByCampaignId(selectedData));
     console.log(selectedData);
 
     const leafCampaignsData = selectedNodes
@@ -1081,8 +1132,8 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
         } else {
           arr.push({
             campaignid: item.campaignid,
-            Account: item.accountNumber,   
-            level: "campaign",            
+            Account: item.accountNumber,
+            level: "campaign",
             pinned: action === "pin",
             userPin: userdetails?.email,
             editedPinTime: timeStamp
@@ -1112,7 +1163,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
       }));
 
       const resp = await apiClient.post(
-        '/Comments/upsertBulk',
+        '/Comments/upsertBulkNew',
         { items, usercommit: userdetails?.email }
       );
 
@@ -1142,6 +1193,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
               arr.push({
                 campaignid: item.campaignid,
                 Account: item.accountNumber,
+                campaignname: item.campaignname,
                 level: 'campaign',
                 comment,
                 usercommit: userdetails?.email,
@@ -1319,6 +1371,15 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
+    // filter: "agTextColumnFilter",
+    // filterValueGetter: (params) => {
+    //   if (params.node.group) {
+    //     // Use the group key (campaign name)
+    //     return params.node.key;
+    //   }
+    //   // For leaf rows, use the campaign_name or any field
+    //   return params.data?.campaignname || '';
+    // },
 
     // comparator: (campaignA, campaignB) => {
     //   if (!campaignA) return 1;
@@ -1375,6 +1436,8 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
       // 2️⃣ fallback: alphabetical by group key
       return String(groupKeyA).localeCompare(String(groupKeyB));
     },
+
+    cellRenderer: "agGroupCellRenderer",
 
     cellRendererParams: {
       checkbox: true,
@@ -2320,6 +2383,22 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
           </div>
         );
       }
+    },
+    processCellForClipboard: (params) => {
+      if (params.node.group) {
+        console.log("Processing group column for copy..."); // Debugging log
+
+        // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
+        if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
+          return params.node.key;
+        }
+
+        // ✅ Only copy group name for the first row in the group
+        return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
+          ? params.node.key
+          : ""; // Prevent duplicate copies
+      }
+      return params.value; // Normal copy behavior for regular cells
     }
   };
 
@@ -2486,7 +2565,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
       const fullData = filteredData?.length > 0 ? [...filteredData] : [];
 
       let newFilterData;
-      if (campaignStatusFilter !== "ALL") {
+      if (campaignStatusFilter !== "All") {
         newFilterData = fullData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       }
       else {
@@ -2770,6 +2849,13 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
     },
     ensureDomOrder: false
   }), []);
+  document.addEventListener("DOMContentLoaded", function () {
+    const gridDiv = document.getElementById("myGrid");
+    new agGrid.Grid(gridDiv, gridOptions1);
+
+    // Set column definitions separately after grid initialization
+    gridOptions1.api.setColumnDefs(columnDefs);
+  });
   const restoreGridState = (gridApi) => {
     const filterModel = JSON.parse(localStorage.getItem('gridFilterModel'));
     const sortModel = JSON.parse(localStorage.getItem('gridSortModel'));
@@ -2862,8 +2948,9 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
   useEffect(() => {
     // functionCall1();
     console.log(campaignStatusFilter, "campaignStatusFilter");
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+      // const filteredByStatus = memorizedDailyData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       setdailyData(filteredByStatus);
     } else {
       setdailyData(newRowDataForFilter.current);
@@ -2889,7 +2976,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
       }) : null;
     newRowDataForFilter.current = filterData;
     let newFilterData;
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       console.log("testing 4444");
       newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
     }
@@ -2953,31 +3040,9 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                 />
               </div>
             </div>
-          ) : dailyData?.filter((each) => {
-            const normalizedCampaign = each.campaignname.trim().toLowerCase();
-            const normalizedInput = inputValue.trim().toLowerCase();
-            return (
-              normalizedCampaign.startsWith(normalizedInput) ||
-              normalizedCampaign.includes(normalizedInput) ||
-              normalizedCampaign.endsWith(normalizedInput)
-            );
-          }
-          )?.length > 0 ? (
-            <div
-              className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-            // style={{
-            //     width: '100%',
-            //     // borderRadius: 12,
-            //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-            //     padding: 10,
-            //     height: 'auto',
-            //     boxShadow:
-            //     theme === 'dark'
-            //         ? '0 1px 3px rgba(0,0,0,0.6)'
-            //         : '0 1px 6px rgba(0,0,0,0.08)',
-            // }}
-            >
-              <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
+          ) : newRowDataForFilter.current?.length > 0 ? (
+            <div>
+              <Row className="header-row" style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
                 <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                   <Space align="center" className='daily-contaier'>
                     <div className="blinking-circle"></div>
@@ -3026,7 +3091,7 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                           fontSize: "14px",
                         }}
                       >
-                        <RxSwitch size={20} />
+                        <RxSwitch size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
 
                       </Tooltip>
 
@@ -3100,27 +3165,28 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                             fontSize: "18px",
                           }}
                         >
-                          <PushpinOutlined size={20} />
+                          <PushpinOutlined size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
                         </button>
                       </Tooltip>
                       {/*  comment */}
-                      <Tooltip title="Bulk Comment" overlayInnerStyle={{
+                      <Tooltip title="Bulk comment" overlayInnerStyle={{
                         backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                         color: theme === "dark" ? "#ffffff" : "#000000",
                         borderRadius: 6,
                         padding: "6px 10px",
                         fontSize: "14px",
                       }}>
-                        <MessageOutlined
+                        <EditOutlined
                           onClick={() => setIsBulkCommentModalVisible(true)}
                           style={{
                             fontSize: "15px",
-                            cursor: "pointer"
+                            cursor: "pointer",
+                            color: theme === "dark" ? "white" : "black"
                           }}
                         />
                       </Tooltip>
                       <Modal
-                        title="Bulk Comment"
+                        title="Bulk comment"
                         open={isBulkCommentModalVisible}
                         onCancel={() => setIsBulkCommentModalVisible(false)}
                         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
@@ -3149,19 +3215,20 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                       </Modal>
 
                       {/* Category */}
-                      <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                      <Tooltip title="Bulk add category" overlayInnerStyle={{
                         backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                         color: theme === "dark" ? "#ffffff" : "#000000",
                         borderRadius: 6,
                         padding: "6px 10px",
                         fontSize: "14px",
                       }}>
-                        <EditOutlined
+                        <PlusOutlined
                           onClick={openBulkCategoryModal}
                           style={{
                             fontSize: "15px",
                             cursor: "pointer",
-                            marginLeft: '5px'
+                            marginLeft: '5px',
+                            color: theme === "dark" ? "white" : "black"
                           }}
                         />
                       </Tooltip>
@@ -3317,6 +3384,126 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                                                 <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
                                             </Tooltip>
                                         </Col> */}
+                <Col>
+                  <Input
+                    placeholder="Search..."
+                    // prefix={<SearchOutlined />}
+                    onChange={(value) => setInsideInput(value.target.value)}
+                    // onBlur={handleBlur}
+                    value={insideInput}
+                    allowClear
+                    className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
+                    style={{
+                      borderRadius: 8,
+                      border: '1px solid #91C25F',
+                      // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                      // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                      color: theme === 'dark' ? '#fff' : '#000',
+                      fontWeight: 500,
+                      width: 120,
+                      marginRight: '8px'
+                    }}
+                  />
+                </Col>
+
+                <Col>
+                  <Dropdown
+                    overlay={
+                      <Menu
+                        onClick={({ key }) =>
+                          // onStatusFilterChange && 
+                          // onStatusFilterChange(key)
+                          setcampaignStatusLabel(key)
+                        } // <-- Add this line
+                        items={[
+                          {
+                            key: 'All',
+                            label: (
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#122F6E',
+                                    marginRight: '6px',
+                                  }}
+                                ></span>
+                                All
+                              </span>
+                            ),
+                          },
+                          {
+                            key: 'Active',
+                            label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'green',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Active
+
+                            </span>
+                          },
+                          {
+                            key: 'Paused', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'red',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Paused
+
+                            </span>
+                          },
+                          {
+                            key: 'Archived', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'orange',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Archived
+
+                            </span>
+                          },
+                        ]}
+                      />
+                    }
+                    trigger={['click']}
+                  >
+                    <Button
+                      type="default"
+                      style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                        border: '1px solid #4CAF50',
+                        color: theme === 'dark' ? '#95de64' : '#389e0d',
+                        fontWeight: 500,
+                        marginRight: '5px'
+                      }}
+                    >
+                      <Space size={2}>
+                        <FilterOutlined />
+                        {campaignStatusFilter}
+                        <DownOutlined style={{ fontSize: 10 }} />
+                      </Space>
+                    </Button>
+                  </Dropdown>
+                </Col>
+
                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                   <Tooltip
                     title={
@@ -3382,158 +3569,292 @@ const Daily = ({ campaignStatusFilter, functionCallForCampaigns, context, functi
                   {/* </Tooltip> */}
                 </Col>
               </Row>
-              <div className='table-container'> 
-                <AgGridReact
-                ref={gridRef1}
-                context={context}
-                className='custom-grid'
-                rowHeight={30}
-                // rowSelection="multiple"
-                groupSelectsChildren={true} // ✅ Selects all children when a group is selected
-                suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
-                rowSelection="multiple"
-                rowData={memorizedDailyData}
-                columnDefs={memorizedColumnDef1}
-                onCellClicked={onCellClicked}
-                pagination={true}
-                paginationPageSize={200}
-                paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
-                groupDisplayType='multipleColumns'
-                suppressAggFuncInHeader={true}
-                groupSuppressBlankHeader={true}
-                defaultColDef={defaultColDef}
-                // groupIncludeFooter={true}
-                // groupIncludeTotalFooter={true}
-                autoGroupColumnDef={autoGroupColumnDef}
-                onSelectionChanged={onSelectionChanged}
-                enableCharts={true}
-                enableRangeSelection={true}
-                                      
-                onGridReady={(params) => {
-                  gridRef1.current = params.api; // Store grid API
-                  window.__top5 = params.api;
-                  restoreGridState(gridRef1.current); // Restore state when grid is ready
-                  onGridReady(params, 'grid2', gridRef1);
-                  if (params.columnApi) {
-                    params.columnApi.autoSizeAllColumns();
-                  }
-                }}
-                gridOptions={{
-                  ...gridOptions1,
-                  ensureDomOrder: false,
-                  suppressRowClickSelection: true,
-                  suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                  enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                }}
-                getMainMenuItems={getMainMenuItems}
-                pinnedBottomRowData={dailyFixedFooter}
+              {dailyData?.length > 0 ? (
+                <div
+                  className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                >
 
-                // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                onCellKeyDown={onCellKeyDown}
-                getRowStyle={params => {
-                  if (params.node.rowPinned) {
-                    return {
-                      // fontWeight: 'bold',
-                      backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                      color: theme === "dark" ? '#fff' : '#000',
-                      height: '30px'         // Text color should contrast with the background
-                    };
-                  }
+                  <div className='table-container'>
+                    <AgGridReact
+                      ref={gridRef1}
+                      context={context}
+                      className='custom-grid'
+                      rowHeight={30}
+                      suppressReactUi={true}
+                      // rowSelection="multiple"
+                      groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                      suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
+                      rowSelection="multiple"
+                      rowData={memorizedDailyData}
+                      columnDefs={memorizedColumnDef1}
+                      onCellClicked={onCellClicked}
+                      pagination={true}
+                      paginationPageSize={200}
+                      paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                      groupDisplayType='multipleColumns'
+                      suppressAggFuncInHeader={true}
+                      groupSuppressBlankHeader={true}
+                      defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                      // groupIncludeFooter={true}
+                      // groupIncludeTotalFooter={true}
+                      autoGroupColumnDef={autoGroupColumnDef}
+                      onSelectionChanged={onSelectionChanged}
+                      // onGridReady={(params) => {
+                      //   gridRef1.current = params.api; // Store grid API
+                      //   restoreGridState(gridRef1.current); // Restore state when grid is ready
+                      //   onGridReady(params, 'grid2', gridRef1);
+                      //   if (params.columnApi) {
+                      //     params.columnApi.autoSizeAllColumns();
+                      //   }
+                      // }}
+                      onGridReady={(params) => onGridReady(params, 'grid1', gridRef1)}
+                      gridOptions={{
+                        ...gridOptions1,
+                        ensureDomOrder: false,
+                        enableCharts: true,
+                        suppressRowClickSelection: true,
+                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                        groupSelectsChildren: true, // ✅ Enables Shift + Arrow for selection
+                      }}
+                      getMainMenuItems={getMainMenuItems}
+                      pinnedBottomRowData={dailyFixedFooter}
 
-                  return null;
-                }}
-                getCellStyle={(params) => {
-                  const isSelected = selectedCells.some(
-                    (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                  );
+                      // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                      onCellKeyDown={onCellKeyDown}
+                      getRowStyle={params => {
+                        if (params.node.rowPinned) {
+                          return {
+                            // fontWeight: 'bold',
+                            backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                            color: theme === "dark" ? '#fff' : '#000',
+                            height: '30px'         // Text color should contrast with the background
+                          };
+                        }
 
-                  // ✅ Ensure first cell inside a group is highlighted
-                  const isFirstSelected = firstSelectedCell &&
-                    firstSelectedCell.rowIndex === params.node.rowIndex &&
-                    firstSelectedCell.colId === params.column.getId();
+                        return null;
+                      }}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                          (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                        );
 
-                  return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                }}
-                onFilterChanged={(params) => {
-                  const api = params.api;
-                  const filteredData = [];
-                  // api.forEachNodeAfterFilterAndSort((node) => {
-                  //     if (!node.rowPinned) {
-                  //         filteredData.push(node.data);
-                  //     }
-                  // });
-                  const normalizedInput = inputValue.trim().toLowerCase();
+                        // ✅ Ensure first cell inside a group is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                          firstSelectedCell.rowIndex === params.node.rowIndex &&
+                          firstSelectedCell.colId === params.column.getId();
 
-                  api.forEachNodeAfterFilterAndSort((node) => {
-                    // Check if node.data exists and has a valid campaignname
-                    if (node.data && node.data.campaignname) {
-                      const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                      }}
+                      onFilterChanged={(params) => {
+                        const api = params.api;
+                        const filteredData = [];
+                        // api.forEachNodeAfterFilterAndSort((node) => {
+                        //     if (!node.rowPinned) {
+                        //         filteredData.push(node.data);
+                        //     }
+                        // });
+                        const normalizedInput = inputValue.trim().toLowerCase();
 
-                      // Apply both search and AG-Grid filters
-                      if (
-                        normalizedCampaign.startsWith(normalizedInput) ||
-                        normalizedCampaign.includes(normalizedInput) ||
-                        normalizedCampaign.endsWith(normalizedInput)
-                      ) {
-                        filteredData.push(node.data);
-                      }
-                    }
-                  });
+                        api.forEachNodeAfterFilterAndSort((node) => {
+                          // Check if node.data exists and has a valid campaignname
+                          if (node.data && node.data.campaignname) {
+                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
 
-                  const updatedFooter = [
-                    {
-                      // [`${newtime}Date`]: 'Totals',
-                      campaignName: 'Total',
-                      spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                      revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                      profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                      margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                      rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                      cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                      ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                      fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                      conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                      fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                      roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                      cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                      cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                      fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                      fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                      impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                      ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
-                      tq: parseFloat(
-                        filteredData.reduce((acc, curr) => {
-                          const tqValue = Number(curr?.tq);
-                          return acc + (isNaN(tqValue) ? 0 : tqValue);
-                        }, 0).toFixed(2)
-                      ),
-                    },
-                  ];
+                            // Apply both search and AG-Grid filters
+                            if (
+                              normalizedCampaign.startsWith(normalizedInput) ||
+                              normalizedCampaign.includes(normalizedInput) ||
+                              normalizedCampaign.endsWith(normalizedInput)
+                            ) {
+                              filteredData.push(node.data);
+                            }
+                          }
+                        });
 
-                  setDailyFixedFooter(updatedFooter);
-                }}
-              />
-              </div>
+                        const updatedFooter = [
+                          {
+                            // [`${newtime}Date`]: 'Totals',
+                            campaignName: 'Total',
+                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                            tq: parseFloat(
+                              filteredData.reduce((acc, curr) => {
+                                const tqValue = Number(curr?.tq);
+                                return acc + (isNaN(tqValue) ? 0 : tqValue);
+                              }, 0).toFixed(2)
+                            ),
+                          },
+                        ];
+
+                        setDailyFixedFooter(updatedFooter);
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                <div
+                  className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                >
+
+                  <div className='table-container'>
+                    <AgGridReact
+                      ref={gridRef1}
+                      context={context}
+                      className='custom-grid'
+                      rowHeight={30}
+                      suppressReactUi={true}
+                      // rowSelection="multiple"
+                      groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                      suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
+                      rowSelection="multiple"
+                      rowData={[]}
+                      columnDefs={memorizedColumnDef1}
+                      onCellClicked={onCellClicked}
+                      pagination={true}
+                      paginationPageSize={200}
+                      paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                      groupDisplayType='multipleColumns'
+                      suppressAggFuncInHeader={true}
+                      groupSuppressBlankHeader={true}
+                      defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                      // groupIncludeFooter={true}
+                      // groupIncludeTotalFooter={true}
+                      autoGroupColumnDef={autoGroupColumnDef}
+                      onSelectionChanged={onSelectionChanged}
+                      // onGridReady={(params) => {
+                      //   gridRef1.current = params.api; // Store grid API
+                      //   restoreGridState(gridRef1.current); // Restore state when grid is ready
+                      //   onGridReady(params, 'grid2', gridRef1);
+                      //   if (params.columnApi) {
+                      //     params.columnApi.autoSizeAllColumns();
+                      //   }
+                      // }}
+                      onGridReady={(params) => onGridReady(params, 'grid1', gridRef1)}
+                      gridOptions={{
+                        ...gridOptions1,
+                        ensureDomOrder: false,
+                        enableCharts: true,
+                        suppressRowClickSelection: true,
+                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                        groupSelectsChildren: true, // ✅ Enables Shift + Arrow for selection
+                      }}
+                      getMainMenuItems={getMainMenuItems}
+                      pinnedBottomRowData={dailyFixedFooter}
+
+                      // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                      onCellKeyDown={onCellKeyDown}
+                      getRowStyle={params => {
+                        if (params.node.rowPinned) {
+                          return {
+                            // fontWeight: 'bold',
+                            backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                            color: theme === "dark" ? '#fff' : '#000',
+                            height: '30px'         // Text color should contrast with the background
+                          };
+                        }
+
+                        return null;
+                      }}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                          (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                        );
+
+                        // ✅ Ensure first cell inside a group is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                          firstSelectedCell.rowIndex === params.node.rowIndex &&
+                          firstSelectedCell.colId === params.column.getId();
+
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                      }}
+                      onFilterChanged={(params) => {
+                        const api = params.api;
+                        const filteredData = [];
+                        // api.forEachNodeAfterFilterAndSort((node) => {
+                        //     if (!node.rowPinned) {
+                        //         filteredData.push(node.data);
+                        //     }
+                        // });
+                        const normalizedInput = inputValue.trim().toLowerCase();
+
+                        api.forEachNodeAfterFilterAndSort((node) => {
+                          // Check if node.data exists and has a valid campaignname
+                          if (node.data && node.data.campaignname) {
+                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                            // Apply both search and AG-Grid filters
+                            if (
+                              normalizedCampaign.startsWith(normalizedInput) ||
+                              normalizedCampaign.includes(normalizedInput) ||
+                              normalizedCampaign.endsWith(normalizedInput)
+                            ) {
+                              filteredData.push(node.data);
+                            }
+                          }
+                        });
+
+                        const updatedFooter = [
+                          {
+                            // [`${newtime}Date`]: 'Totals',
+                            campaignName: 'Total',
+                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                            tq: parseFloat(
+                              filteredData.reduce((acc, curr) => {
+                                const tqValue = Number(curr?.tq);
+                                return acc + (isNaN(tqValue) ? 0 : tqValue);
+                              }, 0).toFixed(2)
+                            ),
+                          },
+                        ];
+
+                        setDailyFixedFooter(updatedFooter);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>}
+
             </div>
           ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-            {apiStatus === true ?
-              <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                // icon={<SmileOutlined />}
-                title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-              /> :
-              (startDate !== endDate ? <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                icon={<SmileOutlined />}
-                title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
-              // extra={<Button type="primary">Next</Button>}
-              /> : <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                icon={<SmileOutlined />}
-                title={`No DailyData for ${newaccount} to ${startDate}`}
-              // extra={<Button type="primary">Next</Button>}
-              />)}
+            <Result
+              className={theme === 'dark' ? 'dark-result' : 'light-result'}
+              icon={<SmileOutlined />}
+              title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
+            // extra={<Button type="primary">Next</Button>}
+            />
           </div>}
       </div>
     </div>

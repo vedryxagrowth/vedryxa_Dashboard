@@ -3938,11 +3938,17 @@ select:focus,
   .inputat400px {
     width: 100px !important;
   }
+  .inputatInsideTable{
+    width: 70px !important;
+  }
 }
 
 @media (min-width: 500px) {
   .inputat400px {
     width: 190px !important;
+  }
+  .inputatInsideTable{
+    width: 140px !important;
   }
 }
 
@@ -4138,3 +4144,16 @@ select:focus,
         --value-size: 15px;
     }
 }
+
+/* Row height in the Daily tab */
+.header-row {
+  line-height: normal !important;      /* remove that huge inherited line-height */
+  min-height: 45px;                    /* keeps it comfortably tall */
+  height: auto;
+  display: flex;                       /* use flex for vertical centering */
+  align-items: center;
+  /* padding: 8px 12px; */
+  box-sizing: border-box;
+  overflow: visible;
+}
+/*  */

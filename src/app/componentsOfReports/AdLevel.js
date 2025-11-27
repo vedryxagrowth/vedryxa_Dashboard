@@ -3,10 +3,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import { Space } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Space, Tooltip, Menu, Dropdown } from 'antd';
+import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -60,17 +58,20 @@ const selectTimezone = {
   CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
+const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
   console.log(campaignComments);
-  const { theme } = useTokenContext();
-  const { apiClient } = useTokenContext();
+  const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
   const [rowData, setRowData] = useState([]);
 
   const newRowDataForFilter = useRef([]);
+
+  const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
+
+  const [insideInput, setInsideInput] = useState("");
 
   const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
@@ -83,7 +84,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
 
   const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
   const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
-  const [activeTab, setActiveTab] = useState("1");
+  // const [activeTab, setActiveTab] = useState("1");
 
   const timezone = useRef();
 
@@ -107,18 +108,67 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
   const oneTimeFetch = useRef(true);
 
   const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
-  const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
-    const normalizedCampaign = each.adname.trim().toLowerCase();
+  // const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
+  //   const normalizedCampaign = each.adname.trim().toLowerCase();
+  //   const normalizedInput = inputValue.trim().toLowerCase();
+  //   return (
+  //     normalizedCampaign.startsWith(normalizedInput) ||
+  //     normalizedCampaign.includes(normalizedInput) ||
+  //     normalizedCampaign.endsWith(normalizedInput)
+  //   );
+  // }
+  // ) : [], [rowData, inputValue, theme]);
+  // console.log(memorizedRowData, "memorizedRowData");
+  // console.log(rowData, "rowData");
+
+  const memorizedRowData = useMemo(() => {
+    let filtered = newRowDataForFilter.current || [];
+
     const normalizedInput = inputValue.trim().toLowerCase();
-    return (
-      normalizedCampaign.startsWith(normalizedInput) ||
-      normalizedCampaign.includes(normalizedInput) ||
-      normalizedCampaign.endsWith(normalizedInput)
-    );
-  }
-  ) : [], [rowData, inputValue, theme]);
-  console.log(memorizedRowData, "memorizedRowData");
-  console.log(rowData, "rowData");
+    const normalizedInside = insideInput.trim().toLowerCase();
+
+    // 1️⃣ FIRST FILTER → by inputValue (only adname)
+    if (normalizedInput) {
+      filtered = filtered.filter((each) => {
+        const adname = (each?.adname || "").trim().toLowerCase();
+        const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+        const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+        const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
+        const adId = (each?.adid || "").toString().trim().toLowerCase();
+        return (
+          adname.startsWith(normalizedInput) ||
+          adname.includes(normalizedInput) ||
+          adname.endsWith(normalizedInput) ||
+          accountNumber.includes(normalizedInput) ||
+          campaignId.includes(normalizedInput) ||
+          adsetId.includes(normalizedInput) ||
+          adId.includes(normalizedInput)
+        );
+      });
+    }
+
+    // 2️⃣ SECOND FILTER → by insideInput (all fields)
+    if (normalizedInside) {
+      filtered = filtered.filter((each) => {
+        const adname = (each?.adname || "").trim().toLowerCase();
+        const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+        const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+        const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
+        const adId = (each?.adid || "").toString().trim().toLowerCase();
+
+        return (
+          adname.includes(normalizedInside) ||
+          accountNumber.includes(normalizedInside) ||
+          campaignId.includes(normalizedInside) ||
+          adsetId.includes(normalizedInside) ||
+          adId.includes(normalizedInside)
+        );
+      });
+    }
+
+    return filtered;
+  }, [newRowDataForFilter.current, inputValue, insideInput]);
+
   const [selectedAd, setSelectedAd] = useState([]);
   const [leafCampaigns, setLeafCampaigns] = useState([]);
   const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
@@ -183,672 +233,6 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
 
   };
 
-  // const autoGroupColumnDefLive = {
-  //     headerName: 'Ad name',
-  //     minWidth: 450,
-  //     pinned: 'left',
-  //     sortable: true, // Enable sorting
-  //     unSortIcon: true,
-  //     headerClass: 'ag-center-header',
-
-  //     comparator: (campaignA, campaignB) => {
-  //         if (!campaignA) return 1;
-  //         if (!campaignB) return -1;
-
-  //         // Function to get the 'pinned' status of a campaign
-  //         const getPinStatusForCampaign = (campaignName) => {
-  //             const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-  //             return relatedComment ? relatedComment.pinned : false;
-  //         };
-
-  //         // Prioritize pinned campaigns first (pinned campaigns should come to the top)
-  //         const isPinnedA = getPinStatusForCampaign(campaignA);
-  //         const isPinnedB = getPinStatusForCampaign(campaignB);
-
-  //         if (isPinnedA !== isPinnedB) {
-  //             return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
-  //         }
-
-  //         // If both campaigns have the same pinned status, fallback to alphabetical sorting
-  //         return campaignA.localeCompare(campaignB);
-  //     },
-
-  //     cellRenderer: "agGroupCellRenderer", // ✅ Use AG Grid's built-in renderer
-  //     cellRendererParams: {
-  //         suppressCount: false,
-  //         innerRenderer: (params) => {
-  //             if (params.node.footer) {
-  //                 return 'Total';
-  //             }
-  //             // console.log(params.value, "value");
-
-  //             const firstColumnValue = params.node.key;  // campaign name
-  //             // const campaignName = params.node.key;
-  //             const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
-  //             const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
-
-  //             let campaignid, adsetid, adid;
-
-  //             if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
-  //                 const firstChild = params.node.childrenAfterGroup[0]?.data;  // Safe access with optional chaining
-
-  //                 if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
-  //                     campaignid = firstChild.campaignid ?? null;  // Use null-safe access
-  //                     adsetid = firstChild.adsetid ?? null;
-  //                     adid = firstChild.adid ?? null;
-  //                 } else {
-  //                     console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
-  //                 }
-  //             } else if (params.data) {
-  //                 campaignid = params.data.campaignid ?? null;
-  //                 adsetid = params.data.adsetid ?? null;
-  //                 adid = params.data.adid ?? null;
-  //             } else {
-  //                 console.error('Missing campaignid or adsetid for campaign:', campaignName);
-  //                 return (
-  //                     <div style={{ color: 'red' }}>
-  //                         Error: campaignid or adsetid missing for {campaignName}
-  //                     </div>
-  //                 );
-  //             }
-
-  //             const getEditedUserAndTime = (campaignName, newaccount) => {
-  //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-  //                 return relatedStatus ? relatedStatus : null;
-  //             };
-
-  //             const getPinEditedUserAndTime = (campaignName, newaccount) => {
-  //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-  //                 return relatedStatus ? relatedStatus : null;
-  //             };
-
-  //             const getStatusForCampaign = (campaignName, newaccount) => {
-  //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-  //                 return relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
-  //             };
-
-  //             const getCommentForCampaign = (campaignName) => {
-  //                 const relatedComment = campaignComments.find(comment => comment.campaignname === adName);
-  //                 return relatedComment ? relatedComment.comment : null;
-  //             };
-
-  //             const getPinStatusForCampaign = (campaignName) => {
-  //                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-  //                 return relatedComment ? relatedComment.pinned : false;
-  //             };
-
-  //             const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
-  //             const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
-  //             const relatedStatus = getStatusForCampaign(campaignName, newaccount);
-  //             const relatedComment = getCommentForCampaign(campaignName);
-  //             console.log("relatedComment:", relatedComment);
-  //             const valueWithCount = `${firstColumnValue}`;
-  //             // console.log(editUserANdTime);
-
-  //             const [tooltipText, setTooltipText] = useState("Click to Copy");
-  //             const [isModalVisibles, setIsModalVisibles] = useState(false);
-
-  //             const [isAdidModalVisibles, setIsAdidModalVisibles] = useState(false);
-  //             const [selectedAdid, setSelectedAdid] = useState(null); // store adid when switch clicked
-  //             // const [switchOn, setSwitchOn] = useState(false); // control toggle state
-  //             const [switchStates, setSwitchStates] = useState({}); // { adid1: true, adid2: false }
-  //             const [nextChecked, setNextChecked] = useState(false); // what user clicked
-
-  //             const [comment, setComment] = useState(relatedComment || '');
-  //             const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
-
-  //             // Update switch state from AdLevel
-  //             // useEffect(() => {
-  //             //     const matchedComment = campaignComments.find(
-  //             //     (item) =>
-  //             //         item.campaignid === campaignid &&
-  //             //         item.adsetid === adsetid &&
-  //             //         item.AdLevel?.ad_id === adid
-  //             //     );
-
-  //             //     if (matchedComment?.AdLevel?.status) {
-  //             //         setSwitchOn(matchedComment.AdLevel.status === "ACTIVE");
-  //             //     } else {
-  //             //         // Default to ACTIVE if AdLevel doesn't exist
-  //             //         setSwitchOn(true);
-  //             //       }
-  //             // }, [campaignComments, campaignid, adsetid, adid]);
-
-  //             useEffect(() => {
-  //                 if (!adid) return;
-
-  //                 // Search by campaignid only, not adsetid
-  //                 const matchedComment = campaignComments.find(
-  //                     (item) =>
-  //                     item.campaignid === campaignid &&
-  //                     Array.isArray(item.AdLevel) &&
-  //                     item.AdLevel.some(ad => ad.ad_id === adid)
-  //                 );
-
-  //                 // const matchedComment = campaignComments.find(
-  //                 //   (item) =>
-  //                 //     item.campaignid === campaignid &&
-  //                 //     item.adsetid === adsetid &&
-  //                 //     Array.isArray(item.AdLevel) &&
-  //                 //     item.AdLevel.find(ad => ad.ad_id === adid)
-  //                 // );
-
-  //                 const adEntry = matchedComment?.AdLevel?.find(ad => ad.ad_id === adid);
-  //                 const isActive = adEntry?.status === "ACTIVE";
-
-  //                 if (matchedComment && adEntry) {
-  //                     setSwitchStates((prev) => ({
-  //                       ...prev,
-  //                       [adid]: isActive
-  //                     }));
-  //                 }else {
-  //                     // fallback to true (assume ACTIVE) if no comment in DB
-  //                     setSwitchStates((prev) => ({
-  //                       ...prev,
-  //                       [adid]: true
-  //                     }));
-  //                 }
-  //             }, [campaignComments, campaignid, adsetid, adid]);
-
-  //             const handlePauseClick = (adid, checked) => {
-  //                 setSelectedAdid(adid); 
-  //                 setNextChecked(checked); // user’s toggle intent
-  //                 setIsAdidModalVisibles(true);
-  //             };
-
-  //             const handlePauseOk = async () => {
-  //                 if (!selectedAdid) {
-  //                     console.warn("No ad selected.");
-  //                     return;
-  //                 }
-
-  //                 // update visual switch state for selected ad
-  //                 setSwitchStates((prev) => ({
-  //                     ...prev,
-  //                     [selectedAdid]: nextChecked
-  //                 }));
-
-  //                 // setSwitchOn(nextChecked); // update visual switch state
-
-  //                 try {
-  //                   const token = localStorage.getItem("token");
-
-  //                   const response = await apiClient.post(`/adStatusChange`,
-  //                     {
-  //                         status: nextChecked ? "ACTIVE" : "PAUSED",
-  //                         id: params.data?.identifier,             
-  //                         ad_id: selectedAdid,                              
-  //                         name: campaignName,
-  //                         accountNumber: newaccount,
-  //                         revenuePartner: params.data?.revenuePartner || "",
-  //                         campaign_id: campaignid,
-  //                         adset_id: adsetid,
-  //                         email: userdetails?.email,
-  //                     },
-  //                     {
-  //                       headers: {
-  //                         Authorization: token
-  //                       }
-  //                     }
-  //                   );
-
-  //                   if (response.status === 200 || response.status === 201) {
-  //                     functionCallForCommnets(newaccount);
-  //                     console.log(" Status updated on Facebook:", response.data.status, "Ad ID:", response.data.ad_id);
-  //                   } else {
-  //                     console.warn(" Backend returned unexpected status:", response.status);
-  //                   }
-
-  //                 } catch (error) {
-  //                   console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
-  //                 }
-
-  //                 setIsAdidModalVisibles(false);
-  //                 setSelectedAdid(null);
-  //             };
-
-  //             const handlePauseCancel = () => {
-  //                 setIsAdidModalVisibles(false);
-  //                 setSelectedAdid(null);
-  //             };
-
-
-  //             const copyToClipboard = () => {
-  //                 navigator.clipboard.writeText(firstColumnValue)
-  //                     .then(() => {
-  //                         setTooltipText("Copied!");
-  //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
-  //                     })
-  //                     .catch(() => {
-  //                         console.error('Failed to copy to clipboard');
-  //                     });
-  //             };
-
-  //             const handleEditClick = () => {
-  //                 setIsModalVisibles(true);
-  //             };
-
-  //             const sendNewCommentToAPI = async (logData) => {
-  //                 try {
-  //                     const response = await apiClient.post('/Comments', {
-  //                         commentsdatas: logData,
-  //                     });
-  //                 } catch (error) {
-  //                     console.error('Error sending data to server:', error);
-  //                 }
-  //             };
-
-  //             const handleDelete = async () => {
-  //                 try {
-  //                     // Prepare the payload for the API call
-  //                     const payload = {
-  //                         campaignname: firstColumnValue,
-  //                         Account: newaccount,
-  //                         adsetid: adsetid,
-  //                         campaignid: campaignid,
-  //                     };
-  //                     // console.log(payload);
-
-  //                     // Call the backend API to delete the comment
-  //                     const response = await apiClient.post('/Comments/delete', payload);
-
-  //                     if (response.status === 200  || response.status === 201) {
-  //                         // Remove the comment from the local state
-  //                         // const updatedComments = campaignComments.filter(
-  //                         //     (comment) => comment.campaignname !== firstColumnValue
-  //                         // );
-  //                         refreshComments(newaccount);
-
-  //                         // // Update the state with the updated comments
-  //                         // setCampaignComments(updatedComments);
-
-  //                         // // Refresh the table or any other UI component
-  //                         // // changeRRefrst();
-
-  //                         message.success('Comment deleted successfully!');
-  //                         setIsModalVisibles(false); // Close the popup
-  //                     } else {
-  //                         message.error('Failed to delete the comment. Please try again.-1');
-  //                     }
-  //                 } catch (error) {
-  //                     console.error('Error deleting the comment:', error);
-  //                     message.error('Failed to delete the comment. Please try again.');
-  //                 }
-  //             };
-
-
-  //             const sendEditedCommentToAPI = async (logData) => {
-  //                 try {
-  //                     const response = await apiClient.post('/Comments/edit', {
-  //                         campaignname: logData.campaignname,
-  //                         comment: logData.comment,
-  //                         Account: logData.Account,
-  //                         adsetid: logData.adsetid,
-  //                         campaignid: logData.campaignid,
-  //                         status: true
-
-  //                     });
-  //                     return response.data;
-  //                 } catch (error) {
-  //                     console.error('Error sending edited comment to server:', error);
-  //                     throw error;
-  //                 }
-  //             };
-
-  //             const handleOks = async () => {
-  //                 try {
-  //                     const logData = {
-  //                         Account: newaccount,
-  //                         usercommit: userdetails?.email,
-  //                         campaignname: firstColumnValue,
-  //                         comment: comment,
-  //                         campaignid: campaignid,
-  //                         adsetid: adsetid
-  //                     };
-
-  //                     if (relatedComment) {
-  //                         await sendEditedCommentToAPI(logData);
-  //                         refreshComments(newaccount);
-  //                         message.success("Comment updated successfully!");
-  //                     } else {
-  //                         await sendNewCommentToAPI(logData);
-  //                         refreshComments(newaccount);
-  //                         message.success("New comment added successfully!");
-  //                     }
-
-  //                     // const updatedComments = relatedComment
-  //                     //     ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
-  //                     //     : [...campaignComments, logData];
-  //                     // setCampaignComments(updatedComments);
-
-  //                     // changeRRefrst();
-  //                     setIsModalVisibles(false);
-  //                 } catch (error) {
-  //                     console.error('Error while submitting comment:', error);
-  //                     message.error("Error while submitting the comment.");
-  //                 }
-  //             };
-
-  //             const handleCancels = () => {
-  //                 setIsModalVisibles(false);
-  //             };
-
-  //             const CustomTooltipContent = ({ editedTime, usercommit }) => (
-  //                 <div style={{ padding: '5px', borderRadius: '5px' }}>
-  //                     <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
-  //                     <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
-  //                 </div>
-  //             );
-
-  //             const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
-  //                 const updatedPinStatus = !currentPinStatus;
-
-  //                 try {
-  //                     let response;
-  //                     if (updatedPinStatus) {
-  //                         response = await apiClient.post('/Pin', {
-  //                             campaignname: campaignName,
-  //                             Account: newaccount,
-  //                             campaignid: campaignid,
-  //                             adsetid: adsetid,
-  //                             userPin: userdetails?.email,
-  //                             comment: comment || ''
-  //                         });
-  //                         if(response.status ===200 || response.status === 201){
-  //                             refreshComments(newaccount);
-  //                         }
-
-  //                         message.success("Campaign pinned!");
-  //                     } else {
-  //                         response = await apiClient.post('/Unpin', {
-  //                             campaignname: campaignName,
-  //                             Account: newaccount,
-  //                             campaignid: campaignid,
-  //                             adsetid: adsetid
-  //                         });
-  //                         if(response.status ===200 || response.status === 201){
-  //                             refreshComments(newaccount);
-  //                         }
-
-  //                         message.success("Campaign unpinned!");
-  //                     }
-
-  //                     // Update campaignComments with the new pinned status and edited user/time
-  //                     // const updatedComments = campaignComments.map(cmt =>
-  //                     //     cmt.campaignname === campaignName
-  //                     //         ? {
-  //                     //             ...cmt,
-  //                     //             pinned: updatedPinStatus,
-  //                     //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-  //                     //             userPin: userdetails?.email
-  //                     //         }
-  //                     //         : cmt
-  //                     // );
-
-  //                     // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
-  //                     //     updatedComments.push({
-  //                     //         campaignname: campaignName,
-  //                     //         pinned: updatedPinStatus,
-  //                     //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-  //                     //         userPin: userdetails?.email
-  //                     //     });
-  //                     // }
-  //                     // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
-  //                     // setCampaignComments(sortedComments);
-  //                     setPinned(updatedPinStatus);
-  //                 } catch (error) {
-  //                     console.error('Error toggling pin status:', error);
-  //                     message.error('Error while updating pin status.');
-  //                 }
-  //             };
-
-  //             const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
-  //                 return (
-  //                     <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
-  //                         <button
-  //                             onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
-  //                             style={{
-  //                                 border: "none",
-  //                                 background: "none",
-  //                                 cursor: "pointer",
-  //                                 fontSize: "16px",
-  //                             }}
-  //                         >
-  //                             {pinned ? "📌" : "📍"}
-  //                         </button>
-  //                     </Tooltip>
-  //                 );
-  //             };
-
-  //             return (
-  //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-  //                     <Switch 
-  //                         // checked={switchOn}
-  //                         checked={!!switchStates[adid]}
-  //                         onClick={(checked) => handlePauseClick(adid, checked)}
-  //                         size="small" 
-  //                         style={{
-  //                           backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9',
-  //                         }} 
-  //                     />
-  //                     <Modal
-  //                         title="Confirm Action"
-  //                         open={isAdidModalVisibles}
-  //                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-  //                         onOk={handlePauseOk}
-  //                         onCancel={handlePauseCancel}
-  //                     >
-  //                         <p>
-  //                             Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?
-  //                         </p>
-  //                         <p>Ad ID: {selectedAdid}</p>
-  //                     </Modal>
-  //                     <PinIcon
-  //                         campaignName={campaignName}
-  //                         campaignid={campaignid}
-  //                         adsetid={adsetid}
-  //                         pinned={pinned}
-  //                     />
-  //                     {/* <div style={{ marginLeft: '2px' }}>
-  //                         {(() => {
-  //                             // Find the matching campaign in the Camapignlevelstatus array
-  //                             const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
-
-  //                             if (campaignStatus) {
-  //                                 const { status, start, end } = campaignStatus;
-
-  //                                 // Tooltip content with start and end dates
-  //                                 const tooltipContent = (
-  //                                     <div>
-  //                                         <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
-  //                                         <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
-  //                                     </div>
-  //                                 );
-
-  //                                 if (status === 'PAUSED') {
-  //                                     return (
-  //                                         <Tooltip title={tooltipContent}>
-  //                                             <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}  className='black-icon-pause' />
-  //                                         </Tooltip>
-  //                                     );
-  //                                 } else if (status === 'ACTIVE') {
-  //                                     return (
-  //                                         <Tooltip title={tooltipContent}>
-  //                                             <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active' />
-  //                                         </Tooltip>
-  //                                     );
-  //                                 } else {
-  //                                     // Default for unknown status
-  //                                     return (
-  //                                         <Tooltip title={tooltipContent}>
-  //                                             <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-  //                                         </Tooltip>
-  //                                     );
-  //                                 }
-  //                             } else {
-  //                                 // Fallback if no matching campaign is found
-  //                                 return (
-  //                                     <Tooltip title="No campaign data available">
-  //                                         <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-  //                                     </Tooltip>
-  //                                 );
-  //                             }
-  //                         })()}
-  //                     </div> */}
-  //                     {/* {relatedComment && (
-  //                         <Tooltip title={(
-  //                             <div style={{ display: 'flex', alignItems: 'center' }}>
-  //                                 <span>{relatedComment || 'No comment available'}</span>
-  //                                 <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
-  //                             </div>
-  //                         )}>
-  //                             <MessageOutlined className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
-  //                             <Tooltip title={tooltipText}></Tooltip>
-  //                         </Tooltip>
-  //                     )} */}
-  //                     {relatedComment && (
-  //                         <Tooltip
-  //                             // title={relatedComment || 'No comment available'}
-  //                             title={
-  //                                 <div>
-  //                                   <div>{relatedComment || 'No comment available'}</div>
-  //                                   <div>
-  //                                     {editUserANdTime
-  //                                       ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A")
-  //                                       : ""}
-  //                                   </div>
-  //                                 </div>
-  //                             }
-  //                             overlayInnerStyle={{
-  //                                 backgroundColor: theme === 'dark' ? '#111' : '#fff',
-  //                                 color: theme === 'dark' ? '#fff' : '#000',
-  //                                 border: '1px solid #ccc',   
-  //                                 borderRadius: 6,
-  //                                 // fontWeight: 500,
-  //                             }}
-  //                         >
-  //                             <MessageOutlined
-  //                                 className={theme === "dark" ? "black-icon-comment" : 'Message'}
-  //                                 style={{
-  //                                     cursor: 'pointer',
-  //                                     marginLeft: '10px',
-  //                                     marginRight: '10px',
-  //                                     color: '#4CAF50'
-  //                                 }}
-  //                                 onClick={handleEditClick} // Open modal directly on click
-  //                             />
-  //                         </Tooltip>
-  //                     )}
-  //                     {!relatedComment && (
-  //                         <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
-  //                     )}
-  //                     <Tooltip 
-  //                         title={tooltipText}
-  //                         overlayInnerStyle={{
-  //                             backgroundColor: theme === 'dark' ? '#111' : '#fff',
-  //                             color: theme === 'dark' ? '#fff' : '#000',
-  //                             border: '1px solid #ccc',   
-  //                             borderRadius: 6,
-  //                             // fontWeight: 500,
-  //                         }}
-  //                     >
-  //                         <CopyOutlined
-  //                             onClick={copyToClipboard}
-  //                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
-  //                         />
-  //                     </Tooltip>
-  //                     <LinkOutlined 
-  //                         onClick={() => {
-  //                             const url = `/LiveHistory/LiveAdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-  //                             window.open(url, '_blank', 'noopener,noreferrer');
-  //                         }}
-  //                         style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
-  //                     />
-  //                     <Tooltip 
-  //                         title={valueWithCount}
-  //                         overlayInnerStyle={{
-  //                             backgroundColor: theme === 'dark' ? '#111' : '#fff',
-  //                             color: theme === 'dark' ? '#fff' : '#000',
-  //                             border: '1px solid #ccc',   
-  //                             borderRadius: 6,
-  //                             // fontWeight: 500,
-  //                         }}
-  //                     >
-  //                         <span
-  //                             // onClick={() => {
-  //                             //     const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-  //                             //     window.open(url, '_blank', 'noopener,noreferrer');
-  //                             // }}
-  //                         >
-  //                             {valueWithCount}
-  //                         </span>
-  //                     </Tooltip>
-  //                     <Modal
-  //                          title={
-  //                             firstColumnValue
-  //                         }
-  //                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-  //                         visible={isModalVisibles}
-  //                         onOk={handleOks} // Default Ok button functionality
-  //                         onCancel={handleCancels} // Default Cancel button functionality
-  //                         footer={[
-  //                             <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-  //                                 <div style={{display:'flex', flexDirection:"column"}}>
-  //                                     <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
-  //                                         Last Edited Time:
-  //                                     </span>
-  //                                     <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
-  //                                         {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
-  //                                     </span>
-
-  //                                 </div>
-  //                                 <div>
-  //                                 <Button
-  //                                     key="delete"
-  //                                     type="danger"
-  //                                     onClick={handleDelete}
-  //                                     style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
-  //                                 >
-  //                                     Delete
-  //                                 </Button>
-  //                                 <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
-  //                                     Cancel
-  //                                 </Button>
-  //                                 <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
-  //                                     Ok
-  //                                 </Button>
-  //                                 </div>
-  //                             </div>
-  //                         ]}
-  //                     >
-  //                         <Input.TextArea
-  //                             placeholder="Enter your comments here"
-  //                             value={comment}
-  //                             onChange={(e) => setComment(e.target.value)}
-  //                             style={{color: theme === "dark" ? "white" : "black"}}
-  //                         />
-  //                     </Modal>
-  //                 </div>
-  //             );
-  //         }
-  //     },
-  //     processCellForClipboard: (params) => {
-  //         if (params.node.group) {
-  //             console.log("Processing group column for copy..."); // Debugging log
-
-  //             // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
-  //             if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
-  //                 return params.node.key;
-  //             }
-
-  //             // ✅ Only copy group name for the first row in the group
-  //             return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
-  //                 ? params.node.key
-  //                 : ""; // Prevent duplicate copies
-  //         }
-  //         return params.value; // Normal copy behavior for regular cells
-  //     }
-  // };
   const onSelectionChanged = (event) => {
     const selectedNodes = event.api.getSelectedNodes();
     const selectedData = selectedNodes.map(node => node.data);
@@ -937,8 +321,8 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
             campaignid: item.campaignid,
             Account: item.accountNumber,
             adsetid: item.adsetid,
-            ad_id: item.ad_id,     
-            level: "ad",            
+            ad_id: item.ad_id,
+            level: "ad",
             pinned: action === "pin",
             userPin: userdetails?.email,
             editedPinTime: timeStamp
@@ -951,38 +335,111 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
     });
   };
 
+  // const handleBulkCommentSubmitAd = async () => {
+  //   try {
+  //     message.loading({ content: "Saving comments for ads...", key: "bulkCommentAd" });
+  //     const items = leafCampaigns.map(item => ({
+  //       accountNumber: item.accountNumber,
+  //       campaignid: item.campaignid,
+  //       adsetid: item.adsetid,
+  //       ad_id: item.adid,
+  //       comment,
+  //       usercommit: userdetails?.email,
+  //       level: "ad"
+  //     }));
+
+  //     const resp = await apiClient.post(
+  //       "/Comments/upsertBulkNew",
+  //       { items }
+  //     );
+
+  //     if (resp.status === 200 || resp.status === 201) {
+  //       const timeStamp = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+  //       setCampaignComments(prev => {
+  //         const arr = [...prev];
+
+  //         items.forEach(item => {
+  //           const idx = arr.findIndex(
+  //             i =>
+  //               String(i.campaignid) === String(item.campaignid) &&
+  //               String(i.Account) === String(item.accountNumber) &&
+  //               String(i.adsetid) === String(item.adsetid) &&
+  //               String(i.ad_id) === String(item.ad_id) &&
+  //               i.level === "ad"
+  //           );
+
+  //           if (idx >= 0) {
+  //             arr[idx] = {
+  //               ...arr[idx],
+  //               comment,
+  //               usercommit: userdetails?.email,
+  //               editedTime: timeStamp
+  //             };
+  //           } else {
+  //             arr.push({
+  //               ...item,
+  //               editedTime: timeStamp
+  //             });
+  //           }
+  //         });
+
+  //         return arr;
+  //       });
+
+  //       message.success({
+  //         content: `${items.length} ads updated`,
+  //         key: "bulkCommentAd",
+  //         duration: 3
+  //       });
+
+  //       setIsBulkCommentModalVisible(false);
+  //     }
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     message.error("Bulk ad comment failed");
+  //   }
+  // };
+
   const handleBulkCommentSubmitAd = async () => {
     try {
-      message.loading({ content: "Saving comments for ads...", key: "bulkCommentAd" });
+      message.loading({
+        content: 'Saving comments for selected adsets...',
+        key: 'bulkCommentAdset'
+      });
+
       const items = leafCampaigns.map(item => ({
         accountNumber: item.accountNumber,
         campaignid: item.campaignid,
         adsetid: item.adsetid,
         ad_id: item.adid,
         comment,
+        campaignname: item.adName,
         usercommit: userdetails?.email,
         level: "ad"
       }));
 
       const resp = await apiClient.post(
-        "/Comments/upsertBulk",
-        { items }
+        '/Comments/upsertBulkNew',
+        { items, usercommit: userdetails?.email, }
       );
 
       if (resp.status === 200 || resp.status === 201) {
-        const timeStamp = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+        const timeStamp = moment().tz('Asia/Kolkata')
+          .format('YYYY-MM-DD hh:mm:ss A');
 
         setCampaignComments(prev => {
           const arr = [...prev];
 
-          items.forEach(item => {
+          leafCampaigns.forEach(item => {
             const idx = arr.findIndex(
               i =>
                 String(i.campaignid) === String(item.campaignid) &&
                 String(i.Account) === String(item.accountNumber) &&
                 String(i.adsetid) === String(item.adsetid) &&
-                String(i.ad_id) === String(item.ad_id) &&
-                i.level === "ad"
+                String(i.ad_id) === String(item.adid) &&
+                i.level === 'ad'
             );
 
             if (idx >= 0) {
@@ -994,7 +451,14 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
               };
             } else {
               arr.push({
-                ...item,
+                campaignid: item.campaignid,
+                Account: item.accountNumber,
+                adsetid: item.adsetid,
+                ad_id: item.adid,
+                campaignname: item.adName,
+                level: 'ad',
+                comment,
+                usercommit: userdetails?.email,
                 editedTime: timeStamp
               });
             }
@@ -1004,19 +468,20 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
         });
 
         message.success({
-          content: `${items.length} ads updated`,
-          key: "bulkCommentAd",
+          content: `${leafCampaigns.length} comment(s) saved successfully`,
+          key: 'bulkCommentAdset',
           duration: 3
         });
 
         setIsBulkCommentModalVisible(false);
       }
 
-    } catch (err) {
-      console.error(err);
-      message.error("Bulk ad comment failed");
+    } catch (error) {
+      console.error('Bulk adset comment error:', error);
+      message.error('Error while saving comments for selected adsets.');
     }
   };
+
   const handleBulkAdStatusSubmit = async () => {
     try {
       setConfirmBulkLoading(true);
@@ -1192,6 +657,15 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
+    // filter: "agTextColumnFilter",
+    // filterValueGetter: (params) => {
+    //   if (params.node.group) {
+    //     // Use the group key (campaign name)
+    //     return params.node.key;
+    //   }
+    //   // For leaf rows, use the campaign_name or any field
+    //   return params.data?.adname || '';
+    // },
 
     // 🔁 Comparator now respects pin overrides so rows re-order immediately
     // comparator: (campaignA, campaignB, nodeA, nodeB) => {
@@ -1244,6 +718,8 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
       // get first leaf row of group A
       const leafA = nodeA.allLeafChildren?.[0]?.data;
       const leafB = nodeB.allLeafChildren?.[0]?.data;
+      // const leafA = nodeA?.allLeafChildren?.[0]?.data ?? nodeA?.data ?? null;
+      // const leafB = nodeB?.allLeafChildren?.[0]?.data ?? nodeB?.data ?? null;
 
       // safety
       if (!leafA) return 1;
@@ -2525,7 +2001,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
       }
 
       let newFilterData;
-      if (campaignStatusFilter !== "ALL") {
+      if (campaignStatusFilter !== "All") {
         newFilterData = filteredData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       }
       else {
@@ -2845,18 +2321,45 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
     functionCall1();
     setApiStatus(false);
   }
+  // useEffect(() => {
+  //   if (activeTab === "3") {
+  //     functionCall1();
+  //   }
+  //   // if(selectedAdsets){
+  //   // console.log("test2");
+  //   // functionCall1();
+  //   // oneTimeFetch.current = false;
+  //   // }
+  // }, [selectedAdsets, selectedCampaigns, activeTab]);
+  const ranOnce = useRef(false);
+  const prevAdsets = useRef(null);
+  const prevCampaigns = useRef(null);
+
   useEffect(() => {
-    // if(selectedAdsets){
-    // console.log("test2");
-    functionCall1();
-    // oneTimeFetch.current = false;
-    // }
-  }, [selectedAdsets, selectedCampaigns]);
+    if (activeTab !== "3") return; // only care when tab 3 is active
+
+    const adsetsStr = JSON.stringify(selectedAdsets);
+    const campsStr = JSON.stringify(selectedCampaigns);
+
+    const changed =
+      !ranOnce.current ||
+      prevAdsets.current !== adsetsStr ||
+      prevCampaigns.current !== campsStr;
+
+    if (changed) {
+      functionCall1();
+
+      // mark current values as seen
+      ranOnce.current = true;
+      prevAdsets.current = adsetsStr;
+      prevCampaigns.current = campsStr;
+    }
+  }, [activeTab, selectedAdsets, selectedCampaigns]);
 
   useEffect(() => {
     // functionCall1();
     console.log(campaignStatusFilter, "campaignStatusFilter");
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       setRowData(filteredByStatus);
     } else {
@@ -2884,7 +2387,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
       }) : null;
     newRowDataForFilter.current = filterData;
     let newFilterData;
-    if (campaignStatusFilter !== "ALL") {
+    if (campaignStatusFilter !== "All") {
       newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
     }
     else {
@@ -2964,10 +2467,10 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
     }
   };
 
-  const handleTabChange = (key) => {
-    console.log("Switched to Tab:", key); // Debugging log
-    setActiveTab(key);
-  };
+  // const handleTabChange = (key) => {
+  //   console.log("Switched to Tab:", key); // Debugging log
+  //   setActiveTab(key);
+  // };
 
   const items = [
     { key: '1', label: 'Campaigns', content: 'Content for Campaign data' },
@@ -2975,41 +2478,41 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
     { key: '3', label: 'Ad', content: 'Content for Ad data' }
   ];
 
-  const handleCarouselChange = (index) => {
-    setActiveTab(index);
-    // console.log(index);
-    // console.log(parseInt(index)-1);
-    // carouselRef.current.goTo(parseInt(index))
-    // localStorage.setItem("activeTab", index);
+  // const handleCarouselChange = (index) => {
+  //   setActiveTab(index);
+  //   // console.log(index);
+  //   // console.log(parseInt(index)-1);
+  //   // carouselRef.current.goTo(parseInt(index))
+  //   // localStorage.setItem("activeTab", index);
 
-  };
+  // };
 
-  const renderCarouselNav = () => (
-    <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop: '15px' }}>
-      <Tabs
-        activeKey={activeTab}
-        onChange={handleCarouselChange}
-        items={items.map((item) => ({
-          key: item.key,
-          label: item.label,
-        }))}
-        className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
-        style={{
-          backgroundColor: 'transparent',
-          padding: '0',
-          marginBottom: '0',
-        }}
-        tabBarStyle={{
-          fontSize: '12px',
-          padding: '0',
-          height: '30px',
-          lineHeight: '30px',
-          marginBottom: '-1px',
-          borderBottom: 'none',
-        }}
-      />
-    </StickyBox>
-  );
+  // const renderCarouselNav = () => (
+  //   <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px', paddingTop: '15px' }}>
+  //     <Tabs
+  //       activeKey={activeTab}
+  //       onChange={handleCarouselChange}
+  //       items={items.map((item) => ({
+  //         key: item.key,
+  //         label: item.label,
+  //       }))}
+  //       className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+  //       style={{
+  //         backgroundColor: 'transparent',
+  //         padding: '0',
+  //         marginBottom: '0',
+  //       }}
+  //       tabBarStyle={{
+  //         fontSize: '12px',
+  //         padding: '0',
+  //         height: '30px',
+  //         lineHeight: '30px',
+  //         marginBottom: '-1px',
+  //         borderBottom: 'none',
+  //       }}
+  //     />
+  //   </StickyBox>
+  // );
 
 
 
@@ -3260,23 +2763,9 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                 />
               </div>
             </div>
-          ) : rowData?.length > 0 ? (
-            <div
-              className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-            // style={{
-            //     width: '100%',
-            //     // borderRadius: 12,
-            //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-            //     padding: 10,
-            //     height: '100%',
-            //     boxShadow:
-            //     theme === 'dark'
-            //         ? '0 1px 3px rgba(0,0,0,0.6)'
-            //         : '0 1px 6px rgba(0,0,0,0.08)',
-            // }}
-            >
-
-              <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
+          ) : newRowDataForFilter.current?.length > 0 ? (
+            <div>
+              <Row className="header-row" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                 <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                   <Space align="center">
                     <div className="blinking-circle-1"></div>
@@ -3325,7 +2814,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                           fontSize: "14px",
                         }}
                       >
-                        <RxSwitch size={20} />
+                        <RxSwitch size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
 
                       </Tooltip>
                       <Modal
@@ -3399,7 +2888,7 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                             fontSize: "18px",
                           }}
                         >
-                          <PushpinOutlined size={20} />
+                          <PushpinOutlined size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
                         </button>
                       </Tooltip>
                       {/*  comment */}
@@ -3410,11 +2899,12 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                         padding: "6px 10px",
                         fontSize: "14px",
                       }}>
-                        <MessageOutlined
+                        <EditOutlined
                           onClick={() => setIsBulkCommentModalVisible(true)}
                           style={{
                             fontSize: "15px",
-                            cursor: "pointer"
+                            cursor: "pointer",
+                            color: theme === "dark" ? "white" : "black"
                           }}
                         />
                       </Tooltip>
@@ -3448,19 +2938,20 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                       </Modal>
 
                       {/* Category */}
-                      <Tooltip title="Bulk Edit Category" overlayInnerStyle={{
+                      <Tooltip title="Bulk add category" overlayInnerStyle={{
                         backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                         color: theme === "dark" ? "#ffffff" : "#000000",
                         borderRadius: 6,
                         padding: "6px 10px",
                         fontSize: "14px",
                       }}>
-                        <EditOutlined
+                        <PlusOutlined
                           onClick={openBulkCategoryModal}
                           style={{
                             fontSize: "15px",
                             cursor: "pointer",
-                            marginLeft: '5px'
+                            marginLeft: '5px',
+                            color: theme === "dark" ? "white" : "black"
                           }}
                         />
                       </Tooltip>
@@ -3598,6 +3089,127 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                 <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                   <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                 </Col>
+
+                <Col>
+                  <Input
+                    placeholder="Search..."
+                    // prefix={<SearchOutlined />}
+                    onChange={(value) => setInsideInput(value.target.value)}
+                    // onBlur={handleBlur}
+                    value={insideInput}
+                    allowClear
+                    className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
+                    style={{
+                      borderRadius: 8,
+                      border: '1px solid #91C25F',
+                      // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                      // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                      color: theme === 'dark' ? '#fff' : '#000',
+                      fontWeight: 500,
+                      width: 120,
+                      marginRight: '8px'
+                    }}
+                  />
+                </Col>
+
+                <Col>
+                  <Dropdown
+                    overlay={
+                      <Menu
+                        onClick={({ key }) =>
+                          // onStatusFilterChange && 
+                          // onStatusFilterChange(key)
+                          setcampaignStatusLabel(key)
+                        } // <-- Add this line
+                        items={[
+                          {
+                            key: 'All',
+                            label: (
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#122F6E',
+                                    marginRight: '6px',
+                                  }}
+                                ></span>
+                                All
+                              </span>
+                            ),
+                          },
+                          {
+                            key: 'Active',
+                            label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'green',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Active
+
+                            </span>
+                          },
+                          {
+                            key: 'Paused', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'red',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Paused
+
+                            </span>
+                          },
+                          {
+                            key: 'Archived', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'orange',
+                                  marginRight: '6px',
+                                }}
+                              ></span>
+                              Archived
+
+                            </span>
+                          },
+                        ]}
+                      />
+                    }
+                    trigger={['click']}
+                  >
+                    <Button
+                      type="default"
+                      style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                        border: '1px solid #4CAF50',
+                        color: theme === 'dark' ? '#95de64' : '#389e0d',
+                        fontWeight: 500,
+                        marginRight: '5px'
+                      }}
+                    >
+                      <Space size={2}>
+                        <FilterOutlined />
+                        {campaignStatusFilter}
+                        <DownOutlined style={{ fontSize: 10 }} />
+                      </Space>
+                    </Button>
+                  </Dropdown>
+                </Col>
+
                 {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ fontWeight: '600' }}>
                                             Cron/Acc status: {cronStatus.current} /{' '}
@@ -3650,154 +3262,271 @@ const AdLevelReports = ({ context, campaignStatusFilter, functionCallForCommnets
                   {/* </Tooltip> */}
                 </Col>
               </Row>
-              <div className='table-container'>
-                <AgGridReact
-                  ref={gridRef}
-                  rowHeight={30}
-                  className='custom-grid'
-                  rowData={memorizedRowData}
-                  rowSelection='multiple'
-                  columnDefs={memorizedColumnDef}
-                  defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-                  // onCellClicked={onCellClickedLive}
-                  onSelectionChanged={onSelectionChanged}
-                  groupSelectsChildren={true} // ✅ Selects all children when a group is selected
-                  suppressRowClickSelection={true}
-                  context={context}
-                  pagination={true}
-                  paginationPageSize={200}
-                  paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
-                  suppressAggFuncInHeader={true}
-                  getMainMenuItems={getMainMenuItems}
+              {rowData?.length > 0 ?
+                <div
+                  className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                >
 
-                  // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                  // onCellKeyDown={onCellKeyDown}
-                  // domLayout="normal"
-                  // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
-                  // groupIncludeFooter={rowData.length > 0 ? true : false}
-                  autoGroupColumnDef={autoGroupColumnDefLive}
-                  // onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                  enableCharts={true}
-                                        enableRangeSelection={true}
-                                        onGridReady={(params) => {
-                                            // keep the debug global
-                                            window.__top5 = params.api;
-                                            // call your existing handler passing the grid id and ref
-                                            onGridReady(params, 'grid1', gridRef);
-                                          }}
-                  gridOptions={{
-                    ...gridOptions,
-                    ensureDomOrder: false,
-                    suppressRowClickSelection: true,
-                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                    groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
-                  }}
-                  frameworkComponents={{ GroupCellRenderer }}
-                  groupDisplayType='multipleColumns'
-                  // rowGroupPanelShow='always'
-                  // onFilterChanged={onFilterChanged} // Use the custom filter handler
-                  pinnedBottomRowData={liveFixedFooter}
-                  suppressCellSelection={true}
-                  getRowStyle={(params) => {
-                    if (params.node.rowPinned) {
 
-                      return {
-                        // fontWeight: "bold",
-                        backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
-                        color: theme === "dark" ? "#fff" : "#000",
-                        height: '30px'
-                      };
-                    }
-                    return null; // Keep other row styles unchanged
-                  }}
-                  getCellStyle={(params) => {
-                    const isSelected = selectedCells.some(
-                      (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                    );
+                  <div className='table-container'>
+                    <AgGridReact
+                      ref={gridRef}
+                      rowHeight={30}
+                      className='custom-grid'
+                      rowData={memorizedRowData}
+                      rowSelection='multiple'
+                      columnDefs={memorizedColumnDef}
+                      defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                      // onCellClicked={onCellClickedLive}
+                      onSelectionChanged={onSelectionChanged}
+                      groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                      suppressRowClickSelection={true}
+                      context={context}
+                      pagination={true}
+                      paginationPageSize={200}
+                      paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                      suppressAggFuncInHeader={true}
+                      getMainMenuItems={getMainMenuItems}
 
-                    // ✅ Ensure first cell inside a group is highlighted
-                    const isFirstSelected = firstSelectedCell &&
-                      firstSelectedCell.rowIndex === params.node.rowIndex &&
-                      firstSelectedCell.colId === params.column.getId();
+                      // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                      // onCellKeyDown={onCellKeyDown}
+                      // domLayout="normal"
+                      // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                      // groupIncludeFooter={rowData.length > 0 ? true : false}
+                      autoGroupColumnDef={autoGroupColumnDefLive}
+                      onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                      gridOptions={{
+                        ...gridOptions,
+                        ensureDomOrder: false,
+                        enableCharts: true,
+                        suppressRowClickSelection: true,
+                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                        groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                      }}
+                      frameworkComponents={{ GroupCellRenderer }}
+                      groupDisplayType='multipleColumns'
+                      // rowGroupPanelShow='always'
+                      // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                      pinnedBottomRowData={liveFixedFooter}
+                      suppressCellSelection={true}
+                      getRowStyle={(params) => {
+                        if (params.node.rowPinned) {
 
-                    return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                  }}
-                  onFilterChanged={(params) => {
-                    const api = params.api;
-                    const filteredData = [];
-                    // api.forEachNodeAfterFilterAndSort((node) => {
-                    //     if (!node.rowPinned) {
-                    //         filteredData.push(node.data);
-                    //     }
-                    // });
-                    const normalizedInput = inputValue.trim().toLowerCase();
-
-                    api.forEachNodeAfterFilterAndSort((node) => {
-                      if (node.data && node.data.campaignname) {
-                        const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-
-                        // Apply search and filter conditions
-                        if (
-                          normalizedCampaign.startsWith(normalizedInput) ||
-                          normalizedCampaign.includes(normalizedInput) ||
-                          normalizedCampaign.endsWith(normalizedInput)
-                        ) {
-                          filteredData.push(node.data);
+                          return {
+                            // fontWeight: "bold",
+                            backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                            color: theme === "dark" ? "#fff" : "#000",
+                            height: '30px'
+                          };
                         }
-                      }
-                    });
+                        return null; // Keep other row styles unchanged
+                      }}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                          (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                        );
 
-                    const updatedFooter = [
-                      {
-                        // [`${newtime}Date`]: 'Totals',
-                        campaignName: 'Total',
-                        actions: "",
-                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                        revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                        margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                        rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                        cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                        ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                        fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                        conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                        fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                        roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                        cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                        cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                        fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                        fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                        impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
-                      },
-                    ];
+                        // ✅ Ensure first cell inside a group is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                          firstSelectedCell.rowIndex === params.node.rowIndex &&
+                          firstSelectedCell.colId === params.column.getId();
 
-                    setLiveFixedFooter(updatedFooter);
-                  }}
-                />
-              </div>
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                      }}
+                      onFilterChanged={(params) => {
+                        const api = params.api;
+                        const filteredData = [];
+                        // api.forEachNodeAfterFilterAndSort((node) => {
+                        //     if (!node.rowPinned) {
+                        //         filteredData.push(node.data);
+                        //     }
+                        // });
+                        const normalizedInput = inputValue.trim().toLowerCase();
+
+                        api.forEachNodeAfterFilterAndSort((node) => {
+                          if (node.data && node.data.campaignname) {
+                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                            // Apply search and filter conditions
+                            if (
+                              normalizedCampaign.startsWith(normalizedInput) ||
+                              normalizedCampaign.includes(normalizedInput) ||
+                              normalizedCampaign.endsWith(normalizedInput)
+                            ) {
+                              filteredData.push(node.data);
+                            }
+                          }
+                        });
+
+                        const updatedFooter = [
+                          {
+                            // [`${newtime}Date`]: 'Totals',
+                            campaignName: 'Total',
+                            actions: "",
+                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                          },
+                        ];
+
+                        setLiveFixedFooter(updatedFooter);
+                      }}
+                    />
+                  </div>
 
 
+                </div>
+                :
+                <div
+                  className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                >
+                  <div className='table-container'>
+                    <AgGridReact
+                      ref={gridRef}
+                      rowHeight={30}
+                      className='custom-grid'
+                      rowData={[]}
+                      rowSelection='multiple'
+                      columnDefs={memorizedColumnDef}
+                      defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                      // onCellClicked={onCellClickedLive}
+                      onSelectionChanged={onSelectionChanged}
+                      groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                      suppressRowClickSelection={true}
+                      context={context}
+                      pagination={true}
+                      paginationPageSize={200}
+                      paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                      suppressAggFuncInHeader={true}
+                      getMainMenuItems={getMainMenuItems}
+
+                      // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                      // onCellKeyDown={onCellKeyDown}
+                      // domLayout="normal"
+                      // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                      // groupIncludeFooter={rowData.length > 0 ? true : false}
+                      autoGroupColumnDef={autoGroupColumnDefLive}
+                      onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                      gridOptions={{
+                        ...gridOptions,
+                        ensureDomOrder: false,
+                        enableCharts: true,
+                        suppressRowClickSelection: true,
+                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                        groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                      }}
+                      frameworkComponents={{ GroupCellRenderer }}
+                      groupDisplayType='multipleColumns'
+                      // rowGroupPanelShow='always'
+                      // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                      pinnedBottomRowData={liveFixedFooter}
+                      suppressCellSelection={true}
+                      getRowStyle={(params) => {
+                        if (params.node.rowPinned) {
+
+                          return {
+                            // fontWeight: "bold",
+                            backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                            color: theme === "dark" ? "#fff" : "#000",
+                            height: '30px'
+                          };
+                        }
+                        return null; // Keep other row styles unchanged
+                      }}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                          (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                        );
+
+                        // ✅ Ensure first cell inside a group is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                          firstSelectedCell.rowIndex === params.node.rowIndex &&
+                          firstSelectedCell.colId === params.column.getId();
+
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                      }}
+                      onFilterChanged={(params) => {
+                        const api = params.api;
+                        const filteredData = [];
+                        // api.forEachNodeAfterFilterAndSort((node) => {
+                        //     if (!node.rowPinned) {
+                        //         filteredData.push(node.data);
+                        //     }
+                        // });
+                        const normalizedInput = inputValue.trim().toLowerCase();
+
+                        api.forEachNodeAfterFilterAndSort((node) => {
+                          if (node.data && node.data.campaignname) {
+                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                            // Apply search and filter conditions
+                            if (
+                              normalizedCampaign.startsWith(normalizedInput) ||
+                              normalizedCampaign.includes(normalizedInput) ||
+                              normalizedCampaign.endsWith(normalizedInput)
+                            ) {
+                              filteredData.push(node.data);
+                            }
+                          }
+                        });
+
+                        const updatedFooter = [
+                          {
+                            // [`${newtime}Date`]: 'Totals',
+                            campaignName: 'Total',
+                            actions: "",
+                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                          },
+                        ];
+
+                        setLiveFixedFooter(updatedFooter);
+                      }}
+                    />
+                  </div>
+
+
+                </div>
+              }
             </div>
           ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-            {apiStatus === true ?
-              <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                // icon={<SmileOutlined />}
-                title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-              /> : (startDate !== endDate ? <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                icon={<SmileOutlined />}
-                title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
-              // extra={<Button type="primary">Next</Button>}
-              /> : <Result
-                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                icon={<SmileOutlined />}
-                title={`No LiveData for ${newaccount} to ${startDate}`}
-              // extra={<Button type="primary">Next</Button>}
-              />)}
+            <Result
+              className={theme === 'dark' ? 'dark-result' : 'light-result'}
+              icon={<SmileOutlined />}
+              title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+            // extra={<Button type="primary">Next</Button>}
+            />
           </div>}
         </div>
       </div>

@@ -159,7 +159,7 @@
     "id": 18718,
     "files": [
       "static/chunks/1143-3a144dbb269e0431.js",
-      "static/chunks/8718.6f1a412939ab61d3.js"
+      "static/chunks/8718.c2f46cddeda2cc50.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-accountaccess": {
@@ -188,7 +188,7 @@
     "id": 39976,
     "files": [
       "static/chunks/1143-3a144dbb269e0431.js",
-      "static/chunks/9976.9a1b3b84bddbaa7c.js"
+      "static/chunks/9976.4739e0a4c80a504a.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/updates_notifications": {
@@ -209,7 +209,7 @@
     "files": [
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
-      "static/chunks/3397.7027bd8f973f0a39.js"
+      "static/chunks/3397.641628ceba902a80.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/DAKeywords": {
@@ -222,7 +222,7 @@
   "app\\Reports\\page.js -> ../componentsOfReports/Daily": {
     "id": 41541,
     "files": [
-      "static/chunks/1541.917b3405987a3bb1.js"
+      "static/chunks/1541.96e68fdd8c0bb16d.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/InmobiKeywords": {
@@ -235,7 +235,7 @@
   "app\\Reports\\page.js -> ../componentsOfReports/Live": {
     "id": 84887,
     "files": [
-      "static/chunks/4887.9e1cd89fab776edb.js"
+      "static/chunks/4887.a410b6dc2b4d27e9.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetAdDaily": {
@@ -283,7 +283,7 @@
   "app\\componentsOfReports\\AllCampaigns.js -> ./SearchFilters": {
     "id": 78466,
     "files": [
-      "static/chunks/8466.2e0d27daabad8276.js"
+      "static/chunks/8466.a7c166ccbb5fdf0e.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdLevelDaily": {
@@ -293,7 +293,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/5825.187a994de86e3125.js"
+      "static/chunks/5825.8a562967e2545860.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdsetLevelDaily": {
@@ -303,7 +303,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/9369.4075bce2ab92e2ba.js"
+      "static/chunks/9369.379de08ae4248da4.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./CampaignLevelDaily": {
@@ -313,13 +313,13 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/1997.d048e5d1d0b513e6.js"
+      "static/chunks/1997.cf9714add507fb8e.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./SearchFilters": {
     "id": 78466,
     "files": [
-      "static/chunks/8466.2e0d27daabad8276.js"
+      "static/chunks/8466.a7c166ccbb5fdf0e.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdLevel": {
@@ -329,7 +329,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/4630.a2882a178a27160e.js"
+      "static/chunks/4630.61b2d078a515e5d2.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdsetLevel": {
@@ -339,7 +339,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/9941.22a98d23aa822bfd.js"
+      "static/chunks/9941.cc1a22609f52908d.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./CampaignLevel": {
@@ -349,13 +349,13 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/781.12756bd6386e4ed1.js"
+      "static/chunks/781.649615434816cf79.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./SearchFilters": {
     "id": 78466,
     "files": [
-      "static/chunks/8466.2e0d27daabad8276.js"
+      "static/chunks/8466.a7c166ccbb5fdf0e.js"
     ]
   }
 }

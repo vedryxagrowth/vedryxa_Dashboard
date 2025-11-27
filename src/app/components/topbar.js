@@ -1941,6 +1941,28 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               setuserdetails({ ...usersDataForLogin[0], adAccounts: ManagernewObject });
               break;
 
+            case 'Network_Partner':
+              const Network_Partner = usersDataForLogin[0].adAccounts;
+              const NetworkPartnerAdAccounts = Object.keys(Network_Partner);
+              const NetworkPartnerObject = {};
+              // console.log(NetworkPartnerAdAccounts, "keys");
+
+              for (let item of NetworkPartnerAdAccounts) {
+                if (Network_Partner[item][0] === "All") {
+                  // Retry logic for Accounts API
+                  console.log(item);
+                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
+                  NetworkPartnerObject[item] = networkResponse.data;
+                } else {
+                  const response = await retryFetch(() =>
+                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: Network_Partner[item] })
+                  );
+                  NetworkPartnerObject[item] = response.data;
+                }
+              }
+              setuserdetails({ ...usersDataForLogin[0], adAccounts: NetworkPartnerObject });
+              break;
+
             // Case Admin
             case 'Admin':
               // Retry logic for All Accounts API
