@@ -1412,7 +1412,7 @@ useEffect(() => {
 
     return (
         <div style={{ height: "100%" }}>
-            {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} />}
+            {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} AccountsData={AccountsData}/>}
             <DynamicNewaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} AccountsData={AccountsData} />
             <DynamicEdituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} AccountsData={AccountsData} onClose={onCloseDrawer} />
             <DynamicEditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} AccountsData={AccountsData} />

@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Drawer, Button, Modal, Form, Input, Select, message, } from 'antd';
+import { Drawer, Button, Modal, Form, Input, Select, message, Tooltip, Popover, } from 'antd';
 import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { Add } from '@mui/icons-material';
@@ -35,6 +35,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
     const [formAccounts, setFormAccounts] = useState([]);
     const [selectedNetworks, setSelectedNetworks] = useState([]);
     const [editeddatas, setEditeddatas] = useState(null);
+    const [allApiAccounts, setAllApiAccounts] = useState([]);
+
     var token = localStorage.getItem("token")
     const [form] = Form.useForm();
     useEffect(() => {
@@ -45,6 +47,32 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
             setAdditionalAccounts([])
         }
     }, [userAccess]);
+    useEffect(() => {
+        const fetchAllAccounts = async () => {
+            try {
+                const res = await axios.get(
+                    "https://prodapis.adsgoat.in/allaccounts",
+                    { headers: { Authorization: token } }
+                );
+                setAllApiAccounts(res.data || []);
+            } catch (err) {
+                console.error("API accounts fetch failed:", err);
+            }
+        };
+
+        fetchAllAccounts();
+    }, []);
+    const getAccountsForNetwork = (network) => {
+        if (!network) return [];
+        const local = AccountsData
+            ?.filter(item => String(item.Network).trim() === network.trim())
+            .map(item => String(item.accountNumber).trim());
+        const api = allApiAccounts
+            ?.filter(item => String(item.Network).trim() === network.trim())
+            .map(item => String(item.accountNumber).trim());
+        return Array.from(new Set([...(local || []), ...(api || [])]));
+    };
+
     // const submitForm = async (values) => {
     //     try {
     //         const allAccounts = [
@@ -90,6 +118,26 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
             setAdditionalAccounts(prevAdditionalAccounts => [...prevAdditionalAccounts, newAccount]);
         }
     };
+
+    useEffect(() => {
+        if (visible && editeddata) {
+            form.resetFields();
+            form.setFieldsValue({
+                userName: editeddata.userName,
+                email: editeddata.email,
+                role: editeddata.role
+            });
+
+            setAdditionalAccounts(
+                editeddata.adAccounts
+                    ? Object.keys(editeddata.adAccounts).map(key => ({
+                        network: key,
+                        inputs: editeddata.adAccounts[key]
+                    }))
+                    : []
+            );
+        }
+    }, [visible, editeddata]);
 
     const handleRemoveAccount = (index) => {
         Modal.confirm({
@@ -276,7 +324,20 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
     // };
     const validateAllAccountsBeforeSubmit = async () => {
         for (const acc of additionalAccounts) {
+            const seen = new Set();
 
+            for (const id of acc.inputs) {
+                const trimmed = id.trim();
+
+                if (seen.has(trimmed)) {
+                    message.error(
+                        `Account ${trimmed} is added more than once check`
+                    );
+                    return false;
+                }
+
+                seen.add(trimmed);
+            }
             if (!acc.network) {
                 message.error("Please select a network for all accounts");
                 return false;
@@ -363,6 +424,17 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
         return true;
     };
     const submitForm = async (values) => {
+
+        values.userName = values.userName?.trim();
+        values.email = values.email?.trim();
+        values.role = values.role?.trim();
+
+        // TRIM all network + account IDs before sending
+        const cleanedAccounts = additionalAccounts.map(acc => ({
+            network: acc.network?.trim(),
+            inputs: acc.inputs.map(i => i.trim())
+        }));
+
         const isValid = await validateAllAccountsBeforeSubmit();
         if (!isValid) return;
         Modal.confirm({
@@ -375,7 +447,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                     //     ...(editeddata && editeddata.adAccounts ? editeddata.adAccounts : []),
                     //     ...additionalAccounts
                     // ];
-                    const singleObject = additionalAccounts.reduce((acc, obj) => {
+                    const singleObject = cleanedAccounts.reduce((acc, obj) => {
                         const key = obj[Object.keys(obj)[0]];
                         const value = Object.keys(obj)[1];
                         // console.log() // Get the key from the current object
@@ -616,15 +688,27 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                             justifyContent: 'center',
                                         }}
                                     >
-                                        <Input
-                                            value={input}
-                                            onChange={(e) =>
-                                                handleInputChange(accountIndex, inputIndex, e.target.value)
+                                        <Popover
+                                            placement="right"
+                                            title={`Accounts in ${account.network}`}
+                                            content={
+                                                <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                                                    {getAccountsForNetwork(account.network).map(acc => (
+                                                        <div key={acc}>{acc}</div>
+                                                    ))}
+                                                </div>
                                             }
-                                            placeholder="Enter Account ID"
-                                            style={{ width: '100%', marginRight: '8px', height: '32px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                        />
+                                        >
+                                            <Input
+                                                value={input}
+                                                onChange={(e) =>
+                                                    handleInputChange(accountIndex, inputIndex, e.target.value)
+                                                }
+                                                placeholder="Enter Account ID"
+                                                style={{ width: '100%', marginRight: '8px', height: '32px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                            />
+                                        </Popover>
 
                                         {/* Show DeleteOutlined only if there is more than one input */}
                                         {account.inputs.length > 1 && inputIndex !== 0 && (
@@ -789,20 +873,33 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                                                     ]}
                                                                     style={{ margin: 0, flex: 1 }}
                                                                 >
-                                                                    <Input
-                                                                        placeholder="Enter Account ID"
-                                                                        value={
-                                                                            additionalAccounts[projIndex]?.inputs[inputIndex]
+                                                                    <Popover
+                                                                        placement="right"
+                                                                        title={`Accounts in ${account.network}`}
+                                                                        content={
+                                                                            <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                                                                                {getAccountsForNetwork(account.network).map(acc => (
+                                                                                    <div key={acc}>{acc}</div>
+                                                                                ))}
+                                                                            </div>
                                                                         }
-                                                                        onChange={(e) =>
-                                                                            handleInputChange(
-                                                                                projIndex,
-                                                                                inputIndex,
-                                                                                e.target.value
-                                                                            )
-                                                                        }
+                                                                    >
+                                                                        <Input
+                                                                            placeholder="Enter Account ID"
+                                                                            value={
+                                                                                additionalAccounts[projIndex]?.inputs[inputIndex]
+                                                                            }
+                                                                            onChange={(e) =>
+                                                                                handleInputChange(
+                                                                                    projIndex,
+                                                                                    inputIndex,
+                                                                                    e.target.value
+                                                                                )
+                                                                            }
 
-                                                                    />
+                                                                        />
+                                                                    </Popover>
+
                                                                 </Form.Item>
 
                                                                 {/* Remove Input */}
@@ -884,7 +981,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
             >
                 <p>Are you sure you want to submit?</p>
             </Modal>
-        </Drawer>
+        </Drawer >
     );
 };
 

@@ -1,11 +1,11 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Drawer, Button, Modal, Form, Input, Select, message } from 'antd';
+import { Drawer, Button, Modal, Form, Input, Select, message, Popover } from 'antd';
 import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 
-const Createnewuser = ({ visible, onClose, refreshUsers }) => {
+const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
     const { userdetails } = useTokenContext();
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -30,6 +30,8 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
     const [additionalAccounts, setAdditionalAccounts] = useState([]);
     const [selectedNetworks, setSelectedNetworks] = useState([]);
     const [availableNetworks, setAvailableNetworks] = useState([]);
+    const [allApiAccounts, setAllApiAccounts] = useState([]);
+
 
     const [form] = Form.useForm();
 
@@ -41,6 +43,34 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
             setAdditionalAccounts([...additionalAccounts, { network: '', inputs: [''] }]);
 
         }
+    };
+    useEffect(() => {
+        const fetchAllAccounts = async () => {
+            try {
+                const res = await axios.get(
+                    "https://prodapis.adsgoat.in/allaccounts",
+                    { headers: { Authorization: token } }
+                );
+                setAllApiAccounts(res.data || []);
+            } catch (err) {
+                console.error("API accounts fetch failed:", err);
+            }
+        };
+
+        fetchAllAccounts();
+    }, []);
+    const getAccountsForNetwork = (network) => {
+        if (!network) return [];
+
+        const local = AccountsData
+            ?.filter(item => String(item.Network).trim() === network.trim())
+            .map(item => String(item.accountNumber).trim());
+
+        const api = allApiAccounts
+            ?.filter(item => String(item.Network).trim() === network.trim())
+            .map(item => String(item.accountNumber).trim());
+
+        return Array.from(new Set([...(local || []), ...(api || [])]));
     };
 
     const handleRemoveAccount = (index) => {
@@ -106,8 +136,6 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
             const fetchNetworks = async () => {
                 try {
                     const res = await apiClient.get("/networks");
-
-                    // ✅ ensure it's an array before setting
                     setAvailableNetworks(Array.isArray(res.data) ? res.data : []);
                 } catch (err) {
                     console.error("Error fetching networks:", err);
@@ -123,8 +151,109 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
             setAvailableNetworks(networks);
         }
     }, [visible]);
+    const validateAllAccountsBeforeSubmit = async () => {
+        for (const acc of additionalAccounts) {
+            if (!acc.network?.trim()) {
+                message.error("Please select a network for all accounts");
+                return false;
+            }
+
+            const selectedNetwork = acc.network.trim();
+            const seen = new Set();
+
+            for (const id of acc.inputs) {
+                const accountNumber = id?.trim();
+                if (!accountNumber) {
+                    message.error("Account ID cannot be empty");
+                    return false;
+                }
+                if (seen.has(accountNumber)) {
+                    message.error(`Account ${accountNumber} is added more than once in ${selectedNetwork}`);
+                    return false;
+                }
+                seen.add(accountNumber);
+                if (accountNumber.toLowerCase() === "all") continue;
+                const localMatch = AccountsData?.find(
+                    item => String(item.accountNumber).trim() === accountNumber
+                );
+
+                if (localMatch) {
+                    const localNetwork = String(localMatch.Network).trim();
+
+                    if (localNetwork !== selectedNetwork) {
+                        message.error(
+                            `Account ${accountNumber} already exists in network ${localNetwork}.`
+                        );
+                        return false;
+                    }
+
+                    continue; 
+                }
+
+                let apiList = [];
+                try {
+                    const res = await axios.get("https://prodapis.adsgoat.in/allaccounts", {
+                        headers: { Authorization: token }
+                    });
+                    apiList = res.data || [];
+                } catch (err) {
+                    message.error("Error validating account. Please try again.");
+                    return false;
+                }
+
+                const apiMatch = apiList.find(
+                    item => String(item.accountNumber).trim() === accountNumber
+                );
+
+                if (apiMatch) {
+                    const apiNetwork = String(apiMatch.Network).trim();
+
+                    if (apiNetwork === selectedNetwork) {
+                        message.error(
+                            `Account ${accountNumber} exists in this network but you don't have access.`
+                        );
+                        return false;
+                    } else {
+                        message.error(
+                            `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`
+                        );
+                        return false;
+                    }
+                }
+
+                message.error(
+                    `Account ${accountNumber} does NOT exist in any network. Please add.`
+                );
+                return false;
+            }
+        }
+
+        return true;
+    };
+    const rolevalid = (selectedRole) => {
+        if (selectedRole !== "Admin" && additionalAccounts.length === 0) {
+            message.error("Please select at least one project");
+            return false;
+        }
+        return true;
+    };
 
     const submitForm = async (values) => {
+        values.userName = values.userName?.trim();
+        values.email = values.email?.trim();
+        values.role = values.role?.trim();
+
+        const cleanedAccounts = additionalAccounts.map(acc => ({
+            network: acc.network?.trim(),
+            inputs: acc.inputs.map(i => i.trim())
+        }));
+
+        const isValid = await validateAllAccountsBeforeSubmit();
+        const isValidRole = rolevalid(values.role);
+
+        if (!isValid) return;
+        if (!isValidRole) return;
+
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to create new user?',
@@ -284,13 +413,25 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                                         <div className='add-account-container' style={{ width: '100%', padding: '0px', margin: '0px' }}>
                                             {account.inputs.map((input, inputIndex) => (
                                                 <div key={inputIndex} className='add-account-container-input'>
-                                                    <Input
-                                                        value={input}
-                                                        onChange={(e) => handleInputChange(accountIndex, inputIndex, e.target.value)}
-                                                        placeholder="Enter Account ID"
-                                                        style={{ width: '100%', marginRight: '8px', height: '32px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                                    />
+                                                    <Popover
+                                                        placement="right"
+                                                        title={`Accounts in ${account.network}`}
+                                                        content={
+                                                            <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                                                                {getAccountsForNetwork(account.network).map(acc => (
+                                                                    <div key={acc}>{acc}</div>
+                                                                ))}
+                                                            </div>
+                                                        }
+                                                    >
+                                                        <Input
+                                                            value={input}
+                                                            onChange={(e) => handleInputChange(accountIndex, inputIndex, e.target.value)}
+                                                            placeholder="Enter Account ID"
+                                                            style={{ width: '100%', marginRight: '8px', height: '32px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                                        />
+                                                    </Popover>
                                                     {account.inputs.length === 1 && inputIndex === 0 && (
                                                         <Button
                                                             style={{ marginBottom: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}

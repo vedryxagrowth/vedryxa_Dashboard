@@ -5,7 +5,8 @@ import axios from "axios";
 import { useTokenContext } from '../../components/parent';
 
 const { Option } = Select;
-import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
+import { CloseOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { FaTrashCan } from "react-icons/fa6";
 
 const timezones = [
   "UTC",
@@ -97,33 +98,135 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
   const containerRef = useRef(null);
   const token = localStorage.getItem("token");
   console.log(editeddata, "edit");
+  const [pixels, setPixels] = useState([{ pixelName: "", pixelId: "" }]);
+  const [pages, setPages] = useState([{ pageName: "", pageId: "" }]);
 
 
+
+  // useEffect(() => {
+  //   if (editeddata) {
+  //     form.setFieldsValue({
+  //       ...editeddata,
+  //       timeZone: timeZoneShortNames[editeddata.timeZone],
+  //       pixelID: editeddata?.pixelID || "",
+  //       pageID: editeddata?.pageID || "",
+  //       AgencyName: editeddata?.AgencyName || "",
+  //       BMName: editeddata?.BMName || ""
+  //     });
+  //     setBMName(editeddata.BMName || "");
+
+  //   }
+  // }, [editeddata, form]);
+  const addPixelRow = () => {
+    setPixels(prev => [...prev, { pixelName: "", pixelId: "" }]);
+  };
+
+  const handlePixelChange = (index, field, value) => {
+    setPixels(prev => {
+      const updated = [...prev];
+      updated[index][field] = value;
+      return updated;
+    });
+  };
+
+  const removePixelRow = (index) => {
+    setPixels(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePageChange = (index, field, value) => {
+    setPages(prev => {
+      const updated = [...prev];
+      updated[index][field] = value;
+      return updated;
+    });
+  };
+
+  const addPage = () => {
+    setPages(prev => [...prev, { pageName: "", pageId: "" }]);
+  };
+
+  const removePage = (index) => {
+    setPages(prev => prev.filter((_, i) => i !== index));
+  };
   useEffect(() => {
     if (editeddata) {
       form.setFieldsValue({
         ...editeddata,
-        timeZone: timeZoneShortNames[editeddata.timeZone],
-        pixelID: editeddata?.pixelID || "",
-        pageID: editeddata?.pageID || "",
+        timeZone: timeZoneShortNames[editeddata.timeZone] || "",
         AgencyName: editeddata?.AgencyName || "",
         BMName: editeddata?.BMName || ""
       });
+      if (typeof editeddata.pixelID === "string") {
+        setPixels([{ pixelName: "", pixelId: editeddata.pixelID }]);
+      } else if (editeddata.pixelID && typeof editeddata.pixelID === "object") {
+        setPixels(
+          Object.entries(editeddata.pixelID).map(([name, id]) => ({
+            pixelName: name,
+            pixelId: id
+          }))
+        );
+      }
+      if (typeof editeddata.pageID === "string") {
+        setPages([{ pageName: editeddata.pageName || "", pageId: editeddata.pageID }]);
+      } else if (editeddata.pageID && typeof editeddata.pageID === "object") {
+        setPages(
+          Object.entries(editeddata.pageID).map(([name, id]) => ({
+            pageName: name,
+            pageId: id
+          }))
+        );
+      }
       setBMName(editeddata.BMName || "");
-
     }
-  }, [editeddata, form]);
-
+  }, [editeddata]);
 
   const onFinish = async (values) => {
+    let formattedPixels;
+    if (pixels.length === 1) {
+      formattedPixels = pixels[0].pixelId.trim();
+    } else {
+      formattedPixels = {};
+      pixels.forEach(p => {
+        if (p.pixelName && p.pixelId) {
+          formattedPixels[p.pixelName.trim()] = p.pixelId.trim();
+        }
+      });
+    }
+
+    let formattedPages;
+    let formattedPageName;
+
+    if (pages.length === 1) {
+      formattedPages = pages[0].pageId.trim();
+      formattedPageName = pages[0].pageName.trim();
+    } else {
+      formattedPages = {};
+      pages.forEach(p => {
+        if (p.pageName && p.pageId) {
+          formattedPages[p.pageName.trim()] = p.pageId.trim();
+        }
+      });
+    }
+
     try {
+      // const newValues = {
+      //   ...editeddata,
+      //   ...values,
+      //   BMName: BMName,
+      //   BMId: values.BMId || editeddata.BMId,
+      //   timeZone: timeZoneFullNames[values.timeZone],
+      // };
       const newValues = {
         ...editeddata,
         ...values,
+        pixelID: formattedPixels,
+        pageID: formattedPages,
+        pageName: formattedPageName,
         BMName: BMName,
         BMId: values.BMId || editeddata.BMId,
         timeZone: timeZoneFullNames[values.timeZone],
       };
+
       console.log(newValues, "new");
       const response = await apiClient.post(
         "/updateAccount/",
@@ -231,17 +334,108 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
 
-          <Form.Item label="Pixel ID" name="pixelID">
+          {/* <Form.Item label="Pixel ID" name="pixelID">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
-          </Form.Item>
+          </Form.Item> */}
+          <Form.Item label="Pixel ID">
+            {pixels.map((row, index) => (
+              <div key={index} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
 
-          <Form.Item label="Page ID" name="pageID">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
-          </Form.Item>
+                {pixels.length > 1 && (
+                  <Input
+                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                    placeholder="Pixel Name"
+                    value={row.pixelName}
+                    onChange={(e) =>
+                      handlePixelChange(index, "pixelName", e.target.value)
+                    }
+                  />
+                )}
 
-          <Form.Item label="Page Name" name="pageName">
-            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+                <Input
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                  placeholder="Pixel ID"
+                  value={row.pixelId}
+                  onChange={(e) =>
+                    handlePixelChange(index, "pixelId", e.target.value)
+                  }
+                />
+
+                {pixels.length > 1 && (
+                  <Button type="text" onClick={() => removePixelRow(index)} icon={<FaTrashCan color="#EC7117" />}></Button>
+                )}
+
+                {index === pixels.length - 1 && (
+                  <Button type="text" onClick={addPixelRow}>
+                    <PlusOutlined />
+                  </Button>
+                )}
+              </div>
+            ))}
           </Form.Item>
+          {/* <Form.Item label="Page ID" name="pageID">
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+          </Form.Item> */}
+          {pages.length === 1 ? (
+            <>
+              <Form.Item label="Page ID" required style={{ marginTop: 8 }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <Input
+                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                    placeholder="Page ID"
+                    value={pages[0].pageId}
+                    onChange={(e) => handlePageChange(0, "pageId", e.target.value)}
+                  />
+
+                  {/* Add second row */}
+                  <Button type="text" onClick={addPage} icon={<PlusOutlined />} />
+                </div>
+              </Form.Item>
+
+              <Form.Item label="Page Name" required style={{ marginTop: 8 }}>
+                <Input
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                  placeholder="Page Name"
+                  value={pages[0].pageName}
+                  onChange={(e) => handlePageChange(0, "pageName", e.target.value)}
+                />
+              </Form.Item>
+            </>
+          ) : (
+
+            <Form.Item label="Page ID">
+              {pages.map((p, index) => (
+                <div key={index} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+
+                  <Input
+                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                    placeholder="Page Name"
+                    value={p.pageName}
+                    onChange={(e) => handlePageChange(index, "pageName", e.target.value)}
+                  />
+
+                  <Input
+                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                    placeholder="Page ID"
+                    value={p.pageId}
+                    onChange={(e) => handlePageChange(index, "pageId", e.target.value)}
+                  />
+
+                  <Button  type="text" onClick={() => removePage(index)} icon={<FaTrashCan color="#EC7117" />}>
+
+                  </Button>
+
+                  {index === pages.length - 1 && (
+                    <Button type="text" onClick={addPage} icon={<PlusOutlined />} />
+                  )}
+                </div>
+              ))}
+            </Form.Item>
+          )}
+
+          {/* <Form.Item label="Page Name" name="pageName">
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+          </Form.Item> */}
 
           <Form.Item label="Agency Name" name="AgencyName">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />

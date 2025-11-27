@@ -6,6 +6,7 @@ import { useTokenContext } from '../../components/parent';
 
 const { Option } = Select;
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
+import { FaTrashCan } from 'react-icons/fa6';
 
 const timezones = [
     "UTC",
@@ -23,24 +24,24 @@ const timezones = [
     "DST",
     "HST",
     "EST",
-  ];
+];
 
 const timeZoneFullNames = {
     'EDT': 'America/New_York',
     'UTC': 'Atlantic/Azores',
     'EEST': 'Europe/Athens',
-    'CEST':"Europe/Paris",
-    'CST':'America/Mexico_City',
-    'PDT':'America/Los_Angeles',
-    'BST':'Europe/London',
-    'GMT':'Africa/Accra',
-    'IST':'Asia/Kolkata',
-    'MST':'America/Dawson',
-    'CDT':'America/Chicago',
-    'AST':'America/Puerto_Rico',
-    'DST':'Asia/Dubai',
-    'HST':'Pacific/Honolulu',
-    'EST':'America/Toronto'
+    'CEST': "Europe/Paris",
+    'CST': 'America/Mexico_City',
+    'PDT': 'America/Los_Angeles',
+    'BST': 'Europe/London',
+    'GMT': 'Africa/Accra',
+    'IST': 'Asia/Kolkata',
+    'MST': 'America/Dawson',
+    'CDT': 'America/Chicago',
+    'AST': 'America/Puerto_Rico',
+    'DST': 'Asia/Dubai',
+    'HST': 'Pacific/Honolulu',
+    'EST': 'America/Toronto'
 };
 
 
@@ -64,16 +65,23 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
     var token = localStorage.getItem("token");
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
-    
+
     const [uniquePartners, setUniquePartners] = useState([]);
-   
+
     const [options, setOptions] = useState([]);
 
     const [newOptions, setNewOptions] = useState([]);
-    
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newValue, setNewValue] = useState("");
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+    const [pixels, setPixels] = useState([
+        { pixelName: "", pixelId: "" }
+    ]);
+    const [pages, setPages] = useState([
+        { pageName: "", pageId: "" }
+    ]);
+
 
     const containerRef = useRef(null); // Reference to the container div
 
@@ -114,9 +122,9 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
     //     setNewOptions(mainData);
     // }
 
-    useEffect(()=>{
-        if(visible){
-            const uniqueBMName  = [...new Set(AccountsData?.map(item => item?.BMName).filter(val => val && val.trim() !== ""))].sort((a, b) => a.localeCompare(b));
+    useEffect(() => {
+        if (visible) {
+            const uniqueBMName = [...new Set(AccountsData?.map(item => item?.BMName).filter(val => val && val.trim() !== ""))].sort((a, b) => a.localeCompare(b));
             const uniquePartners = [...new Set(AccountsData?.map(item => item?.revenuePartner).filter(val => val && val.trim() !== ""))].sort((a, b) => a.localeCompare(b));
             setUniquePartners(uniquePartners);
             setOptions(uniqueBMName);
@@ -125,17 +133,123 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
             setRevenuePartner(uniquePartners[0])
         }
     }, [visible, AccountsData]);
+    const validateAccountBeforeSubmit = async () => {
+        const acc = accountNumber?.trim();
 
-    const onFinish = async (values) => {
+        if (!acc) {
+            message.error("Account Number cannot be empty");
+            return false;
+        }
+
+
+        const localMatch = AccountsData?.find(
+            item => String(item.accountNumber).trim() === acc
+        );
+
+        if (localMatch) {
+            message.error(`Account ${acc} already exists. Please check.`);
+            return false;
+        }
+
+
+        let apiList = [];
         try {
-            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : '', AgencyName: values?.AgencyName ? values?.AgencyName: ""}
+            const res = await axios.get("https://prodapis.adsgoat.in/allaccounts", {
+                headers: { Authorization: token }
+            });
+            apiList = res.data || [];
+        } catch (err) {
+            message.error("Error validating account. Please try again.");
+            return false;
+        }
+
+        const apiMatch = apiList.find(
+            item => String(item.accountNumber).trim() === acc
+        );
+
+        if (apiMatch) {
+            message.error(
+                `Account ${acc} already exists but you don't have access. Please check.`
+            );
+            return false;
+        }
+
+        return true;
+    };
+    const resetFormState = () => {
+        form.resetFields();
+
+        setPixels([{ pixelName: "", pixelId: "" }]);
+        setPages([{ pageName: "", pageId: "" }]);
+
+        setBMName("Winkleads Search");
+        setAccountNumber("");
+        setAccountName("");
+        setAgencyName("");
+    };
+    const onFinish = async (values) => {
+        const trimmedValues = Object.fromEntries(
+            Object.entries(values).map(([key, val]) => [
+                key,
+                typeof val === "string" ? val.trim() : val
+            ])
+        );
+        const isValid = await validateAccountBeforeSubmit();
+        if (!isValid) return;
+
+        let formattedPixels;
+        if (pixels.length === 1) {
+            formattedPixels = pixels[0].pixelId.trim();
+        } else {
+            formattedPixels = {};
+            pixels.forEach(p => {
+                if (p.pixelName && p.pixelId) {
+                    formattedPixels[p.pixelName.trim()] = p.pixelId.trim();
+                }
+            });
+        }
+
+        let formattedPages;
+        let formattedPageName;
+
+        if (pages.length === 1) {
+            formattedPages = pages[0].pageId.trim();
+            formattedPageName = pages[0].pageName.trim();
+        } else {
+            formattedPages = {};
+            pages.forEach(p => {
+                if (p.pageName && p.pageId) {
+                    formattedPages[p.pageName.trim()] = p.pageId.trim();
+                }
+            });
+        }
+        try {
+            // const newValues = { ...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '', pixelID: values.pixelID ? values.pixelID : '', AgencyName: values?.AgencyName ? values?.AgencyName : "" }
+            const newValues = {
+                ...trimmedValues,
+                pixelID: formattedPixels,
+                pageID: formattedPages,
+                pageName: formattedPageName,
+                timeZone: timeZoneFullNames[values.timeZone],
+                pixelId: undefined
+            };
             console.log(newValues, "newValues");
-            const response = await apiClient.post('/createNewAccount/', {newAccount: newValues});
+            const response = await apiClient.post('/createNewAccount/', { newAccount: newValues });
             if (response.status === 200) {
+                // message.success('Account created successfully');
+                // form.resetFields();
+                // setPixels([
+                //     { pixelName: "", pixelId: "" }
+                // ]);
+                // setPages([
+                //     { pageName: "", pageId: "" }
+                // ])
+                // setBMName("Winkleads Search");
+                // onClose("AccountNumber");
                 message.success('Account created successfully');
-                form.resetFields();
-                setBMName("Winkleads Search");
-                onClose("AccountNumber"); // Close the drawer after successful submission
+                resetFormState();
+                onClose("AccountNumber");
+
             } else {
                 message.error('Failed to create account');
             }
@@ -149,8 +263,20 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
         setIsModalVisible(false);
     };
 
-    const showModal = () => {
+    const showModal = async () => {
+        // setIsModalVisible(true);
+
+        try {
+            await form.validateFields();
+        } catch {
+            message.error("Please fill all required fields");
+            return;
+        }
+        const isValid = await validateAccountBeforeSubmit();
+        if (!isValid) return;
         setIsModalVisible(true);
+
+
     };
 
     const onChangeTimeZone = (value) => {
@@ -177,21 +303,54 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
         setPixelId(event.target.value);
     }
 
-    const onChangeSpendPartner = (value)=>{
+    const onChangeSpendPartner = (value) => {
         setSpendPartner(value);
     }
 
-    const onChangeBMName = (value)=>{
+    const onChangeBMName = (value) => {
         setBMName(value);
     }
 
-    const onChangeStatus = (value)=>{
+    const onChangeStatus = (value) => {
         setStatus(value);
     }
 
-    const onChangeRevenuePartner = (value)=>{
+    const onChangeRevenuePartner = (value) => {
         setRevenuePartner(value);
     }
+
+    const handlePixelChange = (index, field, value) => {
+        const updated = [...pixels];
+        updated[index][field] = value;
+        setPixels(updated);
+    };
+
+    const addPixelRow = () => {
+        setPixels(prev => [...prev, { pixelName: "", pixelId: "" }]);
+    };
+
+    const removePixelRow = (index) => {
+        const updated = pixels.filter((_, i) => i !== index);
+        setPixels(updated);
+    };
+
+
+    const addPage = () => {
+        setPages(prev => [...prev, { pageName: "", pageId: "" }]);
+    };
+
+    const removePage = (index) => {
+        setPages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handlePageChange = (index, field, value) => {
+        setPages(prev => {
+            const updated = [...prev];
+            updated[index][field] = value;
+            return updated;
+        });
+    };
+
 
     return (
         <>
@@ -205,7 +364,10 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
             >
                 <Form form={form} onFinish={onFinish} layout="vertical" style={{ width: "80%" }} initialValues={{ status: status, spendPartner: spendPartner, revenuePartner: revenuePartner, BMName: BMName, timeZone: timeZone }} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Form.Item label="Spend Partner" name="spendPartner" value={spendPartner}>
-                        <Select placeholder="Select a status" 
+                        <Select placeholder="Select a status"
+
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                                } green-border-select`}
                             defaultValue="Facebook" onChange={onChangeSpendPartner}
                             title=''
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}>
@@ -214,25 +376,156 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                         </Select>
                     </Form.Item>
                     <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the spend account ID!' }]}>
-                        <Input autoComplete="off"  value={accountNumber} onChange={onChangeAccountNumber} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" value={accountNumber} onChange={onChangeAccountNumber} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                     </Form.Item>
                     <Form.Item label="Spend Account Name" name="accountName" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
-                        <Input autoComplete="off" value={accountName} onChange={onChangeAccountName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" value={accountName} onChange={onChangeAccountName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                     </Form.Item>
-                    <Form.Item label="Pixel ID" name="pixelID">
-                        <Input autoComplete="off" value={pixelId} onChange={onChangePixelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    {/* <Form.Item label="Pixel ID" name="pixelID" rules={[{ required: true, message: 'Please input the Pixel ID!' }]}>
+                        <Input autoComplete="off" value={pixelId} onChange={onChangePixelId} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+                    </Form.Item> */}
+                    <Form.Item label="Pixel ID" rules={[{ required: true, message: 'Please input the Pixel ID!' }]}>
+                        {pixels.map((row, index) => (
+                            <div key={index} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+
+                                {/* Pixel Name */}
+                                {pixels.length > 1 && (
+                                    <Input
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }}
+                                        placeholder="Pixel Name"
+                                        value={row.pixelName}
+                                        required
+                                        onChange={(e) =>
+                                            handlePixelChange(index, "pixelName", e.target.value)
+                                        }
+                                    />
+                                )}
+
+                                {/* Pixel ID */}
+                                <Input
+                                    placeholder="Pixel ID"
+                                    required
+                                    value={row.pixelId}
+                                    onChange={(e) =>
+                                        handlePixelChange(index, "pixelId", e.target.value)
+                                    }
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }}
+                                />
+
+                                {/* Remove */}
+                                {pixels.length > 1 && (
+                                    <Button type='text' onClick={() => removePixelRow(index)} icon={<FaTrashCan color="#EC7117" />}>
+
+                                    </Button>
+                                )}
+
+                                {/* Add */}
+                                {index === pixels.length - 1 && (
+                                    <Button onClick={addPixelRow} icon={<PlusOutlined />} type="text" />
+
+
+                                )}
+                            </div>
+                        ))}
                     </Form.Item>
-                    <Form.Item label="Page ID" name="pageID">
-                        <Input autoComplete="off" value={pageId} onChange={onChangePagelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+
+                    {/* <Form.Item label="Page ID" name="pageID" rules={[{ required: true, message: 'Please input the Page ID!' }]}>
+                        <Input autoComplete="off" value={pageId} onChange={onChangePagelId} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+                    </Form.Item> */}
+                    {pages.length === 1 ? (
+                        <>
+                            <Form.Item
+                                label="Page ID"
+                                required
+                                style={{ marginTop: 8 }}
+                                rules={[{ required: true, message: 'Please input the Page ID!' }]}
+                            >
+                                <div style={{ display: "flex", gap: 8 }}>
+                                    <Input
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }}
+                                        placeholder="Page ID"
+                                        value={pages[0].pageId}
+                                        required
+                                        onChange={(e) =>
+                                            handlePageChange(0, "pageId", e.target.value)
+                                        }
+                                    />
+
+                                    {/* add second row */}
+                                    <Button
+                                        type="text"
+                                        onClick={addPage}
+                                        icon={<PlusOutlined />}
+                                    />
+                                </div>
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Page Name"
+                                required
+                                style={{ marginTop: 8 }}
+                                rules={[{ required: true, message: 'Please input the page name!' }]}
+                            >
+                                <Input
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }}
+                                    placeholder="Page Name"
+                                    value={pages[0].pageName}
+                                    required
+                                    onChange={(e) =>
+                                        handlePageChange(0, "pageName", e.target.value)
+                                    }
+                                />
+                            </Form.Item>
+                        </>
+                    ) : (
+                        <Form.Item label="Page IDs" rules={[{ required: true, message: 'Please input the Pixel ID!' }]}>
+                            {pages.map((p, index) => (
+                                <div key={index} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                                    <Input
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }}
+                                        placeholder="Page Name"
+                                        required
+                                        value={p.pageName}
+                                        onChange={(e) =>
+                                            handlePageChange(index, "pageName", e.target.value)
+                                        }
+                                    />
+
+                                    <Input
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }}
+                                        placeholder="Page ID"
+                                        value={p.pageId}
+                                        required
+                                        onChange={(e) =>
+                                            handlePageChange(index, "pageId", e.target.value)
+                                        }
+                                    />
+
+                                    <Button type="text" onClick={() => removePage(index)} icon={<FaTrashCan color="#EC7117" />}>
+                                    </Button>
+
+                                    {index === pages.length - 1 && (
+                                        <Button
+                                            type="text"
+                                            onClick={addPage}
+                                            icon={<PlusOutlined />}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </Form.Item>
+                    )}
+
+                    {/* <Form.Item label="Page Name" name="pageName" rules={[{ required: true, message: 'Please input the Page Name!' }]}>
+                        <Input autoComplete="off" value={pageName} onChange={onChangePageName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+                    </Form.Item> */}
+
+
+                    <Form.Item label="Agency Name" name="AgencyName" rules={[{ required: true, message: 'Please input the Agency Name!' }]}>
+                        <Input autoComplete="off" value={AgencyName} onChange={onChangeAgencyName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                     </Form.Item>
-                    <Form.Item label="Page Name" name="pageName">
-                        <Input autoComplete="off" value={pageName} onChange={onChangePageName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                    </Form.Item>
-                    <Form.Item label="Agency Name" name="AgencyName">
-                        <Input autoComplete="off" value={AgencyName} onChange={onChangeAgencyName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                    </Form.Item>
-                    <Form.Item label="BM name" name="BMName">
-                        <div ref={containerRef} className='form-item-bmname' style={{display:'flex'}}>
+                    <Form.Item label="BM name" name="BMName" rules={[{ required: true, message: 'Please input the BM Name!' }]}>
+                        <div ref={containerRef} className='form-item-bmname' style={{ display: 'flex' }}>
                             <Select
                                 showSearch
                                 placeholder="Select or add a value"
@@ -244,6 +537,8 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                                     backgroundColor: theme === "dark" ? "#333" : undefined,
                                     color: theme === "dark" ? "#fff" : undefined,
                                 }}
+                                className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                                    } green-border-select`}
                                 dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
                                 allowClear
                             >
@@ -253,8 +548,8 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                                     </Option>
                                 ))}
                             </Select>
-                            <Button style={{backgroundColor:'#91C25F', width:'24px', marginLeft:'5px'}} onClick={() => setIsModalOpen(true)}>
-                                <PlusOutlined  className="black-icon"/>
+                            <Button style={{ backgroundColor: '#91C25F', width: '24px', marginLeft: '5px' }} onClick={() => setIsModalOpen(true)}>
+                                <PlusOutlined className="black-icon" />
                             </Button>
                         </div>
 
@@ -274,7 +569,7 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                                 top: `${modalPosition.top - 50}px`, // Offset the modal above the Select
                                 left: `${modalPosition.left}px`,
                                 transform: "translateY(0)",
-                                width:'200px'
+                                width: '200px'
                             }}
                         >
                             <Input
@@ -284,17 +579,17 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                             />
                         </Modal>
                     </Form.Item>
-                    { !(newOptions.includes(BMName)) && 
-                    <Form.Item label="BM ID" name="BMId" rules={[{ required: true, message: 'Please input the BM ID!' }]}>
-                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                    </Form.Item>
+                    {!(newOptions.includes(BMName)) &&
+                        <Form.Item label="BM ID" name="BMId" rules={[{ required: true, message: 'Please input the BM ID!' }]}>
+                            <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+                        </Form.Item>
                     }
 
                     <Form.Item label="Time zone" name="timeZone" value={timeZone}>
                         <Select
                             showSearch
                             onChange={onChangeTimeZone}
-                            style={{ 
+                            style={{
                                 width: '100%',
                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                 color: theme === 'dark' && '#fff',
@@ -302,6 +597,8 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                             placeholder="Select Timezone"
                             optionFilterProp="label"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                                } green-border-select`}
                             defaultValue="UTC"
                             options={timezones.map((item) => ({
                                 value: item,
@@ -313,6 +610,8 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                     <Form.Item label="Status" name="status" value={status}>
                         <Select placeholder="Select a status"
                             defaultValue="Active" onChange={onChangeStatus}
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                                } green-border-select`}
                             title=''
                             style={{
                                 backgroundColor: theme === 'dark' && '#333', // Background color
@@ -326,8 +625,10 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                     <Form.Item label="Revenue partner" name="revenuePartner" value={revenuePartner} >
                         <Select
                             showSearch
+                            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                                } green-border-select`}
                             onChange={onChangeRevenuePartner}
-                            style={{ 
+                            style={{
                                 width: '100%',
                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                 color: theme === 'dark' && '#fff',
@@ -344,13 +645,13 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                         />
                     </Form.Item>
                     <Form.Item label="Media Buyer Name" name="MediaBuyerName" rules={[{ required: true, message: 'Please input the Media Buyer Name ID!' }]}>
-                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                     </Form.Item>
                     <Form.Item label="Holder" name="Holder" rules={[{ required: true, message: 'Please input the Holder Name ID!' }]}>
-                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                     </Form.Item>
                     <Form.Item>
-                        <Button style={{backgroundColor:'#91C25F'}} onClick={showModal}>Submit</Button>
+                        <Button style={{ backgroundColor: '#91C25F' }} onClick={showModal}>Submit</Button>
                     </Form.Item>
                 </Form>
             </Drawer>
