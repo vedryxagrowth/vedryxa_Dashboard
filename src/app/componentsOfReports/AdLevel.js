@@ -657,15 +657,15 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
-    filter: "agTextColumnFilter",
-    filterValueGetter: (params) => {
-      if (params.node.group) {
-        // Use the group key (campaign name)
-        return params.node.key;
-      }
-      // For leaf rows, use the campaign_name or any field
-      return params.data?.adname || '';
-    },
+    // filter: "agTextColumnFilter",
+    // filterValueGetter: (params) => {
+    //   if (params.node.group) {
+    //     // Use the group key (campaign name)
+    //     return params.node.key;
+    //   }
+    //   // For leaf rows, use the campaign_name or any field
+    //   return params.data?.adname || '';
+    // },
 
     // 🔁 Comparator now respects pin overrides so rows re-order immediately
     // comparator: (campaignA, campaignB, nodeA, nodeB) => {

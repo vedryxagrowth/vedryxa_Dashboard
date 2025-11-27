@@ -615,15 +615,15 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
-        filter: "agTextColumnFilter",
-        filterValueGetter: (params) => {
-            if (params.node.group) {
-                // Use the group key (campaign name)
-                return params.node.key;
-            }
-            // For leaf rows, use the campaign_name or any field
-            return params.data?.adsetname || '';
-        },
+        // filter: "agTextColumnFilter",
+        // filterValueGetter: (params) => {
+        //     if (params.node.group) {
+        //         // Use the group key (campaign name)
+        //         return params.node.key;
+        //     }
+        //     // For leaf rows, use the campaign_name or any field
+        //     return params.data?.adsetname || '';
+        // },
 
         // comparator: (campaignA, campaignB) => {
         //     if (!campaignA) return 1;

@@ -556,15 +556,15 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
-        filter: "agTextColumnFilter",
-        filterValueGetter: (params) => {
-            if (params.node.group) {
-                // Use the group key (campaign name)
-                return params.node.key;
-            }
-            // For leaf rows, use the campaign_name or any field
-            return params.data?.campaignname || '';
-        },
+        // filter: "agTextColumnFilter",
+        // filterValueGetter: (params) => {
+        //     if (params.node.group) {
+        //         // Use the group key (campaign name)
+        //         return params.node.key;
+        //     }
+        //     // For leaf rows, use the campaign_name or any field
+        //     return params.data?.campaignname || '';
+        // },
         // valueGetter: (params) => {
         //     const leaf = params.node.allLeafChildren?.[0]?.data;
         //     const campaignid = leaf?.campaignid;

@@ -582,15 +582,15 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
-        filter: "agTextColumnFilter",
-        filterValueGetter: (params) => {
-            if (params.node.group) {
-                // Use the group key (campaign name)
-                return params.node.key;
-            }
-            // For leaf rows, use the campaign_name or any field
-            return params.data?.adsetname || '';
-        },
+        // filter: "agTextColumnFilter",
+        // filterValueGetter: (params) => {
+        //     if (params.node.group) {
+        //         // Use the group key (campaign name)
+        //         return params.node.key;
+        //     }
+        //     // For leaf rows, use the campaign_name or any field
+        //     return params.data?.adsetname || '';
+        // },
         // filter: 'agTextColumnFilter',      // Enable string filter
         // floatingFilter: false,              // Optional: show quick filter below header
         // suppressMenu: false,
