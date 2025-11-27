@@ -72,6 +72,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
     const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
 
+    const [insideInput, setInsideInput] = useState("");
+
     const [dailyFixedFooter, setDailyFixedFooter] = useState([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,16 +102,61 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
 
     const memorizedColumnDef1 = useMemo(() => columnDefs.current, [columnDefs.current]);
-    const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
-        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+    // const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
+    //     const normalizedCampaign = each.campaignname.trim().toLowerCase();
+    //     const normalizedInput = inputValue.trim().toLowerCase();
+    //     return (
+    //         normalizedCampaign.startsWith(normalizedInput) ||
+    //         normalizedCampaign.includes(normalizedInput) ||
+    //         normalizedCampaign.endsWith(normalizedInput)
+    //     );
+    // }
+    // ), [dailyData, inputValue, theme]);
+
+    const memorizedDailyData = useMemo(() => {
+        let filtered = newRowDataForFilter.current || [];
+
         const normalizedInput = inputValue.trim().toLowerCase();
-        return (
-            normalizedCampaign.startsWith(normalizedInput) ||
-            normalizedCampaign.includes(normalizedInput) ||
-            normalizedCampaign.endsWith(normalizedInput)
-        );
-    }
-    ), [dailyData, inputValue, theme]);
+        const normalizedInside = insideInput.trim().toLowerCase();
+
+        // 1️⃣ FIRST FILTER → by inputValue (only adname)
+        if (normalizedInput) {
+            filtered = filtered.filter((each) => {
+                const adsetname = (each?.adsetname || "").trim().toLowerCase();
+                const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+                const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+                const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
+                return (
+                    adsetname.startsWith(normalizedInput) ||
+                    adsetname.includes(normalizedInput) ||
+                    adsetname.endsWith(normalizedInput) ||
+                    accountNumber.includes(normalizedInput) ||
+                    campaignId.includes(normalizedInput) ||
+                    adsetId.includes(normalizedInput)
+                );
+            });
+        }
+
+        // 2️⃣ SECOND FILTER → by insideInput (all fields)
+        if (normalizedInside) {
+            filtered = filtered.filter((each) => {
+                const adsetname = (each?.adsetname || "").trim().toLowerCase();
+                const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+                const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+                const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
+
+                return (
+                    adsetname.includes(normalizedInside) ||
+                    accountNumber.includes(normalizedInside) ||
+                    campaignId.includes(normalizedInside) ||
+                    adsetId.includes(normalizedInside)
+                );
+            });
+        }
+
+        return filtered;
+    }, [newRowDataForFilter.current, inputValue, insideInput]);
+
     const [leafCampaigns, setLeafCampaigns] = useState([]);
     const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
     const [comment, setComment] = useState("");
@@ -120,29 +167,29 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     const [bulkCategory, setBulkCategory] = useState("");
 
     // useEffect to show selected campaigns after clearing search
-    useEffect(() => {
-        const api = gridRef1.current?.api;
-        if (!api) return;
+    // useEffect(() => {
+    //     const api = gridRef1.current?.api;
+    //     if (!api) return;
 
-        if (inputValue.trim() === '' && selectedAdset.length > 0) {
-            const selectedIds = selectedAdset.map(item => item.adsetid);
-            const selectedOnly = dailyData.filter(item => selectedIds.includes(item.adsetid));
+    //     if (inputValue.trim() === '' && selectedAdset.length > 0) {
+    //         const selectedIds = selectedAdset.map(item => item.adsetid);
+    //         const selectedOnly = dailyData.filter(item => selectedIds.includes(item.adsetid));
 
-            // ✅ Replace rows
-            api.applyTransaction({ replace: true, data: selectedOnly });
+    //         // ✅ Replace rows
+    //         api.applyTransaction({ replace: true, data: selectedOnly });
 
-            // ✅ Reselect those rows
-            setTimeout(() => {
-                api.forEachNode((node) => {
-                    if (selectedIds.includes(node.data?.adsetid)) {
-                        node.setSelected(true);
-                    }
-                });
-            }, 0);
-        } else if (inputValue.trim() === '' && selectedAdset.length === 0) {
-            api.applyTransaction({ replace: true, data: dailyData });
-        }
-    }, [inputValue, selectedAdset, dailyData]);
+    //         // ✅ Reselect those rows
+    //         setTimeout(() => {
+    //             api.forEachNode((node) => {
+    //                 if (selectedIds.includes(node.data?.adsetid)) {
+    //                     node.setSelected(true);
+    //                 }
+    //             });
+    //         }, 0);
+    //     } else if (inputValue.trim() === '' && selectedAdset.length === 0) {
+    //         api.applyTransaction({ replace: true, data: dailyData });
+    //     }
+    // }, [inputValue, selectedAdset, dailyData]);
 
     useEffect(() => {
         setDailyFixedFooter(
@@ -343,6 +390,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 accountNumber: item.accountNumber,
                 campaignid: item.campaignid,
                 adsetid: item.adsetid,
+                campaignname: item.adsetname,
                 comment,
                 usercommit: userdetails?.email,
                 level: "adset"
@@ -350,7 +398,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             const resp = await apiClient.post(
                 '/Comments/upsertBulkNew',
-                { items }
+                { items, usercommit: userdetails?.email }
             );
 
             if (resp.status === 200 || resp.status === 201) {
@@ -381,6 +429,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                 campaignid: item.campaignid,
                                 Account: item.accountNumber,
                                 adsetid: item.adsetid,
+                                campaignname: item.adsetname,
                                 level: 'adset',
                                 comment,
                                 usercommit: userdetails?.email,
@@ -2588,12 +2637,23 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     //     }
     // }, [selectedCampaigns]);
 
-    useEffect(() => {
-        if (activeTab === "2") {
-            functionCall2();
-        }
+    const hasRunOnce2 = useRef(false);
+    const prevCampaigns2 = useRef(null);
 
-    }, [selectedCampaigns, activeTab]);
+    useEffect(() => {
+        if (activeTab !== "2") return;
+
+        const campsStr = JSON.stringify(selectedCampaigns);
+
+        const changed =
+            !hasRunOnce2.current || prevCampaigns2.current !== campsStr;
+
+        if (changed) {
+            functionCall2();
+            hasRunOnce2.current = true;
+            prevCampaigns2.current = campsStr;
+        }
+    }, [activeTab, selectedCampaigns]);
 
     useEffect(() => {
         // functionCall1();
@@ -3021,6 +3081,28 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col> */}
+
+                                <Col>
+                                    <Input
+                                        placeholder="Search..."
+                                        // prefix={<SearchOutlined />}
+                                        onChange={(value) => setInsideInput(value.target.value)}
+                                        // onBlur={handleBlur}
+                                        value={insideInput}
+                                        allowClear
+                                        className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
+                                        style={{
+                                            borderRadius: 8,
+                                            border: '1px solid #91C25F',
+                                            // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                                            // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            fontWeight: 500,
+                                            width: 120,
+                                            marginRight: '8px'
+                                        }}
+                                    />
+                                </Col>
                                 <Col>
                                     <Dropdown
                                         overlay={
@@ -3184,7 +3266,142 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                 </Col>
                             </Row>
                             {dailyData.length > 0 ?
-                                (<div
+                                (
+                                    <div
+                                        className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    >
+                                        <div className='table-container'>
+                                            <AgGridReact
+                                                ref={gridRef1}
+                                                className='custom-grid'
+                                                rowHeight={30}
+                                                context={context}
+                                                rowData={memorizedDailyData}
+                                                columnDefs={memorizedColumnDef1}
+                                                onCellClicked={onCellClicked}
+                                                groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                                                suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
+                                                rowSelection="multiple"
+                                                pagination={true}
+                                                paginationPageSize={200}
+                                                paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                                                groupDisplayType='multipleColumns'
+                                                suppressAggFuncInHeader={true}
+                                                groupSuppressBlankHeader={true}
+                                                defaultColDef={defaultColDef}
+                                                // groupIncludeFooter={true}
+                                                // groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                onSelectionChanged={onSelectionChanged}
+                                                onGridReady={(params) => {
+                                                    gridRef1.current = params.api; // Store grid API
+                                                    restoreGridState(gridRef1.current); // Restore state when grid is ready
+                                                    onGridReady(params, 'grid2', gridRef1);
+                                                    if (params.columnApi) {
+                                                        params.columnApi.autoSizeAllColumns();
+                                                    }
+                                                }}
+                                                gridOptions={{
+                                                    ...gridOptions1,
+                                                    ensureDomOrder: false,
+                                                    enableCharts: true,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
+                                                getMainMenuItems={getMainMenuItems}
+                                                pinnedBottomRowData={dailyFixedFooter}
+
+                                                // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                                onCellKeyDown={onCellKeyDown}
+                                                getRowStyle={params => {
+                                                    if (params.node.rowPinned) {
+                                                        return {
+                                                            // fontWeight: 'bold',
+                                                            backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                            color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                            height: '30px'
+                                                        };
+                                                    }
+
+                                                    return null;
+                                                }}
+                                                getCellStyle={(params) => {
+                                                    const isSelected = selectedCells.some(
+                                                        (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                                    );
+
+                                                    // ✅ Ensure first cell inside a group is highlighted
+                                                    const isFirstSelected = firstSelectedCell &&
+                                                        firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                                        firstSelectedCell.colId === params.column.getId();
+
+                                                    return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                                }}
+                                                onFilterChanged={(params) => {
+                                                    const api = params.api;
+                                                    const filteredData = [];
+                                                    // api.forEachNodeAfterFilterAndSort((node) => {
+                                                    //     if (!node.rowPinned) {
+                                                    //         filteredData.push(node.data);
+                                                    //     }
+                                                    // });
+                                                    const normalizedInput = inputValue.trim().toLowerCase();
+
+                                                    api.forEachNodeAfterFilterAndSort((node) => {
+                                                        // Check if node.data exists and has a valid campaignname
+                                                        if (node.data && node.data.campaignname) {
+                                                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                                                            // Apply both search and AG-Grid filters
+                                                            if (
+                                                                normalizedCampaign.startsWith(normalizedInput) ||
+                                                                normalizedCampaign.includes(normalizedInput) ||
+                                                                normalizedCampaign.endsWith(normalizedInput)
+                                                            ) {
+                                                                filteredData.push(node.data);
+                                                            }
+                                                        }
+                                                    });
+
+                                                    const updatedFooter = [
+                                                        {
+                                                            // [`${newtime}Date`]: 'Totals',
+                                                            campaignName: 'Total',
+                                                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                                                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                                                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                                                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                                                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                                                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                                                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                                                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                            tq: parseFloat(
+                                                                filteredData.reduce((acc, curr) => {
+                                                                    const tqValue = Number(curr?.tq);
+                                                                    return acc + (isNaN(tqValue) ? 0 : tqValue);
+                                                                }, 0).toFixed(2)
+                                                            ),
+                                                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                        },
+                                                    ];
+
+                                                    setDailyFixedFooter(updatedFooter);
+                                                }}
+                                            />
+                                        </div>
+
+                                    </div>
+                                ) :
+                                <div
                                     className={`ag-theme-alpine ag-container ${gridThemeClass}`}
                                 >
                                     <div className='table-container'>
@@ -3193,7 +3410,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                             className='custom-grid'
                                             rowHeight={30}
                                             context={context}
-                                            rowData={memorizedDailyData}
+                                            rowData={[]}
                                             columnDefs={memorizedColumnDef1}
                                             onCellClicked={onCellClicked}
                                             groupSelectsChildren={true} // ✅ Selects all children when a group is selected
@@ -3317,14 +3534,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                     </div>
 
                                 </div>
-                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                                    <Result
-                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                        icon={<SmileOutlined />}
-                                        title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    />
-                                </div>}
+                            }
                         </div>
 
                     ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>

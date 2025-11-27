@@ -92,7 +92,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
     const oneTimeFetch = useRef(true);
 
     const [apiStatus, setApiStatus] = useState(false);
-    const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") && localStorage.getItem("activeTab") !== "undefined" && localStorage.getItem("activeTab") !== "null" ? localStorage.getItem("activeTab") : "1");
+    const [activeTab, setActiveTab] = useState(localStorage.getItem("DailyActiveTab") && localStorage.getItem("DailyActiveTab") !== "undefined" && localStorage.getItem("DailyActiveTab") !== "null" ? localStorage.getItem("DailyActiveTab") : "1");
 
     const [selectedCampaigns, setSelectedCampaigns] = useState([]);
 
@@ -1313,7 +1313,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         activeKey={activeTab}
                         onChange={(key) => {
                             setActiveTab(key);
-                            localStorage.setItem('LiveActiveTab', key);
+                            localStorage.setItem('DailyActiveTab', key);
                         }}
                         items={carouselItems}
                         tabBarStyle={{

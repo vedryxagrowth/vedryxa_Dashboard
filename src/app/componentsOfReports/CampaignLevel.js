@@ -72,6 +72,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
 
+    const [insideInput, setInsideInput] = useState("");
+
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
     const [isLoading, setLoading] = useState(true);
@@ -114,16 +116,57 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
 
-    const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
-        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+    // const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
+    //     const normalizedCampaign = each.campaignname.trim().toLowerCase();
+    //     const normalizedInput = inputValue.trim().toLowerCase();
+    //     return (
+    //         normalizedCampaign.startsWith(normalizedInput) ||
+    //         normalizedCampaign.includes(normalizedInput) ||
+    //         normalizedCampaign.endsWith(normalizedInput)
+    //     );
+    // }
+    // ) : [], [rowData, inputValue, theme]);
+    const memorizedRowData = useMemo(() => {
+        let filtered = rowData || [];
+
         const normalizedInput = inputValue.trim().toLowerCase();
-        return (
-            normalizedCampaign.startsWith(normalizedInput) ||
-            normalizedCampaign.includes(normalizedInput) ||
-            normalizedCampaign.endsWith(normalizedInput)
-        );
-    }
-    ) : [], [rowData, inputValue, theme]);
+        const normalizedInside = insideInput.trim().toLowerCase();
+
+        // 1️⃣ FIRST FILTER → by inputValue (only adname)
+        if (normalizedInput) {
+            filtered = filtered.filter((each) => {
+                const campaignname = (each?.campaignname || "").trim().toLowerCase();
+                const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+                const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+                return (
+                    campaignname.startsWith(normalizedInput) ||
+                    campaignname.includes(normalizedInput) ||
+                    campaignname.endsWith(normalizedInput) ||
+                    accountNumber.includes(normalizedInput) ||
+                    campaignId.includes(normalizedInput)
+                );
+            });
+        }
+
+        // 2️⃣ SECOND FILTER → by insideInput (all fields)
+        if (normalizedInside) {
+            filtered = filtered.filter((each) => {
+                const campaignname = (each?.campaignname || "").trim().toLowerCase();
+                const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+                const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+
+                return (
+                    campaignname.includes(normalizedInside) ||
+                    accountNumber.includes(normalizedInside) ||
+                    campaignId.includes(normalizedInside)
+                    // adsetId.includes(normalizedInside) ||
+                    // adId.includes(normalizedInside)
+                );
+            });
+        }
+
+        return filtered;
+    }, [rowData, inputValue, insideInput]);
     const [leafCampaigns, setLeafCampaigns] = useState([]);
     const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
     const [comment, setComment] = useState("");
@@ -334,6 +377,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             arr.push({
                                 campaignid: item.campaignid,
                                 Account: item.accountNumber,
+                                campaignname: item.campaignname,
                                 level: 'campaign',
                                 comment,
                                 usercommit: userdetails?.email,
@@ -455,7 +499,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "http://localhost:8000/BulkUpdateCategory",
+                "/BulkUpdateCategory",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -2484,10 +2528,14 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     useEffect(() => {
         // functionCall1();
         console.log(campaignStatusFilter, "campaignStatusFilter");
+        console.log(campaignStatusFilter?.toUpperCase())
         if (campaignStatusFilter !== "All") {
             const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             setRowData(filteredByStatus);
+            // newRowDataForFilter.current = filteredByStatus;
+            // console.log(newRowDataForFilter.current)
         } else {
+            // console.log(newRowDataForFilter.current)
             setRowData(newRowDataForFilter.current);
         }
     }, [campaignStatusFilter]);
@@ -3005,7 +3053,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                     fontSize: "14px",
                                                 }}
                                             >
-                                                <RxSwitch size={20} style={{color: theme === "dark" ? "white" : "black"}} />
+                                                <RxSwitch size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
 
                                             </Tooltip>
 
@@ -3079,7 +3127,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                         fontSize: "18px",
                                                     }}
                                                 >
-                                                    <PushpinOutlined size={20} style={{color: theme === "dark" ? "white" : "black"}} />
+                                                    <PushpinOutlined size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
                                                 </button>
                                             </Tooltip>
                                             {/*  comment */}
@@ -3282,6 +3330,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                                 <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                     <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                </Col>
+                                <Col>
+                                    <Input
+                                        placeholder="Search..."
+                                        // prefix={<SearchOutlined />}
+                                        onChange={(value) => setInsideInput(value.target.value)}
+                                        // onBlur={handleBlur}
+                                        value={insideInput}
+                                        allowClear
+                                        className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
+                                        style={{
+                                            borderRadius: 8,
+                                            border: '1px solid #91C25F',
+                                            // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                                            // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            fontWeight: 500,
+                                            width: 120,
+                                            marginRight: '8px'
+                                        }}
+                                    />
                                 </Col>
                                 <Col>
                                     <Dropdown
@@ -3582,7 +3651,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                                     // </div>
                                 ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                                    {apiStatus === true ?
+                                    {/* {apiStatus === true ?
                                         <Result
                                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                             // icon={<SmileOutlined />}
@@ -3598,7 +3667,145 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             icon={<SmileOutlined />}
                                             title={`No LiveData for ${newaccount} to ${startDate}`}
                                         // extra={<Button type="primary">Next</Button>}
-                                        />)}
+                                        />)} */}
+                                    <div
+                                        className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    // style={{
+                                    //     width: '100%',
+                                    //     // borderRadius: 12,
+                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                    //     padding: 10,
+                                    //     height: 'auto',
+                                    //     boxShadow:
+                                    //     theme === 'dark'
+                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                    // }}
+                                    >
+                                        <div className='table-container'>
+                                            <AgGridReact
+                                                ref={gridRef}
+                                                suppressReactUi={true}
+                                                rowHeight={30}
+                                                className='custom-grid'
+                                                context={context}
+                                                rowData={[]}
+                                                rowSelection='multiple'
+                                                columnDefs={memorizedColumnDef}
+                                                defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                                                onCellClicked={onCellClickedLive}
+                                                pagination={true}
+                                                paginationPageSize={200}
+                                                paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                                                suppressAggFuncInHeader={true}
+                                                getMainMenuItems={getMainMenuItems}
+                                                groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                                                suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
+                                                // rowSelection="multiple"
+
+                                                // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                                // onCellKeyDown={onCellKeyDown}
+                                                // domLayout="normal"
+                                                // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                                                // groupIncludeFooter={rowData.length > 0 ? true : false}
+                                                // onRowSelected={onRowSelected}
+                                                onSelectionChanged={onSelectionChanged}
+                                                autoGroupColumnDef={autoGroupColumnDefLive}
+                                                onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                                                gridOptions={{
+                                                    ...gridOptions,
+                                                    ensureDomOrder: false,
+                                                    enableCharts: true,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                                                }}
+                                                frameworkComponents={{ GroupCellRenderer }}
+                                                groupDisplayType='multipleColumns'
+                                                // rowGroupPanelShow='always'
+                                                // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                                                pinnedBottomRowData={liveFixedFooter}
+                                                suppressCellSelection={true}
+                                                getRowStyle={(params) => {
+                                                    if (params.node.rowPinned) {
+
+                                                        return {
+                                                            // fontWeight: "bold",
+                                                            backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                                                            color: theme === "dark" ? "#fff" : "#000",
+                                                            height: '30px'
+                                                        };
+                                                    }
+                                                    return null; // Keep other row styles unchanged
+                                                }}
+                                                getCellStyle={(params) => {
+                                                    const isSelected = selectedCells.some(
+                                                        (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                                    );
+
+                                                    // ✅ Ensure first cell inside a group is highlighted
+                                                    const isFirstSelected = firstSelectedCell &&
+                                                        firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                                        firstSelectedCell.colId === params.column.getId();
+
+                                                    return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                                }}
+                                                onFilterChanged={(params) => {
+                                                    const api = params.api;
+                                                    const filteredData = [];
+                                                    // api.forEachNodeAfterFilterAndSort((node) => {
+                                                    //     if (!node.rowPinned) {
+                                                    //         filteredData.push(node.data);
+                                                    //     }
+                                                    // });
+                                                    const normalizedInput = inputValue.trim().toLowerCase();
+
+                                                    api.forEachNodeAfterFilterAndSort((node) => {
+                                                        if (node.data && node.data.campaignname) {
+                                                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                                                            // Apply search and filter conditions
+                                                            if (
+                                                                normalizedCampaign.startsWith(normalizedInput) ||
+                                                                normalizedCampaign.includes(normalizedInput) ||
+                                                                normalizedCampaign.endsWith(normalizedInput)
+                                                            ) {
+                                                                filteredData.push(node.data);
+                                                            }
+                                                        }
+                                                    });
+
+                                                    const updatedFooter = [
+                                                        {
+                                                            // [`${newtime}Date`]: 'Totals',
+                                                            campaignName: 'Total',
+                                                            actions: "",
+                                                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                                                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                                                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                                                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                                                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                                                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                                                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                                                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                        },
+                                                    ];
+
+                                                    setLiveFixedFooter(updatedFooter);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>}
                         </div>
                         :

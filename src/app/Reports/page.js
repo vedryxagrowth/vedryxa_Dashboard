@@ -13123,7 +13123,7 @@ const MyTablePage = () => {
         // console.log(response.data);
         mainDataRef.current = updateDataArray;
         setColumnDefs(getColumnDefs(updateDataArray));
-        columnDefs1.current = (getColumnDefs1(updateDataArray));
+        columnDefs1.current = (getColumnDefs2(updateDataArray));
         columnDefs2.current = (getColumnDefs2(updateDataArray));
         columnDefs3.current = (getColumnDefs3(updateDataArray));
         columnDefs4.current = (getColumnDefs4(updateDataArray));
@@ -14615,11 +14615,11 @@ const MyTablePage = () => {
 
                             // 👇 Show first account + count
                             value={
-                                newaccount?.length === 0
+                                account?.length === 0
                                     ? undefined
-                                    : newaccount?.length === 1
-                                        ? newaccount[0] // just that account number
-                                        : `${newaccount[0]}, +${newaccount?.length - 1} more`
+                                    : account?.length === 1
+                                        ? account[0] // just that account number
+                                        : `${account[0]}, +${account?.length - 1} more`
                             }
 
                             dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}

@@ -98,55 +98,63 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
   const accountStatus = useRef('-');
 
   const memorizedColumnDef1 = useMemo(() => columnDefs.current, [columnDefs.current]);
-  const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
-    const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
-    const normalizedInput = inputValue.trim().toLowerCase();
-    return (
-      normalizedCampaign.startsWith(normalizedInput) ||
-      normalizedCampaign.includes(normalizedInput) ||
-      normalizedCampaign.endsWith(normalizedInput)
-    );
-  }
-  ), [dailyData, inputValue, theme]);
-  //   const memorizedDailyData = useMemo(() => {
-  //   let filtered = newRowDataForFilter.current || [];
-
+  // const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
+  //   const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
   //   const normalizedInput = inputValue.trim().toLowerCase();
-  //   const normalizedInside = insideInput.trim().toLowerCase();
+  //   return (
+  //     normalizedCampaign.startsWith(normalizedInput) ||
+  //     normalizedCampaign.includes(normalizedInput) ||
+  //     normalizedCampaign.endsWith(normalizedInput)
+  //   );
+  // }
+  // ), [dailyData, inputValue, theme]);
+    const memorizedDailyData = useMemo(() => {
+    let filtered = newRowDataForFilter.current || [];
 
-  //   // 1️⃣ FIRST FILTER → by inputValue (only adname)
-  //   if (normalizedInput) {
-  //     filtered = filtered.filter((each) => {
-  //       const adname = (each?.adname || "").trim().toLowerCase();
-  //       return (
-  //         adname.startsWith(normalizedInput) ||
-  //         adname.includes(normalizedInput) ||
-  //         adname.endsWith(normalizedInput)
-  //       );
-  //     });
-  //   }
+    const normalizedInput = inputValue.trim().toLowerCase();
+    const normalizedInside = insideInput.trim().toLowerCase();
 
-  //   // 2️⃣ SECOND FILTER → by insideInput (all fields)
-  //   if (normalizedInside) {
-  //     filtered = filtered.filter((each) => {
-  //       const adname = (each?.adname || "").trim().toLowerCase();
-  //       const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
-  //       const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
-  //       const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
-  //       const adId = (each?.adid || "").toString().trim().toLowerCase();
+    // 1️⃣ FIRST FILTER → by inputValue (only adname)
+    if (normalizedInput) {
+      filtered = filtered.filter((each) => {
+        const adname = (each?.adname || "").trim().toLowerCase();
+        const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+        const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+        const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
+        const adId = (each?.adid || "").toString().trim().toLowerCase();
+        return (
+          adname.startsWith(normalizedInput) ||
+          adname.includes(normalizedInput) ||
+          adname.endsWith(normalizedInput) ||
+          accountNumber.includes(normalizedInput) ||
+          campaignId.includes(normalizedInput) ||
+          adsetId.includes(normalizedInput) ||
+          adId.includes(normalizedInput)
+        );
+      });
+    }
 
-  //       return (
-  //         adname.includes(normalizedInside) ||
-  //         accountNumber.includes(normalizedInside) ||
-  //         campaignId.includes(normalizedInside) ||
-  //         adsetId.includes(normalizedInside) ||
-  //         adId.includes(normalizedInside)
-  //       );
-  //     });
-  //   }
+    // 2️⃣ SECOND FILTER → by insideInput (all fields)
+    if (normalizedInside) {
+      filtered = filtered.filter((each) => {
+        const adname = (each?.adname || "").trim().toLowerCase();
+        const accountNumber = (each?.accountNumber || "").toString().trim().toLowerCase();
+        const campaignId = (each?.campaignid || "").toString().trim().toLowerCase();
+        const adsetId = (each?.adsetid || "").toString().trim().toLowerCase();
+        const adId = (each?.adid || "").toString().trim().toLowerCase();
 
-  //   return filtered;
-  // }, [newRowDataForFilter, inputValue, insideInput]);
+        return (
+          adname.includes(normalizedInside) ||
+          accountNumber.includes(normalizedInside) ||
+          campaignId.includes(normalizedInside) ||
+          adsetId.includes(normalizedInside) ||
+          adId.includes(normalizedInside)
+        );
+      });
+    }
+
+    return filtered;
+  }, [newRowDataForFilter.current, inputValue, insideInput]);
   const [selectedAd, setSelectedAd] = useState([]);
   const [leafCampaigns, setLeafCampaigns] = useState([])
   const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
@@ -421,7 +429,9 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
         content: 'Saving comments for selected adsets...',
         key: 'bulkCommentAdset'
       });
- 
+
+
+
       const items = leafCampaigns.map(item => ({
         accountNumber: item.accountNumber,
         campaignid: item.campaignid,
@@ -432,19 +442,19 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
         usercommit: userdetails?.email,
         level: "ad"
       }));
- 
+
       const resp = await apiClient.post(
         '/Comments/upsertBulkNew',
-        { items }
+        { items, usercommit: userdetails?.email, }
       );
- 
+
       if (resp.status === 200 || resp.status === 201) {
         const timeStamp = moment().tz('Asia/Kolkata')
           .format('YYYY-MM-DD hh:mm:ss A');
- 
+
         setCampaignComments(prev => {
           const arr = [...prev];
- 
+
           leafCampaigns.forEach(item => {
             const idx = arr.findIndex(
               i =>
@@ -454,7 +464,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 String(i.ad_id) === String(item.adid) &&
                 i.level === 'ad'
             );
- 
+
             if (idx >= 0) {
               arr[idx] = {
                 ...arr[idx],
@@ -476,25 +486,25 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               });
             }
           });
- 
+
           return arr;
         });
- 
+
         message.success({
           content: `${leafCampaigns.length} comment(s) saved successfully`,
           key: 'bulkCommentAdset',
           duration: 3
         });
- 
+
         setIsBulkCommentModalVisible(false);
       }
- 
+
     } catch (error) {
       console.error('Bulk adset comment error:', error);
       message.error('Error while saving comments for selected adsets.');
     }
   };
-  
+
   const handleBulkAdStatusSubmit = async () => {
     try {
       setConfirmBulkLoading(true);
@@ -671,15 +681,15 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
-    filter: "agTextColumnFilter",
-    filterValueGetter: (params) => {
-      if (params.node.group) {
-        // Use the group key (campaign name)
-        return params.node.key;
-      }
-      // For leaf rows, use the campaign_name or any field
-      return params.data?.adname || '';
-    },
+    // filter: "agTextColumnFilter",
+    // filterValueGetter: (params) => {
+    //   if (params.node.group) {
+    //     // Use the group key (campaign name)
+    //     return params.node.key;
+    //   }
+    //   // For leaf rows, use the campaign_name or any field
+    //   return params.data?.adname || '';
+    // },
 
     // comparator: (campaignA, campaignB) => {
     //   if (!campaignA) return 1;
@@ -2591,15 +2601,40 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     setApiStatus(false);
   }
 
+  // useEffect(() => {
+  //   if (activeTab === "3") {
+  //     functionCall2();
+  //   }
+  //   // if(selectedAdsets){
+  //   // functionCall2();
+  //   // oneTimeFetch.current = false;
+  //   // }
+  // }, [selectedAdsets, selectedCampaigns, activeTab]);
+
+  const ranOnce = useRef(false);
+  const prevAdsets = useRef(null);
+  const prevCampaigns = useRef(null);
+
   useEffect(() => {
-    if (activeTab === "3") {
+    if (activeTab !== "3") return; // only care when tab 3 is active
+
+    const adsetsStr = JSON.stringify(selectedAdsets);
+    const campsStr = JSON.stringify(selectedCampaigns);
+
+    const changed =
+      !ranOnce.current ||
+      prevAdsets.current !== adsetsStr ||
+      prevCampaigns.current !== campsStr;
+
+    if (changed) {
       functionCall2();
+
+      // mark current values as seen
+      ranOnce.current = true;
+      prevAdsets.current = adsetsStr;
+      prevCampaigns.current = campsStr;
     }
-    // if(selectedAdsets){
-    // functionCall2();
-    // oneTimeFetch.current = false;
-    // }
-  }, [selectedAdsets, selectedCampaigns, activeTab]);
+  }, [activeTab, selectedAdsets, selectedCampaigns]);
 
   useEffect(() => {
     // functionCall1();
@@ -3015,7 +3050,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                                             <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col> */}
 
-                  {/* <Col>
+                  <Col>
                     <Input
                       placeholder="Search..."
                       // prefix={<SearchOutlined />}
@@ -3035,7 +3070,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                         marginRight: '8px'
                       }}
                     />
-                  </Col> */}
+                  </Col>
                   <Col>
                     <Dropdown
                       overlay={
@@ -3198,192 +3233,341 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 </Row>
               </div>
 
-              {dailyData?.length > 0 ? (<div
-                className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-              // style={{
-              //     width: '100%',
-              //     // borderRadius: 12,
-              //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-              //     padding: 10,
-              //     height: 'auto',
-              //     boxShadow:
-              //     theme === 'dark'
-              //         ? '0 1px 3px rgba(0,0,0,0.6)'
-              //         : '0 1px 6px rgba(0,0,0,0.08)',
-              // }}
-              >
+              {dailyData?.length > 0 ? (
+                <div
+                  className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                // style={{
+                //     width: '100%',
+                //     // borderRadius: 12,
+                //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                //     padding: 10,
+                //     height: 'auto',
+                //     boxShadow:
+                //     theme === 'dark'
+                //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                //         : '0 1px 6px rgba(0,0,0,0.08)',
+                // }}
+                >
 
-                <div className='table-container'>
-                  <AgGridReact
-                    ref={gridRef1}
-                    rowHeight={30}
-                    className='custom-grid'
-                    rowData={memorizedDailyData}
-                    columnDefs={memorizedColumnDef1}
-                    onCellClicked={onCellClicked}
-                    context={context}
-                    pagination={true}
-                    paginationPageSize={200}
-                    paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
-                    groupDisplayType='multipleColumns'
-                    suppressAggFuncInHeader={true}
-                    suppressCellSelection={true}
-                    groupSuppressBlankHeader={true}
-                    defaultColDef={defaultColDef}
-                    rowSelection='multiple'
-                    onSelectionChanged={onSelectionChanged}
-                    groupSelectsChildren={true} // ✅ Selects all children when a group is selected
-                    suppressRowClickSelection={true}
-                    // groupIncludeFooter={true}
-                    // groupIncludeTotalFooter={true}
-                    autoGroupColumnDef={autoGroupColumnDef}
-                    onGridReady={(params) => {
-                      gridRef1.current = params.api; // Store grid API
-                      restoreGridState(gridRef1.current); // Restore state when grid is ready
-                      onGridReady(params, 'grid2', gridRef1);
-                      if (params.columnApi) {
-                        params.columnApi.autoSizeAllColumns();
-                      }
-                    }}
-                    gridOptions={{
-                      ...gridOptions1,
-                      ensureDomOrder: false,
-                      enableCharts: true,
-                      suppressRowClickSelection: true,
-                      suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                      enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                    }}
-                    getMainMenuItems={getMainMenuItems}
-                    pinnedBottomRowData={dailyFixedFooter}
-
-                    // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                    onCellKeyDown={onCellKeyDown}
-                    getRowStyle={params => {
-                      if (params.node.rowPinned) {
-                        return {
-                          // fontWeight: 'bold',
-                          backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                          color: theme === "dark" ? '#fff' : '#000',
-                          height: '30px'         // Text color should contrast with the background
-                        };
-                      }
-
-                      return null;
-                    }}
-                    getCellStyle={(params) => {
-                      const isSelected = selectedCells.some(
-                        (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                      );
-
-                      // ✅ Ensure first cell inside a group is highlighted
-                      const isFirstSelected = firstSelectedCell &&
-                        firstSelectedCell.rowIndex === params.node.rowIndex &&
-                        firstSelectedCell.colId === params.column.getId();
-
-                      return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                    }}
-                    onFilterChanged={(params) => {
-                      const api = params.api;
-                      const filteredData = [];
-                      // api.forEachNodeAfterFilterAndSort((node) => {
-                      //     if (!node.rowPinned) {
-                      //         filteredData.push(node.data);
-                      //     }
-                      // });
-                      const normalizedInput = inputValue.trim().toLowerCase();
-
-                      api.forEachNodeAfterFilterAndSort((node) => {
-                        // Check if node.data exists and has a valid campaignname
-                        if (node.data && node.data.campaignname) {
-                          const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-
-                          // Apply both search and AG-Grid filters
-                          if (
-                            normalizedCampaign.startsWith(normalizedInput) ||
-                            normalizedCampaign.includes(normalizedInput) ||
-                            normalizedCampaign.endsWith(normalizedInput)
-                          ) {
-                            filteredData.push(node.data);
-                          }
+                  <div className='table-container'>
+                    <AgGridReact
+                      ref={gridRef1}
+                      rowHeight={30}
+                      className='custom-grid'
+                      rowData={memorizedDailyData}
+                      columnDefs={memorizedColumnDef1}
+                      onCellClicked={onCellClicked}
+                      context={context}
+                      pagination={true}
+                      paginationPageSize={200}
+                      paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                      groupDisplayType='multipleColumns'
+                      suppressAggFuncInHeader={true}
+                      suppressCellSelection={true}
+                      groupSuppressBlankHeader={true}
+                      defaultColDef={defaultColDef}
+                      rowSelection='multiple'
+                      onSelectionChanged={onSelectionChanged}
+                      groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                      suppressRowClickSelection={true}
+                      // groupIncludeFooter={true}
+                      // groupIncludeTotalFooter={true}
+                      autoGroupColumnDef={autoGroupColumnDef}
+                      onGridReady={(params) => {
+                        gridRef1.current = params.api; // Store grid API
+                        restoreGridState(gridRef1.current); // Restore state when grid is ready
+                        onGridReady(params, 'grid2', gridRef1);
+                        if (params.columnApi) {
+                          params.columnApi.autoSizeAllColumns();
                         }
-                      });
+                      }}
+                      gridOptions={{
+                        ...gridOptions1,
+                        ensureDomOrder: false,
+                        enableCharts: true,
+                        suppressRowClickSelection: true,
+                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                      }}
+                      getMainMenuItems={getMainMenuItems}
+                      pinnedBottomRowData={dailyFixedFooter}
 
-                      // Step 1: Group rows by adname
-                      // const groupedTQMap = new Map();
+                      // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                      onCellKeyDown={onCellKeyDown}
+                      getRowStyle={params => {
+                        if (params.node.rowPinned) {
+                          return {
+                            // fontWeight: 'bold',
+                            backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                            color: theme === "dark" ? '#fff' : '#000',
+                            height: '30px'         // Text color should contrast with the background
+                          };
+                        }
 
-                      // filteredData.forEach((row) => {
-                      // if (!groupedTQMap.has(row.adname)) {
-                      //     groupedTQMap.set(row.adname, 0);
-                      // }
-                      // const currentTQ = groupedTQMap.get(row.adname);
-                      // groupedTQMap.set(row.adname, currentTQ + (isNaN(row.tq) ? 0 : Number(row.tq)));
-                      // });
+                        return null;
+                      }}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                          (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                        );
 
-                      // Step 2: Compute average of grouped totals
-                      // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
-                      // const averageGroupedTQ = groupedTQMap.size > 0 ? (totalGroupedSum / groupedTQMap.size).toFixed(2) : "0.00";
+                        // ✅ Ensure first cell inside a group is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                          firstSelectedCell.rowIndex === params.node.rowIndex &&
+                          firstSelectedCell.colId === params.column.getId();
 
-                      const updatedFooter = [
-                        {
-                          // [`${newtime}Date`]: 'Totals',
-                          campaignName: 'Total',
-                          spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                          revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                          profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                          margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                          rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                          cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                          ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                          fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                          conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                          fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                          roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                          cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                          cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                          fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                          fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                          impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                          ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
-                          // tq: averageGroupedTQ,
-                          M_tq: (() => {
-                            const nonZero = filteredData.filter(d => parseFloat(d?.M_tq) > 0);
-                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq || 0), 0);
-                            return parseFloat((total / (nonZero.length || 1)).toFixed(2));
-                          })(),
-                          D_tq: (() => {
-                            const nonZero = filteredData.filter(d => parseFloat(d?.D_tq) > 0);
-                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq || 0), 0);
-                            return parseFloat((total / (nonZero.length || 1)).toFixed(2));
-                          })(),
-                        },
-                      ];
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                      }}
+                      onFilterChanged={(params) => {
+                        const api = params.api;
+                        const filteredData = [];
+                        // api.forEachNodeAfterFilterAndSort((node) => {
+                        //     if (!node.rowPinned) {
+                        //         filteredData.push(node.data);
+                        //     }
+                        // });
+                        const normalizedInput = inputValue.trim().toLowerCase();
 
-                      setDailyFixedFooter(updatedFooter);
-                    }}
-                  />
+                        api.forEachNodeAfterFilterAndSort((node) => {
+                          // Check if node.data exists and has a valid campaignname
+                          if (node.data && node.data.campaignname) {
+                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                            // Apply both search and AG-Grid filters
+                            if (
+                              normalizedCampaign.startsWith(normalizedInput) ||
+                              normalizedCampaign.includes(normalizedInput) ||
+                              normalizedCampaign.endsWith(normalizedInput)
+                            ) {
+                              filteredData.push(node.data);
+                            }
+                          }
+                        });
+
+                        // Step 1: Group rows by adname
+                        // const groupedTQMap = new Map();
+
+                        // filteredData.forEach((row) => {
+                        // if (!groupedTQMap.has(row.adname)) {
+                        //     groupedTQMap.set(row.adname, 0);
+                        // }
+                        // const currentTQ = groupedTQMap.get(row.adname);
+                        // groupedTQMap.set(row.adname, currentTQ + (isNaN(row.tq) ? 0 : Number(row.tq)));
+                        // });
+
+                        // Step 2: Compute average of grouped totals
+                        // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
+                        // const averageGroupedTQ = groupedTQMap.size > 0 ? (totalGroupedSum / groupedTQMap.size).toFixed(2) : "0.00";
+
+                        const updatedFooter = [
+                          {
+                            // [`${newtime}Date`]: 'Totals',
+                            campaignName: 'Total',
+                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                            // tq: averageGroupedTQ,
+                            M_tq: (() => {
+                              const nonZero = filteredData.filter(d => parseFloat(d?.M_tq) > 0);
+                              const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq || 0), 0);
+                              return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                            })(),
+                            D_tq: (() => {
+                              const nonZero = filteredData.filter(d => parseFloat(d?.D_tq) > 0);
+                              const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq || 0), 0);
+                              return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                            })(),
+                          },
+                        ];
+
+                        setDailyFixedFooter(updatedFooter);
+                      }}
+                    />
+                  </div>
+
                 </div>
+              ) :
+                <div
+                  className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                // style={{
+                //     width: '100%',
+                //     // borderRadius: 12,
+                //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                //     padding: 10,
+                //     height: 'auto',
+                //     boxShadow:
+                //     theme === 'dark'
+                //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                //         : '0 1px 6px rgba(0,0,0,0.08)',
+                // }}
+                >
 
-              </div>
-              ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                {apiStatus === true ?
-                  <Result
-                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                    // icon={<SmileOutlined />}
-                    title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                    extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                  /> :
-                  (startDate !== endDate ? <Result
-                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                    icon={<SmileOutlined />}
-                    title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
-                  // extra={<Button type="primary">Next</Button>}
-                  /> : <Result
-                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                    icon={<SmileOutlined />}
-                    title={`No DailyData for ${newaccount} to ${startDate}`}
-                  // extra={<Button type="primary">Next</Button>}
-                  />)}
-              </div>}
+                  <div className='table-container'>
+                    <AgGridReact
+                      ref={gridRef1}
+                      rowHeight={30}
+                      className='custom-grid'
+                      rowData={[]}
+                      columnDefs={memorizedColumnDef1}
+                      onCellClicked={onCellClicked}
+                      context={context}
+                      pagination={true}
+                      paginationPageSize={200}
+                      paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
+                      groupDisplayType='multipleColumns'
+                      suppressAggFuncInHeader={true}
+                      suppressCellSelection={true}
+                      groupSuppressBlankHeader={true}
+                      defaultColDef={defaultColDef}
+                      rowSelection='multiple'
+                      onSelectionChanged={onSelectionChanged}
+                      groupSelectsChildren={true} // ✅ Selects all children when a group is selected
+                      suppressRowClickSelection={true}
+                      // groupIncludeFooter={true}
+                      // groupIncludeTotalFooter={true}
+                      autoGroupColumnDef={autoGroupColumnDef}
+                      onGridReady={(params) => {
+                        gridRef1.current = params.api; // Store grid API
+                        restoreGridState(gridRef1.current); // Restore state when grid is ready
+                        onGridReady(params, 'grid2', gridRef1);
+                        if (params.columnApi) {
+                          params.columnApi.autoSizeAllColumns();
+                        }
+                      }}
+                      gridOptions={{
+                        ...gridOptions1,
+                        ensureDomOrder: false,
+                        enableCharts: true,
+                        suppressRowClickSelection: true,
+                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                      }}
+                      getMainMenuItems={getMainMenuItems}
+                      pinnedBottomRowData={dailyFixedFooter}
+
+                      // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                      onCellKeyDown={onCellKeyDown}
+                      getRowStyle={params => {
+                        if (params.node.rowPinned) {
+                          return {
+                            // fontWeight: 'bold',
+                            backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                            color: theme === "dark" ? '#fff' : '#000',
+                            height: '30px'         // Text color should contrast with the background
+                          };
+                        }
+
+                        return null;
+                      }}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                          (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                        );
+
+                        // ✅ Ensure first cell inside a group is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                          firstSelectedCell.rowIndex === params.node.rowIndex &&
+                          firstSelectedCell.colId === params.column.getId();
+
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                      }}
+                      onFilterChanged={(params) => {
+                        const api = params.api;
+                        const filteredData = [];
+                        // api.forEachNodeAfterFilterAndSort((node) => {
+                        //     if (!node.rowPinned) {
+                        //         filteredData.push(node.data);
+                        //     }
+                        // });
+                        const normalizedInput = inputValue.trim().toLowerCase();
+
+                        api.forEachNodeAfterFilterAndSort((node) => {
+                          // Check if node.data exists and has a valid campaignname
+                          if (node.data && node.data.campaignname) {
+                            const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+
+                            // Apply both search and AG-Grid filters
+                            if (
+                              normalizedCampaign.startsWith(normalizedInput) ||
+                              normalizedCampaign.includes(normalizedInput) ||
+                              normalizedCampaign.endsWith(normalizedInput)
+                            ) {
+                              filteredData.push(node.data);
+                            }
+                          }
+                        });
+
+                        // Step 1: Group rows by adname
+                        // const groupedTQMap = new Map();
+
+                        // filteredData.forEach((row) => {
+                        // if (!groupedTQMap.has(row.adname)) {
+                        //     groupedTQMap.set(row.adname, 0);
+                        // }
+                        // const currentTQ = groupedTQMap.get(row.adname);
+                        // groupedTQMap.set(row.adname, currentTQ + (isNaN(row.tq) ? 0 : Number(row.tq)));
+                        // });
+
+                        // Step 2: Compute average of grouped totals
+                        // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
+                        // const averageGroupedTQ = groupedTQMap.size > 0 ? (totalGroupedSum / groupedTQMap.size).toFixed(2) : "0.00";
+
+                        const updatedFooter = [
+                          {
+                            // [`${newtime}Date`]: 'Totals',
+                            campaignName: 'Total',
+                            spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                            revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                            profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                            margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                            rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                            cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                            ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                            fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                            conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                            fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                            cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                            cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                            fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                            fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                            impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                            // tq: averageGroupedTQ,
+                            M_tq: (() => {
+                              const nonZero = filteredData.filter(d => parseFloat(d?.M_tq) > 0);
+                              const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq || 0), 0);
+                              return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                            })(),
+                            D_tq: (() => {
+                              const nonZero = filteredData.filter(d => parseFloat(d?.D_tq) > 0);
+                              const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq || 0), 0);
+                              return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                            })(),
+                          },
+                        ];
+
+                        setDailyFixedFooter(updatedFooter);
+                      }}
+                    />
+                  </div>
+
+                </div>
+              }
             </div>
             : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
               <Result

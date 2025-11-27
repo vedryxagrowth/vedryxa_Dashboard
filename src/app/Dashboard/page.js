@@ -2307,17 +2307,17 @@ const Dashboard = () => {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             color: theme === 'dark' ? 'white' : 'black',
-
+                            width:"100%"
                         }}
                     >
-                        <Divider style={{ color: theme === 'dark' ? 'white' : 'black' }}>
+                        <Divider style={{ color: theme === 'dark' ? 'white' : 'black',  fontSize:"16px" }}>
                             <Checkbox
                                 checked={allSelected}
                                 onChange={(e) => handleSelectAllChange(e.target.checked, category)}
                                 style={{ marginRight: '5px' }}
                                 className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light'}
                             />
-                            {category}
+                            <span style={{ fontSize:"16px"}}>{category}</span>
 
                         </Divider>
                     </div>
@@ -2337,20 +2337,20 @@ const Dashboard = () => {
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            padding: '5px 10px',
+                                            paddingLeft: '5px',
                                             borderBottom: '1px solid #ddd',
                                         }}>
                                             <div style={{ display: 'flex' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', marginRight: '5px' }}>
-                                                    <span style={{ fontWeight: '600' }}>{accountNumber}</span>
+                                                    <span style={{ fontWeight: '600'}}>{accountNumber}</span>
                                                     <span>{item.accountName || ''}</span>
 
                                                 </div>
                                                 <div>
                                                     {item.status === 'Active' ? (
-                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 14 }} />
                                                     ) : (
-                                                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
+                                                        <CloseCircleFilled style={{ color: '#EC7117', fontSize: 14 }} />
                                                     )}
                                                 </div>
                                             </div>
@@ -5225,7 +5225,7 @@ const Dashboard = () => {
                                 </div>
 
                                 <div style={{
-                                    width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
+                                    width: '65%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
                                     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#dbd9d9ff',
                                     padding: "10px",
                                     marginBottom: '5px',
@@ -5298,7 +5298,7 @@ const Dashboard = () => {
                                             />
                                         </Col>
 
-                                        <Col span={7}>
+                                        <Col span={8}>
                                             <Select
                                                 mode="multiple"
                                                 showSearch
@@ -5309,14 +5309,14 @@ const Dashboard = () => {
                                                 dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
                                                 dropdownRender={() => (
-                                                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                                                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px'}}>
                                                         {renderInnerSelects(theme)}
                                                     </div>
                                                 )}
                                             />
                                         </Col>
 
-                                        <Col span={3}>
+                                        <Col span={2}>
                                             <Select
                                                 showSearch
                                                 onChange={onChangeTime}
