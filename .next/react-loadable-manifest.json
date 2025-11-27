@@ -150,22 +150,24 @@
   "app\\NewUser\\page.js -> ./users-components/add-newaccount": {
     "id": 72834,
     "files": [
+      "static/chunks/53c13509-03d30a3558286aaf.js",
       "static/chunks/1143-3a144dbb269e0431.js",
-      "static/chunks/2834.86e8e60ca5fa55c8.js"
+      "static/chunks/9438.c5be6a2f75b69ad0.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/create-newuser": {
     "id": 18718,
     "files": [
       "static/chunks/1143-3a144dbb269e0431.js",
-      "static/chunks/8718.162df85fd6891e0b.js"
+      "static/chunks/8718.c2f46cddeda2cc50.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-accountaccess": {
     "id": 88081,
     "files": [
+      "static/chunks/53c13509-03d30a3558286aaf.js",
       "static/chunks/1143-3a144dbb269e0431.js",
-      "static/chunks/8081.78069cb0dbf87193.js"
+      "static/chunks/978.5ccbcd58dd3bd461.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-network": {
@@ -186,7 +188,7 @@
     "id": 39976,
     "files": [
       "static/chunks/1143-3a144dbb269e0431.js",
-      "static/chunks/9976.a50d77bb3d16ed87.js"
+      "static/chunks/9976.4739e0a4c80a504a.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/updates_notifications": {
@@ -301,7 +303,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/9369.c1c4ff94f6d6fb56.js"
+      "static/chunks/9369.379de08ae4248da4.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./CampaignLevelDaily": {
@@ -327,7 +329,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/4630.6daf084908387021.js"
+      "static/chunks/4630.61b2d078a515e5d2.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdsetLevel": {
@@ -337,7 +339,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/9941.7b4e51fe7de6edb4.js"
+      "static/chunks/9941.cc1a22609f52908d.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./CampaignLevel": {
@@ -347,7 +349,7 @@
       "static/chunks/8110-60bcbda92701a17f.js",
       "static/chunks/3292-703155cd306670bd.js",
       "static/chunks/5592.7180c00f5d1eec02.js",
-      "static/chunks/781.95ca9aeec4363587.js"
+      "static/chunks/781.649615434816cf79.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./SearchFilters": {
