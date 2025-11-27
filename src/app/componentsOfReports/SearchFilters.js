@@ -237,7 +237,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                 // fontWeight: 500,
             }}
         >          */}
-                <Dropdown
+                {/* <Dropdown
                     overlay={
                         <Menu
                             onClick={({ key }) => onStatusFilterChange && onStatusFilterChange(key)} // <-- Add this line
@@ -312,7 +312,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                             <DownOutlined style={{ fontSize: 10 }} />
                         </Space>
                     </Button>
-                </Dropdown>
+                </Dropdown> */}
                 {/* </Tooltip> */}
                 {/* <Tooltip 
             title={`🍳 This feature is cooking—almost ready to serve 😜`}

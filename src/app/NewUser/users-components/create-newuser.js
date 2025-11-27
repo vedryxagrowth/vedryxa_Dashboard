@@ -240,6 +240,9 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
                         {userdetails.role !== "Special_User" && (
+                            <Select.Option value="Network_Partner">Network_Partner</Select.Option>
+                        )}
+                        {userdetails.role !== "Special_User" && (
                             <Select.Option value="Revenue_Partner">Revenue_Partner</Select.Option>
                         )}
                         {userdetails.role !== "Special_User" && (
