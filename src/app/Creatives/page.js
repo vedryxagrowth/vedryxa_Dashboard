@@ -134,6 +134,28 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     useEffect(() => {
         selectedImagesRef.current = selectedImages;
     }, [selectedImages]);
+ 
+   useEffect(() => {
+    if (!images) return;
+
+    // Always show all items if search is empty
+    if (!searchQuery.trim()) {
+        setFilteredImages(images);
+        return;
+    }
+
+    const query = searchQuery.toLowerCase();
+
+    // Apply search on whatever current folder images you have
+    const filtered = images.filter(img =>
+        img.name?.toLowerCase().includes(query)
+    );
+
+    setFilteredImages(filtered);
+}, [searchQuery, images, currentFolder]);
+
+
+
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -452,7 +474,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     });
 
                 setImages(filteredItems);
-                setFilteredImages(filteredItems);
+                // setFilteredImages(filteredItems);
+                
             }
         } catch (error) {
             console.error("Error fetching images:", error.response?.data || error.message);
@@ -970,10 +993,10 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             }
 
             if (isSelected && prev.length === 1) {
-                return []; // Deselect
+                return [];
             }
 
-            return [image]; // Single select
+            return [image];
         });
 
         selectedImagesRef.current = selectedImages;
@@ -1206,15 +1229,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const handleSearch = (e) => {
         const query = e.target.value.toLowerCase(); // Convert to lowercase for case-insensitive search
         setSearchQuery(query);
-        // Filter images based on filename
-        if (query.trim() === "") {
-            setFilteredImages(images); // Reset if empty search
-        } else {
-            const filtered = images.filter(image =>
-                image.name.toLowerCase().includes(query)
-            );
-            setFilteredImages(filtered);
-        }
+
     };
 
     const extractDisplayName = (name) => {
@@ -1282,7 +1297,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
         return { x, y };
     };
-   
+
     const downloadBlob = (blob, filename) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -1328,9 +1343,9 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         }
     };
 
-    
-   
-   
+
+
+
 
 
 
@@ -1636,13 +1651,23 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             onChange={handleValueChange}
                             disabled={!selectedKey}
                             value={selectedValue}
+
                             selectedAccountNumber={selectedAccountNumber}
                             optionLabelProp="value"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            filterOption={(input, option) => {
+                                const number = option.value?.toString()?.toLowerCase() || "";
+                                const name = option.accountname?.toString()?.toLowerCase() || "";
+
+                                return (
+                                    number.includes(input.toLowerCase()) ||
+                                    name.includes(input.toLowerCase())
+                                );
+                            }}
                         >
                             {valueOptions.length > 0 ? (
                                 valueOptions.map(option => (
-                                    <Select.Option key={option.value} value={option.value}>
+                                    <Select.Option key={option.value} value={option.value} accountname={option.accountName}>
                                         <div style={{
                                             display: 'flex',
                                             justifyContent: 'space-between',
@@ -2111,8 +2136,32 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                             }}
 
+                                            // onClick={(e) => {
+                                            //     e.stopPropagation();
+                                            //     if (image.isFolder) {
+                                            //         setSelectedImages([]);
+                                            //         selectedImagesRef.current = [];
+                                            //         handleFolderClick(image.name);
+                                            //     } else {
+                                            //         handleImageSelect(image);
+                                            //     }
+                                            // }}
                                             onClick={(e) => {
                                                 e.stopPropagation();
+
+                                                const isCtrl = e.ctrlKey || e.metaKey;
+                                                if (isCtrl) {
+                                                    setSelectedImages(prev => {
+                                                        const already = prev.some(f => f.uid === image.uid);
+                                                        return already
+                                                            ? prev.filter(f => f.uid !== image.uid)
+                                                            : [...prev, image];
+                                                    });
+                                                    selectedImagesRef.current = selectedImages;
+                                                    return;
+                                                }
+
+
                                                 if (image.isFolder) {
                                                     setSelectedImages([]);
                                                     selectedImagesRef.current = [];
@@ -2121,7 +2170,6 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                     handleImageSelect(image);
                                                 }
                                             }}
-
                                             onDragOver={(e) => e.preventDefault()}
                                             onDrop={async (e) => {
                                                 e.preventDefault();
@@ -2598,7 +2646,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                         try {
                                             await Promise.all(items.map(item =>
-                                                axios.delete("https://prodapis.adsgoat.in/permanentlyDelete", {
+                                                axios.delete(" http://localhost:8000/permanentlyDelete", {
                                                     headers: {
                                                         Authorization: localStorage.getItem("token"),
                                                         username: userdetails.userName,
@@ -2672,6 +2720,78 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         {!isTrashView && contextMenu.selectedList?.length > 1 && (
 
                             <>
+                                <div
+                                    style={{ padding: "8px 12px", cursor: "pointer" }}
+                                    onClick={async () => {
+                                        const selected = contextMenu.selectedList;
+
+                                        let allFiles = [];
+
+                                        for (const item of selected) {
+
+                                            // 1️⃣ If it's a FILE → push directly
+                                            if (!item.isFolder) {
+                                                allFiles.push({
+                                                    uid: item.uid,
+                                                    name: item.name,
+                                                    url: item.url,
+                                                    type: getFileType(item.url),
+                                                });
+                                                continue;
+                                            }
+
+                                            // 2️⃣ If it's a FOLDER → fetch files inside
+                                            try {
+                                                const res = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
+                                                    headers: {
+                                                        username: userdetails.userName,
+                                                        "x-folder": item.uid,
+                                                        Authorization: localStorage.getItem("token"),
+                                                    },
+                                                });
+
+                                                const files = res.data.images
+                                                    .filter(f => !f.key.endsWith("/"))
+                                                    .map(f => ({
+                                                        uid: f.key,
+                                                        name: f.key.split("/").pop(),
+                                                        url: `https://sudheer-fbimages.s3.amazonaws.com/${f.key}`,
+                                                        type: getFileType(f.key),
+                                                    }));
+
+                                                allFiles.push(...files);
+
+                                            } catch (err) {
+                                                console.error("Folder load failed:", err);
+                                            }
+                                        }
+
+                                        // 3️⃣ Merge files into checkboxSelected
+                                        setCheckboxSelected(prev => {
+                                            const merged = [...prev, ...allFiles].filter(
+                                                (v, i, arr) => arr.findIndex(t => t.uid === v.uid) === i
+                                            );
+                                            selectedImagesRef.current = merged;
+                                            return merged;
+                                        });
+
+                                        // 4️⃣ Highlight parent folders (for files)
+                                        setHighlightedFolders(prev => {
+                                            const keys = allFiles.map(f =>
+                                                f.uid.substring(0, f.uid.lastIndexOf("/") + 1)
+                                            );
+                                            return [...new Set([...prev, ...keys])];
+                                        });
+
+                                        setContextMenu({ ...contextMenu, visible: false });
+
+                                        message.success(`${allFiles.length} items added to campaign`);
+                                    }}
+                                >
+                                    ➕ Add to Campaign
+                                </div>
+
+
                                 <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
                                     {contextMenu.selectedList.length} selected
                                 </div>
@@ -2768,6 +2888,49 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                 {contextMenu.isFolder ? (
                                     <>
+                                        <div
+                                            style={{ padding: '8px 12px', cursor: 'pointer' }}
+                                            onClick={async () => {
+                                                const folderKey = contextMenu.target.uid;
+
+                                                // 1️⃣ Fetch files inside that folder
+                                                const res = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
+                                                    headers: {
+                                                        username: userdetails.userName,
+                                                        "x-folder": folderKey,
+                                                        Authorization: localStorage.getItem("token"),
+                                                    },
+                                                });
+
+                                                // 2️⃣ Extract ONLY files
+                                                const files = res.data.images
+                                                    .filter((file) => !file.key.endsWith("/")) // skip folders
+                                                    .map((file) => ({
+                                                        uid: file.key,
+                                                        name: file.key.split("/").pop(),
+                                                        url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+                                                        type: getFileType(file.key),
+                                                    }));
+
+                                                // 3️⃣ Save to submit selection
+                                                setCheckboxSelected(prev => {
+                                                    // remove duplicates using uid
+                                                    const merged = [...prev, ...files].filter(
+                                                        (v, i, arr) => arr.findIndex(t => t.uid === v.uid) === i
+                                                    );
+
+                                                    selectedImagesRef.current = merged;
+                                                    return merged;
+                                                });
+                                                setHighlightedFolders(prev => [...new Set([...prev, folderKey])]);
+
+                                                setContextMenu({ ...contextMenu, visible: false });
+
+                                                message.success(`${files.length} files added to campaign`);
+                                            }}
+                                        >
+                                            ➕ Add to Campaign
+                                        </div>
 
 
                                         <div style={{ padding: '8px 12px' }} onClick={() => {
@@ -2818,7 +2981,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     </>
                                 ) : (
                                     <>
-                                       
+
                                         <div
                                             style={{ padding: '8px 12px', cursor: 'pointer' }}
                                             onClick={async () => {

@@ -5,6 +5,7 @@ import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { Add } from '@mui/icons-material';
 import { useTokenContext } from '../../components/parent';
+import { FaTrashCan } from 'react-icons/fa6';
 
 const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
     // console.log(editeddata, "heyy edit-useraccess page")
@@ -330,16 +331,23 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                 const trimmed = id.trim();
 
                 if (seen.has(trimmed)) {
-                    message.error(
-                        `Account ${trimmed} is added more than once check`
-                    );
+
+                    message.open({
+                        type: 'error',
+                        content: `Account ${trimmed} is added more than once check`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
                     return false;
                 }
 
                 seen.add(trimmed);
             }
             if (!acc.network) {
-                message.error("Please select a network for all accounts");
+                message.open({
+                    type: 'error',
+                    content: `Please select a network for all accounts`,
+                    className: theme === 'dark' ? 'dark-message' : '',
+                });
                 return false;
             }
 
@@ -349,7 +357,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                 const accountNumber = id?.trim();
 
                 if (!accountNumber) {
-                    message.error("Account ID cannot be empty");
+                    message.open({
+                        type: 'error',
+                        content: `Account ID cannot be empty`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
                     return false;
                 }
 
@@ -368,10 +380,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
 
                         continue;
                     } else {
-
-                        message.error(
-                            `Account ${accountNumber} is present in network ${localNetwork}. Please check.`
-                        );
+                        message.open({
+                            type: 'error',
+                            content: `Account ${accountNumber} is present in network ${localNetwork}. Please check.`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        });
                         return false;
                     }
                 }
@@ -386,7 +399,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                     apiList = res.data || [];
                 } catch (err) {
                     console.error("API validation failed:", err);
-                    message.error("Error validating account. Please try again.");
+                    message.open({
+                        type: 'error',
+                        content: `Error validating account. Please try again.`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
                     return false;
                 }
 
@@ -398,25 +415,26 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                     const apiNetwork = String(apiMatch.Network).trim();
 
                     if (apiNetwork === selectedNetwork) {
-
-                        message.error(
-                            `Account ${accountNumber} exists in this network but you don't have access.`
-                        );
+                        message.open({
+                            type: 'error',
+                            content: `Account ${accountNumber} exists in this network but you don't have access.`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        });
                         return false;
                     } else {
-
-                        message.error(
-                            `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`
-                        );
+                        message.open({
+                            type: 'error',
+                            content: `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        });
                         return false;
                     }
                 }
-
-
-
-                message.error(
-                    `Account ${accountNumber} does NOT exist in any network. Please add.`
-                );
+                message.open({
+                    type: 'error',
+                    content: `Account ${accountNumber} does NOT exist in any network. Please add.`,
+                    className: theme === 'dark' ? 'dark-message' : '',
+                });
                 return false;
             }
         }
@@ -471,8 +489,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                         });
 
                     if (response.status === 200) {
-                        message.success("User Edits updated successfully"); // Display success message
-
+                        message.open({
+                            type: 'success',
+                            content: `User Edits updated successfully`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        });
                         // Pass the updated user data back to the parent to update the table
                         const updatedUserData = { ...editeddata, ...formattedData };
 
@@ -693,9 +714,23 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                     >
                                         <Popover
                                             placement="right"
-                                            title={`Accounts in ${account.network}`}
+                                            title={
+                                                <div
+                                                    style={{
+                                                        color: theme === "dark" ? "#ffffff" : "#000000",
+                                                        background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                    }}
+                                                >
+                                                    Accounts in {account.network}
+                                                </div>
+                                            }
+                                            overlayInnerStyle={{
+                                                background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                                border: theme === "dark" ? "1px solid #444" : "1px solid #ddd",
+                                            }}
                                             content={
-                                                <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                                                <div style={{ maxHeight: 200, overflowY: "auto", color: theme === "dark" ? "#ffffff" : "#000000" }}>
                                                     {getAccountsForNetwork(account.network).map(acc => (
                                                         <div key={acc}>{acc}</div>
                                                     ))}
@@ -715,8 +750,9 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
 
                                         {/* Show DeleteOutlined only if there is more than one input */}
                                         {account.inputs.length > 1 && inputIndex !== 0 && (
-                                            <DeleteOutlined
-                                                style={{ cursor: 'pointer' }}
+                                            <FaTrashCan
+
+                                                style={{ cursor: 'pointer', color: "#EC7117" }}
                                                 onClick={() => handleRemoveInput(accountIndex, inputIndex)}
                                             />
                                         )}
@@ -724,11 +760,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                         {/* Show Remove button only if there is exactly one input */}
                                         {account.inputs.length === 1 && inputIndex === 0 && (
                                             <Button
-                                                style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                                type="default"
+                                                type="text"
                                                 onClick={() => handleRemoveAccount(accountIndex)}
+                                                icon={<FaTrashCan color="#EC7117" />}
                                             >
-                                                Remove
+
                                             </Button>
                                         )}
 
@@ -878,9 +914,24 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                                                 >
                                                                     <Popover
                                                                         placement="right"
-                                                                        title={`Accounts in ${account.network}`}
+
+                                                                        title={
+                                                                            <div
+                                                                                style={{
+                                                                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                                                                    background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                                                }}
+                                                                            >
+                                                                                Accounts in {account.network}
+                                                                            </div>
+                                                                        }
+                                                                        overlayInnerStyle={{
+                                                                            background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                                            color: theme === "dark" ? "#ffffff" : "#000000",
+                                                                            border: theme === "dark" ? "1px solid #444" : "1px solid #ddd",
+                                                                        }}
                                                                         content={
-                                                                            <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                                                                            <div style={{ maxHeight: 200, overflowY: "auto", color: theme === "dark" ? "#ffffff" : "#000000" }} >
                                                                                 {getAccountsForNetwork(account.network).map(acc => (
                                                                                     <div key={acc}>{acc}</div>
                                                                                 ))}
@@ -913,8 +964,9 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                                                         onClick={() =>
                                                                             handleRemoveInput(projIndex, inputIndex)
                                                                         }
+                                                                        icon={<FaTrashCan color="#EC7117" />}
                                                                     >
-                                                                        Remove
+
                                                                     </Button>
                                                                 )}
 
@@ -943,8 +995,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                         </div>
 
                                         {/* Remove Project */}
-                                        <Button danger onClick={() => handleRemoveAccount(projIndex)}>
-                                            Remove
+                                        <Button type='text' danger onClick={() => handleRemoveAccount(projIndex)} icon={<FaTrashCan color="#EC7117" />}>
+
                                         </Button>
                                     </div>
                                 </div>
@@ -952,7 +1004,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
 
                             {/* Add New Project */}
                             <Form.Item style={{ marginTop: 8 }}>
-                                <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined />}>
+                                <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined className="black-icon" />} style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }}>
                                     Add Project
                                 </Button>
                             </Form.Item>
