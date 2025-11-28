@@ -57,6 +57,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const [fileInputName, setFileInputName] = useState("");
     const [searchQuery, setSearchQuery] = useState(""); // State to store search input
     const selectedImagesRef = useRef([]);
+    const previousSearchResults = useRef(null);
 
     const [editingUid, setEditingUid] = useState(null);
     const [inlineName, setInlineName] = useState("");
@@ -134,25 +135,25 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     useEffect(() => {
         selectedImagesRef.current = selectedImages;
     }, [selectedImages]);
- 
-   useEffect(() => {
-    if (!images) return;
 
-    // Always show all items if search is empty
-    if (!searchQuery.trim()) {
-        setFilteredImages(images);
-        return;
-    }
+    //    useEffect(() => {
+    //     if (!images) return;
 
-    const query = searchQuery.toLowerCase();
+    //     // Always show all items if search is empty
+    //     if (!searchQuery.trim()) {
+    //         setFilteredImages(images);
+    //         return;
+    //     }
 
-    // Apply search on whatever current folder images you have
-    const filtered = images.filter(img =>
-        img.name?.toLowerCase().includes(query)
-    );
+    //     const query = searchQuery.toLowerCase();
 
-    setFilteredImages(filtered);
-}, [searchQuery, images, currentFolder]);
+    //     // Apply search on whatever current folder images you have
+    //     const filtered = images.filter(img =>
+    //         img.name?.toLowerCase().includes(query)
+    //     );
+
+    //     setFilteredImages(filtered);
+    // }, [searchQuery, images, currentFolder]);
 
 
 
@@ -474,8 +475,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     });
 
                 setImages(filteredItems);
-                // setFilteredImages(filteredItems);
-                
+                setFilteredImages(filteredItems);
+
             }
         } catch (error) {
             console.error("Error fetching images:", error.response?.data || error.message);
@@ -1225,12 +1226,25 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         }
     };
 
-    // Function to handle search input changes
+
     const handleSearch = (e) => {
-        const query = e.target.value.toLowerCase(); // Convert to lowercase for case-insensitive search
+        const query = e.target.value.toLowerCase();
         setSearchQuery(query);
 
+        if (!query.trim()) {
+            setFilteredImages(images);
+            return;
+        }
+
+        const filtered = images.filter(img =>
+            img.name.toLowerCase().includes(query)
+        );
+
+        setFilteredImages(filtered);
+        previousSearchResults.current = filtered;
+
     };
+
 
     const extractDisplayName = (name) => {
         if (!name) return '';
@@ -1242,6 +1256,10 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         // 🧹 Clear previous selections
         setSelectedImages([]);
         selectedImagesRef.current = [];
+        if (searchQuery.trim() !== "") {
+            setCurrentFolder(folderName + "/");
+            return;
+        }
 
         const newPath = `${currentFolder}${folderName}/`;
         setCurrentFolder(newPath);
@@ -1921,6 +1939,11 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             <div style={{ display: 'flex' }}>
                 {currentFolder && (
                     <Button type="link" icon={<ArrowLeftOutlined style={{ color: theme === 'dark' ? '#91C25F' : 'black' }} />} onClick={() => {
+                        if (searchQuery.trim() !== "" && previousSearchResults.current) {
+                            setFilteredImages(previousSearchResults.current);
+                            return;
+
+                        }
                         const segments = currentFolder.split('/').filter(Boolean);
                         const newPath = segments.slice(0, -1).join('/') + (segments.length > 1 ? '/' : '');
                         setCurrentFolder(newPath);
@@ -2646,7 +2669,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                         try {
                                             await Promise.all(items.map(item =>
-                                                axios.delete(" http://localhost:8000/permanentlyDelete", {
+                                                axios.delete("https://prodapis.adsgoat.in/permanentlyDeleteNew", {
                                                     headers: {
                                                         Authorization: localStorage.getItem("token"),
                                                         username: userdetails.userName,
