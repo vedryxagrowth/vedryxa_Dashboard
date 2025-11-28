@@ -4,6 +4,7 @@ import { Drawer, Button, Modal, Form, Input, Select, message, Popover } from 'an
 import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
+import { FaTrashCan } from 'react-icons/fa6';
 
 const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
     const { userdetails } = useTokenContext();
@@ -154,7 +155,11 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
     const validateAllAccountsBeforeSubmit = async () => {
         for (const acc of additionalAccounts) {
             if (!acc.network?.trim()) {
-                message.error("Please select a network for all accounts");
+                message.open({
+                    type: 'error',
+                    content: `Please select a network for all accounts`,
+                    className: theme === 'dark' ? 'dark-message' : '',
+                });
                 return false;
             }
 
@@ -164,11 +169,19 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
             for (const id of acc.inputs) {
                 const accountNumber = id?.trim();
                 if (!accountNumber) {
-                    message.error("Account ID cannot be empty");
+                    message.open({
+                        type: 'error',
+                        content: `Account ID cannot be empty`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
                     return false;
                 }
                 if (seen.has(accountNumber)) {
-                    message.error(`Account ${accountNumber} is added more than once in ${selectedNetwork}`);
+                    message.open({
+                        type: 'error',
+                        content: `Account ${accountNumber} is added more than once in ${selectedNetwork}`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
                     return false;
                 }
                 seen.add(accountNumber);
@@ -181,13 +194,15 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                     const localNetwork = String(localMatch.Network).trim();
 
                     if (localNetwork !== selectedNetwork) {
-                        message.error(
-                            `Account ${accountNumber} already exists in network ${localNetwork}.`
-                        );
+                        message.open({
+                            type: 'error',
+                            content: `Account ${accountNumber} already exists in network ${localNetwork}`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        });
                         return false;
                     }
 
-                    continue; 
+                    continue;
                 }
 
                 let apiList = [];
@@ -197,7 +212,11 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                     });
                     apiList = res.data || [];
                 } catch (err) {
-                    message.error("Error validating account. Please try again.");
+                    message.open({
+                        type: 'error',
+                        content: `Error validating account. Please try again.`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
                     return false;
                 }
 
@@ -209,21 +228,28 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                     const apiNetwork = String(apiMatch.Network).trim();
 
                     if (apiNetwork === selectedNetwork) {
-                        message.error(
-                            `Account ${accountNumber} exists in this network but you don't have access.`
-                        );
+                         message.open({
+                        type: 'error',
+                        content: `Account ${accountNumber} exists in this network but you don't have access.`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
+
                         return false;
                     } else {
-                        message.error(
-                            `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`
-                        );
+                         message.open({
+                        type: 'error',
+                        content: `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
+
                         return false;
                     }
                 }
-
-                message.error(
-                    `Account ${accountNumber} does NOT exist in any network. Please add.`
-                );
+                  message.open({
+                        type: 'error',
+                        content: `Account ${accountNumber} does NOT exist in any network. Please add.`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    });
                 return false;
             }
         }
@@ -232,7 +258,12 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
     };
     const rolevalid = (selectedRole) => {
         if (selectedRole !== "Admin" && additionalAccounts.length === 0) {
-            message.error("Please select at least one project");
+
+            message.open({
+                        type: 'error',
+                        content: `Please select at least one project`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    })
             return false;
         }
         return true;
@@ -280,7 +311,12 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                     const response = await apiClient.post('/api/createUser/', { formattedData });
 
                     if (response.status === 200) {
-                        message.success("User created successfully"); // Display success message
+                         // Display success message
+                         message.open({
+                        type: 'success',
+                        content: `User created successfully`,
+                        className: theme === 'dark' ? 'dark-message' : '',
+                    })
                         refreshUsers();
                         setIsModalVisible(false); // Close modal after success
 
@@ -418,9 +454,23 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                                                 <div key={inputIndex} className='add-account-container-input'>
                                                     <Popover
                                                         placement="right"
-                                                        title={`Accounts in ${account.network}`}
+                                                        title={
+                                                            <div
+                                                                style={{
+                                                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                                                    background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                                }}
+                                                            >
+                                                                Accounts in {account.network}
+                                                            </div>
+                                                        }
+                                                        overlayInnerStyle={{
+                                                            background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                            color: theme === "dark" ? "#ffffff" : "#000000",
+                                                            border: theme === "dark" ? "1px solid #444" : "1px solid #ddd",
+                                                        }}
                                                         content={
-                                                            <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                                                            <div style={{ maxHeight: 200, overflowY: "auto", color: theme === "dark" ? "#ffffff" : "#000000" }}>
                                                                 {getAccountsForNetwork(account.network).map(acc => (
                                                                     <div key={acc}>{acc}</div>
                                                                 ))}
@@ -437,12 +487,11 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                                                     </Popover>
                                                     {account.inputs.length === 1 && inputIndex === 0 && (
                                                         <Button
-                                                            style={{ marginBottom: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                                                            type="default"
+                                                            type="text"
                                                             onClick={() => handleRemoveAccount(accountIndex)}
-
+                                                            icon={<FaTrashCan color="#EC7117" />}
                                                         >
-                                                            Remove
+
                                                         </Button>
                                                     )}
                                                     {account.inputs.length > 1 && inputIndex !== 0 && (

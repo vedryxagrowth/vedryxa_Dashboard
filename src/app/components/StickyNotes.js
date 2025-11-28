@@ -87,8 +87,8 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
   //   }
   //   return uploadedUrls;
   // };
-  
-const handleMultipleFileUpload = async (files, userdetails) => {
+
+  const handleMultipleFileUpload = async (files, userdetails) => {
     if (!files?.length || !userdetails?.userName) {
       message.error("No files or user details!");
       return [];
@@ -100,18 +100,18 @@ const handleMultipleFileUpload = async (files, userdetails) => {
     for (const file of files) {
       const extension = file.name.split(".").pop();
       const uniqueFilename = `${uuidv4()}.${extension}`;
-      const finalKey = `StickyNotes/${userdetails.userName}/${uniqueFilename}`; 
+      const finalKey = `StickyNotes/${userdetails.userName}/${uniqueFilename}`;
 
       const formData = new FormData();
       formData.append("file", file);
       formData.append("filename", finalKey);
-      formData.append("uploadDate", uploadDate); 
+      formData.append("uploadDate", uploadDate);
 
       try {
         const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
           headers: {
             Authorization: localStorage.getItem("token"),
-            username: userdetails.userName, 
+            username: userdetails.userName,
           },
         });
 
@@ -241,6 +241,52 @@ const handleMultipleFileUpload = async (files, userdetails) => {
       });
     });
   };
+
+
+const convertToPng = (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext("2d").drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => reject("Load Error");
+    img.src = url;
+  });
+};
+
+const copyNoteContent = async (note) => {
+  try {
+  //  1.add to text
+    let html = `<div>${(note.text || "").replace(/\n/g, "<br>")}</div>`;
+
+    // 2. Add multiple images (converted to PNG)
+    if (note.images) {
+      for (const url of note.images) {
+        const png = await convertToPng(url);
+        html += `<img src="${png}" style="max-width:100%; margin-top:8px;" />`;
+      }
+    }
+
+    // 3. Copy to clipboard
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([note.text || ""], { type: "text/plain" }),
+      })
+    ]);
+
+    message.success("Copied!")
+  } catch (err) {
+    console.error(err);
+    message.error("Copy failed!");
+  }
+};
+
 
   return (
     <>
@@ -466,7 +512,8 @@ const handleMultipleFileUpload = async (files, userdetails) => {
                 <div>
                   <Button onClick={(e) => {
                     e.stopPropagation();
-                    copyToClipboard(openNote.text);
+                    // copyToClipboard(openNote.text);
+                    copyNoteContent(openNote);
                   }}
                     style={{
                       background: "none",
@@ -478,7 +525,7 @@ const handleMultipleFileUpload = async (files, userdetails) => {
                     <div className={`icon-wrapper ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
                       <CopyOutlined className="copy-icon" />
                     </div>
- 
+
                   </Button>
                 </div>
                 <div
@@ -490,10 +537,10 @@ const handleMultipleFileUpload = async (files, userdetails) => {
                   }}
                 >⋯</div>
                 <button onClick={closeCurrentNote} style={{
-                  background: "none", border: "none", cursor: "pointer", fontSize: "16px",color:'#000'
+                  background: "none", border: "none", cursor: "pointer", fontSize: "16px", color: '#000'
                 }}>✖</button>
               </div>
- 
+
               {colorMenuVisible && (
                 <div className="floating-color-menu" style={{
                   position: "absolute", top: "38px", right: "35px",
@@ -518,7 +565,7 @@ const handleMultipleFileUpload = async (files, userdetails) => {
                 </div>
               )}
             </div>
- 
+
             {/* Note Body */}
             <div style={{
               flex: 1,
@@ -569,14 +616,14 @@ const handleMultipleFileUpload = async (files, userdetails) => {
                 </div>
               ))}
             </div>
- 
+
             {/* Note Footer */}
             <div style={{
               display: "flex", justifyContent: "flex-end", alignItems: "center",
               padding: "10px", borderTop: "1px solid rgba(0,0,0,0.1)"
             }}>
               <label title="Insert image" style={{ background: "none", border: "none", cursor: "pointer" }}>
- 
+
                 <div className={`icon-wrapper ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
                   <PictureOutlined className="copy-icon" />
                   <input
@@ -593,7 +640,7 @@ const handleMultipleFileUpload = async (files, userdetails) => {
                 style={{
                   background: "none", border: "none", cursor: "pointer",
                   color: "red", marginLeft: "10px"
- 
+
                 }}
                 onClick={() => deleteNote(openNote.id)}
               >
