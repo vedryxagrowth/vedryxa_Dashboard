@@ -114,7 +114,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     // ), [dailyData, inputValue, theme]);
 
     const memorizedDailyData = useMemo(() => {
-        let filtered = newRowDataForFilter.current || [];
+        let filtered = dailyData || [];
 
         const normalizedInput = inputValue.trim().toLowerCase();
         const normalizedInside = insideInput.trim().toLowerCase();
@@ -155,7 +155,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
         }
 
         return filtered;
-    }, [newRowDataForFilter.current, inputValue, insideInput]);
+    }, [dailyData, inputValue, insideInput]);
 
     const [leafCampaigns, setLeafCampaigns] = useState([]);
     const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
@@ -738,11 +738,11 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     accountNumberToPassHistoryPage = params.data.accountNumber ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
-                    return (
-                        <div style={{ color: 'red' }}>
-                            Error: campaignid or adsetid missing for {campaignName}
-                        </div>
-                    );
+                    // return (
+                    //     <div style={{ color: 'red' }}>
+                    //         Error: campaignid or adsetid missing for {campaignName}
+                    //     </div>
+                    // );
                 }
 
                 // selected accounts (multi)

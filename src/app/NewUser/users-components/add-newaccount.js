@@ -137,7 +137,11 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
         const acc = accountNumber?.trim();
 
         if (!acc) {
-            message.error("Account Number cannot be empty");
+            message.open({
+                type: 'error',
+                content: `Account Number cannot be empty`,
+                className: theme === 'dark' ? 'dark-message' : '',
+            })
             return false;
         }
 
@@ -147,7 +151,13 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
         );
 
         if (localMatch) {
-            message.error(`Account ${acc} already exists. Please check.`);
+
+            message.open({
+                type: 'error',
+                content: `Account ${acc} already exists. Please check.`,
+                className: theme === 'dark' ? 'dark-message' : '',
+            })
+
             return false;
         }
 
@@ -159,7 +169,12 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
             });
             apiList = res.data || [];
         } catch (err) {
-            message.error("Error validating account. Please try again.");
+
+            message.open({
+                type: 'error',
+                content: `Error validating account. Please try again.`,
+                className: theme === 'dark' ? 'dark-message' : '',
+            })
             return false;
         }
 
@@ -168,9 +183,11 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
         );
 
         if (apiMatch) {
-            message.error(
-                `Account ${acc} already exists but you don't have access. Please check.`
-            );
+            message.open({
+                type: 'error',
+                content: `Account ${acc} already exists but you don't have access. Please check.`,
+                className: theme === 'dark' ? 'dark-message' : '',
+            })
             return false;
         }
 
@@ -246,16 +263,29 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                 // ])
                 // setBMName("Winkleads Search");
                 // onClose("AccountNumber");
-                message.success('Account created successfully');
+
+                message.open({
+                    type: 'success',
+                    content: `Account created successfully`,
+                    className: theme === 'dark' ? 'dark-message' : '',
+                })
                 resetFormState();
                 onClose("AccountNumber");
 
             } else {
-                message.error('Failed to create account');
+                message.open({
+                    type: 'error',
+                    content: `Failed to create account`,
+                    className: theme === 'dark' ? 'dark-message' : '',
+                })
             }
         } catch (error) {
             console.error('Error creating account:', error);
-            message.error('Failed to create account');
+            message.open({
+                type: 'error',
+                content: `Failed to create account`,
+                className: theme === 'dark' ? 'dark-message' : '',
+            })
         }
     };
 
@@ -269,7 +299,11 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
         try {
             await form.validateFields();
         } catch {
-            message.error("Please fill all required fields");
+            message.open({
+                type: 'error',
+                content: `Please fill all required fields`,
+                className: theme === 'dark' ? 'dark-message' : '',
+            })
             return;
         }
         const isValid = await validateAccountBeforeSubmit();

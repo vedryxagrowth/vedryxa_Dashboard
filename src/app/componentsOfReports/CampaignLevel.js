@@ -724,11 +724,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     accountNumberToPassHistoryPage = params.data.accountNumber ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
-                    return (
-                        <div style={{ color: 'red' }}>
-                            Error: campaignid or adsetid missing for {campaignName}
-                        </div>
-                    );
+                    // return (
+                    //     <div style={{ color: 'red' }}>
+                    //         Error: campaignid or adsetid missing for {campaignName}
+                    //     </div>
+                    // );
                 }
 
 

@@ -234,15 +234,28 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
       );
 
       if (response.status === 200) {
-        message.success("Account Updated successfully");
+
+        message.open({
+          type: 'success',
+          content: `Account Updated successfully`,
+          className: theme === 'dark' ? 'dark-message' : '',
+        })
         form.resetFields();
         onClose(newValues);
       } else {
-        message.error("Failed to update account");
+        message.open({
+          type: 'error',
+          content: `Failed to update account`,
+          className: theme === 'dark' ? 'dark-message' : '',
+        })
       }
     } catch (error) {
       console.error("Error creating account:", error);
-      message.error("Failed to update account");
+      message.open({
+        type: 'error',
+        content: `Failed to update account`,
+        className: theme === 'dark' ? 'dark-message' : '',
+      })
     }
   };
   const handleCancel = () => {
@@ -421,7 +434,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
                     onChange={(e) => handlePageChange(index, "pageId", e.target.value)}
                   />
 
-                  <Button  type="text" onClick={() => removePage(index)} icon={<FaTrashCan color="#EC7117" />}>
+                  <Button type="text" onClick={() => removePage(index)} icon={<FaTrashCan color="#EC7117" />}>
 
                   </Button>
 

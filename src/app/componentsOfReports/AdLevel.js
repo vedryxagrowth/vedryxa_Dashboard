@@ -58,7 +58,7 @@ const selectTimezone = {
   CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
+const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
   console.log(campaignComments);
@@ -122,7 +122,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
   // console.log(rowData, "rowData");
 
   const memorizedRowData = useMemo(() => {
-    let filtered = newRowDataForFilter.current || [];
+    let filtered = rowData || [];
 
     const normalizedInput = inputValue.trim().toLowerCase();
     const normalizedInside = insideInput.trim().toLowerCase();
@@ -167,7 +167,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     }
 
     return filtered;
-  }, [newRowDataForFilter.current, inputValue, insideInput]);
+  }, [rowData, inputValue, insideInput]);
 
   const [selectedAd, setSelectedAd] = useState([]);
   const [leafCampaigns, setLeafCampaigns] = useState([]);
@@ -233,12 +233,21 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
   };
 
+  const uniqueByAdId = (arr) => {
+    const map = new Map();
+    arr.forEach(obj => {
+      if (!map.has(obj.adid)) {
+        map.set(obj.adid, obj);
+      }
+    });
+    return Array.from(map.values());
+  };
   const onSelectionChanged = (event) => {
     const selectedNodes = event.api.getSelectedNodes();
     const selectedData = selectedNodes.map(node => node.data);
 
     setSelectedAd(selectedData);
-
+    showAdLevel(uniqueByAdId(selectedData));
     const leafCampaignsData = selectedNodes
       .filter(node => !node.group && node.data)
       .map(node => ({
@@ -790,7 +799,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           rowAccount = params.data.accountNumber ?? null;
         } else {
           console.error('Missing campaignid or adsetid for campaign:', campaignName);
-          return <div style={{ color: 'red' }}>Error: campaignid or adsetid missing for {campaignName}</div>;
+          // return <div style={{ color: 'red' }}>Error: campaignid or adsetid missing for {campaignName}</div>;
         }
 
         // ✅ unified key (ad name preferred)
@@ -2741,6 +2750,20 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
   // );
 
   // normalize to array
+  useEffect(() => {
+    if (removeSelectedAds === "Remove") {
+      // if (gridRef.current) {
+      //   gridRef.current.api.deselectAll();
+
+
+      // }
+      const api = gridRef.current.api;
+      api.deselectAll();
+      api.forEachNode((node) => {
+        node.selectThisNode(false);
+      });
+    }
+  }, [removeSelectedAds]);
   const ids = Array.isArray(newaccount)
     ? newaccount
     : (newaccount ? [newaccount] : []);
@@ -3287,6 +3310,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                       suppressAggFuncInHeader={true}
                       getMainMenuItems={getMainMenuItems}
+                      getRowId={(params) => String(params.data.adid)}
+
 
                       // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
                       // onCellKeyDown={onCellKeyDown}
@@ -3414,6 +3439,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                       suppressAggFuncInHeader={true}
                       getMainMenuItems={getMainMenuItems}
+                      getRowId={(params) => params.data.adid}
 
                       // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
                       // onCellKeyDown={onCellKeyDown}

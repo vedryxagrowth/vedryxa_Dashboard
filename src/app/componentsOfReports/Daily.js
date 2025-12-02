@@ -66,7 +66,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess,commentsMap }) => {
+const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
     console.log("new multiple accounts:", newaccount);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -103,29 +103,30 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
     const [removeSelectedCampaigns, setRemoveSelectedCampaigns] = useState("");
 
     const [removeSelectedAdsets, setRemoveSelectedAdsets] = useState("");
-     //Active pause
-     const [campaignStatusFilter, setCampaignStatusFilter] = useState('ALL');
+    const [removeSelectedAds, setRemoveSelectedAds] = useState("");
+    //Active pause
+    const [campaignStatusFilter, setCampaignStatusFilter] = useState('ALL');
 
-     const handleStatusFilterChange = (key) => {
-     if (key === 'active') {
-         setCampaignStatusFilter('ACTIVE');
-     } else if (key === 'pause') {
-         setCampaignStatusFilter('PAUSED');
-     } else if (key === 'all') {
-         setCampaignStatusFilter('ALL');
-     }
-     };
-
-     const campaignStatusLabels = React.useMemo(() => {
-        switch ((campaignStatusFilter || 'ALL').toUpperCase()) {
-          case 'ACTIVE':
-            return 'Active';
-          case 'PAUSED':
-            return 'Paused';
-          default:
-            return 'All';
+    const handleStatusFilterChange = (key) => {
+        if (key === 'active') {
+            setCampaignStatusFilter('ACTIVE');
+        } else if (key === 'pause') {
+            setCampaignStatusFilter('PAUSED');
+        } else if (key === 'all') {
+            setCampaignStatusFilter('ALL');
         }
-      }, [campaignStatusFilter]);
+    };
+
+    const campaignStatusLabels = React.useMemo(() => {
+        switch ((campaignStatusFilter || 'ALL').toUpperCase()) {
+            case 'ACTIVE':
+                return 'Active';
+            case 'PAUSED':
+                return 'Paused';
+            default:
+                return 'All';
+        }
+    }, [campaignStatusFilter]);
 
     const memorizedColumnDef1 = useMemo(() => columnDefs.current, [columnDefs.current]);
     // const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
@@ -212,6 +213,10 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
         setSelectedAdsets(data);
         console.log(data, "AdsetLeveldata");
     }
+    const showAdLevel = (data) => {
+        setSelectedAds(data);
+        console.log(data, "AdsetLeveldata");
+    }
 
     const onClickRemoveSelectedCampaigns = () => {
         setSelectedCampaigns([]);
@@ -234,13 +239,13 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
     }
 
     const onClickRemoveSelectedAds = () => {
-        // setSelectedAds([]);
-        // // removeSelectedCampaigns();
-        // setRemoveSelectedAdsets("");
-        // setTimeout(() => {
-        //     setRemoveSelectedAdsets("Remove");
-        // }
-        // , 100);
+        setSelectedAds([]);
+        // removeSelectedCampaigns();
+        setRemoveSelectedAds("");
+        setTimeout(() => {
+            setRemoveSelectedAds("Remove");
+        }
+            , 100);
     }
 
     const moveToNextTab = (data) => {
@@ -1337,9 +1342,9 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         onClickRefresh={onClickRefresh}
                         onStatusFilterChange={handleStatusFilterChange}
                         campaignStatusLabel={campaignStatusLabels}
-                         accountsFromReports={newaccount}
-                         network={newRevenuePratner}
-                         time={newtime}
+                        accountsFromReports={newaccount}
+                        network={newRevenuePratner}
+                        time={newtime}
                     />
                 </Col>
             </Row>
@@ -1450,6 +1455,8 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         getMainMenuItems={getMainMenuItems}
                         toggleStatus={toggleStatus}
                         handleChangeToggle={handleChangeToggle}
+                        showAdLevel={showAdLevel}
+                        removeSelectedAds={removeSelectedAds}
                         theme={theme}
                         tabStatus={"Live"}
                         selectedCampaigns={selectedCampaigns}

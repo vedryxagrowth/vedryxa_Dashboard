@@ -22,8 +22,7 @@ import locale from 'antd/es/date-picker/locale/en_US';
 import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
-import { MdOutlineCancel } from "react-icons/md";
-import { TiTickOutline } from "react-icons/ti";
+import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
@@ -328,11 +327,11 @@ const MyTablePage = () => {
 
     const [isTrue, setTrue] = useState(false);
 
-    const [account, setAccount] = useState((accountNumberFromDashboard ? accountNumberFromDashboard : (storedData ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
+    const [account, setAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
     const [time, setTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
 
-    const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [accountNumberFromDashboard] : (storedData ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
+    const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
     console.log(newaccount)
@@ -13761,60 +13760,51 @@ const MyTablePage = () => {
     // };
 
     // value will be an array of accountNumbers (strings)
+    //     const handleChange1 = (newValues) => {
+
+    //         setAccount(newValues);
+    //         // setNewAccount(newValues);
+    //         const accountsNames = newValues.map(item => {
+    //   const found = accountsAccess.find(acc => acc.accountNumber === item);
+    //   return found ? found.accountName : null;
+    // });
+    //         setAccountName(accountsNames)
+    //         // setnewAccountName(accountsNames)
+    //     };
+
     const handleChange1 = (newValues) => {
-        // setSelectedValue((prevSelected) => {
-        //     // Keep existing selections outside current search
-        //     const prev = new Set(prevSelected.map(String));
-        //     const filteredSet = new Set(filteredAccounts.map(a => String(a.accountNumber)));
+        const normalized = newValues.map(String);
+        const visibleSet = new Set(filteredAccounts.map(a => String(a.accountNumber)));
 
-        //     // Remove only accounts that belong to current search list
-        //     for (const val of filteredSet) {
-        //         if (prev.has(val)) prev.delete(val);
-        //     }
+        setAccount((prevSelected) => {
+            const prev = new Set(prevSelected.map(String));
 
-        //     // Add currently selected (visible) accounts
-        //     for (const val of newValues) {
-        //         prev.add(String(val));
-        //     }
+            visibleSet.forEach(v => prev.delete(v));
 
-        //     const finalSelected = Array.from(prev);
+            // Add newly selected
+            normalized.forEach(v => prev.add(v));
 
-        //     // ✅ Persist new state to localStorage
-        //     localStorage.setItem("selectedAccounts", JSON.stringify(finalSelected));
+            const final = Array.from(prev);
 
-        //     // ✅ Notify parent or other logic
-        //     onChangeSelect(finalSelected);
-        //     setAccountChanged(true);
+            // Save to localStorage
+            localStorage.setItem("selectedAccounts", JSON.stringify(final));
 
-        //     return finalSelected;
-        // });
+            // Send to parent
+            onChangeSelect(final);
+            setAccountChanged(true);
 
-        // userPickedRef.current = true;
+            // Update names
+            const names = final.map(num => {
+                const f = accountsAccess.find(acc => String(acc.accountNumber) === num);
+                return f ? f.accountName : null;
+            });
 
-        // // ✅ Preserve account name behavior using last picked item
-        // const last = newValues[newValues.length - 1];
-        // if (last) {
-        //     const findAccount = (data, accountNumber) =>
-        //         Object.values(data).flat().find(
-        //             (item) => String(item.accountNumber) === String(accountNumber)
-        //         ) || null;
+            setAccountName(names);
+            // setnewAccountName(names);
 
-        //     const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
-        //     if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
-        // }
-        // console.log(newValues);
-        // console.log(newValues);
-        setAccount(newValues);
-        // setNewAccount(newValues);
-        const accountsNames = newValues.map(item => {
-  const found = accountsAccess.find(acc => acc.accountNumber === item);
-  return found ? found.accountName : null;
-});
-        setAccountName(accountsNames)
-        setnewAccountName(accountsNames)
+            return final;
+        });
     };
-
-
 
     const filteredAccounts = useMemo(() => {
         const q = searchText.trim().toLowerCase();
@@ -13897,7 +13887,7 @@ const MyTablePage = () => {
                         title="Select All Active Accounts"
                         onClick={onClickButton}
                     />
-                    <MdOutlineCancel
+                    <TiTimesOutline
                         style={{
                             fontSize: 20,
                             color: "#ff4d4f",

@@ -1466,7 +1466,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           rowAccount = params.data?.accountNumber ?? null;
         } else {
           console.error('Missing campaignid or adsetid for campaign:', campaignName);
-          return <div style={{ color: 'red' }}>Error: campaignid or adsetid missing for {campaignName}</div>;
+          // return <div style={{ color: 'red' }}>Error: campaignid or adsetid missing for {campaignName}</div>;
         }
 
         // 🧰 accounts for bulk endpoints (single row -> 1 element array is fine)
