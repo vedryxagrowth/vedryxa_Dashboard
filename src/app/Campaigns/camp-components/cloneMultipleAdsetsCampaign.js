@@ -53,8 +53,10 @@ import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
-import { FaTrashCan } from "react-icons/fa6";
+import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
 import { Category } from "@mui/icons-material";
+
+
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 
@@ -5813,15 +5815,133 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [draftsData, setDraftsData] = useState([]);
-  const [popupInputs, setPopupInputs] = useState({ input1: "", input2: "" });
-  const [errors, setErrors] = useState({ input1: "", input2: "" });
+  const [popupInputs, setPopupInputs] = useState({ input1: "", input2: "", reportCat: "" });
+  const [errors, setErrors] = useState({ input1: "", input2: "", reportCat: "" });
   const [refreshDraft, setRefreshDraft] = useState(false);
   const [fullCampaignData, setFullCampaignData] = useState(null);
   const [addlevelData, setAddLevelData] = useState({});
   const [newAddLevelData, setNewAddLevelData] = useState({});
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
   console.log(selectedRow, "selectedRow in EditMultipleAdsetCampaignDrawer");
+  const [reportCategories, setReportCategories] = useState([]);
+  const [newReportCategory, setNewReportCategory] = useState("");
+  const [rEditModalVisible, setREditModalVisible] = useState(false);
+  const [rDeleteModalVisible, setRDeleteModalVisible] = useState(false);
+  const [rCurrentCategory, setRCurrentCategory] = useState(null);
+  const [rEditedName, setREditedName] = useState("");
 
+  useEffect(() => {
+    if (!accountNumber || accountNumber.length === 0) return;
+
+    const accountArray = Array.isArray(accountNumber) ? accountNumber : [accountNumber];
+
+    (async () => {
+      const resp = await fetch(`https://www.testapi.adsgoat.in/api/getreportcategories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ accounts: accountArray }),
+      });
+
+      const json = await resp.json().catch(() => ({}));
+      if (json.ok) {
+        setReportCategories(json.categories);
+      }
+    })();
+  }, [accountNumber, token]);
+
+
+  const addReportCategory = async () => {
+    const name = newReportCategory.trim();
+    if (!name || !accountNumber) return;
+
+    const accounts = Array.isArray(accountNumber) ? accountNumber : [accountNumber];
+
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/newreportcategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accounts, name }),
+    });
+
+    const json = await resp.json();
+    if (resp.ok && json.ok) {
+      setReportCategories(prev => [...prev, ...json.added]);
+      setPopupInputs(s => ({ ...s, reportCat: json.added[0]?.name || "" }));
+      setNewReportCategory("");
+      setErrors(e => ({ ...e, reportCat: "" }));
+
+      message.success(`Report category added to ${json.added.length} account(s)`);
+    } else {
+      message.error(json.message || "Add failed");
+    }
+  };
+
+  const renameReportCategory = async (accountNumber, catId, newName) => {
+    const clean = newName?.trim();
+    if (!catId || !clean || !accountNumber) return;
+
+    const old = reportCategories.find(
+      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+    )?.name;
+
+    if (old && old.trim().toLowerCase() === clean.toLowerCase()) {
+      message.info("No changes to save");
+      return;
+    }
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({ name: clean }),
+      }
+    );
+
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setReportCategories(prev =>
+        prev.map(c =>
+          String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber)
+            ? { ...c, name: clean }
+            : c
+        )
+      );
+      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === old ? clean : s.reportCat }));
+      message.success("Report category renamed");
+    } else {
+      message.error(json.message || "Rename failed");
+    }
+  };
+
+
+  const deleteReportCategory = async (accountNumber, catId) => {
+    if (!catId || !accountNumber) return;
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      { method: "DELETE", headers: { Authorization: token } }
+    );
+    const json = await resp.json().catch(() => ({}));
+
+    if (resp.ok && json.ok) {
+      setReportCategories(prev =>
+        prev.filter(c =>
+          !(String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber))
+        )
+      );
+      message.success("Report category deleted");
+    } else {
+      message.error(json.message || "Delete failed");
+    }
+  };
   // const handleConfirm = async() => {
   //   const newErrors = {
   //     input1: popupInputs.input1.trim() ? '' : 'First input is required',
@@ -5856,6 +5976,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     const newErrors = {
       input1: popupInputs.input1.trim() ? "" : "First input is required",
       input2: popupInputs.input2.trim() ? "" : "Second input is required",
+      input3: popupInputs.reportCat?.trim() ? "" : "Report category is required",
     };
 
     setErrors(newErrors);
@@ -7700,7 +7821,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         return item.key;
       });
   }
-
+  const category = fullCampaignData?.Category;
   const MultipleAdsestsFetching = async (values) => {
     let AllAdsetsData = {
       identifier: uuidv4(),
@@ -7708,7 +7829,8 @@ const CloneMultipleAdsetCampaignDrawer = ({
       Account_Number: values.Account_Number,
       Approval: "PENDING_APPROVAL",
       fbstatus: "No-Live",
-      Category: fullCampaignData.Category || "",
+      // Category: fullCampaignData.Category || "",
+      Category: popupInputs.reportCat || "",
       camapaignlevel: {
         createdby: session?.user?.name,
         Name: values.Name,
@@ -8778,6 +8900,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     setSelectedFilesFromMedia({}); // Clear selected files from media
     setSelectedFiles({}); // Clear all selected files
     setShowBidAmount(false); // Reset showBidAmount state
+    setPopupInputs({}); // Clear popup inputs
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -9417,6 +9540,166 @@ const CloneMultipleAdsetCampaignDrawer = ({
       }}
       style={{ borderRadius: "12px" }}
     >
+      <div style={{ marginBottom: '10px' }}>
+        <Select
+          placeholder="Select report category"
+          className={`${theme === "dark" ? "dark-theme" : "light-theme"
+            } green-border-select`}
+          value={popupInputs.reportCat || category}
+          optionLabelProp="value"
+          onChange={(val) => {
+            setPopupInputs(s => ({ ...s, reportCat: val }));
+            if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
+          }}
+          showSearch
+          filterOption={(input, option) =>
+            (option?.name || "").toLowerCase().includes(input.toLowerCase())
+          }
+          options={[
+            category
+              ? {
+                value: category,
+                name: category,
+                label: (
+                  <div style={{ fontWeight: 600 }}>
+                    {category} (Current)
+                  </div>
+                )
+              }
+              : null,
+
+            ...reportCategories.map(c => ({
+              value: `${c.name}`,
+              name: c.name,
+              id: c.categoryId,
+              label: (
+                <div style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 8
+                }}>
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: 200
+                    }}
+                    title={`${c.name} - ${c.accountNumber}`}
+                  >
+                    {c.name} - {c.accountNumber}
+                  </span>
+
+                  <span style={{ display: "flex", gap: 10 }}>
+                    <FaPenToSquare
+                      style={{ fontSize: 12 }}
+                      title="Edit"
+                      onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      onClick={(e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        setRCurrentCategory(c);
+                        setREditedName(c.name);
+                        setREditModalVisible(true);
+                      }}
+                    />
+
+                    <FaTrashCan
+                      style={{ fontSize: 12, color: "#EC7117" }}
+                      title="Delete"
+                      onClick={(e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        setRCurrentCategory(c);
+                        setRDeleteModalVisible(true);
+                      }}
+                    />
+                  </span>
+                </div>
+              )
+            }))
+          ].filter(Boolean)}
+
+          style={{ width: 240 }}
+          dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+          dropdownRender={(menu) => (
+            <div>
+              {menu}
+              <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
+                <Input
+                  size="small"
+                  placeholder="New report category"
+                  value={newReportCategory}
+                  onChange={(e) => setNewReportCategory(e.target.value)}
+                  onPressEnter={addReportCategory}
+                  className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                />
+                <Button
+                  size="small"
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={addReportCategory}
+                  style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                />
+              </div>
+            </div>
+          )}
+        />
+        {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
+      </div>
+      <Modal
+        title="Delete Report Category"
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+          }`}
+        open={rDeleteModalVisible}
+        onOk={async () => {
+          if (!rCurrentCategory) return;
+          await deleteReportCategory(
+            rCurrentCategory.accountNumber ?? (Array.isArray(account) ? account[0] : account),
+            rCurrentCategory.categoryId
+          );
+          setRDeleteModalVisible(false);
+          setRCurrentCategory(null);
+        }}
+
+        onCancel={() => {
+          setRDeleteModalVisible(false);
+          setRCurrentCategory(null);
+        }}
+        okText="Delete"
+        okButtonProps={{ danger: true, type: "primary" }}
+      >
+        <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
+      </Modal>
+      <Modal
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+        title="Edit Report Category"
+        visible={rEditModalVisible}
+        onOk={async () => {
+          if (rEditedName.trim() && rCurrentCategory) {
+            await renameReportCategory(
+              rCurrentCategory.accountNumber,
+              rCurrentCategory.categoryId,
+              rEditedName.trim()
+            );
+            setREditModalVisible(false);
+            setREditedName("");
+            setRCurrentCategory(null);
+          }
+        }}
+        onCancel={() => {
+          setREditModalVisible(false);
+          setREditedName("");
+          setRCurrentCategory(null);
+        }}
+        okText="Save"
+      >
+        <Input
+          value={rEditedName}
+          onChange={(e) => setREditedName(e.target.value)}
+          className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+        />
+      </Modal>
       {/* {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
@@ -10144,7 +10427,14 @@ const CloneMultipleAdsetCampaignDrawer = ({
                       minWidth: "200px",
                       borderWidth: "0px",
                     }}
+                  
                     onClick={async () => {
+                      const finalCategory = popupInputs.reportCat || fullCampaignData?.Category;
+                      if (!finalCategory) {
+                        setErrors(e => ({ ...e, reportCat: "Report category is required" }));
+                        return;
+                      }
+
                       try {
                         const values = await form.validateFields(); // Validates all form fields
 
@@ -10383,6 +10673,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             Account_Number={accountis}
           />
         </Drawer>
+
       )}
     </Modal>
   );

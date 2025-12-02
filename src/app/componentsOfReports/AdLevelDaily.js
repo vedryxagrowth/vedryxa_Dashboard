@@ -59,7 +59,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap }) => {
+const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
   const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -108,8 +108,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
   //   );
   // }
   // ), [dailyData, inputValue, theme]);
-    const memorizedDailyData = useMemo(() => {
-    let filtered = newRowDataForFilter.current || [];
+  const memorizedDailyData = useMemo(() => {
+    let filtered = dailyData || [];
 
     const normalizedInput = inputValue.trim().toLowerCase();
     const normalizedInside = insideInput.trim().toLowerCase();
@@ -154,7 +154,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     }
 
     return filtered;
-  }, [newRowDataForFilter.current, inputValue, insideInput]);
+  }, [dailyData, inputValue, insideInput]);
   const [selectedAd, setSelectedAd] = useState([]);
   const [leafCampaigns, setLeafCampaigns] = useState([])
   const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
@@ -249,13 +249,37 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     }
     updateDetails();
   };
+  useEffect(() => {
+    if (removeSelectedAds === "Remove") {
+      // if (gridRef.current) {
+      //   gridRef.current.api.deselectAll();
+
+
+      // }
+      const api = gridRef1.current.api;
+      api.deselectAll();
+      api.forEachNode((node) => {
+        node.selectThisNode(false);
+      });
+
+    }
+  }, [removeSelectedAds]);
+  const uniqueByAdId = (arr) => {
+    const map = new Map();
+    arr.forEach(obj => {
+      if (!map.has(obj.adid)) {
+        map.set(obj.adid, obj);
+      }
+    });
+    return Array.from(map.values());
+  };
   const onSelectionChanged = (event) => {
     const selectedNodes = event.api.getSelectedNodes();
     const selectedData = selectedNodes.map(node => node.data);
 
     // Store selection persistently
     setSelectedAd(selectedData);
-
+    showAdLevel(uniqueByAdId(selectedData));
     const leafCampaignsData = selectedNodes
       .filter(node => !node.group && node.data)
       .map(node => ({
@@ -795,11 +819,11 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           rowAccount = params.data.accountNumber ?? null;  // prefer row account if present
         } else {
           console.error('Missing campaignid or adsetid for campaign:', campaignName);
-          return (
-            <div style={{ color: 'red' }}>
-              Error: campaignid or adsetid missing for {campaignName}
-            </div>
-          );
+          // return (
+          //   <div style={{ color: 'red' }}>
+          //     Error: campaignid or adsetid missing for {campaignName}
+          //   </div>
+          // );
         }
 
         // prefer ad name for ad-level comment docs; fallback on campaign name
@@ -3054,7 +3078,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                     <Input
                       placeholder="Search..."
                       // prefix={<SearchOutlined />}
-                      onChange={(value)=> setInsideInput(value.target.value)}
+                      onChange={(value) => setInsideInput(value.target.value)}
                       // onBlur={handleBlur}
                       value={insideInput}
                       allowClear
@@ -3273,6 +3297,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       // groupIncludeFooter={true}
                       // groupIncludeTotalFooter={true}
                       autoGroupColumnDef={autoGroupColumnDef}
+                      getRowId={(params) => String(params.data.adid)}
                       onGridReady={(params) => {
                         gridRef1.current = params.api; // Store grid API
                         restoreGridState(gridRef1.current); // Restore state when grid is ready
@@ -3440,6 +3465,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       // groupIncludeFooter={true}
                       // groupIncludeTotalFooter={true}
                       autoGroupColumnDef={autoGroupColumnDef}
+                      getRowId={(params) => String(params.data.adid)}
                       onGridReady={(params) => {
                         gridRef1.current = params.api; // Store grid API
                         restoreGridState(gridRef1.current); // Restore state when grid is ready
