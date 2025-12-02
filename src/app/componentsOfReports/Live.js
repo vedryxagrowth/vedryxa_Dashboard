@@ -120,6 +120,8 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
     const [removeSelectedCampaigns, setRemoveSelectedCampaigns] = useState("");
 
     const [removeSelectedAdsets, setRemoveSelectedAdsets] = useState("");
+    
+    const [removeSelectedAds, setRemoveSelectedAds] = useState("");
     //Active pause
     const [campaignStatusFilter, setCampaignStatusFilter] = useState('ALL');
 
@@ -224,6 +226,11 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         setSelectedAdsets(data);
         console.log(data, "AdsetLeveldata");
     }
+     const showAdLevel = (data) => {
+        setSelectedAds(data);
+        console.log(data, "AdsetLeveldata");
+    }
+
 
     const onClickRemoveSelectedCampaigns = () => {
         setSelectedCampaigns([]);
@@ -246,13 +253,13 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
     }
 
     const onClickRemoveSelectedAds = () => {
-        // setSelectedAds([]);
-        // // removeSelectedCampaigns();
-        // setRemoveSelectedAdsets("");
-        // setTimeout(() => {
-        //     setRemoveSelectedAdsets("Remove");
-        // }
-        // , 100);
+        setSelectedAds([]);
+        // removeSelectedCampaigns();
+        setRemoveSelectedAds("");
+        setTimeout(() => {
+            setRemoveSelectedAds("Remove");
+        }
+        , 100);
     }
 
     const moveToNextTab = (data) => {
@@ -1555,6 +1562,8 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         getMainMenuItems={getMainMenuItems}
                         toggleStatus={toggleStatus}
                         handleChangeToggle={handleChangeToggle}
+                        showAdLevel={showAdLevel}
+                        removeSelectedAds={removeSelectedAds}
                         theme={theme}
                         tabStatus={"Live"}
                         selectedCampaigns={selectedCampaigns}

@@ -119,7 +119,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
     // }
     // ) : [], [rowData, inputValue, theme]);
     const memorizedRowData = useMemo(() => {
-        let filtered = newRowDataForFilter.current || [];
+        let filtered =  rowData || [];
 
         const normalizedInput = inputValue.trim().toLowerCase();
         const normalizedInside = insideInput.trim().toLowerCase();
@@ -159,7 +159,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         }
 
         return filtered;
-    }, [newRowDataForFilter.current, inputValue, insideInput]);
+    }, [ rowData, inputValue, insideInput]);
     const [leafCampaigns, setLeafCampaigns] = useState([]);
     const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
     const [comment, setComment] = useState("");
@@ -701,11 +701,11 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
-                    return (
-                        <div style={{ color: 'red' }}>
-                            Error: campaignid or adsetid missing for {campaignName}
-                        </div>
-                    );
+                    // return (
+                    //     <div style={{ color: 'red' }}>
+                    //         Error: campaignid or adsetid missing for {campaignName}
+                    //     </div>
+                    // );
                 }
 
                 // selected accounts (multi)

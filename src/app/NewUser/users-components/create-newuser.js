@@ -228,28 +228,28 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                     const apiNetwork = String(apiMatch.Network).trim();
 
                     if (apiNetwork === selectedNetwork) {
-                         message.open({
-                        type: 'error',
-                        content: `Account ${accountNumber} exists in this network but you don't have access.`,
-                        className: theme === 'dark' ? 'dark-message' : '',
-                    });
+                        message.open({
+                            type: 'error',
+                            content: `Account ${accountNumber} exists in this network but you don't have access.`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        });
 
                         return false;
                     } else {
-                         message.open({
-                        type: 'error',
-                        content: `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`,
-                        className: theme === 'dark' ? 'dark-message' : '',
-                    });
+                        message.open({
+                            type: 'error',
+                            content: `Account ${accountNumber} exists in network ${apiNetwork}. You do not have access.`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        });
 
                         return false;
                     }
                 }
-                  message.open({
-                        type: 'error',
-                        content: `Account ${accountNumber} does NOT exist in any network. Please add.`,
-                        className: theme === 'dark' ? 'dark-message' : '',
-                    });
+                message.open({
+                    type: 'error',
+                    content: `Account ${accountNumber} does NOT exist in any network. Please add.`,
+                    className: theme === 'dark' ? 'dark-message' : '',
+                });
                 return false;
             }
         }
@@ -260,15 +260,22 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
         if (selectedRole !== "Admin" && additionalAccounts.length === 0) {
 
             message.open({
-                        type: 'error',
-                        content: `Please select at least one project`,
-                        className: theme === 'dark' ? 'dark-message' : '',
-                    })
+                type: 'error',
+                content: `Please select at least one project`,
+                className: theme === 'dark' ? 'dark-message' : '',
+            })
             return false;
         }
         return true;
     };
-
+    const checkEmailExists = async (email) => {
+        try {
+            const res = await apiClient.post("https://prodapis.adsgoat.in/checkEmailExists", { email });
+            return res.data.exists;
+        } catch (e) {
+            return false;
+        }
+    }
     const submitForm = async (values) => {
         values.userName = values.userName?.trim();
         values.email = values.email?.trim();
@@ -311,12 +318,12 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                     const response = await apiClient.post('/api/createUser/', { formattedData });
 
                     if (response.status === 200) {
-                         // Display success message
-                         message.open({
-                        type: 'success',
-                        content: `User created successfully`,
-                        className: theme === 'dark' ? 'dark-message' : '',
-                    })
+                        // Display success message
+                        message.open({
+                            type: 'success',
+                            content: `User created successfully`,
+                            className: theme === 'dark' ? 'dark-message' : '',
+                        })
                         refreshUsers();
                         setIsModalVisible(false); // Close modal after success
 
@@ -360,10 +367,8 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                     label="User Name"
                     name="userName"
                     rules={[
-                        {
-                            required: true,
-                            message: 'Please input the username!',
-                        },
+                        { required: true, message: "Please input the UserName!" },
+
                     ]}
                 >
                     <Input autoComplete="off" placeholder='Enter User Name' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
@@ -372,11 +377,25 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                 <Form.Item
                     label="Email"
                     name="email"
+                    validateTrigger="onSubmit"
                     rules={[
                         {
                             required: true,
                             message: 'Please input the email!',
                         },
+
+                        {
+                            validator: async (_, value) => {
+                                if (!value) return Promise.resolve();
+
+                                const exists = await checkEmailExists(value.trim());
+                                if (exists) {
+                                    return Promise.reject("This email already exists");
+                                }
+
+                                return Promise.resolve();
+                            }
+                        }
                     ]}
                 >
                     <Input autoComplete="off" placeholder='Enter User Email' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />

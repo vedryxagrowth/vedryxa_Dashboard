@@ -4,7 +4,7 @@ import Draggable from "react-draggable";
 import { v4 as uuidv4 } from "uuid";
 import dayjs from "dayjs";
 import { PictureOutlined, DeleteOutlined, PlusOutlined, CopyOutlined } from "@ant-design/icons";
-import { Button, message } from "antd";
+import { Button, Checkbox, message } from "antd";
 import moment from "moment";
 import { useTokenContext } from "./parent";
 import { useRef } from "react";
@@ -35,6 +35,9 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [colorMenuVisible, setColorMenuVisible] = useState(false);
+  const [selectedNotes, setSelectedNotes] = useState([]);
+
+
 
   useEffect(() => {
     apiClient.get(`/notes/${userEmail}`)
@@ -58,6 +61,30 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+  const toggleSelect = (id) => {
+    setSelectedNotes(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
+    );
+  };
+  const deleteMultipleNotes = () => {
+    apiClient.delete("/notes/bulk", {
+      data: {
+        email: userEmail,
+        ids: selectedNotes
+      }
+    }).then(() => {
+      const updated = notes.filter(n => !selectedNotes.includes(n.id));
+      setNotes(updated);
+      setSelectedNotes([]);
+      saveToDB(updated);
+      setOpenNote(null);
+    })
+      .catch(err => console.error("Bulk delete failed", err));
+  };
+  console.log("BULK DELETE sending IDs:", selectedNotes);
+
 
   // const handleMultipleFileUpload = async (files, userdetails) => {
   //   if (!files.length || !userdetails?.userName) {
@@ -243,49 +270,45 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
   };
 
 
-const convertToPng = (url) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas.getContext("2d").drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.onerror = () => reject("Load Error");
-    img.src = url;
-  });
-};
+  const convertToPng = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = () => reject("Load Error");
+      img.src = url;
+    });
+  };
 
-const copyNoteContent = async (note) => {
-  try {
-  //  1.add to text
-    let html = `<div>${(note.text || "").replace(/\n/g, "<br>")}</div>`;
+  const copyNoteContent = async (note) => {
+    try {
 
-    // 2. Add multiple images (converted to PNG)
-    if (note.images) {
-      for (const url of note.images) {
-        const png = await convertToPng(url);
-        html += `<img src="${png}" style="max-width:100%; margin-top:8px;" />`;
+      let html = `<div>${(note.text || "").replace(/\n/g, "<br>")}</div>`;
+      if (note.images) {
+        for (const url of note.images) {
+          const png = await convertToPng(url);
+          html += `<img src="${png}" style="max-width:100%; margin-top:8px;" />`;
+        }
       }
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([note.text || ""], { type: "text/plain" }),
+        })
+      ]);
+
+      message.success("Copied!")
+    } catch (err) {
+      console.error(err);
+      message.error("Copy failed!");
     }
-
-    // 3. Copy to clipboard
-    await navigator.clipboard.write([
-      new ClipboardItem({
-        "text/html": new Blob([html], { type: "text/html" }),
-        "text/plain": new Blob([note.text || ""], { type: "text/plain" }),
-      })
-    ]);
-
-    message.success("Copied!")
-  } catch (err) {
-    console.error(err);
-    message.error("Copy failed!");
-  }
-};
+  };
 
 
   return (
@@ -315,8 +338,27 @@ const copyNoteContent = async (note) => {
           width: "350px", padding: "10px", borderRadius: "8px", background: theme === 'dark' ? '#333' : '#fff',
           boxShadow: "0 2px 6px rgba(0,0,0,0.2)", zIndex: selectedImage ? -1 : 9999
         }}>
+
+
           <div style={{ cursor: "grab", marginBottom: "10px", display: "flex", justifyContent: "space-between" }}>
-            <button onClick={addNote} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px" }}><PlusOutlined /></button>
+            <div>
+              <button onClick={addNote} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px" }}><PlusOutlined /></button>
+              <button
+                onClick={deleteMultipleNotes}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  padding: 0
+                }}
+              >
+                <div className={`icon-wrapper ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
+                  <DeleteOutlined className="copy-icon1" />
+                </div>
+              </button>
+
+            </div>
             <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px", color: theme === 'dark' ? '#fff' : '#000' }}>✖</button>
           </div>
           <h3 style={{ margin: "0 0 10px 0" }}>Sticky Notes</h3>
@@ -331,6 +373,7 @@ const copyNoteContent = async (note) => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <div style={{ overflowY: "auto", maxHeight: "60vh" }}>
+
             {notes.filter(n => n.text.toLowerCase().includes(searchTerm.toLowerCase())).map(note => (
               <div
                 key={note.id}
@@ -341,10 +384,18 @@ const copyNoteContent = async (note) => {
                   padding: "5px",
                   borderRadius: "5px",
                   cursor: "pointer",
-                  color: '#333'
+                  color: '#333',
+                  display: "flex",
+                  alignItems: "center"
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <Checkbox
+                  className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                  checked={selectedNotes?.includes(note.id)}
+                  onChange={() => toggleSelect(note.id)}
+                  style={{ marginRight: "10px" }}
+                />
+                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                   <span>{note.text.substring(0, 20) || "New Note"}</span>
                   <span style={{ fontSize: "12px", color: "gray" }}>{note.timestamp}</span>
                 </div>
