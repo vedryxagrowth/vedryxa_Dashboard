@@ -70,6 +70,8 @@ import dayjs from "dayjs";
 import { DatePicker } from "antd";
 import StickyBox from "react-sticky-box";
 import { FaClone, FaEye, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
+ 
 import { Token } from "aws-sdk";
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
@@ -3206,24 +3208,28 @@ const App = () => {
     // setAccount(value);
   }
 
-  const handleChange1 = (values) => {
-    const uniq = Array.from(new Set(values.map(String)));
-    setSelectedValue(uniq);
+  const handleChange1 = (currentVisibleSelected) => {
+    const visible = filteredAccounts.map(a => String(a.accountNumber));
+    const current = currentVisibleSelected.map(String);
+    const added = current.filter(id => !selectedValue.includes(id));
+    let updated = Array.from(new Set([...selectedValue, ...added]));
+    const removed = visible.filter(id =>
+      selectedValue.includes(id) && !current.includes(id)
+    );
+    updated = updated.filter(id => !removed.includes(id));
+    setSelectedValue(updated);
     userPickedRef.current = true;
-
-    // Preserve your accountName behavior using the last picked item (if needed)
-    const last = values[values.length - 1];
+    const last = currentVisibleSelected[currentVisibleSelected.length - 1];
     if (last) {
       const findAccount = (data, accountNumber) =>
         Object.values(data).flat().find((item) => item.accountNumber === accountNumber) || null;
-
-      const accountNameForAccount = findAccount(userdetails?.adAccounts, last);
-      // if (accountNameForAccount) setAccountName(accountNameForAccount.accountName);
+      const accName = findAccount(userdetails?.adAccounts, last);
     }
 
-    onChangeSelect(values);     // now passing array
+    onChangeSelect(updated);
     setAccountChanged(true);
   };
+ 
 
   const filteredAccounts = useMemo(() => {
     const q = searchText.trim().toLowerCase();
@@ -3233,44 +3239,141 @@ const App = () => {
     );
   }, [accountsAccess, searchText]);
 
-  const renderAccountsCheckboxes = (theme) => (
-    <Checkbox.Group
-      options={filteredAccounts.map((account) => ({
-        value: String(account.accountNumber),
-        label: (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '5px 10px',
-              borderBottom: '1px solid #ddd'
+  // const renderAccountsCheckboxes = (theme) => (
+  //   <Checkbox.Group
+  //     options={filteredAccounts.map((account) => ({
+  //       value: String(account.accountNumber),
+  //       label: (
+  //         <div
+  //           style={{
+  //             display: 'flex',
+  //             justifyContent: 'space-between',
+  //             alignItems: 'center',
+  //             padding: '5px 10px',
+  //             borderBottom: '1px solid #ddd'
+  //           }}
+  //         >
+  //           <div style={{ display: 'flex', flexDirection: 'column' }}>
+  //             <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+  //             {/* show accountName only when dropdown open (same as your old pattern) */}
+  //             {isOpen && (
+  //               <span style={{ fontSize: 12, color: 'gray' }}>
+  //                 {account.accountName || ''}
+  //               </span>
+  //             )}
+  //           </div>
+  //           <span style={{ textAlign: 'right', marginLeft: 10 }}>
+  //             {account.status === "Active" ? (
+  //               <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+  //             ) : (
+  //               <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
+  //             )}
+  //           </span>
+  //         </div>
+  //       ),
+  //     }))}
+  //     value={selectedValue}      // array of selected accountNumbers
+  //     onChange={handleChange1}   // updates your selectedValue + notifies parent
+  //     className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+  //   />
+  // );
+
+  const renderAccountsCheckboxes = (theme) => {
+    const activeAccountNumbers = filteredAccounts
+      .filter(acc => acc.status === "Active")
+      .map(acc => String(acc.accountNumber));
+
+    const allActiveSelected =
+      activeAccountNumbers.length > 0 &&
+      activeAccountNumbers.every(acc => selectedValue.includes(acc));
+
+    return (
+      <>
+        <div style={{ padding: '5px 10px', borderBottom: '1px solid #ddd' }}>
+          <Checkbox
+            className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+            checked={allActiveSelected}
+            indeterminate={
+              selectedValue.length > 0 &&
+              !allActiveSelected &&
+              activeAccountNumbers.some(acc => selectedValue.includes(acc))
+            }
+            onChange={(e) => {
+              if (e.target.checked) {
+                handleChange1(activeAccountNumbers);
+              } else {
+                const remaining = selectedValue.filter(
+                  val => !activeAccountNumbers.includes(val)
+                );
+                handleChange1(remaining);
+              }
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
-              {/* show accountName only when dropdown open (same as your old pattern) */}
-              {isOpen && (
-                <span style={{ fontSize: 12, color: 'gray' }}>
-                  {account.accountName || ''}
+            <strong>All Accounts</strong>
+          </Checkbox>
+          <TiTickOutline
+            style={{
+              fontSize: 20,
+              color: "#52c41a",
+              cursor: "pointer",
+            }}
+            title="Select All Active Accounts"
+            onClick={handleApply}
+          />
+          <TiTimesOutline
+            style={{
+              fontSize: 20,
+              color: "#ff4d4f",
+              cursor: "pointer",
+            }}
+            title="Unselect All"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              handleChange1([]);
+
+            }}
+          />
+        </div>
+        <Checkbox.Group
+          options={filteredAccounts.map((account) => ({
+            value: String(account.accountNumber),
+            label: (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '5px 10px',
+                  borderBottom: '1px solid #ddd'
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontWeight: 600 }}>{account.accountNumber}</span>
+                  {isOpen && (
+                    <span style={{ fontSize: 12, color: 'gray' }}>
+                      {account.accountName || ''}
+                    </span>
+                  )}
+                </div>
+                <span style={{ textAlign: 'right', marginLeft: 10 }}>
+                  {account.status === "Active" ? (
+                    <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                  ) : (
+                    <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
+                  )}
                 </span>
-              )}
-            </div>
-            <span style={{ textAlign: 'right', marginLeft: 10 }}>
-              {account.status === "Active" ? (
-                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
-              ) : (
-                <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
-              )}
-            </span>
-          </div>
-        ),
-      }))}
-      value={selectedValue}      // array of selected accountNumbers
-      onChange={handleChange1}   // updates your selectedValue + notifies parent
-      className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
-    />
-  );
+              </div>
+            ),
+          }))}
+          value={selectedValue}
+          onChange={handleChange1}
+          className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+        />
+      </>
+    );
+  };
+ 
 
   return (
     <div>

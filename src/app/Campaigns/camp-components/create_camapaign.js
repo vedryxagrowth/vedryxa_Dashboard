@@ -1069,7 +1069,7 @@ const AdsetComponent = ({
   addAdset,
   removeAdset,
   cloneAdset,
-  currentDate,
+  // currentDate,
   localesdata,
   handleFieldChange,
   network,
@@ -1084,15 +1084,18 @@ const AdsetComponent = ({
   pageidList,
   pixelIdList,
   defaultUrlData,
-  setDefaultUrlData
+  setDefaultUrlData,
+  budgetType,
+  page,
+  pixel,
+  geo
 }) => {
   console.log(page_id_list, "page_id_list in adset component");
   console.log(pageidList, "pageidList in adset component");
   console.log(pixel_id_list, "pixel_id_list in adset component");
   console.log(pixelIdList, "pixelIdList in adset component");
-  const [] = useState(false);
-  const [] = useState(false);
-  const [] = useState(false);
+  const currentDate = dayjs();
+  const after30Days = currentDate.add(30, "day");
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
     useState(false);
@@ -1107,12 +1110,18 @@ const AdsetComponent = ({
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
+  const [budget, setBudget] = useState(adset?.DailyAdd_amount ?? 0)
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
   console.log(selectedPositions?.[adset.id]);
   console.log(adset, "adset in adset component");
   console.log(defaultUrlData, "defaultUrlData in adset component");
+
+  const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+
+  const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
+  const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
 
   const Bid_strategy_values = [
     {
@@ -1189,10 +1198,294 @@ const AdsetComponent = ({
     { value: "SE", label: "Sweden" },
   ];
 
+
+
   const campaignCountries = Form.useWatch("countries", form) || [];
   const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
 
   console.log(campaignCountries);
+
+  const newCampaignCountries = campaignCountries && campaignCountries.length > 0 ? campaignCountries.map(item => {
+    return allCountries.find(item1 => item1.value === item)
+  }) : []
+
+  console.log(newCampaignCountries);
+
+  //   const options = useMemo(() => {
+  //   const newpageidList = form.getFieldValue(["adsets", index, "page_id"]) || []
+  //   const norm = (v) =>
+  //     v == null ? null
+  //     : typeof v === "string" ? v
+  //     : v.accountId ?? v.accountNumber ?? (Object.values(v)[0] ?? null);
+
+  //   const selectedAccountIds = new Set(
+  //     (newpageidList || []).map(norm).filter(Boolean)
+  //   );
+
+  //   const selectedValuesSet = new Set(
+  //     (newpageidList || []).map((v) =>
+  //       typeof v === "string" ? v : JSON.stringify(v)
+  //     )
+  //   );
+
+  //   return (page_id_list || []).map((p) => {
+  //     const accountId = p.accountId ?? norm(p.value);
+  //     const valueKey = typeof p.value === "string" ? p.value : JSON.stringify(p.value);
+  //     return {
+  //       value: p.value,
+  //       label: p.label ?? p.value,
+  //       disabled: Boolean(accountId) && selectedAccountIds.has(accountId) && !selectedValuesSet.has(valueKey),
+  //     };
+  //   });
+  // }, [page_id_list, form, index]);
+
+  const allAdsets = Form.useWatch("adsets", form) || [];
+  const thisSelected = allAdsets[index]?.page_id || [];
+
+  const norm = (v) =>
+    v == null ? null
+      : typeof v === "string" ? (v.split(" - ")[0] || "").trim() || null
+        : v.accountId ?? v.accountNumber ?? Object.values(v)[0] ?? null;
+
+  const valueKeyOf = (v) => (typeof v === "string" ? v : JSON.stringify(v));
+
+  const selectedAccountsInOther = useMemo(() => {
+    const s = new Set();
+    (allAdsets || []).forEach((ad, i) => {
+      if (i === index) return;
+      (ad?.page_id || []).forEach((v) => {
+        const id = norm(v);
+        if (id) s.add(id);
+      });
+    });
+    return s;
+  }, [allAdsets, index]);
+
+  const thisSelectedKeys = useMemo(
+    () => new Set((thisSelected || []).map((v) => valueKeyOf(v))),
+    [thisSelected]
+  );
+
+  const options = useMemo(
+    () =>
+      (page_id_list || []).map((p) => {
+        const acc = p.accountId ?? norm(p.value);
+        const key = valueKeyOf(p.value);
+        return {
+          value: p.value,
+          label: p.label ?? (typeof p.value === "string" ? p.value : JSON.stringify(p.value)),
+          disabled: Boolean(acc) && selectedAccountsInOther.has(acc) && !thisSelectedKeys.has(key),
+        };
+      }),
+    [page_id_list, selectedAccountsInOther, thisSelectedKeys]
+  );
+
+  // // const selected = Form.useWatch("page_id", form) || []; // array of strings
+  // const coerceToString = (v) => (v == null ? "" : String(v?.value ?? v));
+  // const extractAccount = (val) => {
+  //   if (!val) return null;
+  //   const parts = String(val).split(" - ");
+  //   return parts[0]?.trim() || null;
+  // };
+
+  // watch the top-level Account_Number (array of account ids/strings)
+  const watchedAccountList = Form.useWatch("Account_Number", form) || [];
+
+  // normalize account id strings (trim)
+  const normalizedRequiredAccounts = React.useMemo(() => {
+    if (!Array.isArray(watchedAccountList)) return [];
+    return watchedAccountList
+      .map((a) => (a == null ? "" : String(a).trim()))
+      .filter(Boolean);
+  }, [watchedAccountList]);
+
+  // helper: extract account prefix from an option value like "acctA - page1"
+  const coerceToString = (v) => (v == null ? "" : String(v?.value ?? v));
+  const extractAccount = (val) => {
+    if (!val) return "";
+    const parts = String(val).split(" - ");
+    return parts[0]?.trim() || ""
+  };
+
+  const minSelectionValidatorPerAccount = (friendlyLabel) => ({
+    validator: (_, value) => {
+      // selected values from the field (array of strings or option objects)
+      const selectedArray = Array.isArray(value) ? value : value ? [value] : [];
+
+      // compute set of accounts present in selected values
+      const selectedAccountsSet = new Set(
+        selectedArray.map(coerceToString).map(extractAccount).filter(Boolean)
+      );
+
+      // which required accounts are missing from selection?
+      const missing = normalizedRequiredAccounts.filter(
+        (acct) => !selectedAccountsSet.has(String(acct))
+      );
+
+      if (missing.length === 0) {
+        return Promise.resolve();
+      }
+
+      // friendly message: list missing accounts (or show count if too many)
+      const maxList = 5; // if too many missing, don't spam
+      const missingMsg =
+        missing.length <= maxList ? missing.join(", ") : `${missing.length} accounts`;
+
+      return Promise.reject(
+        new Error(
+          `Select ${friendlyLabel} for ${missingMsg} ${missing.length > 1 ? "accounts" : "account"}`
+        )
+      );
+    },
+  });
+
+  // ---------- Per-adset watchers & memoized option lists ----------
+  // For page_id (per adset)
+  const selectedPages = Form.useWatch("page_id", form) || [];
+  // const optionsWithDisabled = useMemo(() => {
+  //   const selectedStrings = (selectedPages || []).map(coerceToString);
+  //   const selectedAccounts = new Set(selectedStrings.map(extractAccount).filter(Boolean));
+
+  //   return (page_id_list || []).map((opt) => {
+  //     const optValue = coerceToString(opt?.value ?? opt);
+  //     const optAccount = extractAccount(optValue);
+  //     const alreadySelected = selectedStrings.includes(optValue);
+
+  //     const disabled = Boolean(optAccount) && selectedAccounts.has(optAccount) && !alreadySelected;
+
+  //     return {
+  //       label: opt?.label ?? optValue,
+  //       value: optValue,
+  //       disabled,
+  //     };
+  //   });
+  // }, [page_id_list, selectedPages]);
+
+  // For pixel_id (per adset)
+
+  const optionsWithDisabled = useMemo(() => {
+    const selectedStrings = (selectedPages || []).map(coerceToString);
+    const selectedAccounts = new Set(
+      selectedStrings.map(extractAccount).filter(Boolean)
+    );
+
+    return (page_id_list || []).map((opt) => {
+      const optValue = coerceToString(opt?.value ?? opt);
+      const optAccount = extractAccount(optValue);
+      const alreadySelected = selectedStrings.includes(optValue);
+
+      // 🔥 When page = "Pages", no disabling at all
+      if (page === "Pages") {
+        return {
+          label: opt?.label ?? optValue,
+          value: optValue,
+          disabled: false,
+        };
+      }
+
+      // ✅ Original functionality (1 selection per account)
+      const disabled =
+        Boolean(optAccount) &&
+        selectedAccounts.has(optAccount) &&
+        !alreadySelected;
+
+      return {
+        label: opt?.label ?? optValue,
+        value: optValue,
+        disabled,
+      };
+    });
+  }, [page_id_list, selectedPages, page]);
+
+
+  const selectedPixels = Form.useWatch("pixel_id", form) || [];
+  // const pixelOptionsWithDisabled = useMemo(() => {
+  //   const selectedStrings = (selectedPixels || []).map(coerceToString);
+  //   const selectedAccounts = new Set(selectedStrings.map(extractAccount).filter(Boolean));
+
+  //   return (pixel_id_list || []).map((opt) => {
+  //     const optValue = coerceToString(opt?.value ?? opt);
+  //     const optAccount = extractAccount(optValue);
+  //     const alreadySelected = selectedStrings.includes(optValue);
+
+  //     const disabled = Boolean(optAccount) && selectedAccounts.has(optAccount) && !alreadySelected;
+
+  //     return {
+  //       label: opt?.label ?? optValue,
+  //       value: optValue,
+  //       disabled,
+  //     };
+  //   });
+  // }, [pixel_id_list, selectedPixels]);
+
+  // ---------- Validator factory (reusable) ----------
+  // const minSelectionValidator = (fieldLabel, idx) => {
+  //   // returns antd validator function (receives rule, value)
+  //   return {
+  //     validator: (_, value) => {
+  //       // value may be undefined or array
+  //       const vals = Array.isArray(value) ? value : (value ? [value] : []);
+  //       const required = getRequiredCountForAdset(form.getFieldValue, idx);
+  //       if (vals.length >= required) {
+  //         return Promise.resolve();
+  //       }
+  //       return Promise.reject(
+  //         new Error(`Select at least ${required} ${fieldLabel}${required > 1 ? "s" : ""}`)
+  //       );
+  //     },
+  //   };
+  // };
+
+  const pixelOptionsWithDisabled = useMemo(() => {
+    const selectedStrings = (selectedPixels || []).map(coerceToString);
+    const selectedAccounts = new Set(
+      selectedStrings.map(extractAccount).filter(Boolean)
+    );
+
+    return (pixel_id_list || []).map((opt) => {
+      const optValue = coerceToString(opt?.value ?? opt);
+      const optAccount = extractAccount(optValue);
+      const alreadySelected = selectedStrings.includes(optValue);
+
+      // 🔥 When page = "Pixels", no disabling at all
+      if (pixel === "Pixels") {
+        return {
+          label: opt?.label ?? optValue,
+          value: optValue,
+          disabled: false,
+        };
+      }
+
+      // ✅ Original functionality (1 selection per account)
+      const disabled =
+        Boolean(optAccount) &&
+        selectedAccounts.has(optAccount) &&
+        !alreadySelected;
+
+      return {
+        label: opt?.label ?? optValue,
+        value: optValue,
+        disabled,
+      };
+    });
+  }, [pixel_id_list, selectedPixels, pixel]);
+
+
+
+  const handleFirstOptimizationChange = (value) => {
+    // Get current adsets from form
+    const adsets = form.getFieldValue("adsets") || [];
+
+    // Map through adsets and set optimization_goal to the new value
+    const newAdsets = adsets.map((a) => ({
+      ...a,
+      optimization_goal: value,
+    }));
+
+    // Update the form
+    form.setFieldsValue({ adsets: newAdsets });
+  };
+
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -1633,6 +1926,77 @@ const AdsetComponent = ({
   //   setNewPixelIdList(pixel_id_list || []);
   // }, [page_id_list, pixel_id_list, pageidList, pixelIdList, form]);
 
+  // useEffect(() => {
+  //   if (hasCountries) {
+  //     form.setFieldsValue({
+  //       adsets: {
+  //         [index]: {
+  //           page_id: newpageidList,
+  //           pixel_id: newPixelIdList
+  //         },
+  //       },
+  //     });
+  //   }
+  // }, [newpageidList, newPixelIdList, form]);
+
+  // useEffect(() => {
+  //   // Only set if pageidList is defined (avoid overwriting user edits with undefined)
+  //   // if (Array.isArray(newpageidList)) {
+  //     form.setFieldsValue({
+  //       adsets: {
+  //         [index]: {
+  //           page_id: newpageidList
+  //         },
+  //       },
+  //     });
+  //   // }
+  // }, [newpageidList, index, form]);
+
+  //   useEffect(() => {
+  //   form.setFieldsValue({
+  //     adsets: {
+  //       [index]: {
+  //         DatePicker: currentDate ? dayjs(currentDate) : dayjs(),
+  //       },
+  //     },
+  //   });
+  // }, [currentDate, index, form]);
+
+  useEffect(() => {
+    if (pixel === "Pixel") {
+      form.setFieldsValue({
+        pixel_id: pixelIdList || []
+      });
+    }
+  }, [pixel, pixelIdList, form]);
+
+  useEffect(() => {
+    if (page === "Page") {
+      form.setFieldsValue({
+        page_id: pageidList || []
+      });
+    }
+  }, [page, pageidList, form]);
+
+
+  useEffect(() => {
+    if (geo !== "Geos") return;
+
+    if (!Array.isArray(allAdsets) || allAdsets.length === 0) return;
+
+    // First adset's countries
+    const firstCountries =
+      Array.isArray(allAdsets[0]?.countries) ? allAdsets[0].countries : [];
+
+    // Assign to all allAdsets
+    const updated = allAdsets.map((a) => ({
+      ...a,
+      countries: firstCountries.slice(), // copy to avoid shared ref
+    }));
+
+    form.setFieldsValue({ adsets: updated });
+  }, [geo, allAdsets, form]);
+
   useEffect(() => {
     if (hasCountries) {
       form.setFieldsValue({
@@ -1640,7 +2004,7 @@ const AdsetComponent = ({
           [index]: {
             Min_Age: "18",
             Max_Age: "65",
-            Gender: "0",
+            Gender: "0"
           },
         },
       });
@@ -1671,6 +2035,31 @@ const AdsetComponent = ({
       });
     }
   }, [selectedPositions, adset.id]);
+
+  useEffect(() => {
+    // Re-run once selectedPositions or adset.id updates
+    if (
+      selectedPositions?.[adset.id] &&
+      Array.isArray(selectedPositions[adset.id])
+    ) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            positions: selectedPositions[adset.id].map((pos) => pos.key),
+          },
+        },
+      });
+    }
+  }, [selectedPositions, adset.id]);
+  //   useEffect(() => {
+  //     console.log(adset, index)
+  //   if (adset?.DailyAdd_amount !== undefined) {
+  //     form.setFieldValue(
+  //       ["adsets", index, "DailyAdd_amount"],
+  //       adset.DailyAdd_amount
+  //     );
+  //   }
+  // }, [adset?.DailyAdd_amount, index, form]);
   // useEffect(() => {
   //     if(adset?.DailyAdd_amount){
   //         form.setFieldsValue({
@@ -1682,16 +2071,27 @@ const AdsetComponent = ({
   //         });
   //     }
   // }, [adset]);
-  useEffect(() => {
-    if (adset?.DailyAdd_amount !== undefined) {
-      form.setFields([
-        {
-          name: ["adsets", index, "DailyAdd_amount"],
-          value: adset.DailyAdd_amount,
-        },
-      ]);
-    }
-  }, [adset?.DailyAdd_amount]);
+  // useEffect(() => {
+  //   if (adset?.DailyAdd_amount !== undefined) {
+  //     form.setFields([
+  //       {
+  //         name: ["adsets", index, "DailyAdd_amount"],
+  //         value: adset.DailyAdd_amount,
+  //       },
+  //     ]);
+  //   }
+  // }, [adset?.DailyAdd_amount]);
+  //   useEffect(() => {
+  //   if (adset?.DailyAdd_amount !== undefined) {
+  //     form.setFieldsValue({
+  //       adsets: {
+  //         [index]: {
+  //           DailyAdd_amount: adset.DailyAdd_amount,
+  //         },
+  //       },
+  //     });
+  //   }
+  // }, [adset?.DailyAdd_amount, index]);
 
   useEffect(() => {
     setSelectedIndex(String(accountis[0]));
@@ -1743,31 +2143,167 @@ const AdsetComponent = ({
   //   }
   // }, [campaignCountries, form, index, allCountries]);
 
+  // useEffect(() => {
+  //   // Get current adset country value
+  //   const current = form.getFieldValue(["adsets", index, "countries"]);
+
+  //   if (campaignCountries.length > 0) {
+  //     // 🧠 CASE 1: Campaign-level countries exist
+  //     // ✅ Keep previous value if it’s still part of new campaignCountries
+  //     if (campaignCountries.includes(current)) {
+  //       // Do nothing — current is still valid
+  //       return;
+  //     }
+
+  //     // ❌ If not valid or empty, fallback to the first campaign country
+  //     form.setFieldValue(["adsets", index, "countries"], campaignCountries[0]);
+  //   } else {
+  //     // 🧠 CASE 2: No campaign-level countries exist
+  //     // ✅ Keep current if it’s part of all countries
+  //     const isValid = allCountries.some((c) => c.value === current);
+
+  //     if (!isValid) {
+  //       // ❌ Not valid — default to first available
+  //       form.setFieldValue(["adsets", index, "countries"], allCountries[0].value);
+  //     }
+  //   }
+  // }, [campaignCountries, form, index, allCountries]);
+
   useEffect(() => {
-    // Get current adset country value
-    const current = form.getFieldValue(["adsets", index, "countries"]);
+    // always treat current as an array
+    const current = form.getFieldValue(["adsets", index, "countries"]) || [];
+
+    // helper to set an array value safely
+    const setArrayValue = (valArray) => {
+      form.setFields([
+        { name: ["adsets", index, "countries"], value: valArray },
+      ]);
+      form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+    };
 
     if (campaignCountries.length > 0) {
-      // 🧠 CASE 1: Campaign-level countries exist
-      // ✅ Keep previous value if it’s still part of new campaignCountries
-      if (campaignCountries.includes(current)) {
-        // Do nothing — current is still valid
-        return;
+      // Allowed values are campaignCountries
+      const filtered = Array.isArray(current)
+        ? current.filter((c) => campaignCountries.includes(c))
+        : (campaignCountries.includes(current) ? [current] : []);
+
+      if (filtered.length === 0) {
+        // fallback to first campaign country (as an array)
+        setArrayValue([campaignCountries[0]]);
+        // form.setFieldsValue({
+        //   adsets: {
+        //     [index]: { countries: [campaignCountries[0]] }
+        //   }
+        // });
+        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+      } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        // remove invalid entries, keep the valid ones
+        setArrayValue(filtered);
       }
-
-      // ❌ If not valid or empty, fallback to the first campaign country
-      form.setFieldValue(["adsets", index, "countries"], campaignCountries[0]);
     } else {
-      // 🧠 CASE 2: No campaign-level countries exist
-      // ✅ Keep current if it’s part of all countries
-      const isValid = allCountries.some((c) => c.value === current);
+      // No campaign-level countries -> allowed values are allCountries' values
+      const validSet = new Set(allCountries.map((c) => c.value));
+      const filtered = Array.isArray(current)
+        ? current.filter((c) => validSet.has(c))
+        : (validSet.has(current) ? [current] : []);
 
-      if (!isValid) {
-        // ❌ Not valid — default to first available
-        form.setFieldValue(["adsets", index, "countries"], allCountries[0].value);
+      if (filtered.length === 0) {
+        // fallback to first available country (as an array)
+        setArrayValue([allCountries[0].value]);
+        // form.setFieldsValue({
+        //   adsets: {
+        //     [index]: { countries: [allCountries[0].value] }
+        //   }
+        // });
+        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+      }
+      else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        setArrayValue(filtered);
       }
     }
+    // include only necessary deps (allCountries is an array constant — ok to include)
   }, [campaignCountries, form, index, allCountries]);
+
+  const handleFirstCountriesChange = (newCountriesArray) => {
+    const adsets = form.getFieldValue("adsets") || [];
+    const newAdsets = adsets.map((a, i) => ({
+      ...a,
+      countries: Array.isArray(newCountriesArray) ? newCountriesArray : [],
+    }));
+    form.setFieldsValue({ adsets: newAdsets });
+  };
+
+  const Optimization_goal_values = {
+    OUTCOME_LEADS: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ],
+    OUTCOME_SALES: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "VALUE", label: "Maximize value of conversions" },
+      { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ]
+  }
+
+  const Conversion_Event_options = {
+    OUTCOME_LEADS: [
+      { value: "LEAD", label: "Lead" },
+      { value: "CONTACT", label: "Contact" },
+      { value: "SCHEDULE", label: "Schedule  " },
+    ],
+    OUTCOME_SALES: [
+      { value: "PURCHASE", label: "Purchase" },
+      { value: "INITIATED_CHECKOUT", label: "Initiate Checkout" },
+      { value: "ADD_TO_CART ", label: "Add to Cart" },
+      { value: "CONTENT_VIEW", label: "View Content" },
+      { value: "ADD_TO_WISHLIST", label: " Add to Wishlist" },
+    ]
+  }
+
+  const Action_Source_Values = {
+    OUTCOME_LEADS: [
+      { value: "website", label: "Website" },
+    ],
+    OUTCOME_SALES: [
+      { value: "website", label: "Website" },
+    ]
+  }
+
+  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+
+  // value currently in form for this adset (keeps UI in sync)
+  const adsetsValues = form.getFieldValue("adsets") || [];
+  const currentValue = adsetsValues[index]?.optimization_goal ?? "";
+
+  const optionsForIndex =
+    index === 0
+      ? optionsForOptimz_goal
+      : optionsForOptimz_goal.map((o) => ({ ...o, disabled: o.value !== currentValue }));
+
+  const currentCountries = adsetsValues[index]?.countries ?? [];
+
+  // source options: either filtered by campaignCountries or all
+  const baseOptions =
+    campaignCountries.length > 0
+      ? allCountries.filter((c) => campaignCountries.includes(c.value))
+      : allCountries;
+
+  // Build options depending on geo and index
+  const optionsForIndexOfCountries =
+    geo === "Geos" && index > 0
+      ? // disable any option that's NOT currently selected for this adset
+      baseOptions.map((opt) => ({
+        ...opt,
+        disabled: !currentCountries.includes(opt.value),
+      }))
+      : // otherwise full options (fully editable)
+      baseOptions;
 
 
   return (
@@ -1878,6 +2414,27 @@ const AdsetComponent = ({
             />
           </Form.Item>
           <Form.Item
+            name={["adsets", index, "action_source"]}
+            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "120px" }}
+          // initialValue={adset.action_source || "website"}
+          >
+            <Select
+              options={Action_Source_Values[objectiveValue] || []}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.action_source || "website"}
+            // onChange={(value) => handleFieldChange(index, "action_source", value)}
+            />
+          </Form.Item>
+          {/* <Form.Item
             name={["adsets", index, "optimization_goal"]}
             label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
             rules={[
@@ -1887,20 +2444,70 @@ const AdsetComponent = ({
               },
             ]}
             style={{ flex: "120px" }}
-            initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
+          // initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
           >
             <Select
-              options={[
-                { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                { value: "LINK_CLICKS", label: "Clicks" },
-                { value: "REACH", label: "Reach" },
-                { value: "VALUE", label: "Value" },
-              ]}
+              options={
+                Optimization_goal_values[objectiveValue] || []
+                //   [
+                //   { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
+                //   { value: "LINK_CLICKS", label: "Clicks" },
+                //   { value: "REACH", label: "Reach" },
+                //   { value: "VALUE", label: "Value" },
+                // ]
+              }
               // onChange={(value) => handleFieldChange(index, "optimization_goal", value)}
               // defaultValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
+            />
+          </Form.Item> */}
+          <Form.Item
+            key={index}
+            name={["adsets", index, "optimization_goal"]}
+            label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
+            rules={[{ required: true, message: "Please select an option!" }]}
+            style={{ flex: "120px" }}
+          >
+            {index === 0 ? (
+              <Select
+                options={optionsForIndex}
+                value={currentValue}
+                onChange={(val) => handleFirstOptimizationChange(val)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            ) : (
+              // Select stays enabled but only the current option is enabled to pick
+              <Select
+                options={optionsForIndex}
+                value={currentValue}
+                // no onChange needed (user can't change to another value because other options are disabled)
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            )}
+          </Form.Item>
+          <Form.Item
+            name={["adsets", index, "custom_event_type"]}
+            label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "120px" }}
+          // initialValue={adset.custom_event_type || "LEAD"}
+          >
+            <Select
+              options={Conversion_Event_options[objectiveValue] || []}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.custom_event_type || "LEAD"}
+            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
             />
           </Form.Item>
           <Form.Item
@@ -1927,81 +2534,6 @@ const AdsetComponent = ({
             // onChange={(value) => handleFieldChange(index, "billing_event", value)}
             />
           </Form.Item>
-          <Form.Item
-            name={["adsets", index, "DatePicker"]}
-            label={<span style={{ color: "#B4B4B4" }}>Start Time (IST)</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please input!",
-              },
-            ]}
-            style={{ flex: "150px" }}
-            initialValue={currentDate ? dayjs(currentDate) : dayjs()}
-          >
-            <DatePicker
-              showTime
-              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
-              className="green-border-picker"
-              //                                 onChange={(value, dateString) => {
-              //     console.log("Local Time:", dateString)
-              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-              //   }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "action_source"]}
-            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.action_source || "website"}
-          >
-            <Select
-              options={[
-                { value: "website", label: "Website" },
-                { value: "email", label: "Email" },
-                { value: "app", label: "App" },
-                { value: "phone_call", label: "Phone Call" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.action_source || "website"}
-            // onChange={(value) => handleFieldChange(index, "action_source", value)}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "custom_event_type"]}
-            label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.custom_event_type || "LEAD"}
-          >
-            <Select
-              options={[
-                { value: "LEAD", label: "Lead" },
-                { value: "PURCHASE", label: "Purchase" },
-                { value: "SEARCH", label: "Search" },
-                { value: "CONTACT", label: "Contact" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.custom_event_type || "LEAD"}
-            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
-            />
-          </Form.Item>
           {/* <Form.Item
                         name="pixel_id"
                         initialValue={imagehash?.pixelID}
@@ -2016,7 +2548,7 @@ const AdsetComponent = ({
                     >
                         <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                     </Form.Item> */}
-          <Form.Item
+          {/* <Form.Item
             name="pixel_id"
             // initialValue={
             //   typeof imagehash?.pixelID === "object"
@@ -2032,26 +2564,6 @@ const AdsetComponent = ({
             ]}
             style={{ flex: "140px" }}
           >
-            {/* {typeof imagehash?.pixelID === "object" ? (
-              <Select
-                defaultValue={imagehash?.pixelID?.Universal}
-                className={
-                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
-                }
-              >
-                {Object.entries(imagehash.pixelID).map(([label, value]) => (
-                  <Select.Option key={value} value={value}>
-                    {`${label} - ${value}`}
-                  </Select.Option>
-                ))}
-              </Select>
-            ) : (
-              <Input
-                className={
-                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
-                }
-              />
-            )} */}
             <Select
               mode="multiple"
               value={pixelIdList}                // array of strings
@@ -2067,7 +2579,133 @@ const AdsetComponent = ({
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               style={{ width: "100%", borderRadius: 8 }}
             />
+          </Form.Item> */}
+
+
+          {/* <Form.Item
+            name="pixel_id"
+            // initialValue={
+            //   typeof imagehash?.pixelID === "object"
+            //     ? imagehash.pixelID.Universal
+            //     : imagehash?.pixelID
+            // }
+            label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "140px" }}
+          >
+            <Form.Item shouldUpdate>
+    {({ getFieldValue }) => {
+      const selected = getFieldValue("pixel_id") || [];
+
+      const options = pixel_id_list.map((p) => ({
+        value: p.value,
+        label: p.label,
+        disabled: selected.includes(p.value)   // 👈 disable based on selected value
+      }));
+
+      return (
+        <Select
+              mode="multiple"
+              value={pixelIdList}                // array of strings
+              // onChange={Accountchange}             // gets string[]
+              options={options}             // [{value,label}]
+              placeholder="Select account(s)"
+              // showSearch
+              optionFilterProp="label"
+              allowClear
+              maxTagCount={1}                                      // 👈 always show only the first selected
+              maxTagPlaceholder={(omitted) => `+${omitted.length}`} // 👈 rest as a count
+              className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              style={{ width: "100%", borderRadius: 8 }}
+            />
+      );
+    }}
+  </Form.Item>
+          </Form.Item> */}
+
+          {/* <Form.Item
+            // name = {["adsets", index, "pixel_id"]}
+            name="pixel_id"
+            label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+            // rules={[
+            //           {
+            //             required: true,
+            //             message: "Please select an option!",
+            //           },
+            //         ]}
+            style={{ flex: "180px" }}
+            rules={[{ type: "array", required: true, min: 1, message: "Please select at least one pixel!" }]}
+          >
+            <Form.Item shouldUpdate={(prev, cur) => prev.pixel_id !== cur.pixel_id}>
+              {({ getFieldValue, setFieldsValue }) => {
+                const selected = getFieldValue("pixel_id") || []; // e.g. ["abc - 123"]
+
+                // Build set of selected account prefixes: split by ' - ' and take first part
+                const selectedAccounts = new Set(
+                  selected
+                    .map(v => (typeof v === "string" ? v.split(" - ")[0].trim() : null))
+                    .filter(Boolean)
+                );
+
+                // Build options and disable other values from already selected accounts
+                const options = pixel_id_list.map(opt => {
+                  // extract this option's account prefix in same way
+                  const accountPrefix = typeof opt.value === "string" ? opt.value.split(" - ")[0].trim() : null;
+
+                  // disabled if account already chosen AND this particular value is NOT already selected
+                  const disabled = accountPrefix && selectedAccounts.has(accountPrefix) && !selected.includes(opt.value);
+
+                  return {
+                    value: opt.value,
+                    label: opt.label ?? opt.value,
+                    disabled,
+                  };
+                });
+
+                return (
+                  <Select
+                    mode="multiple"
+                    options={options}
+                    placeholder="Select pixel(s)"
+                    allowClear
+                    onChange={(vals) => setFieldsValue({ pixel_id: vals })}
+                    maxTagCount={1}
+                    maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                    style={{ width: "100%" }}
+                  />
+                );
+              }}
+            </Form.Item>
+          </Form.Item> */}
+          <Form.Item
+            name="pixel_id"
+            required
+            label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+            validateTrigger={["onChange", "onBlur"]}
+            dependencies={["Account_Number"]}                     // top-level dependency
+            rules={[minSelectionValidatorPerAccount("pixel")]}    // <-- new validator
+            style={{ flex: 3, marginLeft: "1%" }}
+          >
+            <Select
+              mode="multiple"
+              options={pixelOptionsWithDisabled}
+              placeholder="Select pixel(s)"
+              optionFilterProp="label"
+              allowClear
+              maxTagCount={1}
+              maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+              className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              style={{ width: "100%", borderRadius: 8 }}
+            />
           </Form.Item>
+
           {/*pk*/}
           {/* <Form.Item
                         name={['adsets', index, "DailyAdd_amount"]} 
@@ -2198,7 +2836,7 @@ const AdsetComponent = ({
                         </Tooltip>
                     </Form.Item> */}
 
-          <Form.Item
+          {/* <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
             label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
             rules={[
@@ -2247,7 +2885,196 @@ const AdsetComponent = ({
                 }
               />
             </Tooltip>
+          </Form.Item> */}
+
+          <Form.Item
+            name={["adsets", index, "DailyAdd_amount"]}
+            required={!CampaignBudgetActive}
+            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+            initialValue={0}
+            // validateTrigger={["onBlur"]}
+            // re-run validation whenever campaign-level Daily_amount changes
+            validateTrigger={["onChange", "onBlur"]}
+            dependencies={["adsets"]}
+            // rules={[
+            //     {
+            //       required: (!CampaignBudgetActive),
+            //       message: `Please enter a valid budget Adset ${index} `,
+            //     }
+            //   ]}
+            // rules={[
+            //   {
+            //     // custom validator: valid if campaign has budget OR this adset has > 0
+            //     validator: async (_, value) => {
+            //       const campaignValue = Number(form.getFieldValue("Daily_amount")) || 0;
+            //       const adsetValue = Number(value) || 0;
+
+            //       if (campaignValue > 0 || adsetValue > 0) {
+            //         return Promise.resolve();
+            //       }
+
+            //       return Promise.reject(
+            //         new Error(`Please enter a valid budget > 0 in Adset ${index + 1}`)
+            //       );
+            //     },
+            //   },
+            // ]}
+            //             rules={[
+            //   {
+            //     validator: async (_, _value) => {
+            //       const allAdsets = form.getFieldValue("adsets") || [];
+
+            //       // If only one adset → no validation needed
+            //       if (allAdsets.length <= 1) {
+            //         return Promise.resolve();
+            //       }
+
+            //       // Check if ANY adset has DailyAdd_amount > 0
+            //       const anyGreaterThanZero = allAdsets.some(
+            //         (a) => Number(a?.DailyAdd_amount ?? 0) > 0
+            //       );
+
+            //       // If ANY adset has > 0 → throw error
+            //       if (anyGreaterThanZero) {
+            //         const failingIndexes = allAdsets
+            //           .map((a, i) => Number(a?.DailyAdd_amount ?? 0) > 0 ? i + 1 : null)
+            //           .filter(Boolean);
+
+            //         return Promise.reject(
+            //           new Error(
+            //             `Budget not allowed: Adset(s) ${failingIndexes.join(", ")} have value > 0`
+            //           )
+            //         );
+            //       }
+
+            //       // Otherwise valid
+            //       return Promise.resolve();
+            //     },
+            //   },
+            // ]}
+            rules={[
+              {
+                validator: async () => {
+                  const allAdsets = form.getFieldValue("adsets") || [];
+                  const campaignValue = Number(form.getFieldValue("Daily_amount") ?? 0);
+
+                  // Convert adsets to numbers safely
+                  const adsetValues = allAdsets.map(a => Number(a?.DailyAdd_amount ?? 0));
+
+                  const allAdsetsZero = adsetValues.every(v => v === 0);
+                  const anyAdsetGreaterThanZero = adsetValues.some(v => v > 0);
+
+                  // 2) If campaign = 0 AND ALL adsets = 0 → valid
+
+                  if (campaignValue > 0) {
+                    return Promise.resolve();
+                  }
+
+                  if (campaignValue === 0 && allAdsetsZero) {
+                    return Promise.resolve();
+                  }
+
+                  // const anyGreaterThanZero = allAdsets.some(a => Number(a?.DailyAdd_amount ?? 0) > 0);
+                  if (budget <= 0) {
+                    const failing = allAdsets.map((a, i) => Number(a?.DailyAdd_amount ?? 0) > 0 ? i + 1 : null).filter(Boolean);
+                    return Promise.reject(new Error(`Adset Budget enabled: provide budget > 0 at ${adset.AdsetPanelName}`));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
+
+          >
+            <Tooltip
+              title={
+                CampaignBudgetActive
+                  ? "You have enabled budget in the Campaign Level"
+                  : ""
+              }
+              overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+                border: '1px solid #ccc',
+                borderRadius: 6,
+                // fontWeight: 500,
+              }}
+            >
+              <InputNumber
+                placeholder="$"
+                min={0}
+                step={0.01}
+                value={budget}
+                // DON'T set `value` prop here — let Form control the field
+                // If you still need to sync external state, use onChange to notify (no setFieldsValue)
+                onChange={(val) => {
+                  // optional: keep external adset state in sync if you use one
+                  // make sure handleAdsetChange is defined before calling
+                  // if (typeof handleAdsetChange === "function") {
+                  //   handleAdsetChange(index, val);
+                  // }
+                  setBudget(val)
+                  form.setFieldValue(["adsets", index, "DailyAdd_amount"], val)
+                  // No form.setFieldsValue here — Ant Form updates the field value automatically.
+                }}
+                // visually and functionally disable when campaign budget active
+                disabled={CampaignBudgetActive}
+                style={{ width: 120 }}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+              />
+            </Tooltip>
           </Form.Item>
+
+          <Form.Item
+            name={["adsets", index, "DatePicker"]}
+            label={<span style={{ color: "#B4B4B4" }}>Start Time (IST)</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please input!",
+              },
+            ]}
+            style={{ flex: "150px" }}
+            initialValue={currentDate ? dayjs(currentDate) : dayjs()}
+          >
+            <DatePicker
+              showTime
+              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+              className="green-border-picker"
+              //                                 onChange={(value, dateString) => {
+              //     console.log("Local Time:", dateString)
+              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+              //   }}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+
+          {budgetType !== "daily" &&
+            <Form.Item
+              name={["adsets", index, "DatePickerEnd"]}
+              label={<span style={{ color: "#B4B4B4" }}>End Time (IST)</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input!",
+                },
+              ]}
+              style={{ flex: "150px" }}
+              initialValue={after30Days ? dayjs(after30Days) : dayjs()}
+            >
+              <DatePicker
+                showTime
+                dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+                className="green-border-picker"
+                //                                 onChange={(value, dateString) => {
+                //     console.log("Local Time:", dateString)
+                //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                //   }}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          }
 
           {showBidAmount && (
             <Form.Item
@@ -2485,19 +3312,24 @@ const AdsetComponent = ({
   }}
 </Form.Item> */}
           {/* ✅ FINAL VERSION WITH useWatch */}
-          <Form.Item noStyle>
+          {/* <Form.Item noStyle>
             <Form.Item
               name={["adsets", index, "countries"]}
               label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
-              rules={[{ required: true, message: "Please select at least one country!" }]}
-              style={{ flex: "140px" }}
-              initialValue={
-                campaignCountries.length > 0
-                  ? [campaignCountries[0]]
-                  : [allCountries[0].value]
-              }
+              required={true}
+              // rules={[{ required: true, message: "Please select at least one country!" }]}
+              // rules={[
+              //   { type: "array", required: true, min: 1, message: "Please select at least one country!" }
+              // ]}
+              style={{ flex: "0 0 140px" }}
+            // initialValue={
+            //   campaignCountries.length > 0
+            //     ? [campaignCountries[0]]
+            //     : [allCountries[0].value]
+            // }
             >
               <Select
+                mode="multiple"
                 allowClear
                 showSearch
                 placeholder={
@@ -2513,6 +3345,43 @@ const AdsetComponent = ({
                 getPopupContainer={(trigger) => trigger.parentNode}
                 dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
                 className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            </Form.Item>
+          </Form.Item> */}
+
+          <Form.Item noStyle key={index}>
+            <Form.Item
+              name={["adsets", index, "countries"]}
+              label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+              required={true}
+              style={{ flex: "0 0 140px" }}
+            >
+              {/*
+          - index === 0 and geo === "Geos": onChange will propagate to all adsets
+          - index > 0 and geo === "Geos": Select opens but only current items selectable (others disabled)
+          - geo !== "Geos": every index is independent
+        */}
+              <Select
+                mode="multiple"
+                allowClear
+                showSearch
+                placeholder={
+                  campaignCountries.length ? "Select from campaign countries" : "Select any country"
+                }
+                disabled={(geo === "Geos" && index !== 0)}
+                options={optionsForIndexOfCountries}
+                getPopupContainer={(trigger) => trigger.parentNode}
+                dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                // change handler: only needs to actively update when first index and geo === "Geos"
+                onChange={(val) => {
+                  if (geo === "Geos" && index === 0) {
+                    handleFirstCountriesChange(val);
+                  } else {
+                    // For independent mode, let Ant Form handle the change automatically.
+                    // If you need side effects when geo !== "Geos", handle them here.
+                  }
+                }}
               />
             </Form.Item>
           </Form.Item>
@@ -2544,7 +3413,15 @@ const AdsetComponent = ({
                 label={
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
-                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}>
+                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                      overlayInnerStyle={{
+                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#000',
+                        border: '1px solid #ccc',
+                        borderRadius: 6,
+                        // fontWeight: 500,
+                      }}
+                    >
                       <InfoCircleOutlined
                         style={{
                           color: theme === "dark" ? "#bbb" : "#888",
@@ -2590,7 +3467,15 @@ const AdsetComponent = ({
                         // <span style={{ color: "#B4B4B4" }}>Payer</span>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <span style={{ color: "#B4B4B4" }}>Payer</span>
-                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}>
+                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                            overlayInnerStyle={{
+                              backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                              color: theme === 'dark' ? '#fff' : '#000',
+                              border: '1px solid #ccc',
+                              borderRadius: 6,
+                              // fontWeight: 500,
+                            }}
+                          >
                             <InfoCircleOutlined
                               style={{
                                 color: theme === "dark" ? "#bbb" : "#888",
@@ -2714,7 +3599,7 @@ const AdsetComponent = ({
                     initialValue={adset.Min_Age || "18"}
                   >
                     <Select
-                      disabled={isDisabled}
+                      disabled={hasCountries}
                       options={[
                         { value: "18", label: "18", title: "" },
                         { value: "25", label: "25", title: "", disabled: hasCountries },
@@ -2737,7 +3622,7 @@ const AdsetComponent = ({
                     initialValue={adset.Max_Age || "65"}
                   >
                     <Select
-                      disabled={isDisabled}
+                      disabled={hasCountries}
                       options={[
                         { value: "20", label: "20", title: "", disabled: hasCountries },
                         { value: "30", label: "30", title: "", disabled: hasCountries },
@@ -2760,7 +3645,7 @@ const AdsetComponent = ({
                     initialValue={adset.Gender || "0"}
                   >
                     <Select
-                      disabled={isDisabled}
+                      disabled={hasCountries}
                       options={[
                         { value: "0", label: "All", title: "" },
                         { value: "1", label: "Male", title: "", disabled: hasCountries },
@@ -2967,7 +3852,15 @@ const AdsetComponent = ({
                           );
 
                           return (
-                            <Tooltip placement="top" title={tooltipText}>
+                            <Tooltip placement="top" title={tooltipText}
+                              overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                              }}
+                            >
                               <InfoCircleOutlined
                                 style={{
                                   color: theme === "dark" ? "#bbb" : "#888",
@@ -3959,6 +4852,29 @@ const AdsetComponent = ({
 
                   <Form.Item
                     name="page_id"
+                    required
+                    label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+                    validateTrigger={["onChange", "onBlur"]}
+                    dependencies={["Account_Number"]}                     // top-level dependency
+                    rules={[minSelectionValidatorPerAccount("page")]}     // <-- new validator
+                    style={{ flex: 3, marginLeft: "1%" }}
+                  >
+                    <Select
+                      mode="multiple"
+                      options={optionsWithDisabled}
+                      placeholder="Select account(s)"
+                      optionFilterProp="label"
+                      allowClear
+                      maxTagCount={1}
+                      maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                      className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                      dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                      style={{ width: "100%", borderRadius: 8 }}
+                    />
+                  </Form.Item>
+
+                  {/* <Form.Item
+                    name="page_id"
                     // initialValue={pageidList || []}
                     label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                     rules={[
@@ -3969,14 +4885,7 @@ const AdsetComponent = ({
                     ]}
                     style={{ flex: 3, marginLeft: "1%" }}
                   >
-                    {/* <Input
-                      style={{ width: "23%" }}
-                      className={
-                        theme === "dark"
-                          ? "custom-input-dark"
-                          : "custom-input-light"
-                      }
-                    /> */}
+                    
                     <Select
                       mode="multiple"
                       value={pageidList}                // array of strings
@@ -3992,7 +4901,249 @@ const AdsetComponent = ({
                       dropdownClassName={theme === "dark" && "custom-dropdown"}
                       style={{ width: "100%", borderRadius: 8 }}
                     />
-                  </Form.Item>
+                  </Form.Item> */}
+                  {/* <Form.Item
+                    name = {["adsets", index, "page_id"]}
+                    // name="page_id"
+                    required={true}
+                    label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+                    rules={[{ type: "array", required: true, min: 1, message: "Please select at least one page!" }]}
+                    style={{ flex: 3, marginLeft: "1%" }}
+                    // initialValue={newpageidList}
+                  >
+                    <Form.Item shouldUpdate={(prev, curr) => prev.page_id !== curr.page_id}>
+                      {({ getFieldValue, setFieldsValue }) => {
+                        const selected = getFieldValue("page_id") || []; // array of selected option values
+
+                        // Build a set of account identifiers that are already selected.
+                        // Prefer p.accountId if present; otherwise extract prefix before " - ".
+                        const selectedAccounts = new Set(
+                          selected
+                            .map((val) => {
+                              const found = page_id_list.find((o) => o.value === val);
+                              if (found && found.accountId) return found.accountId;
+                              if (typeof val === "string" && val.includes(" - ")) return val.split(" - ")[0].trim();
+                              return null;
+                            })
+                            .filter(Boolean)
+                        );
+
+                        // Build options *from your existing page_id_list* and disable other
+                        // entries from accounts that are already selected (except the selected one).
+                        const options = page_id_list.map((p) => {
+                          const accountId = p.accountId ?? (typeof p.value === "string" && p.value.includes(" - ") ? p.value.split(" - ")[0].trim() : null);
+                          const disabled = accountId && selectedAccounts.has(accountId) && !selected.includes(p.value);
+
+                          return {
+                            value: p.value,
+                            label: p.label ?? p.value,
+                            disabled,
+                          };
+                        });
+
+                        return (
+                          <Select
+                            mode="multiple"
+                            value={newpageidList}
+                            options={options}
+                            placeholder="Select page(s)"
+                            optionFilterProp="label"
+                            allowClear
+                            maxTagCount={1}
+                            maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                            className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                            dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                            style={{ width: "100%", borderRadius: 8 }}
+                            // update the Form-managed value on change
+                            onChange={(vals) => setFieldsValue({ page_id: vals })}
+                          />
+                        );
+                      }}
+                    </Form.Item>
+                  </Form.Item> */}
+                  {/* <Form.Item
+                    name="page_id"
+                    required={true}
+                    label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+                    rules={[
+                      {
+                        type: "array",
+                        required: true,
+                        min: 1,
+                        message: "Please select at least one page!",
+                      },
+                    ]}
+                    style={{ flex: 3, marginLeft: "1%" }}
+                  >
+                    {({ getFieldValue }) => {
+                      const selected = getFieldValue("page_id") || [];
+
+                      // Build set of accounts already selected
+                      const selectedAccounts = new Set(
+                        selected
+                          .map((val) => {
+                            const obj = page_id_list.find((o) => o.value === val);
+                            if (obj?.accountId) return obj.accountId;
+
+                            if (typeof val === "string" && val.includes(" - "))
+                              return val.split(" - ")[0].trim();
+
+                            return null;
+                          })
+                          .filter(Boolean)
+                      );
+
+                      // Build final option array with disabled flags
+                      const options = page_id_list.map((p) => {
+                        const accountId =
+                          p.accountId ??
+                          (typeof p.value === "string" && p.value.includes(" - ")
+                            ? p.value.split(" - ")[0].trim()
+                            : null);
+
+                        const disabled =
+                          accountId && selectedAccounts.has(accountId) && !selected.includes(p.value);
+
+                        return {
+                          value: p.value,
+                          label: p.label ?? p.value,
+                          disabled,
+                        };
+                      });
+
+                      return (
+                        <Select
+                          mode="multiple"
+                          options={options}
+                          placeholder="Select page(s)"
+                          optionFilterProp="label"
+                          allowClear
+                          maxTagCount={1}
+                          maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                          className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                            }`}
+                          dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                          style={{ width: "100%", borderRadius: 8 }}
+                        />
+                      );
+                    }}
+                  </Form.Item> */}
+
+                  {/* <Form.Item
+        name={["adsets", index, "page_id"]}
+        required
+        label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+        rules={[
+          { type: "array", required: true, min: 1, message: "Please select at least one page!" },
+        ]}
+        style={{ flex: 3, marginLeft: "1%" }}
+        // initialValue={newpageidList}
+      >
+        <Select
+          mode="multiple"
+          // value={newpageidList}
+          options={options}
+          placeholder="Select page(s)"
+          optionFilterProp="label"
+          allowClear
+          maxTagCount={1}
+          maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+          className={`single-row-select green-border-select ${
+            theme === "dark" ? "custom-input-dark" : "custom-input-light"
+          }`}
+          dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+          style={{ width: "100%", borderRadius: 8 }}
+        />
+      </Form.Item> */}
+
+                  {/* <Form.Item
+      name={["adsets", index, "page_id"]}
+      rules={[{ type: "array", required: true, min: 1, message: "Please select at least one page!" }]}
+      style={{ flex: 3, marginLeft: "1%" }}
+    >
+      <Select
+        mode="multiple"
+        options={options}
+        placeholder="Select page(s)"
+        optionFilterProp="label"
+        allowClear
+        maxTagCount={1}
+        maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+        className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+        dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+        style={{ width: "100%", borderRadius: 8 }}
+      />
+    </Form.Item> */}
+
+                  {/* <Form.Item
+  name={["adsets", index, "page_id"]}
+  rules={[{ type: "array", required: true, min: 1, message: "Please select at least one page!" }]}
+  style={{ flex: 3, marginLeft: "1%" }}
+>
+  <Form.Item
+    shouldUpdate={(prev, cur) => JSON.stringify(prev.adsets) !== JSON.stringify(cur.adsets)}
+    noStyle
+  >
+    {({ getFieldValue }) => {
+      const allAdsets = getFieldValue("adsets") || [];
+
+      // currently selected values in THIS adset (strings like "acct - val")
+      const currentSelectedRaw = allAdsets[index]?.page_id || [];
+      const currentSelected = (currentSelectedRaw || []).map((v) => String(v));
+
+      const extractAccount = (val) => {
+        if (!val) return null;
+        const s = String(val);
+        const parts = s.split(" - ");
+        return parts[0]?.trim() || null;
+      };
+
+      // accounts used by other adsets (form values)
+      const accountsWithSelectionElsewhere = new Set();
+      allAdsets.forEach((adset, i) => {
+        if (i === index) return;
+        (adset?.page_id || []).forEach((v) => {
+          const acc = extractAccount(v);
+          if (acc) accountsWithSelectionElsewhere.add(acc);
+        });
+      });
+
+      // include external/default values (pageidList) as already-taken
+      (pageidList || []).forEach((v) => {
+        const acc = extractAccount(v);
+        if (acc) accountsWithSelectionElsewhere.add(acc);
+      });
+
+      // build options from page_id_list with disabled flags
+      const optionsWithDisabled = (page_id_list || []).map((opt) => {
+        const optValue = String(opt.value ?? opt);
+        const optAccount = extractAccount(optValue);
+        const alreadySelectedHere = currentSelected.includes(optValue);
+        const disabled = Boolean(optAccount && accountsWithSelectionElsewhere.has(optAccount) && !alreadySelectedHere);
+        return { ...opt, value: optValue, disabled };
+      });
+
+      return (
+        <Select
+          mode="multiple"
+          options={optionsWithDisabled}
+          placeholder="Select page(s)"
+          optionFilterProp="label"
+          allowClear
+          maxTagCount={1}
+          maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+          className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+          dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+          style={{ width: "100%", borderRadius: 8 }}
+        />
+      );
+    }}
+  </Form.Item>
+</Form.Item> */}
+
+
+
+
                 </div>
                 <Form.Item
                   name={["adsets", index, "AddName"]}
@@ -4210,7 +5361,7 @@ const AdsetComponent = ({
                   </Breadcrumb> */}
 
                   <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px", marginBottom: "16px" }}>
-                    {accountis.map((account, index) => (
+                    {watchedAccountList.map((account, index) => (
                       <React.Fragment key={account}>
                         <span
                           onClick={() => setSelectedIndex(String(account))}
@@ -4228,7 +5379,7 @@ const AdsetComponent = ({
                         </span>
 
                         {/* Show "/" unless it's the last item */}
-                        {index !== accountis.length - 1 && (
+                        {index !== watchedAccountList.length - 1 && (
                           <span style={{ color: "#ccc", userSelect: "none" }}>/</span>
                         )}
                       </React.Fragment>
@@ -4236,7 +5387,7 @@ const AdsetComponent = ({
                   </div>
 
                   {/* Render ALL AccountForms but only show active one */}
-                  {accountis.map((account, newindex) => (
+                  {watchedAccountList.map((account, newindex) => (
                     <div
                       key={account}
                       style={{ display: selectedIndex === account ? "block" : "none" }} // 🔑 hide inactive ones
@@ -4574,7 +5725,7 @@ const AdsetComponent = ({
                   : null}
               </div> */}
               <div style={{ flex: "30%" }}>
-                {accountis.map((account) =>
+                {watchedAccountList.map((account) =>
                   selectedIndex === account ? (
                     <AdPreviewPerAccount
                       key={account}
@@ -4646,6 +5797,7 @@ const CreateCampaignDrawer = ({
   accountis,
   network,
 }) => {
+  console.log(network, "network in CreateCampaignDrawer");
   console.log(accountis, "accountis in CreateCampaignDrawer");
   // const [selectedFile, setSelectedFile] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -4690,9 +5842,7 @@ const CreateCampaignDrawer = ({
   const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState({});
   const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState({});
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
-  const [adsets, setAdsets] = useState([
-    { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
-  ]);
+  const [adsets, setAdsets] = useState([]);
   const [creativeIndex, setCreativeIndex] = useState(0);
   const selectedRef = useRef(null);
   const newSelectedRef = useRef(null);
@@ -4744,11 +5894,37 @@ const CreateCampaignDrawer = ({
   const [options, setOptions] = useState([]);
   const { adAccounts } = userdetails || {};
   const [selectedDraftForShare, setSelectedDraftForShare] = useState(null);
+  const [geo, setGeos] = useState("Geo");
+  const [pixel, setPixels] = useState("Pixel");
+  const [page, setPages] = useState("Page");
   const userPickedRef = useRef(false);
+  // const [budgetType, ]
 
+  // const adsets = Form.useWatch("adsets", form) || [];
 
+  //   // Extract all adset DailyAdd_amount values
+  //   const isAnyAdsetBudgetSet = adsets.some(
+  //     (item) => Number(item?.DailyAdd_amount) > 0
+  //   );
+
+  //   // Watch the campaign-level Daily_amount
+  //   const campaignDailyBudget = Form.useWatch("Daily_amount", form);
 
   const [selectedKey, setSelectedKey] = useState(null);
+
+  const [budgetType, setBudgetType] = useState("daily");
+
+  const watchedAdsets = Form.useWatch("adsets", form) || [];
+
+  // Derived condition name changed to watchedHasAdsetBudget
+  const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
+    ? watchedAdsets.some(ad => Number(ad?.DailyAdd_amount) > 0)
+    : false;
+
+  // Watch campaign-level Daily_amount too (different name)
+  const watchedCampaignBudget = Form.useWatch("Daily_amount", form);
+
+  const objectiveValue = Form.useWatch("Objectives", form);
 
   const accountsForAccess = adAccounts[selectedKey];
   const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -4868,6 +6044,25 @@ const CreateCampaignDrawer = ({
       setValueOptions([]);
     }
   }, [selectedKey, userdetails]);
+
+  useEffect(() => {
+    // Run only when objectiveValue changes
+    if (objectiveValue) {
+      const adsets = form.getFieldValue("adsets") || [];
+
+      const updatedAdsets = adsets.map((adset) => ({
+        ...adset,
+        optimization_goal: "OFFSITE_CONVERSIONS",
+        custom_event_type:
+          objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
+        action_source: "website"
+      }));
+
+      form.setFieldsValue({
+        adsets: updatedAdsets,
+      });
+    }
+  }, [objectiveValue, form]);
 
   const handleShareDraft = async () => {
 
@@ -5444,11 +6639,11 @@ const CreateCampaignDrawer = ({
   //     setIsAnyAdsetBudgetSet(anyAdsetFilled);
   // }, [adsets]);
 
-  useEffect(() => {
-    const adsets = form.getFieldValue("adsets") || [];
-    const anyAdsetFilled = adsets.some((adset) => adset?.DailyAdd_amount > 0);
-    setIsAnyAdsetBudgetSet(anyAdsetFilled);
-  }, [form]);
+  // useEffect(() => {
+  //   const adsets = form.getFieldValue("adsets") || [];
+  //   const anyAdsetFilled = adsets?.some((adset) => adset?.DailyAdd_amount > 0);
+  //   setIsAnyAdsetBudgetSet(anyAdsetFilled);
+  // }, [form]);
 
   // Function to update adset value
   const handleAdsetChange = (index, value) => {
@@ -5491,9 +6686,17 @@ const CreateCampaignDrawer = ({
       setCampaignName("");
       setAddName("");
       setAdsetLevelDailyBudget(0);
+      const newAdsets = [
+        { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
+      ]
+      form.setFieldsValue({ adsets: newAdsets })
+      setAdsets(newAdsets);
       // setCampaignLevelDailyBudget(0);
       setSelectedOption("upload");
       setIsManual(false);
+      setGeos("Geo");
+      setPages("Page");
+      setPixels("Pixel");
     }
   }, [visible]);
 
@@ -5612,14 +6815,16 @@ const CreateCampaignDrawer = ({
   // For adding a new adset
   const addAdset = () => {
     const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
+    const allAdsets = form.getFieldValue("adsets") || [];
+    const first = allAdsets[0] || {};
     const newAdset = {
       id: uuidv4(),
       AdsetPanelName: newAdsetName,
       AdsetName: "", // Add default values for the new adset
-      optimization_goal: "OFFSITE_CONVERSIONS",
-      billing_event: "IMPRESSIONS",
-      action_source: "website",
-      custom_event_type: "LEAD",
+      optimization_goal: first.optimization_goal || "",
+      billing_event: first.billing_event || "",
+      action_source: first.action_source || "",
+      custom_event_type: first.custom_event_type || "",
       countries: "US",
       Min_Age: "18",
       Max_Age: "65",
@@ -5635,7 +6840,20 @@ const CreateCampaignDrawer = ({
       start_date: new Date(),
       MediaContent: [], // Default MediaContent as empty array
     };
-    setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
+    // setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
+    setAdsets((prevAdsets) => {
+      const updatedAdsets = [...prevAdsets, newAdset];
+
+      // Update the Ant Form: set the whole adsets array so form state stays in sync
+      const currentFormAdsets = form.getFieldValue("adsets") || [];
+      const updatedFormAdsets = [...currentFormAdsets, newAdset];
+      form.setFieldsValue({ adsets: updatedFormAdsets });
+
+      // Activate the last panel (new one)
+      setActiveKey([`${updatedAdsets.length - 1}`]);
+
+      return updatedAdsets;
+    });
 
     // Add the new adset to the state
     // setAdsets(prevAdsets => {
@@ -5813,11 +7031,15 @@ const CreateCampaignDrawer = ({
   // }, [adsets]);
 
   const cloneAdset = (adsetId) => {
-    const adsetIndex = adsets.findIndex((ad) => ad.id === adsetId);
+    const adsetIndex = adsetId
+    console.log(adsetIndex)
     if (adsetIndex === -1) return;
-
-    const originalAdset = adsets[adsetIndex];
+    const adsets = form.getFieldValue("adsets") || [];
+    console.log(adsets)
+    const originalAdset = adsets.find(item => item.id === adsetIndex);
     const newId = uuidv4();
+
+    console.log(originalAdset)
 
     const baseName = originalAdset.AdsetPanelName;
     const copyCount = adsets.filter((ad) =>
@@ -6189,11 +7411,11 @@ const CreateCampaignDrawer = ({
 
   useEffect(() => {
     console.log(imageHashArray, "imageHashArray in useEffect");
-    const pageIdList = imageHashArray.map((item) => ({ value: `${item.accountNumber} - ${item.pageID}`, label: `${item.accountNumber} - ${item.pageID}` }));
-    const pageIdListFiltered = imageHashArray.map((item) => `${item.accountNumber} - ${item.pageID}`);
+    // const pageIdList = imageHashArray.map((item) => ({ value: `${item.accountNumber} - ${item.pageID}`, label: `${item.accountNumber} - ${item.pageID}` }));
+    // const pageIdListFiltered = imageHashArray.map((item) => `${item.accountNumber} - ${item.pageID}`);
     const pixelIdListFiltered = imageHashArray.map((item) => {
-      if (typeof item.pixelID === "object" && item.pixelID !== null) {
-        const universalValue = item.pixelID.Universal;
+      if (typeof item.pixelID === "object" && item.pixelID !== null && item.Network === network) {
+        const universalValue = item.pixelID.Universal || Object.values(item.pixelID)[0];
         if (universalValue) {
           return `${item.accountNumber} - ${universalValue}`; // ✅ matches options.value
         }
@@ -6201,8 +7423,21 @@ const CreateCampaignDrawer = ({
       }
       return `${item.accountNumber} - ${item.pixelID}`;       // ✅ matches options.value
     }).filter(Boolean)
+    const pageIdListFiltered = imageHashArray.map((item) => {
+      if (typeof item.pageID === "object" && item.pageID !== null && item.Network === network) {
+        console.log(item);
+        const universalValue = item.pageID.Universal || Object.values(item.pageID)[0];
+        console.log(universalValue);
+        if (universalValue) {
+          return `${item.accountNumber} - ${universalValue}`; // ✅ matches options.value
+        }
+        return null;
+      }
+      return `${item.accountNumber} - ${item.pageID}`;       // ✅ matches options.value
+    }).filter(Boolean)
+
     const pixelIdList = imageHashArray.flatMap((item) => {
-      if (typeof item.pixelID === "object" && item.pixelID !== null) {
+      if (typeof item.pixelID === "object" && item.pixelID !== null && item.Network === network) {
         return Object.entries(item.pixelID).map(([key, value]) => ({
           value: `${item.accountNumber} - ${value}`,
           label: `${item.accountNumber} - ${key} - ${value}`,
@@ -6214,6 +7449,21 @@ const CreateCampaignDrawer = ({
         label: `${item.accountNumber} - ${item.pixelID}`,
       };
     });
+
+    const pageIdList = imageHashArray.flatMap((item) => {
+      if (typeof item.pageID === "object" && item.pageID !== null && item.Network === network) {
+        return Object.entries(item.pageID).map(([key, value]) => ({
+          value: `${item.accountNumber} - ${value}`,
+          label: `${item.accountNumber} - ${key} - ${value}`,
+        }));
+      }
+
+      return {
+        value: `${item.accountNumber} - ${item.pageID}`,
+        label: `${item.accountNumber} - ${item.pageID}`,
+      };
+    });
+
     console.log(pixelIdList, "pixelIdList");
     console.log(pixelIdListFiltered, "pixelIdListFiltered");
     console.log(pageIdList, "pageIdList");
@@ -6251,8 +7501,14 @@ const CreateCampaignDrawer = ({
       );
       console.log("account data", ...response?.data);
 
-      setImageHashArray(response?.data || []);
-      setNewImageHashArray(response?.data || []);
+      // response?.data?.map((item) => {
+      //   console.log(item.Network === network, "item.Network === network");
+      // });
+
+      console.log(response?.data?.filter((item) => item.Network === network));
+
+      setImageHashArray(response?.data?.filter((item) => item.Network === network) || []);
+      setNewImageHashArray(response?.data?.filter((item) => item.Network === network) || []);
 
       setimagehash(...response?.data);
     } catch (error) {
@@ -7334,7 +8590,9 @@ const CreateCampaignDrawer = ({
         setIsCampaignBudgetActive(false);
         setIsAnyAdsetBudgetSet(false);
         setShowBidAmount(false);
-
+        setGeos("Geo");
+        setPages("Page");
+        setPixels("Pixel");
       }
     } catch (error) {
       console.error("Error during campaign creation:", error);
@@ -7399,154 +8657,504 @@ const CreateCampaignDrawer = ({
       const newImageHash = imageHashArray.find(item => item.accountNumber === account);
       const list_of_page_id = values.page_id;
       const list_of_pixel_id = values.pixel_id;
-      const page_id = list_of_page_id.find(item => item.includes(account)).split("-");
-      const pixel_id = list_of_pixel_id.find(item => item.includes(account)).split("-");
-      const newPageId = page_id[page_id.length - 1].trim();
-      const newPixelId = pixel_id[pixel_id.length - 1].trim();
-      //12
-      // console.log("page_id", account, page_id[page_id.length - 1].trim());
-      // console.log("pixel_id", account, pixel_id[pixel_id.length - 1].trim());
-      let AllAdsetsData = {
-        campaign_name: values.Name,
-        Account_Number: account,
-        Approval: "PENDING_APPROVAL",
-        fbstatus: "No-Live",
-        Category: selectedCategory,
-        camapaignlevel: {
-          createdby: session?.user?.name,
-          Name: values.Name,
-          Objectives: values.Objectives,
-          Special_categories: values.Special_categories,
-          ...(Array.isArray(values?.Special_categories)
-            ? { Special_categories_countries: values.countries }
-            : {}),
-          Bid_strategy: values.Bid_strategy,
-          Daily_amount: parseFloat(values.Daily_amount) * 100,
-          Status: values.Status,
-          access_token: newImageHash.token,
-          createdDate: moment().tz(newImageHash.timeZone).format("YYYY-MM-DD"),
-        },
-      };
-      const onSuccess = (status, response) => {
-        console.log("Upload success:", response);
-      };
+      // const page_id = list_of_page_id.find(item => item.includes(account)).split("-");
+      // const pixel_id = list_of_pixel_id.find(item => item.includes(account)).split("-");
 
-      const onError = (status, error) => {
-        console.error("Upload error:", error);
-      };
+      const matchedPageIds = list_of_page_id
+        .filter(item => item.includes(account))
+        .map(item => item.split("-")[1]?.trim());   // only index 1 (page name)
 
-      for (let i = 0; i < values.adsets.length; i++) {
-        let AdsetsData = {};
+      const page_ids =
+        page === "Pages"
+          ? matchedPageIds                          // return all
+          : matchedPageIds.length > 0
+            ? [matchedPageIds[0]]                   // return only first
+            : [];
 
-        const imagesHashArray = await customRequest(
-          account,
-          values.adsets[i],
-          i,
-          onSuccess,
-          onError,
-          adsets[i].id
-        );
-        const addLevelData = imagesHashArray.map((media, index) => {
-          if (media.imag_hash) {
-            // This is an image
-            return {
-              id: uuidv4(),
-              AddName: `${values.adsets[i].AddName}_${index + 1}`,
-              filename: media.filename,
-              imag_hash: media.imag_hash,
-              page_id: newPageId,
-              message: values.adsets[i].message,
-              headline: values.adsets[i].headline,
-              Description: values.adsets[i].Description,
-              Caption: values.adsets[i][account].Caption,
-              Website_URL: values.adsets[i][account].Website_URL,
 
-              // urlParameters: values.urlParameters
-            };
-          } else if (media.videoid) {
-            // This is a video
-            return {
-              id: uuidv4(),
-              AddName: `${values.adsets[i].AddName}_${index + 1}`,
-              filename: media.filename,
-              videoid: media.videoid,
-              thambnailurl: media.thambnailurl,
-              page_id: newPageId,
-              message: values.adsets[i].message,
-              headline: values.adsets[i].headline,
-              Description: values.adsets[i].Description,
-              Caption: values.adsets[i][account].Caption,
-              Website_URL: values.adsets[i][account].Website_URL,
-              // urlParameters: values.urlParameters
-            };
+      // Pixel IDs
+      const matchedPixelIds = list_of_pixel_id
+        .filter(item => item.includes(account))
+        .map(item => item.split("-")[1]?.trim());   // only index 1 (pixel name)
+
+      const pixel_ids =
+        pixel === "Pixels"
+          ? matchedPixelIds
+          : matchedPixelIds.length > 0
+            ? [matchedPixelIds[0]]
+            : [];
+
+
+
+      for (const page_id of page_ids) {
+        for (const pixel_id of pixel_ids) {
+          //12
+          // console.log("page_id", account, page_id[page_id.length - 1].trim());
+          // console.log("pixel_id", account, pixel_id[pixel_id.length - 1].trim());
+
+          if (geo == "Geos") {
+            const multipleGeoData = values.adsets[0].countries;
+            for (const country of multipleGeoData) {
+              let AllAdsetsData = {
+                campaign_name: values.Name,
+                Account_Number: account,
+                Approval: "PENDING_APPROVAL",
+                fbstatus: "No-Live",
+                Category: selectedCategory,
+                camapaignlevel: {
+                  createdby: session?.user?.name,
+                  Name: values.Name,
+                  Objectives: values.Objectives,
+                  Special_categories: values.Special_categories,
+                  ...(Array.isArray(values?.Special_categories)
+                    ? { Special_categories_countries: values.countries }
+                    : {}),
+                  Bid_strategy: values.Bid_strategy,
+                  Budget_type: budgetType,
+                  Daily_amount: parseFloat(values.Daily_amount) * 100,
+                  Status: values.Status,
+                  access_token: newImageHash.token,
+                  createdDate: moment().tz(newImageHash.timeZone).format("YYYY-MM-DD"),
+                },
+              };
+              const onSuccess = (status, response) => {
+                console.log("Upload success:", response);
+              };
+
+              const onError = (status, error) => {
+                console.error("Upload error:", error);
+              };
+
+              for (let i = 0; i < values.adsets.length; i++) {
+                let AdsetsData = {};
+
+                const imagesHashArray = await customRequest(
+                  account,
+                  values.adsets[i],
+                  i,
+                  onSuccess,
+                  onError,
+                  adsets[i].id
+                );
+                const addLevelData = imagesHashArray.map((media, index) => {
+                  if (media.imag_hash) {
+                    // This is an image
+                    return {
+                      id: uuidv4(),
+                      AddName: `${values.adsets[i].AddName}_${index + 1}`,
+                      filename: media.filename,
+                      imag_hash: media.imag_hash,
+                      page_id: page_id,
+                      message: values.adsets[i].message,
+                      headline: values.adsets[i].headline,
+                      Description: values.adsets[i].Description,
+                      Caption: values.adsets[i][account].Caption,
+                      Website_URL: values.adsets[i][account].Website_URL,
+
+                      // urlParameters: values.urlParameters
+                    };
+                  } else if (media.videoid) {
+                    // This is a video
+                    return {
+                      id: uuidv4(),
+                      AddName: `${values.adsets[i].AddName}_${index + 1}`,
+                      filename: media.filename,
+                      videoid: media.videoid,
+                      thambnailurl: media.thambnailurl,
+                      page_id: page_id,
+                      message: values.adsets[i].message,
+                      headline: values.adsets[i].headline,
+                      Description: values.adsets[i].Description,
+                      Caption: values.adsets[i][account].Caption,
+                      Website_URL: values.adsets[i][account].Website_URL,
+                      // urlParameters: values.urlParameters
+                    };
+                  }
+                });
+                AdsetsData[`adsetlevel_${i + 1}`] = {
+                  id: uuidv4(),
+                  AdsetName: values.adsets[i].AdsetName,
+                  Budget_type: budgetType,
+                  Daily_amount: values.adsets[i].DailyAdd_amount
+                    ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
+                    : "",
+                  optimization_goal: values.adsets[i].optimization_goal,
+                  billing_event: values.adsets[i].billing_event,
+                  start_time: moment(values.adsets[i].DatePicker.$d)
+                    .tz(newImageHash.timeZone)
+                    .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+                  ...(values.adsets[i].DatePickerEnd
+                    ? {
+                      end_time: moment(values.adsets[i].DatePickerEnd.$d)
+                        .tz(newImageHash.timeZone)
+                        .format("YYYY-MM-DDTHH:mm:ssZ"),
+                    }
+                    : {}),
+                  action_source: values.adsets[i].action_source,
+                  custom_event_type: values.adsets[i].custom_event_type,
+                  pixel_id: pixel_id,
+                  // bid_amount: values.adsets[i].bid_amount
+                  //   ? parseFloat(values.adsets[i].bid_amount) * 100
+                  //   : 0,
+                  bid_amount: values.adsets[i].bid_amount
+                    ? Math.round(Number(values.adsets[i].bid_amount) * 100)
+                    : 0,
+                  countries: [String(country)],
+                  Min_Age: values.adsets[i].Min_Age,
+                  Max_Age: values.adsets[i].Max_Age,
+                  Gender: parseInt(values.adsets[i].Gender),
+                  locales: values.adsets[i].Language,
+                  placements: values.adsets[i].placements,
+                  ...(values.adsets[i].placements !== "Advance" && {
+                    publisher_platforms: values.adsets[i].platforms,
+                    Facebook_positions:
+                      extractValuesByPartialLabel(
+                        selectedPositions[adsets[i].id],
+                        "Facebook"
+                      ) || [],
+                    instagram_positions:
+                      extractValuesByPartialLabel(
+                        selectedPositions[adsets[i].id],
+                        "Instagram"
+                      ) || [],
+                    audience_network_positions:
+                      extractValuesByPartialLabel(
+                        selectedPositions[adsets[i].id],
+                        "Audience"
+                      ) || [],
+                    messenger_positions:
+                      extractValuesByPartialLabel(
+                        selectedPositions[adsets[i].id],
+                        "Messenger"
+                      ) || [],
+                    position: values.adsets[i].positions,
+                    device_platforms: values.adsets[i].device_platforms,
+                  }),
+                  ...(values.adsets[i].Beneficiary
+                    ? { beneficiary: values.adsets[i].Beneficiary }
+                    : {}),
+                  ...(values.adsets[i].Beneficiary
+                    ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+                    : {}),
+                  buying_type: "AUCTION",
+                  addlevel: addLevelData,
+                };
+                AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+              }
+
+              multipleAccountsData.push(AllAdsetsData);
+            }
           }
-        });
-        AdsetsData[`adsetlevel_${i + 1}`] = {
-          id: uuidv4(),
-          AdsetName: values.adsets[i].AdsetName,
-          Daily_amount: values.adsets[i].DailyAdd_amount
-            ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
-            : "",
-          optimization_goal: values.adsets[i].optimization_goal,
-          billing_event: values.adsets[i].billing_event,
-          start_time: moment(values.adsets[i].DatePicker.$d)
-            .tz(newImageHash.timeZone)
-            .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
-          action_source: values.adsets[i].action_source,
-          custom_event_type: values.adsets[i].custom_event_type,
-          pixel_id: newPixelId,
-          // bid_amount: values.adsets[i].bid_amount
-          //   ? parseFloat(values.adsets[i].bid_amount) * 100
-          //   : 0,
-          bid_amount: values.adsets[i].bid_amount
-            ? Math.round(Number(values.adsets[i].bid_amount) * 100)
-            : 0,
-          countries: values.adsets[i].countries,
-          Min_Age: values.adsets[i].Min_Age,
-          Max_Age: values.adsets[i].Max_Age,
-          Gender: parseInt(values.adsets[i].Gender),
-          locales: values.adsets[i].Language,
-          placements: values.adsets[i].placements,
-          ...(values.adsets[i].placements !== "Advance" && {
-            publisher_platforms: values.adsets[i].platforms,
-            Facebook_positions:
-              extractValuesByPartialLabel(
-                selectedPositions[adsets[i].id],
-                "Facebook"
-              ) || [],
-            instagram_positions:
-              extractValuesByPartialLabel(
-                selectedPositions[adsets[i].id],
-                "Instagram"
-              ) || [],
-            audience_network_positions:
-              extractValuesByPartialLabel(
-                selectedPositions[adsets[i].id],
-                "Audience"
-              ) || [],
-            messenger_positions:
-              extractValuesByPartialLabel(
-                selectedPositions[adsets[i].id],
-                "Messenger"
-              ) || [],
-            position: values.adsets[i].positions,
-            device_platforms: values.adsets[i].device_platforms,
-          }),
-          ...(values.adsets[i].Beneficiary
-            ? { beneficiary: values.adsets[i].Beneficiary }
-            : {}),
-          ...(values.adsets[i].Beneficiary
-            ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
-            : {}),
-          buying_type: "AUCTION",
-          addlevel: addLevelData,
-        };
-        AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+          else {
+            let AllAdsetsData = {
+              campaign_name: values.Name,
+              Account_Number: account,
+              Approval: "PENDING_APPROVAL",
+              fbstatus: "No-Live",
+              Category: selectedCategory,
+              camapaignlevel: {
+                createdby: session?.user?.name,
+                Name: values.Name,
+                Objectives: values.Objectives,
+                Special_categories: values.Special_categories,
+                ...(Array.isArray(values?.Special_categories)
+                  ? { Special_categories_countries: values.countries }
+                  : {}),
+                Bid_strategy: values.Bid_strategy,
+                Budget_type: budgetType,
+                Daily_amount: parseFloat(values.Daily_amount) * 100,
+                Status: values.Status,
+                access_token: newImageHash.token,
+                createdDate: moment().tz(newImageHash.timeZone).format("YYYY-MM-DD"),
+              },
+            };
+            const onSuccess = (status, response) => {
+              console.log("Upload success:", response);
+            };
+
+            const onError = (status, error) => {
+              console.error("Upload error:", error);
+            };
+
+            for (let i = 0; i < values.adsets.length; i++) {
+              let AdsetsData = {};
+
+              const imagesHashArray = await customRequest(
+                account,
+                values.adsets[i],
+                i,
+                onSuccess,
+                onError,
+                adsets[i].id
+              );
+              const addLevelData = imagesHashArray.map((media, index) => {
+                if (media.imag_hash) {
+                  // This is an image
+                  return {
+                    id: uuidv4(),
+                    AddName: `${values.adsets[i].AddName}_${index + 1}`,
+                    filename: media.filename,
+                    imag_hash: media.imag_hash,
+                    page_id: page_id,
+                    message: values.adsets[i].message,
+                    headline: values.adsets[i].headline,
+                    Description: values.adsets[i].Description,
+                    Caption: values.adsets[i][account].Caption,
+                    Website_URL: values.adsets[i][account].Website_URL,
+
+                    // urlParameters: values.urlParameters
+                  };
+                } else if (media.videoid) {
+                  // This is a video
+                  return {
+                    id: uuidv4(),
+                    AddName: `${values.adsets[i].AddName}_${index + 1}`,
+                    filename: media.filename,
+                    videoid: media.videoid,
+                    thambnailurl: media.thambnailurl,
+                    page_id: page_id,
+                    message: values.adsets[i].message,
+                    headline: values.adsets[i].headline,
+                    Description: values.adsets[i].Description,
+                    Caption: values.adsets[i][account].Caption,
+                    Website_URL: values.adsets[i][account].Website_URL,
+                    // urlParameters: values.urlParameters
+                  };
+                }
+              });
+              AdsetsData[`adsetlevel_${i + 1}`] = {
+                id: uuidv4(),
+                AdsetName: values.adsets[i].AdsetName,
+                Budget_type: budgetType,
+                Daily_amount: values.adsets[i].DailyAdd_amount
+                  ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
+                  : "",
+                optimization_goal: values.adsets[i].optimization_goal,
+                billing_event: values.adsets[i].billing_event,
+                start_time: moment(values.adsets[i].DatePicker.$d)
+                  .tz(newImageHash.timeZone)
+                  .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+                ...(values.adsets[i].DatePickerEnd
+                  ? {
+                    end_time: moment(values.adsets[i].DatePickerEnd.$d)
+                      .tz(newImageHash.timeZone)
+                      .format("YYYY-MM-DDTHH:mm:ssZ"),
+                  }
+                  : {}),
+                action_source: values.adsets[i].action_source,
+                custom_event_type: values.adsets[i].custom_event_type,
+                pixel_id: pixel_id,
+                // bid_amount: values.adsets[i].bid_amount
+                //   ? parseFloat(values.adsets[i].bid_amount) * 100
+                //   : 0,
+                bid_amount: values.adsets[i].bid_amount
+                  ? Math.round(Number(values.adsets[i].bid_amount) * 100)
+                  : 0,
+                countries: values.adsets[i].countries,
+                Min_Age: values.adsets[i].Min_Age,
+                Max_Age: values.adsets[i].Max_Age,
+                Gender: parseInt(values.adsets[i].Gender),
+                locales: values.adsets[i].Language,
+                placements: values.adsets[i].placements,
+                ...(values.adsets[i].placements !== "Advance" && {
+                  publisher_platforms: values.adsets[i].platforms,
+                  Facebook_positions:
+                    extractValuesByPartialLabel(
+                      selectedPositions[adsets[i].id],
+                      "Facebook"
+                    ) || [],
+                  instagram_positions:
+                    extractValuesByPartialLabel(
+                      selectedPositions[adsets[i].id],
+                      "Instagram"
+                    ) || [],
+                  audience_network_positions:
+                    extractValuesByPartialLabel(
+                      selectedPositions[adsets[i].id],
+                      "Audience"
+                    ) || [],
+                  messenger_positions:
+                    extractValuesByPartialLabel(
+                      selectedPositions[adsets[i].id],
+                      "Messenger"
+                    ) || [],
+                  position: values.adsets[i].positions,
+                  device_platforms: values.adsets[i].device_platforms,
+                }),
+                ...(values.adsets[i].Beneficiary
+                  ? { beneficiary: values.adsets[i].Beneficiary }
+                  : {}),
+                ...(values.adsets[i].Beneficiary
+                  ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+                  : {}),
+                buying_type: "AUCTION",
+                addlevel: addLevelData,
+              };
+              AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+            }
+
+            multipleAccountsData.push(AllAdsetsData);
+          }
+
+
+          //45
+        }
       }
 
-      multipleAccountsData.push(AllAdsetsData);
 
-      //45
+      // //12
+      // // console.log("page_id", account, page_id[page_id.length - 1].trim());
+      // // console.log("pixel_id", account, pixel_id[pixel_id.length - 1].trim());
+      // let AllAdsetsData = {
+      //   campaign_name: values.Name,
+      //   Account_Number: account,
+      //   Approval: "PENDING_APPROVAL",
+      //   fbstatus: "No-Live",
+      //   Category: selectedCategory,
+      //   camapaignlevel: {
+      //     createdby: session?.user?.name,
+      //     Name: values.Name,
+      //     Objectives: values.Objectives,
+      //     Special_categories: values.Special_categories,
+      //     ...(Array.isArray(values?.Special_categories)
+      //       ? { Special_categories_countries: values.countries }
+      //       : {}),
+      //     Bid_strategy: values.Bid_strategy,
+      //     Budget_type: budgetType,
+      //     Daily_amount: parseFloat(values.Daily_amount) * 100,
+      //     Status: values.Status,
+      //     access_token: newImageHash.token,
+      //     createdDate: moment().tz(newImageHash.timeZone).format("YYYY-MM-DD"),
+      //   },
+      // };
+      // const onSuccess = (status, response) => {
+      //   console.log("Upload success:", response);
+      // };
+
+      // const onError = (status, error) => {
+      //   console.error("Upload error:", error);
+      // };
+
+      // for (let i = 0; i < values.adsets.length; i++) {
+      //   let AdsetsData = {};
+
+      //   const imagesHashArray = await customRequest(
+      //     account,
+      //     values.adsets[i],
+      //     i,
+      //     onSuccess,
+      //     onError,
+      //     adsets[i].id
+      //   );
+      //   const addLevelData = imagesHashArray.map((media, index) => {
+      //     if (media.imag_hash) {
+      //       // This is an image
+      //       return {
+      //         id: uuidv4(),
+      //         AddName: `${values.adsets[i].AddName}_${index + 1}`,
+      //         filename: media.filename,
+      //         imag_hash: media.imag_hash,
+      //         page_id: newPageId,
+      //         message: values.adsets[i].message,
+      //         headline: values.adsets[i].headline,
+      //         Description: values.adsets[i].Description,
+      //         Caption: values.adsets[i][account].Caption,
+      //         Website_URL: values.adsets[i][account].Website_URL,
+
+      //         // urlParameters: values.urlParameters
+      //       };
+      //     } else if (media.videoid) {
+      //       // This is a video
+      //       return {
+      //         id: uuidv4(),
+      //         AddName: `${values.adsets[i].AddName}_${index + 1}`,
+      //         filename: media.filename,
+      //         videoid: media.videoid,
+      //         thambnailurl: media.thambnailurl,
+      //         page_id: newPageId,
+      //         message: values.adsets[i].message,
+      //         headline: values.adsets[i].headline,
+      //         Description: values.adsets[i].Description,
+      //         Caption: values.adsets[i][account].Caption,
+      //         Website_URL: values.adsets[i][account].Website_URL,
+      //         // urlParameters: values.urlParameters
+      //       };
+      //     }
+      //   });
+      //   AdsetsData[`adsetlevel_${i + 1}`] = {
+      //     id: uuidv4(),
+      //     AdsetName: values.adsets[i].AdsetName,
+      //     Budget_type: budgetType,
+      //     Daily_amount: values.adsets[i].DailyAdd_amount
+      //       ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
+      //       : "",
+      //     optimization_goal: values.adsets[i].optimization_goal,
+      //     billing_event: values.adsets[i].billing_event,
+      //     start_time: moment(values.adsets[i].DatePicker.$d)
+      //       .tz(newImageHash.timeZone)
+      //       .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+      //     ...(values.adsets[i].DatePickerEnd
+      //       ? {
+      //         end_time: moment(values.adsets[i].DatePickerEnd.$d)
+      //           .tz(newImageHash.timeZone)
+      //           .format("YYYY-MM-DDTHH:mm:ssZ"),
+      //       }
+      //       : {}),
+      //     action_source: values.adsets[i].action_source,
+      //     custom_event_type: values.adsets[i].custom_event_type,
+      //     pixel_id: newPixelId,
+      //     // bid_amount: values.adsets[i].bid_amount
+      //     //   ? parseFloat(values.adsets[i].bid_amount) * 100
+      //     //   : 0,
+      //     bid_amount: values.adsets[i].bid_amount
+      //       ? Math.round(Number(values.adsets[i].bid_amount) * 100)
+      //       : 0,
+      //     countries: values.adsets[i].countries,
+      //     Min_Age: values.adsets[i].Min_Age,
+      //     Max_Age: values.adsets[i].Max_Age,
+      //     Gender: parseInt(values.adsets[i].Gender),
+      //     locales: values.adsets[i].Language,
+      //     placements: values.adsets[i].placements,
+      //     ...(values.adsets[i].placements !== "Advance" && {
+      //       publisher_platforms: values.adsets[i].platforms,
+      //       Facebook_positions:
+      //         extractValuesByPartialLabel(
+      //           selectedPositions[adsets[i].id],
+      //           "Facebook"
+      //         ) || [],
+      //       instagram_positions:
+      //         extractValuesByPartialLabel(
+      //           selectedPositions[adsets[i].id],
+      //           "Instagram"
+      //         ) || [],
+      //       audience_network_positions:
+      //         extractValuesByPartialLabel(
+      //           selectedPositions[adsets[i].id],
+      //           "Audience"
+      //         ) || [],
+      //       messenger_positions:
+      //         extractValuesByPartialLabel(
+      //           selectedPositions[adsets[i].id],
+      //           "Messenger"
+      //         ) || [],
+      //       position: values.adsets[i].positions,
+      //       device_platforms: values.adsets[i].device_platforms,
+      //     }),
+      //     ...(values.adsets[i].Beneficiary
+      //       ? { beneficiary: values.adsets[i].Beneficiary }
+      //       : {}),
+      //     ...(values.adsets[i].Beneficiary
+      //       ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+      //       : {}),
+      //     buying_type: "AUCTION",
+      //     addlevel: addLevelData,
+      //   };
+      //   AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
+      // }
+
+      // multipleAccountsData.push(AllAdsetsData);
+
+      // //45
     }
 
 
@@ -7978,6 +9586,7 @@ const CreateCampaignDrawer = ({
     Bid_strategy: "LOWEST_COST_WITHOUT_CAP",
     Account_Number: accountis === "All" ? "" : accountNumber,
     Daily_amount: 0, // Initial daily budget for the campaign
+    // adsets: adsets,
     // Name: campaignName,
     // adsets: [
     //   getDefaultAdset(
@@ -8036,6 +9645,9 @@ const CreateCampaignDrawer = ({
     setErrors?.({ input1: "", input2: "" });      // if you keep field errors in state
     setIsEditingDraft?.(false);
     setSelectedTemplate(null);
+    setGeos("Geo");
+    setPages("Page");
+    setPixels("Pixel");
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -8626,117 +10238,206 @@ const CreateCampaignDrawer = ({
       >
         Campaign Templates
       </Button> */}
-      <div style={{ display: 'flex' }}>
-        <Button
-          type="primary"
-          style={{
-            border: "1.5px solid #4caf50",
-            borderRadius: "8px",
-            marginBottom: "7px",
-            marginLeft: "2px",
-          }}
-          onClick={() => setIsTemplatesModalOpen(true)}
-        >
-          Campaign Templates
-        </Button>
-        <div style={{ marginLeft: '20px' }}>
-          <Select
-            placeholder="Select report category"
-            className={`${theme === "dark" ? "dark-theme" : "light-theme"
-              } green-border-select`}
-            value={popupInputs.reportCat || undefined}
-            optionLabelProp="value"
-            onChange={(val) => {
-              setPopupInputs(s => ({ ...s, reportCat: val }));
-              if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex' }}>
+          <Button
+            type="primary"
+            style={{
+              border: "1.5px solid #4caf50",
+              borderRadius: "8px",
+              marginBottom: "7px",
+              marginLeft: "2px",
             }}
-            showSearch
-            filterOption={(input, option) =>
-              (option?.name || "").toLowerCase().includes(input.toLowerCase())
-            }
-            options={reportCategories.map(c => ({
-              value: `${c.name}`,
-              name: c.name,
-              id: c.categoryId,
+            onClick={() => setIsTemplatesModalOpen(true)}
+          >
+            Campaign Templates
+          </Button>
+          <div style={{ marginLeft: '20px' }}>
+            <Select
+              placeholder="Select report category"
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+              value={popupInputs.reportCat || undefined}
+              optionLabelProp="value"
+              onChange={(val) => {
+                setPopupInputs(s => ({ ...s, reportCat: val }));
+                if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
+              }}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.name || "").toLowerCase().includes(input.toLowerCase())
+              }
+              options={reportCategories.map(c => ({
+                value: `${c.name}`,
+                name: c.name,
+                id: c.categoryId,
 
-              label: (
-                <div style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 8
+                label: (
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 8
 
-                }}>
-                  <span style={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    maxWidth: 200
-                  }} title={`${c.name} - ${c.accountNumber}`}>
-                    {c.name} - {c.accountNumber}
-                  </span>
-                  <span style={{ display: "flex", gap: 10 }}>
-                    <FaPenToSquare
-                      style={{ fontSize: 12 }}
-                      title="Edit"
-                      onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                      onClick={(e) => {
-                        e.preventDefault(); e.stopPropagation();
-                        setRCurrentCategory(c);
-                        setREditedName(c.name);
-                        setREditModalVisible(true);
-                      }}
+                  }}>
+                    <span style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: 200
+                    }} title={`${c.name} - ${c.accountNumber}`}>
+                      {c.name} - {c.accountNumber}
+                    </span>
+                    <span style={{ display: "flex", gap: 10 }}>
+                      <FaPenToSquare
+                        style={{ fontSize: 12 }}
+                        title="Edit"
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setREditedName(c.name);
+                          setREditModalVisible(true);
+                        }}
+                      />
+                      <FaTrashCan
+                        style={{ fontSize: 12, color: "#EC7117" }}
+                        title="Delete"
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setRDeleteModalVisible(true);
+                        }}
+                      />
+                    </span>
+                  </div>
+                )
+              }))}
+
+              style={{ width: 240 }}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              dropdownRender={(menu) => (
+                <div>
+                  {menu}
+                  <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
+                    <Input
+                      size="small"
+                      placeholder="New report category"
+                      value={newReportCategory}
+                      onChange={(e) => setNewReportCategory(e.target.value)}
+                      onPressEnter={addReportCategory}
+                      className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
                     />
-                    <FaTrashCan
-                      style={{ fontSize: 12, color: "#EC7117" }}
-                      title="Delete"
-                      onClick={(e) => {
-                        e.preventDefault(); e.stopPropagation();
-                        setRCurrentCategory(c);
-                        setRDeleteModalVisible(true);
-                      }}
+                    <Button
+                      size="small"
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={addReportCategory}
+                      style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
                     />
-                  </span>
+                  </div>
                 </div>
-              )
-            }))}
+              )}
+            />
+            {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
+          </div>
 
-            style={{ width: 240 }}
-            dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
-            dropdownRender={(menu) => (
+          <div style={{ marginLeft: '20px' }}>
+            <Select
+              value={budgetType}   // "daily" or "lifetime"
+              onChange={(value) => setBudgetType(value)}
+              // style={{ height: "20px" }}
+              options={[
+                { label: "Daily", value: "daily" },
+                { label: "Lifetime", value: "lifetime" },
+              ]}
+            // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
+            // getPopupContainer={(triggerNode) => triggerNode.parentElement}
+            />
+          </div>
+          <div style={{ marginLeft: '20px' }}>
+            {selectedTemplate && (
               <div>
-                {menu}
-                <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
-                  <Input
-                    size="small"
-                    placeholder="New report category"
-                    value={newReportCategory}
-                    onChange={(e) => setNewReportCategory(e.target.value)}
-                    onPressEnter={addReportCategory}
-                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                  />
-                  <Button
-                    size="small"
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={addReportCategory}
-                    style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
-                  />
-                </div>
+                <strong>Selected Template:</strong> {selectedTemplate.Draft_Name}
               </div>
             )}
-          />
-          {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
-        </div>
-        <div style={{ marginLeft: '20px' }}>
-          {selectedTemplate && (
-            <div>
-              <strong>Selected Template:</strong> {selectedTemplate.Draft_Name}
-            </div>
-          )}
+          </div>
         </div>
 
+        <div style={{ display: 'flex' }}>
+          <div>
+            <Tooltip title={geo === "Geos" ? "Turn off to launch campaign in multiple geos at once" : "Turn on to launch campaign in individual geo"}
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
+            >
+              <Switch
+                checked={geo === "Geos"}        // switch ON when "Geos"
+                onChange={(checked) => setGeos(checked ? "Geos" : "Geo")}
+                checkedChildren="Geos"
+                unCheckedChildren="Geo"
+                style={{
+                  marginRight: "10px",
+                  backgroundColor: geo === "Geos" ? "#91C25F" : "#d9d9d9",
+                  color: "#fff"
+                }}
+              />
+            </Tooltip>
+          </div>
+
+          <div>
+            <Tooltip title="Turn on to launch campaigns in multiple Pixels"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
+            >
+              <Switch
+                checked={pixel === "Pixels"}        // switch ON when "Geos"
+                onChange={(checked) => setPixels(checked ? "Pixels" : "Pixel")}
+                checkedChildren="Pixels"
+                unCheckedChildren="Pixel"
+                style={{
+                  marginRight: "10px",
+                  backgroundColor: pixel === "Pixels" ? "#91C25F" : "#d9d9d9",
+                  color: "#fff"
+                }}
+              />
+            </Tooltip>
+          </div>
+
+          <div>
+            <Tooltip title="Turn on to launch campaigns in multiple Pages"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
+            >
+              <Switch
+                checked={page === "Pages"}        // switch ON when "Pages"
+                onChange={(checked) => setPages(checked ? "Pages" : "Page")}
+                checkedChildren="Pages"
+                unCheckedChildren="Page"
+                style={{
+                  marginRight: "10px",
+                  backgroundColor: page === "Pages" ? "#91C25F" : "#d9d9d9",
+                  color: "#fff"
+                }}
+              />
+            </Tooltip>
+          </div>
+        </div>
       </div>
       <Modal
         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
@@ -8956,6 +10657,7 @@ const CreateCampaignDrawer = ({
                           padding: "6px 10px",
                           fontSize: "14px",
                         }}
+
                       >
                         {/* <MdOutlineNumbers
                           style={{ fontSize: 16, color: "#91c25f", cursor: "pointer" }}
@@ -9285,22 +10987,22 @@ const CreateCampaignDrawer = ({
                     options={[
                       { value: "OUTCOME_LEADS", label: "Leads", title: "" },
                       { value: "OUTCOME_SALES", label: "Sales", title: "" },
-                      {
-                        value: "OUTCOME_ENGAGEMENT",
-                        label: "Engagement",
-                        title: "",
-                      },
-                      {
-                        value: "OUTCOME_AWARENESS",
-                        label: "Awareness",
-                        title: "",
-                      },
-                      { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
-                      {
-                        value: "OUTCOME_APP_PROMOTION",
-                        label: "App promotion",
-                        title: "",
-                      },
+                      // {
+                      //   value: "OUTCOME_ENGAGEMENT",
+                      //   label: "Engagement",
+                      //   title: "",
+                      // },
+                      // {
+                      //   value: "OUTCOME_AWARENESS",
+                      //   label: "Awareness",
+                      //   title: "",
+                      // },
+                      // { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
+                      // {
+                      //   value: "OUTCOME_APP_PROMOTION",
+                      //   label: "App promotion",
+                      //   title: "",
+                      // },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"
@@ -9331,11 +11033,11 @@ const CreateCampaignDrawer = ({
                         title: "",
                       },
                       { value: "EMPLOYMENT", label: "Employment", title: "" },
-                      {
-                        value: "ISSUES_ELECTIONS_POLITICS",
-                        label: "Politics",
-                        title: "",
-                      },
+                      // {
+                      //   value: "ISSUES_ELECTIONS_POLITICS",
+                      //   label: "Politics",
+                      //   title: "",
+                      // },
                       { value: "NONE", label: "None", title: "" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -9618,7 +11320,7 @@ const CreateCampaignDrawer = ({
           />
         </Form.Item>
       </Tooltip> */}
-                <Tooltip
+                {/* <Tooltip
                   title={
                     isAnyAdsetBudgetSet
                       ? "You have enabled daily budget in the Adset Level"
@@ -9649,6 +11351,50 @@ const CreateCampaignDrawer = ({
                         setIsCampaignBudgetActive(value > 0);
                       }}
                       readOnly={isAnyAdsetBudgetSet} // Make campaign budget read-only if any adset has a budget
+                      style={{
+                        flex: 0.2,
+                        color: theme === "dark" ? "#fff" : "#000",
+                      }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>
+                </Tooltip> */}
+                <Tooltip
+                  title={
+                    watchedHasAdsetBudget
+                      ? "You have enabled budget at Adset level — Campaign budget is disabled."
+                      : ""
+                  }
+                  overlayInnerStyle={{
+                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                    color: theme === 'dark' ? '#fff' : '#000',
+                    border: '1px solid #ccc',
+                    borderRadius: 6,
+                    // fontWeight: 500,
+                  }}
+                >
+                  <Form.Item
+                    name="Daily_amount"
+                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+
+                    required={!watchedHasAdsetBudget}
+                    rules={[
+                      {
+                        required: !(watchedHasAdsetBudget || Number(watchedCampaignBudget) > 0),
+                        message: "Please enter a valid daily budget for the Campaign",
+                      },
+                    ]}
+                    style={{ marginLeft: "1%", marginBottom: 24 }}
+                  >
+                    <InputNumber
+                      min={0}
+                      step={0.01}
+                      placeholder="$"
+                      readOnly={watchedHasAdsetBudget} // only depends on watchedAdsets
                       style={{
                         flex: 0.2,
                         color: theme === "dark" ? "#fff" : "#000",
@@ -9753,6 +11499,10 @@ const CreateCampaignDrawer = ({
                   pixelIdList={pixelIdList}
                   setDefaultUrlData={setDefaultUrlData}
                   defaultUrlData={defaultUrlData}
+                  budgetType={budgetType}
+                  page={page}
+                  pixel={pixel}
+                  geo={geo}
                 />
               );
               // <ffff/>
