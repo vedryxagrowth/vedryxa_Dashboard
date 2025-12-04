@@ -71,7 +71,7 @@ import { DatePicker } from "antd";
 import StickyBox from "react-sticky-box";
 import { FaClone, FaEye, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
- 
+
 import { Token } from "aws-sdk";
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
@@ -2167,7 +2167,7 @@ const App = () => {
         <div
           style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         >
-          <span 
+          <span
           // onClick={() => handleCampaignNameClick(record)}
           >{text}</span>
           {record.reports && (
@@ -2740,77 +2740,76 @@ const App = () => {
     //   },
     // }
     {
-  title: "Permission",
-  dataIndex: "Approval",
-  key: "permission",
-  width: 120,
-  align: "center",
-  render: (text, record) => {
-    const approval = record?.Approval?.toLowerCase();
-    const fbstatus = record?.fbstatus?.toLowerCase();
-    const accountNumber = record?.Account_Number;
-    const campaignId = record?.campaignid;
-    const openCampaignHistory = () => {
-      if (!campaignId || !accountNumber) {
-        console.error("Missing campaign ID or account number");
-        return;
-      }
-      const href = `/Campaigns/CampaignHistory?account=${encodeURIComponent(
-        accountNumber
-      )}&type=Campaign&id=${encodeURIComponent(campaignId)}`;
-      window.open(href, "_blank", "noopener,noreferrer");
-    };
-    if (fbstatus === "live") {
-      return (
-        <Tooltip title="View Campaign History">
-          <HistoryOutlined
-            style={{
-              fontSize: 16,
-              color: theme === "dark" ? "#91C25F" : "#37474F",
-              cursor: "pointer",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              openCampaignHistory();
-            }}
-          />
-        </Tooltip>
-      );
-    }
-    if (approval === "pending_approval") {
-      return (
-        <>
-          <Button
-            style={{
-              backgroundColor: "#91C25F",
-              color: "#000",
-              border: "none",
-            }}
-            onClick={() => handleApprovalforAdsets(record)}
-          >
-            Approve
-          </Button>
+      title: "Permission",
+      dataIndex: "Approval",
+      key: "permission",
+      width: 120,
+      align: "center",
+      render: (text, record) => {
+        const approval = record?.Approval?.toLowerCase();
+        const fbstatus = record?.fbstatus?.toLowerCase();
+        const accountNumber = record?.Account_Number;
+        const campaignId = record?.campaignid;
+        const openCampaignHistory = () => {
+          if (!campaignId || !accountNumber) {
+            console.error("Missing campaign ID or account number");
+            return;
+          }
+          const href = `/Campaigns/CampaignHistory?account=${encodeURIComponent(
+            accountNumber
+          )}&type=Campaign&id=${encodeURIComponent(campaignId)}`;
+          window.open(href, "_blank", "noopener,noreferrer");
+        };
+        if (fbstatus === "live") {
+          return (
+            <Tooltip title="View Campaign History">
+              <HistoryOutlined
+                style={{
+                  fontSize: 16,
+                  color: theme === "dark" ? "#91C25F" : "#37474F",
+                  cursor: "pointer",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openCampaignHistory();
+                }}
+              />
+            </Tooltip>
+          );
+        }
+        if (approval === "pending_approval") {
+          return (
+            <>
+              <Button
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  border: "none",
+                }}
+                onClick={() => handleApprovalforAdsets(record)}
+              >
+                Approve
+              </Button>
 
-          {useaprovalForAdsets?.identifier === record.identifier && (
-            <Modal
-              title="Confirm approval"
-              open={isModalVisibleForAdsets}
-              onOk={handleOkForAdsets}
-              onCancel={() => setIsModalVisibleForAdsets(false)}
-              className={`custom-modal ${
-                theme === "dark" ? "dark-theme-modal" : ""
-              }`}
-            >
-              <p>Are you sure you want to approve?</p>
-            </Modal>
-          )}
-        </>
-      );
-    }
+              {useaprovalForAdsets?.identifier === record.identifier && (
+                <Modal
+                  title="Confirm approval"
+                  open={isModalVisibleForAdsets}
+                  onOk={handleOkForAdsets}
+                  onCancel={() => setIsModalVisibleForAdsets(false)}
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
+                >
+                  <p>Are you sure you want to approve?</p>
+                </Modal>
+              )}
+            </>
+          );
+        }
 
-    return null;
-  },
-     }
+        return null;
+      },
+    }
 
 
   ];
@@ -3229,7 +3228,7 @@ const App = () => {
     onChangeSelect(updated);
     setAccountChanged(true);
   };
- 
+
 
   const filteredAccounts = useMemo(() => {
     const q = searchText.trim().toLowerCase();
@@ -3373,7 +3372,7 @@ const App = () => {
       </>
     );
   };
- 
+
 
   return (
     <div>
@@ -3485,7 +3484,7 @@ const App = () => {
         }
         size="small"
         extra={
-          userdetails?.email !== "careers@adsgoat.in" && (
+          userdetails?.role !== "Network_Partner" && (
             <Button
               onClick={showDrawer}
               icon={<PlusOutlined className="black-icon" />}
@@ -3500,7 +3499,7 @@ const App = () => {
             </Button>
           )
         }
-        
+
       >
         {/* Entire filter section in one single aligned row */}
         <Row
@@ -3545,7 +3544,7 @@ const App = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         {isActive
                           ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
-                          : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1'/>}
+                          : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
                         <span>{option.label}</span>
                       </div>
                     </Option>
@@ -3881,20 +3880,20 @@ const App = () => {
             >
               Budget: ${totalDailySpend}
             </span> */}
-            {userdetails?.email !== "careers@adsgoat.in" && (
-  <span
-    style={{
-      backgroundColor: "transparent",
-      padding: "5px 14px",
-      borderRadius: "8px",
-      fontSize: "14px",
-      color: theme === "dark" ? "#fff" : "#000",
-      border: "1px solid #4caf50",
-    }}
-  >
-    Budget: ${totalDailySpend}
-  </span>
-)}
+            {userdetails?.role !== "Network_Partner" && (
+              <span
+                style={{
+                  backgroundColor: "transparent",
+                  padding: "5px 14px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  color: theme === "dark" ? "#fff" : "#000",
+                  border: "1px solid #4caf50",
+                }}
+              >
+                Budget: ${totalDailySpend}
+              </span>
+            )}
 
 
             {/* 🔹 Refresh Button */}

@@ -35,6 +35,7 @@ import {
   PaperClipOutlined,
   DeleteOutlined,
   CopyOutlined,
+  InfoCircleOutlined
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -1937,7 +1938,7 @@ const AddComponent = ({
 
             <Form.Item
               name="page_id"
-              initialValue={imagehash?.pageID}
+              initialValue={adset?.page_id || ""}
               label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
               rules={[
                 {
@@ -1950,6 +1951,7 @@ const AddComponent = ({
             >
               <Input
                 style={{ width: "23%" }}
+                disabled={true}
                 className={
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
@@ -2652,6 +2654,8 @@ const AdsetComponent = ({
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
+  const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
+
   const Billing_Event_options = {
     OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
     VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
@@ -2660,6 +2664,66 @@ const AdsetComponent = ({
     DAILY_UNIQUE_REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
     IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
   }
+
+  const allCountries = [
+    { value: "US", label: "United States" },
+    { value: "GB", label: "United Kingdom" },
+    { value: "AU", label: "Australia" },
+    { value: "IN", label: "India" },
+    { value: "AE", label: "United Arab Emirates" },
+    { value: "CA", label: "Canada" },
+    { value: "DE", label: "Germany" },
+    { value: "FR", label: "France" },
+    { value: "JP", label: "Japan" },
+    { value: "CN", label: "China" },
+    { value: "BR", label: "Brazil" },
+    { value: "ZA", label: "South Africa" },
+    { value: "RU", label: "Russia" },
+    { value: "IT", label: "Italy" },
+    { value: "ES", label: "Spain" },
+    { value: "SG", label: "Singapore" },
+    { value: "NZ", label: "New Zealand" },
+    { value: "MX", label: "Mexico" },
+    { value: "AT", label: "Austria" },
+    { value: "BE", label: "Belgium" },
+    { value: "BG", label: "Bulgaria" },
+    { value: "HR", label: "Croatia" },
+    { value: "CY", label: "Cyprus" },
+    { value: "CZ", label: "Czech Republic" },
+    { value: "DK", label: "Denmark" },
+    { value: "EE", label: "Estonia" },
+    { value: "FI", label: "Finland" },
+    { value: "GR", label: "Greece" },
+    { value: "HU", label: "Hungary" },
+    { value: "IE", label: "Ireland" },
+    { value: "LV", label: "Latvia" },
+    { value: "LT", label: "Lithuania" },
+    { value: "LU", label: "Luxembourg" },
+    { value: "MT", label: "Malta" },
+    { value: "NL", label: "Netherlands" },
+    { value: "PL", label: "Poland" },
+    { value: "PT", label: "Portugal" },
+    { value: "RO", label: "Romania" },
+    { value: "SK", label: "Slovakia" },
+    { value: "SI", label: "Slovenia" },
+    { value: "SE", label: "Sweden" },
+  ];
+
+  const adsetLocationCountry = Form.useWatch(["adsets", index, "countries"], form);
+
+  // console.log(adsetLocationCountry);
+
+
+  const campaignCountries = Form.useWatch("countries", form) || [];
+  const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
+
+  // console.log(campaignCountries);
+
+  const newCampaignCountries = campaignCountries && campaignCountries.length > 0 ? campaignCountries.map(item => {
+    return allCountries.find(item1 => item1.value === item)
+  }) : allCountries;
+
+  console.log(newCampaignCountries);
 
   const Optimization_goal_values = {
     OUTCOME_LEADS: [
@@ -2712,6 +2776,49 @@ const AdsetComponent = ({
     index === 0
       ? optionsForOptimz_goal
       : optionsForOptimz_goal.map((o) => ({ ...o, disabled: o.value !== currentValue }));
+
+  const EU_AND_ASSOCIATED = [
+    // EU 27
+    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT",
+    "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+    // EU territories & regions
+    "AX", "PT-20", "DE-BS", "IT-CO", "ES-CN", "GF", "GP", "DE-HL", "IT-LI", "PT-30",
+    "MQ", "YT", "ES-ML", "GR-MA", "RE", "FR-MF"
+  ];
+  //   return targetCountries.some(c => EU_AND_ASSOCIATED.includes(c));
+  // }
+  //   const EU_AND_ASSOCIATED = [
+  //   // ... your list ...
+  //   "MQ", "YT", "ES-ML", "GR-MA", "RE", "FR-MF"
+  // ];
+
+  function needsBeneficiaryAndPayer(targetCountries) {
+    if (!targetCountries) return false;
+
+    // Normalize to an array:
+    let countries = targetCountries;
+
+    // If a comma/semicolon/space-separated string (common when reading form values)
+    if (typeof targetCountries === 'string') {
+      countries = targetCountries
+        .split(/[,;]\s*|\s+/)   // split by comma, semicolon or whitespace
+        .map(s => s.trim())
+        .filter(Boolean);
+    } else if (!Array.isArray(targetCountries)) {
+      // If it's an object (e.g., {0: 'IN', 1: 'DE'}) try to get values and flatten
+      if (typeof targetCountries === 'object' && targetCountries !== null) {
+        countries = Object.values(targetCountries).flat().map(String).map(s => s.trim()).filter(Boolean);
+      } else {
+        // unknown type — bail out safely
+        return false;
+      }
+    }
+
+    // Finally, do the check
+    return Array.isArray(countries) && countries.some(c => EU_AND_ASSOCIATED.includes(String(c)));
+  }
+
+  const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -3113,6 +3220,75 @@ const AdsetComponent = ({
   };
 
   useEffect(() => {
+    // always treat current as an array
+    const current = form.getFieldValue(["adsets", index, "countries"]) || [];
+
+    // helper to set an array value safely
+    const setArrayValue = (valArray) => {
+      form.setFields([
+        { name: ["adsets", index, "countries"], value: valArray },
+      ]);
+      form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+    };
+
+    if (campaignCountries.length > 0) {
+      // Allowed values are campaignCountries
+      const filtered = Array.isArray(current)
+        ? current.filter((c) => campaignCountries.includes(c))
+        : (campaignCountries.includes(current) ? [current] : []);
+
+      if (filtered.length === 0) {
+        // fallback to first campaign country (as an array)
+        setArrayValue([campaignCountries[0]]);
+        // form.setFieldsValue({
+        //   adsets: {
+        //     [index]: { countries: [campaignCountries[0]] }
+        //   }
+        // });
+        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+      } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        // remove invalid entries, keep the valid ones
+        setArrayValue(filtered);
+      }
+    } else {
+      // No campaign-level countries -> allowed values are allCountries' values
+      const validSet = new Set(allCountries.map((c) => c.value));
+      const filtered = Array.isArray(current)
+        ? current.filter((c) => validSet.has(c))
+        : (validSet.has(current) ? [current] : []);
+
+      if (filtered.length === 0) {
+        // fallback to first available country (as an array)
+        setArrayValue([allCountries[0].value]);
+        // form.setFieldsValue({
+        //   adsets: {
+        //     [index]: { countries: [allCountries[0].value] }
+        //   }
+        // });
+        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+      }
+      else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        setArrayValue(filtered);
+      }
+    }
+    // include only necessary deps (allCountries is an array constant — ok to include)
+  }, [campaignCountries, form, index, allCountries]);
+
+  useEffect(() => {
+    if (hasCountries) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            Min_Age: "18",
+            Max_Age: "65",
+            Gender: "0"
+          },
+        },
+      });
+    }
+  }, [hasCountries, index, form]);
+
+  useEffect(() => {
     const creatives = selectedFilesFromCreatives?.[adset.id];
     if (Array.isArray(creatives) && creatives.length > 0) {
       setSelectedOption("creative");
@@ -3430,6 +3606,7 @@ const AdsetComponent = ({
             {index === 0 ? (
               <Select
                 options={optionsForIndex}
+                disabled={adset?.Adsetid ? true : false}
                 value={currentValue}
                 onChange={(val) => handleFirstOptimizationChange(val)}
                 dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -3439,6 +3616,7 @@ const AdsetComponent = ({
               // Select stays enabled but only the current option is enabled to pick
               <Select
                 options={optionsForIndex}
+                disabled={adset?.Adsetid ? true : false}
                 value={currentValue}
                 // no onChange needed (user can't change to another value because other options are disabled)
                 dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -3459,13 +3637,16 @@ const AdsetComponent = ({
             initialValue={adset.custom_event_type || "LEAD"}
           >
             <Select
-              disabled={adset.Adsetid || view ? true : false}
-              options={[
-                { value: "LEAD", label: "Lead" },
-                { value: "PURCHASE", label: "Purchase" },
-                { value: "SEARCH", label: "Search" },
-                { value: "CONTACT", label: "Contact" },
-              ]}
+              disabled={adset?.Adsetid ? true : false}
+              //   options={
+              //     [
+              //     { value: "LEAD", label: "Lead" },
+              //     { value: "PURCHASE", label: "Purchase" },
+              //     { value: "SEARCH", label: "Search" },
+              //     { value: "CONTACT", label: "Contact" },
+              //   ]
+              // }
+              options={Conversion_Event_options[objectiveValue] || []}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
@@ -3492,7 +3673,7 @@ const AdsetComponent = ({
                 //   { value: "IMPRESSIONS", label: "Impressions" },
                 //   { value: "VALUE", label: "Value" },
                 // ]
-                Billing_Event_options[adset?.optimization_goal] || []
+                Billing_Event_options[optimizationGoalValue] || []
               }
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
@@ -3883,7 +4064,7 @@ const AdsetComponent = ({
           Targeting
         </span>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-          <Form.Item
+          {/* <Form.Item
             name={["adsets", index, "countries"]}
             label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
             rules={[
@@ -3965,8 +4146,226 @@ const AdsetComponent = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
+          </Form.Item> */}
+          <Form.Item noStyle key={index}>
+            <Form.Item
+              name={["adsets", index, "countries"]}
+              label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+              required={true}
+              style={{ flex: "0 0 140px" }}
+              rules={[
+                {
+                  validator: (_, value) =>
+                    value && value.length > 0
+                      ? Promise.resolve()
+                      : Promise.reject(new Error("At least one country is required")),
+                },
+              ]}
+            >
+              {/*
+                    - index === 0 and geo === "Geos": onChange will propagate to all adsets
+                    - index > 0 and geo === "Geos": Select opens but only current items selectable (others disabled)
+                    - geo !== "Geos": every index is independent
+                  */}
+              <Select
+                mode="multiple"
+                allowClear
+                showSearch
+                placeholder={
+                  campaignCountries.length ? "Select from campaign countries" : "Select any country"
+                }
+                // disabled={(geo === "Geos" && index !== 0)}
+                options={newCampaignCountries}
+                getPopupContainer={(trigger) => trigger.parentNode}
+                dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              // change handler: only needs to actively update when first index and geo === "Geos"
+              // onChange={(val) => {
+              //   if (geo === "Geos" && index === 0) {
+              //     handleFirstCountriesChange(val);
+              //   } else {
+              //     // For independent mode, let Ant Form handle the change automatically.
+              //     // If you need side effects when geo !== "Geos", handle them here.
+              //   }
+              // }}
+              />
+            </Form.Item>
           </Form.Item>
+
+          {BeneficiaryAndPayer && (
+            <>
+              <Form.Item
+                label={
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                      overlayInnerStyle={{
+                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#000',
+                        border: '1px solid #ccc',
+                        borderRadius: 6,
+                        // fontWeight: 500,
+                      }}
+                    >
+                      <InfoCircleOutlined
+                        style={{
+                          color: theme === "dark" ? "#bbb" : "#888",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Tooltip>
+                    <Form.Item
+                      noStyle
+                      name={["adsets", index, "showPayer"]}
+                      valuePropName="checked"
+                    >
+                      <Switch size="small" />
+                    </Form.Item>
+                  </div>
+                }
+                name={["adsets", index, "Beneficiary"]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please fill the input!",
+                  },
+                ]}
+                style={{ flex: "1 1 150px" }}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, curr) =>
+                  prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
+                }
+              >
+                {({ getFieldValue }) =>
+                  getFieldValue(["adsets", index, "showPayer"]) ? (
+                    <Form.Item
+                      name={["adsets", index, "Payer"]}
+                      label={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ color: "#B4B4B4" }}>Payer</span>
+                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                            overlayInnerStyle={{
+                              backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                              color: theme === 'dark' ? '#fff' : '#000',
+                              border: '1px solid #ccc',
+                              borderRadius: 6,
+                              // fontWeight: 500,
+                            }}
+                          >
+                            <InfoCircleOutlined
+                              style={{
+                                color: theme === "dark" ? "#bbb" : "#888",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </Tooltip>
+                        </div>
+                      }
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please fill the input!",
+                        },
+                      ]}
+                      style={{ flex: "1 1 150px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+            </>
+          )}
+
           <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) =>
+              prev?.adsets?.[index]?.countries !== curr?.adsets?.[index]?.countries
+            }
+          >
+            {({ getFieldValue }) => {
+              const selectedCountries = getFieldValue(["adsets", index, "countries"]);
+              const isDisabled = Array.isArray(selectedCountries) && selectedCountries.length > 0;
+
+              return (
+                <>
+                  {/* 🔹 Min Age */}
+                  <Form.Item
+                    name={["adsets", index, "Min_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Min_Age || "18"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "18", label: "18", title: "" },
+                        { value: "25", label: "25", title: "", disabled: hasCountries },
+                        { value: "35", label: "35", title: "", disabled: hasCountries },
+                        { value: "40", label: "40", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Max Age */}
+                  <Form.Item
+                    name={["adsets", index, "Max_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Max_Age || "65"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "20", label: "20", title: "", disabled: hasCountries },
+                        { value: "30", label: "30", title: "", disabled: hasCountries },
+                        { value: "65", label: "65+", title: "" },
+                        { value: "80", label: "80", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Gender */}
+                  <Form.Item
+                    name={["adsets", index, "Gender"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Gender</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Gender || "0"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "0", label: "All", title: "" },
+                        { value: "1", label: "Male", title: "", disabled: hasCountries },
+                        { value: "2", label: "Female", title: "", disabled: hasCountries },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+                </>
+              );
+            }}
+          </Form.Item>
+
+          {/* <Form.Item
             name={["adsets", index, "Min_Age"]}
             label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
             rules={[
@@ -4039,7 +4438,7 @@ const AdsetComponent = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             name={["adsets", index, "Language"]}
             label={<span style={{ color: "#B4B4B4" }}>Language</span>}
@@ -6042,6 +6441,8 @@ const EditMultipleAdsetCampaignDrawer = ({
 
   console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
   console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
+
+  const objectiveValue = Form.useWatch("Objectives", form);
   // const handleConfirm = async() => {
   //   const newErrors = {
   //     input1: popupInputs.input1.trim() ? '' : 'First input is required',
@@ -6194,6 +6595,26 @@ const EditMultipleAdsetCampaignDrawer = ({
       console.error("Error fetching campaign list:", error);
     }
   };
+
+  useEffect(() => {
+    // Run only when objectiveValue changes
+    if (objectiveValue) {
+      const adsets = form.getFieldValue("adsets") || [];
+
+      const updatedAdsets = adsets.map((adset) => ({
+        ...adset,
+        optimization_goal: "OFFSITE_CONVERSIONS",
+        custom_event_type:
+          objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
+        action_source: "website",
+        billing_event: "IMPRESSIONS",
+      }));
+
+      form.setFieldsValue({
+        adsets: updatedAdsets,
+      });
+    }
+  }, [objectiveValue, form]);
 
   useEffect(() => {
     fetchData(selectedRow);
@@ -10344,11 +10765,11 @@ const EditMultipleAdsetCampaignDrawer = ({
                         title: "",
                       },
                       { value: "EMPLOYMENT", label: "Employment", title: "" },
-                      {
-                        value: "ISSUES_ELECTIONS_POLITICS",
-                        label: "Politics",
-                        title: "",
-                      },
+                      // {
+                      //   value: "ISSUES_ELECTIONS_POLITICS",
+                      //   label: "Politics",
+                      //   title: "",
+                      // },
                       { value: "NONE", label: "None", title: "" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
