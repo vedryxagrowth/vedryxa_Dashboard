@@ -800,7 +800,13 @@ const AccountForm = ({
         onCancel={handleCancelForURLBuilder}
         footer={null}
         width="80%"
-        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        styles={{
+          body: {
+            height: "50vh",
+            overflowY: "auto",
+          },
+        }}
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
         {getUrlBuilder}
@@ -2715,7 +2721,7 @@ const AdsetComponent = ({
             validateTrigger={["onChange", "onBlur"]}
             dependencies={["Account_Number"]}                     // top-level dependency
             rules={[minSelectionValidatorPerAccount("pixel")]}    // <-- new validator
-            style={{ flex: 3, marginLeft: "1%" }}
+            style={{ flex: 3 }}
           >
             <Select
               mode="multiple"
@@ -2915,7 +2921,7 @@ const AdsetComponent = ({
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
             required={!CampaignBudgetActive}
-            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
             initialValue={0}
             // validateTrigger={["onBlur"]}
             // re-run validation whenever campaign-level Daily_amount changes
@@ -5805,7 +5811,13 @@ const AdsetComponent = ({
           // ]}
           footer={null}
           width="80%" // Set width of the modal
-          bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          styles={{
+            body: {
+              height: "50vh",
+              overflowY: "auto",
+            },
+          }}
           className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
             }`}
         >
@@ -10247,12 +10259,21 @@ const CreateCampaignDrawer = ({
       footer={null}
       centered
       width="85%"
-      bodyStyle={{
-        height: '80vh',
-        overflowY: 'auto',
-        padding: 10,
-        backgroundColor: theme === 'dark' ? '#333' : '#fff',
-        color: theme === 'dark' ? '#fff' : '#000',
+      // bodyStyle={{
+      //   height: '80vh',
+      //   overflowY: 'auto',
+      //   padding: 10,
+      //   backgroundColor: theme === 'dark' ? '#333' : '#fff',
+      //   color: theme === 'dark' ? '#fff' : '#000',
+      // }}
+      styles={{
+        body: {
+          height: '80vh',
+          overflowY: 'auto',
+          padding: 10,
+          backgroundColor: theme === 'dark' ? '#333' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
+        },
       }}
       style={{ borderRadius: '12px' }}
     >
@@ -10382,6 +10403,7 @@ const CreateCampaignDrawer = ({
                 { label: "Daily", value: "daily" },
                 { label: "Lifetime", value: "lifetime" },
               ]}
+              style={{ width: 100 }}
             // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
             // getPopupContainer={(triggerNode) => triggerNode.parentElement}
             />
@@ -11409,7 +11431,7 @@ const CreateCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
 
                     required={!watchedHasAdsetBudget}
                     rules={[
@@ -11418,7 +11440,7 @@ const CreateCampaignDrawer = ({
                         message: "Please enter a valid daily budget for the Campaign",
                       },
                     ]}
-                    style={{ marginLeft: "1%", marginBottom: 24 }}
+                    style={{ marginLeft: "1%" }}
                   >
                     <InputNumber
                       min={0}
@@ -11426,7 +11448,7 @@ const CreateCampaignDrawer = ({
                       placeholder="$"
                       readOnly={watchedHasAdsetBudget} // only depends on watchedAdsets
                       style={{
-                        flex: 0.2,
+                        // flex: 0.2,
                         color: theme === "dark" ? "#fff" : "#000",
                       }}
                       className={
@@ -11446,7 +11468,7 @@ const CreateCampaignDrawer = ({
                       message: "Please select an option!",
                     },
                   ]}
-                  style={{ flex: 0.1, marginLeft: "1%" }}
+                  style={{ flex: 0.1 }}
                 // style={{ width: 160, marginLeft: "1%" }}
                 >
                   <Select

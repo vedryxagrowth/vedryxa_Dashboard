@@ -67,41 +67,41 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     console.log(dupdata, "duplicatedata")
     console.log(selectedFile, "selectedFileselectedFile")
     function getNextAddName(data) {
-      let maxNumber = -Infinity;
-      let prefix = "";
-    
-      data.forEach(obj => {
-        const parts = obj.AddName.split("_");
-        const lastIndex = parseInt(parts[parts.length - 1], 10);
-    
-        if (!isNaN(lastIndex) && lastIndex > maxNumber) {
-          maxNumber = lastIndex;
-          prefix = parts.slice(0, -1).join("_"); // Get prefix (all parts except the last)
-        }
-      });
-    
-      return `${prefix}_${maxNumber + 1}`; // Return prefix with incremented max number
+        let maxNumber = -Infinity;
+        let prefix = "";
+
+        data.forEach(obj => {
+            const parts = obj.AddName.split("_");
+            const lastIndex = parseInt(parts[parts.length - 1], 10);
+
+            if (!isNaN(lastIndex) && lastIndex > maxNumber) {
+                maxNumber = lastIndex;
+                prefix = parts.slice(0, -1).join("_"); // Get prefix (all parts except the last)
+            }
+        });
+
+        return `${prefix}_${maxNumber + 1}`; // Return prefix with incremented max number
     }
     const [addName, setAddName] = useState(getNextAddName(adsData));
 
-    useEffect(()=>{
+    useEffect(() => {
         if (visible) {
-          form.resetFields();          // Reset form fields to their initialValues
-          setWebsiteURL(dupdata.Website_URL); 
-          setPrimaryText(dupdata.message);          // Clear primary text field
-          setCaption(dupdata.Caption);              // Clear caption field
-          setHeadline(dupdata.headline);             // Clear headline field
-          setDescription(dupdata.Description);          // Clear description field
-          setSelectedFile(null)
-          setAddName(getNextAddName(adsData))
-          form.setFieldsValue({ AddName: getNextAddName(adsData) });
-      }
-    },[visible])
+            form.resetFields();          // Reset form fields to their initialValues
+            setWebsiteURL(dupdata.Website_URL);
+            setPrimaryText(dupdata.message);          // Clear primary text field
+            setCaption(dupdata.Caption);              // Clear caption field
+            setHeadline(dupdata.headline);             // Clear headline field
+            setDescription(dupdata.Description);          // Clear description field
+            setSelectedFile(null)
+            setAddName(getNextAddName(adsData))
+            form.setFieldsValue({ AddName: getNextAddName(adsData) });
+        }
+    }, [visible])
 
     useEffect(() => {
         form.setFieldsValue({ Website_URL: websiteURL, Caption: caption });
-    
-      }, [websiteURL, form]);
+
+    }, [websiteURL, form]);
 
     const handleSubmit = () => {
         form
@@ -171,7 +171,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     //         onError("error", error);
     //     }
     // };
-    
+
     const handleEditClick = (file) => {
         setCurrentFile(file); // Set the file to be edited
         setIsImgEditorShown(true); // Open the image editor
@@ -179,14 +179,14 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
 
     const handleSaveEditedImage = (fileId, editedImageObject) => {
         if (!editedImageObject) {
-          console.error("Edited image data is null or undefined");
-          return;
+            console.error("Edited image data is null or undefined");
+            return;
         }
-      
+
         // Set the new edited image URL
         const editedImageURL = URL.createObjectURL(editedImageObject);
         setEditedImageUrl(editedImageURL);
-      
+
         // Close FabricCanvas immediately, allowing its "Save As" modal to show on top
         setIsImgEditorShown(false);
     };
@@ -463,28 +463,28 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     //     }
     // };
 
-    const imageHashCaller = async()=>{
+    const imageHashCaller = async () => {
         try {
-          const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${data.Account_Number}`,
-              {
-                  headers: {
-                      'Authorization': token
-                  }
-              }
-          );
-          console.log("account data", ...response?.data);
-          setimagehash(...response?.data)
+            const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${data.Account_Number}`,
+                {
+                    headers: {
+                        'Authorization': token
+                    }
+                }
+            );
+            console.log("account data", ...response?.data);
+            setimagehash(...response?.data)
         } catch (error) {
             console.error("Error fetching campaign data:", error);
             // Handle error
         }
-      }
-    
-      useEffect(()=>{
-        if(visible){
-          imageHashCaller();
+    }
+
+    useEffect(() => {
+        if (visible) {
+            imageHashCaller();
         }
-      },[visible])
+    }, [visible])
 
     const postData = async (values) => {
         try {
@@ -539,19 +539,19 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
         setWebsiteURL(text);
-        if(network === "FB_Mnet" || network === "FB_DomainActive"){
+        if (network === "FB_Mnet" || network === "FB_DomainActive") {
             setCaption(text.split('//')[1].split("/")[0]);
 
-        }else{
+        } else {
             setCaption(text.split('/')[0]);
 
         }
         form.setFieldsValue(initialValue);
         // form.resetFields()
         // console.log(text, "text");
-      }
-    
-      const getUrlBuilder = (network) => {
+    }
+
+    const getUrlBuilder = (network) => {
         switch (network) {
             case 'FB_Mnet':
                 return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
@@ -562,19 +562,19 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
             case 'FB_DomainActive':
                 return <DActiveUrlBuilder onReturnMessage={onReturnUrl} />
         }
-      }
-    
-    
-    
-      // const [imageHashes, setImageHashes] = useState([]);
-    
-      const onClickEdit = () => {
+    }
+
+
+
+    // const [imageHashes, setImageHashes] = useState([]);
+
+    const onClickEdit = () => {
         setIsModalVisibleForURLBuilder(true);
-      };
-    
-      const handleCancelForURLBuilder = () => {
+    };
+
+    const handleCancelForURLBuilder = () => {
         setIsModalVisibleForURLBuilder(false);
-      };
+    };
 
 
     const handleModalCancel = () => {
@@ -625,7 +625,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         maxCount={1}
                                         accept="image/*, video/*"
                                     >
-                                        <Button className="dark-icon-button" icon={<UploadOutlined/>}  style={{color: theme === "dark" ? "white" : "#000"}}>Select file</Button>
+                                        <Button className="dark-icon-button" icon={<UploadOutlined />} style={{ color: theme === "dark" ? "white" : "#000" }}>Select file</Button>
                                     </Upload>
                                 </Form.Item>
                                 <Form.Item
@@ -640,7 +640,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     ]}
                                     style={{ flex: 3, marginLeft: "1%" }}
                                 >
-                                    <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                    <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                             </div>
                             <Form.Item
@@ -670,8 +670,8 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     },
                                 ]}
                                 required
-                                // tooltip="This is a required field"
-                                >
+                            // tooltip="This is a required field"
+                            >
                                 <TextArea
                                     placeholder="Primary text"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
@@ -691,8 +691,8 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     },
                                 ]}
                                 required
-                                // tooltip="This is a required field"
-                                >
+                            // tooltip="This is a required field"
+                            >
                                 <TextArea
                                     placeholder="Headline"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
@@ -711,8 +711,8 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     },
                                 ]}
                                 required
-                                // tooltip="This is a required field"
-                                >
+                            // tooltip="This is a required field"
+                            >
                                 <TextArea
                                     placeholder="Description"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
@@ -722,33 +722,33 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                             </Form.Item>
                             <Form.Item
                                 label={
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                        <span style={{ color: "#B4B4B4" }}>Website_URL</span>
-                                        {/* <Tooltip title="This is a required field">
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
+                                            <span style={{ color: "#B4B4B4" }}>Website_URL</span>
+                                            {/* <Tooltip title="This is a required field">
                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                                         </Tooltip> */}
+                                        </div>
+                                        <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
                                     </div>
-                                    <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
-                                </div>
                                 }
                                 labelCol={{ style: { width: '100%' } }}  // Makes the label full width
                                 wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
                                 name="Website_URL"
                                 rules={[
-                                {
-                                    required: true,
-                                    message: "Please select Website_URL!",
-                                },
+                                    {
+                                        required: true,
+                                        message: "Please select Website_URL!",
+                                    },
                                 ]}
                                 required
                             >
                                 <TextArea
-                                placeholder="Website_URL"
-                                autoSize={{ minRows: 5, maxRows: 15 }}
-                                onChange={(e) => setWebsiteURL(e.target.value)}
-                                value={websiteURL}
-                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    placeholder="Website_URL"
+                                    autoSize={{ minRows: 5, maxRows: 15 }}
+                                    onChange={(e) => setWebsiteURL(e.target.value)}
+                                    value={websiteURL}
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                 />
                             </Form.Item>
                             <Form.Item
@@ -761,8 +761,8 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     },
                                 ]}
                                 required
-                                // tooltip="This is a required field"
-                                >
+                            // tooltip="This is a required field"
+                            >
                                 <TextArea
                                     placeholder="Display Link"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
@@ -908,17 +908,17 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 )}
                                             </div>
 
-                                            <div className="title" style={{color : theme === "dark" && "white"}}>
+                                            <div className="title" style={{ color: theme === "dark" && "white" }}>
                                                 <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                     {addName}
-                                                </div>           
-                                                    {imagehash?.pageName ? (
-                                                        <>
+                                                </div>
+                                                {imagehash?.pageName ? (
+                                                    <>
                                                         {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                        </>
-                                                        ) : (
-                                                        <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                    )}                                               <div className="sub">
+                                                    </>
+                                                ) : (
+                                                    <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                )}                                               <div className="sub">
                                                     {/* Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
                                                 </div>
                                             </div>
@@ -929,7 +929,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 <MoreOutlined style={{ fontSize: "20px" }} />
                                             </div>
                                         </div>
-                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color : theme === "dark" && "white" }}>
+                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" && "white" }}>
                                             {primaryText}
                                         </div>
                                         <div className="ad-image" style={{ width: '100%', height: '300px' }}>
@@ -953,27 +953,27 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         </div>
 
                                         <div className="ad-cta">
-                                            <div className="details" style={{color : theme === "dark" && "white"}}>
+                                            <div className="details" style={{ color: theme === "dark" && "white" }}>
                                                 <div className="link">{caption}</div>
                                                 <div className="title">{headline}</div>
                                                 <div className="desc">{description}</div>
                                             </div>
                                             <div className="ad-button">
-                                                <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
+                                                <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>Learn More</button>
                                             </div>
                                         </div>
                                         <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
                                             {websiteURL}
                                         </a>                                                <div className="icons">
-                                            <div className="like" style={{color : theme === "dark" && "white"}}>
+                                            <div className="like" style={{ color: theme === "dark" && "white" }}>
                                                 <LikeOutlined style={{ fontSize: "20px" }} />
                                                 Like
                                             </div>
-                                            <div className="comment" style={{color : theme === "dark" && "white"}}>
+                                            <div className="comment" style={{ color: theme === "dark" && "white" }}>
                                                 <CommentOutlined style={{ fontSize: "20px" }} />
                                                 Comment
                                             </div>
-                                            <div className="share" style={{color : theme === "dark" && "white"}}>
+                                            <div className="share" style={{ color: theme === "dark" && "white" }}>
                                                 <ShareAltOutlined style={{ fontSize: "20px" }} />
                                                 Share
                                             </div>
@@ -985,7 +985,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 <div className="container-ad-preview">
                                     <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4d4c49" }}>
                                         <div className="ad-heading">
-                                            <div className="filename" style={{ width: '40px', height: '40px', backgroundColor: theme === "dark" ? "#7a7973" : "#333" , borderRadius:'50%', marginRight:'10px' }}>
+                                            <div className="filename" style={{ width: '40px', height: '40px', backgroundColor: theme === "dark" ? "#7a7973" : "#333", borderRadius: '50%', marginRight: '10px' }}>
                                                 {initialValue.fileType === 'image' ? (
                                                     <img
                                                         src={initialValue.filename}
@@ -1007,14 +1007,14 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 )}
                                             </div>
 
-                                            <div className="title" style={{color : theme === "dark" && "white"}}>
+                                            <div className="title" style={{ color: theme === "dark" && "white" }}>
                                                 <div className="main" >{"Facebook Page"}</div>
                                                 <div className="sub">
                                                     {imagehash?.pageName ? (
                                                         <>
-                                                        {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                            {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
                                                         </>
-                                                        ) : (
+                                                    ) : (
                                                         <GlobalOutlined style={{ opacity: "0.6" }} />
                                                     )}
                                                     {/* Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
@@ -1027,7 +1027,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 <MoreOutlined style={{ fontSize: "20px" }} />
                                             </div>
                                         </div>
-                                        <div className="ad-desc" style={{color : theme === "dark" && "white"}}>{"adMessage"}</div>
+                                        <div className="ad-desc" style={{ color: theme === "dark" && "white" }}>{"adMessage"}</div>
                                         <div className="ad-image" style={{ width: '350px', height: '200px' }}>
                                             {initialValue.fileType === 'image' ? (
                                                 <img
@@ -1047,25 +1047,25 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         </div>
 
                                         <div className="ad-cta">
-                                            <div className="details" style={{color : theme === "dark" && "white"}}>
+                                            <div className="details" style={{ color: theme === "dark" && "white" }}>
                                                 <div className="link">{"adCaption"}</div>
                                                 <div className="title">{"adName"}</div>
                                                 <div className="desc">{"adDesc"}</div>
                                             </div>
                                             <div className="ad-button">
-                                                <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
+                                                <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>Learn More</button>
                                             </div>
                                         </div>
                                         <div className="icons">
-                                            <div className="like"  style={{color : theme === "dark" && "white"}}>
+                                            <div className="like" style={{ color: theme === "dark" && "white" }}>
                                                 <LikeOutlined style={{ fontSize: "20px" }} />
                                                 Like
                                             </div>
-                                            <div className="comment" style={{color : theme === "dark" && "white"}}>
+                                            <div className="comment" style={{ color: theme === "dark" && "white" }}>
                                                 <CommentOutlined style={{ fontSize: "20px" }} />
                                                 Comment
                                             </div>
-                                            <div className="share" style={{color : theme === "dark" && "white"}}>
+                                            <div className="share" style={{ color: theme === "dark" && "white" }}>
                                                 <ShareAltOutlined style={{ fontSize: "20px" }} />
                                                 Share
                                             </div>
@@ -1078,10 +1078,10 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                     </div>
                     <Form.Item>
                         <Space>
-                            <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">
+                            <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} htmlType="submit">
                                 Submit
                             </Button>
-                            <Button className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}} onClick={handleClear}>Clear</Button>
+                            <Button className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }} onClick={handleClear}>Clear</Button>
                         </Space>
                     </Form.Item>
                 </Form>
@@ -1101,10 +1101,16 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                 title="URL Builder"
                 visible={isModalVisibleForURLBuilder}
                 onCancel={handleCancelForURLBuilder}
-                                                
+
                 footer={null}
                 width="80%" // Set width of the modal
-                bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                styles={{
+                    body: {
+                        height: "50vh",
+                        overflowY: "auto",
+                    },
+                }}
                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             >
                 {getUrlBuilder(network)}

@@ -683,7 +683,7 @@ const App = () => {
   const handleApply = () => {
     if (selectedValue && startDate && endDate) {
 
-      fetchData(selectedValue, startDate, endDate);
+      // fetchData(selectedValue, startDate, endDate);
       fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
       setAccountChanged(false);
 
@@ -693,18 +693,18 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    if (!selectedValue || !startDate || !endDate) return;
-    fetchData(selectedValue, startDate, endDate);
-  }, [refrst]);
+  // useEffect(() => {
+  //   if (!selectedValue || !startDate || !endDate) return;
+  //   fetchData(selectedValue, startDate, endDate);
+  // }, [refrst]);
 
-  useEffect(() => {
-    if (!selectedValue || !startDate || !endDate) return;
-    if (!allowFetchOnSelectRef.current) return;
-    fetchData(selectedValue, startDate, endDate);
+  // useEffect(() => {
+  //   if (!selectedValue || !startDate || !endDate) return;
+  //   if (!allowFetchOnSelectRef.current) return;
+  //   fetchData(selectedValue, startDate, endDate);
 
-    allowFetchOnSelectRef.current = false;
-  }, [selectedValue]);
+  //   allowFetchOnSelectRef.current = false;
+  // }, [selectedValue]);
 
   useEffect(() => {
     if (!selectedValue || !startDate || !endDate) return;
@@ -754,7 +754,7 @@ const App = () => {
   }, [draftsLoading]);
   const handleRefresh = () => {
     if (selectedValue) {
-      fetchData(selectedValue);
+      // fetchData(selectedValue);
       fetchMultipleAdsetCampaigns(selectedValue);
     } // This will re-fetch the data or update the component
   };
@@ -786,7 +786,7 @@ const App = () => {
     console.log("Search Input:", searchValue);
     if (!searchValue) {
       setSendInputToApi("");
-      fetchData(selectedValue, startDate, endDate, searchValue);
+      // fetchData(selectedValue, startDate, endDate, searchValue);
       fetchMultipleAdsetCampaigns(
         selectedValue,
         startDate,
@@ -804,7 +804,7 @@ const App = () => {
   };
   const handleSearchSubmit = () => {
     setSendInputToApi(searchInput);
-    fetchData(selectedValue, startDate, endDate, searchInput); // Fetch data with search input
+    // fetchData(selectedValue, startDate, endDate, searchInput); // Fetch data with search input
     fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate, searchInput); // Fetch multiple adset campaigns with search input
     console.log("Search Input:", searchInput);
     console.log("Selected Input:", searchInput.length);
@@ -3912,7 +3912,7 @@ const App = () => {
         </Row>
       </Card>
 
-      <div>{renderCarouselNav()}</div>
+      {/* <div>{renderCarouselNav()}</div> */}
 
       {/* {loading ? (
         <Skeleton

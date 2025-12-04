@@ -54,6 +54,11 @@ import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
 import { FaTrashCan } from "react-icons/fa6";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 
@@ -1940,7 +1945,8 @@ const AddComponent = ({
                   message: "Please select an option!",
                 },
               ]}
-              style={{ flex: 3, marginLeft: "1%" }}
+              // style={{ flex: 1, marginLeft: "1%" }}
+              style={{ flex: "140px" }}
             >
               <Input
                 style={{ width: "23%" }}
@@ -2146,7 +2152,13 @@ const AddComponent = ({
             // ]}
             footer={null}
             width="80%" // Set width of the modal
-            bodyStyle={{ height: "50vh", overflowY: "auto" }}
+            // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+            styles={{
+              body: {
+                height: "50vh",
+                overflowY: "auto",
+              },
+            }}
             className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
               }`}
           >
@@ -2600,7 +2612,8 @@ const AdsetComponent = ({
   view,
   setIsAnyAdsetBudgetSet,
   pageIDList,
-  pixelIDLIst
+  pixelIDLIst,
+  budgetType
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2636,6 +2649,69 @@ const AdsetComponent = ({
 
   console.log(addlevelData, "addlevelData in adset component");
   console.log(newAddLevelData, "newAddLevelData in adset component");
+
+  const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+
+  const Billing_Event_options = {
+    OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LANDING_PAGE_VIEWS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LINK_CLICKS: [{ value: "IMPRESSIONS", label: "Impressions" }, { value: "LINK_CLICKS", label: "Link Clicks" }],
+    DAILY_UNIQUE_REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
+  }
+
+  const Optimization_goal_values = {
+    OUTCOME_LEADS: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ],
+    OUTCOME_SALES: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "VALUE", label: "Maximize value of conversions" },
+      { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ]
+  }
+
+  const Conversion_Event_options = {
+    OUTCOME_LEADS: [
+      { value: "LEAD", label: "Lead" },
+      { value: "CONTACT", label: "Contact" },
+      { value: "SCHEDULE", label: "Schedule  " },
+    ],
+    OUTCOME_SALES: [
+      { value: "PURCHASE", label: "Purchase" },
+      { value: "INITIATED_CHECKOUT", label: "Initiate Checkout" },
+      { value: "ADD_TO_CART ", label: "Add to Cart" },
+      { value: "CONTENT_VIEW", label: "View Content" },
+      { value: "ADD_TO_WISHLIST", label: " Add to Wishlist" },
+    ]
+  }
+
+  const Action_Source_Values = {
+    OUTCOME_LEADS: [
+      { value: "website", label: "Website" },
+    ],
+    OUTCOME_SALES: [
+      { value: "website", label: "Website" },
+    ]
+  }
+
+  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+
+  const adsetsValues = form.getFieldValue("adsets") || [];
+  const currentValue = adsetsValues[index]?.optimization_goal ?? "";
+
+  const optionsForIndex =
+    index === 0
+      ? optionsForOptimz_goal
+      : optionsForOptimz_goal.map((o) => ({ ...o, disabled: o.value !== currentValue }));
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -3054,17 +3130,49 @@ const AdsetComponent = ({
       setDescription(adset?.addlevel[0]?.Description || "");
       setWebsiteURL(adset?.addlevel[0]?.Website_URL || "");
     }
-    if(adset?.pixel_id){
+    if (adset?.pixel_id) {
       form.setFieldsValue({
-        pixel_id: adset.pixel_id,
-      })
+        adsets: {
+          [index]: {
+            pixel_id: adset.pixel_id
+          },
+        }
+      });
+      // form.setFieldsValue({
+      //   pixel_id: adset.pixel_id
+      // })
     }
-    if(adset?.page_id){
+    if (adset?.page_id) {
       form.setFieldsValue({
-        page_id: adset.page_id,
+        adsets: {
+          [index]: {
+            page_id: adset.page_id
+          },
+        }
+      });
+      // form.setFieldsValue({
+      //   page_id: adset.page_id
+      // });
+    }
+    if (adset?.start_time) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            DatePicker: dayjs(adset.start_time).tz("America/New_York"),
+          },
+        }
       });
     }
-  }, [adset]);
+    if (adset?.end_time) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            DatePickerEnd: dayjs(adset.end_time).tz("America/New_York"),
+          },
+        }
+      });
+    }
+  }, [adset, index]);
 
   useEffect(() => {
     // Re-run once selectedPositions or adset.id updates
@@ -3103,6 +3211,20 @@ const AdsetComponent = ({
       ]);
     }
   }, [adset?.DailyAdd_amount]);
+
+  const handleFirstOptimizationChange = (value) => {
+    // Get current adsets from form
+    const adsets = form.getFieldValue("adsets") || [];
+
+    // Map through adsets and set optimization_goal to the new value
+    const newAdsets = adsets.map((a) => ({
+      ...a,
+      optimization_goal: value,
+    }));
+
+    // Update the form
+    form.setFieldsValue({ adsets: newAdsets });
+  };
 
   //   useEffect(() => {
   //     if (!selectedPublishers?.[adset.id]) return;
@@ -3231,7 +3353,7 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "1 1 200px" }}
+            style={{ flex: "1 1 250px" }}
           >
             <Input
               className={
@@ -3250,6 +3372,36 @@ const AdsetComponent = ({
             />
           </Form.Item>
           <Form.Item
+            name={["adsets", index, "action_source"]}
+            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "1 1 150px" }}
+            initialValue={adset.action_source || "website"}
+          >
+            <Select
+              disabled={adset.Adsetid || view ? true : false}
+              options={
+                Action_Source_Values[objectiveValue] || []
+                //   [
+                //   { value: "website", label: "Website" },
+                //   { value: "email", label: "Email" },
+                //   { value: "app", label: "App" },
+                //   { value: "phone_call", label: "Phone Call" },
+                // ]
+              }
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.action_source || "website"}
+            // onChange={(value) => handleFieldChange(index, "action_source", value)}
+            />
+          </Form.Item>
+          <Form.Item
             name={["adsets", index, "optimization_goal"]}
             label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
             rules={[
@@ -3258,10 +3410,10 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "120px" }}
+            style={{ flex: "1 1 140px" }}
             initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
           >
-            <Select
+            {/* <Select
               disabled={adset.Adsetid || view ? true : false}
               options={[
                 { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
@@ -3274,83 +3426,25 @@ const AdsetComponent = ({
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "billing_event"]}
-            label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.billing_event || "IMPRESSIONS"}
-          >
-            <Select
-              disabled={adset.Adsetid || view ? true : false}
-              options={[
-                { value: "IMPRESSIONS", label: "Impressions" },
-                { value: "VALUE", label: "Value" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.billing_event || "IMPRESSIONS"}
-            // onChange={(value) => handleFieldChange(index, "billing_event", value)}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "DatePicker"]}
-            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please input!",
-              },
-            ]}
-            style={{ flex: "150px" }}
-            initialValue={currentDate ? dayjs(currentDate) : dayjs()}
-          >
-            <DatePicker
-              disabled={adset.Adsetid || view ? true : false}
-              showTime
-              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
-              className="green-border-picker"
-              //                                 onChange={(value, dateString) => {
-              //     console.log("Local Time:", dateString)
-              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-              //   }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "action_source"]}
-            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.action_source || "website"}
-          >
-            <Select
-              disabled={adset.Adsetid || view ? true : false}
-              options={[
-                { value: "website", label: "Website" },
-                { value: "email", label: "Email" },
-                { value: "app", label: "App" },
-                { value: "phone_call", label: "Phone Call" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.action_source || "website"}
-            // onChange={(value) => handleFieldChange(index, "action_source", value)}
-            />
+            /> */}
+            {index === 0 ? (
+              <Select
+                options={optionsForIndex}
+                value={currentValue}
+                onChange={(val) => handleFirstOptimizationChange(val)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            ) : (
+              // Select stays enabled but only the current option is enabled to pick
+              <Select
+                options={optionsForIndex}
+                value={currentValue}
+                // no onChange needed (user can't change to another value because other options are disabled)
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            )}
           </Form.Item>
           <Form.Item
             name={["adsets", index, "custom_event_type"]}
@@ -3361,7 +3455,7 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "120px" }}
+            style={{ flex: "1 1 140px" }}
             initialValue={adset.custom_event_type || "LEAD"}
           >
             <Select
@@ -3379,6 +3473,34 @@ const AdsetComponent = ({
             // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
             />
           </Form.Item>
+          <Form.Item
+            name={["adsets", index, "billing_event"]}
+            label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "1 1 140px" }}
+            initialValue={adset.billing_event || "IMPRESSIONS"}
+          >
+            <Select
+              disabled={adset.Adsetid || view ? true : false}
+              options={
+                //   [
+                //   { value: "IMPRESSIONS", label: "Impressions" },
+                //   { value: "VALUE", label: "Value" },
+                // ]
+                Billing_Event_options[adset?.optimization_goal] || []
+              }
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.billing_event || "IMPRESSIONS"}
+            // onChange={(value) => handleFieldChange(index, "billing_event", value)}
+            />
+          </Form.Item>
           {/* <Form.Item
                         name="pixel_id"
                         initialValue={imagehash?.pixelID}
@@ -3394,13 +3516,14 @@ const AdsetComponent = ({
                         <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                     </Form.Item> */}
           <Form.Item
-            name="pixel_id"
+            // name="pixel_id"
+            name={["adsets", index, "pixel_id"]}
             // initialValue={
             //   typeof imagehash?.pixelID === "object"
             //     ? imagehash.pixelID.Universal || Object.values(imagehash.pixelID)[0]
             //     : imagehash?.pixelID
             // }
-            initialValue={adset.pixel_id}
+            initialValue={adset?.pixel_id}
             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
             rules={[
               {
@@ -3408,11 +3531,12 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "140px" }}
+            style={{ flex: "120px" }}
           >
             <Select
               // mode="multiple"
               options={pixelIDLIst}
+              disabled={adset?.Adsetid}
               placeholder="Select pixel"
               // optionFilterProp="label"
               // allowClear
@@ -3573,10 +3697,58 @@ const AdsetComponent = ({
                             />
                         </Tooltip>
                     </Form.Item> */}
-
+          <Form.Item
+            name={["adsets", index, "DatePicker"]}
+            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please input!",
+              },
+            ]}
+            style={{ flex: "150px" }}
+          // initialValue={adset?.start_time ? dayjs(adset?.start_time) : dayjs()}
+          >
+            <DatePicker
+              disabled={adset.Adsetid || view ? true : false}
+              showTime
+              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+              className="green-border-picker"
+              //                                 onChange={(value, dateString) => {
+              //     console.log("Local Time:", dateString)
+              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+              //   }}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          {budgetType !== "daily" &&
+            <Form.Item
+              name={["adsets", index, "DatePickerEnd"]}
+              label={<span style={{ color: "#B4B4B4" }}>End Time</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input!",
+                },
+              ]}
+              style={{ flex: "150px" }}
+            // initialValue={after30Days ? dayjs(after30Days) : dayjs()}
+            >
+              <DatePicker
+                showTime
+                dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+                className="green-border-picker"
+                //                                 onChange={(value, dateString) => {
+                //     console.log("Local Time:", dateString)
+                //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                //   }}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          }
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
-            label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
             rules={[
               {
                 required: !(
@@ -3589,6 +3761,13 @@ const AdsetComponent = ({
             ]}
           >
             <Tooltip
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
               title={
                 isCampaignBudgetActive
                   ? "You have enabled daily budget in the Campaign Level"
@@ -3645,7 +3824,6 @@ const AdsetComponent = ({
               />
             </Tooltip>
           </Form.Item>
-
           {showBidAmount && (
             <Form.Item
               name={["adsets", index, "bid_amount"]}
@@ -5079,7 +5257,7 @@ const AdsetComponent = ({
                           message: "Please select an option!",
                         },
                       ]}
-                      style={{ flex: 3, marginLeft: "1%" }}
+                      style={{ flex: "140px" }}
                     >
                       <Input
                         style={{ width: "23%" }}
@@ -5387,7 +5565,13 @@ const AdsetComponent = ({
                     // ]}
                     footer={null}
                     width="80%" // Set width of the modal
-                    bodyStyle={{ height: "50vh", overflowY: "auto" }}
+                    // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+                    styles={{
+                      body: {
+                        height: "50vh",
+                        overflowY: "auto",
+                      },
+                    }}
                     className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
                       }`}
                   >
@@ -5762,7 +5946,13 @@ const AdsetComponent = ({
           // ]}
           footer={null}
           width="80%" // Set width of the modal
-          bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          styles={{
+            body: {
+              height: "50vh",
+              overflowY: "auto",
+            },
+          }}
           className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
             }`}
         >
@@ -5848,6 +6038,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   console.log(selectedRow, "selectedRow in EditMultipleAdsetCampaignDrawer");
   const [pixelIDLIst, setPixelIDList] = useState([]);
   const [pageIDList, setPageIDList] = useState([]);
+  const [budgetType, setBudgetType] = useState("daily");
 
   console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
   console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
@@ -5969,6 +6160,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         );
         console.log("hello viewdata", ...response.data);
         setFullCampaignData(response?.data[0]);
+        setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "daily")
 
         setFormValuesFromDraft(response?.data[0]);
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
@@ -6857,10 +7049,10 @@ const EditMultipleAdsetCampaignDrawer = ({
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
     if (visible) {
-      form.setFieldsValue({
-        pixel_id: imagehash?.pixelID,
-        page_id: imagehash?.pageID,
-      });
+      // form.setFieldsValue({
+      //   pixel_id: imagehash?.pixelID,
+      //   page_id: imagehash?.pageID,
+      // });
 
       // Check if all required fields are complete
       const checkFormCompletion = () => {
@@ -9894,53 +10086,83 @@ const EditMultipleAdsetCampaignDrawer = ({
       footer={null}
       centered
       width="85%"
-      bodyStyle={{
-        height: "80vh",
-        overflowY: "auto",
-        padding: 10,
-        backgroundColor: theme === "dark" ? "#333" : "#fff",
-        color: theme === "dark" ? "#fff" : "#000",
+      // bodyStyle={{
+      //   height: "80vh",
+      //   overflowY: "auto",
+      //   padding: 10,
+      //   backgroundColor: theme === "dark" ? "#333" : "#fff",
+      //   color: theme === "dark" ? "#fff" : "#000",
+      // }}
+      styles={{
+        body: {
+          height: "80vh",
+          overflowY: "auto",
+          padding: 10,
+          backgroundColor: theme === "dark" ? "#333" : "#fff",
+          color: theme === "dark" ? "#fff" : "#000",
+        },
       }}
       style={{ borderRadius: "12px" }}
     >
-      {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div>
-            <Button
-              type="primary"
-              style={{
-                backgroundColor: "#91C25F",
-                color: "#000",
-                borderColor: "#91C25F",
-                borderWidth: 0,
-                marginBottom: "10px",
-                cursor: "pointer",
-                marginLeft: "10px",
-              }}
-              onClick={() => setShowApprovalModal(true)}
-            >
-              Approve
-            </Button>
-          </div>
-          <div>
-            <Alert
-              message={fullCampaignData.Approval}
-              // description="This Camapaign"
-              type="info"
-              // showIcon
-              // banner
-              className="blinking"
-              style={{
-                textAlign: "center",
-                marginRight: "10px",
-                backgroundColor: theme === "dark" && "#444",
-                color: theme === "dark" && "#fff",
-                marginBottom: "10px",
-              }}
-            />
-          </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <div>
+          <Select
+            value={budgetType}   // "daily" or "lifetime"
+            onChange={(value) => setBudgetType(value)}
+            disabled={fullCampaignData?.camapaignlevel?.campaignid ? true : false}
+            // style={{ height: "20px" }}
+            options={[
+              { label: "Daily", value: "daily" },
+              { label: "Lifetime", value: "lifetime" },
+            ]}
+            style={{ width: 100 }}
+          // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
+          // getPopupContainer={(triggerNode) => triggerNode.parentElement}
+          />
         </div>
-      )}
+        {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div>
+              <Button
+                type="primary"
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  borderColor: "#91C25F",
+                  borderWidth: 0,
+                  marginBottom: "10px",
+                  cursor: "pointer",
+                  marginLeft: "10px",
+                  height: "32px",
+                }}
+                onClick={() => setShowApprovalModal(true)}
+              >
+                Approve
+              </Button>
+            </div>
+            <div>
+              <Alert
+                message={fullCampaignData.Approval}
+                // description="This Camapaign"
+                type="info"
+                // showIcon
+                // banner
+                className="blinking"
+                style={{
+                  textAlign: "center",
+                  // marginRight: "10px",
+                  backgroundColor: theme === "dark" && "#444",
+                  color: theme === "dark" && "#fff",
+                  marginBottom: "10px",
+                  height: "32px",
+                  marginLeft: "10px",
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
 
       <Modal
         title="Confirm Approval"
@@ -10525,7 +10747,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   <Form.Item
                     name="Daily_amount"
                     label={
-                      <span style={{ color: "#B4B4B4" }}>Daily budget</span>
+                      <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
                     }
                     rules={[
                       {
@@ -10654,6 +10876,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   imagehash={imagehash}
                   pixelIDLIst={pixelIDLIst}
                   pageIDList={pageIDList}
+                  budgetType={budgetType}
                 />
               );
               // <ffff/>
