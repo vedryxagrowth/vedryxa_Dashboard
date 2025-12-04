@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { use, useEffect, useMemo } from "react";
 import {
   Drawer,
   Button,
@@ -546,6 +546,7 @@ function getPositionsByKeys(keys) {
 }
 
 const AddComponent = ({
+  view,
   imagehash,
   adset,
   network,
@@ -1887,36 +1888,38 @@ const AddComponent = ({
                                                                                   }}
                                                                                   style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
                                                                                   /> */}
-                              {!isViewAdset && (
-                                <DeleteOutlined
-                                  onClick={() => {
-                                    // 1. Remove from selectedFilesFromCreatives
-                                    setSelectedFilesFromCreatives([]);
+                              {/* {!isViewAdset  */}
+                              {!view
+                                && (
+                                  <DeleteOutlined
+                                    onClick={() => {
+                                      // 1. Remove from selectedFilesFromCreatives
+                                      setSelectedFilesFromCreatives([]);
 
-                                    // 2. Remove from selectedFiles
-                                    setSelectedFiles([]);
+                                      // 2. Remove from selectedFiles
+                                      setSelectedFiles([]);
 
-                                    // 3. Update the top-level form field `MediaContent`
-                                    const currentMedia =
-                                      form.getFieldValue("MediaContent") || [];
-                                    const updatedMedia = currentMedia.filter(
-                                      (f) => f.uid !== file.uid
-                                    );
+                                      // 3. Update the top-level form field `MediaContent`
+                                      const currentMedia =
+                                        form.getFieldValue("MediaContent") || [];
+                                      const updatedMedia = currentMedia.filter(
+                                        (f) => f.uid !== file.uid
+                                      );
 
-                                    form.setFieldsValue({
-                                      MediaContent: updatedMedia,
-                                    });
+                                      form.setFieldsValue({
+                                        MediaContent: updatedMedia,
+                                      });
 
-                                    // 4. Validate only the `MediaContent` field
-                                    form.validateFields(["MediaContent"]);
-                                  }}
-                                  style={{
-                                    color: "red",
-                                    marginLeft: 12,
-                                    cursor: "pointer",
-                                  }}
-                                />
-                              )}
+                                      // 4. Validate only the `MediaContent` field
+                                      form.validateFields(["MediaContent"]);
+                                    }}
+                                    style={{
+                                      color: "red",
+                                      marginLeft: 12,
+                                      cursor: "pointer",
+                                    }}
+                                  />
+                                )}
                             </div>
                           ))}
                         </div>
@@ -2596,6 +2599,8 @@ const AdsetComponent = ({
   setNewAddLevelData,
   view,
   setIsAnyAdsetBudgetSet,
+  pageIDList,
+  pixelIDLIst
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2612,6 +2617,10 @@ const AdsetComponent = ({
   const [editedImages, setEditedImages] = useState({});
   const [viewSingleAd, setViewSingleAd] = useState({});
 
+  console.log(pixelIDLIst, "pixelIDLIst in adset component");
+  console.log(pageIDList, "pageIDList in adset component");
+  console.log(adset.pixel_id, "adset.pixel_id in adset component");
+  console.log(adset.page_id, "adset.page_id in adset component");
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -3045,6 +3054,16 @@ const AdsetComponent = ({
       setDescription(adset?.addlevel[0]?.Description || "");
       setWebsiteURL(adset?.addlevel[0]?.Website_URL || "");
     }
+    if(adset?.pixel_id){
+      form.setFieldsValue({
+        pixel_id: adset.pixel_id,
+      })
+    }
+    if(adset?.page_id){
+      form.setFieldsValue({
+        page_id: adset.page_id,
+      });
+    }
   }, [adset]);
 
   useEffect(() => {
@@ -3376,11 +3395,12 @@ const AdsetComponent = ({
                     </Form.Item> */}
           <Form.Item
             name="pixel_id"
-            initialValue={
-              typeof imagehash?.pixelID === "object"
-                ? imagehash.pixelID.Universal
-                : imagehash?.pixelID
-            }
+            // initialValue={
+            //   typeof imagehash?.pixelID === "object"
+            //     ? imagehash.pixelID.Universal || Object.values(imagehash.pixelID)[0]
+            //     : imagehash?.pixelID
+            // }
+            initialValue={adset.pixel_id}
             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
             rules={[
               {
@@ -3390,7 +3410,19 @@ const AdsetComponent = ({
             ]}
             style={{ flex: "140px" }}
           >
-            {typeof imagehash?.pixelID === "object" ? (
+            <Select
+              // mode="multiple"
+              options={pixelIDLIst}
+              placeholder="Select pixel"
+              // optionFilterProp="label"
+              // allowClear
+              // maxTagCount={1}
+              // maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+              // className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              style={{ width: "100%", borderRadius: 8 }}
+            />
+            {/* {typeof imagehash?.pixelID === "object" ? (
               <Select
                 defaultValue={imagehash?.pixelID?.Universal}
                 className={
@@ -3410,7 +3442,7 @@ const AdsetComponent = ({
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
               />
-            )}
+            )} */}
           </Form.Item>
           {/*pk*/}
           {/* <Form.Item
@@ -4188,6 +4220,7 @@ const AdsetComponent = ({
           >
             {viewSingleAd && Object.keys(viewSingleAd).length > 0 && (
               <AddComponent
+                view={view}
                 adset={adset}
                 imagehash={imagehash}
                 accountis={accountis}
@@ -5813,7 +5846,11 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [newAddLevelData, setNewAddLevelData] = useState({});
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
   console.log(selectedRow, "selectedRow in EditMultipleAdsetCampaignDrawer");
+  const [pixelIDLIst, setPixelIDList] = useState([]);
+  const [pageIDList, setPageIDList] = useState([]);
 
+  console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
+  console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
   // const handleConfirm = async() => {
   //   const newErrors = {
   //     input1: popupInputs.input1.trim() ? '' : 'First input is required',
@@ -6819,35 +6856,62 @@ const EditMultipleAdsetCampaignDrawer = ({
 
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
-    form.setFieldsValue({
-      pixel_id: imagehash?.pixelID,
-      page_id: imagehash?.pageID,
-    });
+    if (visible) {
+      form.setFieldsValue({
+        pixel_id: imagehash?.pixelID,
+        page_id: imagehash?.pageID,
+      });
 
-    // Check if all required fields are complete
-    const checkFormCompletion = () => {
-      const allValues = form.getFieldsValue(true);
-      const isComplete = Object.keys(allValues).every(
-        (key) => allValues[key] !== undefined && allValues[key] !== ""
-      );
-      setIsFormComplete(isComplete);
-    };
-
-    // Trigger form completion check
-    checkFormCompletion();
-    if (imagehash) {
-      if (
-        imagehash.pixelID === null ||
-        imagehash.pixelID === undefined ||
-        imagehash.pixelID === ""
-      ) {
-        message.error(
-          "There is no PageID and PixelID for this account. Contact your manager",
-          10
+      // Check if all required fields are complete
+      const checkFormCompletion = () => {
+        const allValues = form.getFieldsValue(true);
+        const isComplete = Object.keys(allValues).every(
+          (key) => allValues[key] !== undefined && allValues[key] !== ""
         );
+        setIsFormComplete(isComplete);
+      };
+
+      // Trigger form completion check
+      checkFormCompletion();
+      if (imagehash) {
+        const pixelIDs = imagehash?.pixelID || [];
+        const pageIDs = imagehash?.pageID || [];
+        let uniquePixelIDs;
+        let uniquePageIDs;
+        if (pixelIDs && typeof pixelIDs === "object") {
+          const result = Object.entries(pixelIDs).map(([key, value]) => ({
+            value,
+            label: `${key} - ${value}`
+          }));
+          uniquePixelIDs = result
+        } else {
+          uniquePixelIDs = [{ value: pixelIDs, label: pixelIDs }]
+        }
+        if (pageIDs && typeof pageIDs === "object") {
+          const result = Object.entries(pageIDs).map(([key, value]) => ({
+            value,
+            label: `${key} - ${value}`
+          }));
+          uniquePageIDs = result
+        }
+        else {
+          uniquePageIDs = [{ value: pageIDs, label: pageIDs }]
+        }
+        setPixelIDList(uniquePixelIDs);
+        setPageIDList(uniquePageIDs);
+        if (
+          imagehash.pixelID === null ||
+          imagehash.pixelID === undefined ||
+          imagehash.pixelID === ""
+        ) {
+          message.error(
+            "There is no PageID and PixelID for this account. Contact your manager",
+            10
+          );
+        }
       }
     }
-  }, [imagehash, form]);
+  }, [visible, imagehash, form]);
 
   const Accountchange = (e) => {
     setAccountNumber(e.target.value);
@@ -10011,22 +10075,22 @@ const EditMultipleAdsetCampaignDrawer = ({
                     options={[
                       { value: "OUTCOME_LEADS", label: "Leads", title: "" },
                       { value: "OUTCOME_SALES", label: "Sales", title: "" },
-                      {
-                        value: "OUTCOME_ENGAGEMENT",
-                        label: "Engagement",
-                        title: "",
-                      },
-                      {
-                        value: "OUTCOME_AWARENESS",
-                        label: "Awareness",
-                        title: "",
-                      },
-                      { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
-                      {
-                        value: "OUTCOME_APP_PROMOTION",
-                        label: "App promotion",
-                        title: "",
-                      },
+                      // {
+                      //   value: "OUTCOME_ENGAGEMENT",
+                      //   label: "Engagement",
+                      //   title: "",
+                      // },
+                      // {
+                      //   value: "OUTCOME_AWARENESS",
+                      //   label: "Awareness",
+                      //   title: "",
+                      // },
+                      // { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
+                      // {
+                      //   value: "OUTCOME_APP_PROMOTION",
+                      //   label: "App promotion",
+                      //   title: "",
+                      // },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"
@@ -10588,6 +10652,8 @@ const EditMultipleAdsetCampaignDrawer = ({
                   setNewAddLevelData={setNewAddLevelData}
                   setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
                   imagehash={imagehash}
+                  pixelIDLIst={pixelIDLIst}
+                  pageIDList={pageIDList}
                 />
               );
               // <ffff/>

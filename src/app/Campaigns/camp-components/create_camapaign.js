@@ -569,6 +569,7 @@ const AccountForm = ({
   const [websiteURL, setWebsiteURL] = useState("");
   const [caption, setCaption] = useState("");
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
+  const [indexValueForAccount, setIndexValueForAccount] = useState("");
   console.log("defaultUrlData in account form", defaultUrlData);
 
 
@@ -610,7 +611,9 @@ const AccountForm = ({
 
   const onClickEdit = (index) => {
     setIsModalVisibleForURLBuilder(true);
-    setDefaultURLBuilder(form.getFieldValue(["adsets", index, account, "Website_URL"]) ? form.getFieldValue(["adsets", index, account, "Website_URL"]) : defaultUrlData);
+    const val = form.getFieldValue(["adsets", index, account, "Website_URL"])
+    setIndexValueForAccount(val);
+    setDefaultURLBuilder(defaultUrlData);
   };
 
   const onClickSetToAllAccounts = () => {
@@ -657,11 +660,12 @@ const AccountForm = ({
       case "FB_Mnet":
         //defaultValues
         return (
-          <MnetUrlBuilder defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+          <MnetUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
+            indexValueForAccount={indexValueForAccount}
             defaultValues={defaultURLBuilder}
             accountis={account}
             onReturnMessage={onReturnUrl}
@@ -670,6 +674,7 @@ const AccountForm = ({
       case "FB_System1":
         return (
           <System1UrlBuilder
+            indexValueForAccount={indexValueForAccount}
             defaultValues={defaultURLBuilder}
             accountis={account}
             onReturnMessage={onReturnUrl}
@@ -684,7 +689,7 @@ const AccountForm = ({
         );
     }
     // }
-  }, [network, account, defaultURLBuilder, onReturnUrl]);
+  }, [network, account, defaultURLBuilder, indexValueForAccount, onReturnUrl]);
 
   // useEffect(() => {
   //   if (selectedIndex === account) {
@@ -1110,7 +1115,7 @@ const AdsetComponent = ({
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
-  const [budget, setBudget] = useState(adset?.DailyAdd_amount ?? 0)
+  const [budget, setBudget] = useState(adset?.DailyAdd_amount || 0)
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -1119,6 +1124,10 @@ const AdsetComponent = ({
   console.log(defaultUrlData, "defaultUrlData in adset component");
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+
+  const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
+
+  // console.log(optimizationGoalValue);
 
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
@@ -1963,6 +1972,10 @@ const AdsetComponent = ({
   // }, [currentDate, index, form]);
 
   useEffect(() => {
+    setBudget(adset?.DailyAdd_amount || 0);
+  }, [adset]);
+
+  useEffect(() => {
     if (pixel === "Pixel") {
       form.setFieldsValue({
         pixel_id: pixelIdList || []
@@ -2232,6 +2245,15 @@ const AdsetComponent = ({
     }));
     form.setFieldsValue({ adsets: newAdsets });
   };
+
+  const Billing_Event_options = {
+    OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LANDING_PAGE_VIEWS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LINK_CLICKS: [{ value: "IMPRESSIONS", label: "Impressions" }, { value: "LINK_CLICKS", label: "Link Clicks" }],
+    DAILY_UNIQUE_REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
+  }
 
   const Optimization_goal_values = {
     OUTCOME_LEADS: [
@@ -2520,13 +2542,16 @@ const AdsetComponent = ({
               },
             ]}
             style={{ flex: "120px" }}
-            initialValue={adset.billing_event || "IMPRESSIONS"}
+          // initialValue={adset.billing_event || "IMPRESSIONS"}
           >
             <Select
-              options={[
-                { value: "IMPRESSIONS", label: "Impressions" },
-                { value: "VALUE", label: "Value" },
-              ]}
+              options={
+                Billing_Event_options[optimizationGoalValue] || []
+                //   [
+                //   { value: "IMPRESSIONS", label: "Impressions" },
+                //   { value: "VALUE", label: "Value" },
+                // ]
+              }
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
@@ -6055,7 +6080,8 @@ const CreateCampaignDrawer = ({
         optimization_goal: "OFFSITE_CONVERSIONS",
         custom_event_type:
           objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
-        action_source: "website"
+        action_source: "website",
+        billing_event: "IMPRESSIONS",
       }));
 
       form.setFieldsValue({
@@ -6687,7 +6713,7 @@ const CreateCampaignDrawer = ({
       setAddName("");
       setAdsetLevelDailyBudget(0);
       const newAdsets = [
-        { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
+        { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1", },
       ]
       form.setFieldsValue({ adsets: newAdsets })
       setAdsets(newAdsets);
@@ -6697,6 +6723,7 @@ const CreateCampaignDrawer = ({
       setGeos("Geo");
       setPages("Page");
       setPixels("Pixel");
+      setBudgetType("daily");
     }
   }, [visible]);
 
@@ -7376,38 +7403,41 @@ const CreateCampaignDrawer = ({
   }, [adsetLevelDailyBudget, form]);
 
   useEffect(() => {
-    // Update the form field value for Website_URL whenever websiteURL changes
-    // const pageIDList = 
-    console.log(imagehash, "imagehash in useEffect");
-    // form.setFieldsValue({
-    //   pixel_id: imagehash?.pixelID,
-    //   page_id: imagehash?.pageID,
-    // });
+    if (visible) {
+      // Update the form field value for Website_URL whenever websiteURL changes
+      // const pageIDList = 
+      console.log(imagehash, "imagehash in useEffect");
+      // form.setFieldsValue({
+      //   pixel_id: imagehash?.pixelID,
+      //   page_id: imagehash?.pageID,
+      // });
 
-    // Check if all required fields are complete
-    const checkFormCompletion = () => {
-      const allValues = form.getFieldsValue(true);
-      const isComplete = Object.keys(allValues).every(
-        (key) => allValues[key] !== undefined && allValues[key] !== ""
-      );
-      setIsFormComplete(isComplete);
-    };
-
-    // Trigger form completion check
-    checkFormCompletion();
-    if (imagehash) {
-      if (
-        imagehash.pixelID === null ||
-        imagehash.pixelID === undefined ||
-        imagehash.pixelID === ""
-      ) {
-        message.error(
-          "There is no PageID and PixelID for this account. Contact your manager",
-          10
+      // Check if all required fields are complete
+      const checkFormCompletion = () => {
+        const allValues = form.getFieldsValue(true);
+        const isComplete = Object.keys(allValues).every(
+          (key) => allValues[key] !== undefined && allValues[key] !== ""
         );
+        setIsFormComplete(isComplete);
+      };
+
+      // Trigger form completion check
+      checkFormCompletion();
+      if (imagehash) {
+        if (
+          imagehash.pixelID === null ||
+          imagehash.pixelID === undefined ||
+          imagehash.pixelID === ""
+        ) {
+          message.error(
+            "There is no PageID and PixelID for this account. Contact your manager",
+            10
+          );
+        }
       }
     }
-  }, [imagehash, form]);
+
+  }, [imagehash, form, visible]);
 
   useEffect(() => {
     console.log(imageHashArray, "imageHashArray in useEffect");

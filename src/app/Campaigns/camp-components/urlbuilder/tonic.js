@@ -4,7 +4,7 @@ import { Button, Input, Row, Col } from 'antd';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTokenContext } from '../../../components/parent';
-const TonicUrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => {
+const TonicUrlBuilder = ({defaultValues,indexValueForAccount, onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -25,11 +25,18 @@ const TonicUrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => 
         const response = await apiClient.get(`/get/urlbuilderdata?network=Tonic1`);
         if(response?.status === 200){
           setNetworkData(response?.data)
-          if(defaultValues){
-            const defaultSiteName = defaultValues?.split("/")[0];
-            const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[3]?.split("=")[1];
+          if(indexValueForAccount){
+            const defaultSiteName = indexValueForAccount?.split("/")[0];
+            const defaultKeyword = indexValueForAccount?.split("/")[1]?.split("&")[3]?.split("=")[1];
             setSiteName(defaultSiteName);
             setKeyWords(defaultKeyword);
+          }else{
+            if(defaultValues){
+                const defaultSiteName = defaultValues?.split("/")[0];
+                // const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[3]?.split("=")[1];
+                setSiteName(defaultSiteName);
+                setKeyWords("");
+            }
           }
         }
       };
