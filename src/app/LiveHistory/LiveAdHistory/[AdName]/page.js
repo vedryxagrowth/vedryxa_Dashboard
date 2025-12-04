@@ -154,6 +154,7 @@ const MnetLiveAdHistory = ({ params }) => {
         "margin",
         "rpc",
         "cpl",
+        "cpm",
         "ncpl",
         "fbleads",
         "filteration",
@@ -409,7 +410,33 @@ const MnetLiveAdHistory = ({ params }) => {
 
         return 0;
     }
+    const getCPM = (params) => {
+        if (params.data !== undefined) {
+            const { impressions, spend } = params.data;
 
+            if (spend !== "0.00" || spend !== undefined) {
+                const RPC = (spend/impressions) * 1000;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
+                }
+                return `${Math.round(RPC * 100) / 100}%`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { impressions, spend } = params.node.aggData;
+            if (spend !== "0.00" || spend !== undefined) {
+                const RPC = (spend/impressions) * 1000;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
+                }
+                return `${Math.round(RPC * 100) / 100}%`;
+
+            }
+        }
+
+        return 0;
+    }
     const getROI = (params) => {
         if (params.data !== undefined) {
             const { revenue, spend } = params.data;
@@ -556,6 +583,7 @@ const MnetLiveAdHistory = ({ params }) => {
         const fieldOrder = columnState.map(col => col.colId);
         // console.log(fieldOrder);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-adsetnname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
+
         // localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         // updatingColumnsStructure(newFieldOrder);
         // console.log(newFieldOrder);
@@ -988,6 +1016,16 @@ const MnetLiveAdHistory = ({ params }) => {
             menuTabs: [],
             headerClass: 'hide-menu',
             headerToolTip: 'ROI = (Revenue - Spend) / Spend * 100',
+        },
+          cpm: {
+            headerName: 'CPM', field: 'cpm', valueGetter: getCPM,
+            comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}`,
+            width: 90,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPM = (spend/impressions) * 1000',
         },
         cpc: {
             headerName: 'CPC', field: 'cpc', aggFunc: cpcSpender,
@@ -2094,7 +2132,7 @@ const MnetLiveAdHistory = ({ params }) => {
                                         {decodedString}
                                     </p>
                                 </Tooltip>
-                                {((campaignComments.length > 0) && (campaignComments[0]?.comment) )  && (
+                                {((campaignComments.length > 0) && (campaignComments[0]?.comment)) && (
                                     <Tooltip title={campaignComments[0]?.comment}>
                                         <p
                                             style={{
@@ -2124,6 +2162,9 @@ const MnetLiveAdHistory = ({ params }) => {
                                 defaultColDef={defaultColDef}
                                 pinnedBottomRowData={domainFixedFooter}
                                 onCellClicked={onCellClicked}
+                                getMainMenuItems={(params) => {
+                                    return params.defaultItems.filter(item => item !== 'resetColumns');
+                                }}
                                 gridOptions={{
                                     ensureDomOrder: false,
                                     suppressRowClickSelection: true,

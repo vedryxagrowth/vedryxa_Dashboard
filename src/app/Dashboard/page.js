@@ -1532,6 +1532,7 @@ const Dashboard = () => {
                         estimated_revenue: obj?.estimated_revenue ? parseFloat(obj?.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj?.fbLeads) : 0,
                         fbClicks: obj.fbClicks ? parseInt(obj?.fbClicks) : 0,
+                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj?.fbLinkClicks) : 0,
                         impressions: obj.impressions ? parseInt(obj?.impressions) : 0,
                         conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                             ? obj.ad_clicks
@@ -1552,6 +1553,7 @@ const Dashboard = () => {
                     entry.estimated_revenue += obj?.estimated_revenue !== null && obj?.estimated_revenue !== undefined ? parseFloat(obj?.estimated_revenue) : 0;
                     entry.fbLeads += obj?.fbLeads !== null && obj?.fbLeads !== undefined ? parseInt(obj?.fbLeads) : 0;
                     entry.fbClicks += obj?.fbClicks !== null && obj?.fbClicks !== undefined ? parseInt(obj?.fbClicks) : 0;
+                    entry.fbLinkClicks += obj?.fbLinkClicks !== null && obj?.fbLinkClicks !== undefined ? parseInt(obj?.fbLinkClicks) : 0;
                     entry.impressions += obj?.impressions !== null && obj?.impressions !== undefined ? parseInt(obj?.impressions) : 0;
                     entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                         ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
@@ -1804,6 +1806,7 @@ const Dashboard = () => {
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
+                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0,
                         impressions: obj.impressions ? parseInt(obj.impressions) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
@@ -1825,6 +1828,7 @@ const Dashboard = () => {
                     entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                     entry.fbClicks += obj.fbClicks !== null && obj.fbClicks !== undefined ? parseInt(obj.fbClicks) : 0;
+                    entry.fbLinkClicks += obj.fbLinkClicks !== null && obj.fbLinkClicks !== undefined ? parseInt(obj.fbLinkClicks) : 0;
                     entry.impressions += obj.impressions !== null && obj.impressions !== undefined ? parseInt(obj.impressions) : 0;
                     entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
                         ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
@@ -1914,6 +1918,7 @@ const Dashboard = () => {
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: obj.conversions ? parseInt(obj.conversions) : 0,
                         fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0, //new
+                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0, //new
                         impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
@@ -1926,6 +1931,7 @@ const Dashboard = () => {
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                     entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
                     entry.fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0; // new
+                    entry.fbLinkClicks += obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0; // new
                     entry.impressions += obj.impressions ? parseInt(obj.impressions) : 0; // new
                 }
 
@@ -1993,7 +1999,8 @@ const Dashboard = () => {
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: obj.conversions ? parseInt(obj.conversions) : 0,
-                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0, //new
+                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
+                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0, //new
                         impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
@@ -2006,7 +2013,8 @@ const Dashboard = () => {
                 acc[key].estimated_revenue += estimated_revenue;
                 acc[key].fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                 acc[key].conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
-                acc[key].fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0; // new
+                acc[key].fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0;
+                acc[key].fbLinkClicks += obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0; // new
                 acc[key].impressions += obj.impressions ? parseInt(obj.impressions) : 0; // new
 
                 return acc;
@@ -2039,7 +2047,8 @@ const Dashboard = () => {
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: obj.conversions ? parseInt(obj.conversions) : 0,
-                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0, //new
+                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
+                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0, //new
                         impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
                         accountNumber,
                         accountName: userdetails?.adAccounts[revenuePartnerNames[revenuePartner]]?.find(each => each.accountNumber === accountNumber)?.accountName
@@ -2051,7 +2060,8 @@ const Dashboard = () => {
                 acc[key].estimated_revenue += estimated_revenue;
                 acc[key].fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                 acc[key].conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
-                acc[key].fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0; // new
+                acc[key].fbClicks += obj.fbClicks ? parseInt(obj.fbClicks) : 0;
+                acc[key].fbLinkClicks += obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0; // new
                 acc[key].impressions += obj.impressions ? parseInt(obj.impressions) : 0; // new
 
                 return acc;
@@ -2307,17 +2317,17 @@ const Dashboard = () => {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             color: theme === 'dark' ? 'white' : 'black',
-                            width:"100%"
+                            width: "100%"
                         }}
                     >
-                        <Divider style={{ color: theme === 'dark' ? 'white' : 'black',  fontSize:"16px" }}>
+                        <Divider style={{ color: theme === 'dark' ? 'white' : 'black', fontSize: "16px" }}>
                             <Checkbox
                                 checked={allSelected}
                                 onChange={(e) => handleSelectAllChange(e.target.checked, category)}
                                 style={{ marginRight: '5px' }}
                                 className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light'}
                             />
-                            <span style={{ fontSize:"16px"}}>{category}</span>
+                            <span style={{ fontSize: "16px" }}>{category}</span>
 
                         </Divider>
                     </div>
@@ -2342,7 +2352,7 @@ const Dashboard = () => {
                                         }}>
                                             <div style={{ display: 'flex' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', marginRight: '5px' }}>
-                                                    <span style={{ fontWeight: '600'}}>{accountNumber}</span>
+                                                    <span style={{ fontWeight: '600' }}>{accountNumber}</span>
                                                     <span>{item.accountName || ''}</span>
 
                                                 </div>
@@ -2435,7 +2445,55 @@ const Dashboard = () => {
 
         return 0;
     };
+    const getDev = (params) => {
+        const rpc = avgRpcCpl(params);
+        if (params.data !== undefined) {
+            const { fbLeads } = params.data;
 
+            if (fbLeads !== 0) {
+                const CPL = rpc * fbLeads;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return CPL;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { fbLeads } = params.node.aggData;
+            if (fbLeads !== 0) {
+                const CPL = rpc * fbLeads;
+                return CPL;
+            }
+        }
+
+        return 0;
+
+    }
+
+    const avgFMARGIN = (params) => {
+        const revenue = getDev(params);
+        if (params.data !== undefined) {
+            const { spend, estimated_revenue } = params.data;
+            if (revenue !== 0) {
+                const RPC = ((estimated_revenue - spend) / revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return 0;
+                }
+                return `${Number(RPC.toFixed(2))}`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, estimated_revenue } = params.node.aggData;
+            if (revenue !== 0) {
+                const RPC = ((estimated_revenue - spend) / revenue) * 100;
+                return `${Number(RPC.toFixed(2))}`;
+            }
+        }
+
+        return 0;
+    }
     const avgNCPL = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
@@ -2489,7 +2547,85 @@ const Dashboard = () => {
 
         return 0;
     };
+    const avgCPM = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { spend, impressions } = params.data;
+            if (impressions !== 0) {
+                const RPC = (spend / impressions) * 1000;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
 
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { spend, impressions } = params.node.aggData;
+            if (impressions !== 0) {
+                const RPC = (spend / impressions) * 1000;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+    const avgMARGIN = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { spend, estimated_revenue } = params.data;
+            if (estimated_revenue !== 0) {
+                const RPC = ((estimated_revenue - spend) / estimated_revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { spend, estimated_revenue } = params.node.aggData;
+            if (estimated_revenue !== 0) {
+                const RPC = ((estimated_revenue - spend) / estimated_revenue) * 100;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
+    const avgROI = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { spend, estimated_revenue } = params.data;
+            if (estimated_revenue !== 0) {
+                const RPC = ((estimated_revenue - spend) / spend) * 100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { spend, estimated_revenue } = params.node.aggData;
+            if (estimated_revenue !== 0) {
+                const RPC = ((estimated_revenue - spend) / spend) * 100;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
     const avgCPC = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
@@ -2516,6 +2652,33 @@ const Dashboard = () => {
 
         return 0;
     };
+    const avgCPCLinkClikcs = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { fbLinkClicks, spend } = params.data;
+            if (fbLinkClicks !== 0) {
+                const RPC = spend / fbLinkClicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { fbLinkClicks, spend } = params.node.aggData;
+            if (fbLinkClicks !== 0) {
+                const RPC = spend / fbLinkClicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
 
     const avgCpc = (params) => {
         // For non-grouped rows (individual row data)
@@ -3215,6 +3378,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'cpclinkclicks',
+            headerName: 'CPCLinkClicks',
+            valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -3281,7 +3455,61 @@ const Dashboard = () => {
             filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
-
+        {
+            field: "fbLinkClicks",
+            headerName: 'Fb link clicks',
+            aggFunc: spender,
+            // valueFormatter: currencyFormatter,
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
+        },
+        {
+            field: 'cpm',
+            headerName: 'CPM',
+            valueGetter: avgCPM,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'roi',
+            headerName: 'ROI',
+            valueGetter: avgROI,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'margin',
+            headerName: 'Margin',
+            valueGetter: avgMARGIN,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fmargin',
+            headerName: 'FMargin',
+            valueGetter: avgFMARGIN,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
     ]
     const items = [
         { key: '1', label: 'Profit', content: 'Content for Profit Accounts' },
@@ -3700,6 +3928,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'cpclinkclicks',
+            headerName: 'CPCLinkClicks',
+            valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -3759,6 +3998,61 @@ const Dashboard = () => {
             field: 'impressions',
             headerName: 'Imp',
             aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: "fbLinkClicks",
+            headerName: 'Fb link clicks',
+            aggFunc: spender,
+            // valueFormatter: currencyFormatter,
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
+        },
+        {
+            field: 'cpm',
+            headerName: 'CPM',
+            valueGetter: avgCPM,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'roi',
+            headerName: 'ROI',
+            valueGetter: avgROI,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'margin',
+            headerName: 'Margin',
+            valueGetter: avgMARGIN,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fmargin',
+            headerName: 'FMargin',
+            valueGetter: avgFMARGIN,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4020,6 +4314,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'cpclinkclicks',
+            headerName: 'CPCLinkClicks',
+            valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -4079,6 +4384,61 @@ const Dashboard = () => {
             field: 'impressions',
             headerName: 'Imp',
             aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: "fbLinkClicks",
+            headerName: 'Fb link clicks',
+            aggFunc: spender,
+            // valueFormatter: currencyFormatter,
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
+        },
+        {
+            field: 'cpm',
+            headerName: 'CPM',
+            valueGetter: avgCPM,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'roi',
+            headerName: 'ROI',
+            valueGetter: avgROI,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'margin',
+            headerName: 'Margin',
+            valueGetter: avgMARGIN,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fmargin',
+            headerName: 'FMargin',
+            valueGetter: avgFMARGIN,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4335,6 +4695,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'cpclinkclicks',
+            headerName: 'CPCLinkClicks',
+            valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -4394,6 +4765,61 @@ const Dashboard = () => {
             field: 'impressions',
             headerName: 'Imp',
             aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: "fbLinkClicks",
+            headerName: 'Fb link clicks',
+            aggFunc: spender,
+            // valueFormatter: currencyFormatter,
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
+        },
+        {
+            field: 'cpm',
+            headerName: 'CPM',
+            valueGetter: avgCPM,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'roi',
+            headerName: 'ROI',
+            valueGetter: avgROI,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'margin',
+            headerName: 'Margin',
+            valueGetter: avgMARGIN,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fmargin',
+            headerName: 'FMargin',
+            valueGetter: avgFMARGIN,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4577,6 +5003,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'cpclinkclicks',
+            headerName: 'CPCLinkClicks',
+            valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -4622,6 +5059,16 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: "fbLinkClicks",
+            aggFunc: spender,
+            // valueFormatter: currencyFormatter,
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            filter: "agNumberColumnFilter",
+        },
+        {
             field: 'fbClicks',
             headerName: 'Fb clicks',
             aggFunc: spender,
@@ -4636,6 +5083,50 @@ const Dashboard = () => {
             field: 'impressions',
             headerName: 'Imp',
             aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpm',
+            headerName: 'CPM',
+            valueGetter: avgCPM,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'roi',
+            headerName: 'ROI',
+            valueGetter: avgROI,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'margin',
+            headerName: 'Margin',
+            valueGetter: avgMARGIN,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'fmargin',
+            headerName: 'FMargin',
+            valueGetter: avgFMARGIN,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -5309,7 +5800,7 @@ const Dashboard = () => {
                                                 dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
                                                 dropdownRender={() => (
-                                                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px'}}>
+                                                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
                                                         {renderInnerSelects(theme)}
                                                     </div>
                                                 )}
@@ -5780,28 +6271,28 @@ const Dashboard = () => {
                                         ))}
                                     </Row> */}
                                     <div className="metrics-container">
-    <div className="metrics-grid">
-        {metrics.map((m, i) => (
-            <Card className="metric-card" key={i} bordered={false}
-            style={{
-        backgroundColor: theme === "dark" ? "#2F2F2F" : "white"
-    }}>
-                <div className="metric-title" style={{ color: m.color }}>
-                    <span className="dot" style={{ backgroundColor: m.color }}></span>
-                    {m.label}
-                </div>
+                                        <div className="metrics-grid">
+                                            {metrics.map((m, i) => (
+                                                <Card className="metric-card" key={i} bordered={false}
+                                                    style={{
+                                                        backgroundColor: theme === "dark" ? "#2F2F2F" : "white"
+                                                    }}>
+                                                    <div className="metric-title" style={{ color: m.color }}>
+                                                        <span className="dot" style={{ backgroundColor: m.color }}></span>
+                                                        {m.label}
+                                                    </div>
 
-                <div className="metric-value"
-                 style={{
-            color: theme === "dark" ? "#fff" : "#3A9100"  // <-- VALUE COLOR HERE
-        }}
-                >
-                    {m.prefix ? m.prefix + " " : ""}{m.value}
-                </div>
-            </Card>
-        ))}
-    </div>
-</div>
+                                                    <div className="metric-value"
+                                                        style={{
+                                                            color: theme === "dark" ? "#fff" : "#3A9100"  // <-- VALUE COLOR HERE
+                                                        }}
+                                                    >
+                                                        {m.prefix ? m.prefix + " " : ""}{m.value}
+                                                    </div>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    </div>
 
                                 </div>
 
@@ -6240,8 +6731,8 @@ const Dashboard = () => {
                                                     // groupAggFiltering ={true}
                                                     onCellClicked={onCellClicked}
                                                     enableCharts={true}
-                                                        enableRangeSelection={true}
-                                                        onGridReady={(params) => { window.__top5 = params.api; }}
+                                                    enableRangeSelection={true}
+                                                    onGridReady={(params) => { window.__top5 = params.api; }}
                                                     onFilterChanged={onFilterChanged}
                                                 />
                                             </div>
@@ -6563,7 +7054,7 @@ const Dashboard = () => {
                                                             ...defaultColDef,
                                                             wrapText: true,
                                                             autoHeight: true,
-                                                            enableCharts: true, 
+                                                            enableCharts: true,
                                                             cellStyle: {
                                                                 whiteSpace: 'normal',
                                                                 lineHeight: '1.4',
@@ -6602,7 +7093,7 @@ const Dashboard = () => {
                                                             ...defaultColDef,
                                                             wrapText: true,
                                                             autoHeight: true,
-                                                            enableCharts: true, 
+                                                            enableCharts: true,
                                                             cellStyle: {
                                                                 whiteSpace: 'normal',
                                                                 lineHeight: '1.4',
