@@ -20,6 +20,7 @@ import {
   Breadcrumb,
   Popconfirm,
   Alert,
+  Switch
 } from "antd";
 import {
   PlusOutlined,
@@ -4153,14 +4154,14 @@ const AdsetComponent = ({
               label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
               required={true}
               style={{ flex: "0 0 140px" }}
-              rules={[
-                {
-                  validator: (_, value) =>
-                    value && value.length > 0
-                      ? Promise.resolve()
-                      : Promise.reject(new Error("At least one country is required")),
-                },
-              ]}
+              // rules={[
+              //   {
+              //     validator: (_, value) =>
+              //       value && value.length > 0
+              //         ? Promise.resolve()
+              //         : Promise.reject(new Error("At least one country is required")),
+              //   },
+              // ]}
             >
               {/*
                     - index === 0 and geo === "Geos": onChange will propagate to all adsets
