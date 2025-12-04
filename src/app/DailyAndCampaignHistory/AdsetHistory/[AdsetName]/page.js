@@ -355,7 +355,33 @@ export default function AdsetNameAndAccount({ params }) {
 
         return 0;
     }
+ const getCPM = (params) => {
+        if (params.data !== undefined) {
+            const { impressions, spend } = params.data;
 
+            if (spend !== "0.00" || spend !== undefined) {
+                const RPC = (spend/impressions) * 1000;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
+                }
+                return `${Math.round(RPC * 100) / 100}%`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { impressions, spend } = params.node.aggData;
+            if (spend !== "0.00" || spend !== undefined) {
+                const RPC = (spend/impressions) * 1000;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
+                }
+                return `${Math.round(RPC * 100) / 100}%`;
+
+            }
+        }
+
+        return 0;
+    }
     const agFunc = (params) => {
         let sum = 0;
         params.values.forEach((value) => (sum += parseFloat(value)));
@@ -382,6 +408,7 @@ export default function AdsetNameAndAccount({ params }) {
         "profit",
         "margin",
         "rpc",
+        "cpm",
         "cpl",
         "ncpl",
         "fbleads",
@@ -1195,6 +1222,16 @@ export default function AdsetNameAndAccount({ params }) {
             headerToolTip: 'ROI = ((Revenue - Spend) / Spend) * 100',
             width: 90
         },
+         cpm: {
+            headerName: 'CPM', field: 'cpm', valueGetter: getCPM,
+            // comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}`,
+            width: 90,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPM = (spend/impressions) * 1000',
+        },
         cpc: {
             headerName: 'CPC', field: 'cpc',
             aggFunc: (params) => {
@@ -1863,7 +1900,7 @@ export default function AdsetNameAndAccount({ params }) {
                                         {decodedString}
                                     </p>
                                 </Tooltip>
-                                {((campaignComments.length > 0) && (campaignComments[0]?.comment) )  && (
+                                {((campaignComments.length > 0) && (campaignComments[0]?.comment)) && (
                                     <Tooltip title={campaignComments[0]?.comment}>
                                         <p
                                             style={{
@@ -1892,6 +1929,9 @@ export default function AdsetNameAndAccount({ params }) {
                                 quickFilterText={searchText}
                                 pinnedBottomRowData={domainFixedFooter}
                                 onCellClicked={onCellClicked}
+                                getMainMenuItems={(params) => {
+                                    return params.defaultItems.filter(item => item !== 'resetColumns');
+                                }}
                                 gridOptions={{
                                     ensureDomOrder: false,
                                     suppressRowClickSelection: true,
