@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { use, useEffect, useMemo } from "react";
 import {
   Drawer,
   Button,
@@ -20,6 +20,7 @@ import {
   Breadcrumb,
   Popconfirm,
   Alert,
+  Switch
 } from "antd";
 import {
   PlusOutlined,
@@ -35,7 +36,9 @@ import {
   PaperClipOutlined,
   DeleteOutlined,
   CopyOutlined,
+  InfoCircleOutlined
 } from "@ant-design/icons";
+import { FaPenToSquare, FaShareFromSquare, FaTrashCan } from "react-icons/fa6";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
 import TextArea from "antd/es/input/TextArea";
@@ -53,7 +56,11 @@ import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
-import { FaTrashCan } from "react-icons/fa6";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 
@@ -546,6 +553,7 @@ function getPositionsByKeys(keys) {
 }
 
 const AddComponent = ({
+  view,
   imagehash,
   adset,
   network,
@@ -1887,36 +1895,38 @@ const AddComponent = ({
                                                                                   }}
                                                                                   style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
                                                                                   /> */}
-                              {!isViewAdset && (
-                                <DeleteOutlined
-                                  onClick={() => {
-                                    // 1. Remove from selectedFilesFromCreatives
-                                    setSelectedFilesFromCreatives([]);
+                              {/* {!isViewAdset  */}
+                              {!view
+                                && (
+                                  <DeleteOutlined
+                                    onClick={() => {
+                                      // 1. Remove from selectedFilesFromCreatives
+                                      setSelectedFilesFromCreatives([]);
 
-                                    // 2. Remove from selectedFiles
-                                    setSelectedFiles([]);
+                                      // 2. Remove from selectedFiles
+                                      setSelectedFiles([]);
 
-                                    // 3. Update the top-level form field `MediaContent`
-                                    const currentMedia =
-                                      form.getFieldValue("MediaContent") || [];
-                                    const updatedMedia = currentMedia.filter(
-                                      (f) => f.uid !== file.uid
-                                    );
+                                      // 3. Update the top-level form field `MediaContent`
+                                      const currentMedia =
+                                        form.getFieldValue("MediaContent") || [];
+                                      const updatedMedia = currentMedia.filter(
+                                        (f) => f.uid !== file.uid
+                                      );
 
-                                    form.setFieldsValue({
-                                      MediaContent: updatedMedia,
-                                    });
+                                      form.setFieldsValue({
+                                        MediaContent: updatedMedia,
+                                      });
 
-                                    // 4. Validate only the `MediaContent` field
-                                    form.validateFields(["MediaContent"]);
-                                  }}
-                                  style={{
-                                    color: "red",
-                                    marginLeft: 12,
-                                    cursor: "pointer",
-                                  }}
-                                />
-                              )}
+                                      // 4. Validate only the `MediaContent` field
+                                      form.validateFields(["MediaContent"]);
+                                    }}
+                                    style={{
+                                      color: "red",
+                                      marginLeft: 12,
+                                      cursor: "pointer",
+                                    }}
+                                  />
+                                )}
                             </div>
                           ))}
                         </div>
@@ -1929,7 +1939,7 @@ const AddComponent = ({
 
             <Form.Item
               name="page_id"
-              initialValue={imagehash?.pageID}
+              initialValue={adset?.page_id || ""}
               label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
               rules={[
                 {
@@ -1937,10 +1947,12 @@ const AddComponent = ({
                   message: "Please select an option!",
                 },
               ]}
-              style={{ flex: 3, marginLeft: "1%" }}
+              // style={{ flex: 1, marginLeft: "1%" }}
+              style={{ flex: "140px" }}
             >
               <Input
                 style={{ width: "23%" }}
+                disabled={true}
                 className={
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
@@ -2143,7 +2155,13 @@ const AddComponent = ({
             // ]}
             footer={null}
             width="80%" // Set width of the modal
-            bodyStyle={{ height: "50vh", overflowY: "auto" }}
+            // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+            styles={{
+              body: {
+                height: "50vh",
+                overflowY: "auto",
+              },
+            }}
             className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
               }`}
           >
@@ -2580,7 +2598,7 @@ const AdsetComponent = ({
   addAdset,
   removeAdset,
   cloneAdset,
-  currentDate,
+  // currentDate,
   localesdata,
   handleFieldChange,
   network,
@@ -2596,6 +2614,9 @@ const AdsetComponent = ({
   setNewAddLevelData,
   view,
   setIsAnyAdsetBudgetSet,
+  pageIDList,
+  pixelIDLIst,
+  budgetType
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2612,6 +2633,10 @@ const AdsetComponent = ({
   const [editedImages, setEditedImages] = useState({});
   const [viewSingleAd, setViewSingleAd] = useState({});
 
+  console.log(pixelIDLIst, "pixelIDLIst in adset component");
+  console.log(pageIDList, "pageIDList in adset component");
+  console.log(adset.pixel_id, "adset.pixel_id in adset component");
+  console.log(adset.page_id, "adset.page_id in adset component");
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -2627,6 +2652,177 @@ const AdsetComponent = ({
 
   console.log(addlevelData, "addlevelData in adset component");
   console.log(newAddLevelData, "newAddLevelData in adset component");
+
+  const currentDate = dayjs();
+  const after30Days = currentDate.add(30, "day");
+
+  const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+
+  const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
+
+  const Billing_Event_options = {
+    OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LANDING_PAGE_VIEWS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LINK_CLICKS: [{ value: "IMPRESSIONS", label: "Impressions" }, { value: "LINK_CLICKS", label: "Link Clicks" }],
+    REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
+  }
+
+  const allCountries = [
+    { value: "US", label: "United States" },
+    { value: "GB", label: "United Kingdom" },
+    { value: "AU", label: "Australia" },
+    { value: "IN", label: "India" },
+    { value: "AE", label: "United Arab Emirates" },
+    { value: "CA", label: "Canada" },
+    { value: "DE", label: "Germany" },
+    { value: "FR", label: "France" },
+    { value: "JP", label: "Japan" },
+    { value: "CN", label: "China" },
+    { value: "BR", label: "Brazil" },
+    { value: "ZA", label: "South Africa" },
+    { value: "RU", label: "Russia" },
+    { value: "IT", label: "Italy" },
+    { value: "ES", label: "Spain" },
+    { value: "SG", label: "Singapore" },
+    { value: "NZ", label: "New Zealand" },
+    { value: "MX", label: "Mexico" },
+    { value: "AT", label: "Austria" },
+    { value: "BE", label: "Belgium" },
+    { value: "BG", label: "Bulgaria" },
+    { value: "HR", label: "Croatia" },
+    { value: "CY", label: "Cyprus" },
+    { value: "CZ", label: "Czech Republic" },
+    { value: "DK", label: "Denmark" },
+    { value: "EE", label: "Estonia" },
+    { value: "FI", label: "Finland" },
+    { value: "GR", label: "Greece" },
+    { value: "HU", label: "Hungary" },
+    { value: "IE", label: "Ireland" },
+    { value: "LV", label: "Latvia" },
+    { value: "LT", label: "Lithuania" },
+    { value: "LU", label: "Luxembourg" },
+    { value: "MT", label: "Malta" },
+    { value: "NL", label: "Netherlands" },
+    { value: "PL", label: "Poland" },
+    { value: "PT", label: "Portugal" },
+    { value: "RO", label: "Romania" },
+    { value: "SK", label: "Slovakia" },
+    { value: "SI", label: "Slovenia" },
+    { value: "SE", label: "Sweden" },
+  ];
+
+  const adsetLocationCountry = Form.useWatch(["adsets", index, "countries"], form);
+
+  // console.log(adsetLocationCountry);
+
+
+  const campaignCountries = Form.useWatch("countries", form) || [];
+  const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
+
+  // console.log(campaignCountries);
+
+  const newCampaignCountries = campaignCountries && campaignCountries.length > 0 ? campaignCountries.map(item => {
+    return allCountries.find(item1 => item1.value === item)
+  }) : allCountries;
+
+  console.log(newCampaignCountries);
+
+  const Optimization_goal_values = {
+    OUTCOME_LEADS: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ],
+    OUTCOME_SALES: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "VALUE", label: "Maximize value of conversions" },
+      { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ]
+  }
+
+  const Conversion_Event_options = {
+    OUTCOME_LEADS: [
+      { value: "LEAD", label: "Lead" },
+      { value: "CONTACT", label: "Contact" },
+      { value: "SCHEDULE", label: "Schedule  " },
+    ],
+    OUTCOME_SALES: [
+      { value: "PURCHASE", label: "Purchase" },
+      { value: "INITIATED_CHECKOUT", label: "Initiate Checkout" },
+      { value: "ADD_TO_CART ", label: "Add to Cart" },
+      { value: "CONTENT_VIEW", label: "View Content" },
+      { value: "ADD_TO_WISHLIST", label: " Add to Wishlist" },
+    ]
+  }
+
+  const Action_Source_Values = {
+    OUTCOME_LEADS: [
+      { value: "website", label: "Website" },
+    ],
+    OUTCOME_SALES: [
+      { value: "website", label: "Website" },
+    ]
+  }
+
+  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+
+  const adsetsValues = form.getFieldValue("adsets") || [];
+  const currentValue = adsetsValues[index]?.optimization_goal ?? "";
+
+  const optionsForIndex =
+    index === 0
+      ? optionsForOptimz_goal
+      : optionsForOptimz_goal.map((o) => ({ ...o, disabled: o.value !== currentValue }));
+
+  const EU_AND_ASSOCIATED = [
+    // EU 27
+    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT",
+    "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+    // EU territories & regions
+    "AX", "PT-20", "DE-BS", "IT-CO", "ES-CN", "GF", "GP", "DE-HL", "IT-LI", "PT-30",
+    "MQ", "YT", "ES-ML", "GR-MA", "RE", "FR-MF"
+  ];
+  //   return targetCountries.some(c => EU_AND_ASSOCIATED.includes(c));
+  // }
+  //   const EU_AND_ASSOCIATED = [
+  //   // ... your list ...
+  //   "MQ", "YT", "ES-ML", "GR-MA", "RE", "FR-MF"
+  // ];
+
+  function needsBeneficiaryAndPayer(targetCountries) {
+    if (!targetCountries) return false;
+
+    // Normalize to an array:
+    let countries = targetCountries;
+
+    // If a comma/semicolon/space-separated string (common when reading form values)
+    if (typeof targetCountries === 'string') {
+      countries = targetCountries
+        .split(/[,;]\s*|\s+/)   // split by comma, semicolon or whitespace
+        .map(s => s.trim())
+        .filter(Boolean);
+    } else if (!Array.isArray(targetCountries)) {
+      // If it's an object (e.g., {0: 'IN', 1: 'DE'}) try to get values and flatten
+      if (typeof targetCountries === 'object' && targetCountries !== null) {
+        countries = Object.values(targetCountries).flat().map(String).map(s => s.trim()).filter(Boolean);
+      } else {
+        // unknown type — bail out safely
+        return false;
+      }
+    }
+
+    // Finally, do the check
+    return Array.isArray(countries) && countries.some(c => EU_AND_ASSOCIATED.includes(String(c)));
+  }
+
+  const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -3028,6 +3224,75 @@ const AdsetComponent = ({
   };
 
   useEffect(() => {
+    // always treat current as an array
+    const current = form.getFieldValue(["adsets", index, "countries"]) || [];
+
+    // helper to set an array value safely
+    const setArrayValue = (valArray) => {
+      form.setFields([
+        { name: ["adsets", index, "countries"], value: valArray },
+      ]);
+      form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+    };
+
+    if (campaignCountries.length > 0) {
+      // Allowed values are campaignCountries
+      const filtered = Array.isArray(current)
+        ? current.filter((c) => campaignCountries.includes(c))
+        : (campaignCountries.includes(current) ? [current] : []);
+
+      if (filtered.length === 0) {
+        // fallback to first campaign country (as an array)
+        setArrayValue([campaignCountries[0]]);
+        // form.setFieldsValue({
+        //   adsets: {
+        //     [index]: { countries: [campaignCountries[0]] }
+        //   }
+        // });
+        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+      } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        // remove invalid entries, keep the valid ones
+        setArrayValue(filtered);
+      }
+    } else {
+      // No campaign-level countries -> allowed values are allCountries' values
+      const validSet = new Set(allCountries.map((c) => c.value));
+      const filtered = Array.isArray(current)
+        ? current.filter((c) => validSet.has(c))
+        : (validSet.has(current) ? [current] : []);
+
+      if (filtered.length === 0) {
+        // fallback to first available country (as an array)
+        setArrayValue([allCountries[0].value]);
+        // form.setFieldsValue({
+        //   adsets: {
+        //     [index]: { countries: [allCountries[0].value] }
+        //   }
+        // });
+        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+      }
+      else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        setArrayValue(filtered);
+      }
+    }
+    // include only necessary deps (allCountries is an array constant — ok to include)
+  }, [campaignCountries, form, index, allCountries]);
+
+  useEffect(() => {
+    if (hasCountries) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            Min_Age: "18",
+            Max_Age: "65",
+            Gender: "0"
+          },
+        },
+      });
+    }
+  }, [hasCountries, index, form]);
+
+  useEffect(() => {
     const creatives = selectedFilesFromCreatives?.[adset.id];
     if (Array.isArray(creatives) && creatives.length > 0) {
       setSelectedOption("creative");
@@ -3045,7 +3310,59 @@ const AdsetComponent = ({
       setDescription(adset?.addlevel[0]?.Description || "");
       setWebsiteURL(adset?.addlevel[0]?.Website_URL || "");
     }
-  }, [adset]);
+    if (adset?.pixel_id) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            pixel_id: adset.pixel_id
+          },
+        }
+      });
+      // form.setFieldsValue({
+      //   pixel_id: adset.pixel_id
+      // })
+    }
+    if (adset?.addlevel) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            page_id: adset?.addlevel[0]?.page_id || ""
+          },
+        }
+      });
+      // form.setFieldsValue({
+      //   page_id: adset.page_id
+      // });
+    }
+    if (adset?.start_time) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            DatePicker: dayjs(adset.start_time).tz("America/New_York"),
+          },
+        }
+      });
+    }
+    if (adset?.end_time) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            DatePickerEnd: dayjs(adset.end_time).tz(imagehash?.timeZone),
+          },
+        }
+      });
+    }
+    if (adset?.beneficiary) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            Beneficiary: adset.beneficiary,
+            Payer: adset.payer
+          },
+        }
+      });
+    }
+  }, [adset, index, imagehash]);
 
   useEffect(() => {
     // Re-run once selectedPositions or adset.id updates
@@ -3084,6 +3401,20 @@ const AdsetComponent = ({
       ]);
     }
   }, [adset?.DailyAdd_amount]);
+
+  const handleFirstOptimizationChange = (value) => {
+    // Get current adsets from form
+    const adsets = form.getFieldValue("adsets") || [];
+
+    // Map through adsets and set optimization_goal to the new value
+    const newAdsets = adsets.map((a) => ({
+      ...a,
+      optimization_goal: value,
+    }));
+
+    // Update the form
+    form.setFieldsValue({ adsets: newAdsets });
+  };
 
   //   useEffect(() => {
   //     if (!selectedPublishers?.[adset.id]) return;
@@ -3212,7 +3543,7 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "1 1 200px" }}
+            style={{ flex: "1 1 250px" }}
           >
             <Input
               className={
@@ -3231,6 +3562,36 @@ const AdsetComponent = ({
             />
           </Form.Item>
           <Form.Item
+            name={["adsets", index, "action_source"]}
+            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "1 1 150px" }}
+            initialValue={adset.action_source || "website"}
+          >
+            <Select
+              disabled={adset.Adsetid || view ? true : false}
+              options={
+                Action_Source_Values[objectiveValue] || []
+                //   [
+                //   { value: "website", label: "Website" },
+                //   { value: "email", label: "Email" },
+                //   { value: "app", label: "App" },
+                //   { value: "phone_call", label: "Phone Call" },
+                // ]
+              }
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.action_source || "website"}
+            // onChange={(value) => handleFieldChange(index, "action_source", value)}
+            />
+          </Form.Item>
+          <Form.Item
             name={["adsets", index, "optimization_goal"]}
             label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
             rules={[
@@ -3239,10 +3600,10 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "120px" }}
+            style={{ flex: "1 1 140px" }}
             initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
           >
-            <Select
+            {/* <Select
               disabled={adset.Adsetid || view ? true : false}
               options={[
                 { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
@@ -3255,6 +3616,56 @@ const AdsetComponent = ({
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
+            /> */}
+            {index === 0 ? (
+              <Select
+                options={optionsForIndex}
+                disabled={adset?.Adsetid ? true : false}
+                value={currentValue}
+                onChange={(val) => handleFirstOptimizationChange(val)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            ) : (
+              // Select stays enabled but only the current option is enabled to pick
+              <Select
+                options={optionsForIndex}
+                disabled={adset?.Adsetid ? true : false}
+                value={currentValue}
+                // no onChange needed (user can't change to another value because other options are disabled)
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            )}
+          </Form.Item>
+          <Form.Item
+            name={["adsets", index, "custom_event_type"]}
+            label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "1 1 140px" }}
+            initialValue={adset.custom_event_type || "LEAD"}
+          >
+            <Select
+              disabled={adset?.Adsetid ? true : false}
+              //   options={
+              //     [
+              //     { value: "LEAD", label: "Lead" },
+              //     { value: "PURCHASE", label: "Purchase" },
+              //     { value: "SEARCH", label: "Search" },
+              //     { value: "CONTACT", label: "Contact" },
+              //   ]
+              // }
+              options={Conversion_Event_options[objectiveValue] || []}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.custom_event_type || "LEAD"}
+            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
             />
           </Form.Item>
           <Form.Item
@@ -3266,98 +3677,23 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "120px" }}
+            style={{ flex: "1 1 140px" }}
             initialValue={adset.billing_event || "IMPRESSIONS"}
           >
             <Select
               disabled={adset.Adsetid || view ? true : false}
-              options={[
-                { value: "IMPRESSIONS", label: "Impressions" },
-                { value: "VALUE", label: "Value" },
-              ]}
+              options={
+                //   [
+                //   { value: "IMPRESSIONS", label: "Impressions" },
+                //   { value: "VALUE", label: "Value" },
+                // ]
+                Billing_Event_options[optimizationGoalValue] || []
+              }
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             // defaultValue={adset.billing_event || "IMPRESSIONS"}
             // onChange={(value) => handleFieldChange(index, "billing_event", value)}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "DatePicker"]}
-            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please input!",
-              },
-            ]}
-            style={{ flex: "150px" }}
-            initialValue={currentDate ? dayjs(currentDate) : dayjs()}
-          >
-            <DatePicker
-              disabled={adset.Adsetid || view ? true : false}
-              showTime
-              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
-              className="green-border-picker"
-              //                                 onChange={(value, dateString) => {
-              //     console.log("Local Time:", dateString)
-              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-              //   }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "action_source"]}
-            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.action_source || "website"}
-          >
-            <Select
-              disabled={adset.Adsetid || view ? true : false}
-              options={[
-                { value: "website", label: "Website" },
-                { value: "email", label: "Email" },
-                { value: "app", label: "App" },
-                { value: "phone_call", label: "Phone Call" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.action_source || "website"}
-            // onChange={(value) => handleFieldChange(index, "action_source", value)}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "custom_event_type"]}
-            label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.custom_event_type || "LEAD"}
-          >
-            <Select
-              disabled={adset.Adsetid || view ? true : false}
-              options={[
-                { value: "LEAD", label: "Lead" },
-                { value: "PURCHASE", label: "Purchase" },
-                { value: "SEARCH", label: "Search" },
-                { value: "CONTACT", label: "Contact" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.custom_event_type || "LEAD"}
-            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
             />
           </Form.Item>
           {/* <Form.Item
@@ -3375,12 +3711,14 @@ const AdsetComponent = ({
                         <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                     </Form.Item> */}
           <Form.Item
-            name="pixel_id"
-            initialValue={
-              typeof imagehash?.pixelID === "object"
-                ? imagehash.pixelID.Universal
-                : imagehash?.pixelID
-            }
+            // name="pixel_id"
+            name={["adsets", index, "pixel_id"]}
+            // initialValue={
+            //   typeof imagehash?.pixelID === "object"
+            //     ? imagehash.pixelID.Universal || Object.values(imagehash.pixelID)[0]
+            //     : imagehash?.pixelID
+            // }
+            initialValue={adset?.pixel_id}
             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
             rules={[
               {
@@ -3388,9 +3726,22 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "140px" }}
+            style={{ flex: "120px" }}
           >
-            {typeof imagehash?.pixelID === "object" ? (
+            <Select
+              // mode="multiple"
+              options={pixelIDLIst}
+              disabled={adset?.Adsetid}
+              placeholder="Select pixel"
+              // optionFilterProp="label"
+              // allowClear
+              // maxTagCount={1}
+              // maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+              // className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              style={{ width: "100%", borderRadius: 8 }}
+            />
+            {/* {typeof imagehash?.pixelID === "object" ? (
               <Select
                 defaultValue={imagehash?.pixelID?.Universal}
                 className={
@@ -3410,7 +3761,7 @@ const AdsetComponent = ({
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
               />
-            )}
+            )} */}
           </Form.Item>
           {/*pk*/}
           {/* <Form.Item
@@ -3541,10 +3892,58 @@ const AdsetComponent = ({
                             />
                         </Tooltip>
                     </Form.Item> */}
-
+          <Form.Item
+            name={["adsets", index, "DatePicker"]}
+            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please input!",
+              },
+            ]}
+            style={{ flex: "150px" }}
+          // initialValue={adset?.start_time ? dayjs(adset?.start_time) : dayjs()}
+          >
+            <DatePicker
+              disabled={adset.Adsetid || view ? true : false}
+              showTime
+              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+              className="green-border-picker"
+              //                                 onChange={(value, dateString) => {
+              //     console.log("Local Time:", dateString)
+              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+              //   }}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          {budgetType !== "daily" &&
+            <Form.Item
+              name={["adsets", index, "DatePickerEnd"]}
+              label={<span style={{ color: "#B4B4B4" }}>End Time</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input!",
+                },
+              ]}
+              style={{ flex: "150px" }}
+              initialValue={after30Days ? dayjs(after30Days) : dayjs()}
+            >
+              <DatePicker
+                showTime
+                dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+                className="green-border-picker"
+                //                                 onChange={(value, dateString) => {
+                //     console.log("Local Time:", dateString)
+                //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                //   }}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          }
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
-            label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
             rules={[
               {
                 required: !(
@@ -3557,6 +3956,13 @@ const AdsetComponent = ({
             ]}
           >
             <Tooltip
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
               title={
                 isCampaignBudgetActive
                   ? "You have enabled daily budget in the Campaign Level"
@@ -3613,7 +4019,6 @@ const AdsetComponent = ({
               />
             </Tooltip>
           </Form.Item>
-
           {showBidAmount && (
             <Form.Item
               name={["adsets", index, "bid_amount"]}
@@ -3673,7 +4078,7 @@ const AdsetComponent = ({
           Targeting
         </span>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-          <Form.Item
+          {/* <Form.Item
             name={["adsets", index, "countries"]}
             label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
             rules={[
@@ -3755,8 +4160,226 @@ const AdsetComponent = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
+          </Form.Item> */}
+          <Form.Item noStyle key={index}>
+            <Form.Item
+              name={["adsets", index, "countries"]}
+              label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+              required={true}
+              style={{ flex: "0 0 140px" }}
+            // rules={[
+            //   {
+            //     validator: (_, value) =>
+            //       value && value.length > 0
+            //         ? Promise.resolve()
+            //         : Promise.reject(new Error("At least one country is required")),
+            //   },
+            // ]}
+            >
+              {/*
+                    - index === 0 and geo === "Geos": onChange will propagate to all adsets
+                    - index > 0 and geo === "Geos": Select opens but only current items selectable (others disabled)
+                    - geo !== "Geos": every index is independent
+                  */}
+              <Select
+                mode="multiple"
+                allowClear
+                showSearch
+                placeholder={
+                  campaignCountries.length ? "Select from campaign countries" : "Select any country"
+                }
+                // disabled={(geo === "Geos" && index !== 0)}
+                options={newCampaignCountries}
+                getPopupContainer={(trigger) => trigger.parentNode}
+                dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              // change handler: only needs to actively update when first index and geo === "Geos"
+              // onChange={(val) => {
+              //   if (geo === "Geos" && index === 0) {
+              //     handleFirstCountriesChange(val);
+              //   } else {
+              //     // For independent mode, let Ant Form handle the change automatically.
+              //     // If you need side effects when geo !== "Geos", handle them here.
+              //   }
+              // }}
+              />
+            </Form.Item>
           </Form.Item>
+
+          {BeneficiaryAndPayer && (
+            <>
+              <Form.Item
+                label={
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                      overlayInnerStyle={{
+                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#000',
+                        border: '1px solid #ccc',
+                        borderRadius: 6,
+                        // fontWeight: 500,
+                      }}
+                    >
+                      <InfoCircleOutlined
+                        style={{
+                          color: theme === "dark" ? "#bbb" : "#888",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Tooltip>
+                    <Form.Item
+                      noStyle
+                      name={["adsets", index, "showPayer"]}
+                      valuePropName="checked"
+                    >
+                      <Switch size="small" />
+                    </Form.Item>
+                  </div>
+                }
+                name={["adsets", index, "Beneficiary"]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please fill the input!",
+                  },
+                ]}
+                style={{ flex: "1 1 150px" }}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, curr) =>
+                  prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
+                }
+              >
+                {({ getFieldValue }) =>
+                  getFieldValue(["adsets", index, "showPayer"]) ? (
+                    <Form.Item
+                      name={["adsets", index, "Payer"]}
+                      label={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ color: "#B4B4B4" }}>Payer</span>
+                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                            overlayInnerStyle={{
+                              backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                              color: theme === 'dark' ? '#fff' : '#000',
+                              border: '1px solid #ccc',
+                              borderRadius: 6,
+                              // fontWeight: 500,
+                            }}
+                          >
+                            <InfoCircleOutlined
+                              style={{
+                                color: theme === "dark" ? "#bbb" : "#888",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </Tooltip>
+                        </div>
+                      }
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please fill the input!",
+                        },
+                      ]}
+                      style={{ flex: "1 1 150px" }}
+                    >
+                      <Input />
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+            </>
+          )}
+
           <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) =>
+              prev?.adsets?.[index]?.countries !== curr?.adsets?.[index]?.countries
+            }
+          >
+            {({ getFieldValue }) => {
+              const selectedCountries = getFieldValue(["adsets", index, "countries"]);
+              const isDisabled = Array.isArray(selectedCountries) && selectedCountries.length > 0;
+
+              return (
+                <>
+                  {/* 🔹 Min Age */}
+                  <Form.Item
+                    name={["adsets", index, "Min_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Min_Age || "18"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "18", label: "18", title: "" },
+                        { value: "25", label: "25", title: "", disabled: hasCountries },
+                        { value: "35", label: "35", title: "", disabled: hasCountries },
+                        { value: "40", label: "40", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Max Age */}
+                  <Form.Item
+                    name={["adsets", index, "Max_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Max_Age || "65"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "20", label: "20", title: "", disabled: hasCountries },
+                        { value: "30", label: "30", title: "", disabled: hasCountries },
+                        { value: "65", label: "65+", title: "" },
+                        { value: "80", label: "80", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Gender */}
+                  <Form.Item
+                    name={["adsets", index, "Gender"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Gender</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Gender || "0"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "0", label: "All", title: "" },
+                        { value: "1", label: "Male", title: "", disabled: hasCountries },
+                        { value: "2", label: "Female", title: "", disabled: hasCountries },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+                </>
+              );
+            }}
+          </Form.Item>
+
+          {/* <Form.Item
             name={["adsets", index, "Min_Age"]}
             label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
             rules={[
@@ -3829,7 +4452,7 @@ const AdsetComponent = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             name={["adsets", index, "Language"]}
             label={<span style={{ color: "#B4B4B4" }}>Language</span>}
@@ -4188,6 +4811,7 @@ const AdsetComponent = ({
           >
             {viewSingleAd && Object.keys(viewSingleAd).length > 0 && (
               <AddComponent
+                view={view}
                 adset={adset}
                 imagehash={imagehash}
                 accountis={accountis}
@@ -5037,8 +5661,9 @@ const AdsetComponent = ({
                     </div>
 
                     <Form.Item
-                      name="page_id"
-                      initialValue={imagehash?.pageID}
+                      // name="page_id"
+                      name={["adsets", index, "page_id"]}
+                      initialValue={adset?.page_id}
                       label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                       rules={[
                         {
@@ -5046,16 +5671,46 @@ const AdsetComponent = ({
                           message: "Please select an option!",
                         },
                       ]}
-                      style={{ flex: 3, marginLeft: "1%" }}
+                      style={{ flex: "140px" }}
                     >
-                      <Input
+                      <Select
+                        // mode="multiple"
+                        options={pageIDList}
+                        disabled={adset?.Adsetid}
+                        placeholder="Select page"
+                        onChange={(value) => {
+                          // setAddName(e.target.value);
+                          setNewAddLevelData((prev) => {
+                            const key = adset.id;
+                            const list = Array.isArray(prev[key])
+                              ? prev[key].filter(Boolean)
+                              : [];
+
+                            const next = list.map((item, idx) => ({
+                              ...item,
+                              page_id: value,
+                            }));
+
+                            return { ...prev, [key]: next };
+                          });
+                        }}
+
+                        // optionFilterProp="label"
+                        // allowClear
+                        // maxTagCount={1}
+                        // maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                        // className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                        dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                        style={{ width: "100%", borderRadius: 8 }}
+                      />
+                      {/* <Input
                         style={{ width: "23%" }}
                         className={
                           theme === "dark"
                             ? "custom-input-dark"
                             : "custom-input-light"
                         }
-                      />
+                      /> */}
                     </Form.Item>
                   </div>
                   <Form.Item
@@ -5354,7 +6009,13 @@ const AdsetComponent = ({
                     // ]}
                     footer={null}
                     width="80%" // Set width of the modal
-                    bodyStyle={{ height: "50vh", overflowY: "auto" }}
+                    // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+                    styles={{
+                      body: {
+                        height: "50vh",
+                        overflowY: "auto",
+                      },
+                    }}
                     className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
                       }`}
                   >
@@ -5729,7 +6390,13 @@ const AdsetComponent = ({
           // ]}
           footer={null}
           width="80%" // Set width of the modal
-          bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          styles={{
+            body: {
+              height: "50vh",
+              overflowY: "auto",
+            },
+          }}
           className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
             }`}
         >
@@ -5805,7 +6472,13 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [draftsData, setDraftsData] = useState([]);
-  const [popupInputs, setPopupInputs] = useState({ input1: "", input2: "" });
+  const [popupInputs, setPopupInputs] = useState({ reportCat: "", input2: "" });
+  const [newReportCategory, setNewReportCategory] = useState("");
+  const [reportCategories, setReportCategories] = useState([]);
+  const [rEditModalVisible, setREditModalVisible] = useState(false);
+  const [rDeleteModalVisible, setRDeleteModalVisible] = useState(false);
+  const [rCurrentCategory, setRCurrentCategory] = useState(null);
+  const [rEditedName, setREditedName] = useState("");
   const [errors, setErrors] = useState({ input1: "", input2: "" });
   const [refreshDraft, setRefreshDraft] = useState(false);
   const [fullCampaignData, setFullCampaignData] = useState(null);
@@ -5813,7 +6486,14 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [newAddLevelData, setNewAddLevelData] = useState({});
   console.log(draftsData, "draftsData in CreateCampaignDrawer");
   console.log(selectedRow, "selectedRow in EditMultipleAdsetCampaignDrawer");
+  const [pixelIDLIst, setPixelIDList] = useState([]);
+  const [pageIDList, setPageIDList] = useState([]);
+  const [budgetType, setBudgetType] = useState("daily");
 
+  console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
+  console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
+
+  const objectiveValue = Form.useWatch("Objectives", form);
   // const handleConfirm = async() => {
   //   const newErrors = {
   //     input1: popupInputs.input1.trim() ? '' : 'First input is required',
@@ -5919,6 +6599,97 @@ const EditMultipleAdsetCampaignDrawer = ({
   //     const anyAdsetFilled = adsets.some(adset => adset.DailyAdd_amount > 0);
   //     setIsAnyAdsetBudgetSet(anyAdsetFilled);
   // }, [adsets]);
+
+  const addReportCategory = async () => {
+    const name = newReportCategory.trim();
+    if (!name || !(selectedRow?.Account_Number)) return;
+
+    const accounts = Array.isArray(selectedRow?.Account_Number) ? selectedRow?.Account_Number : [selectedRow?.Account_Number];
+
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/newreportcategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accounts, name }),
+    });
+
+    const json = await resp.json();
+    if (resp.ok && json.ok) {
+      setReportCategories(prev => [...prev, ...json.added]);
+      setPopupInputs(s => ({ ...s, reportCat: json.added[0]?.name || "" }));
+      setNewReportCategory("");
+      setErrors(e => ({ ...e, reportCat: "" }));
+
+      message.success(`Report category added to ${json.added.length} account(s)`);
+    } else {
+      message.error(json.message || "Add failed");
+    }
+  };
+
+  const renameReportCategory = async (accountNumber, catId, newName) => {
+    const clean = newName?.trim();
+    if (!catId || !clean || !(accountNumber)) return;
+
+    const old = reportCategories.find(
+      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+    )?.name;
+
+    if (old && old.trim().toLowerCase() === clean.toLowerCase()) {
+      message.info("No changes to save");
+      return;
+    }
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({ name: clean }),
+      }
+    );
+
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setReportCategories(prev =>
+        prev.map(c =>
+          String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber)
+            ? { ...c, name: clean }
+            : c
+        )
+      );
+      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === old ? clean : s.reportCat }));
+      message.success("Report category renamed");
+    } else {
+      message.error(json.message || "Rename failed");
+    }
+  };
+
+
+  const deleteReportCategory = async (accountNumber, catId) => {
+    if (!catId || !accountNumber) return;
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      { method: "DELETE", headers: { Authorization: token } }
+    );
+    const json = await resp.json().catch(() => ({}));
+
+    if (resp.ok && json.ok) {
+      setReportCategories(prev =>
+        prev.filter(c =>
+          !(String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber))
+        )
+      );
+      message.success("Report category deleted");
+    } else {
+      message.error(json.message || "Delete failed");
+    }
+  };
+
   const fetchData = async (selectedRow) => {
     try {
       if (selectedRow) {
@@ -5932,6 +6703,11 @@ const EditMultipleAdsetCampaignDrawer = ({
         );
         console.log("hello viewdata", ...response.data);
         setFullCampaignData(response?.data[0]);
+        setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "daily")
+        setPopupInputs(prev => ({
+          ...prev,
+          reportCat: response?.data[0]?.Category  // <-- value coming from API
+        }));
 
         setFormValuesFromDraft(response?.data[0]);
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
@@ -5966,8 +6742,60 @@ const EditMultipleAdsetCampaignDrawer = ({
     }
   };
 
+  const fetchCategories = async (selectedRow) => {
+    try {
+      if (selectedRow) {
+        const resp = await axios.post(
+          "https://www.testapi.adsgoat.in/api/getreportcategories",
+          { accounts: [String(selectedRow?.Account_Number)] },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+          }
+        );
+
+        if (resp.data?.ok) {
+          setReportCategories(resp.data.categories);
+        }
+      }
+
+    } catch (error) {
+      console.error("Error fetching report categories:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchData(selectedRow);
+    // Run only when objectiveValue changes
+    if (objectiveValue) {
+      const adsets = form.getFieldValue("adsets") || [];
+
+      const updatedAdsets = adsets.map((adset) => ({
+        ...adset,
+        optimization_goal: "OFFSITE_CONVERSIONS",
+        custom_event_type:
+          objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
+        action_source: "website",
+        billing_event: "IMPRESSIONS",
+      }));
+
+      form.setFieldsValue({
+        adsets: updatedAdsets,
+      });
+    }
+  }, [objectiveValue, form]);
+
+  // useEffect(() => {
+  //   fetchData(selectedRow);
+  //   fetchCategories(selectedRow);
+  // }, [selectedRow]);
+  useEffect(() => {
+    const run = async () => {
+      await fetchData(selectedRow);
+      await fetchCategories(selectedRow);
+    };
+    run();
   }, [selectedRow]);
 
   useEffect(() => {
@@ -6819,35 +7647,62 @@ const EditMultipleAdsetCampaignDrawer = ({
 
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
-    form.setFieldsValue({
-      pixel_id: imagehash?.pixelID,
-      page_id: imagehash?.pageID,
-    });
+    if (visible) {
+      // form.setFieldsValue({
+      //   pixel_id: imagehash?.pixelID,
+      //   page_id: imagehash?.pageID,
+      // });
 
-    // Check if all required fields are complete
-    const checkFormCompletion = () => {
-      const allValues = form.getFieldsValue(true);
-      const isComplete = Object.keys(allValues).every(
-        (key) => allValues[key] !== undefined && allValues[key] !== ""
-      );
-      setIsFormComplete(isComplete);
-    };
-
-    // Trigger form completion check
-    checkFormCompletion();
-    if (imagehash) {
-      if (
-        imagehash.pixelID === null ||
-        imagehash.pixelID === undefined ||
-        imagehash.pixelID === ""
-      ) {
-        message.error(
-          "There is no PageID and PixelID for this account. Contact your manager",
-          10
+      // Check if all required fields are complete
+      const checkFormCompletion = () => {
+        const allValues = form.getFieldsValue(true);
+        const isComplete = Object.keys(allValues).every(
+          (key) => allValues[key] !== undefined && allValues[key] !== ""
         );
+        setIsFormComplete(isComplete);
+      };
+
+      // Trigger form completion check
+      checkFormCompletion();
+      if (imagehash) {
+        const pixelIDs = imagehash?.pixelID || [];
+        const pageIDs = imagehash?.pageID || [];
+        let uniquePixelIDs;
+        let uniquePageIDs;
+        if (pixelIDs && typeof pixelIDs === "object") {
+          const result = Object.entries(pixelIDs).map(([key, value]) => ({
+            value,
+            label: `${key} - ${value}`
+          }));
+          uniquePixelIDs = result
+        } else {
+          uniquePixelIDs = [{ value: pixelIDs, label: pixelIDs }]
+        }
+        if (pageIDs && typeof pageIDs === "object") {
+          const result = Object.entries(pageIDs).map(([key, value]) => ({
+            value,
+            label: `${key} - ${value}`
+          }));
+          uniquePageIDs = result
+        }
+        else {
+          uniquePageIDs = [{ value: pageIDs, label: pageIDs }]
+        }
+        setPixelIDList(uniquePixelIDs);
+        setPageIDList(uniquePageIDs);
+        if (
+          imagehash.pixelID === null ||
+          imagehash.pixelID === undefined ||
+          imagehash.pixelID === ""
+        ) {
+          message.error(
+            "There is no PageID and PixelID for this account. Contact your manager",
+            10
+          );
+        }
       }
     }
-  }, [imagehash, form]);
+  }, [visible, imagehash, form]);
 
   const Accountchange = (e) => {
     setAccountNumber(e.target.value);
@@ -7704,13 +8559,15 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["campaign_name"] = values?.Name;
     AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
     AllAdsetsData["Approval"] = fullCampaignData.Approval;
-    AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus;
+    AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus === "Processing" ? "No-Live" : fullCampaignData.fbstatus;
     AllAdsetsData["Category"] = fullCampaignData.Category;
     if (fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
     if (fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
-
+      AllAdsetsData["camapaignlevel"]["Editedby"] = session?.user?.name;
+      AllAdsetsData["camapaignlevel"]["EditedDate"] = moment().tz(imagehash.timeZone).format("YYYY-MM-DD");
+      AllAdsetsData["camapaignlevel"]["Budget_type"] = budgetType;
       AllAdsetsData["camapaignlevel"]["campaignid"] =
         fullCampaignData.camapaignlevel.campaignid;
       AllAdsetsData["camapaignlevel"]["createdDate"] =
@@ -7795,7 +8652,8 @@ const EditMultipleAdsetCampaignDrawer = ({
           send_re_launch_status = true;
         }
       }
-    } else {
+    }
+    else {
       AllAdsetsData["camapaignlevel"] = {
         createdby: fullCampaignData.camapaignlevel.createdby,
         Editedby: session?.user?.name,
@@ -7806,6 +8664,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           ? { Special_categories_countries: values.countries }
           : {}),
         Bid_strategy: values.Bid_strategy,
+        Budget_type: budgetType,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
         access_token: imagehash.token,
@@ -8282,8 +9141,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (findMatchingAdset.Adsetid) {
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
+          AdsetsData["Budget_type"] = budgetType;
         } else {
           AdsetsData["id"] = formValuesObject.id;
+          AdsetsData["Budget_type"] = budgetType;
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
           AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
@@ -8310,6 +9171,14 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (findMatchingAdset["re_lunch_targeting"]) {
           AdsetsData["re_lunch_targeting"] =
             findMatchingAdset["re_lunch_targeting"];
+        }
+        if (findMatchingAdset["re_lunch_endtime"]) {
+          AdsetsData["re_lunch_endtime"] =
+            findMatchingAdset["re_lunch_endtime"];
+        }
+        if (findMatchingAdset["re_lunch_beneficiary_payer"]) {
+          AdsetsData["re_lunch_beneficiary_payer"] =
+            findMatchingAdset["re_lunch_beneficiary_payer"];
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -8374,17 +9243,97 @@ const EditMultipleAdsetCampaignDrawer = ({
           AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
           AdsetsData["pixel_id"] = findMatchingAdset.pixel_id;
         }
+        if (budgetType === "lifetime") {
+          const newEnd = dayjs(formValuesObject.DatePickerEnd)
+            .format("YYYY-MM-DDTHH:mm:ssZ");
+
+          AdsetsData["end_time"] = newEnd;
+
+          if (findMatchingAdset?.Adsetid && findMatchingAdset.end_time !== newEnd) {
+            AdsetsData["re_lunch_endtime"] = true;
+            send_re_launch_status = true;
+            re_lunch = true;
+          }
+        }
         if (
           findMatchingAdset.Adsetid &&
           findMatchingAdset.countries &&
           findMatchingAdset.countries !== formValuesObject.countries
         ) {
           AdsetsData["countries"] = formValuesObject.countries;
+          // if (formValuesObject.Beneficiary) {
+          //   AdsetsData["beneficiary"] = formValuesObject.Beneficiary
+          //   if (formValuesObject.Payer) {
+          //     AdsetsData["payer"] = formValuesObject.Payer
+          //   } else {
+          //     AdsetsData["payer"] = formValuesObject.Beneficiary
+          //   }
+          // }
           AdsetsData["re_lunch_targeting"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["countries"] = formValuesObject.countries;
+          // if (formValuesObject.Beneficiary) {
+          //   AdsetsData["beneficiary"] = formValuesObject.Beneficiary
+          //   if (formValuesObject.Payer) {
+          //     AdsetsData["payer"] = formValuesObject.Payer
+          //   } else {
+          //     AdsetsData["payer"] = formValuesObject.Beneficiary
+          //   }
+          // }
+        }
+        if (findMatchingAdset.Adsetid) {
+          // countries
+          const newCountries = formValuesObject.countries;
+          if (findMatchingAdset.countries && findMatchingAdset.countries !== newCountries) {
+            AdsetsData["countries"] = newCountries;
+            AdsetsData.re_lunch_targeting = true;
+            send_re_launch_status = true;
+            re_lunch = true;
+          } else {
+            AdsetsData.countries = newCountries;
+          }
+
+          // beneficiary/payer — only if form provides beneficiary
+          if (formValuesObject.Beneficiary) {
+            const newBeneficiary = formValuesObject.Beneficiary;
+            const newPayer = formValuesObject.Payer ?? formValuesObject.Beneficiary;
+            const existingBeneficiary = findMatchingAdset.beneficiary;
+            const existingPayer = findMatchingAdset.payer ?? findMatchingAdset.beneficiary;
+
+            // 1) No existing beneficiary but new provided -> add + flag
+            if (!existingBeneficiary && newBeneficiary) {
+              AdsetsData.beneficiary = newBeneficiary;
+              AdsetsData.payer = newPayer;
+              AdsetsData.re_lunch_beneficiary_payer = true;
+              send_re_launch_status = true;
+              re_lunch = true;
+            }
+            // 2) Existing present but changed -> update + flag
+            else if (
+              (existingBeneficiary && existingBeneficiary !== newBeneficiary) ||
+              (existingPayer && existingPayer !== newPayer)
+            ) {
+              AdsetsData.beneficiary = newBeneficiary;
+              AdsetsData.payer = newPayer;
+              AdsetsData.re_lunch_beneficiary_payer = true;
+              send_re_launch_status = true;
+              re_lunch = true;
+            }
+            // 3) Values exist and unchanged -> copy (no flag)
+            else {
+              AdsetsData.beneficiary = newBeneficiary;
+              AdsetsData.payer = newPayer;
+            }
+          }
+        } else {
+          if (formValuesObject.Beneficiary) {
+            const newBeneficiary = formValuesObject.Beneficiary;
+            const newPayer = formValuesObject.Payer ?? formValuesObject.Beneficiary;
+            AdsetsData.beneficiary = newBeneficiary;
+            AdsetsData.payer = newPayer;
+          }
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -8714,6 +9663,23 @@ const EditMultipleAdsetCampaignDrawer = ({
         } else {
           AdsetsData["placements"] = formValuesObject.placements;
         }
+        if (budgetType === "lifetime") {
+          const newEnd =
+            dayjs(formValuesObject.DatePickerEnd.$d)
+              .tz(imagehash.timeZone)
+              .format("YYYY-MM-DDTHH:mm:ssZ");
+
+          AdsetsData["end_time"] = newEnd;
+        }
+        if (formValuesObject.Beneficiary) {
+          AdsetsData["beneficiary"] = formValuesObject.Beneficiary
+          if (formValuesObject.Payer) {
+            AdsetsData["payer"] = formValuesObject.Payer
+          } else {
+            AdsetsData["payer"] = formValuesObject.Beneficiary
+          }
+        }
+
         AdsetsData["buying_type"] = "AUCTION";
         AdsetsData["addlevel"] = newAddLevel;
       }
@@ -9830,53 +10796,175 @@ const EditMultipleAdsetCampaignDrawer = ({
       footer={null}
       centered
       width="85%"
-      bodyStyle={{
-        height: "80vh",
-        overflowY: "auto",
-        padding: 10,
-        backgroundColor: theme === "dark" ? "#333" : "#fff",
-        color: theme === "dark" ? "#fff" : "#000",
+      // bodyStyle={{
+      //   height: "80vh",
+      //   overflowY: "auto",
+      //   padding: 10,
+      //   backgroundColor: theme === "dark" ? "#333" : "#fff",
+      //   color: theme === "dark" ? "#fff" : "#000",
+      // }}
+      styles={{
+        body: {
+          height: "80vh",
+          overflowY: "auto",
+          padding: 10,
+          backgroundColor: theme === "dark" ? "#333" : "#fff",
+          color: theme === "dark" ? "#fff" : "#000",
+        },
       }}
       style={{ borderRadius: "12px" }}
     >
-      {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div>
-            <Button
-              type="primary"
-              style={{
-                backgroundColor: "#91C25F",
-                color: "#000",
-                borderColor: "#91C25F",
-                borderWidth: 0,
-                marginBottom: "10px",
-                cursor: "pointer",
-                marginLeft: "10px",
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <div style={{ display: 'flex' }}>
+          <div style={{ marginRight: '10px' }}>
+            <Select
+              placeholder="Select report category"
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+              value={popupInputs.reportCat || undefined}
+              optionLabelProp="value"
+              onChange={(val) => {
+                setPopupInputs(s => ({ ...s, reportCat: val }));
+                if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
               }}
-              onClick={() => setShowApprovalModal(true)}
-            >
-              Approve
-            </Button>
+              showSearch
+              filterOption={(input, option) =>
+                (option?.name || "").toLowerCase().includes(input.toLowerCase())
+              }
+              options={reportCategories.map(c => ({
+                value: `${c.name}`,
+                name: c.name,
+                id: c.categoryId,
+
+                label: (
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 8
+
+                  }}>
+                    <span style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: 200
+                    }} title={`${c.name} - ${c.accountNumber}`}>
+                      {c.name} - {c.accountNumber}
+                    </span>
+                    <span style={{ display: "flex", gap: 10 }}>
+                      <FaPenToSquare
+                        style={{ fontSize: 12 }}
+                        title="Edit"
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setREditedName(c.name);
+                          setREditModalVisible(true);
+                        }}
+                      />
+                      <FaTrashCan
+                        style={{ fontSize: 12, color: "#EC7117" }}
+                        title="Delete"
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setRDeleteModalVisible(true);
+                        }}
+                      />
+                    </span>
+                  </div>
+                )
+              }))}
+
+              style={{ width: 240 }}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              dropdownRender={(menu) => (
+                <div>
+                  {menu}
+                  <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
+                    <Input
+                      size="small"
+                      placeholder="New report category"
+                      value={newReportCategory}
+                      onChange={(e) => setNewReportCategory(e.target.value)}
+                      onPressEnter={addReportCategory}
+                      className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                    />
+                    <Button
+                      size="small"
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={addReportCategory}
+                      style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                    />
+                  </div>
+                </div>
+              )}
+            />
+            {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
           </div>
           <div>
-            <Alert
-              message={fullCampaignData.Approval}
-              // description="This Camapaign"
-              type="info"
-              // showIcon
-              // banner
-              className="blinking"
-              style={{
-                textAlign: "center",
-                marginRight: "10px",
-                backgroundColor: theme === "dark" && "#444",
-                color: theme === "dark" && "#fff",
-                marginBottom: "10px",
-              }}
+            <Select
+              value={budgetType}   // "daily" or "lifetime"
+              onChange={(value) => setBudgetType(value)}
+              disabled={fullCampaignData?.camapaignlevel?.campaignid ? true : false}
+              // style={{ height: "20px" }}
+              options={[
+                { label: "Daily", value: "daily" },
+                { label: "Lifetime", value: "lifetime" },
+              ]}
+              style={{ width: 100 }}
+            // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
+            // getPopupContainer={(triggerNode) => triggerNode.parentElement}
             />
           </div>
         </div>
-      )}
+        {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div>
+              <Button
+                type="primary"
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  borderColor: "#91C25F",
+                  borderWidth: 0,
+                  // marginBottom: "10px",
+                  cursor: "pointer",
+                  marginLeft: "10px",
+                  height: "32px",
+                }}
+                onClick={() => setShowApprovalModal(true)}
+              >
+                Approve
+              </Button>
+            </div>
+            <div>
+              <Alert
+                message={fullCampaignData.Approval}
+                // description="This Camapaign"
+                type="info"
+                // showIcon
+                // banner
+                className="blinking"
+                style={{
+                  textAlign: "center",
+                  // marginRight: "10px",
+                  backgroundColor: theme === "dark" && "#444",
+                  color: theme === "dark" && "#fff",
+                  // marginBottom: "10px",
+                  height: "32px",
+                  marginLeft: "10px",
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
 
       <Modal
         title="Confirm Approval"
@@ -10011,22 +11099,22 @@ const EditMultipleAdsetCampaignDrawer = ({
                     options={[
                       { value: "OUTCOME_LEADS", label: "Leads", title: "" },
                       { value: "OUTCOME_SALES", label: "Sales", title: "" },
-                      {
-                        value: "OUTCOME_ENGAGEMENT",
-                        label: "Engagement",
-                        title: "",
-                      },
-                      {
-                        value: "OUTCOME_AWARENESS",
-                        label: "Awareness",
-                        title: "",
-                      },
-                      { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
-                      {
-                        value: "OUTCOME_APP_PROMOTION",
-                        label: "App promotion",
-                        title: "",
-                      },
+                      // {
+                      //   value: "OUTCOME_ENGAGEMENT",
+                      //   label: "Engagement",
+                      //   title: "",
+                      // },
+                      // {
+                      //   value: "OUTCOME_AWARENESS",
+                      //   label: "Awareness",
+                      //   title: "",
+                      // },
+                      // { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
+                      // {
+                      //   value: "OUTCOME_APP_PROMOTION",
+                      //   label: "App promotion",
+                      //   title: "",
+                      // },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"
@@ -10058,11 +11146,11 @@ const EditMultipleAdsetCampaignDrawer = ({
                         title: "",
                       },
                       { value: "EMPLOYMENT", label: "Employment", title: "" },
-                      {
-                        value: "ISSUES_ELECTIONS_POLITICS",
-                        label: "Politics",
-                        title: "",
-                      },
+                      // {
+                      //   value: "ISSUES_ELECTIONS_POLITICS",
+                      //   label: "Politics",
+                      //   title: "",
+                      // },
                       { value: "NONE", label: "None", title: "" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -10461,7 +11549,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   <Form.Item
                     name="Daily_amount"
                     label={
-                      <span style={{ color: "#B4B4B4" }}>Daily budget</span>
+                      <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
                     }
                     rules={[
                       {
@@ -10588,6 +11676,9 @@ const EditMultipleAdsetCampaignDrawer = ({
                   setNewAddLevelData={setNewAddLevelData}
                   setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
                   imagehash={imagehash}
+                  pixelIDLIst={pixelIDLIst}
+                  pageIDList={pageIDList}
+                  budgetType={budgetType}
                 />
               );
               // <ffff/>
@@ -10659,6 +11750,59 @@ const EditMultipleAdsetCampaignDrawer = ({
 >
   Submit
 </Button> */}
+                <Modal
+                  title="Delete Report Category"
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
+                  open={rDeleteModalVisible}
+                  onOk={async () => {
+                    if (!rCurrentCategory) return;
+                    await deleteReportCategory(
+                      rCurrentCategory.accountNumber ?? (Array.isArray(account) ? account[0] : account),
+                      rCurrentCategory.categoryId
+                    );
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
+                  }}
+
+                  onCancel={() => {
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Delete"
+                  okButtonProps={{ danger: true, type: "primary" }}
+                >
+                  <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
+                </Modal>
+                <Modal
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                  title="Edit Report Category"
+                  visible={rEditModalVisible}
+                  onOk={async () => {
+                    if (rEditedName.trim() && rCurrentCategory) {
+                      await renameReportCategory(
+                        rCurrentCategory.accountNumber,
+                        rCurrentCategory.categoryId,
+                        rEditedName.trim()
+                      );
+                      setREditModalVisible(false);
+                      setREditedName("");
+                      setRCurrentCategory(null);
+                    }
+                  }}
+                  onCancel={() => {
+                    setREditModalVisible(false);
+                    setREditedName("");
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Save"
+                >
+                  <Input
+                    value={rEditedName}
+                    onChange={(e) => setREditedName(e.target.value)}
+                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                  />
+                </Modal>
                 {!view && (
                   <Button
                     type="primary"

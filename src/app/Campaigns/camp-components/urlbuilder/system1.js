@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTokenContext } from '../../../components/parent';
-const System1UrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => {
+const System1UrlBuilder = ({defaultValues, indexValueForAccount, onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [pixelId, setPixelId] = useState('');
     const [keywords, setKeyWords] = useState('');
@@ -194,13 +194,23 @@ const System1UrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) =
       const response = await apiClient.get(`/get/urlbuilderdata?network=System1`);
       if(response?.status === 200){
         setNetworkData(response?.data)
-        if(defaultValues){
-          const defaultSiteName = defaultValues?.split("/")[0];
-          const defaultPixelID = defaultValues?.split("/")[1]?.split("&")[2]?.split("=")[1];
-          const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[5]?.split("=")[1];
+        if(indexValueForAccount){
+          const defaultSiteName = indexValueForAccount?.split("/")[0];
+          const defaultPixelID = indexValueForAccount?.split("/")[1]?.split("&")[2]?.split("=")[1];
+          const defaultKeyword = indexValueForAccount?.split("/")[1]?.split("&")[5]?.split("=")[1];
           setSiteName(defaultSiteName);
           setPixelId(defaultPixelID);
           setKeyWords(defaultKeyword);
+        }
+        else{
+          if(defaultValues){
+            const defaultSiteName = defaultValues?.split("/")[0];
+            const defaultPixelID = defaultValues?.split("/")[1]?.split("&")[2]?.split("=")[1];
+            // const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[5]?.split("=")[1];
+            setSiteName(defaultSiteName);
+            setPixelId(defaultPixelID);
+            setKeyWords("");
+          }
         }
       }
     };

@@ -569,6 +569,7 @@ const AccountForm = ({
   const [websiteURL, setWebsiteURL] = useState("");
   const [caption, setCaption] = useState("");
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
+  const [indexValueForAccount, setIndexValueForAccount] = useState("");
   console.log("defaultUrlData in account form", defaultUrlData);
 
 
@@ -610,7 +611,9 @@ const AccountForm = ({
 
   const onClickEdit = (index) => {
     setIsModalVisibleForURLBuilder(true);
-    setDefaultURLBuilder(form.getFieldValue(["adsets", index, account, "Website_URL"]) ? form.getFieldValue(["adsets", index, account, "Website_URL"]) : defaultUrlData);
+    const val = form.getFieldValue(["adsets", index, account, "Website_URL"])
+    setIndexValueForAccount(val);
+    setDefaultURLBuilder(defaultUrlData);
   };
 
   const onClickSetToAllAccounts = () => {
@@ -657,11 +660,12 @@ const AccountForm = ({
       case "FB_Mnet":
         //defaultValues
         return (
-          <MnetUrlBuilder defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+          <MnetUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
+            indexValueForAccount={indexValueForAccount}
             defaultValues={defaultURLBuilder}
             accountis={account}
             onReturnMessage={onReturnUrl}
@@ -670,6 +674,7 @@ const AccountForm = ({
       case "FB_System1":
         return (
           <System1UrlBuilder
+            indexValueForAccount={indexValueForAccount}
             defaultValues={defaultURLBuilder}
             accountis={account}
             onReturnMessage={onReturnUrl}
@@ -684,7 +689,7 @@ const AccountForm = ({
         );
     }
     // }
-  }, [network, account, defaultURLBuilder, onReturnUrl]);
+  }, [network, account, defaultURLBuilder, indexValueForAccount, onReturnUrl]);
 
   // useEffect(() => {
   //   if (selectedIndex === account) {
@@ -795,7 +800,13 @@ const AccountForm = ({
         onCancel={handleCancelForURLBuilder}
         footer={null}
         width="80%"
-        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        styles={{
+          body: {
+            height: "50vh",
+            overflowY: "auto",
+          },
+        }}
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
         {getUrlBuilder}
@@ -1110,7 +1121,7 @@ const AdsetComponent = ({
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
-  const [budget, setBudget] = useState(adset?.DailyAdd_amount ?? 0)
+  const [budget, setBudget] = useState(adset?.DailyAdd_amount || 0)
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -1119,6 +1130,10 @@ const AdsetComponent = ({
   console.log(defaultUrlData, "defaultUrlData in adset component");
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+
+  const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
+
+  // console.log(optimizationGoalValue);
 
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
@@ -1963,6 +1978,10 @@ const AdsetComponent = ({
   // }, [currentDate, index, form]);
 
   useEffect(() => {
+    setBudget(adset?.DailyAdd_amount || 0);
+  }, [adset]);
+
+  useEffect(() => {
     if (pixel === "Pixel") {
       form.setFieldsValue({
         pixel_id: pixelIdList || []
@@ -2233,12 +2252,21 @@ const AdsetComponent = ({
     form.setFieldsValue({ adsets: newAdsets });
   };
 
+  const Billing_Event_options = {
+    OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LANDING_PAGE_VIEWS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LINK_CLICKS: [{ value: "IMPRESSIONS", label: "Impressions" }, { value: "LINK_CLICKS", label: "Link Clicks" }],
+    REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
+  }
+
   const Optimization_goal_values = {
     OUTCOME_LEADS: [
       { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
       { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
       { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
-      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "REACH", label: "Maximize daily unique reach" },
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ],
     OUTCOME_SALES: [
@@ -2246,7 +2274,7 @@ const AdsetComponent = ({
       { value: "VALUE", label: "Maximize value of conversions" },
       { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
       { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
-      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "REACH", label: "Maximize daily unique reach" },
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ]
   }
@@ -2520,13 +2548,16 @@ const AdsetComponent = ({
               },
             ]}
             style={{ flex: "120px" }}
-            initialValue={adset.billing_event || "IMPRESSIONS"}
+          // initialValue={adset.billing_event || "IMPRESSIONS"}
           >
             <Select
-              options={[
-                { value: "IMPRESSIONS", label: "Impressions" },
-                { value: "VALUE", label: "Value" },
-              ]}
+              options={
+                Billing_Event_options[optimizationGoalValue] || []
+                //   [
+                //   { value: "IMPRESSIONS", label: "Impressions" },
+                //   { value: "VALUE", label: "Value" },
+                // ]
+              }
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
@@ -2690,7 +2721,7 @@ const AdsetComponent = ({
             validateTrigger={["onChange", "onBlur"]}
             dependencies={["Account_Number"]}                     // top-level dependency
             rules={[minSelectionValidatorPerAccount("pixel")]}    // <-- new validator
-            style={{ flex: 3, marginLeft: "1%" }}
+            style={{ flex: 3 }}
           >
             <Select
               mode="multiple"
@@ -2890,7 +2921,7 @@ const AdsetComponent = ({
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
             required={!CampaignBudgetActive}
-            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
             initialValue={0}
             // validateTrigger={["onBlur"]}
             // re-run validation whenever campaign-level Daily_amount changes
@@ -5780,7 +5811,13 @@ const AdsetComponent = ({
           // ]}
           footer={null}
           width="80%" // Set width of the modal
-          bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          styles={{
+            body: {
+              height: "50vh",
+              overflowY: "auto",
+            },
+          }}
           className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
             }`}
         >
@@ -6055,7 +6092,8 @@ const CreateCampaignDrawer = ({
         optimization_goal: "OFFSITE_CONVERSIONS",
         custom_event_type:
           objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
-        action_source: "website"
+        action_source: "website",
+        billing_event: "IMPRESSIONS",
       }));
 
       form.setFieldsValue({
@@ -6687,7 +6725,7 @@ const CreateCampaignDrawer = ({
       setAddName("");
       setAdsetLevelDailyBudget(0);
       const newAdsets = [
-        { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1" },
+        { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "ADSET 1", },
       ]
       form.setFieldsValue({ adsets: newAdsets })
       setAdsets(newAdsets);
@@ -6697,6 +6735,7 @@ const CreateCampaignDrawer = ({
       setGeos("Geo");
       setPages("Page");
       setPixels("Pixel");
+      setBudgetType("daily");
     }
   }, [visible]);
 
@@ -7376,38 +7415,41 @@ const CreateCampaignDrawer = ({
   }, [adsetLevelDailyBudget, form]);
 
   useEffect(() => {
-    // Update the form field value for Website_URL whenever websiteURL changes
-    // const pageIDList = 
-    console.log(imagehash, "imagehash in useEffect");
-    // form.setFieldsValue({
-    //   pixel_id: imagehash?.pixelID,
-    //   page_id: imagehash?.pageID,
-    // });
+    if (visible) {
+      // Update the form field value for Website_URL whenever websiteURL changes
+      // const pageIDList = 
+      console.log(imagehash, "imagehash in useEffect");
+      // form.setFieldsValue({
+      //   pixel_id: imagehash?.pixelID,
+      //   page_id: imagehash?.pageID,
+      // });
 
-    // Check if all required fields are complete
-    const checkFormCompletion = () => {
-      const allValues = form.getFieldsValue(true);
-      const isComplete = Object.keys(allValues).every(
-        (key) => allValues[key] !== undefined && allValues[key] !== ""
-      );
-      setIsFormComplete(isComplete);
-    };
-
-    // Trigger form completion check
-    checkFormCompletion();
-    if (imagehash) {
-      if (
-        imagehash.pixelID === null ||
-        imagehash.pixelID === undefined ||
-        imagehash.pixelID === ""
-      ) {
-        message.error(
-          "There is no PageID and PixelID for this account. Contact your manager",
-          10
+      // Check if all required fields are complete
+      const checkFormCompletion = () => {
+        const allValues = form.getFieldsValue(true);
+        const isComplete = Object.keys(allValues).every(
+          (key) => allValues[key] !== undefined && allValues[key] !== ""
         );
+        setIsFormComplete(isComplete);
+      };
+
+      // Trigger form completion check
+      checkFormCompletion();
+      if (imagehash) {
+        if (
+          imagehash.pixelID === null ||
+          imagehash.pixelID === undefined ||
+          imagehash.pixelID === ""
+        ) {
+          message.error(
+            "There is no PageID and PixelID for this account. Contact your manager",
+            10
+          );
+        }
       }
     }
-  }, [imagehash, form]);
+
+  }, [imagehash, form, visible]);
 
   useEffect(() => {
     console.log(imageHashArray, "imageHashArray in useEffect");
@@ -10217,12 +10259,21 @@ const CreateCampaignDrawer = ({
       footer={null}
       centered
       width="85%"
-      bodyStyle={{
-        height: '80vh',
-        overflowY: 'auto',
-        padding: 10,
-        backgroundColor: theme === 'dark' ? '#333' : '#fff',
-        color: theme === 'dark' ? '#fff' : '#000',
+      // bodyStyle={{
+      //   height: '80vh',
+      //   overflowY: 'auto',
+      //   padding: 10,
+      //   backgroundColor: theme === 'dark' ? '#333' : '#fff',
+      //   color: theme === 'dark' ? '#fff' : '#000',
+      // }}
+      styles={{
+        body: {
+          height: '80vh',
+          overflowY: 'auto',
+          padding: 10,
+          backgroundColor: theme === 'dark' ? '#333' : '#fff',
+          color: theme === 'dark' ? '#fff' : '#000',
+        },
       }}
       style={{ borderRadius: '12px' }}
     >
@@ -10352,6 +10403,7 @@ const CreateCampaignDrawer = ({
                 { label: "Daily", value: "daily" },
                 { label: "Lifetime", value: "lifetime" },
               ]}
+              style={{ width: 100 }}
             // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
             // getPopupContainer={(triggerNode) => triggerNode.parentElement}
             />
@@ -11379,7 +11431,7 @@ const CreateCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
 
                     required={!watchedHasAdsetBudget}
                     rules={[
@@ -11388,7 +11440,7 @@ const CreateCampaignDrawer = ({
                         message: "Please enter a valid daily budget for the Campaign",
                       },
                     ]}
-                    style={{ marginLeft: "1%", marginBottom: 24 }}
+                    style={{ marginLeft: "1%" }}
                   >
                     <InputNumber
                       min={0}
@@ -11396,7 +11448,7 @@ const CreateCampaignDrawer = ({
                       placeholder="$"
                       readOnly={watchedHasAdsetBudget} // only depends on watchedAdsets
                       style={{
-                        flex: 0.2,
+                        // flex: 0.2,
                         color: theme === "dark" ? "#fff" : "#000",
                       }}
                       className={
@@ -11416,7 +11468,7 @@ const CreateCampaignDrawer = ({
                       message: "Please select an option!",
                     },
                   ]}
-                  style={{ flex: 0.1, marginLeft: "1%" }}
+                  style={{ flex: 0.1 }}
                 // style={{ width: 160, marginLeft: "1%" }}
                 >
                   <Select

@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTokenContext } from '../../../components/parent';
-const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, accountis }) => {
+const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, showSubmitButton, accountis }) => {
   // Initial data array
   const [domain, setDomain] = useState(null);
   const [source, setSource] = useState("FB");
@@ -187,28 +187,52 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
     const response = await apiClient.get(`/get/urlbuilderdata?network=Mnet`);
     if (response?.status === 200) {
       setNetworkData(response?.data)
-      if(defaultValues){
-        console.log(defaultValues);
+      if (indexValueForAccount) {
+        // console.log(defaultValues);
         // console.log(defaultValues.split("//")[1].split("/")[0]);
         const DomainUrls = response?.data?.Domains
-        .filter(item => item.url.includes(defaultValues.split("//")[1].split("/")[0]))
-        .map(item => item.url);
+          .filter(item => item.url.includes(indexValueForAccount?.split("//")[1]?.split("/")[0]))
+          .map(item => item.url);
         // console.log(DomainUrls);
         setDomain(DomainUrls[0]);
 
-        const text = defaultValues.split("//")[1].split("/")[3];
+        const text = indexValueForAccount?.split("//")[1]?.split("/")[3];
         const result = text.replace(/\+/g, " ");
-        console.log(result);
-        setKeyWords("");
-        console.log(defaultValues.split("//")[1].split("/")[4].split("&")[0].split("?")[1]);
-        setChannel(defaultValues.split("//")[1].split("/")[4].split("&")[0].split("?")[1]);
-        setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
-        setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
-        setGeo(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
+        // console.log(result);
+        setKeyWords(result);
+        console.log(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+        setChannel(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+        setMembetId(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
+        setSource(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
+        setGeo(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
         setSource("FB");
-        if(defaultValues.includes('&trkfb')){setPixelId('PixelId')}else{setPixelId('None')};
-        // console.log(defaultValues.split("//")[1].split("/")[0]);
+        if (indexValueForAccount.includes('&trkfb')) { setPixelId('PixelId') } else { setPixelId('None') };
+        // console.log(indexValueForAccount.split("//")[1].split("/")[0]);
         // const domainData = response 
+      } else {
+        if (defaultValues) {
+          console.log(defaultValues);
+          // console.log(defaultValues.split("//")[1].split("/")[0]);
+          const DomainUrls = response?.data?.Domains
+            .filter(item => item.url.includes(defaultValues?.split("//")[1]?.split("/")[0]))
+            .map(item => item.url);
+          // console.log(DomainUrls);
+          setDomain(DomainUrls[0]);
+
+          const text = defaultValues?.split("//")[1]?.split("/")[3];
+          const result = text.replace(/\+/g, " ");
+          console.log(result);
+          setKeyWords("");
+          console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+          setChannel(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+          setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
+          setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
+          setGeo(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
+          setSource("FB");
+          if (defaultValues.includes('&trkfb')) { setPixelId('PixelId') } else { setPixelId('None') };
+          // console.log(defaultValues.split("//")[1].split("/")[0]);
+          // const domainData = response 
+        }
       }
     }
   };
@@ -256,13 +280,13 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
       let url;
-      
-      if(pixelId === 'PixelId'){
+
+      if (pixelId === 'PixelId') {
         url = domain;
       }
-      else{
+      else {
         const newDomain = domain.split("&trkfb");
-        url = newDomain[0] ;
+        url = newDomain[0];
       }
 
       url = url
@@ -286,13 +310,13 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
       let url;
-      
-      if(pixelId === 'PixelId'){
+
+      if (pixelId === 'PixelId') {
         url = domain;
       }
-      else{
+      else {
         const newDomain = domain.split("&trkfb");
-        url = newDomain[0] ;
+        url = newDomain[0];
       }
 
       url = url
@@ -386,7 +410,7 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
-        <Col style={{ display: 'flex', flexDirection: 'column', marginBottom:'5px' }} xs={11} sm={5} lg={4}>
+        <Col style={{ display: 'flex', flexDirection: 'column', marginBottom: '5px' }} xs={11} sm={5} lg={4}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>PixelId</label>
           <Select
             showSearch
@@ -416,7 +440,7 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
         <Col span={24}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Keywords</label>
           <div style={{ width: '100%' }}>
-            <Input placeholder="Keywords" style={{ width: '100%', paddingRight: '2px' }} value={keywords} onChange={onChangeKeyword} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Input placeholder="Keywords" style={{ width: '100%', paddingRight: '2px' }} value={keywords} onChange={onChangeKeyword} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
           </div>
         </Col>
       </Row>
@@ -431,7 +455,7 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
         </Col>
         <Col>
           <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-          {!showSubmitButton && <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={onClickSubmit}>Submit</Button>}
+          {!showSubmitButton && <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} onClick={onClickSubmit}>Submit</Button>}
         </Col>
       </Row>
       <Row justify="center" style={{ marginTop: '10px' }}>

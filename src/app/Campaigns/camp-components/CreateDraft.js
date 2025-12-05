@@ -2761,7 +2761,13 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         // ]}
                                         footer={null}
                                         width="80%" // Set width of the modal
-                                        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                        // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                        styles={{
+                                            body: {
+                                                height: "50vh",
+                                                overflowY: "auto",
+                                            },
+                                        }}
                                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                                     >
                                         {getUrlBuilder}

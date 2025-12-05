@@ -2146,7 +2146,13 @@ const AddComponent = ({
             // ]}
             footer={null}
             width="80%" // Set width of the modal
-            bodyStyle={{ height: "50vh", overflowY: "auto" }}
+            // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+            styles={{
+              body: {
+                height: "50vh",
+                overflowY: "auto",
+              },
+            }}
             className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
               }`}
           >
@@ -5371,7 +5377,13 @@ const AdsetComponent = ({
                     // ]}
                     footer={null}
                     width="80%" // Set width of the modal
-                    bodyStyle={{ height: "50vh", overflowY: "auto" }}
+                    // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+                    styles={{
+                      body: {
+                        height: "50vh",
+                        overflowY: "auto",
+                      },
+                    }}
                     className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
                       }`}
                   >
@@ -5739,7 +5751,13 @@ const AdsetComponent = ({
           // ]}
           footer={null}
           width="80%" // Set width of the modal
-          bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          // bodyStyle={{ height: "50vh", overflowY: "auto" }}
+          styles={{
+            body: {
+              height: "50vh",
+              overflowY: "auto",
+            },
+          }}
           className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
             }`}
         >
@@ -9531,12 +9549,21 @@ const CloneMultipleAdsetCampaignDrawer = ({
       footer={null}
       centered
       width="85%"
-      bodyStyle={{
-        height: "80vh",
-        overflowY: "auto",
-        padding: 10,
-        backgroundColor: theme === "dark" ? "#333" : "#fff",
-        color: theme === "dark" ? "#fff" : "#000",
+      // bodyStyle={{
+      //   height: "80vh",
+      //   overflowY: "auto",
+      //   padding: 10,
+      //   backgroundColor: theme === "dark" ? "#333" : "#fff",
+      //   color: theme === "dark" ? "#fff" : "#000",
+      // }}
+      styles={{
+        body: {
+          height: "80vh",
+          overflowY: "auto",
+          padding: 10,
+          backgroundColor: theme === "dark" ? "#333" : "#fff",
+          color: theme === "dark" ? "#fff" : "#000",
+        },
       }}
       style={{ borderRadius: "12px" }}
     >
@@ -10427,7 +10454,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                       minWidth: "200px",
                       borderWidth: "0px",
                     }}
-                  
+
                     onClick={async () => {
                       const finalCategory = popupInputs.reportCat || fullCampaignData?.Category;
                       if (!finalCategory) {
