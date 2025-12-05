@@ -38,6 +38,7 @@ import {
   CopyOutlined,
   InfoCircleOutlined
 } from "@ant-design/icons";
+import { FaPenToSquare, FaShareFromSquare, FaTrashCan } from "react-icons/fa6";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
 import TextArea from "antd/es/input/TextArea";
@@ -55,7 +56,6 @@ import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
-import { FaTrashCan } from "react-icons/fa6";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
@@ -2598,7 +2598,7 @@ const AdsetComponent = ({
   addAdset,
   removeAdset,
   cloneAdset,
-  currentDate,
+  // currentDate,
   localesdata,
   handleFieldChange,
   network,
@@ -2653,6 +2653,9 @@ const AdsetComponent = ({
   console.log(addlevelData, "addlevelData in adset component");
   console.log(newAddLevelData, "newAddLevelData in adset component");
 
+  const currentDate = dayjs();
+  const after30Days = currentDate.add(30, "day");
+
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
@@ -2662,7 +2665,7 @@ const AdsetComponent = ({
     VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
     LANDING_PAGE_VIEWS: [{ value: "IMPRESSIONS", label: "Impressions" }],
     LINK_CLICKS: [{ value: "IMPRESSIONS", label: "Impressions" }, { value: "LINK_CLICKS", label: "Link Clicks" }],
-    DAILY_UNIQUE_REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
     IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
   }
 
@@ -2731,7 +2734,7 @@ const AdsetComponent = ({
       { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
       { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
       { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
-      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "REACH", label: "Maximize daily unique reach" },
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ],
     OUTCOME_SALES: [
@@ -2739,7 +2742,7 @@ const AdsetComponent = ({
       { value: "VALUE", label: "Maximize value of conversions" },
       { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
       { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
-      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "REACH", label: "Maximize daily unique reach" },
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ]
   }
@@ -3319,11 +3322,11 @@ const AdsetComponent = ({
       //   pixel_id: adset.pixel_id
       // })
     }
-    if (adset?.page_id) {
+    if (adset?.addlevel) {
       form.setFieldsValue({
         adsets: {
           [index]: {
-            page_id: adset.page_id
+            page_id: adset?.addlevel[0]?.page_id || ""
           },
         }
       });
@@ -3344,12 +3347,22 @@ const AdsetComponent = ({
       form.setFieldsValue({
         adsets: {
           [index]: {
-            DatePickerEnd: dayjs(adset.end_time).tz("America/New_York"),
+            DatePickerEnd: dayjs(adset.end_time).tz(imagehash?.timeZone),
           },
         }
       });
     }
-  }, [adset, index]);
+    if (adset?.beneficiary) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            Beneficiary: adset.beneficiary,
+            Payer: adset.payer
+          },
+        }
+      });
+    }
+  }, [adset, index, imagehash]);
 
   useEffect(() => {
     // Re-run once selectedPositions or adset.id updates
@@ -3914,7 +3927,7 @@ const AdsetComponent = ({
                 },
               ]}
               style={{ flex: "150px" }}
-            // initialValue={after30Days ? dayjs(after30Days) : dayjs()}
+              initialValue={after30Days ? dayjs(after30Days) : dayjs()}
             >
               <DatePicker
                 showTime
@@ -4154,14 +4167,14 @@ const AdsetComponent = ({
               label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
               required={true}
               style={{ flex: "0 0 140px" }}
-              // rules={[
-              //   {
-              //     validator: (_, value) =>
-              //       value && value.length > 0
-              //         ? Promise.resolve()
-              //         : Promise.reject(new Error("At least one country is required")),
-              //   },
-              // ]}
+            // rules={[
+            //   {
+            //     validator: (_, value) =>
+            //       value && value.length > 0
+            //         ? Promise.resolve()
+            //         : Promise.reject(new Error("At least one country is required")),
+            //   },
+            // ]}
             >
               {/*
                     - index === 0 and geo === "Geos": onChange will propagate to all adsets
@@ -5648,8 +5661,9 @@ const AdsetComponent = ({
                     </div>
 
                     <Form.Item
-                      name="page_id"
-                      initialValue={imagehash?.pageID}
+                      // name="page_id"
+                      name={["adsets", index, "page_id"]}
+                      initialValue={adset?.page_id}
                       label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                       rules={[
                         {
@@ -5659,14 +5673,44 @@ const AdsetComponent = ({
                       ]}
                       style={{ flex: "140px" }}
                     >
-                      <Input
+                      <Select
+                        // mode="multiple"
+                        options={pageIDList}
+                        disabled={adset?.Adsetid}
+                        placeholder="Select page"
+                        onChange={(value) => {
+                          // setAddName(e.target.value);
+                          setNewAddLevelData((prev) => {
+                            const key = adset.id;
+                            const list = Array.isArray(prev[key])
+                              ? prev[key].filter(Boolean)
+                              : [];
+
+                            const next = list.map((item, idx) => ({
+                              ...item,
+                              page_id: value,
+                            }));
+
+                            return { ...prev, [key]: next };
+                          });
+                        }}
+
+                        // optionFilterProp="label"
+                        // allowClear
+                        // maxTagCount={1}
+                        // maxTagPlaceholder={(omitted) => `+${omitted.length}`}
+                        // className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                        dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                        style={{ width: "100%", borderRadius: 8 }}
+                      />
+                      {/* <Input
                         style={{ width: "23%" }}
                         className={
                           theme === "dark"
                             ? "custom-input-dark"
                             : "custom-input-light"
                         }
-                      />
+                      /> */}
                     </Form.Item>
                   </div>
                   <Form.Item
@@ -6428,7 +6472,13 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [draftsData, setDraftsData] = useState([]);
-  const [popupInputs, setPopupInputs] = useState({ input1: "", input2: "" });
+  const [popupInputs, setPopupInputs] = useState({ reportCat: "", input2: "" });
+  const [newReportCategory, setNewReportCategory] = useState("");
+  const [reportCategories, setReportCategories] = useState([]);
+  const [rEditModalVisible, setREditModalVisible] = useState(false);
+  const [rDeleteModalVisible, setRDeleteModalVisible] = useState(false);
+  const [rCurrentCategory, setRCurrentCategory] = useState(null);
+  const [rEditedName, setREditedName] = useState("");
   const [errors, setErrors] = useState({ input1: "", input2: "" });
   const [refreshDraft, setRefreshDraft] = useState(false);
   const [fullCampaignData, setFullCampaignData] = useState(null);
@@ -6549,6 +6599,97 @@ const EditMultipleAdsetCampaignDrawer = ({
   //     const anyAdsetFilled = adsets.some(adset => adset.DailyAdd_amount > 0);
   //     setIsAnyAdsetBudgetSet(anyAdsetFilled);
   // }, [adsets]);
+
+  const addReportCategory = async () => {
+    const name = newReportCategory.trim();
+    if (!name || !(selectedRow?.Account_Number)) return;
+
+    const accounts = Array.isArray(selectedRow?.Account_Number) ? selectedRow?.Account_Number : [selectedRow?.Account_Number];
+
+    const resp = await fetch("https://www.testapi.adsgoat.in/api/newreportcategory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ accounts, name }),
+    });
+
+    const json = await resp.json();
+    if (resp.ok && json.ok) {
+      setReportCategories(prev => [...prev, ...json.added]);
+      setPopupInputs(s => ({ ...s, reportCat: json.added[0]?.name || "" }));
+      setNewReportCategory("");
+      setErrors(e => ({ ...e, reportCat: "" }));
+
+      message.success(`Report category added to ${json.added.length} account(s)`);
+    } else {
+      message.error(json.message || "Add failed");
+    }
+  };
+
+  const renameReportCategory = async (accountNumber, catId, newName) => {
+    const clean = newName?.trim();
+    if (!catId || !clean || !(accountNumber)) return;
+
+    const old = reportCategories.find(
+      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+    )?.name;
+
+    if (old && old.trim().toLowerCase() === clean.toLowerCase()) {
+      message.info("No changes to save");
+      return;
+    }
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: token },
+        body: JSON.stringify({ name: clean }),
+      }
+    );
+
+    const json = await resp.json().catch(() => ({}));
+    if (resp.ok && json.ok) {
+      setReportCategories(prev =>
+        prev.map(c =>
+          String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber)
+            ? { ...c, name: clean }
+            : c
+        )
+      );
+      setPopupInputs(s => ({ ...s, reportCat: s.reportCat === old ? clean : s.reportCat }));
+      message.success("Report category renamed");
+    } else {
+      message.error(json.message || "Rename failed");
+    }
+  };
+
+
+  const deleteReportCategory = async (accountNumber, catId) => {
+    if (!catId || !accountNumber) return;
+
+    const resp = await fetch(
+      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      { method: "DELETE", headers: { Authorization: token } }
+    );
+    const json = await resp.json().catch(() => ({}));
+
+    if (resp.ok && json.ok) {
+      setReportCategories(prev =>
+        prev.filter(c =>
+          !(String(c.categoryId) === String(catId) &&
+            String(c.accountNumber) === String(accountNumber))
+        )
+      );
+      message.success("Report category deleted");
+    } else {
+      message.error(json.message || "Delete failed");
+    }
+  };
+
   const fetchData = async (selectedRow) => {
     try {
       if (selectedRow) {
@@ -6563,6 +6704,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         console.log("hello viewdata", ...response.data);
         setFullCampaignData(response?.data[0]);
         setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "daily")
+        setPopupInputs(prev => ({
+          ...prev,
+          reportCat: response?.data[0]?.Category  // <-- value coming from API
+        }));
 
         setFormValuesFromDraft(response?.data[0]);
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
@@ -6597,6 +6742,30 @@ const EditMultipleAdsetCampaignDrawer = ({
     }
   };
 
+  const fetchCategories = async (selectedRow) => {
+    try {
+      if (selectedRow) {
+        const resp = await axios.post(
+          "https://www.testapi.adsgoat.in/api/getreportcategories",
+          { accounts: [String(selectedRow?.Account_Number)] },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+          }
+        );
+
+        if (resp.data?.ok) {
+          setReportCategories(resp.data.categories);
+        }
+      }
+
+    } catch (error) {
+      console.error("Error fetching report categories:", error);
+    }
+  };
+
   useEffect(() => {
     // Run only when objectiveValue changes
     if (objectiveValue) {
@@ -6617,8 +6786,16 @@ const EditMultipleAdsetCampaignDrawer = ({
     }
   }, [objectiveValue, form]);
 
+  // useEffect(() => {
+  //   fetchData(selectedRow);
+  //   fetchCategories(selectedRow);
+  // }, [selectedRow]);
   useEffect(() => {
-    fetchData(selectedRow);
+    const run = async () => {
+      await fetchData(selectedRow);
+      await fetchCategories(selectedRow);
+    };
+    run();
   }, [selectedRow]);
 
   useEffect(() => {
@@ -8382,13 +8559,15 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["campaign_name"] = values?.Name;
     AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
     AllAdsetsData["Approval"] = fullCampaignData.Approval;
-    AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus;
+    AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus === "Processing" ? "No-Live" : fullCampaignData.fbstatus;
     AllAdsetsData["Category"] = fullCampaignData.Category;
     if (fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
     if (fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
-
+      AllAdsetsData["camapaignlevel"]["Editedby"] = session?.user?.name;
+      AllAdsetsData["camapaignlevel"]["EditedDate"] = moment().tz(imagehash.timeZone).format("YYYY-MM-DD");
+      AllAdsetsData["camapaignlevel"]["Budget_type"] = budgetType;
       AllAdsetsData["camapaignlevel"]["campaignid"] =
         fullCampaignData.camapaignlevel.campaignid;
       AllAdsetsData["camapaignlevel"]["createdDate"] =
@@ -8473,7 +8652,8 @@ const EditMultipleAdsetCampaignDrawer = ({
           send_re_launch_status = true;
         }
       }
-    } else {
+    }
+    else {
       AllAdsetsData["camapaignlevel"] = {
         createdby: fullCampaignData.camapaignlevel.createdby,
         Editedby: session?.user?.name,
@@ -8484,6 +8664,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           ? { Special_categories_countries: values.countries }
           : {}),
         Bid_strategy: values.Bid_strategy,
+        Budget_type: budgetType,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
         access_token: imagehash.token,
@@ -8960,8 +9141,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (findMatchingAdset.Adsetid) {
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
+          AdsetsData["Budget_type"] = budgetType;
         } else {
           AdsetsData["id"] = formValuesObject.id;
+          AdsetsData["Budget_type"] = budgetType;
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
           AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
@@ -8988,6 +9171,14 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (findMatchingAdset["re_lunch_targeting"]) {
           AdsetsData["re_lunch_targeting"] =
             findMatchingAdset["re_lunch_targeting"];
+        }
+        if (findMatchingAdset["re_lunch_endtime"]) {
+          AdsetsData["re_lunch_endtime"] =
+            findMatchingAdset["re_lunch_endtime"];
+        }
+        if (findMatchingAdset["re_lunch_beneficiary_payer"]) {
+          AdsetsData["re_lunch_beneficiary_payer"] =
+            findMatchingAdset["re_lunch_beneficiary_payer"];
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -9052,17 +9243,97 @@ const EditMultipleAdsetCampaignDrawer = ({
           AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
           AdsetsData["pixel_id"] = findMatchingAdset.pixel_id;
         }
+        if (budgetType === "lifetime") {
+          const newEnd = dayjs(formValuesObject.DatePickerEnd)
+            .format("YYYY-MM-DDTHH:mm:ssZ");
+
+          AdsetsData["end_time"] = newEnd;
+
+          if (findMatchingAdset?.Adsetid && findMatchingAdset.end_time !== newEnd) {
+            AdsetsData["re_lunch_endtime"] = true;
+            send_re_launch_status = true;
+            re_lunch = true;
+          }
+        }
         if (
           findMatchingAdset.Adsetid &&
           findMatchingAdset.countries &&
           findMatchingAdset.countries !== formValuesObject.countries
         ) {
           AdsetsData["countries"] = formValuesObject.countries;
+          // if (formValuesObject.Beneficiary) {
+          //   AdsetsData["beneficiary"] = formValuesObject.Beneficiary
+          //   if (formValuesObject.Payer) {
+          //     AdsetsData["payer"] = formValuesObject.Payer
+          //   } else {
+          //     AdsetsData["payer"] = formValuesObject.Beneficiary
+          //   }
+          // }
           AdsetsData["re_lunch_targeting"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["countries"] = formValuesObject.countries;
+          // if (formValuesObject.Beneficiary) {
+          //   AdsetsData["beneficiary"] = formValuesObject.Beneficiary
+          //   if (formValuesObject.Payer) {
+          //     AdsetsData["payer"] = formValuesObject.Payer
+          //   } else {
+          //     AdsetsData["payer"] = formValuesObject.Beneficiary
+          //   }
+          // }
+        }
+        if (findMatchingAdset.Adsetid) {
+          // countries
+          const newCountries = formValuesObject.countries;
+          if (findMatchingAdset.countries && findMatchingAdset.countries !== newCountries) {
+            AdsetsData["countries"] = newCountries;
+            AdsetsData.re_lunch_targeting = true;
+            send_re_launch_status = true;
+            re_lunch = true;
+          } else {
+            AdsetsData.countries = newCountries;
+          }
+
+          // beneficiary/payer — only if form provides beneficiary
+          if (formValuesObject.Beneficiary) {
+            const newBeneficiary = formValuesObject.Beneficiary;
+            const newPayer = formValuesObject.Payer ?? formValuesObject.Beneficiary;
+            const existingBeneficiary = findMatchingAdset.beneficiary;
+            const existingPayer = findMatchingAdset.payer ?? findMatchingAdset.beneficiary;
+
+            // 1) No existing beneficiary but new provided -> add + flag
+            if (!existingBeneficiary && newBeneficiary) {
+              AdsetsData.beneficiary = newBeneficiary;
+              AdsetsData.payer = newPayer;
+              AdsetsData.re_lunch_beneficiary_payer = true;
+              send_re_launch_status = true;
+              re_lunch = true;
+            }
+            // 2) Existing present but changed -> update + flag
+            else if (
+              (existingBeneficiary && existingBeneficiary !== newBeneficiary) ||
+              (existingPayer && existingPayer !== newPayer)
+            ) {
+              AdsetsData.beneficiary = newBeneficiary;
+              AdsetsData.payer = newPayer;
+              AdsetsData.re_lunch_beneficiary_payer = true;
+              send_re_launch_status = true;
+              re_lunch = true;
+            }
+            // 3) Values exist and unchanged -> copy (no flag)
+            else {
+              AdsetsData.beneficiary = newBeneficiary;
+              AdsetsData.payer = newPayer;
+            }
+          }
+        } else {
+          if (formValuesObject.Beneficiary) {
+            const newBeneficiary = formValuesObject.Beneficiary;
+            const newPayer = formValuesObject.Payer ?? formValuesObject.Beneficiary;
+            AdsetsData.beneficiary = newBeneficiary;
+            AdsetsData.payer = newPayer;
+          }
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -9392,6 +9663,23 @@ const EditMultipleAdsetCampaignDrawer = ({
         } else {
           AdsetsData["placements"] = formValuesObject.placements;
         }
+        if (budgetType === "lifetime") {
+          const newEnd =
+            dayjs(formValuesObject.DatePickerEnd.$d)
+              .tz(imagehash.timeZone)
+              .format("YYYY-MM-DDTHH:mm:ssZ");
+
+          AdsetsData["end_time"] = newEnd;
+        }
+        if (formValuesObject.Beneficiary) {
+          AdsetsData["beneficiary"] = formValuesObject.Beneficiary
+          if (formValuesObject.Payer) {
+            AdsetsData["payer"] = formValuesObject.Payer
+          } else {
+            AdsetsData["payer"] = formValuesObject.Beneficiary
+          }
+        }
+
         AdsetsData["buying_type"] = "AUCTION";
         AdsetsData["addlevel"] = newAddLevel;
       }
@@ -10527,20 +10815,112 @@ const EditMultipleAdsetCampaignDrawer = ({
       style={{ borderRadius: "12px" }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <div>
-          <Select
-            value={budgetType}   // "daily" or "lifetime"
-            onChange={(value) => setBudgetType(value)}
-            disabled={fullCampaignData?.camapaignlevel?.campaignid ? true : false}
-            // style={{ height: "20px" }}
-            options={[
-              { label: "Daily", value: "daily" },
-              { label: "Lifetime", value: "lifetime" },
-            ]}
-            style={{ width: 100 }}
-          // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
-          // getPopupContainer={(triggerNode) => triggerNode.parentElement}
-          />
+        <div style={{ display: 'flex' }}>
+          <div style={{ marginRight: '10px' }}>
+            <Select
+              placeholder="Select report category"
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+              value={popupInputs.reportCat || undefined}
+              optionLabelProp="value"
+              onChange={(val) => {
+                setPopupInputs(s => ({ ...s, reportCat: val }));
+                if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
+              }}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.name || "").toLowerCase().includes(input.toLowerCase())
+              }
+              options={reportCategories.map(c => ({
+                value: `${c.name}`,
+                name: c.name,
+                id: c.categoryId,
+
+                label: (
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 8
+
+                  }}>
+                    <span style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: 200
+                    }} title={`${c.name} - ${c.accountNumber}`}>
+                      {c.name} - {c.accountNumber}
+                    </span>
+                    <span style={{ display: "flex", gap: 10 }}>
+                      <FaPenToSquare
+                        style={{ fontSize: 12 }}
+                        title="Edit"
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setREditedName(c.name);
+                          setREditModalVisible(true);
+                        }}
+                      />
+                      <FaTrashCan
+                        style={{ fontSize: 12, color: "#EC7117" }}
+                        title="Delete"
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setRDeleteModalVisible(true);
+                        }}
+                      />
+                    </span>
+                  </div>
+                )
+              }))}
+
+              style={{ width: 240 }}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              dropdownRender={(menu) => (
+                <div>
+                  {menu}
+                  <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
+                    <Input
+                      size="small"
+                      placeholder="New report category"
+                      value={newReportCategory}
+                      onChange={(e) => setNewReportCategory(e.target.value)}
+                      onPressEnter={addReportCategory}
+                      className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                    />
+                    <Button
+                      size="small"
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={addReportCategory}
+                      style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                    />
+                  </div>
+                </div>
+              )}
+            />
+            {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
+          </div>
+          <div>
+            <Select
+              value={budgetType}   // "daily" or "lifetime"
+              onChange={(value) => setBudgetType(value)}
+              disabled={fullCampaignData?.camapaignlevel?.campaignid ? true : false}
+              // style={{ height: "20px" }}
+              options={[
+                { label: "Daily", value: "daily" },
+                { label: "Lifetime", value: "lifetime" },
+              ]}
+              style={{ width: 100 }}
+            // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
+            // getPopupContainer={(triggerNode) => triggerNode.parentElement}
+            />
+          </div>
         </div>
         {fullCampaignData?.Approval === "PENDING_APPROVAL" && (
           <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -10552,7 +10932,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   color: "#000",
                   borderColor: "#91C25F",
                   borderWidth: 0,
-                  marginBottom: "10px",
+                  // marginBottom: "10px",
                   cursor: "pointer",
                   marginLeft: "10px",
                   height: "32px",
@@ -10575,7 +10955,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   // marginRight: "10px",
                   backgroundColor: theme === "dark" && "#444",
                   color: theme === "dark" && "#fff",
-                  marginBottom: "10px",
+                  // marginBottom: "10px",
                   height: "32px",
                   marginLeft: "10px",
                 }}
@@ -11370,6 +11750,59 @@ const EditMultipleAdsetCampaignDrawer = ({
 >
   Submit
 </Button> */}
+                <Modal
+                  title="Delete Report Category"
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                    }`}
+                  open={rDeleteModalVisible}
+                  onOk={async () => {
+                    if (!rCurrentCategory) return;
+                    await deleteReportCategory(
+                      rCurrentCategory.accountNumber ?? (Array.isArray(account) ? account[0] : account),
+                      rCurrentCategory.categoryId
+                    );
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
+                  }}
+
+                  onCancel={() => {
+                    setRDeleteModalVisible(false);
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Delete"
+                  okButtonProps={{ danger: true, type: "primary" }}
+                >
+                  <p>Are you sure you want to delete “{rCurrentCategory?.name}”?</p>
+                </Modal>
+                <Modal
+                  className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                  title="Edit Report Category"
+                  visible={rEditModalVisible}
+                  onOk={async () => {
+                    if (rEditedName.trim() && rCurrentCategory) {
+                      await renameReportCategory(
+                        rCurrentCategory.accountNumber,
+                        rCurrentCategory.categoryId,
+                        rEditedName.trim()
+                      );
+                      setREditModalVisible(false);
+                      setREditedName("");
+                      setRCurrentCategory(null);
+                    }
+                  }}
+                  onCancel={() => {
+                    setREditModalVisible(false);
+                    setREditedName("");
+                    setRCurrentCategory(null);
+                  }}
+                  okText="Save"
+                >
+                  <Input
+                    value={rEditedName}
+                    onChange={(e) => setREditedName(e.target.value)}
+                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                  />
+                </Modal>
                 {!view && (
                   <Button
                     type="primary"
