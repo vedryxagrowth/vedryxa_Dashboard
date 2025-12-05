@@ -20,6 +20,7 @@ import {
   Breadcrumb,
   Popconfirm,
   Alert,
+  Switch,
 } from "antd";
 import {
   PlusOutlined,
@@ -35,6 +36,7 @@ import {
   PaperClipOutlined,
   DeleteOutlined,
   CopyOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -54,7 +56,8 @@ import { NodeNextRequest } from "next/dist/server/base-http/node";
 import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
 import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
-import { Category } from "@mui/icons-material";
+import { formControlClasses } from "@mui/material";
+
 
 
 
@@ -2588,7 +2591,7 @@ const AdsetComponent = ({
   addAdset,
   removeAdset,
   cloneAdset,
-  currentDate,
+  // currentDate,
   localesdata,
   handleFieldChange,
   network,
@@ -2604,6 +2607,8 @@ const AdsetComponent = ({
   setNewAddLevelData,
   view,
   setIsAnyAdsetBudgetSet,
+  budgetType,
+  geo,
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2620,6 +2625,7 @@ const AdsetComponent = ({
   const [editedImages, setEditedImages] = useState({});
   const [viewSingleAd, setViewSingleAd] = useState({});
 
+
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -2632,9 +2638,220 @@ const AdsetComponent = ({
     selectedFiles[adset.id],
     "selectedFiles for adset id in adset component"
   );
-
+  const currentDate = dayjs();
+  const after30Days = currentDate.add(30, "day");
   console.log(addlevelData, "addlevelData in adset component");
   console.log(newAddLevelData, "newAddLevelData in adset component");
+  const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
+  const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
+  const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+  const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
+
+  const Billing_Event_options = {
+    OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LANDING_PAGE_VIEWS: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    LINK_CLICKS: [{ value: "IMPRESSIONS", label: "Impressions" }, { value: "LINK_CLICKS", label: "Link Clicks" }],
+    REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
+  }
+  const Conversion_Event_options = {
+    OUTCOME_LEADS: [
+      { value: "LEAD", label: "Lead" },
+      { value: "CONTACT", label: "Contact" },
+      { value: "SCHEDULE", label: "Schedule  " },
+    ],
+    OUTCOME_SALES: [
+      { value: "PURCHASE", label: "Purchase" },
+      { value: "INITIATED_CHECKOUT", label: "Initiate Checkout" },
+      { value: "ADD_TO_CART ", label: "Add to Cart" },
+      { value: "CONTENT_VIEW", label: "View Content" },
+      { value: "ADD_TO_WISHLIST", label: " Add to Wishlist" },
+    ]
+  }
+  const Action_Source_Values = {
+    OUTCOME_LEADS: [
+      { value: "website", label: "Website" },
+    ],
+    OUTCOME_SALES: [
+      { value: "website", label: "Website" },
+    ]
+  }
+  const Optimization_goal_values = {
+    OUTCOME_LEADS: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ],
+    OUTCOME_SALES: [
+      { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
+      { value: "VALUE", label: "Maximize value of conversions" },
+      { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
+      { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
+      { value: "REACH", label: "Maximize daily unique reach" },
+      { value: "IMPRESSIONS", label: "Maximize number of impressions" },
+    ]
+  }
+  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+
+  // value currently in form for this adset (keeps UI in sync)
+  const adsetsValues = form.getFieldValue("adsets") || [];
+  const currentValue = adsetsValues[index]?.optimization_goal ?? "";
+
+  const optionsForIndex =
+    index === 0
+      ? optionsForOptimz_goal
+      : optionsForOptimz_goal.map((o) => ({ ...o, disabled: o.value !== currentValue }));
+
+  const currentCountries = adsetsValues[index]?.countries ?? [];
+  const adsetLocationCountry = Form.useWatch(["adsets", index, "countries"], form);
+
+  console.log(adsetLocationCountry);
+
+  const allCountries = [
+    { value: "US", label: "United States" },
+    { value: "GB", label: "United Kingdom" },
+    { value: "AU", label: "Australia" },
+    { value: "IN", label: "India" },
+    { value: "AE", label: "United Arab Emirates" },
+    { value: "CA", label: "Canada" },
+    { value: "DE", label: "Germany" },
+    { value: "FR", label: "France" },
+    { value: "JP", label: "Japan" },
+    { value: "CN", label: "China" },
+    { value: "BR", label: "Brazil" },
+    { value: "ZA", label: "South Africa" },
+    { value: "RU", label: "Russia" },
+    { value: "IT", label: "Italy" },
+    { value: "ES", label: "Spain" },
+    { value: "SG", label: "Singapore" },
+    { value: "NZ", label: "New Zealand" },
+    { value: "MX", label: "Mexico" },
+    { value: "AT", label: "Austria" },
+    { value: "BE", label: "Belgium" },
+    { value: "BG", label: "Bulgaria" },
+    { value: "HR", label: "Croatia" },
+    { value: "CY", label: "Cyprus" },
+    { value: "CZ", label: "Czech Republic" },
+    { value: "DK", label: "Denmark" },
+    { value: "EE", label: "Estonia" },
+    { value: "FI", label: "Finland" },
+    { value: "GR", label: "Greece" },
+    { value: "HU", label: "Hungary" },
+    { value: "IE", label: "Ireland" },
+    { value: "LV", label: "Latvia" },
+    { value: "LT", label: "Lithuania" },
+    { value: "LU", label: "Luxembourg" },
+    { value: "MT", label: "Malta" },
+    { value: "NL", label: "Netherlands" },
+    { value: "PL", label: "Poland" },
+    { value: "PT", label: "Portugal" },
+    { value: "RO", label: "Romania" },
+    { value: "SK", label: "Slovakia" },
+    { value: "SI", label: "Slovenia" },
+    { value: "SE", label: "Sweden" },
+  ];
+
+  const campaignCountries = Form.useWatch("countries", form) || [];
+
+  const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
+
+  console.log(campaignCountries);
+
+  const newCampaignCountries = campaignCountries && campaignCountries.length > 0 ? campaignCountries.map(item => {
+    return allCountries.find(item1 => item1.value === item)
+  }) : []
+
+  console.log(newCampaignCountries);
+
+  const baseOptions =
+    campaignCountries.length > 0
+      ? allCountries.filter((c) => campaignCountries.includes(c.value))
+      : allCountries;
+
+  // Build options depending on geo and index
+  const optionsForIndexOfCountries =
+    geo === "Geos" && index > 0
+      ? // disable any option that's NOT currently selected for this adset
+      baseOptions.map((opt) => ({
+        ...opt,
+        disabled: !currentCountries.includes(opt.value),
+      }))
+      : // otherwise full options (fully editable)
+      baseOptions;
+
+  const handleFirstOptimizationChange = (value) => {
+    // Get current adsets from form
+    const adsets = form.getFieldValue("adsets") || [];
+
+    // Map through adsets and set optimization_goal to the new value
+    const newAdsets = adsets.map((a) => ({
+      ...a,
+      optimization_goal: value,
+    }));
+
+    // Update the form
+    form.setFieldsValue({ adsets: newAdsets });
+  };
+  const EU_AND_ASSOCIATED = [
+    // EU 27
+    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT",
+    "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+    // EU territories & regions
+    "AX", "PT-20", "DE-BS", "IT-CO", "ES-CN", "GF", "GP", "DE-HL", "IT-LI", "PT-30",
+    "MQ", "YT", "ES-ML", "GR-MA", "RE", "FR-MF"
+  ];
+  function needsBeneficiaryAndPayer(targetCountries) {
+    if (!targetCountries) return false;
+
+    // Normalize to an array:
+    let countries = targetCountries;
+
+    // If a comma/semicolon/space-separated string (common when reading form values)
+    if (typeof targetCountries === 'string') {
+      countries = targetCountries
+        .split(/[,;]\s*|\s+/)   // split by comma, semicolon or whitespace
+        .map(s => s.trim())
+        .filter(Boolean);
+    } else if (!Array.isArray(targetCountries)) {
+      // If it's an object (e.g., {0: 'IN', 1: 'DE'}) try to get values and flatten
+      if (typeof targetCountries === 'object' && targetCountries !== null) {
+        countries = Object.values(targetCountries).flat().map(String).map(s => s.trim()).filter(Boolean);
+      } else {
+        // unknown type — bail out safely
+        return false;
+      }
+    }
+
+    // Finally, do the check
+    return Array.isArray(countries) && countries.some(c => EU_AND_ASSOCIATED.includes(String(c)));
+  }
+  const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
+  console.log(BeneficiaryAndPayer);
+  useEffect(() => {
+    if (adset?.pixel_id) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            pixel_id: adset.pixel_id
+          },
+        }
+      });
+    }
+    if (adset?.addlevel) {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            page_id: adset?.addlevel[0]?.page_id || ""
+          },
+        }
+      })
+    }
+
+  }, [adset, index])
+
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -3240,6 +3457,34 @@ const AdsetComponent = ({
             />
           </Form.Item>
           <Form.Item
+            name={["adsets", index, "action_source"]}
+            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "120px" }}
+            initialValue={adset.action_source}
+          >
+            <Select
+              //   disabled={adset.Adsetid ? true : false}
+              // options={[
+              //   { value: "website", label: "Website" },
+              //   { value: "email", label: "Email" },
+              //   { value: "app", label: "App" },
+              //   { value: "phone_call", label: "Phone Call" },
+              // ]}
+              options={Action_Source_Values[objectiveValue] || []}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.action_source || "website"}
+            // onChange={(value) => handleFieldChange(index, "action_source", value)}
+            />
+          </Form.Item>
+          <Form.Item
             name={["adsets", index, "optimization_goal"]}
             label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
             rules={[
@@ -3249,9 +3494,9 @@ const AdsetComponent = ({
               },
             ]}
             style={{ flex: "120px" }}
-            initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
+            initialValue={adset.optimization_goal}
           >
-            <Select
+            {/* <Select
               //   disabled={adset.Adsetid ? true : false}
               options={[
                 { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
@@ -3259,11 +3504,60 @@ const AdsetComponent = ({
                 { value: "REACH", label: "Reach" },
                 { value: "VALUE", label: "Value" },
               ]}
+
               // onChange={(value) => handleFieldChange(index, "optimization_goal", value)}
               // defaultValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
+            /> */}
+            {index === 0 ? (
+              <Select
+                options={optionsForIndex}
+                value={currentValue}
+                onChange={(val) => handleFirstOptimizationChange(val)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            ) : (
+              // Select stays enabled but only the current option is enabled to pick
+              <Select
+                options={optionsForIndex}
+                value={currentValue}
+                // no onChange needed (user can't change to another value because other options are disabled)
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              />
+            )}
+          </Form.Item>
+
+          <Form.Item
+            name={["adsets", index, "custom_event_type"]}
+            label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please select an option!",
+              },
+            ]}
+            style={{ flex: "120px" }}
+            initialValue={adset.custom_event_type}
+
+          >
+            <Select
+              //   disabled={adset.Adsetid ? true : false}
+              // options={[
+              //   { value: "LEAD", label: "Lead" },
+              //   { value: "PURCHASE", label: "Purchase" },
+              //   { value: "SEARCH", label: "Search" },
+              //   { value: "CONTACT", label: "Contact" },
+              // ]}
+              options={Conversion_Event_options[objectiveValue] || []}
+              dropdownClassName={theme === "dark" && "custom-dropdown"}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                } green-border-select`}
+            // defaultValue={adset.custom_event_type || "LEAD"}
+            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
             />
           </Form.Item>
           <Form.Item
@@ -3276,14 +3570,15 @@ const AdsetComponent = ({
               },
             ]}
             style={{ flex: "120px" }}
-            initialValue={adset.billing_event || "IMPRESSIONS"}
+            initialValue={adset.billing_event}
           >
             <Select
               //   disabled={adset.Adsetid ? true : false}
-              options={[
-                { value: "IMPRESSIONS", label: "Impressions" },
-                { value: "VALUE", label: "Value" },
-              ]}
+              // options={[
+              //   { value: "IMPRESSIONS", label: "Impressions" },
+              //   { value: "VALUE", label: "Value" },
+              // ]}
+              options={Billing_Event_options[optimizationGoalValue] || []}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
@@ -3292,83 +3587,46 @@ const AdsetComponent = ({
             />
           </Form.Item>
           <Form.Item
-            name={["adsets", index, "DatePicker"]}
-            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please input!",
-              },
-            ]}
-            style={{ flex: "150px" }}
-            initialValue={currentDate ? dayjs(currentDate) : dayjs()}
-          >
-            <DatePicker
-              //   disabled={adset.Adsetid ? true : false}
-              showTime
-              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
-              className="green-border-picker"
-              //                                 onChange={(value, dateString) => {
-              //     console.log("Local Time:", dateString)
-              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-              //   }}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-          <Form.Item
-            name={["adsets", index, "action_source"]}
-            label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+            // name="pixel_id"
+            name={["adsets", index, "pixel_id"]}
+            // initialValue={
+            //   typeof imagehash?.pixelID === "object"
+            //     ? imagehash.pixelID.Universal
+            //     : imagehash?.pixelID
+            // }
+            initialValue={adset?.pixel_id}
+            label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
             rules={[
               {
                 required: true,
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.action_source || "website"}
+            style={{ flex: 3 }}
           >
-            <Select
-              //   disabled={adset.Adsetid ? true : false}
-              options={[
-                { value: "website", label: "Website" },
-                { value: "email", label: "Email" },
-                { value: "app", label: "App" },
-                { value: "phone_call", label: "Phone Call" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.action_source || "website"}
-            // onChange={(value) => handleFieldChange(index, "action_source", value)}
-            />
+            {typeof imagehash?.pixelID === "object" ? (
+              <Select
+                // defaultValue={imagehash?.pixelID?.Universal}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+              >
+                {Object.entries(imagehash.pixelID).map(([label, value]) => (
+                  <Select.Option key={value} value={value}>
+                    {`${label} - ${value}`}
+                  </Select.Option>
+                ))}
+              </Select>
+            ) : (
+              <Select
+                // disabled={adset.Adsetid ? true : false}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+              />
+            )}
           </Form.Item>
-          <Form.Item
-            name={["adsets", index, "custom_event_type"]}
-            label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "120px" }}
-            initialValue={adset.custom_event_type || "LEAD"}
-          >
-            <Select
-              //   disabled={adset.Adsetid ? true : false}
-              options={[
-                { value: "LEAD", label: "Lead" },
-                { value: "PURCHASE", label: "Purchase" },
-                { value: "SEARCH", label: "Search" },
-                { value: "CONTACT", label: "Contact" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
-            // defaultValue={adset.custom_event_type || "LEAD"}
-            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
-            />
-          </Form.Item>
+
           {/* <Form.Item
                         name="pixel_id"
                         initialValue={imagehash?.pixelID}
@@ -3383,44 +3641,7 @@ const AdsetComponent = ({
                     >
                         <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                     </Form.Item> */}
-          <Form.Item
-            name="pixel_id"
-            initialValue={
-              typeof imagehash?.pixelID === "object"
-                ? imagehash.pixelID.Universal
-                : imagehash?.pixelID
-            }
-            label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
-            rules={[
-              {
-                required: true,
-                message: "Please select an option!",
-              },
-            ]}
-            style={{ flex: "140px" }}
-          >
-            {typeof imagehash?.pixelID === "object" ? (
-              <Select
-                defaultValue={imagehash?.pixelID?.Universal}
-                className={
-                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
-                }
-              >
-                {Object.entries(imagehash.pixelID).map(([label, value]) => (
-                  <Select.Option key={value} value={value}>
-                    {`${label} - ${value}`}
-                  </Select.Option>
-                ))}
-              </Select>
-            ) : (
-              <Input
-                // disabled={adset.Adsetid ? true : false}
-                className={
-                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
-                }
-              />
-            )}
-          </Form.Item>
+
           {/*pk*/}
           {/* <Form.Item
                         name={['adsets', index, "DailyAdd_amount"]} 
@@ -3550,7 +3771,7 @@ const AdsetComponent = ({
                             />
                         </Tooltip>
                     </Form.Item> */}
-
+          {/* 
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
             label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
@@ -3621,8 +3842,136 @@ const AdsetComponent = ({
                 }
               />
             </Tooltip>
+          </Form.Item> */}
+          <Form.Item
+            name={["adsets", index, "DailyAdd_amount"]}
+            required={!CampaignBudgetActive}
+            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+            // initialValue={0}
+            // validateTrigger={["onBlur"]}
+            // re-run validation whenever campaign-level Daily_amount changes
+            validateTrigger={["onChange", "onBlur"]}
+            dependencies={["adsets"]}
+            rules={[
+              {
+                validator(_, value) {
+                  const isReadOnly = parseInt(campaignLevelDailyBudget) !== 0;
+                  if (isReadOnly) return Promise.resolve();
+
+                  const parsed = parseFloat(value);
+
+                  if (value === undefined || value === '' || isNaN(parsed) || parsed <= 0) {
+                    return Promise.reject(
+                      new Error(`Please enter a valid number > 0 in Adset ${index + 1}`)
+                    );
+                  }
+
+                  return Promise.resolve();
+                },
+              },
+            ]}
+          >
+            <Tooltip
+              title={
+                CampaignBudgetActive
+                  ? "You have enabled budget in the Campaign Level"
+                  : ""
+              }
+              overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+                border: '1px solid #ccc',
+                borderRadius: 6,
+                // fontWeight: 500,
+              }}
+            >
+              <InputNumber
+                placeholder="$"
+                min={0}
+                step={0.01}
+                // value={budget}
+                value={adset.DailyAdd_amount}
+                onChange={(value) => {
+                  const finalValue = value === null ? 0 : value;
+
+
+                  handleAdsetChange(index, finalValue);
+
+
+                  const adsets = form.getFieldValue("adsets") || [];
+
+
+                  const updatedAdsets = adsets.map((ad, i) =>
+                    i === index ? { ...ad, DailyAdd_amount: finalValue } : ad
+                  );
+
+                  form.setFieldsValue({ adsets: updatedAdsets });
+                  const hasBudget = updatedAdsets.some(
+                    (ad) => Number(ad.DailyAdd_amount) > 0
+                  );
+                  setIsAnyAdsetBudgetSet(hasBudget);
+
+
+                }}
+
+                disabled={CampaignBudgetActive}
+                style={{ width: 120 }}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+              />
+            </Tooltip>
+          </Form.Item>
+          <Form.Item
+            name={["adsets", index, "DatePicker"]}
+            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+            rules={[
+              {
+                required: true,
+                message: "Please input!",
+              },
+            ]}
+            style={{ width:"200px" }}
+            initialValue={currentDate ? dayjs(currentDate) : dayjs()}
+          >
+            <DatePicker
+              //   disabled={adset.Adsetid ? true : false}
+              showTime
+              dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+              className="green-border-picker"
+              //                                 onChange={(value, dateString) => {
+              //     console.log("Local Time:", dateString)
+              //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+              //   }}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
 
+          {budgetType !== "daily" &&
+            <Form.Item
+              name={["adsets", index, "DatePickerEnd"]}
+              label={<span style={{ color: "#B4B4B4" }}>End Time (IST)</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input!",
+                },
+              ]}
+              style={{ flex: "150px" }}
+              initialValue={after30Days ? dayjs(after30Days) : dayjs()}
+            >
+              <DatePicker
+                showTime
+                dropdownClassName={theme === "dark" ? "dark-theme-dropdown" : ""}
+                className="green-border-picker"
+                //                                 onChange={(value, dateString) => {
+                //     console.log("Local Time:", dateString)
+                //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                //   }}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          }
           {showBidAmount && (
             <Form.Item
               name={["adsets", index, "bid_amount"]}
@@ -3691,81 +4040,130 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-            style={{ flex: "140px" }}
+             style={{ flex: "0 0 140px" }}
             initialValue={adset.countries || "US"}
           >
             <Select
-              // options={[
-              //   { value: "US", label: "United States", title: "" },
-              //   { value: "GB", label: "United Kingdom", title: "" },
-              //   { value: "AU", label: "Australia", title: "" },
-              //   { value: "IN", label: "India", title: "" },
-              //   { value: "AE", label: "United Arab Emirates", title: "" },
-              //   { value: "CA", label: "Canada", title: "" },
-              //   { value: "DE", label: "Germany", title: "" },
-              //   { value: "FR", label: "France", title: "" },
-              //   { value: "JP", label: "Japan", title: "" },
-              //   { value: "CN", label: "China", title: "" },
-              //   { value: "BR", label: "Brazil", title: "" },
-              //   { value: "ZA", label: "South Africa", title: "" },
-              //   { value: "RU", label: "Russia", title: "" },
-              //   { value: "IT", label: "Italy", title: "" },
-              //   { value: "ES", label: "Spain", title: "" },
-              //   { value: "SG", label: "Singapore", title: "" },
-              //   { value: "NZ", label: "New Zealand", title: "" },
-              //   { value: "MX", label: "Mexico", title: "" },
-              // ]}
-              // defaultValue={adset.countries || "US"}
+              mode="multiple"
+              allowClear
               showSearch
-              options={[
-                { value: "US", label: "United States", title: "" },
-                { value: "GB", label: "United Kingdom", title: "" },
-                { value: "AU", label: "Australia", title: "" },
-                { value: "IN", label: "India", title: "" },
-                { value: "AE", label: "United Arab Emirates", title: "" },
-                { value: "CA", label: "Canada", title: "" },
-                { value: "DE", label: "Germany", title: "" },
-                { value: "FR", label: "France", title: "" },
-                { value: "JP", label: "Japan", title: "" },
-                { value: "CN", label: "China", title: "" },
-                { value: "BR", label: "Brazil", title: "" },
-                { value: "ZA", label: "South Africa", title: "" },
-                { value: "RU", label: "Russia", title: "" },
-                { value: "IT", label: "Italy", title: "" },
-                { value: "ES", label: "Spain", title: "" },
-                { value: "SG", label: "Singapore", title: "" },
-                { value: "NZ", label: "New Zealand", title: "" },
-                { value: "MX", label: "Mexico", title: "" },
-                { value: "AT", label: "Austria", title: "" },
-                { value: "BE", label: "Belgium", title: "" },
-                { value: "BG", label: "Bulgaria", title: "" },
-                { value: "HR", label: "Croatia", title: "" },
-                { value: "CY", label: "Cyprus", title: "" },
-                { value: "CZ", label: "Czech Republic", title: "" },
-                { value: "DK", label: "Denmark", title: "" },
-                { value: "EE", label: "Estonia", title: "" },
-                { value: "FI", label: "Finland", title: "" },
-                { value: "GR", label: "Greece", title: "" },
-                { value: "HU", label: "Hungary", title: "" },
-                { value: "IE", label: "Ireland", title: "" },
-                { value: "LV", label: "Latvia", title: "" },
-                { value: "LT", label: "Lithuania", title: "" },
-                { value: "LU", label: "Luxembourg", title: "" },
-                { value: "MT", label: "Malta", title: "" },
-                { value: "NL", label: "Netherlands", title: "" },
-                { value: "PL", label: "Poland", title: "" },
-                { value: "PT", label: "Portugal", title: "" },
-                { value: "RO", label: "Romania", title: "" },
-                { value: "SK", label: "Slovakia", title: "" },
-                { value: "SI", label: "Slovenia", title: "" },
-                { value: "SE", label: "Sweden", title: "" },
-              ]}
-              dropdownClassName={theme === "dark" && "custom-dropdown"}
-              className={`${theme === "dark" ? "dark-theme" : "light-theme"
-                } green-border-select`}
+              placeholder={
+                campaignCountries.length ? "Select from campaign countries" : "Select any country"
+              }
+              disabled={(geo === "Geos" && index !== 0)}
+              options={optionsForIndexOfCountries}
+              getPopupContainer={(trigger) => trigger.parentNode}
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+              className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+              // change handler: only needs to actively update when first index and geo === "Geos"
+              onChange={(val) => {
+                if (geo === "Geos" && index === 0) {
+                  handleFirstCountriesChange(val);
+                } else {
+                  // For independent mode, let Ant Form handle the change automatically.
+                  // If you need side effects when geo !== "Geos", handle them here.
+                }
+              }}
             />
           </Form.Item>
-          <Form.Item
+
+          {BeneficiaryAndPayer && (
+            <>
+              {/*  Beneficiary field with Switch in label */}
+              <Form.Item
+                label={
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                      overlayInnerStyle={{
+                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#000',
+                        border: '1px solid #ccc',
+                        borderRadius: 6,
+                        // fontWeight: 500,
+                      }}
+                    >
+                      <InfoCircleOutlined
+                        style={{
+                          color: theme === "dark" ? "#bbb" : "#888",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Tooltip>
+
+                    {/* ✅ Switch controls visibility of Payer field */}
+                    <Form.Item
+                      noStyle
+                      name={["adsets", index, "showPayer"]}
+                      valuePropName="checked"
+                    >
+                      <Switch size="small" />
+                    </Form.Item>
+                  </div>
+                }
+                name={["adsets", index, "Beneficiary"]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please fill the input!",
+                  },
+                ]}
+                style={{ flex: "1 1 150px" }}
+                initialValue={adset?.beneficiary}
+              >
+                <Input />
+              </Form.Item>
+
+              {/* ✅ Conditionally render Payer field when switch is ON */}
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, curr) =>
+                  prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
+                }
+              >
+                {({ getFieldValue }) =>
+                  getFieldValue(["adsets", index, "showPayer"]) ? (
+                    <Form.Item
+                      name={["adsets", index, "Payer"]}
+                      label={
+                        // <span style={{ color: "#B4B4B4" }}>Payer</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ color: "#B4B4B4" }}>Payer</span>
+                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+                            overlayInnerStyle={{
+                              backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                              color: theme === 'dark' ? '#fff' : '#000',
+                              border: '1px solid #ccc',
+                              borderRadius: 6,
+                              // fontWeight: 500,
+                            }}
+                          >
+                            <InfoCircleOutlined
+                              style={{
+                                color: theme === "dark" ? "#bbb" : "#888",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </Tooltip>
+                        </div>
+                      }
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please fill the input!",
+                        },
+                      ]}
+                      style={{ flex: "1 1 150px" }}
+                      initialValue={adset?.payer}
+                    >
+                      <Input />
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+            </>
+          )}
+          {/* <Form.Item
             name={["adsets", index, "Min_Age"]}
             label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
             rules={[
@@ -3838,6 +4236,89 @@ const AdsetComponent = ({
               className={`${theme === "dark" ? "dark-theme" : "light-theme"
                 } green-border-select`}
             />
+          </Form.Item> */}
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) =>
+              prev?.adsets?.[index]?.countries !== curr?.adsets?.[index]?.countries
+            }
+          >
+            {({ getFieldValue }) => {
+              const selectedCountries = getFieldValue(["adsets", index, "countries"]);
+              const isDisabled = Array.isArray(selectedCountries) && selectedCountries.length > 0;
+
+              return (
+                <>
+                  {/* 🔹 Min Age */}
+                  <Form.Item
+                    name={["adsets", index, "Min_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Min_Age || "18"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "18", label: "18", title: "" },
+                        { value: "25", label: "25", title: "", disabled: hasCountries },
+                        { value: "35", label: "35", title: "", disabled: hasCountries },
+                        { value: "40", label: "40", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Max Age */}
+                  <Form.Item
+                    name={["adsets", index, "Max_Age"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={adset.Max_Age || "65"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "20", label: "20", title: "", disabled: hasCountries },
+                        { value: "30", label: "30", title: "", disabled: hasCountries },
+                        { value: "65", label: "65+", title: "" },
+                        { value: "80", label: "80", disabled: true, title: "" },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* 🔹 Gender */}
+                  <Form.Item
+                    name={["adsets", index, "Gender"]}
+                    label={<span style={{ color: "#B4B4B4" }}>Gender</span>}
+                    rules={[
+                      { required: true, message: "Please select an option!" },
+                    ]}
+                    style={{ flex: "1 1 150px" }}
+                    initialValue={JSON.stringify(adset?.Gender) || "0"}
+                  >
+                    <Select
+                      disabled={hasCountries}
+                      options={[
+                        { value: "0", label: "All", title: "" },
+                        { value: "1", label: "Male", title: "", disabled: hasCountries },
+                        { value: "2", label: "Female", title: "", disabled: hasCountries },
+                      ]}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                    />
+                  </Form.Item>
+                </>
+              );
+            }}
           </Form.Item>
           <Form.Item
             name={["adsets", index, "Language"]}
@@ -3989,14 +4470,69 @@ const AdsetComponent = ({
                     flexDirection: "row",
                     justifyContent: "space-between",
                     alignItems: "flex-start",
-                    gap: "16px", // spacing between items
+                    gap: "16px",
                     width: "100%",
-                    flexWrap: "wrap", // optional for responsive wrapping
+                    flexWrap: "wrap",
                   }}
                 >
                   <Form.Item
                     name={["adsets", index, "platforms"]}
-                    label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                    // label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                    label={
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ color: "#B4B4B4" }}>Platforms</span>
+
+                        {(() => {
+
+                          const dependencyRules = {
+                            messenger: "Messenger requires Facebook",
+                            audience_network: "Audience Network requires Facebook",
+                          };
+
+
+                          const currentSelection = Array.isArray(selectedPublishers?.[adset.id])
+                            ? selectedPublishers[adset.id]
+                            : [];
+
+
+                          const selectedWithDeps = currentSelection.filter(
+                            (p) => dependencyRules[p]
+                          );
+
+                          if (selectedWithDeps.length === 0) return null;
+
+                          const tooltipText = (
+                            <div style={{ maxWidth: 260, lineHeight: 1.4 }}>
+                              <b>Platform Dependencies:</b>
+                              <br />
+                              {selectedWithDeps.map((p) => (
+                                <div key={p}>• {dependencyRules[p]}</div>
+                              ))}
+                              (Meta doesn’t allow these to run alone)
+                            </div>
+                          );
+
+                          return (
+                            <Tooltip placement="top" title={tooltipText}
+                              overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                              }}
+                            >
+                              <InfoCircleOutlined
+                                style={{
+                                  color: theme === "dark" ? "#bbb" : "#888",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            </Tooltip>
+                          );
+                        })()}
+                      </div>
+                    }
                     rules={[
                       { required: true, message: "Please select an option!" },
                     ]}
@@ -4029,6 +4565,78 @@ const AdsetComponent = ({
                     label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
                     rules={[
                       { required: true, message: "Please select an option!" },
+                      {
+
+                        validator: (_, value = []) => {
+                          if (!Array.isArray(value)) return Promise.resolve();
+
+
+                          const deps = {
+                            // 🔹 Facebook
+                            story_f: ["feed", "story_i"],
+                            marketplace: ["feed"],
+                            search: ["feed"],
+                            profile_feed_f: ["feed"],
+                            notification: ["feed"],
+                            right_hand_column: ["feed"],
+                            facebook_reels_overlay: ["feed"],
+                            instream_video: ["feed"],
+
+
+                            explore_home: ["explore"],
+
+                            story_m: ["feed", "story_i"],
+                            sponsored_messages: ["__exclusive__"],
+
+
+                            classic: ["feed"],
+                            rewarded_video: ["feed"],
+
+                            // 🔹 Threads
+                            threads_stream: ["stream"], // requires Instagram Stream
+                          };
+
+                          // 🔍 Build readable label map
+                          const labelMap = {};
+                          Object.entries(positionOptions).forEach(([platform, arr]) => {
+                            arr.forEach((item) => {
+                              labelMap[item.key] = item.label;
+                            });
+                          });
+
+
+                          if (value.includes("sponsored_messages") && value.length > 1) {
+                            return Promise.reject(
+                              new Error(
+                                ` "Messenger Sponsored Messages" cannot be combined with other placements. Remove the other Platforms except Messenger`
+                              )
+                            );
+                          }
+
+
+                          for (const pos of value) {
+                            const required = deps[pos];
+                            if (!required || required.includes("__exclusive__")) continue;
+
+
+                            if (!required.some((r) => value.includes(r))) {
+                              const missingLabels = required.map((r) => labelMap[r] || r);
+                              const posLabel = labelMap[pos] || pos;
+
+                              const missingText =
+                                missingLabels.length > 1
+                                  ? missingLabels.join(" or ")
+                                  : missingLabels[0];
+
+                              return Promise.reject(
+                                new Error(`⚠️ "${posLabel}" requires "${missingText}" to be selected.`)
+                              );
+                            }
+                          }
+
+                          return Promise.resolve();
+                        },
+                      },
                     ]}
                     style={{ flex: 2, minWidth: "215px" }}
                   >
@@ -4062,6 +4670,52 @@ const AdsetComponent = ({
                     label={<span style={{ color: "#B4B4B4" }}>Device</span>}
                     rules={[
                       { required: true, message: "Please select an option!" },
+                      {
+                        // ✅ Soft dependency validator (platform + position awareness)
+                        validator: (_, devices = []) => {
+                          if (!Array.isArray(devices)) return Promise.resolve();
+
+                          const selectedPos = form.getFieldValue(["adsets", index, "positions"]) || [];
+
+                          // Positions that are mobile-only
+                          const mobileOnly = [
+                            "story_f",
+                            "story_i",
+                            "story_m",
+                            "facebook_reels",
+                            "facebook_reels_overlay",
+                            "instant_article",
+                            "profile_reels",
+                            "rewarded_video",
+                            "classic",
+                          ];
+
+                          // Positions that are desktop-only
+                          const desktopOnly = ["right_hand_column"];
+
+
+                          const hasMobileOnly = selectedPos.some((p) => mobileOnly.includes(p));
+                          const hasDesktopOnly = selectedPos.some((p) => desktopOnly.includes(p));
+
+                          if (hasMobileOnly && devices.includes("desktop") && !devices.includes("mobile")) {
+                            return Promise.reject(
+                              new Error(
+                                ` Selected positions are mobile-only. Please include "Mobile" in devices.`
+                              )
+                            );
+                          }
+
+                          if (hasDesktopOnly && devices.includes("mobile") && !devices.includes("desktop")) {
+                            return Promise.reject(
+                              new Error(
+                                `"Facebook Right Column" is desktop-only. Please include "Desktop" device.`
+                              )
+                            );
+                          }
+
+                          return Promise.resolve();
+                        },
+                      },
                     ]}
                     // style={{ flex: '1 1 200px' }}
                     style={{ flex: 1, minWidth: "215px" }}
@@ -5061,8 +5715,8 @@ const AdsetComponent = ({
                     </div>
 
                     <Form.Item
-                      name="page_id"
-                      initialValue={imagehash?.pageID}
+                      name={["adsets", index, "page_id"]}
+                      initialValue={adset?.page_id}
                       label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                       rules={[
                         {
@@ -5072,14 +5726,52 @@ const AdsetComponent = ({
                       ]}
                       style={{ flex: 3, marginLeft: "1%" }}
                     >
-                      <Input
+                      {typeof imagehash?.pageID === "object" ? (
+                        <Select
+                          // defaultValue={imagehash?.pageID?}
+                          className={
+                            theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                          }
+                          onChange={(value) => {
+                            // setAddName(e.target.value);
+                            setNewAddLevelData((prev) => {
+                              const key = adset.id;
+                              const list = Array.isArray(prev[key])
+                                ? prev[key].filter(Boolean)
+                                : [];
+
+                              const next = list.map((item, idx) => ({
+                                ...item,
+                                page_id: value,
+                              }));
+
+                              return { ...prev, [key]: next };
+                            });
+                          }}
+
+                        >
+                          {Object.entries(imagehash.pageID).map(([label, value]) => (
+                            <Select.Option key={value} value={value}>
+                              {`${label} - ${value}`}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      ) : (
+                        <Select
+                          // disabled={adset.Adsetid ? true : false}
+                          className={
+                            theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                          }
+                        />
+                      )}
+                      {/* <Input
                         style={{ width: "23%" }}
                         className={
                           theme === "dark"
                             ? "custom-input-dark"
                             : "custom-input-light"
                         }
-                      />
+                      /> */}
                     </Form.Item>
                   </div>
                   <Form.Item
@@ -5789,6 +6481,15 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [submitErrors, setSubmitErrors] = useState([]);
 
   const [accountNumber, setAccountNumber] = useState(selectedRow?.Account_Number);
+  const [pixel_id_list, setPixel_id_list] = useState([]);
+  const [page_id_list, setPage_id_list] = useState([]);
+  const [pageidList, setPageIdList] = useState([]);
+  const [pixelIdList, setPixelIdList] = useState([]);
+  const [geo, setGeos] = useState("Geo");
+  const [pixel, setPixels] = useState("Pixel");
+  const [page, setPages] = useState("Page");
+  const [imageHashArray, setImageHashArray] = useState([]);
+  const [newImageHashArray, setNewImageHashArray] = useState([]);
   const [imagehash, setimagehash] = useState("");
   const { data: session } = useSession();
   var token = localStorage.getItem("token");
@@ -5847,7 +6548,15 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [rDeleteModalVisible, setRDeleteModalVisible] = useState(false);
   const [rCurrentCategory, setRCurrentCategory] = useState(null);
   const [rEditedName, setREditedName] = useState("");
+  const [budgetType, setBudgetType] = useState("daily");
 
+  const watchedAdsets = Form.useWatch("adsets", form) || [];
+
+  // Derived condition name changed to watchedHasAdsetBudget
+  const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
+    ? watchedAdsets.some(ad => Number(ad?.DailyAdd_amount) > 0)
+    : false;
+  const watchedCampaignBudget = Form.useWatch("Daily_amount", form);
   useEffect(() => {
     if (!accountNumber || accountNumber.length === 0) return;
 
@@ -6079,7 +6788,8 @@ const CloneMultipleAdsetCampaignDrawer = ({
         );
         console.log("hello viewdata", ...response.data);
         setFullCampaignData(response?.data[0]);
-
+        console.log(fullCampaignData)
+        setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "Daily")
         setFormValuesFromDraft(response?.data[0]);
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
         //     const selectedOption = item.selectedOption || "creative";
@@ -6943,10 +7653,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
 
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
-    form.setFieldsValue({
-      pixel_id: imagehash?.pixelID,
-      page_id: imagehash?.pageID,
-    });
+    // form.setFieldsValue({
+    //   pixel_id: imagehash?.pixelID,
+    //   page_id: imagehash?.pageID,
+    // });
 
     // Check if all required fields are complete
     const checkFormCompletion = () => {
@@ -7776,6 +8486,8 @@ const CloneMultipleAdsetCampaignDrawer = ({
           setSelectedFilesFromMedia({});
           setSelectedFiles({});
           onClose();
+          setPopupInputs({});
+          setBudgetType(" ");
           setSelectedPositions({});
           setAdsets([
             { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
@@ -7840,6 +8552,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       });
   }
   const category = fullCampaignData?.Category;
+
   const MultipleAdsestsFetching = async (values) => {
     let AllAdsetsData = {
       identifier: uuidv4(),
@@ -7848,7 +8561,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       Approval: "PENDING_APPROVAL",
       fbstatus: "No-Live",
       // Category: fullCampaignData.Category || "",
-      Category: popupInputs.reportCat || "",
+      Category: popupInputs.reportCat || category || "",
       camapaignlevel: {
         createdby: session?.user?.name,
         Name: values.Name,
@@ -7857,6 +8570,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         ...(Array.isArray(values?.Special_categories)
           ? { Special_categories_countries: values.countries }
           : {}),
+        Budget_type: budgetType,
         Bid_strategy: values.Bid_strategy,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
@@ -8413,17 +9127,18 @@ const CloneMultipleAdsetCampaignDrawer = ({
       AdsetsData = {
         id: uuidv4(),
         AdsetName: formValuesObject.AdsetName,
+        Budget_type: budgetType,
         Daily_amount: formValuesObject.DailyAdd_amount
           ? parseFloat(formValuesObject.DailyAdd_amount) * 100
           : "",
         optimization_goal: formValuesObject.optimization_goal,
         billing_event: formValuesObject.billing_event,
         start_time: moment(formValuesObject.DatePicker.$d)
-          .tz(imagehash.timeZone)
+          // .tz(imagehash.timeZone)
           .format("YYYY-MM-DDTHH:mm:ssZ"), //formValuesObject.DatePicker.$d
         action_source: formValuesObject.action_source,
         custom_event_type: formValuesObject.custom_event_type,
-        pixel_id: values.pixel_id,
+        pixel_id: formValuesObject.pixel_id,
         bid_amount: formValuesObject.bid_amount
           ? parseFloat(formValuesObject.bid_amount) * 100
           : 0,
@@ -8458,6 +9173,14 @@ const CloneMultipleAdsetCampaignDrawer = ({
           position: formValuesObject.positions,
           device_platforms: formValuesObject.device_platforms,
         }),
+
+        ...(formValuesObject.Beneficiary
+          ? { beneficiary: formValuesObject.Beneficiary }
+          : {}),
+        ...(formValuesObject.Beneficiary
+          ? formValuesObject.Payer ? { payer: formValuesObject.Payer } : { payer: formValuesObject.Beneficiary }
+          : {}),
+
         buying_type: "AUCTION",
         addlevel: newAddLevel || [],
       };
@@ -8539,6 +9262,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       AdsetsData[`adsetlevel_${i + 1}`] = {
         id: uuidv4(),
         AdsetName: values.adsets[i].AdsetName || "",
+        Budget_type: budgetType,
         Daily_amount: values.adsets[i].DailyAdd_amount
           ? parseFloat(values.adsets[i].DailyAdd_amount) * 100
           : "",
@@ -8919,6 +9643,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     setSelectedFiles({}); // Clear all selected files
     setShowBidAmount(false); // Reset showBidAmount state
     setPopupInputs({}); // Clear popup inputs
+    setBudgetType(" ");
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -9567,112 +10292,129 @@ const CloneMultipleAdsetCampaignDrawer = ({
       }}
       style={{ borderRadius: "12px" }}
     >
-      <div style={{ marginBottom: '10px' }}>
-        <Select
-          placeholder="Select report category"
-          className={`${theme === "dark" ? "dark-theme" : "light-theme"
-            } green-border-select`}
-          value={popupInputs.reportCat || category}
-          optionLabelProp="value"
-          onChange={(val) => {
-            setPopupInputs(s => ({ ...s, reportCat: val }));
-            if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
-          }}
-          showSearch
-          filterOption={(input, option) =>
-            (option?.name || "").toLowerCase().includes(input.toLowerCase())
-          }
-          options={[
-            category
-              ? {
-                value: category,
-                name: category,
+      <div style={{ display: 'flex' }}>
+        <div style={{ marginBottom: '10px' }}>
+          <Select
+            placeholder="Select report category"
+            className={`${theme === "dark" ? "dark-theme" : "light-theme"
+              } green-border-select`}
+            value={popupInputs.reportCat || category}
+            optionLabelProp="value"
+            onChange={(val) => {
+              setPopupInputs(s => ({ ...s, reportCat: val }));
+              if (errors.reportCat) setErrors((e) => ({ ...e, reportCat: "" }));
+            }}
+            showSearch
+            filterOption={(input, option) =>
+              (option?.name || "").toLowerCase().includes(input.toLowerCase())
+            }
+            options={[
+              category
+                ? {
+                  value: category,
+                  name: category,
+                  label: (
+                    <div style={{ fontWeight: 600 }}>
+                      {category} (Current)
+                    </div>
+                  )
+                }
+                : null,
+
+              // ...reportCategories.map(c => ({
+              ...(Array.isArray(reportCategories) ? reportCategories : []).map(c => ({
+
+                value: `${c.name}`,
+                name: c.name,
+                id: c.categoryId,
                 label: (
-                  <div style={{ fontWeight: 600 }}>
-                    {category} (Current)
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 8
+                  }}>
+                    <span
+                      style={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        maxWidth: 200
+                      }}
+                      title={`${c.name} - ${c.accountNumber}`}
+                    >
+                      {c.name} - {c.accountNumber}
+                    </span>
+
+                    <span style={{ display: "flex", gap: 10 }}>
+                      <FaPenToSquare
+                        style={{ fontSize: 12 }}
+                        title="Edit"
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setREditedName(c.name);
+                          setREditModalVisible(true);
+                        }}
+                      />
+
+                      <FaTrashCan
+                        style={{ fontSize: 12, color: "#EC7117" }}
+                        title="Delete"
+                        onClick={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setRCurrentCategory(c);
+                          setRDeleteModalVisible(true);
+                        }}
+                      />
+                    </span>
                   </div>
                 )
-              }
-              : null,
+              }))
+            ].filter(Boolean)}
 
-            ...reportCategories.map(c => ({
-              value: `${c.name}`,
-              name: c.name,
-              id: c.categoryId,
-              label: (
-                <div style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 8
-                }}>
-                  <span
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      maxWidth: 200
-                    }}
-                    title={`${c.name} - ${c.accountNumber}`}
-                  >
-                    {c.name} - {c.accountNumber}
-                  </span>
-
-                  <span style={{ display: "flex", gap: 10 }}>
-                    <FaPenToSquare
-                      style={{ fontSize: 12 }}
-                      title="Edit"
-                      onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                      onClick={(e) => {
-                        e.preventDefault(); e.stopPropagation();
-                        setRCurrentCategory(c);
-                        setREditedName(c.name);
-                        setREditModalVisible(true);
-                      }}
-                    />
-
-                    <FaTrashCan
-                      style={{ fontSize: 12, color: "#EC7117" }}
-                      title="Delete"
-                      onClick={(e) => {
-                        e.preventDefault(); e.stopPropagation();
-                        setRCurrentCategory(c);
-                        setRDeleteModalVisible(true);
-                      }}
-                    />
-                  </span>
+            style={{ width: 240 }}
+            dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+            dropdownRender={(menu) => (
+              <div>
+                {menu}
+                <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
+                  <Input
+                    size="small"
+                    placeholder="New report category"
+                    value={newReportCategory}
+                    onChange={(e) => setNewReportCategory(e.target.value)}
+                    onPressEnter={addReportCategory}
+                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                  />
+                  <Button
+                    size="small"
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={addReportCategory}
+                    style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                  />
                 </div>
-              )
-            }))
-          ].filter(Boolean)}
-
-          style={{ width: 240 }}
-          dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
-          dropdownRender={(menu) => (
-            <div>
-              {menu}
-              <div style={{ display: "flex", gap: 8, padding: 8, borderTop: "1px solid #eee" }}>
-                <Input
-                  size="small"
-                  placeholder="New report category"
-                  value={newReportCategory}
-                  onChange={(e) => setNewReportCategory(e.target.value)}
-                  onPressEnter={addReportCategory}
-                  className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-                />
-                <Button
-                  size="small"
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={addReportCategory}
-                  style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
-                />
               </div>
-            </div>
-          )}
-        />
-        {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
+            )}
+          />
+          {errors.reportCat && <div style={{ color: "red", fontSize: 12 }}>{errors.reportCat}</div>}
+        </div>
+        <div style={{ marginLeft: '20px' }}>
+          <Select
+            value={budgetType}
+            onChange={(value) => setBudgetType(value)}
+            // style={{ height: "20px" }}
+            options={[
+              { label: "Daily", value: "daily" },
+              { label: "Lifetime", value: "lifetime" },
+            ]}
+          // disabled={watchedHasAdsetBudget} // if adset budget enabled, disable this
+          // getPopupContainer={(triggerNode) => triggerNode.parentElement}
+          />
+        </div>
       </div>
       <Modal
         title="Delete Report Category"
@@ -9899,22 +10641,22 @@ const CloneMultipleAdsetCampaignDrawer = ({
                     options={[
                       { value: "OUTCOME_LEADS", label: "Leads", title: "" },
                       { value: "OUTCOME_SALES", label: "Sales", title: "" },
-                      {
-                        value: "OUTCOME_ENGAGEMENT",
-                        label: "Engagement",
-                        title: "",
-                      },
-                      {
-                        value: "OUTCOME_AWARENESS",
-                        label: "Awareness",
-                        title: "",
-                      },
-                      { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
-                      {
-                        value: "OUTCOME_APP_PROMOTION",
-                        label: "App promotion",
-                        title: "",
-                      },
+                      // {
+                      //   value: "OUTCOME_ENGAGEMENT",
+                      //   label: "Engagement",
+                      //   title: "",
+                      // },
+                      // {
+                      //   value: "OUTCOME_AWARENESS",
+                      //   label: "Awareness",
+                      //   title: "",
+                      // },
+                      // { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
+                      // {
+                      //   value: "OUTCOME_APP_PROMOTION",
+                      //   label: "App promotion",
+                      //   title: "",
+                      // },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"
@@ -9945,11 +10687,11 @@ const CloneMultipleAdsetCampaignDrawer = ({
                         title: "",
                       },
                       { value: "EMPLOYMENT", label: "Employment", title: "" },
-                      {
-                        value: "ISSUES_ELECTIONS_POLITICS",
-                        label: "Politics",
-                        title: "",
-                      },
+                      // {
+                      //   value: "ISSUES_ELECTIONS_POLITICS",
+                      //   label: "Politics",
+                      //   title: "",
+                      // },
                       { value: "NONE", label: "None", title: "" },
                     ]}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -10232,7 +10974,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
           />
         </Form.Item>
       </Tooltip> */}
-                <Tooltip
+                {/* <Tooltip
                   overlayInnerStyle={{
                     backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                     color: theme === "dark" ? "#ffffff" : "#000000",
@@ -10272,6 +11014,50 @@ const CloneMultipleAdsetCampaignDrawer = ({
                         setIsCampaignBudgetActive(value > 0);
                       }}
                       readOnly={isAnyAdsetBudgetSet} // Make campaign budget read-only if any adset has a budget
+                      style={{
+                        flex: 0.2,
+                        color: theme === "dark" ? "#fff" : "#000",
+                      }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>
+                </Tooltip> */}
+                <Tooltip
+                  title={
+                    watchedHasAdsetBudget
+                      ? "You have enabled budget at Adset level — Campaign budget is disabled."
+                      : ""
+                  }
+                  overlayInnerStyle={{
+                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                    color: theme === 'dark' ? '#fff' : '#000',
+                    border: '1px solid #ccc',
+                    borderRadius: 6,
+                    // fontWeight: 500,
+                  }}
+                >
+                  <Form.Item
+                    name="Daily_amount"
+                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+
+                    required={!watchedHasAdsetBudget}
+                    rules={[
+                      {
+                        required: !(watchedHasAdsetBudget || Number(watchedCampaignBudget) > 0),
+                        message: "Please enter a valid daily budget for the Campaign",
+                      },
+                    ]}
+                    style={{ marginLeft: "1%", marginBottom: 24 }}
+                  >
+                    <InputNumber
+                      min={0}
+                      step={0.01}
+                      placeholder="$"
+                      readOnly={watchedHasAdsetBudget} // only depends on watchedAdsets
                       style={{
                         flex: 0.2,
                         color: theme === "dark" ? "#fff" : "#000",
@@ -10375,6 +11161,15 @@ const CloneMultipleAdsetCampaignDrawer = ({
                   setAddLevelData={setAddLevelData}
                   setNewAddLevelData={setNewAddLevelData}
                   setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
+                  pixel_id_list={pixel_id_list}
+                  page_id_list={page_id_list}
+                  pageidList={pageidList}
+                  pixelIdList={pixelIdList}
+                  budgetType={budgetType}
+                  imagehash={imagehash}
+                  page={page}
+                  pixel={pixel}
+                  geo={geo}
                 />
               );
               // <ffff/>
