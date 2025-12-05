@@ -2257,7 +2257,7 @@ const AdsetComponent = ({
     VALUE: [{ value: "IMPRESSIONS", label: "Impressions" }],
     LANDING_PAGE_VIEWS: [{ value: "IMPRESSIONS", label: "Impressions" }],
     LINK_CLICKS: [{ value: "IMPRESSIONS", label: "Impressions" }, { value: "LINK_CLICKS", label: "Link Clicks" }],
-    DAILY_UNIQUE_REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
+    REACH: [{ value: "IMPRESSIONS", label: "Impressions" }],
     IMPRESSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }]
   }
 
@@ -2266,7 +2266,7 @@ const AdsetComponent = ({
       { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
       { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
       { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
-      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "REACH", label: "Maximize daily unique reach" },
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ],
     OUTCOME_SALES: [
@@ -2274,7 +2274,7 @@ const AdsetComponent = ({
       { value: "VALUE", label: "Maximize value of conversions" },
       { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
       { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
-      { value: "DAILY_UNIQUE_REACH", label: "Maximize daily unique reach" },
+      { value: "REACH", label: "Maximize daily unique reach" },
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ]
   }
