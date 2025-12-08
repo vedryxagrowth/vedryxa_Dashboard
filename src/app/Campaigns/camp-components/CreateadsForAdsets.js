@@ -1031,7 +1031,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                   ]}
                   style={{ flex: 3, marginLeft: "1%" }}
                 >
-                  <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                  <Input  disabled style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                 </Form.Item>
               </div>
               <Form.Item

@@ -709,7 +709,7 @@ const App = () => {
   useEffect(() => {
     if (!selectedValue || !startDate || !endDate) return;
     if (!allowFetchOnSelectRef.current) return;
-    fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+    // fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
     allowFetchOnSelectRef.current = false;
   }, [selectedValue]);
   useEffect(() => {
@@ -2123,6 +2123,7 @@ const App = () => {
             }
             checkedChildren="✓"
             unCheckedChildren="✗"
+            // disabled={record.Approval !== "Approved"}
             size="default"
             style={{
               backgroundColor:
@@ -2131,6 +2132,7 @@ const App = () => {
               height: 22,
             }}
           />
+
         </div>
       ),
     },
@@ -4193,7 +4195,14 @@ const App = () => {
                     key: index,
                   }))
                   .reverse()}
-                pagination={{ pageSize: paginationSize }}
+                // pagination={{ pageSize: paginationSize }}
+                pagination={{
+                  pageSize: paginationSize,
+                  showSizeChanger: true,
+                  onChange: (page, pageSize) => {
+                    setPaginationSize(pageSize);   
+                  }
+                }}
                 scroll={{
                   x: "auto",
                   y: "calc(63vh)",

@@ -220,7 +220,7 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
           setDomain(DomainUrls[0]);
 
           const text = defaultValues?.split("//")[1]?.split("/")[3];
-          const result = text.replace(/\+/g, " ");
+          const result = text?.replace(/\+/g, " ");
           console.log(result);
           setKeyWords("");
           console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);

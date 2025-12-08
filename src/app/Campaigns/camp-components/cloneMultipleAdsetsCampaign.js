@@ -599,7 +599,7 @@ const AddComponent = ({
     setWebsiteURL(text);
     // const currentAdsets = form.getFieldValue("adsets") || [];
     // const updatedAdsets = [...currentAdsets];
-    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    if (network === "FB_Mnet" || network === "FB_DomainActive" || network === "FB_MnetBing") {
       setCaption(text.split("//")[1].split("/")[0]);
       //   setNewAddLevelData((prev) => {
       //     return prev.map((item, idx) =>
@@ -794,6 +794,14 @@ const AddComponent = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_MnetBing":
         return (
           <MnetUrlBuilder
             defaultValues={websiteURL}
@@ -2607,6 +2615,8 @@ const AdsetComponent = ({
   setNewAddLevelData,
   view,
   setIsAnyAdsetBudgetSet,
+  pageIDList,
+  pixelIDList,
   budgetType,
   geo,
 }) => {
@@ -2677,6 +2687,7 @@ const AdsetComponent = ({
       { value: "website", label: "Website" },
     ]
   }
+
   const Optimization_goal_values = {
     OUTCOME_LEADS: [
       { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
@@ -2858,7 +2869,7 @@ const AdsetComponent = ({
     setWebsiteURL(text);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
-    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    if (network === "FB_Mnet" || network === "FB_DomainActive" || network === "FB_MnetBing") {
       setCaption(text.split("//")[1].split("/")[0]);
       updatedAdsets[index] = {
         ...updatedAdsets[index],
@@ -2920,6 +2931,14 @@ const AdsetComponent = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_MnetBing":
         return (
           <MnetUrlBuilder
             defaultValues={websiteURL}
@@ -3589,11 +3608,6 @@ const AdsetComponent = ({
           <Form.Item
             // name="pixel_id"
             name={["adsets", index, "pixel_id"]}
-            // initialValue={
-            //   typeof imagehash?.pixelID === "object"
-            //     ? imagehash.pixelID.Universal
-            //     : imagehash?.pixelID
-            // }
             initialValue={adset?.pixel_id}
             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
             rules={[
@@ -3604,7 +3618,7 @@ const AdsetComponent = ({
             ]}
             style={{ flex: 3 }}
           >
-            {typeof imagehash?.pixelID === "object" ? (
+            {/* {typeof imagehash?.pixelID === "object" ? (
               <Select
                 // defaultValue={imagehash?.pixelID?.Universal}
                 className={
@@ -3619,14 +3633,22 @@ const AdsetComponent = ({
               </Select>
             ) : (
               <Select
-                // disabled={adset.Adsetid ? true : false}
-                className={
-                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
-                }
-              />
-            )}
+                className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                defaultValue={adset?.pixel_id}
+              >
+                <Select.Option value={adset?.pixel_id}>
+                  {adset?.pixel_id}
+                </Select.Option>
+              </Select>
+            )} */}
+            <Select
+              // mode="multiple"
+              options={pixelIDList}
+              placeholder="Select pixel"
+              dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+              style={{ width: "100%", borderRadius: 8 }}
+            />
           </Form.Item>
-
           {/* <Form.Item
                         name="pixel_id"
                         initialValue={imagehash?.pixelID}
@@ -3931,7 +3953,7 @@ const AdsetComponent = ({
                 message: "Please input!",
               },
             ]}
-            style={{ width:"200px" }}
+            style={{ width: "200px" }}
             initialValue={currentDate ? dayjs(currentDate) : dayjs()}
           >
             <DatePicker
@@ -4040,7 +4062,7 @@ const AdsetComponent = ({
                 message: "Please select an option!",
               },
             ]}
-             style={{ flex: "0 0 140px" }}
+            style={{ flex: "0 0 140px" }}
             initialValue={adset.countries || "US"}
           >
             <Select
@@ -5726,7 +5748,30 @@ const AdsetComponent = ({
                       ]}
                       style={{ flex: 3, marginLeft: "1%" }}
                     >
-                      {typeof imagehash?.pageID === "object" ? (
+                      <Select
+                        // mode="multiple"
+                        options={pageIDList}
+                        placeholder="Select page"
+                        onChange={(value) => {
+                          // setAddName(e.target.value);
+                          setNewAddLevelData((prev) => {
+                            const key = adset.id;
+                            const list = Array.isArray(prev[key])
+                              ? prev[key].filter(Boolean)
+                              : [];
+
+                            const next = list.map((item, idx) => ({
+                              ...item,
+                              page_id: value,
+                            }));
+
+                            return { ...prev, [key]: next };
+                          });
+                        }}
+                        dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                        style={{ width: "100%", borderRadius: 8 }}
+                      />
+                      {/* {typeof imagehash?.pageID === "object" ? (
                         <Select
                           // defaultValue={imagehash?.pageID?}
                           className={
@@ -5758,12 +5803,14 @@ const AdsetComponent = ({
                         </Select>
                       ) : (
                         <Select
-                          // disabled={adset.Adsetid ? true : false}
-                          className={
-                            theme === "dark" ? "custom-input-dark" : "custom-input-light"
-                          }
-                        />
-                      )}
+                          className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                          defaultValue={imagehash?.pageID}
+                        >
+                          <Select.Option value={imagehash?.pageID}>
+                            {imagehash?.pageID}
+                          </Select.Option>
+                        </Select>
+                      )} */}
                       {/* <Input
                         style={{ width: "23%" }}
                         className={
@@ -6481,10 +6528,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [submitErrors, setSubmitErrors] = useState([]);
 
   const [accountNumber, setAccountNumber] = useState(selectedRow?.Account_Number);
-  const [pixel_id_list, setPixel_id_list] = useState([]);
-  const [page_id_list, setPage_id_list] = useState([]);
-  const [pageidList, setPageIdList] = useState([]);
-  const [pixelIdList, setPixelIdList] = useState([]);
+
+  const [pixelIDList, setPixelIDList] = useState([]);
+  const [pageIDList, setPageIDList] = useState([]);
   const [geo, setGeos] = useState("Geo");
   const [pixel, setPixels] = useState("Pixel");
   const [page, setPages] = useState("Page");
@@ -6790,6 +6836,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         setFullCampaignData(response?.data[0]);
         console.log(fullCampaignData)
         setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "Daily")
+
         setFormValuesFromDraft(response?.data[0]);
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
         //     const selectedOption = item.selectedOption || "creative";
@@ -7445,7 +7492,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     setWebsiteURL(text);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
-    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    if (network === "FB_Mnet" || network === "FB_DomainActive" || network === "FB_MnetBing") {
       setCaption(text.split("//")[1].split("/")[0]);
       updatedAdsets[urlBuilderIndex] = {
         ...updatedAdsets[urlBuilderIndex],
@@ -7494,6 +7541,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_MnetBing":
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
@@ -7651,38 +7702,99 @@ const CloneMultipleAdsetCampaignDrawer = ({
     checkFormCompletion();
   }, [adsetLevelDailyBudget, form]);
 
+  // useEffect(() => {
+  //   // Update the form field value for Website_URL whenever websiteURL changes
+  //   // form.setFieldsValue({
+  //   //   pixel_id: imagehash?.pixelID,
+  //   //   page_id: imagehash?.pageID,
+  //   // });
+
+  //   // Check if all required fields are complete
+  //   const checkFormCompletion = () => {
+  //     const allValues = form.getFieldsValue(true);
+  //     const isComplete = Object.keys(allValues).every(
+  //       (key) => allValues[key] !== undefined && allValues[key] !== ""
+  //     );
+  //     setIsFormComplete(isComplete);
+  //   };
+
+  //   // Trigger form completion check
+  //   checkFormCompletion();
+  //   if (imagehash) {
+  //     if (
+  //       imagehash.pixelID === null ||
+  //       imagehash.pixelID === undefined ||
+  //       imagehash.pixelID === ""
+  //     ) {
+  //       message.error(
+  //         "There is no PageID and PixelID for this account. Contact your manager",
+  //         10
+  //       );
+  //     }
+  //   }
+  // }, [imagehash, form]);
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
-    // form.setFieldsValue({
-    //   pixel_id: imagehash?.pixelID,
-    //   page_id: imagehash?.pageID,
-    // });
+    if (visible) {
+      // form.setFieldsValue({
+      //   pixel_id: imagehash?.pixelID,
+      //   page_id: imagehash?.pageID,
+      // });
 
-    // Check if all required fields are complete
-    const checkFormCompletion = () => {
-      const allValues = form.getFieldsValue(true);
-      const isComplete = Object.keys(allValues).every(
-        (key) => allValues[key] !== undefined && allValues[key] !== ""
-      );
-      setIsFormComplete(isComplete);
-    };
-
-    // Trigger form completion check
-    checkFormCompletion();
-    if (imagehash) {
-      if (
-        imagehash.pixelID === null ||
-        imagehash.pixelID === undefined ||
-        imagehash.pixelID === ""
-      ) {
-        message.error(
-          "There is no PageID and PixelID for this account. Contact your manager",
-          10
+      // Check if all required fields are complete
+      const checkFormCompletion = () => {
+        const allValues = form.getFieldsValue(true);
+        const isComplete = Object.keys(allValues).every(
+          (key) => allValues[key] !== undefined && allValues[key] !== ""
         );
+        setIsFormComplete(isComplete);
+      };
+
+      // Trigger form completion check
+      checkFormCompletion();
+      if (imagehash) {
+        const pixelIDs = imagehash?.pixelID || [];
+        const pageIDs = imagehash?.pageID || [];
+        let uniquePixelIDs;
+        let uniquePageIDs;
+        if (pixelIDs && typeof pixelIDs === "object") {
+          const result = Object.entries(pixelIDs).map(([key, value]) => ({
+            value,
+            label: `${key} - ${value}`
+          }));
+          uniquePixelIDs = result
+        } else {
+          uniquePixelIDs = [{ value: pixelIDs, label: pixelIDs }]
+        }
+        if (pageIDs && typeof pageIDs === "object") {
+          const result = Object.entries(pageIDs).map(([key, value]) => ({
+            value,
+            label: `${key} - ${value}`
+          }));
+          uniquePageIDs = result
+        }
+        else {
+          uniquePageIDs = [{ value: pageIDs, label: pageIDs }]
+        }
+        setPixelIDList(uniquePixelIDs);
+        setPageIDList(uniquePageIDs);
+
+        if (
+          imagehash.pixelID === null ||
+          imagehash.pixelID === undefined ||
+          imagehash.pixelID === ""
+        ) {
+          message.error(
+            "There is no PageID and PixelID for this account. Contact your manager",
+            10
+          );
+        }
       }
     }
-  }, [imagehash, form]);
+  }, [visible, imagehash, form]);
 
+  console.log(pixelIDList, "pixelIDLIst in clone");
+  console.log(pageIDList, "pageIDList in clone");
   const Accountchange = (e) => {
     setAccountNumber(e.target.value);
   };
@@ -11161,10 +11273,8 @@ const CloneMultipleAdsetCampaignDrawer = ({
                   setAddLevelData={setAddLevelData}
                   setNewAddLevelData={setNewAddLevelData}
                   setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
-                  pixel_id_list={pixel_id_list}
-                  page_id_list={page_id_list}
-                  pageidList={pageidList}
-                  pixelIdList={pixelIdList}
+                  pixelIDList={pixelIDList}
+                  pageIDList={pageIDList}
                   budgetType={budgetType}
                   imagehash={imagehash}
                   page={page}
