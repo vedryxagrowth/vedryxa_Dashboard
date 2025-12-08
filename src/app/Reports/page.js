@@ -13328,7 +13328,7 @@ const MyTablePage = () => {
         // console.log(mainData);
         // console.log(mainData.length);
         // console.log(Camapignlevelstatus);
-        if (mainData?.length > 0 && Camapignlevelstatus.length > 0) {
+        if (mainData?.length > 0 && Camapignlevelstatus.length > 0 && campaignComments.length > 0) {
             setColumnDefs(getColumnDefs(mainData));
             columnDefs1.current = getColumnDefs2(mainData);
             columnDefs2.current = getColumnDefs2(mainData);
@@ -13354,7 +13354,7 @@ const MyTablePage = () => {
             // console.log('Updated columnDefsOfAdID:', newColumnDefs);
             setColumnStructureStatus(true);
         }
-    }, [mainData, Camapignlevelstatus]);
+    }, [mainData, Camapignlevelstatus, campaignComments]);
 
 
     const updatingColumnsStructure = async (updateDataArray) => {

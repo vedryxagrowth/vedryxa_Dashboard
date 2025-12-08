@@ -48,6 +48,7 @@ import { v4 as uuidv4 } from "uuid";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
 import MnetUrlBuilder from "./urlbuilder/mnet";
+import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
@@ -805,7 +806,7 @@ const AddComponent = ({
         );
       case "FB_MnetBing":
         return (
-          <MnetUrlBuilder
+          <MnetBingUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -2908,7 +2909,7 @@ const AdsetComponent = ({
         );
       case "FB_MnetBing":
         return (
-          <MnetUrlBuilder
+          <MnetBingUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -7509,7 +7510,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         );
       case "FB_MnetBing":
         return (
-          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+          <MnetBingUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_Tonic1":
         return (
