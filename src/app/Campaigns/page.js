@@ -954,8 +954,12 @@ const App = () => {
         "Approved"
       );
       // Log the message to the console
-      console.log("Approval confirmed");
-      // Close the modal
+      console.log(userdetails?.role,"AAAAAApproval confirmed");
+
+      if (userdetails?.role === "Network_Partner") {
+        await onToggleStatusForMultipleAdsets(useaprovalForAdsets, "ACTIVE");
+      }
+           
       setIsModalVisibleForAdsets(false);
     } catch (error) {
       console.error("Error updating approval:", error);
@@ -992,7 +996,7 @@ const App = () => {
   const onToggleStatus = async (record, checked) => {
     try {
       const token = localStorage.getItem("token");
-      console.log("Token:", token);
+      console.log("hello siddu",record, checked);
 
       // Update status on your backend
       const backendResponse = await fetch(
@@ -1105,7 +1109,7 @@ const App = () => {
   const onToggleStatusForMultipleAdsets = async (record, checked) => {
     try {
       const token = localStorage.getItem("token");
-      console.log("Token:", token);
+      console.log("Tokensssssssssssssssssssssssss:", token);
 
       // Update status on your backend https://www.testapi.adsgoat.in
       const backendResponse = await fetch(
