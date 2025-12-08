@@ -601,7 +601,7 @@ const AddComponent = ({
     setWebsiteURL(text);
     // const currentAdsets = form.getFieldValue("adsets") || [];
     // const updatedAdsets = [...currentAdsets];
-    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    if (network === "FB_Mnet" || network === "FB_DomainActive" || network === "FB_MnetBing") {
       setCaption(text.split("//")[1].split("/")[0]);
       //   setNewAddLevelData((prev) => {
       //     return prev.map((item, idx) =>
@@ -796,6 +796,14 @@ const AddComponent = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_MnetBing":
         return (
           <MnetUrlBuilder
             defaultValues={websiteURL}
@@ -2829,7 +2837,7 @@ const AdsetComponent = ({
     setWebsiteURL(text);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
-    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    if (network === "FB_Mnet" || network === "FB_DomainActive" || network === "FB_MnetBing") {
       setCaption(text.split("//")[1].split("/")[0]);
       updatedAdsets[index] = {
         ...updatedAdsets[index],
@@ -2891,6 +2899,14 @@ const AdsetComponent = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_MnetBing":
         return (
           <MnetUrlBuilder
             defaultValues={websiteURL}
@@ -7439,7 +7455,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     setWebsiteURL(text);
     const currentAdsets = form.getFieldValue("adsets") || [];
     const updatedAdsets = [...currentAdsets];
-    if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    if (network === "FB_Mnet" || network === "FB_DomainActive" || network === "FB_MnetBing") {
       setCaption(text.split("//")[1].split("/")[0]);
       updatedAdsets[urlBuilderIndex] = {
         ...updatedAdsets[urlBuilderIndex],
@@ -7488,6 +7504,10 @@ const EditMultipleAdsetCampaignDrawer = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_MnetBing":
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );

@@ -10832,8 +10832,7 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
-    //campaignLevelDaily
-    const columnDefsObject2 = {
+   const columnDefsObject2 = {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
@@ -10956,7 +10955,9 @@ const MyTablePage = () => {
         //         const [changeBudget, onChangeBudget] = useState();
         //         const [campaignStatus, setCampaignStatus] = useState(true);
 
+
         //         const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
 
         //         const onChangeSpendAndStatus = async () => {
         //             // Check if it's a group footer row (for groupIncludeFooter)
@@ -10965,13 +10966,16 @@ const MyTablePage = () => {
         //                 return; // Prevent modal from opening for group footer rows
         //             }
 
+
         //             // Ensure allLeafChildren exists and is an array before proceeding
         //             const allLeafChildren = params.node?.allLeafChildren || [];
+
 
         //             // Fetch all the rows under the current group
         //             const groupedData = allLeafChildren.map(node => node.data) || [];
         //             setNewGroupedData(groupedData);
         //             const campaignId = groupedData[0]?.campaignid;
+
 
         //             // Only show the modal if there is data (groupedData length is greater than 0)
         //             if (groupedData.length > 0) {
@@ -10994,6 +10998,7 @@ const MyTablePage = () => {
         //             }
         //         };
 
+
         //         const handleOk = async () => {
         //             setIsModalVisible(false); // Close the modal
         //             const object = {
@@ -11013,10 +11018,12 @@ const MyTablePage = () => {
         //             changeRRefrst();
         //         };
 
+
         //         const handleCancel = () => {
         //             setIsModalVisible(false);
         //             // console.log(changeBudget); // Close the modal
         //         };
+
 
         //         const getTotalSpend = (data) => {
         //             if (!data || data.length === 0) return 0;
@@ -11026,18 +11033,21 @@ const MyTablePage = () => {
         //             return Math.round(total * 100) / 100; // Round to 2 decimal places
         //         };
 
+
         //         const onChangeBudgetValue = event => {
         //             onChangeBudget(event.target.value)
         //         }
+
 
         //         const onChangeCampaignStatus = async () => {
         //             const apiEndpoint = campaignStatus
         //                 ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
         //                 : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
 
+
         //             try {
-        //                 const response = await axios.post(apiEndpoint, 
-        //                     { campaignId: groupedData[0]?.campaignid }, 
+        //                 const response = await axios.post(apiEndpoint,
+        //                     { campaignId: groupedData[0]?.campaignid },
         //                     { headers: { Authorization: token } }
         //                 );
         //                 if (response.status === 200) {
@@ -11052,7 +11062,9 @@ const MyTablePage = () => {
         //             }
         //         };
 
+
         //         // console.log(groupedData);
+
 
         //         return (
         //             <div>
@@ -11069,7 +11081,7 @@ const MyTablePage = () => {
         //                         onCancel={handleCancel}
         //                         width={600}  // Set a custom width for the modal
         //                         style={{ padding: '20px' }}  // Adjust body padding
-        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
         //                     >
         //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -11077,11 +11089,13 @@ const MyTablePage = () => {
         //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
         //                             </div>
 
+
         //                             {/* Input Field */}
         //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
         //                                 <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
         //                                 <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
         //                             </div>
+
 
         //                             {/* Campaign ID */}
         //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -11095,6 +11109,7 @@ const MyTablePage = () => {
         //         );
         //     },
         //     filterParams: { filterEnabled: false },
+
 
         // },
         actions: {
@@ -11113,9 +11128,11 @@ const MyTablePage = () => {
             //     const [changeBudget, onChangeBudget] = useState();
             //     const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
+
             //     const isGroupRow = !!params?.node?.groupData;
             //     let campaignId = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data?.campaignid : params?.data?.campaignid;
             //     const campaignname = isGroupRow ? params?.node?.key : params?.data?.campaignname;
+
 
             //     useEffect(() => {
             //         if (!campaignId || !Array.isArray(allCampaignData)) return;
@@ -11125,11 +11142,13 @@ const MyTablePage = () => {
             //         }
             //     }, [campaignId, allCampaignData]);
 
+
             //     const onChangeSpendAndStatus = () => {
             //         if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
             //         const allLeafChildren = params.node?.allLeafChildren || [];
             //         const grouped = allLeafChildren.map(node => node.data) || [];
             //         setGroupedData(grouped);
+
 
             //         if (!campaignId || !campaignname) {
             //             message.error("Campaign info missing");
@@ -11137,7 +11156,10 @@ const MyTablePage = () => {
             //         }
 
 
+
+
             //         const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
+
 
             //         if (matchedCampaign) {
             //             const budget = parseFloat(
@@ -11146,6 +11168,7 @@ const MyTablePage = () => {
             //                 0
             //             ) / 100;
 
+
             //             onChangeBudget(budget);
             //             setCampaignActualSpend(matchedCampaign); // ✅ critical
             //         } else {
@@ -11153,14 +11176,17 @@ const MyTablePage = () => {
             //             setCampaignActualSpend({});
             //         }
 
+
             //         setIsModalVisible(true);
             //     };
+
 
             //     const handleOk = async () => {
             //         setIsModalVisible(false);
             //         const isArray = Array.isArray(groupedData);
             //         const campaignIdFinal = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
             //         const campaignnameFinal = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;
+
 
             //         const payload = {
             //             campaignId: campaignIdFinal,
@@ -11170,10 +11196,12 @@ const MyTablePage = () => {
             //             updatedby: userdetails?.email,
             //         };
 
+
             //         if (!payload.campaignId) {
             //             message.error("Campaign ID missing. Cannot update budget.");
             //             return;
             //         }
+
 
             //         try {
             //             await apiClient.post('/update/campaign/budget', payload);
@@ -11188,7 +11216,9 @@ const MyTablePage = () => {
             //         }
             //     };
 
+
             //     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
 
             //     return (
             //         <div>
@@ -11204,6 +11234,7 @@ const MyTablePage = () => {
             //                     <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
             //                 </Tooltip>
             //             )}
+
 
             //             {isModalVisible && (
             //                 <Modal
@@ -11226,6 +11257,7 @@ const MyTablePage = () => {
             //                             </span>
             //                         </div>
 
+
             //                         <Input
             //                             type="number"
             //                             value={changeBudget}
@@ -11233,6 +11265,7 @@ const MyTablePage = () => {
             //                             placeholder="Enter budget in USD"
             //                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
             //                         />
+
 
             //                         <div style={{ display: 'flex' }}>
             //                             <p>Campaign ID: </p>
@@ -11245,6 +11278,7 @@ const MyTablePage = () => {
             //     );
             // },
 
+
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
@@ -11253,33 +11287,41 @@ const MyTablePage = () => {
                 const [hasBudget, setHasBudget] = useState(false);
                 const [confirmLoading, setConfirmLoading] = useState(false);
 
+
                 const isGroupRow = !!params?.node?.groupData;
+
 
                 // campaign id + campaign name for this row/group
                 const campaignId = isGroupRow
                     ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
                     : params?.data?.campaignid;
 
+
                 const campaignname = isGroupRow
                     ? params?.node?.key
                     : params?.data?.campaignname;
+
 
                 // ✅ the *accountNumber of this row/group* (not the selected accounts list)
                 const rowAccountNumber = isGroupRow
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
+
                 // const { allCampaignData } = params.context;
+
 
                 // ✅ find the exact record for (campaignId, rowAccountNumber)
                 useEffect(() => {
                     if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
+
 
                     const matched = Camapignlevelstatus.find(
                         c =>
                             String(c.campaign_id) === String(campaignId) &&
                             String(c.accountNumber) === String(rowAccountNumber)
                     );
+
 
                     setCampaignActualSpend(matched ?? {});
                     setHasBudget(
@@ -11291,30 +11333,37 @@ const MyTablePage = () => {
                     );
                 }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
 
+
                 const onChangeSpendAndStatus = () => {
                     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
 
+
                     const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
                     setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
+
 
                     if (!campaignId || !campaignname) {
                         message.error("Campaign info missing");
                         return;
                     }
 
+
                     // Prefill from the matched record for *this* account
                     const b = campaignActualSpend?.campaign_budget;
                     const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
                     onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
 
+
                     setIsModalVisible(true);
                 };
+
 
                 const handleOk = async () => {
                     setConfirmLoading(true);
                     const target = Array.isArray(groupedData) && groupedData.length ? groupedData[0] : params.data;
                     const campaignIdFinal = target?.campaignid;
                     const campaignnameFinal = target?.campaignname;
+
 
                     const payload = {
                         campaignId: campaignIdFinal,
@@ -11326,10 +11375,12 @@ const MyTablePage = () => {
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                     };
 
+
                     if (!payload.campaignId || !payload.accountNumber) {
                         message.error("Campaign ID or account missing. Cannot update budget.");
                         return;
                     }
+
 
                     try {
                         await apiClient.post('/new/update/campaign/budget', payload);
@@ -11363,7 +11414,9 @@ const MyTablePage = () => {
                     }
                 };
 
+
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
 
                 return (
                     <div>
@@ -11374,6 +11427,7 @@ const MyTablePage = () => {
                                 <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
                             </Tooltip>
                         )}
+
 
                         {isModalVisible && (
                             <Modal
@@ -11420,6 +11474,7 @@ const MyTablePage = () => {
                                         </span>
                                     </div>
 
+
                                     <Input
                                         type="number"
                                         value={changeBudget}
@@ -11427,6 +11482,7 @@ const MyTablePage = () => {
                                         placeholder="Enter budget in USD"
                                         className={params.context?.theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
+
 
                                     <div style={{ display: 'flex' }}>
                                         <p>Campaign ID:&nbsp;</p>
@@ -11450,14 +11506,14 @@ const MyTablePage = () => {
             // resizeble: true,
             // sortable: true,
             // width: 300,
-            // rowGroup: true, 
+            // rowGroup: true,
             // rowGroupIndex: 1, // Level 2
             // hide: true,
             // filter: 'agSetColumnFilter',
             // filterParams: {
             //     comparator: (a, b) => a.localeCompare(b),
             //     suppressAndOrCondition: true,
-            // }, 
+            // },
             // // showRowGroup: 'adname',
             hide: true,
         },
@@ -11473,6 +11529,7 @@ const MyTablePage = () => {
             //     suppressAndOrCondition: true,
             // },
             // suppressMenu: true,    // Suppress the column menu
+
 
         },
         // from:{
@@ -11506,16 +11563,19 @@ const MyTablePage = () => {
             sortable: true,
             filter: "agTextColumnFilter",
 
+
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
                 if (!params.value) return '';
                 return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
             },
 
+
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 const capitalize = (val) =>
                     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
 
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
@@ -11525,15 +11585,18 @@ const MyTablePage = () => {
                     return capitalize(campaign?.category);
                 }
 
+
                 // ✅ For normal (leaf) rows
                 return capitalize(params.data?.category);
             },
+
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
                 const capitalize = (val) =>
                     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
 
+
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
@@ -11542,18 +11605,22 @@ const MyTablePage = () => {
                     return capitalize(campaign?.category);
                 }
 
+
                 // ✅ Include leaf rows in filtering
                 return capitalize(params.data?.category);
             },
+
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
             filterParams: {
                 values: (params) => {
                     const uniqueCategories = new Set();
 
+
                     params.api.forEachNode((node) => {
                         const capitalize = (val) =>
                             val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
 
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
@@ -11568,10 +11635,12 @@ const MyTablePage = () => {
                         }
                     });
 
+
                     // params.success(Array.from(uniqueCategories));
                     params.success && params.success(Array.from(uniqueCategories));
                 },
             },
+
 
             // ✅ Safe comparator for sorting (group-aware)
             comparator: (valueA, valueB, nodeA, nodeB) => {
@@ -11584,6 +11653,7 @@ const MyTablePage = () => {
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
 
+
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
@@ -11592,15 +11662,18 @@ const MyTablePage = () => {
                 if (props.node.rowPinned || props.node.footer) return "";
                 if (props.value) return props.value;
 
+
                 const [open, setOpen] = useState(false);
                 const [category, setCategory] = useState("");
                 const [row, setRow] = useState(null);
+
 
                 const getRow = () => {
                     return props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
                 };
+
 
                 const onEdit = () => {
                     const r = getRow();
@@ -11609,8 +11682,10 @@ const MyTablePage = () => {
                     setOpen(true);
                 };
 
+
                 const save = async () => {
                     if (!row) return;
+
 
                     const payload = {
                         accountNumber: row.accountNumber,
@@ -11619,14 +11694,17 @@ const MyTablePage = () => {
                         category,
                     };
 
+
                     try {
                         const token = localStorage.getItem("token");
+
 
                         await apiClient.post(
                             "/UpdateCategoryNew",
                             payload,
                             { headers: { Authorization: token } }
                         );
+
 
                         setCampaignComments((prev) => {
                             const arr = [...prev];
@@ -11655,10 +11733,13 @@ const MyTablePage = () => {
                         console.error(err);
                         message.error("Failed to update category");
 
+
                     }
+
 
                     setOpen(false);
                 };
+
 
                 return (
                     <div>
@@ -11668,6 +11749,7 @@ const MyTablePage = () => {
                         >
                             <PlusOutlined />
                         </span>
+
 
                         <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
                             <Input value={category} onChange={(e) => setCategory(e.target.value)} />
@@ -11698,6 +11780,7 @@ const MyTablePage = () => {
             //             params.node.groupData?.campaignname || params.node.key;
             //         const campaign = campaignMap.get(campaignName);
 
+
             //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
             //     }
             //     return params.data?.from || null;
@@ -11720,8 +11803,10 @@ const MyTablePage = () => {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
                     if (cellValue == null) return -1;
 
+
                     // Convert your cell value string to a Date
                     const cellDate = new Date(cellValue);
+
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
@@ -11744,7 +11829,9 @@ const MyTablePage = () => {
                     const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
                     const campaignId = params.node?.childrenAfterGroup?.[0]?.campaignid || params.node?.key || "";
 
+
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
 
                     return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
                 }
@@ -11789,8 +11876,10 @@ const MyTablePage = () => {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
                     if (cellValue == null) return -1;
 
+
                     // Convert your cell value string to a Date
                     const cellDate = new Date(cellValue);
+
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
@@ -11811,9 +11900,12 @@ const MyTablePage = () => {
                     // console.log(campaignName, "campaignName");
                     // console.log(campaignId, "campaignId");
 
+
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
 
+
                     // console.log(campaign, "campaign");
+
 
                     return campaign && campaign.end
                         ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
@@ -11856,7 +11948,7 @@ const MyTablePage = () => {
         },
         date: {
             headerName: 'Date', field: 'date',
-            // sort: 'asc', 
+            // sort: 'asc',
             sortable: true,
             filter: "agDateColumnFilter",
             // sort: "asc",
@@ -11872,13 +11964,16 @@ const MyTablePage = () => {
                         Number(dateParts[0])
                     );
 
+
                     if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
                         return 0;
                     }
 
+
                     if (cellDate < filterLocalDateAtMidnight) {
                         return -1;
                     }
+
 
                     if (cellDate > filterLocalDateAtMidnight) {
                         return 1;
@@ -11890,41 +11985,65 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
-        spend: {
-            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true, filter: "agTextColumnFilter",
-            valueFormatter: currencyFormatter, comparator: numberComparator,
+        spend:{
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter", // Keep filter active
+            valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Total amount spent",
             filterValueGetter: (params) => parseFloat(params.data.spend || 0),
-        },
+        }
+        ,
         revenue: {
-            headerName: 'Revenue', field: 'revenue', minWidth: 105, aggFunc: spender, sortable: true, filter: "agTextColumnFilter",
-            valueFormatter: currencyFormatter, comparator: numberComparator,
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
-            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
+            filterValueGetter: (params) => parseFloat(params.data.revenue || 0),
+
+
         },
         profit: {
-            headerName: 'Profit', field: 'profit', minWidth: 105, aggFunc: spender, cellClassRules: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            sortable: true,
+            aggFunc: liveSpender,
+            cellClassRules: {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
-            }, sortable: true, headerTooltip: 'Profit = Revenue - Spend', filter: "agTextColumnFilter",
-            valueFormatter: currencyFormatter, comparator: numberComparator,
+            },
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
-            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
+            headerTooltip: "Profit = Revenue - Spend",
+            filterValueGetter: (params) => parseFloat(params.data.profit || 0),
+
+
         },
         margin: {
             headerName: 'Margin',
             field: 'margin',
+            minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            headerTooltip: '(Profit/Revenue)*100',
-            filter: 'agTextColumnFilter',
-            minWidth: 100,
+            filter: "agTextColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -11935,16 +12054,56 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Margin = (Profit / Revenue) * 100",
+
+
         },
-        fbleads: { headerName: 'FBLeads', field: 'fbleads', minWidth: 105, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        conversions: { headerName: 'Conv', headerTooltip: 'Conversions', field: 'conversions', minWidth: 85, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        cpc: {
-            headerName: 'CPC', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter',
-            minWidth: 80,
+        fbleads:{
+            headerName: 'FBLeads',
+            field: 'fbleads',
+            minWidth: 105,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        conversions:{
+            headerName: 'Conv',
+            field: 'conversions',
+            minWidth: 85,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
-            headerTooltip: 'CPC = Spend / FBClicks',
+
+
+            headerTooltip: "Conversions",
+        },
+        cpc: {
+            headerName: 'CPC',
+            field: 'cpc',
+            // valueGetter: (params) => {
+            //     if (params.node.group && params.node.aggData) {
+            //         return sanitizeNumericValue(params.node.aggData["cpc"]) || 0;
+            //     }
+            //     return sanitizeNumericValue(params.data?.cpc);
+            // },
+            aggFunc: cpcSpender,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+
+
         },
         cpclinkclicks: {
             headerName: 'CPC_LC',
@@ -11959,39 +12118,115 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
 
+
         },
-        fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        fblinkclicks: { headerName: 'FB_LC', headerTooltip: 'fblinkclicks', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        impressions: { headerName: 'IMP', headerTooltip: 'Impressions', field: 'impressions', minWidth: 100, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fbclicks: {
+            headerName: 'FBClicks',
+            field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks',
+            headerTooltip: 'fblinkclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        impressions: {
+            headerName: 'IMP',
+            field: 'impressions',
+            minWidth: 100,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Impressions",
+        },
         ctr: {
-            headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter',
+            headerName: 'CTR',
+            field: 'ctr',
+            valueGetter: getCtr,
+            minWidth: 100,
+            sortable: true,
+            filter: "agTextColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth: 100,
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
-            headerTooltip: 'CTR = (FBClicks / Impressions) * 100',
+            headerClass: 'hide-menu' // Add a custom class
+
+
         },
         rpc: {
-            headerName: 'RPC', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            headerName: 'RPC',
+            field: 'rpc',
             minWidth: 80,
+            valueGetter: getRpc,
+            sortable: true,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
-            headerTooltip: 'RPC = Revenue / Conversions',
+            headerTooltip: "RPC = Revenue / Conversions",
             cellStyle: { fontWeight: 'bold' } // Make text bold
         },
-        cpl: { headerName: 'CPL', minWidth: 80, field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: 'CPL = Spend / FBLeads' },
-        ncpl: { headerName: 'NCPL', minWidth: 90, field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: 'NCPL = Spend / Conversions' },
+        cpl: {
+            headerName: 'CPL',
+            field: 'cpl',
+            minWidth: 80,
+            valueGetter: getCpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPL = Spend / FBLeads",
+
+
+        },
+        ncpl: {
+            headerName: 'NCPL',
+            field: 'ncpl',
+            minWidth: 90,
+            valueGetter: getNcpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "NCPL = Spend / Conversions",
+
+
+        },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin',
+            field: 'fmargin',
             minWidth: 120,
+            valueGetter: getFmargin,
+            sortable: true,
+            filter: "agTextColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -12002,25 +12237,32 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
-            headerTooltip: 'FMargin = (Profit / Spend) * 100',
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+
+
         },
         roi: {
-            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: "agNumberColumnFilter",
+            headerName: 'ROI',
+            field: 'roi',
+            minWidth: 100,
+            valueGetter: getROI,
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth: 100,
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
-            headerTooltip: 'ROI = ((Revenue - Spend) / Spend) * 100',
+            headerTooltip: "ROI = ((Revenue - Spend) / Spend) * 100",
+
+
         },
         campaignid: {
-            // headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' 
+            // headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu'
             headerName: 'CampaignId',
             field: 'campaignid',
             sortable: true,
@@ -12038,6 +12280,8 @@ const MyTablePage = () => {
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
+
+
 
     const KeywordCellRenderer = ({ params }) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");

@@ -1781,9 +1781,9 @@ useEffect(() => {
                                     {/* </Row> */}
                                 </Col>
                                 <Col style={{ display: 'flex', marginTop: '2%' }}>
-                                    <Button style={{ float: "right", backgroundColor: '#91C25F', color: 'black' }}>
+                                    {/* <Button style={{ float: "right", backgroundColor: '#91C25F', color: 'black' }}>
                                         Add New URL Builder
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         type="default"
                                         icon={<ReloadOutlined className="black-icon" />}
