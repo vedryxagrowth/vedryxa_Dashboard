@@ -26,7 +26,7 @@ const contentStyle = {
 const { Text } = Typography;
 const newtworkCollections = {
   "FB_Mnet": "Facebook_AD_Daily",
-  "FB_MnetBing": "Facebook_MnetBing",
+  "FB_MnetBing": "Facebook_AD_Daily",
   "FB_Enki": "Facebook_Enki",
   "FB_System1": 'Facebook_System1',
   "FB_Rsoc": 'Facebook_Rsoc',
@@ -2019,7 +2019,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           accountNumbers: accountsParam,
           timezone: newtime,
           status: 'Daily',                  // "Daily" | "Live"
-          network: newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
+          network: newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
           adsetids: adsets,
           campaignids: campaigns
         }
