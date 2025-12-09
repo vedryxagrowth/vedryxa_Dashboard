@@ -30,7 +30,7 @@ const contentStyle = {
 const { Text } = Typography;
 const newtworkCollections = {
   "FB_Mnet": "Facebook_Mnet_Daily",
-  "FB_MnetBing": "Facebook_MnetBing",
+  "FB_MnetBing": "Facebook_MnetBing_Daily",
   "FB_Enki": "Facebook_Enki",
   "FB_System1": 'Facebook_System1',
   "FB_Rsoc": 'Facebook_Rsoc',
@@ -145,7 +145,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           campaignname.includes(normalizedInput) ||
           campaignname.endsWith(normalizedInput) ||
           accountNumber.includes(normalizedInput) ||
-          campaignId.includes(normalizedInput) 
+          campaignId.includes(normalizedInput)
         );
       });
     }
@@ -160,7 +160,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
         return (
           campaignname.includes(normalizedInside) ||
           accountNumber.includes(normalizedInside) ||
-          campaignId.includes(normalizedInside) 
+          campaignId.includes(normalizedInside)
         );
       });
     }
@@ -1337,7 +1337,12 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           );
 
           if (idx >= 0) {
-            arr[idx].category = bulkCategory;
+            if (arr[idx] && arr[idx].category) {
+              arr[idx].category = arr[idx].category;
+            } else {
+              arr[idx].category = bulkCategory;
+            }
+
           } else {
             arr.push({
               campaignid: item.campaignid,

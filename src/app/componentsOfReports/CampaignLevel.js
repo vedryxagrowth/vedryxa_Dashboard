@@ -521,7 +521,12 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     );
 
                     if (idx >= 0) {
-                        arr[idx].category = bulkCategory;
+                        if (arr[idx] && arr[idx].category) {
+                            arr[idx].category = arr[idx].category;
+                        }else{
+                            arr[idx].category = bulkCategory;
+                        }
+
                     } else {
                         arr.push({
                             campaignid: item.campaignid,
@@ -535,9 +540,12 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 return arr;
             });
             leafCampaigns.forEach(item => {
-                const key = `${item.campaignid}_${item.accountNumber}_campaign`;
-                commentsMap.set(key, { category: bulkCategory });
+                if (!item.category || item.category.trim() === "") {
+                    const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+                    commentsMap.set(key, { category: bulkCategory });
+                }
             });
+
 
             message.success({ content: "Category updated!", key: "bulkCategory" });
 

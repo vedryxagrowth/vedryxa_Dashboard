@@ -632,7 +632,12 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           );
 
           if (idx >= 0) {
-            arr[idx].category = bulkCategory;
+            if (arr[idx] && arr[idx].category) {
+              arr[idx].category = arr[idx].category;
+            } else {
+              arr[idx].category = bulkCategory;
+            }
+
           } else {
             arr.push({
               campaignid: item.campaignid,

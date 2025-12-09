@@ -30,7 +30,7 @@ const contentStyle = {
 const { Text } = Typography;
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet_Daily",
-    "FB_MnetBing": "Facebook_MnetBing",
+    "FB_MnetBing": "Facebook_MnetBing_Daily",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
     "FB_Rsoc": 'Facebook_Rsoc',
@@ -581,7 +581,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     );
 
                     if (idx >= 0) {
-                        arr[idx].category = bulkCategory;
+                        if (arr[idx] && arr[idx].category) {
+                            arr[idx].category = arr[idx].category;
+                        } else {
+                            arr[idx].category = bulkCategory;
+                        }
+
                     } else {
                         arr.push({
                             campaignid: item.campaignid,
