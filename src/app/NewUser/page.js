@@ -11,6 +11,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 //UrlBuilder Components
 import MnetUrlBuilder from '../Campaigns/camp-components/urlbuilder/mnet';
+import MnetBingUrlBuilder from '../Campaigns/camp-components/urlbuilder/mnetbing'
 import System1UrlBuilder from '../Campaigns/camp-components/urlbuilder/system1'
 import TonicUrlBuilder from '../Campaigns/camp-components/urlbuilder/tonic';
 import DActiveUrlBuilder from '../Campaigns/camp-components/urlbuilder/dactive';
@@ -38,7 +39,7 @@ const networkStatus = ['All', 'Active', 'InActive'];
 
 const UsersTable = () => {
     const { userdetails } = useTokenContext();
-    
+
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div style={{ padding: '24px' }}>
@@ -134,9 +135,9 @@ const UsersTable = () => {
         setActiveTab(key);
     };
 
-useEffect(() => {
-    fetchNetworksData();
-}, []);
+    useEffect(() => {
+        fetchNetworksData();
+    }, []);
     const handleCarouselChange = (index) => {
         setActiveSlide(index); // Update the active tab based on the carousel's current slide
     };
@@ -391,7 +392,7 @@ useEffect(() => {
             (revenuePartner === 'All' || item.revenuePartner === revenuePartner)
         );
     };
-   
+
 
     const filteredNetworkData = networkFilterData();
 
@@ -1385,6 +1386,8 @@ useEffect(() => {
         switch (network) {
             case 'Mnet':
                 return <MnetUrlBuilder showSubmitButton={true} />
+            case 'MnetBing':
+                return <MnetBingUrlBuilder showSubmitButton={true} />
             case 'Tonic':
                 return <TonicUrlBuilder showSubmitButton={true} />
             case 'System1':
@@ -1412,7 +1415,7 @@ useEffect(() => {
 
     return (
         <div style={{ height: "100%" }}>
-            {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} AccountsData={AccountsData}/>}
+            {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} AccountsData={AccountsData} />}
             <DynamicNewaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} AccountsData={AccountsData} />
             <DynamicEdituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} AccountsData={AccountsData} onClose={onCloseDrawer} />
             <DynamicEditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} AccountsData={AccountsData} />
@@ -1560,7 +1563,7 @@ useEffect(() => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                         <Select
                                             onChange={onChangeNetwork}
-                                             value={revenuePartner}
+                                            value={revenuePartner}
                                             defaultValue="All"
                                             style={{
                                                 width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
@@ -1665,7 +1668,7 @@ useEffect(() => {
                                         <Select
                                             onChange={onChangeNetwork}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                             value={revenuePartner}
+                                            value={revenuePartner}
                                             defaultValue="All"
                                             style={{
                                                 width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
@@ -1766,7 +1769,7 @@ useEffect(() => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                         <Select
                                             defaultValue="All"
-                                             value={revenuePartner}
+                                            value={revenuePartner}
                                             style={{
                                                 width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                             }}

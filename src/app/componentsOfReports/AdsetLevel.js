@@ -546,8 +546,13 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             i.level === "campaign"
                     );
 
-                    if (idx >= 0) {
-                        arr[idx].category = bulkCategory;
+                     if (idx >= 0) {
+                        if (arr[idx] && arr[idx].category) {
+                            arr[idx].category = arr[idx].category;
+                        }else{
+                            arr[idx].category = bulkCategory;
+                        }
+
                     } else {
                         arr.push({
                             campaignid: item.campaignid,

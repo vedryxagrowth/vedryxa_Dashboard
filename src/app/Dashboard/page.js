@@ -22,6 +22,7 @@ Chart.register(...registerables);
 // }
 const revenuePartnerNames = {
     "MEDIA_DOT_NET": "FB_Mnet",
+    "MEDIA_DOT_NET_BING": "FB_MnetBing",
     "Bodies": "FB_Bodies",
     "TONIC": "FB_Tonic",
     "TONIC1": "FB_Tonic1",
@@ -38,7 +39,7 @@ const revenuePartnerNames = {
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet_Daily",
-    "FB_MnetBing": "Facebook_MnetBing",
+    "FB_MnetBing": "Facebook_MnetBing_Daily",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
     "FB_Rsoc": 'Facebook_Rsoc',
@@ -1443,6 +1444,8 @@ const Dashboard = () => {
                     newKey = "Facebook_DActive_Names"
                 } else if (key === "FB_Mnet") {
                     newKey = "Facebook_Mnet_Daily"
+                } else if (key === "FB_MnetBing") {
+                    newKey = "Facebook_MnetBing_Daily"
                 } else if (key === "FB_InuvoPrism") {
                     newKey = "Facebook_InuvoPrismDaily"
                 }
