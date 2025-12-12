@@ -2012,7 +2012,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
       // ✅ call the new multi-account endpoint
       const fetchData = await apiClient.post(
-        newRevenuePratner === "FB_Mnet" ? `/AdLevelAccountsNew` : "/AdLevelAccounts",
+        newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `/AdLevelAccountsNew` : "/AdLevelAccounts",
         {
           dateStart: startDate,
           dateEnd: endDate,
