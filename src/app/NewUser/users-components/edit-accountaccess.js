@@ -581,7 +581,12 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
               }))}
             />
           </Form.Item>
-
+          <Form.Item label="Beneficiary" name="Beneficiary">
+            <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+          </Form.Item>
+          <Form.Item label="Payer" name="Payer">
+            <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+          </Form.Item>
           <Form.Item label="Media Buyer" name="MediaBuyerName">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
