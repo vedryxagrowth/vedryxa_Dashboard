@@ -119,7 +119,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
     // }
     // ) : [], [rowData, inputValue, theme]);
     const memorizedRowData = useMemo(() => {
-        let filtered =  rowData || [];
+        let filtered = rowData || [];
 
         const normalizedInput = inputValue.trim().toLowerCase();
         const normalizedInside = insideInput.trim().toLowerCase();
@@ -153,13 +153,13 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     adsetname.includes(normalizedInside) ||
                     accountNumber.includes(normalizedInside) ||
                     campaignId.includes(normalizedInside) ||
-                    adsetId.includes(normalizedInside) 
+                    adsetId.includes(normalizedInside)
                 );
             });
         }
 
         return filtered;
-    }, [ rowData, inputValue, insideInput]);
+    }, [rowData, inputValue, insideInput]);
     const [leafCampaigns, setLeafCampaigns] = useState([]);
     const [isBulkCommentModalVisible, setIsBulkCommentModalVisible] = useState(false);
     const [comment, setComment] = useState("");
@@ -546,10 +546,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             i.level === "campaign"
                     );
 
-                     if (idx >= 0) {
+                    if (idx >= 0) {
                         if (arr[idx] && arr[idx].category) {
                             arr[idx].category = arr[idx].category;
-                        }else{
+                        } else {
                             arr[idx].category = bulkCategory;
                         }
 
@@ -3256,6 +3256,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             rowHeight={30}
                                             context={context}
                                             rowData={memorizedRowData}
+                                            immutableData={true}
+                                            getRowId={params => params.data.id}
                                             rowSelection='multiple'
                                             groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                                             suppressRowClickSelection={true}

@@ -523,7 +523,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     if (idx >= 0) {
                         if (arr[idx] && arr[idx].category) {
                             arr[idx].category = arr[idx].category;
-                        }else{
+                        } else {
                             arr[idx].category = bulkCategory;
                         }
 
@@ -3538,6 +3538,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 className='custom-grid'
                                                 context={context}
                                                 rowData={memorizedRowData}
+                                                immutableData={true}
+                                                getRowId={params => params.data.id}
                                                 rowSelection='multiple'
                                                 columnDefs={memorizedColumnDef}
                                                 defaultColDef={{ ...defaultColDef, suppressMenu: true }}

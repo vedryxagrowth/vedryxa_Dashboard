@@ -425,7 +425,7 @@ const AdsetCard = ({
             // style={{ color: "#888", cursor: "pointer" }}
             />
           </Tooltip>
-          {
+          {/* {
             //   approvedCount === 0 &&
             !restrictedEmails.includes(userdetails.email) && (
               <Tooltip
@@ -444,7 +444,7 @@ const AdsetCard = ({
                 />
               </Tooltip>
             )
-          }
+          } */}
           {approvedCount === 0 &&
             !restrictedEmails.includes(userdetails.email) && (
               <Popconfirm
