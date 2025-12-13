@@ -69,8 +69,9 @@ import moment from "moment-timezone";
 import dayjs from "dayjs";
 import { DatePicker } from "antd";
 import StickyBox from "react-sticky-box";
-import { FaClone, FaEye, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import { FaClone, FaEye, FaPenToSquare, FaTrashCan, FaRegCommentDots } from "react-icons/fa6";
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
+import { IoMdCreate } from "react-icons/io";
 
 import { Token } from "aws-sdk";
 const { RangePicker } = DatePicker;
@@ -173,7 +174,11 @@ const App = () => {
   ] = useState(false);
   const [view, setView] = useState(false);
   const [accountChanged, setAccountChanged] = useState(false);
-
+  const [comment, setComment] = useState("");
+  const [isModalVisibles, setIsModalVisibles] = useState(false);
+  const [firstColumnValue, setFirstColumnValue] = useState("");
+  const [universalOject, setUniversalOject] = useState({});
+  const [launcherComments, setLauncherComments] = useState([]);
 
   // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
@@ -618,6 +623,45 @@ const App = () => {
     }
   };
 
+  const fetchLauncherComments = async (
+    accountNumber = null,
+  ) => {
+    // setLoadingForMultipleAdsets(true);
+    // setError(null);
+    try {
+      // Construct URL with optional startDate and endDate
+      //https://www.testapi.adsgoat.in
+      // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      // let url = `https://www.testapi.adsgoat.in/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      // if (start && end) {
+      //   url += `&startDate=${start}&endDate=${end}`;
+      // }
+      // if (search) {
+      //   url += `&searchInput=${search}`; // Append search input if provided
+      // }
+      // console.log("Fetching data from URL:", url);
+      const url = `https://www.testapi.adsgoat.in/api/GetCommentsForCampaignLauncher?accountNumber=${accountNumber}`
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      });
+      const allCampaigns = response?.data;
+
+      console.log(allCampaigns, "all multiple adset campaigns");
+      setLauncherComments(allCampaigns);
+
+      // console.log(filteredCampaignData, "multiple adset campaigns");
+
+      // // setMultipleAdsetCampaignData(filteredCampaignData);
+      // setMultipleAdsetCampaignData(allCampaigns);
+    } catch (error) {
+      console.error("Error fetching campaign data:", error);
+      setError("Failed to fetch campaign data.");
+    }
+  };
+
   const fetchDrafts = async () => {
     setDraftsLoading(true);
     // setError(null);
@@ -640,8 +684,6 @@ const App = () => {
     } catch (error) {
       console.error("Error fetching draft data:", error);
       setError("Failed to fetch draft data.");
-    } finally {
-      setDraftsLoading(false);
     }
   };
 
@@ -684,6 +726,7 @@ const App = () => {
     if (selectedValue && startDate && endDate) {
 
       // fetchData(selectedValue, startDate, endDate);
+      fetchLauncherComments(selectedValue)
       fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
       setAccountChanged(false);
 
@@ -714,6 +757,7 @@ const App = () => {
   }, [selectedValue]);
   useEffect(() => {
     if (!selectedValue || !startDate || !endDate) return;
+    fetchLauncherComments(selectedValue);
     fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
   }, [refrst]);
 
@@ -755,6 +799,7 @@ const App = () => {
   const handleRefresh = () => {
     if (selectedValue) {
       // fetchData(selectedValue);
+      fetchLauncherComments(selectedValue);
       fetchMultipleAdsetCampaigns(selectedValue);
     } // This will re-fetch the data or update the component
   };
@@ -954,12 +999,12 @@ const App = () => {
         "Approved"
       );
       // Log the message to the console
-      console.log(userdetails?.role,"AAAAAApproval confirmed");
+      console.log(userdetails?.role, "AAAAAApproval confirmed");
 
       if (userdetails?.role === "Network_Partner") {
         await onToggleStatusForMultipleAdsets(useaprovalForAdsets, "ACTIVE");
       }
-           
+
       setIsModalVisibleForAdsets(false);
     } catch (error) {
       console.error("Error updating approval:", error);
@@ -996,7 +1041,7 @@ const App = () => {
   const onToggleStatus = async (record, checked) => {
     try {
       const token = localStorage.getItem("token");
-      console.log("hello siddu",record, checked);
+      console.log("hello siddu", record, checked);
 
       // Update status on your backend
       const backendResponse = await fetch(
@@ -2364,6 +2409,7 @@ const App = () => {
           (Array.isArray(record?.adsetErrors) &&
             record.adsetErrors.length > 0) ||
           (Array.isArray(record?.adErrors) && record.adErrors.length > 0);
+        const commentForCampaign = launcherComments.find(item => item.Account === record.Account_Number && item.campaignid === record.identifier && item.level === "Launcher") || {};
 
         return (
           <div
@@ -2450,6 +2496,33 @@ const App = () => {
                 />
               </Tooltip>
             )}
+
+            <Tooltip
+              title={commentForCampaign.comment ? commentForCampaign.comment : "Comment"}
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: "14px",
+              }}
+            >
+              <Button
+                icon={commentForCampaign.comment ? <FaRegCommentDots /> : <IoMdCreate />}
+                // disabled={record.fbstatus === "Live"}
+                // onClick={() => handleEditClickMultipleAdsetData(record, false)}
+                onClick={() => handleClickComment(record)}
+                style={{
+                  // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                  backgroundColor:
+                    theme === "dark" ? "transparent" : "transparent",
+                  color: theme === "dark" ? "#fff" : "#000",
+                }}
+              />
+            </Tooltip>
 
             {/* {record.fbstatus === "No-Live" && ( */}
             <Tooltip
@@ -2635,6 +2708,7 @@ const App = () => {
           color = "#4caf50";
         }
         const approvedBy = record?.Approvedby || "N/A";
+        const approvedDate = record?.Approveddate || "N/A";
         return (
           <div>
             <span style={{ color }}>{displayText}</span>
@@ -2642,6 +2716,8 @@ const App = () => {
               <>
                 <br />
                 <small style={{ color: "gray" }}>{approvedBy}</small>
+                {/* <br />
+                <small style={{ color: "gray" }}>{approvedDate}</small> */}
               </>
             )}
           </div>
@@ -3282,6 +3358,127 @@ const App = () => {
   //     className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
   //   />
   // );
+
+  const handleCancels = () => setIsModalVisibles(false);
+
+  const handleOks = async () => {
+    const editedTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+    const commentText = comment.trim();
+
+    if(commentText === ""){
+      message.warning("Please enter valid comment");
+      return;
+    }
+
+    const response = await axios.post(
+      "https://www.testapi.adsgoat.in/api/createcommentForLauncher",
+      { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: commentText, editedTime: editedTime },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        }
+      }
+    );
+    if (response.status === 200 || response.status === 201) {
+      setLauncherComments(prev => {
+
+        const existsIndex = prev.findIndex(item =>
+          item.Account === universalOject.Account &&
+          item.campaignid === universalOject.campaignid &&
+          item.campaignname === universalOject.campaignname &&
+          item.level === "Launcher"
+        );
+
+        // If exists → update it
+        if (existsIndex !== -1) {
+          const updated = [...prev];
+          updated[existsIndex] = {
+            ...updated[existsIndex],
+            comment: commentText,      // <-- your comment variable
+            editedTime: editedTime            // formatted time
+          };
+          return updated;
+        }
+
+        // If not exists → add new object
+        return [
+          ...prev,
+          {
+            Account: universalOject.Account,
+            campaignid: universalOject.campaignid,
+            campaignname: universalOject.campaignname,
+            level: "Launcher",
+            comment: commentText,
+            editedTime: editedTime
+          }
+        ];
+      });
+
+    }
+    setIsModalVisibles(false);
+  }
+
+  const handleDelete = async () => {
+
+    const response = await axios.post(
+      "https://www.testapi.adsgoat.in/api/deleteCommentForLauncher",
+      { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: comment },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        }
+      }
+    );
+    if (response.status === 200 || response.status === 201) {
+      setLauncherComments(prev => {
+
+        const existsIndex = prev.findIndex(item =>
+          item.Account === universalOject.Account &&
+          item.campaignid === universalOject.campaignid &&
+          item.campaignname === universalOject.campaignname &&
+          item.level === "Launcher"
+        );
+
+        // If exists → REMOVE it
+        if (existsIndex !== -1) {
+          return prev.filter((_, index) => index !== existsIndex);
+        }
+
+        // If not exists → ADD new object
+        return [
+          ...prev,
+          {
+            Account: universalOject.Account,
+            campaignid: universalOject.campaignid,
+            campaignname: universalOject.campaignname,
+            level: "Launcher",
+            comment: comment,
+            editedTime: editedTime
+          }
+        ];
+      });
+
+
+    }
+    setIsModalVisibles(false);
+  };
+
+  const handleClickComment = (record) => {
+    setIsModalVisibles(true)
+    setFirstColumnValue(record.campaign_name)
+    const commentObject = launcherComments.find(item => item.Account === record.Account_Number && item.campaignid === record.identifier && item.level === "Launcher") || { campaignname: record.campaign_name, Account: record.Account_Number, campaignid: record.identifier, level: "Launcher" };
+    setUniversalOject(commentObject)
+    if (commentObject.comment) {
+      setComment(commentObject.comment)
+    } else {
+      setComment("")
+    }
+  }
+
+
 
   const renderAccountsCheckboxes = (theme) => {
     const activeAccountNumbers = filteredAccounts
@@ -4204,7 +4401,7 @@ const App = () => {
                   pageSize: paginationSize,
                   showSizeChanger: true,
                   onChange: (page, pageSize) => {
-                    setPaginationSize(pageSize);   
+                    setPaginationSize(pageSize);
                   }
                 }}
                 scroll={{
@@ -4291,6 +4488,48 @@ const App = () => {
         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
       >
         <p>Are you sure you want to delete this draft</p>
+      </Modal>
+
+      <Modal
+        title={firstColumnValue}
+        visible={isModalVisibles}
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        onOk={handleOks}
+        onCancel={handleCancels}
+        footer={[
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+            <div style={{ display: 'flex', flexDirection: "column" }}>
+              <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                Last Edited Time:
+              </span>
+              <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                {universalOject?.editedTime || ""}
+              </span>
+            </div>
+            <div>
+              <Button
+                key="delete"
+                type="danger"
+                onClick={handleDelete}
+                style={{ marginRight: 'auto', border: "1px solid #e3e3da" }}
+              >
+                Delete
+              </Button>
+              <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
+                Cancel
+              </Button>
+              <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                Ok
+              </Button>
+            </div>
+          </div>
+        ]}
+      >
+        <Input.TextArea
+          placeholder="Enter your comments here"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
       </Modal>
     </div>
   );
