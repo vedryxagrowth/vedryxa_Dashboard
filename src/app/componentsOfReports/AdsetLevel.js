@@ -2049,7 +2049,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
             // You had a filter to skip rows where ad_clicks > 0
             const mainData1 = resp.data || [];
-            const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
+            const mainData = mainData1;
 
             const specifiedTimeZone = selectTimezone[newtime];
 

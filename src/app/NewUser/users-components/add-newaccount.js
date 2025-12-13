@@ -678,6 +678,12 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                             }))}
                         />
                     </Form.Item>
+                    <Form.Item label="Beneficiary" name="Beneficiary">
+                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+                    </Form.Item>
+                    <Form.Item label="Payer" name="Payer">
+                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+                    </Form.Item>
                     <Form.Item label="Media Buyer Name" name="MediaBuyerName" rules={[{ required: true, message: 'Please input the Media Buyer Name ID!' }]}>
                         <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                     </Form.Item>

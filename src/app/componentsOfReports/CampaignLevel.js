@@ -2126,7 +2126,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             const mainData1 = resp.data;
 
             // --- keep your existing logic below this line unchanged ---
-            const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
+            const mainData = mainData1;
             const specifiedTimeZone = selectTimezone[newtime];
 
             const filteredData = mainData && mainData.length > 0 ?

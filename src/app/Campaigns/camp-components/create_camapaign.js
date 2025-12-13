@@ -830,6 +830,7 @@ const AdPreviewPerAccount = ({
   theme,
   editedImages,
   imagehash,
+  newImageHashArray
 }) => {
   const adFiles = selectedFiles[adset.id] || [];
 
@@ -840,7 +841,27 @@ const AdPreviewPerAccount = ({
   const description = Form.useWatch(["adsets", adset.index, "Description"], form) || "";
   const primaryText = Form.useWatch(["adsets", adset.index, "message"], form) || "";
   const addName = Form.useWatch(["adsets", adset.index, "AddName"], form) || "";
+  const PagesPageID = Form.useWatch("page_id", form) || [];
+  const page_ids_list_for_pageNames = PagesPageID?.filter(item => item.includes(account));
+  const pageAccount = (newImageHashArray || [])?.find(item => item.accountNumber === account);
+  const extractedPageIds = page_ids_list_for_pageNames.map(str => str.split(" - ")[1]);
+  const pageNameData =
+    typeof pageAccount?.pageID === "object"
+      ? pageAccount.pageID
+      : pageAccount?.pageName;
 
+  let pageNames = [];
+
+  if (typeof pageNameData === "object" && pageNameData !== null) {
+    pageNames = Object.keys(pageNameData).filter(
+      name => extractedPageIds.includes(pageNameData[name])
+    );
+  } else if (typeof pageNameData === "string") {
+    pageNames = [pageNameData];
+  }
+
+  console.log(pageNameData);
+  console.log(pageAccount);
   if (adFiles.length === 0) return null;
 
   return (
@@ -906,8 +927,15 @@ const AdPreviewPerAccount = ({
                     }}
                   >
                     {/* {addName} */}
-                    <div style={{ opacity: 0.7, fontSize: "12px" }}>
-                      <GlobalOutlined /> {imagehash?.pageName || "Page Name"}
+                    <div style={{ opacity: 0.7, fontSize: "12px", display: "flex", alignItems: "flex-start", gap: "4px" }}>
+                      <GlobalOutlined style={{ marginTop: "2px" }} />
+
+                      <div>
+                        {pageNames.map((name, index) => (
+                          <div key={index}>{name}</div>
+                        ))}
+                      </div>
+
                     </div>
                   </div>
                 </div>
@@ -1060,8 +1088,9 @@ const AdPreviewPerAccount = ({
             </div>
           </div>
         </Badge>
-      ))}
-    </div>
+      ))
+      }
+    </div >
   );
 };
 
@@ -1105,7 +1134,8 @@ const AdsetComponent = ({
   budgetType,
   page,
   pixel,
-  geo
+  geo,
+  newImageHashArray
 }) => {
   console.log(page_id_list, "page_id_list in adset component");
   console.log(pageidList, "pageidList in adset component");
@@ -5778,6 +5808,7 @@ const AdsetComponent = ({
                       theme={theme}
                       editedImages={editedImages}
                       imagehash={imagehash}
+                      newImageHashArray={newImageHashArray}
                     />
                   ) : null
                 )}
@@ -11570,6 +11601,7 @@ const CreateCampaignDrawer = ({
                   page={page}
                   pixel={pixel}
                   geo={geo}
+                  newImageHashArray={newImageHashArray}
                 />
               );
               // <ffff/>

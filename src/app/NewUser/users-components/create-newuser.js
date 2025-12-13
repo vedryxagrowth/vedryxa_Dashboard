@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Drawer, Button, Modal, Form, Input, Select, message, Popover } from 'antd';
-import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Drawer, Button, Modal, Form, Input, Select, message, Popover, Tooltip } from 'antd';
+import { CloseOutlined, PlusOutlined, DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 import { FaTrashCan } from 'react-icons/fa6';
@@ -519,12 +519,30 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                                                             onClick={() => handleRemoveInput(accountIndex, inputIndex)}
                                                         />
                                                     )}
-                                                    {inputIndex === account.inputs.length - 1 && (
+                                                    {/* {inputIndex === account.inputs.length - 1 && (
                                                         <PlusOutlined
                                                             style={{ cursor: 'pointer', marginLeft: '8px' }}
                                                             onClick={() => handleAddInput(accountIndex)}
                                                         />
+                                                    )} */}
+                                                    {inputIndex === account.inputs.length - 1 && (
+                                                        input?.trim().toLowerCase() === "all" ? (
+                                                            <Tooltip title="'All' includes every account. You cannot add another Account ID" overlayInnerStyle={{
+                                                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                            }}>
+                                                                <InfoCircleOutlined
+                                                                    style={{ color: "#1890ff", marginLeft: "8px", fontSize: "16px" }}
+                                                                />
+                                                            </Tooltip>
+                                                        ) : (
+                                                            <PlusOutlined
+                                                                style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                                onClick={() => handleAddInput(accountIndex)}
+                                                            />
+                                                        )
                                                     )}
+
                                                 </div>
                                             ))}
                                         </div>
