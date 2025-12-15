@@ -3591,8 +3591,8 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                       suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
                       rowSelection="multiple"
                       rowData={memorizedDailyData}
-                      immutableData={true}
-                      getRowId={params => params.data.id}
+                      // immutableData={true}
+                      // getRowId={params => params.data.id}
                       columnDefs={memorizedColumnDef1}
                       onCellClicked={onCellClicked}
                       pagination={true}

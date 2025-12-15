@@ -3284,7 +3284,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       rowHeight={30}
                       className='custom-grid'
                       rowData={memorizedDailyData}
-                      immutableData={true}
+                      // immutableData={true}
                       // getRowId={params => params.data.id}
                       columnDefs={memorizedColumnDef1}
                       onCellClicked={onCellClicked}

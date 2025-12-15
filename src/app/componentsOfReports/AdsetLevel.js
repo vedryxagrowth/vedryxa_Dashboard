@@ -3256,8 +3256,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             rowHeight={30}
                                             context={context}
                                             rowData={memorizedRowData}
-                                            immutableData={true}
-                                            getRowId={params => params.data.id}
+                                            // immutableData={true}
+                                            // getRowId={params => params.data.id}
                                             rowSelection='multiple'
                                             groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                                             suppressRowClickSelection={true}

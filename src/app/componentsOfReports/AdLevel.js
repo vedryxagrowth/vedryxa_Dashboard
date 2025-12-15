@@ -3302,7 +3302,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       rowHeight={30}
                       className='custom-grid'
                       rowData={memorizedRowData}
-                      immutableData={true}
+                      // immutableData={true}
                       // getRowId={params => params.data.id}
                       rowSelection='multiple'
                       columnDefs={memorizedColumnDef}
