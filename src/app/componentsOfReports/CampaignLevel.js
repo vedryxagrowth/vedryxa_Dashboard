@@ -3538,8 +3538,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 className='custom-grid'
                                                 context={context}
                                                 rowData={memorizedRowData}
-                                                immutableData={true}
-                                                getRowId={params => params.data.id}
+                                                // immutableData={true}
+                                                // getRowId={params => params.data.id}
                                                 rowSelection='multiple'
                                                 columnDefs={memorizedColumnDef}
                                                 defaultColDef={{ ...defaultColDef, suppressMenu: true }}

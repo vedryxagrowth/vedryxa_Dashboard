@@ -3282,8 +3282,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 rowHeight={30}
                                                 context={context}
                                                 rowData={memorizedDailyData}
-                                                immutableData={true}
-                                                getRowId={params => params.data.id}
+                                                // immutableData={true}
+                                                // getRowId={params => params.data.id}
                                                 columnDefs={memorizedColumnDef1}
                                                 onCellClicked={onCellClicked}
                                                 groupSelectsChildren={true} // ✅ Selects all children when a group is selected
