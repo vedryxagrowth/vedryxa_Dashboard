@@ -295,18 +295,18 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         url = url
         .replace("keywords_replace", formattedKeywords)
         .replace("&chanel_replace", "")
-        .replace("business_code_replace_source_code_replace_region_code_replace", ad_id)
-        .replace("campaign_id_replace", campaign_id)
-        .replace("adset_id_replace", adset_id);
+        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+        .replace("campaign_id_replace", adset_id)
+        .replace("adset_id_replace", ad_id);
       }
       else{
 
       url = url
         .replace("keywords_replace", formattedKeywords)
         .replace("chanel_replace", channel)
-        .replace("business_code_replace_source_code_replace_region_code_replace", ad_id)
-        .replace("campaign_id_replace", campaign_id)
-        .replace("adset_id_replace", adset_id);
+        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+        .replace("campaign_id_replace", adset_id)
+        .replace("adset_id_replace", ad_id);
       }
 
       // url = url
@@ -342,18 +342,18 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         url = url
         .replace("keywords_replace", formattedKeywords)
         .replace("&chanel_replace", "")
-        .replace("business_code_replace_source_code_replace_region_code_replace", ad_id)
-        .replace("campaign_id_replace", campaign_id)
-        .replace("adset_id_replace", adset_id);
+        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+        .replace("campaign_id_replace", adset_id)
+        .replace("adset_id_replace", ad_id);
       }
       else{
 
       url = url
         .replace("keywords_replace", formattedKeywords)
         .replace("chanel_replace", channel)
-        .replace("business_code_replace_source_code_replace_region_code_replace", ad_id)
-        .replace("campaign_id_replace", campaign_id)
-        .replace("adset_id_replace", adset_id);
+        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+        .replace("campaign_id_replace", adset_id)
+        .replace("adset_id_replace", ad_id);
       }
       setErrorMessage(url);
     }
