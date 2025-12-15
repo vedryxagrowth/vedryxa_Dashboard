@@ -618,6 +618,9 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                         {userdetails.role !== "Special_User" && (
                             <Select.Option value="Network_Partner">Network_Partner</Select.Option>
                         )}
+                        {userdetails.role !== "Special_User" && (
+                            <Select.Option value="Revenue_Partner">Revenue_Partner</Select.Option>
+                        )}
                         {userdetails?.role !== "Special_User" && (
                             <Select.Option value="Admin">Admin</Select.Option>
                         )}

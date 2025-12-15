@@ -812,6 +812,9 @@ const RevenuePartnerDashboard = () => {
                                         suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
                                         enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
                                     }}
+                                    getMainMenuItems={(params) => {
+                                        return params.defaultItems.filter(item => item !== 'resetColumns');
+                                    }}
                                     suppressAggFuncInHeader={true}
                                     pinnedBottomRowData={fixedFooter}
                                     autoGroupColumnDef={autoGroupColumnDefRevPartner}
@@ -881,6 +884,9 @@ const RevenuePartnerDashboard = () => {
                                             suppressRowClickSelection: true,
                                             suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
                                             enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                        }}
+                                        getMainMenuItems={(params) => {
+                                            return params.defaultItems.filter(item => item !== 'resetColumns');
                                         }}
                                         autoGroupColumnDef={autoGroupColumnDefRevenuePartnerDomainData}
                                         pinnedBottomRowData={domainFixedFooter}
@@ -3236,17 +3242,16 @@ const Dashboard = () => {
             field: "revenuePartner",
             resizable: true,
             sortable: true,
-            width: 100,
+            minWidth: 150,
             hide: true,
             rowGroup: true,
             enableRowGroup: true,
-            minWidth: 108,
         }, // Group by Network
         {
             field: "holder",
             resizable: true,
             sortable: true,
-            width: 100,
+            minWidth: 100,
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
@@ -3260,7 +3265,7 @@ const Dashboard = () => {
             colId: 'accountNumber',
             headerName: 'Account number',
             resizable: true,
-            width: 150,
+            minWidth: 170,
             sortable: true,
             hide: true, // Hide column as it's grouped
             rowGroup: true,
@@ -3829,6 +3834,7 @@ const Dashboard = () => {
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
+            minWidth: 170
 
 
         }, // Group by Network
@@ -4206,7 +4212,8 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            width: 500,
+            // width: 500,
+            minWidth: 170,
             hide: true,
             rowGroup: true,
             enableRowGroup: true,
@@ -6724,7 +6731,9 @@ const Dashboard = () => {
                                                         enableRangeSelection: true,
                                                     }}
                                                     // onFilterChanged={onFilterChanged}
-
+                                                    getMainMenuItems={(params) => {
+                                                        return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                    }}
                                                     autoGroupColumnDef={autoGroupColumnDefOverAllReport}
                                                     rowGroupPanelShow="always"
                                                     suppressAggFuncInHeader={true}
@@ -6805,6 +6814,9 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                        }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeFooter={true}
@@ -6842,6 +6854,9 @@ const Dashboard = () => {
                                                             suppressRowClickSelection: true,
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
+                                                        }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
                                                         }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
@@ -6891,6 +6906,9 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                        }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeFooter={true}
@@ -6939,6 +6957,9 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                        }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeFooter={true}
@@ -6986,6 +7007,9 @@ const Dashboard = () => {
                                                             suppressRowClickSelection: true,
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
+                                                        }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
                                                         }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
@@ -7072,6 +7096,9 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                        }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeFooter={true}
@@ -7110,6 +7137,9 @@ const Dashboard = () => {
                                                             suppressRowClickSelection: true,
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
+                                                        }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
                                                         }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
@@ -7151,6 +7181,9 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                        }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeFooter={true}
@@ -7190,6 +7223,9 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                        }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeFooter={true}
@@ -7228,6 +7264,9 @@ const Dashboard = () => {
                                                             suppressRowClickSelection: true,
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
+                                                        }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
                                                         }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
@@ -7312,6 +7351,9 @@ const Dashboard = () => {
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
                                                         }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
+                                                        }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
                                                         groupIncludeTotalFooter={true}
@@ -7350,6 +7392,9 @@ const Dashboard = () => {
                                                             suppressRowClickSelection: true,
                                                             suppressClipboardPaste: false,
                                                             enableRangeSelection: true,
+                                                        }}
+                                                        getMainMenuItems={(params) => {
+                                                            return params.defaultItems.filter(item => item !== 'resetColumns');
                                                         }}
                                                         rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}
