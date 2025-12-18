@@ -6125,6 +6125,12 @@ const CreateCampaignDrawer = ({
   }, [selectedKey, userdetails]);
 
   useEffect(() => {
+    const newadsets = form.getFieldValue("adsets") || [];
+    console.log(newadsets, "newadsets")
+    console.log(adsets, "adsets");
+  }, [adsets, watchedAdsets])
+
+  useEffect(() => {
     // Run only when objectiveValue changes
     if (objectiveValue) {
       const adsets = form.getFieldValue("adsets") || [];
@@ -6894,14 +6900,78 @@ const CreateCampaignDrawer = ({
   // For adding a new adset
   // For adding a new adset
   // For adding a new adset
+  // const addAdset = () => {
+  //   const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
+  //   const allAdsets = form.getFieldValue("adsets") || [];
+  //   const first = allAdsets[allAdsets.length-1] || {};
+  //   const newAdset = {
+  //     id: uuidv4(),
+  //     AdsetPanelName: newAdsetName,
+  //     AdsetName: "", // Add default values for the new adset
+  //     optimization_goal: first.optimization_goal || "",
+  //     billing_event: first.billing_event || "",
+  //     action_source: first.action_source || "",
+  //     custom_event_type: first.custom_event_type || "",
+  //     countries: "US",
+  //     Min_Age: "18",
+  //     Max_Age: "65",
+  //     Gender: "0",
+  //     Language: [6],
+  //     placements: "Advance",
+  //     DailyAdd_amount: 0,
+  //     AddName: "",
+  //     Description: "Find More",
+  //     Caption: "",
+  //     Website_URL: "",
+  //     pixel_id: "", // Or set it based on your requirement
+  //     start_date: new Date(),
+  //     MediaContent: [], // Default MediaContent as empty array
+  //   };
+  //   // setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
+  //   setAdsets((prevAdsets) => {
+  //     const updatedAdsets = [...prevAdsets, newAdset];
+
+  //     // Update the Ant Form: set the whole adsets array so form state stays in sync
+  //     const currentFormAdsets = form.getFieldValue("adsets") || [];
+  //     const updatedFormAdsets = [...currentFormAdsets, newAdset];
+  //     form.setFieldsValue({ adsets: updatedFormAdsets });
+
+  //     // Activate the last panel (new one)
+  //     setActiveKey([`${updatedAdsets.length - 1}`]);
+
+  //     return updatedAdsets;
+  //   });
+
+  //   // Add the new adset to the state
+  //   // setAdsets(prevAdsets => {
+  //   //     const updatedAdsets = [...prevAdsets, newAdset];
+
+  //   //     // Update the form with only the new adset at the last index
+  //   //     form.setFieldsValue({
+  //   //         // Only update the last adset (the newly added one)
+  //   //         [`adsets[${updatedAdsets.length - 1}]`]: {
+  //   //             ...newAdset,
+  //   //             [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: newAdset.AdsetPanelName,
+  //   //             [`adsets[${updatedAdsets.length - 1}].AdsetName`]: newAdset.AdsetName,
+  //   //             [`adsets[${updatedAdsets.length - 1}].MediaContent`]: newAdset.MediaContent,
+  //   //             // Add other fields as needed
+  //   //         }
+  //   //     });
+
+  //   //     return updatedAdsets;
+  //   // });
+
+  //   // setActiveKey([`${adsets.length}`]); // Open the newly added adset by default
+  // };
   const addAdset = () => {
-    const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
+    const newAdsetName = getNextAdsetName(adsets);
     const allAdsets = form.getFieldValue("adsets") || [];
-    const first = allAdsets[0] || {};
+    const first = allAdsets[allAdsets.length - 1] || {};
+
     const newAdset = {
       id: uuidv4(),
       AdsetPanelName: newAdsetName,
-      AdsetName: "", // Add default values for the new adset
+      AdsetName: "",
       optimization_goal: first.optimization_goal || "",
       billing_event: first.billing_event || "",
       action_source: first.action_source || "",
@@ -6917,47 +6987,22 @@ const CreateCampaignDrawer = ({
       Description: "Find More",
       Caption: "",
       Website_URL: "",
-      pixel_id: "", // Or set it based on your requirement
+      pixel_id: "",
       start_date: new Date(),
-      MediaContent: [], // Default MediaContent as empty array
+      MediaContent: [],
     };
-    // setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
-    setAdsets((prevAdsets) => {
-      const updatedAdsets = [...prevAdsets, newAdset];
 
-      // Update the Ant Form: set the whole adsets array so form state stays in sync
-      const currentFormAdsets = form.getFieldValue("adsets") || [];
-      const updatedFormAdsets = [...currentFormAdsets, newAdset];
-      form.setFieldsValue({ adsets: updatedFormAdsets });
-
-      // Activate the last panel (new one)
-      setActiveKey([`${updatedAdsets.length - 1}`]);
-
-      return updatedAdsets;
+    // ✅ 1. Update React state (PURE)
+    setAdsets(prev => {
+      const updated = [...prev, newAdset];
+      setActiveKey([`${updated.length - 1}`]);
+      return updated;
     });
 
-    // Add the new adset to the state
-    // setAdsets(prevAdsets => {
-    //     const updatedAdsets = [...prevAdsets, newAdset];
-
-    //     // Update the form with only the new adset at the last index
-    //     form.setFieldsValue({
-    //         // Only update the last adset (the newly added one)
-    //         [`adsets[${updatedAdsets.length - 1}]`]: {
-    //             ...newAdset,
-    //             [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: newAdset.AdsetPanelName,
-    //             [`adsets[${updatedAdsets.length - 1}].AdsetName`]: newAdset.AdsetName,
-    //             [`adsets[${updatedAdsets.length - 1}].MediaContent`]: newAdset.MediaContent,
-    //             // Add other fields as needed
-    //         }
-    //     });
-
-    //     return updatedAdsets;
-    // });
-
-    // setActiveKey([`${adsets.length}`]); // Open the newly added adset by default
+    // ✅ 2. Update AntD Form ONCE
+    const updatedFormAdsets = [...allAdsets, newAdset];
+    form.setFieldsValue({ adsets: updatedFormAdsets });
   };
-
   // const cloneAdset = (adsetId) => {
   //     const adsetIndex = adsets.findIndex(ad => ad.id === adsetId);
   //     if (adsetIndex === -1) return;
@@ -7115,7 +7160,7 @@ const CreateCampaignDrawer = ({
     const adsetIndex = adsetId
     console.log(adsetIndex)
     if (adsetIndex === -1) return;
-    const adsets = form.getFieldValue("adsets") || [];
+    // const adsets = adsets || [];
     console.log(adsets)
     const originalAdset = adsets.find(item => item.id === adsetIndex);
     const newId = uuidv4();
@@ -7137,11 +7182,17 @@ const CreateCampaignDrawer = ({
 
     const currentFormAdsets = form.getFieldValue("adsets") || [];
 
+    console.log(currentFormAdsets, "current");
+
     // ✅ Match by UUID not index!
     const formIndex = currentFormAdsets.findIndex(
       (_, i) => adsets[i]?.id === adsetId
     );
-    const clonedFormData = { ...currentFormAdsets[formIndex] };
+    const clonedFormData = {
+      ...currentFormAdsets[formIndex],
+      id: newId,
+      AdsetPanelName: newPanelName
+    };
 
     // ✅ Add `_Copy` to AdsetName and AddName if present
     if (clonedFormData.AdsetName) {
@@ -7831,8 +7882,17 @@ const CreateCampaignDrawer = ({
   const onCancelDelete = () => {
     setDeleteModal({ visible: false, id: null });
   };
+  const updateOuterDraftStates = (draft) => {
+    requestAnimationFrame(() => {
+      setPages(draft?.page || "");
+      setPixels(draft?.pixel || "");
+      setGeos(draft?.geo || "");
+      setBudgetType(draft?.camapaignlevel?.Budget_type || "Daily");
+    });
+  };
   const handleEditDraft = (draft) => {
     onChangeDraft(draft.draftId);
+    updateOuterDraftStates(draft);
     setIsTemplatesModalOpen(false);
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
@@ -9266,6 +9326,9 @@ const CreateCampaignDrawer = ({
         // id: uuidv4(),
         // Draft_Name:"",
         Account_Number: account,
+        geo: geo,
+        pixel: pixel,
+        page: page,
         createdby: session?.user?.name,
         createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
@@ -9278,6 +9341,7 @@ const CreateCampaignDrawer = ({
             ? { Special_categories_countries: values.countries }
             : {}),
           Bid_strategy: values.Bid_strategy,
+          Budget_type: budgetType,
           Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
           Status: values.Status,
           // access_token: imagehash.token,
@@ -9352,6 +9416,7 @@ const CreateCampaignDrawer = ({
           bid_amount: values.adsets[i].bid_amount
             ? Math.round(Number(values.adsets[i].bid_amount) * 100)
             : 0,
+          Budget_type: budgetType,
           countries: values.adsets[i].countries || "",
           Min_Age: values.adsets[i].Min_Age || "",
           Max_Age: values.adsets[i].Max_Age || "",
@@ -9383,6 +9448,12 @@ const CreateCampaignDrawer = ({
             position: values.adsets[i].positions,
             device_platforms: values.adsets[i].device_platforms,
           }),
+          ...(values.adsets[i].Beneficiary
+            ? { beneficiary: values.adsets[i].Beneficiary }
+            : {}),
+          ...(values.adsets[i].Beneficiary
+            ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+            : {}),
           buying_type: "AUCTION",
           addlevel: addLevelData || [],
         };
@@ -10118,7 +10189,7 @@ const CreateCampaignDrawer = ({
     // 2. Update adsets state based on adsetlevel_* count
     setAdsets(
       adsetObjects.map((adsetObj, index) => ({
-        id: adsetObj.id ?? uuidv4(),
+        id: adsetObj.id,
         AdsetPanelName: `ADSET ${index + 1}`,
         DailyAdd_amount: adsetObj.Daily_amount
           ? adsetObj.Daily_amount / 100
@@ -10136,7 +10207,7 @@ const CreateCampaignDrawer = ({
         };
       });
       return {
-        id: adsetObj.id ?? uuidv4(),
+        id: adsetObj.id,
         AdsetPanelName: `ADSET ${index + 1}`,
         AdsetName: adsetObj.AdsetName,
         DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
@@ -10149,6 +10220,9 @@ const CreateCampaignDrawer = ({
         Min_Age: adsetObj.Min_Age,
         Max_Age: adsetObj.Max_Age,
         Gender: adsetObj.Gender,
+        showPayer: !!adsetObj.payer,
+        Beneficiary: adsetObj.beneficiary,
+        Payer: adsetObj.payer,
         platforms: adsetObj.publisher_platforms || [],
         device_platforms: adsetObj.device_platforms || [],
         Language: adsetObj.locales,
@@ -10167,18 +10241,45 @@ const CreateCampaignDrawer = ({
     });
 
     // 4. Update the form fields
+    form.resetFields(['adsets']);
+
+    form.setFields(
+      updatedFormAdsets.map((adset, index) => ({
+        name: ['adsets', index],
+        value: adset,
+      }))
+    );
+
+    // 2️⃣ Set campaign-level fields normally
     form.setFieldsValue({
-      adsets: updatedFormAdsets,
       Name: draft?.camapaignlevel?.Name,
       Objectives: draft?.camapaignlevel?.Objectives,
       Special_categories: draft?.camapaignlevel?.Special_categories,
-      ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
+      ...(Array.isArray(draft.camapaignlevel.Special_categories) &&
+        draft.camapaignlevel.Special_categories_countries
         ? { countries: draft.camapaignlevel.Special_categories_countries }
         : {}),
       Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
       Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
       Status: draft?.camapaignlevel?.Status,
     });
+
+    // ⬇️ force Form to create all indexes
+    // form.setFieldsValue({
+    //   adsets: adsetObjects.map(() => ({})),
+    // });
+    // form.setFieldsValue({
+    //   adsets: updatedFormAdsets,
+    //   Name: draft?.camapaignlevel?.Name,
+    //   Objectives: draft?.camapaignlevel?.Objectives,
+    //   Special_categories: draft?.camapaignlevel?.Special_categories,
+    //   ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
+    //     ? { countries: draft.camapaignlevel.Special_categories_countries }
+    //     : {}),
+    //   Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
+    //   Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
+    //   Status: draft?.camapaignlevel?.Status,
+    // });
 
     // 5. Update per-adset supporting states
     const updatedSelectedFiles = {};
@@ -10824,6 +10925,7 @@ const CreateCampaignDrawer = ({
                   style={{ marginTop: "auto" }}
                   onClick={() => {
                     onChangeDraft(draft.draftId);
+                    updateOuterDraftStates(draft);
                     setSelectedTemplate(draft);
                     setIsTemplatesModalOpen(false);
                     setIsEditingDraft(false);

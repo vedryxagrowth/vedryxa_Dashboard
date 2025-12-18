@@ -410,7 +410,78 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
   //     message.error("Bulk ad comment failed");
   //   }
   // };
+  const handleBulkDeleteComments = async () => {
+    try {
+      message.loading({
+        content: 'Deleting comments for selected campaigns...',
+        key: 'bulkDelete'
+      });
 
+
+      const items = leafCampaigns.map(item => ({
+        campaignid: item.campaignid,
+        adsetid: item.adsetid,
+        ad_id: item.adid
+      }));
+
+      const body = {
+        accountNumber: leafCampaigns?.[0]?.accountNumber,
+        level: 'ad',
+        items
+      };
+
+      const resp = await apiClient.post(
+        '/Comments/bulkdelete',
+        body
+      );
+
+      if (resp.status === 200 || resp.status === 201) {
+        const timeStamp = moment()
+          .tz('Asia/Kolkata')
+          .format('YYYY-MM-DD hh:mm:ss A');
+
+        setCampaignComments(prev => {
+          const arr = [...prev];
+
+          leafCampaigns.forEach(item => {
+            const idx = arr.findIndex(
+              i =>
+                String(i.campaignid) === String(item.campaignid) &&
+                String(i.adsetid) === String(item.adsetid) &&
+                String(i.ad_id) === String(item.adid) &&
+                String(i.Account) === String(item.accountNumber) &&
+                i.level === 'ad'
+            );
+
+            if (idx >= 0) {
+              arr[idx] = {
+                ...arr[idx],
+                comment: "",
+                usercommit: userdetails?.email,
+                editedTime: timeStamp
+              };
+            }
+          });
+
+          return arr;
+        });
+
+        message.success({
+          content: `${leafCampaigns.length} comment(s) deleted successfully`,
+          key: 'bulkDelete',
+          duration: 3
+        });
+
+        setIsBulkCommentModalVisible(false);
+      }
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      message.error({
+        content: 'Error while deleting comments for selected campaigns.',
+        key: 'bulkDelete'
+      });
+    }
+  };
   const handleBulkCommentSubmitAd = async () => {
     try {
       message.loading({
@@ -497,12 +568,46 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
       const token = localStorage.getItem("token");
 
+      // const filteredItems = leafCampaigns
+      //   .filter(item =>
+      //     bulkStatusAction === "ACTIVE"
+      //       ? item.fbStatus === "PAUSED"
+      //       : item.fbStatus === "ACTIVE"
+      //   )
+      //   .map(item => ({
+      //     status: bulkStatusAction,
+      //     campaign_id: item.campaignid,
+      //     adset_id: item.adsetid,
+      //     ad_id: item.adid,
+      //     accountNumber: String(item.accountNumber),
+      //     name: item.adName,
+      //     email: userdetails?.email
+      //   }));
+
+      // Build ad-level status lookup WITHOUT fallback
+      const adStatusMap = new Map(
+        campaignComments
+          .filter(item => item.level === "ad" && item.ad_id)
+          .map(item => [
+            String(item.ad_id),
+            item.fbStatus ? String(item.fbStatus).toUpperCase() : "ACTIVE"
+          ])
+      );
+
+      // Filter leaf ads that actually need status change
       const filteredItems = leafCampaigns
-        .filter(item =>
-          bulkStatusAction === "ACTIVE"
-            ? item.fbStatus === "PAUSED"
-            : item.fbStatus === "ACTIVE"
-        )
+        .filter(item => {
+          const adId = String(item.adid);
+
+          // Fallback ONLY if ad does not exist in campaignComments
+          const currentStatus = adStatusMap.has(adId)
+            ? adStatusMap.get(adId)
+            : "ACTIVE";
+
+          return bulkStatusAction === "ACTIVE"
+            ? currentStatus === "PAUSED"
+            : currentStatus === "ACTIVE";
+        })
         .map(item => ({
           status: bulkStatusAction,
           campaign_id: item.campaignid,
@@ -531,8 +636,80 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         const now = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
 
         // 🔥 UPDATE UI — SAME AS SINGLE UPDATE
-        setCampaignComments(prev => {
-          let arr = Array.isArray(prev) ? [...prev] : [];
+        // setCampaignComments(prev => {
+        //   let arr = Array.isArray(prev) ? [...prev] : [];
+
+        //   filteredItems.forEach(update => {
+        //     const { campaign_id, adset_id, ad_id, accountNumber, status } = update;
+
+        //     const idx = arr.findIndex(i =>
+        //       String(i.campaignid) === String(campaign_id) &&
+        //       String(i.Account) === String(accountNumber) &&
+        //       String(i.adsetid) === String(adset_id) &&
+        //       String(i.ad_id) === String(ad_id) &&
+        //       i.level === "ad"
+        //     );
+
+        //     if (idx >= 0) {
+        //       arr[idx] = {
+        //         ...arr[idx],
+        //         fbStatus: status,
+        //         editedTime: now
+        //       };
+        //     } else {
+        //       arr.push({
+        //         campaignid: campaign_id,
+        //         Account: accountNumber,
+        //         adsetid: adset_id,
+        //         ad_id: ad_id,
+        //         level: "ad",
+        //         fbStatus: status,
+        //         comment: "",
+        //         usercommit: userdetails?.email,
+        //         editedTime: now
+        //       });
+        //     }
+        //   });
+
+        //   if (campaignStatusFilter !== "All") {
+        //     const adStatusMap = new Map(
+        //       arr
+        //         .filter(item => item.level === "ad" && item.ad_id)
+        //         .map(item => [
+        //           String(item.ad_id),
+        //           item.fbStatus ? String(item.fbStatus).toUpperCase() : "ACTIVE"
+        //         ])
+        //     );
+
+        //     const newRowData = newRowDataForFilter.current;
+
+        //     // Attach fbStatus to each row using adStatusMap
+        //     const newRowDataWithFbStatus = newRowData.map(each => {
+        //       const adKey = String(each.adid);
+
+        //       return {
+        //         ...each,
+        //         fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+        //       };
+        //     });
+
+        //     // Final filter by selected status
+        //     const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+        //       item =>
+        //         item.fbStatus.toUpperCase() ===
+        //         campaignStatusFilter?.toUpperCase()
+        //     );
+
+        //     setRowData(filteredRowDataWithStatus);
+        //   }
+
+        //   return arr;
+        // });
+
+        const updatedCampaignComments = (() => {
+          const arr = Array.isArray(campaignComments)
+            ? [...campaignComments]
+            : [];
 
           filteredItems.forEach(update => {
             const { campaign_id, adset_id, ad_id, accountNumber, status } = update;
@@ -556,7 +733,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 campaignid: campaign_id,
                 Account: accountNumber,
                 adsetid: adset_id,
-                ad_id: ad_id,
+                ad_id,
                 level: "ad",
                 fbStatus: status,
                 comment: "",
@@ -567,7 +744,45 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           });
 
           return arr;
-        });
+        })();
+
+        // 2️⃣ Update campaignComments state
+        setCampaignComments(updatedCampaignComments);
+
+        // 3️⃣ Update rowData using the SAME computed data
+        if (campaignStatusFilter !== "All") {
+          const adStatusMap = new Map(
+            updatedCampaignComments
+              .filter(item => item.level === "ad" && item.ad_id)
+              .map(item => [
+                String(item.ad_id),
+                item.fbStatus
+                  ? String(item.fbStatus).toUpperCase()
+                  : "ACTIVE"
+              ])
+          );
+          const newRowData = newRowDataForFilter.current;
+
+          // Attach fbStatus to each row using adStatusMap
+          const newRowDataWithFbStatus = newRowData.map(each => {
+            const adKey = String(each.adid);
+
+            return {
+              ...each,
+              fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+            };
+          });
+
+          // Final filter by selected status
+          const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+            item =>
+              item.fbStatus.toUpperCase() ===
+              campaignStatusFilter?.toUpperCase()
+          );
+
+          setRowData(filteredRowDataWithStatus);
+
+        }
 
         message.success(`${filteredItems.length} ad(s) updated.`);
       }
@@ -982,8 +1197,10 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             );
             if (response.status === 200 || response.status === 201) {
               setConfirmLoading(false);
-              setCampaignComments(prev => {
-                const arr = Array.isArray(prev) ? [...prev] : [];
+              const updatedCampaignComments = (() => {
+                const arr = Array.isArray(campaignComments)
+                  ? [...campaignComments]
+                  : [];
 
                 const match = arr.findIndex(
                   i =>
@@ -991,26 +1208,94 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                     String(i?.Account) === String(rowAccount) &&
                     String(i?.adsetid) === String(adsetid) &&
                     String(i?.ad_id) === String(adid) &&
-                    String(i?.level) === 'ad'
+                    String(i?.level) === "ad"
                 );
 
+                const fbStatus = nextChecked ? "ACTIVE" : "PAUSED";
+
                 if (match >= 0) {
-                  arr[match] = { ...arr[match], fbStatus: nextChecked ? "ACTIVE" : "PAUSED" };
+                  arr[match] = {
+                    ...arr[match],
+                    fbStatus
+                  };
                 } else {
                   arr.push({
                     campaignid,
                     Account: rowAccount,
                     adsetid,
                     ad_id: adid,
-                    level: 'ad',
+                    level: "ad",
                     comment: "",
                     usercommit: "",
-                    fbStatus: nextChecked ? "ACTIVE" : "PAUSED",
+                    fbStatus
                   });
                 }
 
                 return arr;
-              });
+              })();
+              setCampaignComments(updatedCampaignComments);
+              if (campaignStatusFilter !== "All") {
+                const adStatusMap = new Map(
+                  updatedCampaignComments
+                    .filter(item => item.level === "ad" && item.ad_id)
+                    .map(item => [
+                      String(item.ad_id),
+                      item.fbStatus
+                        ? String(item.fbStatus).toUpperCase()
+                        : "ACTIVE"
+                    ])
+                );
+                const newRowData = newRowDataForFilter.current;
+
+                // Attach fbStatus to each row using adStatusMap
+                const newRowDataWithFbStatus = newRowData.map(each => {
+                  const adKey = String(each.adid);
+
+                  return {
+                    ...each,
+                    fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+                  };
+                });
+
+                // Final filter by selected status
+                const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+                  item =>
+                    item.fbStatus.toUpperCase() ===
+                    campaignStatusFilter?.toUpperCase()
+                );
+
+                setRowData(filteredRowDataWithStatus);
+
+              }
+              // setCampaignComments(prev => {
+              //   const arr = Array.isArray(prev) ? [...prev] : [];
+
+              //   const match = arr.findIndex(
+              //     i =>
+              //       String(i?.campaignid) === String(campaignid) &&
+              //       String(i?.Account) === String(rowAccount) &&
+              //       String(i?.adsetid) === String(adsetid) &&
+              //       String(i?.ad_id) === String(adid) &&
+              //       String(i?.level) === 'ad'
+              //   );
+
+              //   if (match >= 0) {
+              //     arr[match] = { ...arr[match], fbStatus: nextChecked ? "ACTIVE" : "PAUSED" };
+              //   } else {
+              //     arr.push({
+              //       campaignid,
+              //       Account: rowAccount,
+              //       adsetid,
+              //       ad_id: adid,
+              //       level: 'ad',
+              //       comment: "",
+              //       usercommit: "",
+              //       fbStatus: nextChecked ? "ACTIVE" : "PAUSED",
+              //     });
+              //   }
+
+              //   return arr;
+              // });
               setIsAdidModalVisibles(false);
             }
 
@@ -2374,44 +2659,74 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     // functionCall1();
     console.log(campaignStatusFilter, "campaignStatusFilter");
     if (campaignStatusFilter !== "All") {
-      const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-      setRowData(filteredByStatus);
+
+      const adStatusMap = new Map(
+        campaignComments
+          .filter(item => item.level === "ad" && item.ad_id)
+          .map(item => [
+            String(item.ad_id),
+            item.fbStatus ? String(item.fbStatus).toUpperCase() : "ACTIVE"
+          ])
+      );
+
+      const newRowData = newRowDataForFilter.current;
+
+      // Attach fbStatus to each row using adStatusMap
+      const newRowDataWithFbStatus = newRowData.map(each => {
+        const adKey = String(each.adid);
+
+        return {
+          ...each,
+          fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+        };
+      });
+
+      // Final filter by selected status
+      const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+        item =>
+          item.fbStatus.toUpperCase() ===
+          campaignStatusFilter?.toUpperCase()
+      );
+
+      setRowData(filteredRowDataWithStatus);
+      // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+      // setRowData(filteredByStatus);
     } else {
       setRowData(newRowDataForFilter.current);
     }
   }, [campaignStatusFilter]);
 
-  useEffect(() => {
-    // console.log(campaignComments, "campaignComments");
-    // console.log(campaignStatusFilter, "campaignStatusFilter");
-    // console.log(campaignComments.filter(ad => ad.level === 'ad'), "campaignComments.filter(ad => ad.level === 'ad')");
-    const mainData = newRowDataForFilter.current;
-    // console.log(mainData, "mainData");
-    const filterData = mainData && mainData.length > 0 ?
-      mainData.map((eachData) => {
-        const getFbStatusKey = campaignComments.find(ad => ad.campaignid === eachData.campaignid && ad.Account === eachData.accountNumber && ad.adsetid === eachData.adsetid && ad.ad_id === eachData.adid && ad.level === 'ad');
-        // console.log(getFbStatusKey, "getFbStatusKey");
-        // console.log(eachData?.adName, "eachData");
-        return (
-          {
-            ...eachData,
-            fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
-          }
-        )
-      }) : null;
-    newRowDataForFilter.current = filterData;
-    let newFilterData;
-    if (campaignStatusFilter !== "All") {
-      newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-    }
-    else {
-      newFilterData = filterData;
-    }
+  // useEffect(() => {
+  //   // console.log(campaignComments, "campaignComments");
+  //   // console.log(campaignStatusFilter, "campaignStatusFilter");
+  //   // console.log(campaignComments.filter(ad => ad.level === 'ad'), "campaignComments.filter(ad => ad.level === 'ad')");
+  //   const mainData = newRowDataForFilter.current;
+  //   // console.log(mainData, "mainData");
+  //   const filterData = mainData && mainData.length > 0 ?
+  //     mainData.map((eachData) => {
+  //       const getFbStatusKey = campaignComments.find(ad => ad.campaignid === eachData.campaignid && ad.Account === eachData.accountNumber && ad.adsetid === eachData.adsetid && ad.ad_id === eachData.adid && ad.level === 'ad');
+  //       // console.log(getFbStatusKey, "getFbStatusKey");
+  //       // console.log(eachData?.adName, "eachData");
+  //       return (
+  //         {
+  //           ...eachData,
+  //           fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
+  //         }
+  //       )
+  //     }) : null;
+  //   newRowDataForFilter.current = filterData;
+  //   let newFilterData;
+  //   if (campaignStatusFilter !== "All") {
+  //     newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+  //   }
+  //   else {
+  //     newFilterData = filterData;
+  //   }
 
-    setRowData(newFilterData);
-    // newRowDataForFilter.current = filteredData;
-  }
-    , [campaignComments]);
+  //   setRowData(newFilterData);
+  //   // newRowDataForFilter.current = filteredData;
+  // }
+  //   , [campaignComments]);
   // useEffect(() => {
   //   // console.log("test1");
   //   functionCall1();
@@ -2942,6 +3257,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                         onCancel={() => setIsBulkCommentModalVisible(false)}
                         footer={[
+                          <Button key="Delete" onClick={handleBulkDeleteComments}>
+                            Delete
+                          </Button>,
                           <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                             Cancel
                           </Button>,

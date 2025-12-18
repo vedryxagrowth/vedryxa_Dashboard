@@ -330,6 +330,75 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     };
 
+    const handleBulkDeleteComments = async () => {
+        try {
+            message.loading({
+                content: 'Deleting comments for selected campaigns...',
+                key: 'bulkDelete'
+            });
+ 
+ 
+            const items = leafCampaigns.map(item => ({
+                campaignid: item.campaignid
+            }));
+ 
+            const body = {
+                accountNumber: leafCampaigns?.[0]?.accountNumber,
+                level: 'campaign',
+                items
+            };
+ 
+            const resp = await apiClient.post(
+                '/Comments/bulkdelete',
+                body
+            );
+ 
+            if (resp.status === 200 || resp.status === 201) {
+                const timeStamp = moment()
+                    .tz('Asia/Kolkata')
+                    .format('YYYY-MM-DD hh:mm:ss A');
+ 
+                setCampaignComments(prev => {
+                    const arr = [...prev];
+ 
+                    leafCampaigns.forEach(item => {
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(item.campaignid) &&
+                                String(i.Account) === String(item.accountNumber) &&
+                                i.level === 'campaign'
+                        );
+ 
+                        if (idx >= 0) {
+                            arr[idx] = {
+                                ...arr[idx],
+                                comment: "",
+                                usercommit: userdetails?.email,
+                                editedTime: timeStamp
+                            };
+                        }
+                    });
+ 
+                    return arr;
+                });
+ 
+                message.success({
+                    content: `${leafCampaigns.length} comment(s) deleted successfully`,
+                    key: 'bulkDelete',
+                    duration: 3
+                });
+ 
+                setIsBulkCommentModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Bulk delete error:', error);
+            message.error({
+                content: 'Error while deleting comments for selected campaigns.',
+                key: 'bulkDelete'
+            });
+        }
+    };
+
     const handleSmartCommentSubmit = async () => {
         try {
             message.loading({
@@ -407,11 +476,37 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
             const token = localStorage.getItem("token");
 
-            const filteredItems = leafCampaigns.filter(item =>
-                bulkStatusAction === "ACTIVE"
-                    ? item.fbStatus === "PAUSED"
-                    : item.fbStatus === "ACTIVE"
-            )
+            // const filteredItems = leafCampaigns.filter(item =>
+            //     bulkStatusAction === "ACTIVE"
+            //         ? item.fbStatus === "PAUSED"
+            //         : item.fbStatus === "ACTIVE"
+            // )
+            //     .map(item => ({
+            //         status: bulkStatusAction,
+            //         campaign_id: item.campaignid,
+            //         accountNumber: String(item.accountNumber),
+            //         name: item.campaignname,
+            //         email: userdetails?.email,
+            //     }));
+
+            const campaignStatusMap = new Map(
+                Camapignlevelstatus.map(item => [
+                    String(item.campaign_id),
+                    item.status?.toUpperCase()
+                ])
+            );
+
+            // Filter leaf campaigns that actually need status change
+            const filteredItems = leafCampaigns
+                .filter(item => {
+                    const campaignId = String(item.campaignid);
+                    const currentStatus =
+                        campaignStatusMap.get(campaignId) || "ACTIVE";
+
+                    return bulkStatusAction === "ACTIVE"
+                        ? currentStatus === "PAUSED"
+                        : currentStatus === "ACTIVE";
+                })
                 .map(item => ({
                     status: bulkStatusAction,
                     campaign_id: item.campaignid,
@@ -437,8 +532,10 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
             if (resp.status === 200 || resp.status === 201) {
-                setCamapignlevelstatus(prev => {
-                    const arr = [...prev];
+                const updatedCampaignLevelStatus = (() => {
+                    const arr = Array.isArray(Camapignlevelstatus)
+                        ? [...Camapignlevelstatus]
+                        : [];
 
                     filteredItems.forEach(update => {
                         const idx = arr.findIndex(
@@ -448,12 +545,50 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         );
 
                         if (idx !== -1) {
-                            arr[idx] = { ...arr[idx], status: bulkStatusAction };
+                            arr[idx] = {
+                                ...arr[idx],
+                                status: bulkStatusAction
+                            };
                         }
                     });
 
                     return arr;
-                });
+                })();
+                setCamapignlevelstatus(updatedCampaignLevelStatus);
+                if (campaignStatusFilter !== "All") {
+                    const campaignStatusMap = new Map(
+                        updatedCampaignLevelStatus.map(item => [
+                            String(item.campaign_id),
+                            item.status?.toUpperCase()
+                        ])
+                    );
+
+                    const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                        campaignStatusMap.get(String(row.campaignid)) ===
+                        campaignStatusFilter?.toUpperCase()
+                    );
+
+                    setRowData(filteredRowObjects);
+                }
+
+
+                // setCamapignlevelstatus(prev => {
+                //     const arr = [...prev];
+
+                //     filteredItems.forEach(update => {
+                //         const idx = arr.findIndex(
+                //             c =>
+                //                 String(c.campaign_id) === String(update.campaign_id) &&
+                //                 String(c.accountNumber) === String(update.accountNumber)
+                //         );
+
+                //         if (idx !== -1) {
+                //             arr[idx] = { ...arr[idx], status: bulkStatusAction };
+                //         }
+                //     });
+
+                //     return arr;
+                // });
 
                 message.success(
                     `${filteredItems.length} campaign(s) updated to ${bulkStatusAction.toLowerCase()}`
@@ -953,14 +1088,39 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         if (response.status === 200 || response.status === 201) {
                             setConfirmLoading(false);
                             setSwitchOn(desired); // optimistic
-                            setCamapignlevelstatus(prevStatus =>
-                                prevStatus.map(item =>
-                                    String(item.campaign_id) === String(campaignid) &&
-                                        String(item.accountNumber) === String(pendingAccount)
-                                        ? { ...item, status: newStatus } // ✅ update only the status
-                                        : item // keep others as is
-                                )
+                            const updatedCampaignLevelStatus = Camapignlevelstatus.map(item =>
+                                String(item.campaign_id) === String(campaignid) &&
+                                    String(item.accountNumber) === String(pendingAccount)
+                                    ? { ...item, status: newStatus } // update only this campaign
+                                    : item
                             );
+                            setCamapignlevelstatus(updatedCampaignLevelStatus);
+                            if (campaignStatusFilter !== "All") {
+                                const campaignStatusMap = new Map(
+                                    updatedCampaignLevelStatus.map(item => [
+                                        String(item.campaign_id),
+                                        item.status?.toUpperCase()
+                                    ])
+                                );
+
+                                const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                                    campaignStatusMap.get(String(row.campaignid)) ===
+                                    campaignStatusFilter?.toUpperCase()
+                                );
+
+                                setRowData(filteredRowObjects);
+                            }
+
+
+
+                            // setCamapignlevelstatus(prevStatus =>
+                            //     prevStatus.map(item =>
+                            //         String(item.campaign_id) === String(campaignid) &&
+                            //             String(item.accountNumber) === String(pendingAccount)
+                            //             ? { ...item, status: newStatus } // ✅ update only the status
+                            //             : item // keep others as is
+                            //     )
+                            // );
                             setIsCampaignModalVisibles(false);
                         }
 
@@ -2538,8 +2698,57 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         console.log(campaignStatusFilter, "campaignStatusFilter");
         console.log(campaignStatusFilter?.toUpperCase())
         if (campaignStatusFilter !== "All") {
-            const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-            setRowData(filteredByStatus);
+            // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            // Filter grid rows by campaign status
+            // const listOfUniqueCampaignids = [
+            //     ...new Set(
+            //         newRowDataForFilter.current
+            //             .map(item => item.campaignid)
+            //             .filter(Boolean)
+            //     )
+            // ];
+
+            // const campaignStatusMap = Camapignlevelstatus.reduce((acc, item) => {
+            //     acc[String(item.campaign_id)] = item.status;
+            //     return acc;
+            // }, {});
+
+            // const campaignIdWithStatus = listOfUniqueCampaignids.map(campaignId => ({
+            //     campaignId: String(campaignId),
+            //     status: campaignStatusMap[String(campaignId)] || "UNKNOWN"
+            // }));
+
+            // const filteredCampaignIds = campaignIdWithStatus
+            //     .filter(
+            //         item =>
+            //             item.status?.toUpperCase() ===
+            //             campaignStatusFilter?.toUpperCase()
+            //     )
+            //     .map(item => item.campaignId);
+
+            // const filteredCampaignIdSet = new Set(filteredCampaignIds);
+
+            // const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+            //     filteredCampaignIdSet.has(String(row.campaignid))
+            // );
+
+            // Filter grid rows by campaign status
+            const campaignStatusMap = new Map(
+                Camapignlevelstatus.map(item => [
+                    String(item.campaign_id),
+                    item.status?.toUpperCase()
+                ])
+            );
+
+            const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                campaignStatusMap.get(String(row.campaignid)) ===
+                campaignStatusFilter?.toUpperCase()
+            );
+
+            // filteredRowObjects is the final filtered grid data
+
+            setRowData(filteredRowObjects);
+            // setRowData(filteredByStatus);
             // newRowDataForFilter.current = filteredByStatus;
             // console.log(newRowDataForFilter.current)
         } else {
@@ -2548,38 +2757,38 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         }
     }, [campaignStatusFilter]);
 
-    useEffect(() => {
-        // console.log(campaignComments, "campaignComments");
-        const mainData = newRowDataForFilter.current;
-        const filterData = mainData && mainData.length > 0 ?
-            mainData.map((eachData) => {
-                const adsetObjectStatus = Camapignlevelstatus
-                    .find(item =>
-                        String(item.campaign_id) === String(eachData.campaignid) &&
-                        String(item.accountNumber) === String(eachData.accountNumber)
-                    );
-                return (
-                    {
-                        ...eachData,
-                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
-                    }
-                )
-            }) : null;
-        newRowDataForFilter.current = filterData;
-        let newFilterData;
-        if (campaignStatusFilter !== "All") {
-            console.log("testing 4444");
-            newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-        }
-        else {
-            newFilterData = filterData;
-        }
+    // useEffect(() => {
+    //     // console.log(campaignComments, "campaignComments");
+    //     const mainData = newRowDataForFilter.current;
+    //     const filterData = mainData && mainData.length > 0 ?
+    //         mainData.map((eachData) => {
+    //             const adsetObjectStatus = Camapignlevelstatus
+    //                 .find(item =>
+    //                     String(item.campaign_id) === String(eachData.campaignid) &&
+    //                     String(item.accountNumber) === String(eachData.accountNumber)
+    //                 );
+    //             return (
+    //                 {
+    //                     ...eachData,
+    //                     fbStatus: adsetObjectStatus?.status || "ACTIVE",
+    //                 }
+    //             )
+    //         }) : null;
+    //     newRowDataForFilter.current = filterData;
+    //     let newFilterData;
+    //     if (campaignStatusFilter !== "All") {
+    //         console.log("testing 4444");
+    //         newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+    //     }
+    //     else {
+    //         newFilterData = filterData;
+    //     }
 
-        setRowData(newFilterData);
-        // newRowDataForFilter.current = filteredData;
-        console.log("testing 4444");
-    }
-        , [Camapignlevelstatus]);
+    //     setRowData(newFilterData);
+    //     // newRowDataForFilter.current = filteredData;
+    //     console.log("testing 4444");
+    // }
+    //     , [Camapignlevelstatus]);
 
     useEffect(() => {
         if (refreshpage === "Refresh11") {
@@ -3160,7 +3369,10 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 open={isBulkCommentModalVisible}
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                                                footer={[
+                                                footer={[ 
+                                                    <Button key="Delete" onClick={handleBulkDeleteComments}>
+                                                        Delete
+                                                    </Button>,
                                                     <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                                                         Cancel
                                                     </Button>,

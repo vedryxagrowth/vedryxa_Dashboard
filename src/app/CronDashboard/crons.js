@@ -22,7 +22,7 @@ const { Option } = Select;
 const domainMapping = {
     FB_Mnet: [
         { label: "1.Fb campaign & adset", value: "FacebookMnet" },
-        { label: "2.Facebook Ad ", value: "FacebookAdid" },
+        { label: "2.Facebook Ad", value: "FacebookAdid" },
         { label: "3.MnetLive", value: "Mnet" },
         { label: "4.MnetDaily", value: "MnetDaily" },
         { label: "5.MnetTQ", value: "MnetTQ" },
@@ -32,10 +32,24 @@ const domainMapping = {
         { label: "MnetToken", value: "MnetToken" },
     ],
     FB_MnetBing: [
-        { label: "1.FacebookMnet", value: "FacebookMnet" },
-        { label: "2.MnetBing", value: "MnetBing" },
-        { label: "3.FBMnetBing", value: "FbMnetBing" },
+        { label: "1.FacebookMnetBing", value: "FacebookMnet" },
+        { label: "2.Facebook Ad", value: "FacebookAdid" },
+        { label: "3.MnetBing", value: "MnetBing" },
+        { label: "4.MnetBingDaily", value: "MnetBingDaily" },
+        { label: "5.Live & Daily Filter for Camapign & adset ", value: "FbMnetBing" },
+        { label: "6.Live filter Ad", value: "filterFacebookPartners" },
+        { label: "7.Daily filter Ad", value: "filterFacebookPartnersDaily" },
         { label: "MnetBingToken", value: "MnetBingToken" },
+    ],
+    FB_CodeFuel: [
+        { label: "1.Live & Daily Facebook for Camapign & adset & ad", value: "FacebookAdid" },
+        { label: "2.CodeFuelLive", value: "CodeFuelLive" },
+        { label: "3.CodeFuelDaily", value: "CodeFuelDaily" },
+        { label: "4.Live Filter for Camapign & adset ", value: "FbCodeFuelLiveFilter" },
+        { label: "5.Daily Filter for Camapign & adset ", value: "FbCodeFuelDailyFilter" },
+        { label: "6.Live filter Ad", value: "filterFacebookPartners" },
+        { label: "7.Daily filter Ad", value: "filterFacebookPartnersDaily" },
+        { label: "CodeFuelToken", value: "CodeFuelToken" },
     ],
     FB_System1: [
         { label: "1.FacebookSystem1", value: "FacebookSystem1" },
@@ -97,7 +111,18 @@ const newdomainMapping = {
     ],
     FB_MnetBing: [
         { label: "1.MnetBing", value: "MnetBing" },
-        { label: "2.FBMnetBing", value: "FbMnetBing" },
+        { label: "2.Mnet Bing Daily", value: "MnetBingDaily" },
+        { label: "4.Live & Daily Filter for Camapign & adset", value: "FbMnetBing" },
+        { label: "5.Live filter ad", value: "filterFacebookPartners" },
+        { label: "6.Daily filter ad", value: "filterFacebookPartnersDaily" },
+    ],
+    FB_CodeFuel: [
+        { label: "1.CodeFuelLive", value: "CodeFuelLive" },
+        { label: "2.CodeFuelDaily", value: "CodeFuelDaily" },
+        { label: "3.Live Filter for Camapign & adset ", value: "FbCodeFuelLiveFilter" },
+        { label: "4.Daily Filter for Camapign & adset ", value: "FbCodeFuelDailyFilter" },
+        { label: "5.Live filter Ad", value: "filterFacebookPartners" },
+        { label: "6.Daily filter Ad", value: "filterFacebookPartnersDaily" },
     ],
     FB_System1: [
         { label: "1.System1", value: "System1" },
@@ -187,6 +212,14 @@ const RequestComponent = ({ network, adAccounts, NetworkData }) => {
     const filterOption = {
         FB_Mnet: "MEDIA_DOT_NET",
         FB_TonicRsoc: "Tonic_Rsoc",
+        FB_MnetBing:"MEDIA_DOT_NET_BING",
+        FB_CodeFuel:"Code_Fuel"
+    };
+
+    const filterOptionsDaily = {
+        FB_Mnet: "MediaDotNet_Daily",
+        FB_MnetBing:"MediaDotNetBing_Daily",
+        FB_CodeFuel:"Code_Fuel_Daily"
     };
 
 
@@ -198,7 +231,8 @@ const RequestComponent = ({ network, adAccounts, NetworkData }) => {
         if (selectedPath === "filterFacebookPartners" || selectedPath === "FacebookAdid" || selectedPath === "filterFacebookPartnersDaily") {
             url += `&revenuePartner=${filterOption[network]}`;
             if (selectedPath === "filterFacebookPartnersDaily") {
-                url += `&revenuePartnerCollectionName=MediaDotNet_Daily`
+                const collectionName= filterOptionsDaily[network]
+                url += `&revenuePartnerCollectionName=${collectionName}`
             }
         }
         setLoading(true);

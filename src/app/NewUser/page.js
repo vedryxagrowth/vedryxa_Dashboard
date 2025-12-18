@@ -32,7 +32,7 @@ const DynamicEditUrlBuilder = dynamic(() => import('./users-components/edit-urlb
 const DynamicRequestComponent = dynamic(() => import('../CronDashboard/crons'));
 const UploadComponent = dynamic(() => import('./users-components/updates_notifications'));
 
-const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User', "Revenue_Partner"];
+const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User', "Revenue_Partner", "Network_Partner"];
 const accountStatus = ['All', 'Active', 'InActive'];
 // const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 const networkStatus = ['All', 'Active', 'InActive'];
