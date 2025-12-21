@@ -4522,9 +4522,9 @@ const AdsetComponent = ({
             }
           >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div style={{ flex: "70%", marginRight: "5%" }}>
-                <div style={{ display: "flex", gap: "16px" }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ marginRight: "5%", width:"62%" }}>
+                <div style={{ display: "flex", gap: "16px", width:"100%" }}>
+                  <div style={{ display: "flex", flexDirection: "column", width:"40%" }}>
                     <Form.Item
                       label={
                         <span style={{ color: "#B4B4B4" }}>Select source</span>
@@ -4580,7 +4580,7 @@ const AdsetComponent = ({
                           className="custom-dark-mode"
                           style={{
                             display:
-                              selectedOption === "upload" ? "block" : "none",
+                              selectedOption === "upload" ? "block" : "none"
                           }}
                         >
                           <Upload
@@ -4810,12 +4810,22 @@ const AdsetComponent = ({
                                 <div style={{ marginTop: "10px" }}>
                                   {selectedFilesFromCreatives[adset.id].map(
                                     (file, index) => (
+                                      // <div
+                                      //   key={index}
+                                      //   style={{
+                                      //     display: "flex",
+                                      //     alignItems: "center",
+                                      //     marginBottom: 8,
+                                      //   }}
+                                      // >
                                       <div
                                         key={index}
                                         style={{
                                           display: "flex",
                                           alignItems: "center",
                                           marginBottom: 8,
+                                          width: "100%",        // 🔑 prevents expansion
+                                          overflow: "hidden",   // 🔑 clip overflow
                                         }}
                                       >
                                         {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
@@ -4839,7 +4849,7 @@ const AdsetComponent = ({
                                             }}
                                           />
                                         )}
-                                        <span
+                                        {/* <span
                                           style={{
                                             maxWidth: 160,
                                             overflow: "hidden",
@@ -4851,7 +4861,22 @@ const AdsetComponent = ({
                                           }}
                                         >
                                           {file.name}
+                                        </span> */}
+                                        <span
+                                          title={file.name}
+                                          style={{
+                                            // flex: 1,                     // ✅ allow shrink
+                                            // minWidth: 0,                 // 🔥 REQUIRED for ellipsis
+                                            // overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                            paddingLeft: 8,
+                                            color: theme === "dark" ? "#ffffff" : "#000000", // ✅ force color
+                                          }}
+                                        >
+                                          {file.name}
                                         </span>
+
                                         {/* </Tooltip> */}
 
                                         {/* <DeleteOutlined
@@ -5229,7 +5254,7 @@ const AdsetComponent = ({
                   ]}
                 >
                   <Input
-                    style={{ width: "60%" }}
+                    style={{ width: "50%" }}
                     onChange={(e) => setAddName(e.target.value)}
                     className={
                       theme === "dark"
@@ -5255,7 +5280,7 @@ const AdsetComponent = ({
                     autoSize={{ minRows: 2, maxRows: 10 }}
                     onChange={(e) => setPrimaryText(e.target.value)}
                     className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
-
+                    // style={{ width: "50%" }}
 
                   />
                 </Form.Item>
@@ -5293,11 +5318,12 @@ const AdsetComponent = ({
                     placeholder="Headline"
                     autoSize={{ minRows: 2, maxRows: 10 }}
                     onChange={(e) => setHeadline(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
+                    // style={{ width: "50%" }}
+                  className={
+                    theme === "dark"
+                      ? "custom-input-dark"
+                      : "custom-input-light"
+                  }
                   />
                 </Form.Item>
 
@@ -5318,11 +5344,12 @@ const AdsetComponent = ({
                     placeholder="Description"
                     autoSize={{ minRows: 2, maxRows: 10 }}
                     onChange={(e) => setDescription(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
+                    // style={{ width: "50%" }}
+                  className={
+                    theme === "dark"
+                      ? "custom-input-dark"
+                      : "custom-input-light"
+                  }
                   />
                 </Form.Item>
                 {/* <Form.Item
