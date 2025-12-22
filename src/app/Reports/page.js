@@ -1,13 +1,13 @@
 "use client"
 import { lazy, useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { redirect } from 'next/navigation';
+import { redirect,useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, RightOutlined } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -23,6 +23,7 @@ import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
+
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
@@ -56,6 +57,7 @@ const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAd
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 
 const MyTablePage = () => {
+    const router = useRouter();
     const { userdetails, theme, apiClient } = useTokenContext();
     const params = new URLSearchParams(window.location.search);
 
@@ -191,6 +193,7 @@ const MyTablePage = () => {
     const [searchText, setSearchText] = useState("");
     const [campaignComments, setCampaignComments] = useState([]);
     const [networksWithStatus, setNetworksWithStatus] = useState([]);
+    
 
     useEffect(() => {
         const fetchNetworksData = async () => {
@@ -437,6 +440,8 @@ const MyTablePage = () => {
     const [selectedValue, setSelectedValue] = useState(
         Array.isArray(initialOne) ? initialOne.map(String) : []
     );
+
+  
 
     // console.log("multiple accounts:", selectedValue);
 
@@ -13725,7 +13730,7 @@ const MyTablePage = () => {
         setTime(value);
         setTimezoneChanged(true);
     }
-
+  
     const onClickButton = async () => {
         // Clear search input if account was changed
         if (accountChanged || dateChanged || timezoneChanged) {
@@ -14961,7 +14966,7 @@ const MyTablePage = () => {
 
                     {/* Apply Button */}
 
-                    <Col>
+                    {/* <Col>
                         <Button
                             type='primary'
                             onClick={onClickButton}
@@ -14980,7 +14985,66 @@ const MyTablePage = () => {
                         >
                             Apply
                         </Button>
-                    </Col>
+                        <Button
+  icon={<RightOutlined />}
+  onClick={() => router.push("/Basereport")}
+  style={{
+    border: "1px solid #4CAF50",
+    borderRadius: "6px",
+    height: "32px",
+  }}
+/>
+                        
+                    </Col> */}
+                    <Col>
+  <Button
+    type="primary"
+    onClick={onClickButton} // Apply action
+    onMouseEnter={() => setHovered(true)}
+    onMouseLeave={() => setHovered(false)}
+    style={{
+      backgroundColor: hovered ? "#91C25F" : "transparent",
+      border: "1px solid #4CAF50",
+      borderRadius: "6px",
+      color: theme === "dark" ? "#ffffff" : "#000000",
+      padding: "0 12px",
+      height: "32px",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      transition: "all 0.15s ease-in-out",
+    }}
+  >
+    <span>Apply</span>
+
+    {/* Divider */}
+    <span style={{ opacity: 0.4 }}>|</span>
+
+    {/* <RightOutlined
+      onClick={(e) => {
+        e.stopPropagation(); 
+        router.push("/Basereport");
+      }}
+      style={{ cursor: "pointer" }}
+    /> */}
+   <Tooltip title="Revenue base report">
+      <span
+        onClick={(e) => {
+          e.stopPropagation(); // 🔴 prevent Apply click
+          router.push("/Basereport");
+        }}
+        style={{
+          cursor: "pointer",
+          fontWeight: "600",
+          padding: "0 4px",
+        }}
+      >
+        R
+      </span>
+    </Tooltip>
+  </Button>
+</Col>
+
 
                     <div className='Dashboard-Details-2'>
                         <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
