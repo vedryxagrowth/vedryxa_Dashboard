@@ -2451,42 +2451,38 @@ const AdsetComponent = ({
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {/* ✅ Dynamic Creative Switch */}
-              {objectiveValue === "OUTCOME_SALES" && <span style={{ marginRight: "8px" }}>Dynamic Creative</span>}
-              {objectiveValue === "OUTCOME_SALES" &&
-                (
-                  <Form.Item
-                    name={["adsets", index, "isDynamicCreative"]}
-                    valuePropName="checked"
-                    style={{ marginBottom: 0 }}
-                  >
-                    {/* <Switch
+              <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
+              <Form.Item
+                name={["adsets", index, "isDynamicCreative"]}
+                valuePropName="checked"
+                style={{ marginBottom: 0 }}
+              >
+                {/* <Switch
                   size="small"
                   onClick={(checked, e) => {
                     e.stopPropagation(); // ⛔ prevent panel collapse
                   }}
                 /> */}
-                    <Switch
-                      size="small"
-                      style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
-                      onClick={(checked, e) => e.stopPropagation()}
-                      onChange={(checked) => {
-                        console.log("Dynamic Creative:", checked);
+                <Switch
+                  size="small"
+                  style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
+                  onClick={(checked, e) => e.stopPropagation()}
+                  onChange={(checked) => {
+                    console.log("Dynamic Creative:", checked);
 
-                        // if (!checked) {
-                        // Example: clear dynamic creative assets
-                        form.setFieldsValue({
-                          adsets: {
-                            [index]: {
-                              isDynamicCreative: checked,
-                            },
-                          },
-                        });
-                        // }
-                      }}
-                    />
-                  </Form.Item>
-                )
-              }
+                    // if (!checked) {
+                    // Example: clear dynamic creative assets
+                    form.setFieldsValue({
+                      adsets: {
+                        [index]: {
+                          isDynamicCreative: checked,
+                        },
+                      },
+                    });
+                    // }
+                  }}
+                />
+              </Form.Item>
 
               {index !== 0 && (
                 <Popconfirm
