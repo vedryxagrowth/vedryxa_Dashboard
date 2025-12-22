@@ -286,7 +286,7 @@ const MyTablePage = () => {
                 setInputValue(inputBuffer.current);
             }, 200); // delay after last backspace
         } else {
-            // For all other keys — update instantly
+            // For all other keys — lllupdate instantly
             setInputValue(value);
         }
     };
