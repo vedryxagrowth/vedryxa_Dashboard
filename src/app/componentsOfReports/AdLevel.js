@@ -3715,7 +3715,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                       suppressAggFuncInHeader={true}
                       getMainMenuItems={getMainMenuItems}
-                      getRowId={(params) => String(params.data.adid)}
+                      // getRowId={(params) => String(params.data.adid)}
 
 
                       // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
