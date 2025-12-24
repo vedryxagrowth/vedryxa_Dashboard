@@ -98,9 +98,9 @@
 //                 setLoading(true);
 //                 setError(null);
 //                 const accounts = Array.isArray(requestedAccounts) ? requestedAccounts : [requestedAccounts];
-                
+
 //                 const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
-                
+
 //                 const res = await axios.post(
 //                     `https://prodapis.adsgoat.in/Recommendations`,
 //                     {"accounts": accounts, ...(accounts.length > 1 ? {"merge":true,"includeAccounts":true} : {})},
@@ -329,14 +329,18 @@
 
 'use client';
 
-
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 import { useSearchParams } from 'next/navigation';
 import { RefreshOutlined } from '@mui/icons-material';
 import { Button } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { ArrowUpOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+
+
 
 
 const networkCollections = {
@@ -363,6 +367,7 @@ export default function RecommendationsPage({ params }) {
     const { theme } = useTokenContext();
     const searchParams = useSearchParams();
 
+    const [recommendations, setRecommendations] = useState({});
 
     const networkParam = searchParams.get('network') || '';
     const time = searchParams.get('time') || '';
@@ -400,6 +405,7 @@ export default function RecommendationsPage({ params }) {
         reallocate_budget: isDark ? '#374151' : '#ffffff',
         creative_alert: isDark ? '#5252c3ff' : '#dbeafe',
         risk_alert: isDark ? '#78350f' : '#ffedd5',
+        filtration: isDark ? '#0cb2f9ff' : '#dbeff7ff',
     };
 
 
@@ -409,6 +415,8 @@ export default function RecommendationsPage({ params }) {
         reallocate_budget: '#d1d5db',
         creative_alert: '#acc8f5ff',
         risk_alert: '#fdba74',
+        filtration: '#46c1f6ff'
+
     };
 
 
@@ -436,6 +444,7 @@ export default function RecommendationsPage({ params }) {
 
 
             setData(api.data || {});
+            setRecommendations(api.recommendations || {});
             setLastUpdated(api.meta?.lastUpdatedDate || null);
 
 
@@ -454,10 +463,30 @@ export default function RecommendationsPage({ params }) {
         fetchData();
     }, []);
 
+    const accountsWithData = [];
+    const accountsWithoutData = [];
+
+    accounts.forEach(acc => {
+        const accData = data?.[activeTab]?.[acc];
+
+        if (
+            accData &&
+            (
+                Array.isArray(accData) ? accData.length > 0 :
+                    typeof accData === 'object' && Object.keys(accData).length > 0
+            )
+        ) {
+            accountsWithData.push(acc);
+        } else {
+            accountsWithoutData.push(acc);
+        }
+    });
+
+    const orderedAccounts = [...accountsWithData, ...accountsWithoutData];
 
     return (
         <div style={{ padding: 10 }}>
-           
+
             <div
                 style={{
                     display: 'flex',
@@ -476,8 +505,8 @@ export default function RecommendationsPage({ params }) {
                 </h3>
 
 
-                <div style={{ display:"flex" }}>
-                    <div style={{ fontSize: 15, color: textDefault ,margin:"10px" }}>
+                <div style={{ display: "flex" }}>
+                    <div style={{ fontSize: 15, color: textDefault, margin: "10px" }}>
                         {lastUpdated ? `Last updated: ${lastUpdated}` : 'Last updated: N/A'}
                     </div>
                     <Button
@@ -495,7 +524,7 @@ export default function RecommendationsPage({ params }) {
             </div>
 
 
-           
+
             <div
                 style={{
                     display: 'flex',
@@ -506,7 +535,7 @@ export default function RecommendationsPage({ params }) {
                     padding: 6,
                 }}
             >
-                {tabs.map(tab => (
+                {/* {tabs.map(tab => (
                     <div
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -528,7 +557,58 @@ export default function RecommendationsPage({ params }) {
                             risk_alert: 'Risk Alert',
                         }[tab] || tab}
                     </div>
-                ))}
+                ))} */}
+                {tabs.map(tab => {
+                    const labelMap = {
+                        pause_loss_makers: 'Pause Loss Makers',
+                        scale_winners: 'Scale Winners',
+                        reallocate_budget: 'Reallocate Budget',
+                        risk_alert: 'Risk Alert',
+                        filtration: 'Filtration'
+                    };
+
+                    return (
+                        <div
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            style={{
+                                cursor: 'pointer',
+                                padding: '6px 12px',
+                                borderRadius: 4,
+                                fontSize: 14,
+                                fontWeight: 600,
+                                background:
+                                    activeTab === tab ? tabBgActive : 'transparent',
+                                color: activeTab === tab ? textActive : textDefault,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 6,
+                            }}
+                        >
+                            <span>{labelMap[tab] || tab}</span>
+
+                            {recommendations?.[tab] && (
+                                <Tooltip
+                                    overlayInnerStyle={{
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                    }}
+                                    title={recommendations[tab]}
+                                    placement="bottom"
+                                >
+                                    <InfoOutlinedIcon
+                                        fontSize="small"
+                                        style={{
+                                            opacity: 0.8,
+                                        }}
+                                        onClick={e => e.stopPropagation()} // prevent tab switch
+                                    />
+                                </Tooltip>
+                            )}
+                        </div>
+                    );
+                })}
+
             </div>
 
 
@@ -539,9 +619,9 @@ export default function RecommendationsPage({ params }) {
             )}
 
 
-           
+
             <div style={{ marginTop: 20 }}>
-                {accounts.map(acc => {
+                {orderedAccounts.map(acc => {
                     const accData = data?.[activeTab]?.[acc];
                     const bg = cardColors[activeTab];
                     const bd = borderColors[activeTab];
@@ -559,7 +639,7 @@ export default function RecommendationsPage({ params }) {
                     }
 
 
-                   
+
                     if (activeTab === 'reallocate_budget') {
                         return (
                             <div key={acc} style={{ marginBottom: 18 }}>
@@ -579,9 +659,17 @@ export default function RecommendationsPage({ params }) {
                                                             : '#22c55e',
                                                 }}
                                             >
-                                                {type === 'low_performers'
+                                                {/* {type === 'low_performers'
                                                     ? '🔻 Low Performance'
-                                                    : '🔺 High Performance'}
+                                                    : '🔺 High Performance'} */}
+                                                {type === 'low_performers' ? (
+                                                    <> <span style={{ color: '#ef4444', fontSize: 14 }}>▲</span> Low Performance</>
+                                                ) : (
+                                                    <>
+                                                        <span style={{ color: '#16a34a', fontSize: 14 }}>▲</span>
+                                                        High Performance
+                                                    </>
+                                                )}
                                             </h5>
 
 

@@ -336,31 +336,31 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 content: 'Deleting comments for selected campaigns...',
                 key: 'bulkDelete'
             });
- 
- 
+
+
             const items = leafCampaigns.map(item => ({
                 campaignid: item.campaignid
             }));
- 
+
             const body = {
                 accountNumber: leafCampaigns?.[0]?.accountNumber,
                 level: 'campaign',
                 items
             };
- 
+
             const resp = await apiClient.post(
                 '/Comments/bulkdelete',
                 body
             );
- 
+
             if (resp.status === 200 || resp.status === 201) {
                 const timeStamp = moment()
                     .tz('Asia/Kolkata')
                     .format('YYYY-MM-DD hh:mm:ss A');
- 
+
                 setCampaignComments(prev => {
                     const arr = [...prev];
- 
+
                     leafCampaigns.forEach(item => {
                         const idx = arr.findIndex(
                             i =>
@@ -368,7 +368,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                 String(i.Account) === String(item.accountNumber) &&
                                 i.level === 'campaign'
                         );
- 
+
                         if (idx >= 0) {
                             arr[idx] = {
                                 ...arr[idx],
@@ -378,16 +378,16 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             };
                         }
                     });
- 
+
                     return arr;
                 });
- 
+
                 message.success({
                     content: `${leafCampaigns.length} comment(s) deleted successfully`,
                     key: 'bulkDelete',
                     duration: 3
                 });
- 
+
                 setIsBulkCommentModalVisible(false);
             }
         } catch (error) {
@@ -608,6 +608,89 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         setBulkOpen(true);
         setBulkCategory("");
     };
+    // const saveBulkCategory = async () => {
+    //     if (!bulkCategory.trim()) {
+    //         message.warning("Enter category");
+    //         return;
+    //     }
+
+    //     const token = localStorage.getItem("token");
+    //     const items = leafCampaigns
+    //         .filter(item => !item.category || item.category.trim() === "")
+    //         .map(item => ({
+    //             accountNumber: item.accountNumber,
+    //             campaignid: item.campaignid,
+    //             level: "campaign",
+    //             campaignname: item.campaignname,
+    //         }));
+
+    //     if (items.length === 0) {
+    //         message.info("All selected campaigns already have a category. Nothing to update.");
+    //         setBulkOpen(false);
+    //         return;
+    //     }
+
+    //     try {
+    //         message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+    //         await apiClient.post(
+    //             "/BulkUpdateCategory",
+    //             { items, category: bulkCategory },
+    //             { headers: { Authorization: token } }
+    //         );
+    //         setCampaignComments(prev => {
+    //             const arr = [...prev];
+    //             setLeafCampaigns(prev =>
+    //                 prev.map(item =>
+    //                     (!item.category || item.category.trim() === "")
+    //                         ? { ...item, category: bulkCategory }
+    //                         : item
+    //                 )
+    //             )
+    //             items.forEach(item => {
+    //                 const idx = arr.findIndex(
+    //                     i =>
+    //                         String(i.campaignid) === String(item.campaignid) &&
+    //                         String(i.Account) === String(item.accountNumber) &&
+    //                         i.level === "campaign"
+    //                 );
+
+    //                 if (idx >= 0) {
+    //                     if (arr[idx] && arr[idx].category) {
+    //                         arr[idx].category = arr[idx].category;
+    //                     } else {
+    //                         arr[idx].category = bulkCategory;
+    //                     }
+
+    //                 } else {
+    //                     arr.push({
+    //                         campaignid: item.campaignid,
+    //                         Account: item.accountNumber,
+    //                         level: "campaign",
+    //                         category: bulkCategory
+    //                     });
+    //                 }
+    //             });
+
+    //             return arr;
+    //         });
+    //         leafCampaigns.forEach(item => {
+    //             if (!item.category || item.category.trim() === "") {
+    //                 const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+    //                 commentsMap.set(key, { category: bulkCategory });
+    //             }
+    //         });
+
+
+    //         message.success({ content: "Category updated!", key: "bulkCategory" });
+
+    //     } catch (err) {
+    //         console.error(err);
+    //         message.error("Failed to update category");
+    //     }
+
+    //     setBulkOpen(false);
+    // };
     const saveBulkCategory = async () => {
         if (!bulkCategory.trim()) {
             message.warning("Enter category");
@@ -615,17 +698,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         }
 
         const token = localStorage.getItem("token");
-        const items = leafCampaigns
-            .filter(item => !item.category || item.category.trim() === "")
-            .map(item => ({
-                accountNumber: item.accountNumber,
-                campaignid: item.campaignid,
-                level: "campaign",
-                campaignname: item.campaignname,
-            }));
+
+        
+        const items = leafCampaigns.map(item => ({
+            accountNumber: item.accountNumber,
+            campaignid: item.campaignid,
+            level: "campaign",
+            campaignname: item.campaignname,
+        }));
 
         if (items.length === 0) {
-            message.info("All selected campaigns already have a category. Nothing to update.");
+            message.info("No campaigns selected.");
             setBulkOpen(false);
             return;
         }
@@ -634,19 +717,23 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "/BulkUpdateCategoryNew",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
+
+          
+            setLeafCampaigns(prev =>
+                prev.map(item => ({
+                    ...item,
+                    category: bulkCategory
+                }))
+            );
+
+           
             setCampaignComments(prev => {
                 const arr = [...prev];
-                setLeafCampaigns(prev =>
-                    prev.map(item =>
-                        (!item.category || item.category.trim() === "")
-                            ? { ...item, category: bulkCategory }
-                            : item
-                    )
-                )
+
                 items.forEach(item => {
                     const idx = arr.findIndex(
                         i =>
@@ -656,12 +743,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     );
 
                     if (idx >= 0) {
-                        if (arr[idx] && arr[idx].category) {
-                            arr[idx].category = arr[idx].category;
-                        } else {
-                            arr[idx].category = bulkCategory;
-                        }
-
+                        arr[idx].category = bulkCategory;
                     } else {
                         arr.push({
                             campaignid: item.campaignid,
@@ -674,16 +756,14 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                 return arr;
             });
+
+        
             leafCampaigns.forEach(item => {
-                if (!item.category || item.category.trim() === "") {
-                    const key = `${item.campaignid}_${item.accountNumber}_campaign`;
-                    commentsMap.set(key, { category: bulkCategory });
-                }
+                const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+                commentsMap.set(key, { category: bulkCategory });
             });
 
-
             message.success({ content: "Category updated!", key: "bulkCategory" });
-
         } catch (err) {
             console.error(err);
             message.error("Failed to update category");
@@ -3369,7 +3449,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 open={isBulkCommentModalVisible}
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                                                footer={[ 
+                                                footer={[
                                                     <Button key="Delete" onClick={handleBulkDeleteComments}>
                                                         Delete
                                                     </Button>,
