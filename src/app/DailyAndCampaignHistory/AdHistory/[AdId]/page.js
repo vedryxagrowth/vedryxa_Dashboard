@@ -553,7 +553,7 @@ export default function AdNameAndAccount({ params }) {
     }
 
     const getHistoryData = async () => {
-        const fetchData = await apiClient.get(`/New/DailyAdHistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=Facebook_Mnet_AD`);
+        const fetchData = await apiClient.get(`/New/DailyAdHistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
 
         const mainData = fetchData.data;

@@ -2736,7 +2736,7 @@ const App = () => {
                 <span style={{ color: "gray", fontSize: "11px", display: "block" }}>
                   {approvedBy}
                 </span>
-                <span style={{ color: "gray", fontSize: "9px", display: "block", marginTop:2, display: approvedDate !== "N/A" ? "block" : "none" }}>
+                <span style={{ color: "gray", fontSize: "9px", display: "block", marginTop: 2, display: approvedDate !== "N/A" ? "block" : "none" }}>
                   {approvedDate}
                 </span>
               </div>
@@ -3620,6 +3620,9 @@ const App = () => {
 
     setIsModalVisiblesForBulkComments(false);
   };
+
+  // const tableData = getFilteredMultipleAdsetCampaigns();
+  const hasData = Array.isArray(checkedRowRecords) && checkedRowRecords.length > 0;
 
 
   const renderAccountsCheckboxes = (theme) => {
@@ -4543,13 +4546,26 @@ const App = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       {checkboxNode} {/* ✅ Select-all checkbox */}
 
-                      <IoMdCreate
+                      {/* <IoMdCreate
                         style={{ cursor: "pointer", }}
                         onClick={(e) => {
                           e.stopPropagation(); // ⛔ prevent select-all toggle
                           // handleHeaderIconClick();
                           // console.log(checkedRowRecords);
                           setIsModalVisiblesForBulkComments(true)
+                        }}
+                      /> */}
+                      <IoMdCreate
+                        style={{
+                          cursor: hasData ? "pointer" : "not-allowed",
+                          opacity: hasData ? 1 : 0.4,
+                          pointerEvents: hasData ? "auto" : "none", // 🔒 fully disable
+                        }}
+                        onClick={(e) => {
+                          if (!hasData) return;
+
+                          e.stopPropagation(); // ⛔ prevent select-all toggle
+                          setIsModalVisiblesForBulkComments(true);
                         }}
                       />
                     </div>
