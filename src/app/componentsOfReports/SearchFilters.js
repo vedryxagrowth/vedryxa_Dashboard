@@ -344,7 +344,13 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                 desc: 'early performance decline',
             });
         }
-
+        if (summary.filtration> 0) {
+            conditions.push({
+                title: 'Filteration',
+                count: summary.filtration,
+                desc: 'Filtered campaigns',
+            })
+        }
 
         return conditions;
     }
