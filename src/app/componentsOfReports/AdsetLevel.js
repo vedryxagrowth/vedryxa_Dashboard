@@ -645,6 +645,86 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         setBulkOpen(true);
         setBulkCategory("");
     };
+    // const saveBulkCategory = async () => {
+    //     if (!bulkCategory.trim()) {
+    //         message.warning("Enter category");
+    //         return;
+    //     }
+
+    //     const token = localStorage.getItem("token");
+    //     const items = leafCampaigns
+    //         .filter(item => !item.category || item.category.trim() === "")
+    //         .map(item => ({
+    //             accountNumber: item.accountNumber,
+    //             campaignid: item.campaignid,
+    //             level: "campaign",
+    //             campaignname: item.campaignname,
+    //         }));
+
+    //     if (items.length === 0) {
+    //         message.info("All selected campaigns already have a category. Nothing to update.");
+    //         setBulkOpen(false);
+    //         return;
+    //     }
+
+    //     try {
+    //         message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+    //         await apiClient.post(
+    //             "/BulkUpdateCategory",
+    //             { items, category: bulkCategory },
+    //             { headers: { Authorization: token } }
+    //         );
+    //         setCampaignComments(prev => {
+    //             const arr = [...prev];
+    //             setLeafCampaigns(prev =>
+    //                 prev.map(item =>
+    //                     (!item.category || item.category.trim() === "")
+    //                         ? { ...item, category: bulkCategory }
+    //                         : item
+    //                 )
+    //             )
+    //             items.forEach(item => {
+    //                 const idx = arr.findIndex(
+    //                     i =>
+    //                         String(i.campaignid) === String(item.campaignid) &&
+    //                         String(i.Account) === String(item.accountNumber) &&
+    //                         i.level === "campaign"
+    //                 );
+
+    //                 if (idx >= 0) {
+    //                     if (arr[idx] && arr[idx].category) {
+    //                         arr[idx].category = arr[idx].category;
+    //                     } else {
+    //                         arr[idx].category = bulkCategory;
+    //                     }
+
+    //                 } else {
+    //                     arr.push({
+    //                         campaignid: item.campaignid,
+    //                         Account: item.accountNumber,
+    //                         level: "campaign",
+    //                         category: bulkCategory
+    //                     });
+    //                 }
+    //             });
+
+    //             return arr;
+    //         });
+    //         leafCampaigns.forEach(item => {
+    //             const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+    //             commentsMap.set(key, { category: bulkCategory });
+    //         });
+
+    //         message.success({ content: "Category updated!", key: "bulkCategory" });
+
+    //     } catch (err) {
+    //         console.error(err);
+    //         message.error("Failed to update category");
+    //     }
+
+    //     setBulkOpen(false);
+    // };
     const saveBulkCategory = async () => {
         if (!bulkCategory.trim()) {
             message.warning("Enter category");
@@ -652,17 +732,17 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         }
 
         const token = localStorage.getItem("token");
-        const items = leafCampaigns
-            .filter(item => !item.category || item.category.trim() === "")
-            .map(item => ({
-                accountNumber: item.accountNumber,
-                campaignid: item.campaignid,
-                level: "campaign",
-                campaignname: item.campaignname,
-            }));
+
+
+        const items = leafCampaigns.map(item => ({
+            accountNumber: item.accountNumber,
+            campaignid: item.campaignid,
+            level: "campaign",
+            campaignname: item.campaignname,
+        }));
 
         if (items.length === 0) {
-            message.info("All selected campaigns already have a category. Nothing to update.");
+            message.info("No campaigns selected.");
             setBulkOpen(false);
             return;
         }
@@ -671,19 +751,23 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "/BulkUpdateCategoryNew",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
+
+
+            setLeafCampaigns(prev =>
+                prev.map(item => ({
+                    ...item,
+                    category: bulkCategory
+                }))
+            );
+
+
             setCampaignComments(prev => {
                 const arr = [...prev];
-                setLeafCampaigns(prev =>
-                    prev.map(item =>
-                        (!item.category || item.category.trim() === "")
-                            ? { ...item, category: bulkCategory }
-                            : item
-                    )
-                )
+
                 items.forEach(item => {
                     const idx = arr.findIndex(
                         i =>
@@ -693,12 +777,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     );
 
                     if (idx >= 0) {
-                        if (arr[idx] && arr[idx].category) {
-                            arr[idx].category = arr[idx].category;
-                        } else {
-                            arr[idx].category = bulkCategory;
-                        }
-
+                        arr[idx].category = bulkCategory;
                     } else {
                         arr.push({
                             campaignid: item.campaignid,
@@ -711,13 +790,14 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                 return arr;
             });
+
+
             leafCampaigns.forEach(item => {
                 const key = `${item.campaignid}_${item.accountNumber}_campaign`;
                 commentsMap.set(key, { category: bulkCategory });
             });
 
             message.success({ content: "Category updated!", key: "bulkCategory" });
-
         } catch (err) {
             console.error(err);
             message.error("Failed to update category");
@@ -725,7 +805,6 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
         setBulkOpen(false);
     };
-
     const autoGroupColumnDefLive = {
         headerName: 'Adset name',
         minWidth: 450,
