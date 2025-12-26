@@ -966,6 +966,16 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
+    valueFormatter: (params) => {
+      // GROUP ROW
+      if (params.node?.group) {
+        const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+        return firstChild?.adname ?? params.node.key;
+      }
+
+      // LEAF ROW
+      return params.value;
+    },
     // filter: "agTextColumnFilter",
     // filterValueGetter: (params) => {
     //   if (params.node.group) {
@@ -3715,6 +3725,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                       suppressAggFuncInHeader={true}
                       getMainMenuItems={getMainMenuItems}
+                      useValueFormatterForExport={true}
                       // getRowId={(params) => String(params.data.adid)}
 
 

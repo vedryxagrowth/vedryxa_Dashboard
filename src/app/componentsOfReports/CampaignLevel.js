@@ -699,7 +699,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
         const token = localStorage.getItem("token");
 
-        
+
         const items = leafCampaigns.map(item => ({
             accountNumber: item.accountNumber,
             campaignid: item.campaignid,
@@ -722,7 +722,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 { headers: { Authorization: token } }
             );
 
-          
+
             setLeafCampaigns(prev =>
                 prev.map(item => ({
                     ...item,
@@ -730,7 +730,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 }))
             );
 
-           
+
             setCampaignComments(prev => {
                 const arr = [...prev];
 
@@ -757,7 +757,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 return arr;
             });
 
-        
+
             leafCampaigns.forEach(item => {
                 const key = `${item.campaignid}_${item.accountNumber}_campaign`;
                 commentsMap.set(key, { category: bulkCategory });
@@ -779,6 +779,16 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
+        valueFormatter: (params) => {
+            // GROUP ROW
+            if (params.node?.group) {
+                const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+                return firstChild?.campaignname ?? params.node.key;
+            }
+
+            // LEAF ROW
+            return params.value;
+        },
         // filter: "agTextColumnFilter",
         // filterValueGetter: (params) => {
         //     if (params.node.group) {
@@ -3996,6 +4006,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 columnDefs={memorizedColumnDef}
                                                 defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                                 onCellClicked={onCellClickedLive}
+                                                useValueFormatterForExport={true}
                                                 pagination={true}
                                                 paginationPageSize={200}
                                                 paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
