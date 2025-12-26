@@ -1502,85 +1502,85 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
   //   setBulkOpen(false);
   // };
   const saveBulkCategory = async () => {
-          if (!bulkCategory.trim()) {
-              message.warning("Enter category");
-              return;
-          }
-  
-          const token = localStorage.getItem("token");
-  
-          
-          const items = leafCampaigns.map(item => ({
-              accountNumber: item.accountNumber,
+    if (!bulkCategory.trim()) {
+      message.warning("Enter category");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+
+    const items = leafCampaigns.map(item => ({
+      accountNumber: item.accountNumber,
+      campaignid: item.campaignid,
+      level: "campaign",
+      campaignname: item.campaignname,
+    }));
+
+    if (items.length === 0) {
+      message.info("No campaigns selected.");
+      setBulkOpen(false);
+      return;
+    }
+
+    try {
+      message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+      await apiClient.post(
+        "/BulkUpdateCategoryNew",
+        { items, category: bulkCategory },
+        { headers: { Authorization: token } }
+      );
+
+
+      setLeafCampaigns(prev =>
+        prev.map(item => ({
+          ...item,
+          category: bulkCategory
+        }))
+      );
+
+
+      setCampaignComments(prev => {
+        const arr = [...prev];
+
+        items.forEach(item => {
+          const idx = arr.findIndex(
+            i =>
+              String(i.campaignid) === String(item.campaignid) &&
+              String(i.Account) === String(item.accountNumber) &&
+              i.level === "campaign"
+          );
+
+          if (idx >= 0) {
+            arr[idx].category = bulkCategory;
+          } else {
+            arr.push({
               campaignid: item.campaignid,
+              Account: item.accountNumber,
               level: "campaign",
-              campaignname: item.campaignname,
-          }));
-  
-          if (items.length === 0) {
-              message.info("No campaigns selected.");
-              setBulkOpen(false);
-              return;
+              category: bulkCategory
+            });
           }
-  
-          try {
-              message.loading({ content: "Updating category...", key: "bulkCategory" });
-  
-              await apiClient.post(
-                  "/BulkUpdateCategoryNew",
-                  { items, category: bulkCategory },
-                  { headers: { Authorization: token } }
-              );
-  
-            
-              setLeafCampaigns(prev =>
-                  prev.map(item => ({
-                      ...item,
-                      category: bulkCategory
-                  }))
-              );
-  
-             
-              setCampaignComments(prev => {
-                  const arr = [...prev];
-  
-                  items.forEach(item => {
-                      const idx = arr.findIndex(
-                          i =>
-                              String(i.campaignid) === String(item.campaignid) &&
-                              String(i.Account) === String(item.accountNumber) &&
-                              i.level === "campaign"
-                      );
-  
-                      if (idx >= 0) {
-                          arr[idx].category = bulkCategory;
-                      } else {
-                          arr.push({
-                              campaignid: item.campaignid,
-                              Account: item.accountNumber,
-                              level: "campaign",
-                              category: bulkCategory
-                          });
-                      }
-                  });
-  
-                  return arr;
-              });
-  
-          
-              leafCampaigns.forEach(item => {
-                  const key = `${item.campaignid}_${item.accountNumber}_campaign`;
-                  commentsMap.set(key, { category: bulkCategory });
-              });
-  
-              message.success({ content: "Category updated!", key: "bulkCategory" });
-          } catch (err) {
-              console.error(err);
-              message.error("Failed to update category");
-          }
-  
-          setBulkOpen(false);
-      };
+        });
+
+        return arr;
+      });
+
+
+      leafCampaigns.forEach(item => {
+        const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+        commentsMap.set(key, { category: bulkCategory });
+      });
+
+      message.success({ content: "Category updated!", key: "bulkCategory" });
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to update category");
+    }
+
+    setBulkOpen(false);
+  };
   const autoGroupColumnDef = {
     headerName: 'Campaign name',
     minWidth: 450,
@@ -1615,7 +1615,16 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
     //   }
     //   return campaignA.localeCompare(campaignB);
     // },
+    valueFormatter: (params) => {
+      // GROUP ROW
+      if (params.node?.group) {
+        const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+        return firstChild?.campaignname ?? params.node.key;
+      }
 
+      // LEAF ROW
+      return params.value;
+    },
     comparator: (groupKeyA, groupKeyB, nodeA, nodeB) => {
 
       // get first leaf row of group A
@@ -3442,22 +3451,22 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                         onCancel={() => setIsBulkCommentModalVisible(false)}
                         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                         footer={[
-                        <Button key="Delete" onClick={handleBulkDeleteComments}>
-                          Delete
-                        </Button>,
-                        <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
-                          Cancel
-                        </Button>,
-                        <Button
-                          key="ok"
-                          style={{ backgroundColor: "#91C25F" }}
-                          onClick={() => {
-                            handleSmartCommentSubmit();
-                            setIsBulkCommentModalVisible(false);
-                          }}
-                        >
-                          Ok
-                        </Button>
+                          <Button key="Delete" onClick={handleBulkDeleteComments}>
+                            Delete
+                          </Button>,
+                          <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
+                            Cancel
+                          </Button>,
+                          <Button
+                            key="ok"
+                            style={{ backgroundColor: "#91C25F" }}
+                            onClick={() => {
+                              handleSmartCommentSubmit();
+                              setIsBulkCommentModalVisible(false);
+                            }}
+                          >
+                            Ok
+                          </Button>
                         ]}
                       >
                         <Input.TextArea
@@ -3855,6 +3864,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                       // groupIncludeTotalFooter={true}
                       autoGroupColumnDef={autoGroupColumnDef}
                       onSelectionChanged={onSelectionChanged}
+                      useValueFormatterForExport={true}
                       // onGridReady={(params) => {
                       //   gridRef1.current = params.api; // Store grid API
                       //   restoreGridState(gridRef1.current); // Restore state when grid is ready
