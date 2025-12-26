@@ -43,6 +43,26 @@ const newtworkCollections = {
     "FB_InuvoPrism": "Facebook_InuvoPrism"
 }
 
+const networkCollectionsForAiAssistant = {
+    FB_Mnet: 'Facebook_Mnet_Daily',
+    FB_MnetBing: 'Facebook_MnetBing_Daily',
+    FB_Enki: 'Facebook_Enki',
+    FB_System1: 'Facebook_System1',
+    FB_Rsoc: 'Facebook_Rsoc',
+    FB_Tonic: 'Facebook_Tonic',
+    FB_DomainActive: 'Facebook_DActive_Names',
+    FB_Bodies: 'Facebook_Bodies',
+    FB_Bodies1: 'Facebook_Bodies1',
+    Newsbreak_DA: 'Newsbreak_DomainActive',
+    FB_Tonic1: 'Facebook_Tonic1',
+    FB_Sedo: 'Facebook_Sedo',
+    FB_Inmobi: 'Facebook_Inmobi',
+    FB_TonicRsoc: 'Facebook_TonicRsoc',
+    FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
+    FB_CodeFuel: 'Facebook_CodeFuel_Daily',
+};
+
+
 const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
 const DailyReports = React.lazy(() => import('../componentsOfReports/Daily'));
 const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampaigns'));
@@ -269,7 +289,7 @@ const MyTablePage = () => {
                 setInputValue(inputBuffer.current);
             }, 200); // delay after last backspace
         } else {
-            // For all other keys — update instantly
+            // For all other keys — llupdate instantly
             setInputValue(value);
         }
     };
@@ -1807,94 +1827,224 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const [row, setRow] = useState(null);
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
+                        return arr;
+                    });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    }
-
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -2829,94 +2979,224 @@ const MyTablePage = () => {
             },
 
             // ✅ Optional — hide empty leaf cells (if any)
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -5003,91 +5283,220 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -6043,91 +6452,221 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -7279,127 +7818,255 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const isGroupRow = !!props?.node?.groupData;
+
+            //     // campaign id + campaign name for this row/group
+            //     const campaignId = isGroupRow
+            //         ? props?.node?.allLeafChildren?.[0]?.data?.campaignid
+            //         : props?.data?.campaignid;
+
+            //     // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+            //     const rowAccountNumber = isGroupRow
+            //         ? props?.node?.allLeafChildren?.[0]?.data?.accountNumber
+            //         : props?.data?.accountNumber;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     useEffect(() => {
+            //         if (!campaignId || !rowAccountNumber) return;
+            //         // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+            //         // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+            //         // const matchedAdset = Camapignlevelstatus.find(
+            //         //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+            //         // );
+            //         const matchedAdset = campaignComments
+            //             .find(item =>
+            //                 String(item.campaignid) === String(campaignId) &&
+            //                 String(item.Account) === String(rowAccountNumber) &&
+            //                 String(item.level) === "campaign"
+            //             );
+            //         if (matchedAdset) {
+            //             setCategory(matchedAdset?.category || "");
+            //         }
+            //     }, [campaignComments]);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
+
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const isGroupRow = !!props?.node?.groupData;
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                // campaign id + campaign name for this row/group
-                const campaignId = isGroupRow
-                    ? props?.node?.allLeafChildren?.[0]?.data?.campaignid
-                    : props?.data?.campaignid;
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
-                const rowAccountNumber = isGroupRow
-                    ? props?.node?.allLeafChildren?.[0]?.data?.accountNumber
-                    : props?.data?.accountNumber;
-
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
-
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber) return;
-                    // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
-                    // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
-                    // const matchedAdset = Camapignlevelstatus.find(
-                    //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
-                    // );
-                    const matchedAdset = campaignComments
-                        .find(item =>
-                            String(item.campaignid) === String(campaignId) &&
-                            String(item.Account) === String(rowAccountNumber) &&
-                            String(item.level) === "campaign"
-                        );
-                    if (matchedAdset) {
-                        setCategory(matchedAdset?.category || "");
-                    }
-                }, [campaignComments]);
-
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
+                        return arr;
+                    });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    }
-
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
-
-
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -8639,92 +9306,221 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                        return arr;
+                    });
 
-                    }
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -9586,93 +10382,223 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -10472,90 +11398,219 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+                
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+               
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
-                    setOpen(false);
+                        return arr;
+                    });
+
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
+               
+                if (props.value && !editing) {
+                    return (
                         <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
                         >
-                            <PlusOutlined />
+                            {props.value}
                         </span>
+                    );
+                }
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -10837,7 +11892,7 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
-   const columnDefsObject2 = {
+    const columnDefsObject2 = {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
@@ -11663,103 +12718,232 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+
+            //         }
+
+
+            //         setOpen(false);
+            //     };
+
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
-
-                    const payload = {
-                        accountNumber: row.accountNumber,
-                        campaignid: row.campaignid,
-                        level: "campaign",
-                        category,
-                    };
-
-
-                    try {
-                        const token = localStorage.getItem("token");
-
-
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
-                        );
-
-
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
-                        });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
-
-
-                    }
-
-
+                    await saveApi(row, category);
                     setOpen(false);
                 };
 
 
-                return (
-                    <div>
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category: catValue,
+                    };
+
+                    const token = localStorage.getItem("token");
+
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
+                        );
+
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
+                        });
+
+                        return arr;
+                    });
+
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
+                };
+
+
+                if (props.value && !editing) {
+                    return (
                         <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
                         >
-                            <PlusOutlined />
+                            {props.value}
                         </span>
+                    );
+                }
 
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -11990,7 +13174,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
-        spend:{
+        spend: {
             headerName: 'Spend',
             field: 'spend',
             minWidth: 105,
@@ -12063,7 +13247,7 @@ const MyTablePage = () => {
 
 
         },
-        fbleads:{
+        fbleads: {
             headerName: 'FBLeads',
             field: 'fbleads',
             minWidth: 105,
@@ -12076,7 +13260,7 @@ const MyTablePage = () => {
 
 
         },
-        conversions:{
+        conversions: {
             headerName: 'Conv',
             field: 'conversions',
             minWidth: 85,
@@ -12765,92 +13949,221 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                        return arr;
+                    });
 
-                    }
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        <span
+                            onClick={() => setEditing(true)}
+                            style={{ cursor: "pointer" }}
+                        >
+                            {props.value}
+                        </span>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={openModal}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -14404,11 +15717,231 @@ const MyTablePage = () => {
             />
         </StickyBox>
     );
+    // const [aiLoading, setAiLoading] = useState(false);
+    // const [aiError, setAiError] = useState(null);
+    // const [recDataByAccount, setRecDataByAccount] = useState({});
+    // const [recAccounts, setRecAccounts] = useState([]);
+    // const network = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]
+    // function buildAiAssistantHref(selectedValue, network, time) {
+    //     const accounts = Array.isArray(selectedValue)
+    //         ? selectedValue
+    //         : String(selectedValue || '')
+    //             .split(',')
+    //             .map(s => s.trim())
+    //             .filter(Boolean);
+
+    //     if (!accounts.length) return '';
+    //     const accountsParam = encodeURIComponent(accounts.join(','));
+    //     const qs = new URLSearchParams();
+    //     if (network) qs.set('network', String(network));
+    //     if (time) qs.set('time', String(time));
+
+    //     const q = qs.toString();
+    //     return q
+    //         ? `/AiAssistant/${accountsParam}?${q}`
+    //         : `/AiAssistant/${accountsParam}`;
+    // }
+
+    // useEffect(() => {
+    //     const accounts = Array.isArray(newaccount)
+    //         ? newaccount
+    //         : String(newaccount || '').split(',').map(s => s.trim()).filter(Boolean);
+
+    //     if (!accounts.length) {
+    //         setRecDataByAccount({});
+    //         setRecAccounts([]);
+    //         setAiLoading(false);
+    //         setAiError(null);
+    //         return;
+    //     }
+
+    //     // const url =
+    //     //     accounts.length === 1
+    //     //         ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
+    //     //         : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
+
+    //     // const token = localStorage.getItem('token');
+
+    //     (async () => {
+    //         try {
+    //             setInitialLoading(true);
+    //             setAiLoading(true);
+    //             setAiError(null);
+
+    //             const headers = {};
+    //             if (token) {
+    //                 headers['Authorization'] = token;
+    //             }
+
+    //             const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
+
+    //             const res = await axios.post(
+    //                 `https://prodapis.adsgoat.in/Recommendations`,
+    //                 { "accounts": accounts, ...(accounts.length > 1 ? { "merge": true, "includeAccounts": true } : {}) },
+    //                 authHeaders
+    //             );
+    //             if (res.status === 404) {
+    //                 setRecDataByAccount({});
+    //                 setRecAccounts([]);
+    //                 setAiLoading(false);
+    //                 return;
+    //             }
+
+    //             // if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    //             const data = res.data;
+    //             setRecDataByAccount(data);
+    //             // setRecAccounts(accounts.filter(acc => data?.[acc]));
+    //             const validAccounts = accounts.filter(acc => {
+    //                 const accountData = data?.[acc];
+    //                 if (!accountData) return false;
+
+    //                 const hasConditions = Array.isArray(accountData.condition) && accountData.condition.length > 0;
+    //                 const hasSummary = accountData.summary && Object.keys(accountData.summary).length > 0;
+
+    //                 return hasConditions || hasSummary;
+    //             });
+
+    //             setRecAccounts(validAccounts);
+    //             setInitialLoading(false);
+    //         } catch (e) {
+    //             setInitialLoading(false);
+    //             setAiError(e.message || 'Failed to load');
+    //             setRecDataByAccount({});
+    //             setRecAccounts([]);
+    //         } finally {
+    //             setAiLoading(false);
+    //             setInitialLoading(false);
+    //         }
+    //     })();
+    // }, [newaccount]);
+    // const aiItems = useMemo(() => {
+    //     if (aiLoading) {
+    //         return [
+    //             {
+    //                 key: 'loading',
+    //                 disabled: true,
+    //                 label: (
+    //                     <span style={{ fontSize: 13, color: theme === 'dark' ? '#bbb' : '#666' }}>
+    //                         Loading recommendations…
+    //                     </span>
+    //                 ),
+    //             },
+    //         ];
+    //     }
+    //     // if (aiError) {
+    //     //     return [
+    //     //         {
+    //     //             key: 'error',
+    //     //             disabled: true,
+    //     //             label: (
+    //     //                 <span style={{ fontSize: 13, color: '#d4380d' }}>
+    //     //                     Error: {aiError}
+    //     //                 </span>
+    //     //             ),
+    //     //         },
+    //     //     ];
+    //     // }
+    //     if (recAccounts.length === 0) {
+    //         return [
+    //             {
+    //                 key: 'empty',
+    //                 disabled: true,
+    //                 label: (
+    //                     <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
+    //                         No recommendations found (last 2 days).
+    //                     </span>
+    //                 ),
+    //             },
+    //         ];
+    //     }
+    //     // const first = recDataByAccount[recAccounts[0]] || {};
+    //     // const condition = Array.isArray(first.condition) ? first.condition : [];
+    //     // Collect all conditions across valid accounts
+    //     const allConditions = new Set();
+    //     recAccounts.forEach(acc => {
+    //         const accConditions = recDataByAccount[acc]?.condition || [];
+    //         accConditions.forEach(c => allConditions.add(c));
+    //     });
+    //     const condition = Array.from(allConditions);
+
+    //     const totals = {};
+    //     condition.forEach(k => (totals[k] = 0));
+    //     recAccounts.forEach(acc => {
+    //         const s = recDataByAccount[acc]?.summary;
+    //         if (!s) return;
+    //         condition.forEach(k => {
+    //             totals[k] += Number(s?.[k]?.count || 0);
+    //         });
+    //     });
+    //     const LABEL_TEXT_BY_CONDITION = {
+    //         highROI: 'campaigns showing ROI > 20%',
+    //         lowROI: 'campaigns showing ROI < -20%',
+    //         lowCTR: 'campaigns showing CTR < 3%',
+    //     };
+    //     const buildQuery = (obj) => {
+    //         const qs = new URLSearchParams();
+    //         Object.entries(obj).forEach(([k, v]) => {
+    //             if (v !== undefined && v !== null && String(v).trim() !== '') {
+    //                 qs.set(k, String(v));
+    //             }
+    //         });
+    //         return qs.toString();
+    //     };
+
+    //     const arr = condition.map((k, idx) => {
+    //         const text = LABEL_TEXT_BY_CONDITION[k] || 'campaigns';
+    //         return {
+    //             key: String(idx + 1),
+    //             label: (
+    //                 <div>
+    //                     <strong>{k} Campaigns</strong>
+    //                     <div style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#888' }}>
+    //                         {totals[k]} {text}
+    //                     </div>
+    //                 </div>
+    //             ),
+    //         };
+    //     });
+    //     arr.push({
+    //         type: 'divider',
+    //         style: {
+    //             border: theme === 'dark' ? '1px solid #ccc' : '1px solid #f0f0f0',
+    //             margin: '6px 0',
+    //         },
+    //     });
+
+
+    //     arr.push({
+    //         key: 'view-all',
+    //         label: (
+    //             <Button
+    //                 type="link"
+    //                 onClick={() => {
+    //                     const href = buildAiAssistantHref(selectedValue, network, time);
+    //                     if (href) window.open(href, '_blank', 'noopener,noreferrer');
+    //                 }}
+    //                 style={{ color: theme === 'dark' ? '#52c41a' : '#389e0d', padding: 0 }}
+    //             >
+    //                 View All Recommendations
+    //             </Button>
+    //         ),
+    //     });
+
+    //     return arr;
+    // }, [aiLoading, aiError, recAccounts, recDataByAccount, theme]);
+
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState(null);
-    const [recDataByAccount, setRecDataByAccount] = useState({});
-    const [recAccounts, setRecAccounts] = useState([]);
-    const network = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]
+    const [aiSummary, setAiSummary] = useState(null);
+    const [aiRequested, setAiRequested] = useState(false);
+
+
+
+
+    const network = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0];
+
+
     function buildAiAssistantHref(selectedValue, network, time) {
         const accounts = Array.isArray(selectedValue)
             ? selectedValue
@@ -14417,11 +15950,13 @@ const MyTablePage = () => {
                 .map(s => s.trim())
                 .filter(Boolean);
 
+
         if (!accounts.length) return '';
         const accountsParam = encodeURIComponent(accounts.join(','));
         const qs = new URLSearchParams();
         if (network) qs.set('network', String(network));
         if (time) qs.set('time', String(time));
+
 
         const q = qs.toString();
         return q
@@ -14429,194 +15964,261 @@ const MyTablePage = () => {
             : `/AiAssistant/${accountsParam}`;
     }
 
+
+    function resolveAiNetwork(network) {
+        if (!network) return network;
+
+
+
+
+        if (networkCollectionsForAiAssistant[network]) {
+            return networkCollectionsForAiAssistant[network];
+        }
+
+
+        return network;
+    }
+
+
     useEffect(() => {
+        if (!aiRequested) return; // 🔑 stop auto call on page load
+
+
         const accounts = Array.isArray(newaccount)
             ? newaccount
-            : String(newaccount || '').split(',').map(s => s.trim()).filter(Boolean);
+            : String(newaccount || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+
 
         if (!accounts.length) {
-            setRecDataByAccount({});
-            setRecAccounts([]);
-            setAiLoading(false);
+            setAiSummary(null);
             setAiError(null);
+            setAiLoading(false);
             return;
         }
 
-        // const url =
-        //     accounts.length === 1
-        //         ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
-        //         : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
 
-        // const token = localStorage.getItem('token');
+        const resolvedNetwork = resolveAiNetwork(network);
+
 
         (async () => {
             try {
-                setInitialLoading(true);
                 setAiLoading(true);
                 setAiError(null);
 
-                const headers = {};
-                if (token) {
-                    headers['Authorization'] = token;
-                }
-
-                const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
 
                 const res = await axios.post(
-                    `https://prodapis.adsgoat.in/Recommendations`,
-                    { "accounts": accounts, ...(accounts.length > 1 ? { "merge": true, "includeAccounts": true } : {}) },
-                    authHeaders
+                    'https://prodapis.adsgoat.in/AiCampaignRecommendations',
+                    {
+                        accountNumbers: accounts,
+                        network: resolvedNetwork,
+                        timezone: time,
+                    },
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token'),
+                        },
+                    }
                 );
-                if (res.status === 404) {
-                    setRecDataByAccount({});
-                    setRecAccounts([]);
-                    setAiLoading(false);
-                    return;
-                }
 
-                // if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                const data = res.data;
-                setRecDataByAccount(data);
-                // setRecAccounts(accounts.filter(acc => data?.[acc]));
-                const validAccounts = accounts.filter(acc => {
-                    const accountData = data?.[acc];
-                    if (!accountData) return false;
-
-                    const hasConditions = Array.isArray(accountData.condition) && accountData.condition.length > 0;
-                    const hasSummary = accountData.summary && Object.keys(accountData.summary).length > 0;
-
-                    return hasConditions || hasSummary;
-                });
-
-                setRecAccounts(validAccounts);
-                setInitialLoading(false);
+                setAiSummary(res.data?.summary || null);
             } catch (e) {
-                setInitialLoading(false);
-                setAiError(e.message || 'Failed to load');
-                setRecDataByAccount({});
-                setRecAccounts([]);
+                setAiError(e.message || 'Failed to load AI recommendations');
+                setAiSummary(null);
             } finally {
                 setAiLoading(false);
-                setInitialLoading(false);
             }
         })();
-    }, [newaccount]);
+    }, [aiRequested, newaccount, network, time]);
+
+
+    useEffect(() => {
+        setAiRequested(false);
+        setAiSummary(null);
+    }, [newaccount, network, time]);
+
+
+    function buildConditionsFromSummary(summary) {
+        if (!summary) return [];
+
+
+        const conditions = [];
+
+
+        if (summary.pause_loss_makers > 0) {
+            conditions.push({
+                key: 'pause_loss_makers',
+                title: 'Pause Loss Makers',
+                count: summary.pause_loss_makers,
+                desc: 'campaigns losing money consistently',
+            });
+        }
+
+
+        if (summary.scale_winners > 0) {
+            conditions.push({
+                key: 'scale_winners',
+                title: 'Scale Winners',
+                count: summary.scale_winners,
+                desc: 'high ROI campaigns',
+            });
+        }
+
+
+        if (summary.reallocate_budget?.low_performers > 0) {
+            conditions.push({
+                key: 'reallocate_low',
+                title: 'Reallocate Budget (Low)',
+                count: summary.reallocate_budget.low_performers,
+                desc: 'low performing campaigns',
+            });
+        }
+
+
+        if (summary.reallocate_budget?.high_performers > 0) {
+            conditions.push({
+                key: 'reallocate_high',
+                title: 'Reallocate Budget (High)',
+                count: summary.reallocate_budget.high_performers,
+                desc: 'top performing campaigns',
+            });
+        }
+
+
+        if (summary.risk_alert > 0) {
+            conditions.push({
+                key: 'risk_alert',
+                title: 'Risk Alerts',
+                count: summary.risk_alert,
+                desc: 'early performance decline',
+            });
+        }
+        if (summary.filtration > 0) {
+            conditions.push({
+                title: 'Filteration',
+                count: summary.filtration,
+                desc: 'Filtered campaigns',
+            })
+        }
+
+        return conditions;
+    }
     const aiItems = useMemo(() => {
         if (aiLoading) {
-            return [
-                {
-                    key: 'loading',
-                    disabled: true,
-                    label: (
-                        <span style={{ fontSize: 13, color: theme === 'dark' ? '#bbb' : '#666' }}>
-                            Loading recommendations…
-                        </span>
-                    ),
-                },
-            ];
-        }
-        // if (aiError) {
-        //     return [
-        //         {
-        //             key: 'error',
-        //             disabled: true,
-        //             label: (
-        //                 <span style={{ fontSize: 13, color: '#d4380d' }}>
-        //                     Error: {aiError}
-        //                 </span>
-        //             ),
-        //         },
-        //     ];
-        // }
-        if (recAccounts.length === 0) {
-            return [
-                {
-                    key: 'empty',
-                    disabled: true,
-                    label: (
-                        <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
-                            No recommendations found (last 2 days).
-                        </span>
-                    ),
-                },
-            ];
-        }
-        // const first = recDataByAccount[recAccounts[0]] || {};
-        // const condition = Array.isArray(first.condition) ? first.condition : [];
-        // Collect all conditions across valid accounts
-        const allConditions = new Set();
-        recAccounts.forEach(acc => {
-            const accConditions = recDataByAccount[acc]?.condition || [];
-            accConditions.forEach(c => allConditions.add(c));
-        });
-        const condition = Array.from(allConditions);
-
-        const totals = {};
-        condition.forEach(k => (totals[k] = 0));
-        recAccounts.forEach(acc => {
-            const s = recDataByAccount[acc]?.summary;
-            if (!s) return;
-            condition.forEach(k => {
-                totals[k] += Number(s?.[k]?.count || 0);
-            });
-        });
-        const LABEL_TEXT_BY_CONDITION = {
-            highROI: 'campaigns showing ROI > 20%',
-            lowROI: 'campaigns showing ROI < -20%',
-            lowCTR: 'campaigns showing CTR < 3%',
-        };
-        const buildQuery = (obj) => {
-            const qs = new URLSearchParams();
-            Object.entries(obj).forEach(([k, v]) => {
-                if (v !== undefined && v !== null && String(v).trim() !== '') {
-                    qs.set(k, String(v));
-                }
-            });
-            return qs.toString();
-        };
-
-        const arr = condition.map((k, idx) => {
-            const text = LABEL_TEXT_BY_CONDITION[k] || 'campaigns';
-            return {
-                key: String(idx + 1),
+            return [{
+                key: 'loading',
+                disabled: true,
                 label: (
-                    <div>
-                        <strong>{k} Campaigns</strong>
-                        <div style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#888' }}>
-                            {totals[k]} {text}
-                        </div>
-                    </div>
+                    <span style={{ fontSize: 13, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                        Loading recommendations…
+                    </span>
                 ),
-            };
-        });
-        arr.push({
+            }];
+        }
+
+
+        if (aiError) {
+            return [{
+                key: 'error',
+                disabled: true,
+                label: (
+                    <span style={{ fontSize: 12, color: '#d4380d' }}>
+                        Failed to load recommendations
+                    </span>
+                ),
+            }];
+        }
+
+
+        if (!aiSummary) {
+            return [{
+                key: 'empty',
+                disabled: true,
+                label: (
+                    <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                        No recommendations found (last 4 days).
+                    </span>
+                ),
+            }];
+        }
+
+
+        const conditions = buildConditionsFromSummary(aiSummary);
+
+
+        if (!conditions.length) {
+            return [{
+                key: 'empty',
+                disabled: true,
+                label: (
+                    <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                        No recommendations found (last 4 days).
+                    </span>
+                ),
+            }];
+        }
+
+
+        const items = conditions.map((c, idx) => ({
+            key: String(idx + 1),
+            label: (
+                <div>
+                    <strong>{c.title}</strong>
+                    <div style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#888' }}>
+                        {c.count} {c.desc}
+                    </div>
+                </div>
+            ),
+        }));
+
+
+        items.push({
             type: 'divider',
             style: {
-                border: theme === 'dark' ? '1px solid #ccc' : '1px solid #f0f0f0',
+                border: theme === 'dark' ? '1px solid #333' : '1px solid #f0f0f0',
                 margin: '6px 0',
             },
         });
 
 
-        arr.push({
+        items.push({
             key: 'view-all',
             label: (
                 <Button
                     type="link"
                     onClick={() => {
-                        const href = buildAiAssistantHref(selectedValue, network, time);
-                        if (href) window.open(href, '_blank', 'noopener,noreferrer');
+                        const resolvedNetwork = resolveAiNetwork(network);
+
+
+                        const href = buildAiAssistantHref(
+                            newaccount,
+                            resolvedNetwork,
+                            time
+                        );
+
+
+                        if (href) {
+                            window.open(href, '_blank', 'noopener,noreferrer');
+                        }
                     }}
-                    style={{ color: theme === 'dark' ? '#52c41a' : '#389e0d', padding: 0 }}
+
+
+                    style={{
+                        color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                        padding: 0,
+                    }}
                 >
                     View All Recommendations
                 </Button>
             ),
         });
 
-        return arr;
-    }, [aiLoading, aiError, recAccounts, recDataByAccount, theme]);
+
+        return items;
+    }, [aiLoading, aiError, aiSummary, theme, selectedValue, network, time]);
 
     return (
         <div className='reports-container'>
@@ -15274,7 +16876,7 @@ const MyTablePage = () => {
                                         AI Assistant
                                     </Button>
                                 </Tooltip> */}
-                                <Dropdown
+                                {/* <Dropdown
                                     menu={{
                                         items: aiItems,
                                         className: theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light',
@@ -15296,8 +16898,39 @@ const MyTablePage = () => {
                                     >
                                         AI Assistant
                                     </Button>
+                                </Dropdown> */}
+                                <Dropdown
+                                    menu={{
+                                        items: aiItems,
+                                        className: theme === 'dark'
+                                            ? 'custom-dropdown-menu-dark'
+                                            : 'custom-dropdown-menu-light',
+                                    }}
+                                    trigger={['click']}
+                                    onOpenChange={(open) => {
+                                        if (open && !aiRequested) {
+                                            setAiRequested(true); // 🚀 API fires here
+                                        }
+                                    }}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                                        loading={aiLoading}   // ✅ use loading, not disabled
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark'
+                                                ? 'rgba(82,196,26,0.06)'
+                                                : '#f0fdf4',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                                            fontWeight: 500,
+                                            marginRight: '5px',
+                                        }}
+                                    >
+                                        AI Assistant
+                                    </Button>
                                 </Dropdown>
-
                                 <Tooltip
                                     title={`🍳 This feature is cooking—almost ready to serve 😜`}
                                     overlayInnerStyle={{

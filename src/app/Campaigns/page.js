@@ -179,6 +179,12 @@ const App = () => {
   const [firstColumnValue, setFirstColumnValue] = useState("");
   const [universalOject, setUniversalOject] = useState({});
   const [launcherComments, setLauncherComments] = useState([]);
+  const [isModalVisiblesForBulkComments, setIsModalVisiblesForBulkComments] = useState(false);
+  const [checkedRowIds, setCheckedRowIds] = useState([]);
+  const [checkedRowRecords, setCheckedRowRecords] = useState([]);
+  const [commentForBulkComments, setCommentForBulkComments] = useState("");
+
+  console.log(checkedRowRecords);
 
   // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
@@ -2696,7 +2702,7 @@ const App = () => {
       title: "Approved",
       dataIndex: "Approval",
       key: "Approval",
-      width: 100,
+      width: 120,
       align: "center",
       render: (text, record) => {
         let color = "black";
@@ -2708,17 +2714,32 @@ const App = () => {
           color = "#4caf50";
         }
         const approvedBy = record?.Approvedby || "N/A";
-        const approvedDate = record?.Approveddate || "N/A";
+        const approvedDate = record?.Approveddate
+          ? moment(record.Approveddate, "YYYY-MM-DD HH:mm z")
+            .tz("Asia/Kolkata")
+            .format("DD-MM-YYYY HH:mm")
+          : "N/A";
+
         return (
           <div>
             <span style={{ color }}>{displayText}</span>
-            {text === "Approved" && (
+            {/* {text === "Approved" && (
               <>
                 <br />
                 <small style={{ color: "gray" }}>{approvedBy}</small>
-                {/* <br />
-                <small style={{ color: "gray" }}>{approvedDate}</small> */}
+                <br />
+                <span style={{ color: "gray", fontSize: "8px" }}>{approvedDate}</span>
               </>
+            )} */}
+            {text === "Approved" && (
+              <div style={{ lineHeight: "12px" }}>
+                <span style={{ color: "gray", fontSize: "11px", display: "block" }}>
+                  {approvedBy}
+                </span>
+                <span style={{ color: "gray", fontSize: "9px", display: "block", marginTop: 2, display: approvedDate !== "N/A" ? "block" : "none" }}>
+                  {approvedDate}
+                </span>
+              </div>
             )}
           </div>
         );
@@ -3366,7 +3387,7 @@ const App = () => {
 
     const commentText = comment.trim();
 
-    if(commentText === ""){
+    if (commentText === "") {
       message.warning("Please enter valid comment");
       return;
     }
@@ -3478,6 +3499,130 @@ const App = () => {
     }
   }
 
+  const handleCancelsForBulkComments = () => setIsModalVisiblesForBulkComments(false);
+  const handleOksForBulkComments = async () => {
+    const editedTime = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+    const commentText = commentForBulkComments.trim();
+
+    if (checkedRowRecords.length === 0) {
+      message.warning("Please select at least one campaign");
+      return;
+    }
+
+    if (commentText === "") {
+      message.warning("Please enter valid comment");
+      return;
+    }
+
+    const response = await axios.post(
+      "https://www.testapi.adsgoat.in/api/bulkCreateCommentForLauncher",
+      {
+        items: checkedRowRecords.map(c => ({
+          Account: c.Account_Number,
+          campaignid: c.identifier,
+          campaignname: c.campaign_name,
+          comment: commentText,
+          editedTime: editedTime
+        })),
+        level: "Launcher"
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        }
+      }
+    );
+    if (response.status === 200 || response.status === 201) {
+
+      setLauncherComments(prev => {
+        const updatedList = [...prev];
+
+        checkedRowRecords.forEach(c => {
+          const Account = c.Account_Number;
+          const campaignid = c.identifier;
+          const campaignname = c.campaign_name;
+
+          const existsIndex = updatedList.findIndex(item =>
+            item.Account === Account &&
+            item.campaignid === campaignid &&
+            item.campaignname === campaignname &&
+            item.level === "Launcher"
+          );
+
+          if (existsIndex !== -1) {
+            // ✅ Update existing object
+            updatedList[existsIndex] = {
+              ...updatedList[existsIndex],
+              comment: commentText,
+              editedTime: editedTime
+            };
+          } else {
+            // ✅ Add new object
+            updatedList.push({
+              Account,
+              campaignid,
+              campaignname,
+              level: "Launcher",
+              comment: commentText,
+              editedTime: editedTime
+            });
+          }
+        });
+
+        return updatedList;
+      });
+
+    }
+
+    setIsModalVisiblesForBulkComments(false);
+  }
+
+  const handleDeleteForBulkComments = async () => {
+    if (checkedRowRecords.length === 0) {
+      message.warning("Please select at least one campaign to delete comment");
+      return;
+    }
+
+    const response = await axios.post(
+      "https://www.testapi.adsgoat.in/api/bulkDeleteCommentForLauncher",
+      {
+        items: checkedRowRecords.map(c => ({
+          Account: c.Account_Number,
+          campaignid: c.identifier
+        })),
+        level: "Launcher"
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        }
+      }
+    );
+    if (response.status === 200 || response.status === 201) {
+
+      setLauncherComments(prev => {
+
+        return prev.filter(item =>
+          !checkedRowRecords.some(c =>
+            item.Account === c.Account_Number &&
+            item.campaignid === c.identifier &&
+            item.campaignname === c.campaign_name &&
+            item.level === "Launcher"
+          )
+        );
+
+      });
+
+    }
+
+    setIsModalVisiblesForBulkComments(false);
+  };
+
+  // const tableData = getFilteredMultipleAdsetCampaigns();
+  const hasData = Array.isArray(checkedRowRecords) && checkedRowRecords.length > 0;
 
 
   const renderAccountsCheckboxes = (theme) => {
@@ -4390,6 +4535,42 @@ const App = () => {
                   : "light-mode-pagination"
                   }`}
                 columns={columnsformultipleadsets}
+                rowSelection={{
+                  type: "checkbox",
+                  selectedRowKeys: checkedRowIds,
+                  onChange: (rowIds, rowRecords) => {
+                    setCheckedRowIds(rowIds);
+                    setCheckedRowRecords(rowRecords);
+                  },
+                  columnTitle: (checkboxNode) => (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      {checkboxNode} {/* ✅ Select-all checkbox */}
+
+                      {/* <IoMdCreate
+                        style={{ cursor: "pointer", }}
+                        onClick={(e) => {
+                          e.stopPropagation(); // ⛔ prevent select-all toggle
+                          // handleHeaderIconClick();
+                          // console.log(checkedRowRecords);
+                          setIsModalVisiblesForBulkComments(true)
+                        }}
+                      /> */}
+                      <IoMdCreate
+                        style={{
+                          cursor: hasData ? "pointer" : "not-allowed",
+                          opacity: hasData ? 1 : 0.4,
+                          pointerEvents: hasData ? "auto" : "none", // 🔒 fully disable
+                        }}
+                        onClick={(e) => {
+                          if (!hasData) return;
+
+                          e.stopPropagation(); // ⛔ prevent select-all toggle
+                          setIsModalVisiblesForBulkComments(true);
+                        }}
+                      />
+                    </div>
+                  ),
+                }}
                 dataSource={getFilteredMultipleAdsetCampaigns()
                   .map((item, index) => ({
                     ...item,
@@ -4529,6 +4710,47 @@ const App = () => {
           placeholder="Enter your comments here"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
+        />
+      </Modal>
+      <Modal
+        title={"Campaigns"}
+        visible={isModalVisiblesForBulkComments}
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        onOk={handleOksForBulkComments}
+        onCancel={handleCancelsForBulkComments}
+        footer={[
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+            <div style={{ display: 'flex', flexDirection: "column" }}>
+              {/* <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                Last Edited Time:
+              </span>
+              <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                {universalOject?.editedTime || ""}
+              </span> */}
+            </div>
+            <div>
+              <Button
+                key="delete"
+                type="danger"
+                onClick={handleDeleteForBulkComments}
+                style={{ marginRight: 'auto', border: "1px solid #e3e3da" }}
+              >
+                Delete
+              </Button>
+              <Button key="cancel" onClick={handleCancelsForBulkComments} style={{ marginLeft: "4px" }}>
+                Cancel
+              </Button>
+              <Button key="ok" onClick={handleOksForBulkComments} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                Ok
+              </Button>
+            </div>
+          </div>
+        ]}
+      >
+        <Input.TextArea
+          placeholder="Enter your comments here"
+          value={commentForBulkComments}
+          onChange={(e) => setCommentForBulkComments(e.target.value)}
         />
       </Modal>
     </div>

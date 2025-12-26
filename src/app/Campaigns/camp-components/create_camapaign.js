@@ -28,6 +28,7 @@ import {
   ShareAltOutlined,
   CommentOutlined,
   LikeOutlined,
+  LinkOutlined,
   MoreOutlined,
   CloseOutlined,
   GlobalOutlined,
@@ -616,6 +617,16 @@ const AccountForm = ({
     setIndexValueForAccount(val);
     setDefaultURLBuilder(defaultUrlData);
   };
+  const onClickLinkView = (index) => {
+    // setIsModalVisibleForURLBuilder(true);
+    const val = form.getFieldValue(["adsets", index, account, "Website_URL"])
+    const newVal = val ? val.trim() : ""
+    if (newVal.startsWith("https")) {
+      window.open(newVal, "_blank", "noopener,noreferrer");
+    }
+    // setIndexValueForAccount(val);
+    // setDefaultURLBuilder(defaultUrlData);
+  };
 
   const onClickSetToAllAccounts = () => {
     const currentAdsets = form.getFieldValue("adsets") || [];
@@ -654,8 +665,45 @@ const AccountForm = ({
     });
   }
 
+  const onClickRemoveToAllAccounts = () => {
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = [...currentAdsets];
+    // if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    //   setCaption(text.split("//")[1].split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("//")[1].split("/")[0],
+    //     }
+    //   };
+    // } else {
+    //   setCaption(text.split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("/")[0],
+    //     }
+    //   };
+    // }
+    for (const newAccount of allAccounts) {
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [newAccount]: {
+          Website_URL: "",
+          Caption: "",
+        }
+      };
+    }
+    // Update the form with the new adsets
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
+  }
 
-  const getUrlBuilder = useMemo(() => {
+  const getUrlBuilder = () => {
+    // useMemo(() => {
     // return (extraString) => {
     switch (network) {
       case "FB_Mnet":
@@ -694,8 +742,9 @@ const AccountForm = ({
           />
         );
     }
-    // }
-  }, [network, account, defaultURLBuilder, indexValueForAccount, onReturnUrl]);
+  }
+  // }
+  // }, [network, account, defaultURLBuilder, indexValueForAccount, onReturnUrl]);
 
   // useEffect(() => {
   //   if (selectedIndex === account) {
@@ -750,6 +799,10 @@ const AccountForm = ({
               style={{ cursor: "pointer" }}
               onClick={() => onClickEdit(index)}
             />
+            <LinkOutlined
+              style={{ cursor: "pointer", marginLeft: "20px" }}
+              onClick={() => onClickLinkView(index)}
+            />
 
             {allAccounts.length > 1 && (
               <Popconfirm
@@ -759,7 +812,7 @@ const AccountForm = ({
                 }}
                 description={
                   <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
-                    Are you sure to add website url and display link all accounts?
+                    Are you sure to add website url and display link for all accounts?
                   </div>
                 }
                 okText={
@@ -774,6 +827,31 @@ const AccountForm = ({
                   border: "1px solid #91C25F", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
                   backgroundColor: "transparent", marginLeft: "50px"
                 }}>Set to All Accounts</Button>
+              </Popconfirm>
+            )}
+            {allAccounts.length > 1 && (
+              <Popconfirm
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                  color: theme === "dark" ? "#fff" : "#333",
+                }}
+                description={
+                  <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
+                    Are you sure to remove website url and display link for all accounts?
+                  </div>
+                }
+                okText={
+                  <div onClick={onClickRemoveToAllAccounts}>
+                    Yes
+                  </div>
+                }
+                cancelText="No"
+              >
+
+                <Button style={{
+                  border: "1px solid #f7370cff", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                  backgroundColor: "transparent", marginLeft: "10px"
+                }}>Clear All</Button>
               </Popconfirm>
             )}
             {/* <div style={style}> */}
@@ -815,7 +893,7 @@ const AccountForm = ({
         }}
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
-        {getUrlBuilder}
+        {getUrlBuilder()}
       </Modal>
       {/* </Form> */}
     </div>
@@ -1168,6 +1246,13 @@ const AdsetComponent = ({
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
+
+  const isDynamicCreative = Form.useWatch(
+    ["adsets", index, "isDynamicCreative"],
+    form
+  );
+
+  console.log(isDynamicCreative);
 
   // console.log(optimizationGoalValue);
 
@@ -2018,6 +2103,47 @@ const AdsetComponent = ({
   //   });
   // }, [currentDate, index, form]);
 
+  // useEffect(() => {
+  //   if (isDynamicCreative) {
+  //     const msgs = form.getFieldValue([
+  //       "adsets",
+  //       index,
+  //       "messages",
+  //     ]);
+
+  //     if (!msgs || msgs.length === 0) {
+  //       form.setFieldValue(
+  //         ["adsets", index, "messages"],
+  //         [""]
+  //       );
+  //     }
+  //   }
+  // }, [isDynamicCreative]);
+
+  useEffect(() => {
+    if (isDynamicCreative) {
+      const ensure = (field) => {
+        const val = form.getFieldValue([
+          "adsets",
+          index,
+          field,
+        ]);
+        if (!val || val.length === 0) {
+          form.setFieldValue(
+            ["adsets", index, field],
+            [""]
+          );
+        }
+      };
+
+      ensure("messages");
+      ensure("headlines");
+      ensure("descriptions");
+    }
+  }, [isDynamicCreative]);
+
+
+
   useEffect(() => {
     setBudget(adset?.DailyAdd_amount || 0);
   }, [adset]);
@@ -2401,7 +2527,41 @@ const AdsetComponent = ({
               {adset.AdsetPanelName}
             </span>
 
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {/* ✅ Dynamic Creative Switch */}
+              <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
+              <Form.Item
+                name={["adsets", index, "isDynamicCreative"]}
+                valuePropName="checked"
+                style={{ marginBottom: 0 }}
+              >
+                {/* <Switch
+                  size="small"
+                  onClick={(checked, e) => {
+                    e.stopPropagation(); // ⛔ prevent panel collapse
+                  }}
+                /> */}
+                <Switch
+                  size="small"
+                  style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
+                  onClick={(checked, e) => e.stopPropagation()}
+                  onChange={(checked) => {
+                    console.log("Dynamic Creative:", checked);
+
+                    // if (!checked) {
+                    // Example: clear dynamic creative assets
+                    form.setFieldsValue({
+                      adsets: {
+                        [index]: {
+                          isDynamicCreative: checked,
+                        },
+                      },
+                    });
+                    // }
+                  }}
+                />
+              </Form.Item>
+
               {index !== 0 && (
                 <Popconfirm
                   title="Are you sure to delete this Adset?"
@@ -2411,7 +2571,7 @@ const AdsetComponent = ({
                   }}
                   okText="Yes"
                   cancelText="No"
-                  style={{ float: "right", marginLeft: "10px" }}
+                  style={{ float: "right", marginLeft: "15px" }}
                 >
                   <Button
                     type="text"
@@ -2420,6 +2580,16 @@ const AdsetComponent = ({
                   />
                 </Popconfirm>
               )}
+
+              <Button
+                type="text"
+                icon={<CopyOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent panel collapse
+                  cloneAdset(adset.id);
+                }}
+                style={{ float: "right", marginLeft: "10px" }}
+              />
               <Button
                 type="text"
                 icon={
@@ -2435,15 +2605,6 @@ const AdsetComponent = ({
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent panel
                   addAdset();
-                }}
-                style={{ float: "right", marginLeft: "10px" }}
-              />
-              <Button
-                type="text"
-                icon={<CopyOutlined />}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent panel collapse
-                  cloneAdset(adset.id);
                 }}
                 style={{ float: "right", marginLeft: "10px" }}
               />
@@ -4522,9 +4683,9 @@ const AdsetComponent = ({
             }
           >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div style={{ flex: "70%", marginRight: "5%" }}>
-                <div style={{ display: "flex", gap: "16px" }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ marginRight: "5%", width: "62%" }}>
+                <div style={{ display: "flex", gap: "16px", width: "100%" }}>
+                  <div style={{ display: "flex", flexDirection: "column", width: "40%" }}>
                     <Form.Item
                       label={
                         <span style={{ color: "#B4B4B4" }}>Select source</span>
@@ -4580,7 +4741,7 @@ const AdsetComponent = ({
                           className="custom-dark-mode"
                           style={{
                             display:
-                              selectedOption === "upload" ? "block" : "none",
+                              selectedOption === "upload" ? "block" : "none"
                           }}
                         >
                           <Upload
@@ -5229,7 +5390,7 @@ const AdsetComponent = ({
                   ]}
                 >
                   <Input
-                    style={{ width: "60%" }}
+                    style={{ width: "50%" }}
                     onChange={(e) => setAddName(e.target.value)}
                     className={
                       theme === "dark"
@@ -5238,27 +5399,157 @@ const AdsetComponent = ({
                     }
                   />
                 </Form.Item>
-                <Form.Item
-                  label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
-                  name={["adsets", index, "message"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter a message!",
-                    },
-                  ]}
-                  required
-                // tooltip="This is a required field"
-                >
-                  <TextArea
-                    placeholder="Primary text"
-                    autoSize={{ minRows: 2, maxRows: 10 }}
-                    onChange={(e) => setPrimaryText(e.target.value)}
-                    className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                {isDynamicCreative ? (
+                  // <Form.List name={["adsets", index, "messages"]}>
+                  //   {(fields, { add, remove }) => (
+                  //     <>
+                  //       {fields.map((field, i) => (
+                  //         <Form.Item
+                  //           key={field.key}
+                  //           label={
+                  //             i === 0 ? (
+                  //               <span style={{ color: "#B4B4B4" }}>Primary Text</span>
+                  //             ) : null
+                  //           }
+                  //           required
+                  //         >
+                  //           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  //             <Form.Item
+                  //               {...field}
+                  //               rules={[
+                  //                 {
+                  //                   required: true,
+                  //                   message: "Please enter primary text",
+                  //                 },
+                  //               ]}
+                  //               noStyle
+                  //             >
+                  //               <TextArea
+                  //                 placeholder={`Primary text ${i + 1}`}
+                  //                 autoSize={{ minRows: 2, maxRows: 10 }}
+                  //                 className={
+                  //                   theme === "dark"
+                  //                     ? "custom-input-dark"
+                  //                     : "custom-input-light"
+                  //                 }
+                  //               />
+                  //             </Form.Item>
 
+                  //             {/* ➕ Add */}
+                  //             {i === fields.length - 1 && (
+                  //               <PlusOutlined
+                  //                 onClick={() => add("")}
+                  //                 style={{ color: "#52c41a", cursor: "pointer" }}
+                  //               />
+                  //             )}
 
-                  />
-                </Form.Item>
+                  //             {/* 🗑 Delete */}
+                  //             {fields.length > 1 && (
+                  //               <DeleteOutlined
+                  //                 onClick={() => remove(field.name)}
+                  //                 style={{ color: "#ff4d4f", cursor: "pointer" }}
+                  //               />
+                  //             )}
+                  //           </div>
+                  //         </Form.Item>
+                  //       ))}
+                  //     </>
+                  //   )}
+                  // </Form.List>
+                  <Form.List name={["adsets", index, "messages"]}>
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map((field, i) => (
+                          <Form.Item
+                            key={field.key}
+                            label={
+                              i === 0 ? (
+                                <span style={{ color: "#B4B4B4" }}>
+                                  Primary Text
+                                </span>
+                              ) : null
+                            }
+                            required
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                              }}
+                            >
+                              {/* TextArea */}
+                              <Form.Item
+                                {...field}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please enter a message!",
+                                  },
+                                ]}
+                                noStyle
+                              >
+                                <TextArea
+                                  placeholder={`Primary text ${i + 1}`}
+                                  autoSize={{ minRows: 2, maxRows: 10 }}
+                                  className={
+                                    theme === "dark"
+                                      ? "custom-input-dark"
+                                      : "custom-input-light"
+                                  }
+                                />
+                              </Form.Item>
+
+                              {/* ➕ Add */}
+                              {i === fields.length - 1 && fields.length < 5 && (
+                                <PlusOutlined
+                                  onClick={() => add("")}
+                                  style={{
+                                    color: "#52c41a",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+
+                              {/* 🗑 Delete */}
+                              {fields.length > 1 && (
+                                <DeleteOutlined
+                                  onClick={() => remove(field.name)}
+                                  style={{
+                                    color: "#ff4d4f",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </Form.Item>
+                        ))}
+                      </>
+                    )}
+                  </Form.List>
+                ) : (
+
+                  <Form.Item
+                    label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
+                    name={["adsets", index, "message"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter a message!",
+                      },
+                    ]}
+                    required
+                  // tooltip="This is a required field"
+                  >
+                    <TextArea
+                      placeholder="Primary text"
+                      autoSize={{ minRows: 2, maxRows: 10 }}
+                      onChange={(e) => setPrimaryText(e.target.value)}
+                      className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
+                    // style={{ width: "50%" }}
+
+                    />
+                  </Form.Item>)}
                 {/* <Form.Item
                                     label="Caption"
                                     name="Caption"
@@ -5277,54 +5568,191 @@ const AdsetComponent = ({
 
                                     />
                                 </Form.Item> */}
-                <Form.Item
-                  label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
-                  name={["adsets", index, "headline"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter a Name!",
-                    },
-                  ]}
-                  required
-                // tooltip="This is a required field"
-                >
-                  <TextArea
-                    placeholder="Headline"
-                    autoSize={{ minRows: 2, maxRows: 10 }}
-                    onChange={(e) => setHeadline(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
-                  />
-                </Form.Item>
+                {isDynamicCreative ? (
+                  <Form.List name={["adsets", index, "headlines"]}>
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map((field, i) => (
+                          <Form.Item
+                            key={field.key}
+                            label={
+                              i === 0 ? (
+                                <span style={{ color: "#B4B4B4" }}>
+                                  Headline
+                                </span>
+                              ) : null
+                            }
+                            required
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                              }}
+                            >
+                              <Form.Item
+                                {...field}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please enter a Headline!",
+                                  },
+                                ]}
+                                noStyle
+                              >
+                                <TextArea
+                                  placeholder={`Headline ${i + 1}`}
+                                  autoSize={{ minRows: 2, maxRows: 10 }}
+                                  className={
+                                    theme === "dark"
+                                      ? "custom-input-dark"
+                                      : "custom-input-light"
+                                  }
+                                />
+                              </Form.Item>
 
-                <Form.Item
-                  label={<span style={{ color: "#B4B4B4" }}>Description</span>}
-                  name={["adsets", index, "Description"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please enter a Description!",
-                    },
-                  ]}
-                  required
-                  initialValue={"Find More"}
-                // tooltip="This is a required field"
-                >
-                  <TextArea
-                    placeholder="Description"
-                    autoSize={{ minRows: 2, maxRows: 10 }}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className={
-                      theme === "dark"
-                        ? "custom-input-dark"
-                        : "custom-input-light"
-                    }
-                  />
-                </Form.Item>
+                              {/* ➕ Add */}
+                              {i === fields.length - 1 && fields.length < 5 && (
+                                <PlusOutlined
+                                  onClick={() => add("")}
+                                  style={{ color: "#52c41a", cursor: "pointer" }}
+                                />
+                              )}
+
+                              {/* 🗑 Delete */}
+                              {fields.length > 1 && (
+                                <DeleteOutlined
+                                  onClick={() => remove(field.name)}
+                                  style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                />
+                              )}
+                            </div>
+                          </Form.Item>
+                        ))}
+                      </>
+                    )}
+                  </Form.List>
+                ) :
+
+                  (<Form.Item
+                    label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
+                    name={["adsets", index, "headline"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter a Name!",
+                      },
+                    ]}
+                    required
+                  // tooltip="This is a required field"
+                  >
+                    <TextArea
+                      placeholder="Headline"
+                      autoSize={{ minRows: 2, maxRows: 10 }}
+                      onChange={(e) => setHeadline(e.target.value)}
+                      // style={{ width: "50%" }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>)}
+
+                {isDynamicCreative ? (
+                  <Form.List name={["adsets", index, "descriptions"]}>
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map((field, i) => (
+                          <Form.Item
+                            key={field.key}
+                            label={
+                              i === 0 ? (
+                                <span style={{ color: "#B4B4B4" }}>
+                                  Description
+                                </span>
+                              ) : null
+                            }
+                            required
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                              }}
+                            >
+                              <Form.Item
+                                {...field}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please enter a Description!",
+                                  },
+                                ]}
+                                noStyle
+                              >
+                                <TextArea
+                                  placeholder={`Description ${i + 1}`}
+                                  autoSize={{ minRows: 2, maxRows: 10 }}
+                                  className={
+                                    theme === "dark"
+                                      ? "custom-input-dark"
+                                      : "custom-input-light"
+                                  }
+                                />
+                              </Form.Item>
+
+                              {/* ➕ Add */}
+                              {i === fields.length - 1 && fields.length < 5 && (
+                                <PlusOutlined
+                                  onClick={() => add("")}
+                                  style={{ color: "#52c41a", cursor: "pointer" }}
+                                />
+                              )}
+
+                              {/* 🗑 Delete */}
+                              {fields.length > 1 && (
+                                <DeleteOutlined
+                                  onClick={() => remove(field.name)}
+                                  style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                />
+                              )}
+                            </div>
+                          </Form.Item>
+                        ))}
+                      </>
+                    )}
+                  </Form.List>
+                ) :
+
+
+                  (<Form.Item
+                    label={<span style={{ color: "#B4B4B4" }}>Description</span>}
+                    name={["adsets", index, "Description"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter a Description!",
+                      },
+                    ]}
+                    required
+                    initialValue={"Find More"}
+                  // tooltip="This is a required field"
+                  >
+                    <TextArea
+                      placeholder="Description"
+                      autoSize={{ minRows: 2, maxRows: 10 }}
+                      onChange={(e) => setDescription(e.target.value)}
+                      // style={{ width: "50%" }}
+                      className={
+                        theme === "dark"
+                          ? "custom-input-dark"
+                          : "custom-input-light"
+                      }
+                    />
+                  </Form.Item>)}
                 {/* <Form.Item
                   label={
                     <div
@@ -6125,6 +6553,12 @@ const CreateCampaignDrawer = ({
   }, [selectedKey, userdetails]);
 
   useEffect(() => {
+    const newadsets = form.getFieldValue("adsets") || [];
+    console.log(newadsets, "newadsets")
+    console.log(adsets, "adsets");
+  }, [adsets, watchedAdsets])
+
+  useEffect(() => {
     // Run only when objectiveValue changes
     if (objectiveValue) {
       const adsets = form.getFieldValue("adsets") || [];
@@ -6894,14 +7328,78 @@ const CreateCampaignDrawer = ({
   // For adding a new adset
   // For adding a new adset
   // For adding a new adset
+  // const addAdset = () => {
+  //   const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
+  //   const allAdsets = form.getFieldValue("adsets") || [];
+  //   const first = allAdsets[allAdsets.length-1] || {};
+  //   const newAdset = {
+  //     id: uuidv4(),
+  //     AdsetPanelName: newAdsetName,
+  //     AdsetName: "", // Add default values for the new adset
+  //     optimization_goal: first.optimization_goal || "",
+  //     billing_event: first.billing_event || "",
+  //     action_source: first.action_source || "",
+  //     custom_event_type: first.custom_event_type || "",
+  //     countries: "US",
+  //     Min_Age: "18",
+  //     Max_Age: "65",
+  //     Gender: "0",
+  //     Language: [6],
+  //     placements: "Advance",
+  //     DailyAdd_amount: 0,
+  //     AddName: "",
+  //     Description: "Find More",
+  //     Caption: "",
+  //     Website_URL: "",
+  //     pixel_id: "", // Or set it based on your requirement
+  //     start_date: new Date(),
+  //     MediaContent: [], // Default MediaContent as empty array
+  //   };
+  //   // setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
+  //   setAdsets((prevAdsets) => {
+  //     const updatedAdsets = [...prevAdsets, newAdset];
+
+  //     // Update the Ant Form: set the whole adsets array so form state stays in sync
+  //     const currentFormAdsets = form.getFieldValue("adsets") || [];
+  //     const updatedFormAdsets = [...currentFormAdsets, newAdset];
+  //     form.setFieldsValue({ adsets: updatedFormAdsets });
+
+  //     // Activate the last panel (new one)
+  //     setActiveKey([`${updatedAdsets.length - 1}`]);
+
+  //     return updatedAdsets;
+  //   });
+
+  //   // Add the new adset to the state
+  //   // setAdsets(prevAdsets => {
+  //   //     const updatedAdsets = [...prevAdsets, newAdset];
+
+  //   //     // Update the form with only the new adset at the last index
+  //   //     form.setFieldsValue({
+  //   //         // Only update the last adset (the newly added one)
+  //   //         [`adsets[${updatedAdsets.length - 1}]`]: {
+  //   //             ...newAdset,
+  //   //             [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: newAdset.AdsetPanelName,
+  //   //             [`adsets[${updatedAdsets.length - 1}].AdsetName`]: newAdset.AdsetName,
+  //   //             [`adsets[${updatedAdsets.length - 1}].MediaContent`]: newAdset.MediaContent,
+  //   //             // Add other fields as needed
+  //   //         }
+  //   //     });
+
+  //   //     return updatedAdsets;
+  //   // });
+
+  //   // setActiveKey([`${adsets.length}`]); // Open the newly added adset by default
+  // };
   const addAdset = () => {
-    const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
+    const newAdsetName = getNextAdsetName(adsets);
     const allAdsets = form.getFieldValue("adsets") || [];
-    const first = allAdsets[0] || {};
+    const first = allAdsets[allAdsets.length - 1] || {};
+
     const newAdset = {
       id: uuidv4(),
       AdsetPanelName: newAdsetName,
-      AdsetName: "", // Add default values for the new adset
+      AdsetName: "",
       optimization_goal: first.optimization_goal || "",
       billing_event: first.billing_event || "",
       action_source: first.action_source || "",
@@ -6917,47 +7415,22 @@ const CreateCampaignDrawer = ({
       Description: "Find More",
       Caption: "",
       Website_URL: "",
-      pixel_id: "", // Or set it based on your requirement
+      pixel_id: "",
       start_date: new Date(),
-      MediaContent: [], // Default MediaContent as empty array
+      MediaContent: [],
     };
-    // setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
-    setAdsets((prevAdsets) => {
-      const updatedAdsets = [...prevAdsets, newAdset];
 
-      // Update the Ant Form: set the whole adsets array so form state stays in sync
-      const currentFormAdsets = form.getFieldValue("adsets") || [];
-      const updatedFormAdsets = [...currentFormAdsets, newAdset];
-      form.setFieldsValue({ adsets: updatedFormAdsets });
-
-      // Activate the last panel (new one)
-      setActiveKey([`${updatedAdsets.length - 1}`]);
-
-      return updatedAdsets;
+    // ✅ 1. Update React state (PURE)
+    setAdsets(prev => {
+      const updated = [...prev, newAdset];
+      setActiveKey([`${updated.length - 1}`]);
+      return updated;
     });
 
-    // Add the new adset to the state
-    // setAdsets(prevAdsets => {
-    //     const updatedAdsets = [...prevAdsets, newAdset];
-
-    //     // Update the form with only the new adset at the last index
-    //     form.setFieldsValue({
-    //         // Only update the last adset (the newly added one)
-    //         [`adsets[${updatedAdsets.length - 1}]`]: {
-    //             ...newAdset,
-    //             [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: newAdset.AdsetPanelName,
-    //             [`adsets[${updatedAdsets.length - 1}].AdsetName`]: newAdset.AdsetName,
-    //             [`adsets[${updatedAdsets.length - 1}].MediaContent`]: newAdset.MediaContent,
-    //             // Add other fields as needed
-    //         }
-    //     });
-
-    //     return updatedAdsets;
-    // });
-
-    // setActiveKey([`${adsets.length}`]); // Open the newly added adset by default
+    // ✅ 2. Update AntD Form ONCE
+    const updatedFormAdsets = [...allAdsets, newAdset];
+    form.setFieldsValue({ adsets: updatedFormAdsets });
   };
-
   // const cloneAdset = (adsetId) => {
   //     const adsetIndex = adsets.findIndex(ad => ad.id === adsetId);
   //     if (adsetIndex === -1) return;
@@ -7115,7 +7588,7 @@ const CreateCampaignDrawer = ({
     const adsetIndex = adsetId
     console.log(adsetIndex)
     if (adsetIndex === -1) return;
-    const adsets = form.getFieldValue("adsets") || [];
+    // const adsets = adsets || [];
     console.log(adsets)
     const originalAdset = adsets.find(item => item.id === adsetIndex);
     const newId = uuidv4();
@@ -7137,11 +7610,17 @@ const CreateCampaignDrawer = ({
 
     const currentFormAdsets = form.getFieldValue("adsets") || [];
 
+    console.log(currentFormAdsets, "current");
+
     // ✅ Match by UUID not index!
     const formIndex = currentFormAdsets.findIndex(
       (_, i) => adsets[i]?.id === adsetId
     );
-    const clonedFormData = { ...currentFormAdsets[formIndex] };
+    const clonedFormData = {
+      ...currentFormAdsets[formIndex],
+      id: newId,
+      AdsetPanelName: newPanelName
+    };
 
     // ✅ Add `_Copy` to AdsetName and AddName if present
     if (clonedFormData.AdsetName) {
@@ -7831,8 +8310,17 @@ const CreateCampaignDrawer = ({
   const onCancelDelete = () => {
     setDeleteModal({ visible: false, id: null });
   };
+  const updateOuterDraftStates = (draft) => {
+    requestAnimationFrame(() => {
+      setPages(draft?.page || "");
+      setPixels(draft?.pixel || "");
+      setGeos(draft?.geo || "");
+      setBudgetType(draft?.camapaignlevel?.Budget_type || "Daily");
+    });
+  };
   const handleEditDraft = (draft) => {
     onChangeDraft(draft.draftId);
+    updateOuterDraftStates(draft);
     setIsTemplatesModalOpen(false);
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
@@ -8628,7 +9116,7 @@ const CreateCampaignDrawer = ({
     const campaignData = await MultipleAdsestsFetching(formValues);
     console.log("Campaign Data before adding category:", campaignData);
     // campaignData.Category = selectedCategory;
-    //abcd
+    //abcd  
 
     try {
       if (campaignData) {
@@ -8737,6 +9225,8 @@ const CreateCampaignDrawer = ({
 
   const MultipleAdsestsFetching = async (values) => {
 
+    console.log(values, "Form Values");
+
     const multipleAccounts = values.Account_Number;
 
     const multipleAccountsData = [];
@@ -8824,7 +9314,34 @@ const CreateCampaignDrawer = ({
                   onError,
                   adsets[i].id
                 );
-                const addLevelData = imagesHashArray.map((media, index) => {
+
+                const getTheImages = imagesHashArray
+                  .map(media => media.imag_hash)
+                  .filter(Boolean);
+                const getTheVidoes = imagesHashArray
+                  .map(media => media.videoid)
+                  .filter(Boolean);
+                // console.log(imageHashArray, "imageHashArray")
+                // console.log(values.adsets[i].isDynamicCreative, "Dynamic creative");
+                const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
+                  id: uuidv4(),
+                  AddName: `${values.adsets[i].AddName}`,
+                  filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                  imag_hash: imagesHashArray.map(media => media.imag_hash),
+                  images: getTheImages,
+                  videos: getTheVidoes,
+                  page_id: page_id,
+                  message: values?.adsets[i]?.messages,
+                  headline: values.adsets[i].headlines,
+                  Description: values.adsets[i].descriptions,
+                  Caption: values.adsets[i][account].Caption,
+                  Website_URL: values.adsets[i][account].Website_URL,
+                  call_to_action_types: ["LEARN_MORE"],
+                  ad_formats: [
+                    ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
+                    ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
+                  ]
+                }] : imagesHashArray.map((media, index) => {
                   if (media.imag_hash) {
                     // This is an image
                     return {
@@ -8859,6 +9376,7 @@ const CreateCampaignDrawer = ({
                     };
                   }
                 });
+                console.log(addLevelData, "addLevelData")
                 AdsetsData[`adsetlevel_${i + 1}`] = {
                   id: uuidv4(),
                   AdsetName: values.adsets[i].AdsetName,
@@ -8884,6 +9402,11 @@ const CreateCampaignDrawer = ({
                   // bid_amount: values.adsets[i].bid_amount
                   //   ? parseFloat(values.adsets[i].bid_amount) * 100
                   //   : 0,
+                  ...(values.adsets[i].isDynamicCreative
+                    ? {
+                      is_dynamic_creative: true
+                    }
+                    : {}),
                   bid_amount: values.adsets[i].bid_amount
                     ? Math.round(Number(values.adsets[i].bid_amount) * 100)
                     : 0,
@@ -8975,7 +9498,34 @@ const CreateCampaignDrawer = ({
                 onError,
                 adsets[i].id
               );
-              const addLevelData = imagesHashArray.map((media, index) => {
+
+              const getTheImages = imagesHashArray
+                .map(media => media.imag_hash)
+                .filter(Boolean);
+              const getTheVidoes = imagesHashArray
+                .map(media => media.vidoeid)
+                .filter(Boolean);
+              const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
+                id: uuidv4(),
+                AddName: `${values.adsets[i].AddName}`,
+                filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                // imag_hash: imagesHashArray.map(media => media.imag_hash),
+                imag_hash: imagesHashArray.map(media => media.imag_hash),
+
+                images: getTheImages?.map(item => ({ hash: item })) || [],
+                videos: getTheVidoes?.map(item => ({ video_id: item })) || [],
+                page_id: page_id,
+                message: values.adsets[i].messages,
+                headline: values.adsets[i].headlines,
+                Description: values.adsets[i].descriptions,
+                Caption: values.adsets[i][account].Caption,
+                Website_URL: values.adsets[i][account].Website_URL,
+                call_to_action_types: ["LEARN_MORE"],
+                ad_formats: [
+                  ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
+                  ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
+                ]
+              }] : imagesHashArray.map((media, index) => {
                 if (media.imag_hash) {
                   // This is an image
                   return {
@@ -9027,6 +9577,11 @@ const CreateCampaignDrawer = ({
                     end_time: moment(values.adsets[i].DatePickerEnd.$d)
                       .tz(newImageHash.timeZone)
                       .format("YYYY-MM-DDTHH:mm:ssZ"),
+                  }
+                  : {}),
+                ...(values.adsets[i].isDynamicCreative
+                  ? {
+                    is_dynamic_creative: true
                   }
                   : {}),
                 action_source: values.adsets[i].action_source,
@@ -9266,6 +9821,9 @@ const CreateCampaignDrawer = ({
         // id: uuidv4(),
         // Draft_Name:"",
         Account_Number: account,
+        geo: geo,
+        pixel: pixel,
+        page: page,
         createdby: session?.user?.name,
         createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
@@ -9278,6 +9836,7 @@ const CreateCampaignDrawer = ({
             ? { Special_categories_countries: values.countries }
             : {}),
           Bid_strategy: values.Bid_strategy,
+          Budget_type: budgetType,
           Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
           Status: values.Status,
           // access_token: imagehash.token,
@@ -9352,6 +9911,7 @@ const CreateCampaignDrawer = ({
           bid_amount: values.adsets[i].bid_amount
             ? Math.round(Number(values.adsets[i].bid_amount) * 100)
             : 0,
+          Budget_type: budgetType,
           countries: values.adsets[i].countries || "",
           Min_Age: values.adsets[i].Min_Age || "",
           Max_Age: values.adsets[i].Max_Age || "",
@@ -9383,6 +9943,12 @@ const CreateCampaignDrawer = ({
             position: values.adsets[i].positions,
             device_platforms: values.adsets[i].device_platforms,
           }),
+          ...(values.adsets[i].Beneficiary
+            ? { beneficiary: values.adsets[i].Beneficiary }
+            : {}),
+          ...(values.adsets[i].Beneficiary
+            ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+            : {}),
           buying_type: "AUCTION",
           addlevel: addLevelData || [],
         };
@@ -10118,7 +10684,7 @@ const CreateCampaignDrawer = ({
     // 2. Update adsets state based on adsetlevel_* count
     setAdsets(
       adsetObjects.map((adsetObj, index) => ({
-        id: adsetObj.id ?? uuidv4(),
+        id: adsetObj.id,
         AdsetPanelName: `ADSET ${index + 1}`,
         DailyAdd_amount: adsetObj.Daily_amount
           ? adsetObj.Daily_amount / 100
@@ -10136,7 +10702,7 @@ const CreateCampaignDrawer = ({
         };
       });
       return {
-        id: adsetObj.id ?? uuidv4(),
+        id: adsetObj.id,
         AdsetPanelName: `ADSET ${index + 1}`,
         AdsetName: adsetObj.AdsetName,
         DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
@@ -10149,6 +10715,9 @@ const CreateCampaignDrawer = ({
         Min_Age: adsetObj.Min_Age,
         Max_Age: adsetObj.Max_Age,
         Gender: adsetObj.Gender,
+        showPayer: !!adsetObj.payer,
+        Beneficiary: adsetObj.beneficiary,
+        Payer: adsetObj.payer,
         platforms: adsetObj.publisher_platforms || [],
         device_platforms: adsetObj.device_platforms || [],
         Language: adsetObj.locales,
@@ -10167,18 +10736,45 @@ const CreateCampaignDrawer = ({
     });
 
     // 4. Update the form fields
+    form.resetFields(['adsets']);
+
+    form.setFields(
+      updatedFormAdsets.map((adset, index) => ({
+        name: ['adsets', index],
+        value: adset,
+      }))
+    );
+
+    // 2️⃣ Set campaign-level fields normally
     form.setFieldsValue({
-      adsets: updatedFormAdsets,
       Name: draft?.camapaignlevel?.Name,
       Objectives: draft?.camapaignlevel?.Objectives,
       Special_categories: draft?.camapaignlevel?.Special_categories,
-      ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
+      ...(Array.isArray(draft.camapaignlevel.Special_categories) &&
+        draft.camapaignlevel.Special_categories_countries
         ? { countries: draft.camapaignlevel.Special_categories_countries }
         : {}),
       Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
       Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
       Status: draft?.camapaignlevel?.Status,
     });
+
+    // ⬇️ force Form to create all indexes
+    // form.setFieldsValue({
+    //   adsets: adsetObjects.map(() => ({})),
+    // });
+    // form.setFieldsValue({
+    //   adsets: updatedFormAdsets,
+    //   Name: draft?.camapaignlevel?.Name,
+    //   Objectives: draft?.camapaignlevel?.Objectives,
+    //   Special_categories: draft?.camapaignlevel?.Special_categories,
+    //   ...(Array.isArray(draft.camapaignlevel.Special_categories) && draft.camapaignlevel.Special_categories_countries
+    //     ? { countries: draft.camapaignlevel.Special_categories_countries }
+    //     : {}),
+    //   Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
+    //   Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
+    //   Status: draft?.camapaignlevel?.Status,
+    // });
 
     // 5. Update per-adset supporting states
     const updatedSelectedFiles = {};
@@ -10824,6 +11420,7 @@ const CreateCampaignDrawer = ({
                   style={{ marginTop: "auto" }}
                   onClick={() => {
                     onChangeDraft(draft.draftId);
+                    updateOuterDraftStates(draft);
                     setSelectedTemplate(draft);
                     setIsTemplatesModalOpen(false);
                     setIsEditingDraft(false);

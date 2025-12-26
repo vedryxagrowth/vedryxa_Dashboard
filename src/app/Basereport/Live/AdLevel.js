@@ -1911,7 +1911,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       const mainData1 = fetchData.data || [];
       const mainData = tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
       // console.log(mainData1, "mainData1");
-      console.log(mainData, "mainData");
+      console.log(mainData, "mainDataffff");
       const specifiedTimeZone = selectTimezone[newtime];
       // const filteredData = mainData && mainData.length > 0 ?
       //   mainData.map((eachData) => {

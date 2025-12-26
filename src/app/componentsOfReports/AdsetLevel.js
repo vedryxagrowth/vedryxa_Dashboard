@@ -347,6 +347,76 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             return arr;
         });
     };
+    const handleBulkDeleteComments = async () => {
+        try {
+            message.loading({
+                content: 'Deleting comments for selected campaigns...',
+                key: 'bulkDelete'
+            });
+
+
+            const items = leafCampaigns.map(item => ({
+                campaignid: item.campaignid,
+                adsetid: item.adsetid,
+            }));
+
+            const body = {
+                accountNumber: leafCampaigns?.[0]?.accountNumber,
+                level: 'adset',
+                items
+            };
+
+            const resp = await apiClient.post(
+                '/Comments/bulkdelete',
+                body
+            );
+
+            if (resp.status === 200 || resp.status === 201) {
+                const timeStamp = moment()
+                    .tz('Asia/Kolkata')
+                    .format('YYYY-MM-DD hh:mm:ss A');
+
+                setCampaignComments(prev => {
+                    const arr = [...prev];
+
+                    leafCampaigns.forEach(item => {
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(item.campaignid) &&
+                                String(i.adsetid) === String(item.adsetid) &&
+                                String(i.Account) === String(item.accountNumber) &&
+                                i.level === 'adset'
+                        );
+
+                        if (idx >= 0) {
+                            arr[idx] = {
+                                ...arr[idx],
+                                comment: "",
+                                usercommit: userdetails?.email,
+                                editedTime: timeStamp
+                            };
+                        }
+                    });
+
+                    return arr;
+                });
+
+                message.success({
+                    content: `${leafCampaigns.length} comment(s) deleted successfully`,
+                    key: 'bulkDelete',
+                    duration: 3
+                });
+
+                setIsBulkCommentModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Bulk delete error:', error);
+            message.error({
+                content: 'Error while deleting comments for selected campaigns.',
+                key: 'bulkDelete'
+            });
+        }
+    };
     const handleSmartCommentSubmitAdset = async () => {
         try {
             message.loading({
@@ -430,11 +500,41 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             const token = localStorage.getItem("token");
 
 
-            const filteredItems = leafCampaigns.filter(item =>
-                bulkStatusAction === "ACTIVE"
-                    ? item.fbStatus === "PAUSED"
-                    : item.fbStatus === "ACTIVE"
-            )
+            // const filteredItems = leafCampaigns.filter(item =>
+            //     bulkStatusAction === "ACTIVE"
+            //         ? item.fbStatus === "PAUSED"
+            //         : item.fbStatus === "ACTIVE"
+            // )
+            //     .map(item => ({
+            //         status: bulkStatusAction,
+            //         campaign_id: item.campaignid,
+            //         adset_id: item.adsetid,
+            //         accountNumber: String(item.accountNumber),
+            //         name: item.adsetname,
+            //         email: userdetails?.email
+            //     }));
+
+            // Build adset status lookup
+            const adsetStatusMap = new Map(
+                Camapignlevelstatus.flatMap(campaign =>
+                    (campaign.adsets || []).map(adset => [
+                        String(adset.adset_id),
+                        adset.status?.toUpperCase()
+                    ])
+                )
+            );
+
+            // Filter leaf adsets that actually need status change
+            const filteredItems = leafCampaigns
+                .filter(item => {
+                    const adsetId = String(item.adsetid);
+                    const currentStatus =
+                        adsetStatusMap.get(adsetId) || "ACTIVE";
+
+                    return bulkStatusAction === "ACTIVE"
+                        ? currentStatus === "PAUSED"
+                        : currentStatus === "ACTIVE";
+                })
                 .map(item => ({
                     status: bulkStatusAction,
                     campaign_id: item.campaignid,
@@ -443,6 +543,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     name: item.adsetname,
                     email: userdetails?.email
                 }));
+
 
             if (filteredItems.length === 0) {
                 message.info("No adsets need updating.");
@@ -458,8 +559,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             );
 
             if (resp.status === 200 || resp.status === 201) {
-                setCamapignlevelstatus(prev => {
-                    let arr = [...prev];
+                const updatedCampaignLevelStatus = (() => {
+                    let arr = Array.isArray(Camapignlevelstatus)
+                        ? [...Camapignlevelstatus]
+                        : [];
 
                     filteredItems.forEach(update => {
                         const { campaign_id, adset_id, accountNumber, status } = update;
@@ -480,7 +583,50 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     });
 
                     return arr;
-                });
+                })();
+                setCamapignlevelstatus(updatedCampaignLevelStatus);
+                if (campaignStatusFilter !== "All") {
+                    const adsetStatusMap = new Map(
+                        updatedCampaignLevelStatus.flatMap(campaign =>
+                            (campaign.adsets || []).map(adset => [
+                                String(adset.adset_id),
+                                adset.status?.toUpperCase()
+                            ])
+                        )
+                    );
+
+                    const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                        adsetStatusMap.get(String(row.adsetid)) ===
+                        campaignStatusFilter?.toUpperCase()
+                    );
+
+                    setRowData(filteredRowObjects);
+                }
+
+
+                // setCamapignlevelstatus(prev => {
+                //     let arr = [...prev];
+
+                //     filteredItems.forEach(update => {
+                //         const { campaign_id, adset_id, accountNumber, status } = update;
+
+                //         arr = arr.map(item =>
+                //             String(item.campaign_id) === String(campaign_id) &&
+                //                 String(item.accountNumber) === String(accountNumber)
+                //                 ? {
+                //                     ...item,
+                //                     adsets: (item.adsets || []).map(adset =>
+                //                         String(adset.adset_id) === String(adset_id)
+                //                             ? { ...adset, status }
+                //                             : adset
+                //                     )
+                //                 }
+                //                 : item
+                //         );
+                //     });
+
+                //     return arr;
+                // });
 
                 message.success(
                     `${filteredItems.length} adset(s) updated to ${bulkStatusAction.toLowerCase()}`
@@ -499,6 +645,86 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         setBulkOpen(true);
         setBulkCategory("");
     };
+    // const saveBulkCategory = async () => {
+    //     if (!bulkCategory.trim()) {
+    //         message.warning("Enter category");
+    //         return;
+    //     }
+
+    //     const token = localStorage.getItem("token");
+    //     const items = leafCampaigns
+    //         .filter(item => !item.category || item.category.trim() === "")
+    //         .map(item => ({
+    //             accountNumber: item.accountNumber,
+    //             campaignid: item.campaignid,
+    //             level: "campaign",
+    //             campaignname: item.campaignname,
+    //         }));
+
+    //     if (items.length === 0) {
+    //         message.info("All selected campaigns already have a category. Nothing to update.");
+    //         setBulkOpen(false);
+    //         return;
+    //     }
+
+    //     try {
+    //         message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+    //         await apiClient.post(
+    //             "/BulkUpdateCategory",
+    //             { items, category: bulkCategory },
+    //             { headers: { Authorization: token } }
+    //         );
+    //         setCampaignComments(prev => {
+    //             const arr = [...prev];
+    //             setLeafCampaigns(prev =>
+    //                 prev.map(item =>
+    //                     (!item.category || item.category.trim() === "")
+    //                         ? { ...item, category: bulkCategory }
+    //                         : item
+    //                 )
+    //             )
+    //             items.forEach(item => {
+    //                 const idx = arr.findIndex(
+    //                     i =>
+    //                         String(i.campaignid) === String(item.campaignid) &&
+    //                         String(i.Account) === String(item.accountNumber) &&
+    //                         i.level === "campaign"
+    //                 );
+
+    //                 if (idx >= 0) {
+    //                     if (arr[idx] && arr[idx].category) {
+    //                         arr[idx].category = arr[idx].category;
+    //                     } else {
+    //                         arr[idx].category = bulkCategory;
+    //                     }
+
+    //                 } else {
+    //                     arr.push({
+    //                         campaignid: item.campaignid,
+    //                         Account: item.accountNumber,
+    //                         level: "campaign",
+    //                         category: bulkCategory
+    //                     });
+    //                 }
+    //             });
+
+    //             return arr;
+    //         });
+    //         leafCampaigns.forEach(item => {
+    //             const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+    //             commentsMap.set(key, { category: bulkCategory });
+    //         });
+
+    //         message.success({ content: "Category updated!", key: "bulkCategory" });
+
+    //     } catch (err) {
+    //         console.error(err);
+    //         message.error("Failed to update category");
+    //     }
+
+    //     setBulkOpen(false);
+    // };
     const saveBulkCategory = async () => {
         if (!bulkCategory.trim()) {
             message.warning("Enter category");
@@ -506,17 +732,17 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         }
 
         const token = localStorage.getItem("token");
-        const items = leafCampaigns
-            .filter(item => !item.category || item.category.trim() === "")
-            .map(item => ({
-                accountNumber: item.accountNumber,
-                campaignid: item.campaignid,
-                level: "campaign",
-                campaignname: item.campaignname,
-            }));
+
+
+        const items = leafCampaigns.map(item => ({
+            accountNumber: item.accountNumber,
+            campaignid: item.campaignid,
+            level: "campaign",
+            campaignname: item.campaignname,
+        }));
 
         if (items.length === 0) {
-            message.info("All selected campaigns already have a category. Nothing to update.");
+            message.info("No campaigns selected.");
             setBulkOpen(false);
             return;
         }
@@ -525,19 +751,23 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "/BulkUpdateCategoryNew",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
+
+
+            setLeafCampaigns(prev =>
+                prev.map(item => ({
+                    ...item,
+                    category: bulkCategory
+                }))
+            );
+
+
             setCampaignComments(prev => {
                 const arr = [...prev];
-                setLeafCampaigns(prev =>
-                    prev.map(item =>
-                        (!item.category || item.category.trim() === "")
-                            ? { ...item, category: bulkCategory }
-                            : item
-                    )
-                )
+
                 items.forEach(item => {
                     const idx = arr.findIndex(
                         i =>
@@ -547,12 +777,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     );
 
                     if (idx >= 0) {
-                        if (arr[idx] && arr[idx].category) {
-                            arr[idx].category = arr[idx].category;
-                        } else {
-                            arr[idx].category = bulkCategory;
-                        }
-
+                        arr[idx].category = bulkCategory;
                     } else {
                         arr.push({
                             campaignid: item.campaignid,
@@ -565,13 +790,14 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                 return arr;
             });
+
+
             leafCampaigns.forEach(item => {
                 const key = `${item.campaignid}_${item.accountNumber}_campaign`;
                 commentsMap.set(key, { category: bulkCategory });
             });
 
             message.success({ content: "Category updated!", key: "bulkCategory" });
-
         } catch (err) {
             console.error(err);
             message.error("Failed to update category");
@@ -579,7 +805,6 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
         setBulkOpen(false);
     };
-
     const autoGroupColumnDefLive = {
         headerName: 'Adset name',
         minWidth: 450,
@@ -941,21 +1166,53 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         if (response.status === 200 || response.status === 201) {
                             setSwitchOn(desired);
                             setConfirmLoading(false);
-                            setCamapignlevelstatus(prevStatus =>
-                                prevStatus.map(item =>
-                                    String(item.campaign_id) === String(campaignid) &&
-                                        String(item.accountNumber) === String(rowAccount)
-                                        ? {
-                                            ...item,
-                                            adsets: item.adsets.map(adset =>
-                                                String(adset.adset_id) === String(adsetid)
-                                                    ? { ...adset, status: newStatus } // ✅ update only that adset's status
-                                                    : adset // keep others as is
-                                            ),
-                                        }
-                                        : item // keep other campaigns as is
-                                )
+                            const updatedCampaignLevelStatus = Camapignlevelstatus.map(item =>
+                                String(item.campaign_id) === String(campaignid) &&
+                                    String(item.accountNumber) === String(rowAccount)
+                                    ? {
+                                        ...item,
+                                        adsets: (item.adsets || []).map(adset =>
+                                            String(adset.adset_id) === String(adsetid)
+                                                ? { ...adset, status: newStatus } // update only this adset
+                                                : adset
+                                        ),
+                                    }
+                                    : item
                             );
+                            setCamapignlevelstatus(updatedCampaignLevelStatus);
+                            if (campaignStatusFilter !== "All") {
+                                const adsetStatusMap = new Map(
+                                    updatedCampaignLevelStatus.flatMap(campaign =>
+                                        (campaign.adsets || []).map(adset => [
+                                            String(adset.adset_id),
+                                            adset.status?.toUpperCase()
+                                        ])
+                                    )
+                                );
+
+                                const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                                    adsetStatusMap.get(String(row.adsetid)) ===
+                                    campaignStatusFilter?.toUpperCase()
+                                );
+
+                                setRowData(filteredRowObjects);
+                            }
+
+                            // setCamapignlevelstatus(prevStatus =>
+                            //     prevStatus.map(item =>
+                            //         String(item.campaign_id) === String(campaignid) &&
+                            //             String(item.accountNumber) === String(rowAccount)
+                            //             ? {
+                            //                 ...item,
+                            //                 adsets: item.adsets.map(adset =>
+                            //                     String(adset.adset_id) === String(adsetid)
+                            //                         ? { ...adset, status: newStatus } // ✅ update only that adset's status
+                            //                         : adset // keep others as is
+                            //                 ),
+                            //             }
+                            //             : item // keep other campaigns as is
+                            //     )
+                            // );
                             setIsAdsetModalVisibles(false);
                         }
 
@@ -2505,55 +2762,72 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         // functionCall1();
         console.log(campaignStatusFilter, "campaignStatusFilter");
         if (campaignStatusFilter !== "All") {
-            const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-            setRowData(filteredByStatus);
+            // Filter grid rows by adset status
+            const adsetStatusMap = new Map(
+                Camapignlevelstatus.flatMap(campaign =>
+                    (campaign.adsets || []).map(adset => [
+                        String(adset.adset_id),
+                        adset.status?.toUpperCase()
+                    ])
+                )
+            );
+
+            const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                adsetStatusMap.get(String(row.adsetid)) ===
+                campaignStatusFilter?.toUpperCase()
+            );
+
+            setRowData(filteredRowObjects);
+            // filteredRowObjects is the final adset-filtered grid data
+
+            // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            // setRowData(filteredByStatus);
         } else {
             setRowData(newRowDataForFilter.current);
         }
     }, [campaignStatusFilter]);
 
-    useEffect(() => {
-        // console.log(campaignComments, "campaignComments");
-        const mainData = newRowDataForFilter.current;
-        const filterData = mainData && mainData.length > 0 ?
-            mainData.map((eachData) => {
-                const adsetObjectStatus = Camapignlevelstatus
-                    .find(item =>
-                        String(item.campaign_id) === String(eachData.campaignid) &&
-                        String(item.accountNumber) === String(eachData.accountNumber)
-                    )?.adsets.find(adset =>
-                        String(adset.adset_id) === String(eachData.adsetid)
-                    );
-                return (
-                    {
-                        ...eachData,
-                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
-                    }
-                )
-            }) : null;
-        newRowDataForFilter.current = filterData;
-        let newFilterData;
-        if (campaignStatusFilter !== "All") {
-            console.log("testing 4444");
-            newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-        }
-        else {
-            newFilterData = filterData;
-        }
+    // useEffect(() => {
+    //     // console.log(campaignComments, "campaignComments");
+    //     const mainData = newRowDataForFilter.current;
+    //     const filterData = mainData && mainData.length > 0 ?
+    //         mainData.map((eachData) => {
+    //             const adsetObjectStatus = Camapignlevelstatus
+    //                 .find(item =>
+    //                     String(item.campaign_id) === String(eachData.campaignid) &&
+    //                     String(item.accountNumber) === String(eachData.accountNumber)
+    //                 )?.adsets.find(adset =>
+    //                     String(adset.adset_id) === String(eachData.adsetid)
+    //                 );
+    //             return (
+    //                 {
+    //                     ...eachData,
+    //                     fbStatus: adsetObjectStatus?.status || "ACTIVE",
+    //                 }
+    //             )
+    //         }) : null;
+    //     newRowDataForFilter.current = filterData;
+    //     let newFilterData;
+    //     if (campaignStatusFilter !== "All") {
+    //         console.log("testing 4444");
+    //         newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+    //     }
+    //     else {
+    //         newFilterData = filterData;
+    //     }
 
-        setRowData(newFilterData);
-        // newRowDataForFilter.current = filteredData;
-        console.log("testing 4444");
-    }
-        , [Camapignlevelstatus]);
+    //     setRowData(newFilterData);
+    //     // newRowDataForFilter.current = filteredData;
+    //     console.log("testing 4444");
+    // }
+    //     , [Camapignlevelstatus]);
 
     useEffect(() => {
         if (refreshpage === "Refresh12") {
             handleReFetchData();
             showAdsetLevel([]);
         }
-    }
-        , [refreshpage]);
+    }, [refreshpage]);
 
     // const onCellClickedLive = (event) => {
     //     setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
@@ -2885,6 +3159,9 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                                                 footer={[
+                                                    <Button key="Delete" onClick={handleBulkDeleteComments}>
+                                                        Delete
+                                                    </Button>,
                                                     <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                                                         Cancel
                                                     </Button>,
@@ -3256,8 +3533,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             rowHeight={30}
                                             context={context}
                                             rowData={memorizedRowData}
-                                            immutableData={true}
-                                            getRowId={params => params.data.id}
+                                            // immutableData={true}
+                                            // getRowId={params => params.data.id}
                                             rowSelection='multiple'
                                             groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                                             suppressRowClickSelection={true}
