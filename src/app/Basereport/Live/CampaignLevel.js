@@ -564,66 +564,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
-        // filter: "agTextColumnFilter",
-        // filterValueGetter: (params) => {
-        //     if (params.node.group) {
-        //         // Use the group key (campaign name)
-        //         return params.node.key;
-        //     }
-        //     // For leaf rows, use the campaign_name or any field
-        //     return params.data?.campaignname || '';
-        // },
-        // valueGetter: (params) => {
-        //     const leaf = params.node.allLeafChildren?.[0]?.data;
-        //     const campaignid = leaf?.campaignid;
-        //     const rowAccount = leaf?.accountNumber;
-
-        //     const mapObject = campaignComments.find(c =>
-        //             // c.campaignname === campaignName &&
-        //             String(c.Account) === String(rowAccount) &&
-        //             (c.campaignid ? String(c.campaignid) === String(campaignid) : true)
-        //             && c.level === "campaign"
-        //             // && (c.adsetid ? String(c.adsetid) === String(aid) : true)
-        //         );
-
-        //     return mapObject;
-        // },
-
-        // comparator: (campaignA, campaignB) => {
-        //     if (!campaignA) return 1;
-        //     if (!campaignB) return -1;
-
-        //     // Function to get the 'pinned' status of a campaign
-        //     const getPinStatusForCampaign = (campaignName) => {
-        //         const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName && comment.level === "campaign");
-        //         return relatedComment ? relatedComment.pinned : false;
-        //     };
-
-        //     // // Prioritize pinned campaigns first (pinned campaigns should come to the top)
-        //     // const isPinnedA = getPinStatusForCampaign(campaignA);
-        //     // const isPinnedB = getPinStatusForCampaign(campaignB);
-
-        //     // if (isPinnedA !== isPinnedB) {
-        //     //     return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
-        //     // }
-
-        //     // // If both campaigns have the same pinned status, fallback to alphabetical sorting
-        //     // return campaignA.localeCompare(campaignB);
-        //     const getNameById = (id) => {
-        //         const match = rowData.find(row => row.campaignid === id);
-        //         return match?.campaignname ?? '';
-        //     };
-
-        //     const nameA = getNameById(campaignA);
-        //     const nameB = getNameById(campaignB);
-
-        //     const isPinnedA = getPinStatusForCampaign(nameA);
-        //     const isPinnedB = getPinStatusForCampaign(nameB);
-
-        //     // if (isPinnedA !== isPinnedB) 
-        //         return isPinnedA ? -1 : 1;
-        //     // return nameA.localeCompare(nameB);
-        // },
+      
         comparator: (groupKeyA, groupKeyB, nodeA, nodeB) => {
 
             // get first leaf row of group A
@@ -663,28 +604,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         },
 
 
-        // comparator: (campaignA, campaignB, nodeA, nodeB) => {
-        //     const getStatus = (node) =>
-        //         node?.childrenAfterGroup?.[0]?.data?.campaignStatus || null;
-
-        //     const getPriority = (status) => {
-        //         const s = String(status || "").toUpperCase();
-        //         if (s === "ACTIVE") return 1;
-        //         if (s === "PAUSED") return 2;
-        //         return 3; // unknown/other last
-        //     };
-
-        //     const pA = getPriority(getStatus(nodeA));
-        //     const pB = getPriority(getStatus(nodeB));
-
-        //     if (pA !== pB) return pA - pB;
-
-        //     // ✅ Fallback safe check: only compare if both are valid strings
-        //     const nameA = typeof campaignA === "string" ? campaignA : "";
-        //     const nameB = typeof campaignB === "string" ? campaignB : "";
-
-        //     return nameA.localeCompare(nameB);
-        // },
+     
 
 
 
@@ -788,15 +708,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
 
-                // const getEditedUserAndTime = (campaignName, newaccount) => {
-                //     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                //     return relatedStatus ? relatedStatus : null;
-                // };
-
-                // const getPinEditedUserAndTime = (campaignName, newaccount) => {
-                //     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                //     return relatedStatus ? relatedStatus : null;
-                // };
+             
 
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
@@ -847,20 +759,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 const statusKey = `${rowAccount}-${campaignid}`;
 
                 const [switchOn, setSwitchOn] = useState("false");
-                // INIT: 1) prefer override Map; 2) fallback to row.data.__status; 3) one-time fallback to Camapignlevelstatus
-
-                // const [switchOn, setSwitchOn] = useState(() => {
-                //     const fromMap = overrides?.get(statusKey); // "ACTIVE" / "PAUSED" / undefined
-                //     if (fromMap === "ACTIVE" || fromMap === "PAUSED") return fromMap === "ACTIVE";
-
-                //     if (params.data?.__status) return params.data.__status === "ACTIVE";
-
-                //     const st = Camapignlevelstatus.find(
-                //         s => String(s.campaign_id) === String(campaignid) &&
-                //             String(s.accountNumber) === String(rowAccount)
-                //     );
-                //     return st ? st.status === "ACTIVE" : false;
-                // });
+             
 
                 React.useEffect(() => {
                     setUniversalObject(campaignComments.find(d => d.level === "campaign" && d.campaignid === campaignid && d.Account === rowAccount));
@@ -884,46 +783,6 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     setIsCampaignModalVisibles(true);
                 };
 
-                //   const handlePauseOk = async () => {
-                //     setSwitchOn(nextChecked); // optimistic UI
-
-                //     try {
-                //       const token = localStorage.getItem("token");
-                //       const payload = {
-                //         status: nextChecked ? "ACTIVE" : "PAUSED",
-                //         id: params.data?.identifier,
-                //         campaign_id: campaignid,
-                //         accountNumber: String(pendingAccount),  // ✅ the row’s account
-                //         adset_id: adsetid,
-                //         name: campaignName,
-                //         email: userdetails?.email,
-                //       };
-
-                //       const response = await apiClient.post(
-                //         `/BulkCampaignStatusChange`,
-                //         payload,
-                //         { headers: { Authorization: token } }
-                //       );
-
-                //       if (response.status === 200 || response.status === 201) {
-                //         // refresh just this account (or your multi-account helper if it supports arrays)
-                //         // If your function expects an array, pass [pendingAccount]
-                //         functionCallForCampaigns(pendingAccount);
-                //         message.success(`Status ${payload.status} on Facebook`);
-                //       } else {
-                //         console.warn("Unexpected status:", response.status);
-                //       }
-                //     } catch (error) {
-                //       console.error("API call failed:", error?.response?.data || error.message);
-                //       message.error("Failed to update campaign status");
-                //       // revert UI if needed:
-                //       setSwitchOn((prev) => !prev);
-                //     } finally {
-                //       setIsCampaignModalVisibles(false);
-                //       setSelectedCampaign(null);
-                //       setPendingAccount(null);
-                //     }
-                //   };
 
 
                 const handlePauseOk = async () => {
@@ -964,10 +823,6 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             setIsCampaignModalVisibles(false);
                         }
 
-                        // ✅ Persist status only in the override Map (no rowData update, no parent setState)
-                        // if (overrides) {
-                        //     overrides.set(statusKey, newStatus);
-                        // }
 
                         message.success(`Campaign ${newStatus.toLowerCase()}`);
                     } catch (e) {
@@ -982,133 +837,6 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     }
                 };
 
-                // const handleSmartCampaignStatusClick = async () => {
-                //     const desiredStatus = nextChecked ? "ACTIVE" : "PAUSED";
-                //     if (!leafCampaigns || leafCampaigns.length <= 1) {
-                //         handlePauseOk();  
-                //         return;
-                //     }
-                //     const listToUpdate = leafCampaigns.filter(item =>
-                //         String(item.fbStatus).toUpperCase() !== desiredStatus
-                //     );
-
-                //     if (listToUpdate.length === 0) {
-                //         message.info("All selected campaigns already have this status.");
-                //         return;
-                //     }
-
-                //     try {
-                //         message.loading({
-                //             content: desiredStatus === "ACTIVE"
-                //                 ? "Activating selected campaigns..."
-                //                 : "Pausing selected campaigns...",
-                //             key: "campaignBulk",
-                //         });
-
-                //         const token = localStorage.getItem("token");
-
-                //         const results = await Promise.allSettled(
-                //             listToUpdate.map(item =>
-                //                 apiClient.post(
-                //                     `/BulkCampaignStatusChange`,
-                //                     {
-                //                         status: desiredStatus,
-                //                         id: item.identifier,
-                //                         campaign_id: item.campaignid,
-                //                         accountNumber: String(item.accountNumber),
-                //                         adset_id: "",
-                //                         name: item.campaignname,
-                //                         email: userdetails?.email
-                //                     },
-                //                     { headers: { Authorization: token } }
-                //                 )
-                //             )
-                //         );
-
-                //         const successCount = results.filter(r => r.status === "fulfilled").length;
-                //         const failedCount = results.length - successCount;
-                //         setCamapignlevelstatus(prev => {
-                //             const arr = [...prev];
-                //             listToUpdate.forEach(update => {
-                //                 const idx = arr.findIndex(
-                //                     c =>
-                //                         String(c.campaign_id) === String(update.campaignid) &&
-                //                         String(c.accountNumber) === String(update.accountNumber)
-                //                 );
-
-                //                 if (idx !== -1) {
-                //                     arr[idx] = { ...arr[idx], status: desiredStatus };
-                //                 }
-                //             });
-                //             return arr;
-                //         });
-
-                //         message.success({
-                //             content: `${successCount} updated, ${failedCount} failed`,
-                //             key: "campaignBulk",
-                //             duration: 3,
-                //         });
-
-                //         setIsCampaignModalVisibles(false);
-
-                //     } catch (e) {
-                //         console.error("Bulk campaign status error:", e);
-                //         message.error("Failed to update selected campaigns.");
-                //     }
-                // };
-
-                // useEffect(() => {
-                //     const campaignStatus = Camapignlevelstatus.find(
-                //         statusObj => statusObj.campaign_id === campaignid
-                //     );
-                //     if (campaignStatus) {
-                //         setSwitchOn(campaignStatus.status === "ACTIVE");
-                //     }
-                // }, [Camapignlevelstatus, campaignid]);
-
-                // const handlePauseClick = (campaignid, checked) => {
-                //     setSelectedCampaign(campaignid); 
-                //     setNextChecked(checked); // user’s toggle intent
-                //     setIsCampaignModalVisibles(true);
-                // };
-
-                // const handlePauseOk = async () => {
-                //     setSwitchOn(nextChecked); // update visual switch state
-
-                //     try {
-                //       const token = localStorage.getItem("token");
-
-                //       const response = await apiClient.post(`/campaignStatusChange`,
-                //         {
-                //           status: nextChecked ? "ACTIVE" : "PAUSED",
-                //           id: params.data?.identifier,
-                //           campaign_id: campaignid,
-                //           accountNumber: newaccount,
-                //           adset_id: adsetid,
-                //           name: campaignName,
-                //           email: userdetails?.email,
-                //         },
-                //         {
-                //           headers: {
-                //             Authorization: token
-                //           }
-                //         }
-                //       );
-
-                //       if (response.status === 200 || response.status === 201) {
-                //         functionCallForCampaigns(newaccount);
-                //         console.log(" Status updated on Facebook:", response.data.status, "Campaign ID:", response.data.campaign_id);
-                //       } else {
-                //         console.warn(" Backend returned unexpected status:", response.status);
-                //       }
-
-                //     } catch (error) {
-                //       console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
-                //     }
-
-                //     setIsCampaignModalVisibles(false);
-                //     setSelectedCampaign(null);
-                // };
 
                 const handlePauseCancel = () => {
                     setIsCampaignModalVisibles(false);
@@ -1141,43 +869,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     }
                 };
 
-                // const handleDelete = async () => {
-                //     try {
-                //         // Prepare the payload for the API call
-                //         const payload = {
-                //             campaignname: firstColumnValue,
-                //             Account: newaccount,
-                //             adsetid: adsetid,
-                //             campaignid: campaignid,
-                //         };
-                //         // console.log(payload);
-
-                //         // Call the backend API to delete the comment
-                //         const response = await apiClient.post('/Comments/delete', payload);
-
-                //         if (response.status === 200  || response.status === 201) {
-                //             // Remove the comment from the local state
-                //             // const updatedComments = campaignComments.filter(
-                //             //     (comment) => comment.campaignname !== firstColumnValue
-                //             // );
-                //             refreshComments(newaccount);
-
-                //             // // Update the state with the updated comments
-                //             // setCampaignComments(updatedComments);
-
-                //             // // Refresh the table or any other UI component
-                //             // // changeRRefrst();
-
-                //             message.success('Comment deleted successfully!');
-                //             setIsModalVisibles(false); // Close the popup
-                //         } else {
-                //             message.error('Failed to delete the comment. Please try again.-1');
-                //         }
-                //     } catch (error) {
-                //         console.error('Error deleting the comment:', error);
-                //         message.error('Failed to delete the comment. Please try again.');
-                //     }
-                // };
+              
 
 
                 const sendEditedCommentToAPI = async (logData) => {
@@ -1198,39 +890,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     }
                 };
 
-                // const handleOks = async () => {
-                //     try {
-                //         const logData = {
-                //             Account: newaccount,
-                //             usercommit: userdetails?.email,
-                //             campaignname: firstColumnValue,
-                //             comment: comment,
-                //             campaignid: campaignid,
-                //             adsetid: adsetid
-                //         };
-
-                //         if (relatedComment) {
-                //             await sendEditedCommentToAPI(logData);
-                //             refreshComments(newaccount);
-                //             message.success("Comment updated successfully!");
-                //         } else {
-                //             await sendNewCommentToAPI(logData);
-                //             refreshComments(newaccount);
-                //             message.success("New comment added successfully!");
-                //         }
-
-                //         // const updatedComments = relatedComment
-                //         //     ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
-                //         //     : [...campaignComments, logData];
-                //         // setCampaignComments(updatedComments);
-
-                //         // changeRRefrst();
-                //         setIsModalVisibles(false);
-                //     } catch (error) {
-                //         console.error('Error while submitting comment:', error);
-                //         message.error("Error while submitting the comment.");
-                //     }
-                // };
+               
 
                 const handleCancels = () => {
                     setIsModalVisibles(false);
@@ -1243,67 +903,6 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     </div>
                 );
 
-                // const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
-                //     const updatedPinStatus = !currentPinStatus;
-
-                //     try {
-                //         let response;
-                //         if (updatedPinStatus) {
-                //             response = await apiClient.post('/Pin', {
-                //                 campaignname: campaignName,
-                //                 Account: newaccount,
-                //                 campaignid: campaignid,
-                //                 adsetid: adsetid,
-                //                 userPin: userdetails?.email,
-                //                 comment: comment || ''
-                //             });
-                //             if(response.status ===200 || response.status === 201){
-                //                 refreshComments(newaccount);
-                //             }
-
-                //             message.success("Campaign pinned!");
-                //         } else {
-                //             response = await apiClient.post('/Unpin', {
-                //                 campaignname: campaignName,
-                //                 Account: newaccount,
-                //                 campaignid: campaignid,
-                //                 adsetid: adsetid
-                //             });
-                //             if(response.status ===200 || response.status === 201){
-                //                 refreshComments(newaccount);
-                //             }
-
-                //             message.success("Campaign unpinned!");
-                //         }
-
-                //         // Update campaignComments with the new pinned status and edited user/time
-                //         // const updatedComments = campaignComments.map(cmt =>
-                //         //     cmt.campaignname === campaignName
-                //         //         ? {
-                //         //             ...cmt,
-                //         //             pinned: updatedPinStatus,
-                //         //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-                //         //             userPin: userdetails?.email
-                //         //         }
-                //         //         : cmt
-                //         // );
-
-                //         // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
-                //         //     updatedComments.push({
-                //         //         campaignname: campaignName,
-                //         //         pinned: updatedPinStatus,
-                //         //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-                //         //         userPin: userdetails?.email
-                //         //     });
-                //         // }
-                //         // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
-                //         // setCampaignComments(sortedComments);
-                //         setPinned(updatedPinStatus);
-                //     } catch (error) {
-                //         console.error('Error toggling pin status:', error);
-                //         message.error('Error while updating pin status.');
-                //     }
-                // };
 
                 const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
                     const updatedPinStatus = !currentPinStatus;
@@ -1359,129 +958,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         setPinned(updatedPinStatus);
                     }
                 };
-                // const handleSmartPinClick = async (cName, cId, aId, currentPinStatus) => {
-                //     const updatedPinStatus = !currentPinStatus;
-                //     if (leafCampaigns && leafCampaigns.length > 1) {
-                //         try {
-                //             if (updatedPinStatus) {
-                //                 message.loading({ content: 'Pinning selected campaigns...', key: 'smartPin' });
-
-                //                 const results = await Promise.allSettled(
-                //                     leafCampaigns.map(item =>
-                //                         apiClient.post(
-                //                             '/NewPinBulk',
-                //                             {
-                //                                 accountNumber: item.accountNumber,
-                //                                 campaignname: item.campaignname,
-                //                                 campaignid: item.campaignid,
-                //                                 userPin: userdetails?.email,
-                //                                 level: item.level,
-                //                             },
-
-                //                         )
-                //                     )
-                //                 );
-
-                //                 const successCount = results.filter(r => r.status === 'fulfilled' && (r.value?.status === 200 || r.value?.status === 201)).length;
-                //                 const failureCount = results.length - successCount;
-                //                 setCampaignComments(prev => {
-                //                     const arr = Array.isArray(prev) ? [...prev] : [];
-                //                     const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
-
-                //                     leafCampaigns.forEach(item => {
-                //                         const match = arr.findIndex(
-                //                             i =>
-                //                                 String(i?.campaignid) === String(item.campaignid) &&
-                //                                 String(i?.Account) === String(item.accountNumber) &&
-                //                                 String(i?.level) === 'campaign'
-                //                         );
-
-                //                         if (match >= 0) {
-                //                             arr[match] = { ...arr[match], pinned: true, userPin: userdetails?.email, editedPinTime: timeStamp };
-                //                         } else {
-                //                             arr.push({
-                //                                 campaignid: item.campaignid,
-                //                                 Account: item.accountNumber,
-                //                                 level: 'campaign',
-                //                                 pinned: true,
-                //                                 userPin: userdetails?.email,
-                //                                 editedPinTime: timeStamp,
-                //                             });
-                //                         }
-                //                     });
-
-                //                     return arr;
-                //                 });
-
-                //                 message.success({
-                //                     content: `${successCount} campaign(s) pinned, ${failureCount} failed`,
-                //                     key: 'smartPin',
-                //                     duration: 3,
-                //                 });
-                //             } else {
-                //                 message.loading({ content: 'Unpinning selected campaigns...', key: 'smartUnpin' });
-
-                //                 const results = await Promise.allSettled(
-                //                     leafCampaigns.map(item =>
-                //                         apiClient.post(
-                //                             '/NewUnpinBulk',
-                //                             {
-                //                                 accountNumber: item.accountNumber,
-                //                                 campaignname: item.campaignname,
-                //                                 campaignid: item.campaignid,
-                //                                 userPin: userdetails?.email,
-                //                                 level: item.level,
-                //                             },
-
-                //                         )
-                //                     )
-                //                 );
-
-                //                 const successCount = results.filter(r => r.status === 'fulfilled' && (r.value?.status === 200 || r.value?.status === 201)).length;
-                //                 const failureCount = results.length - successCount;
-                //                 setCampaignComments(prev => {
-                //                     const arr = Array.isArray(prev) ? [...prev] : [];
-                //                     const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
-
-                //                     leafCampaigns.forEach(item => {
-                //                         const match = arr.findIndex(
-                //                             i =>
-                //                                 String(i?.campaignid) === String(item.campaignid) &&
-                //                                 String(i?.Account) === String(item.accountNumber) &&
-                //                                 String(i?.level) === 'campaign'
-                //                         );
-
-                //                         if (match >= 0) {
-                //                             arr[match] = { ...arr[match], pinned: false, userPin: userdetails?.email, editedPinTime: timeStamp };
-                //                         } else {
-                //                             arr.push({
-                //                                 campaignid: item.campaignid,
-                //                                 Account: item.accountNumber,
-                //                                 level: 'campaign',
-                //                                 pinned: false,
-                //                                 userPin: userdetails?.email,
-                //                                 editedPinTime: timeStamp,
-                //                             });
-                //                         }
-                //                     });
-
-                //                     return arr;
-                //                 });
-
-                //                 message.success({
-                //                     content: `${successCount} campaign(s) unpinned, ${failureCount} failed`,
-                //                     key: 'smartUnpin',
-                //                     duration: 3,
-                //                 });
-                //             }
-                //         } catch (error) {
-                //             console.error(' Bulk Pin/Unpin Error:', error);
-                //             message.error('Failed to update selected campaigns.');
-                //         }
-                //         return;
-                //     }
-                //     handlePinClick(cName, cId, aId, currentPinStatus);
-                // };
+               
                 const handleOks = async () => {
                     const body = {
                         accountNumber: rowAccount,
@@ -1556,18 +1033,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             if (match >= 0) {
                                 arr[match] = { ...arr[match], comment: "", usercommit: userdetails?.email, editedTime: timeStamp };
                             }
-                            // else {
-                            //     arr.push({
-                            //         campaignid,
-                            //         Account: rowAccount,
-                            //         // adsetid,
-                            //         // ad_id: adid,
-                            //         level: 'campaign',
-                            //         comment: comment,
-                            //         usercommit: userdetails?.email,
-                            //         editedTime: timeStamp
-                            //     });
-                            // }
+                       
 
                             return arr;
                         });
@@ -1659,63 +1125,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             pinned={pinned}
                             universalOject={universalOject}
                         />
-                        {/* <div style={{ marginLeft: '2px' }}>
-                            {(() => {
-                                // Find the matching campaign in the Camapignlevelstatus array
-                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
-
-                                if (campaignStatus) {
-                                    const { status, start, end } = campaignStatus;
-
-                                    // Tooltip content with start and end dates
-                                    const tooltipContent = (
-                                        <div>
-                                            <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
-                                            <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
-                                        </div>
-                                    );
-
-                                    if (status === 'PAUSED') {
-                                        return (
-                                            <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}  className='black-icon-pause' />
-                                            </Tooltip>
-                                        );
-                                    } else if (status === 'ACTIVE') {
-                                        return (
-                                            <Tooltip title={tooltipContent}>
-                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active' />
-                                            </Tooltip>
-                                        );
-                                    } else {
-                                        // Default for unknown status
-                                        return (
-                                            <Tooltip title={tooltipContent}>
-                                                <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-                                            </Tooltip>
-                                        );
-                                    }
-                                } else {
-                                    // Fallback if no matching campaign is found
-                                    return (
-                                        <Tooltip title="No campaign data available">
-                                            <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
-                                        </Tooltip>
-                                    );
-                                }
-                            })()}
-                        </div> */}
-                        {/* {relatedComment && (
-                            <Tooltip title={(
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span>{relatedComment || 'No comment available'}</span>
-                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
-                                </div>
-                            )}>
-                                <MessageOutlined className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
-                                <Tooltip title={tooltipText}></Tooltip>
-                            </Tooltip>
-                        )} */}
+                        
+                       
                         {universalOject?.comment && (
                             <Tooltip
                                 // title={relatedComment || 'No comment available'}
@@ -1904,189 +1315,6 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         return hours.length > 0 ? Math.max(...hours) : null;
     }
 
-    // const functionCall1 = async () => {
-    //    try{
-    //     // console.log(newRevenuePratner);
-    //         setLoading(true);
-    //         const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
-    //         // const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
-    //         const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=${collectionName}`);
-    //         const mainData1 = fetchData.data;
-    //         const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
-    //         console.log(mainData1, "mainData1");
-    //         console.log(mainData, "mainData");
-    //         const specifiedTimeZone = selectTimezone[newtime];
-    //         const filteredData = mainData && mainData.length > 0 ?
-    //             mainData.map((eachData) => {
-    //                 let revenueData;
-    //                 if (eachData.estimated_revenue === 0 || isNaN(eachData.estimated_revenue)) {
-    //                     revenueData = 0;
-    //                 }
-    //                 else if (eachData.estimated_revenue === undefined) {
-    //                     revenueData = 0;
-    //                 }
-    //                 else if (eachData.estimated_revenue === null) {
-    //                     revenueData = 0;
-    //                 }
-    //                 else {
-    //                     revenueData = parseFloat(eachData.estimated_revenue).toFixed(2);
-    //                 }
-    //                 const profit = (revenueData - eachData.spend).toFixed(2);
-    //                 let margin;
-    //                 if (revenueData === 0) {
-    //                     margin = "0";
-    //                 }
-    //                 else {
-    //                     margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
-    //                 }
-    //                 const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
-
-    //                 let cpl;
-    //                 if (eachData.fbLeads == 0) {
-    //                     cpl = 0;
-    //                 } else {
-    //                     cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
-    //                 }
-    //                 const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-    //                 // console.log(revenueData, "revenueData");
-    //                 const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
-    //                 const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-    //                 const spend = parseFloat(eachData.spend);
-    //                 const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
-    //                 return (
-
-    //                     {
-    //                         campaignname: eachData.campaign_name,
-    //                         adsetname: eachData.adsetName,
-    //                         date: eachData[specifiedTimeZone],
-    //                         'fb-hour': eachData.hour || "",
-    //                         'mnet-hour': eachData.updatedHour || "",
-    //                         spend: parseFloat(eachData.spend).toFixed(2),
-    //                         revenue: revenueData ? revenueData : 0,
-    //                         profit: parseFloat(profit),
-    //                         // margin: margin,
-    //                         fbleads: parseInt(eachData.fbLeads),
-    //                         conversions: eachData.conversions !== null && eachData.conversions !== 0 ? parseInt(eachData.conversions) : 0,
-    //                         cpc: parseFloat(eachData.cpc),
-    //                         cpclinkclicks: cpcLinkClicks,
-    //                         fbclicks: parseInt(eachData.fbClicks),
-    //                         fblinkclicks: parseInt(eachData.fbLinkClicks),
-    //                         impressions: parseInt(eachData.impressions),
-    //                         rpc: parseFloat(rpc),
-    //                         cpl: parseFloat(cpl),
-    //                         ncpl: parseFloat(ncpl),
-    //                         adsetid: eachData.adset_id,
-    //                         campaignid: eachData.campaign_id,
-    //                         timezone: eachData[newtime] || "",
-    //                         comment: relatedComment ? relatedComment.comment : "",
-    //                         adid: "",
-    //                         adname: "",
-    //                         actions: '...',
-    //                         from: "",
-    //                         profitloss: "",
-    //                         M_tq: "",
-    //                         D_tq: "",
-    //                         fbCron: eachData.fbCron,
-    //                         revenueCron: eachData.revenueCron,
-    //                         cronStatus: eachData.cronStatus,
-    //                         accountStatus: eachData.accountStatus
-    //                     }
-    //                 )
-    //             })
-    //             : null;
-
-    //         const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
-    //         const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
-
-
-    //         if (mainData.length > 1) {
-    //             timezone.current = mainData[0].accountTimezone;
-    //             accountStatus.current = mainData[0].accountStatus;
-    //             cronStatus.current = mainData[0].cronStatus;
-
-    //             fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
-    //             revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
-
-    //             maxHour.current = findMaxHour(mainData);
-    //             maxNetworkHour.current = getMaxHour(mainData);
-    //         }
-
-    //         const filteredByStatus =  campaignStatusFilter && campaignStatusFilter.toLowerCase() !== 'all'
-    //             ? filteredData.filter(item => {
-    //               const campaign = Camapignlevelstatus.find(
-    //                 c => c?.campaign_id?.toString() === item?.campaignid?.toString()
-    //               );
-
-    //               return (
-    //                 campaign?.status?.toUpperCase() === campaignStatusFilter?.toUpperCase()
-    //               );
-    //             })
-    //         : filteredData;
-
-    //         setRowData(filteredByStatus);
-
-    //         setLiveFixedFooter([
-    //         {
-    //             campaignName: 'Total',
-    //             actions: "",
-    //             spend: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2)),
-    //             revenue: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2)),
-    //             profit: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2)),
-    //             margin: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) || 1) * 100).toFixed(2)),
-    //             rpc: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-    //             cpl: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-    //             ncpl: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.ncpl || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-    //             fbleads: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fbleads || 0), 0).toFixed(2)),
-    //             conversions: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.conversions || 0), 0).toFixed(2)),
-    //             fmargin: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0) || 1) * 100).toFixed(2)),
-    //             roi: parseFloat(((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) - filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0) || 1) * 100).toFixed(2)),
-    //             cpc: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.cpc || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-    //             cpclinkclicks: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) / (filteredByStatus.length || 1)).toFixed(2)),
-    //             fbclicks: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0).toFixed(2)),
-    //             fblinkclicks: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0).toFixed(2)),
-    //             impressions: parseFloat(filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0).toFixed(2)),
-    //             ctr: parseFloat((filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) / (filteredByStatus.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0) || 1) * 100).toFixed(2))
-    //         }
-    //         ]);
-
-    //         // setLiveFixedFooter([
-    //         //     {
-    //         //         campaignName: 'Total',
-    //         //         actions: "",
-    //         //         spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
-    //         //         revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
-    //         //         profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
-    //         //         margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-    //         //         rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
-    //         //         cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
-    //         //         ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
-    //         //         fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
-    //         //         conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
-    //         //         fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-    //         //         roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-    //         //         cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
-    //         //         cpclinkclicks: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length).toFixed(2)),
-    //         //         fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
-    //         //         fblinkclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
-    //         //         impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-    //         //         ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
-    //         //     }
-    //         // ]);
-    //         // setRowData(filteredData);
-
-    //         console.log(filteredData, "filteredData");
-    //         newRowData.current = filteredData;
-    //         fetchData.status === 200 && console.log("Success") ;
-    //         fetchData.status === 200 && setApiStatus(false) ;
-    //         // setInitialRowData(filteredData);
-    //         // setTrue(false);
-    //         setLoading(false);
-    //    }
-    //    catch(error){
-    //         setApiStatus(true);
-    //         setLoading(false);
-    //    }
-    // };
 
     const functionCall1 = async () => {
         try {
@@ -2214,14 +1442,110 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             //         };
             //     })
             //     : null;
-            const filteredData =
-  mainData && mainData.length > 0
-    ? mainData
-        // ✅ STEP 1: keep only rows where mnet-hour exists
-        .filter(eachData => eachData.updatedHour) 
-        .map((eachData) => {
+//             const filteredData =
+//   mainData && mainData.length > 0
+//     ? mainData
+//         // ✅ STEP 1: keep only rows where mnet-hour exists
+//         .filter(eachData => eachData.updatedHour) 
+//         .map((eachData) => {
 
-          // ---------- Revenue ----------
+//           // ---------- Revenue ----------
+//           let revenueData = 0;
+//           if (
+//             eachData.estimated_revenue !== null &&
+//             eachData.estimated_revenue !== undefined &&
+//             !isNaN(eachData.estimated_revenue)
+//           ) {
+//             revenueData = parseFloat(eachData.estimated_revenue);
+//           }
+
+//           // ---------- Spend ----------
+//           const spendValue = !isNaN(eachData.spend)
+//             ? parseFloat(eachData.spend)
+//             : 0;
+
+//           // ---------- Profit ----------
+//           const profit = (revenueData - spendValue).toFixed(2);
+
+//           // ---------- RPC ----------
+//           const rpc =
+//             eachData.conversions && eachData.conversions > 0
+//               ? Math.round((revenueData / eachData.conversions) * 100) / 100
+//               : 0;
+
+//           // ---------- CPL ----------
+//           const cpl =
+//             eachData.fbLeads && eachData.fbLeads > 0
+//               ? Math.round((spendValue / eachData.fbLeads) * 100) / 100
+//               : 0;
+
+//           // ---------- NCPL ----------
+//           const ncpl =
+//             eachData.conversions && eachData.conversions > 0
+//               ? Math.round((spendValue / eachData.conversions) * 100) / 100
+//               : 0;
+
+//           const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+//           const cpcLinkClicks =
+//             fbLClicks > 0
+//               ? Math.round((spendValue / fbLClicks) * 100) / 100
+//               : 0;
+
+//           return {
+//             accountNumber: eachData.accountNumber,
+//             campaignname: eachData.campaign_name,
+//             adsetname: eachData.adsetName,
+
+//             date: eachData[specifiedTimeZone],
+//             "fb-hour": eachData.hour || "",
+//             "mnet-hour": eachData.updatedHour, // ✅ only rows with value exist
+
+//             // ✅ send spend & revenue ONLY for mnet-hour rows
+//             spend: spendValue.toFixed(2),
+//             revenue: revenueData.toFixed(2),
+
+//             profit: parseFloat(profit),
+//             fbleads: parseInt(eachData.fbLeads || 0),
+//             conversions: parseInt(eachData.conversions || 0),
+//             cpc: parseFloat(eachData.cpc || 0),
+//             cpclinkclicks: cpcLinkClicks,
+//             fbclicks: parseInt(eachData.fbClicks || 0),
+//             fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
+//             impressions: parseInt(eachData.impressions || 0),
+//             rpc,
+//             cpl,
+//             ncpl,
+
+//             adsetid: eachData.adset_id,
+//             campaignid: eachData.campaign_id,
+//             timezone: eachData[newtime] || "",
+
+//             adid: "",
+//             adname: "",
+//             actions: "...",
+//           };
+//         })
+//     : [];
+
+
+const filteredData =
+  mainData && mainData.length > 0
+    ? Object.values(
+        mainData
+          // 1️⃣ only rows with mnet-hour
+          .filter(eachData => eachData.updatedHour)
+          // 2️⃣ DEDUPLICATE by account + campaign + hour
+          .reduce((acc, eachData) => {
+            const key = `${eachData.accountNumber}_${eachData.campaign_id}_${eachData.updatedHour}`;
+
+            // keep latest entry (override duplicates)
+            acc[key] = eachData;
+            return acc;
+          }, {})
+      )
+        // 3️⃣ map unique rows
+        .map(eachData => {
+
           let revenueData = 0;
           if (
             eachData.estimated_revenue !== null &&
@@ -2231,29 +1555,24 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             revenueData = parseFloat(eachData.estimated_revenue);
           }
 
-          // ---------- Spend ----------
           const spendValue = !isNaN(eachData.spend)
             ? parseFloat(eachData.spend)
             : 0;
 
-          // ---------- Profit ----------
           const profit = (revenueData - spendValue).toFixed(2);
 
-          // ---------- RPC ----------
           const rpc =
-            eachData.conversions && eachData.conversions > 0
+            eachData.conversions > 0
               ? Math.round((revenueData / eachData.conversions) * 100) / 100
               : 0;
 
-          // ---------- CPL ----------
           const cpl =
-            eachData.fbLeads && eachData.fbLeads > 0
+            eachData.fbLeads > 0
               ? Math.round((spendValue / eachData.fbLeads) * 100) / 100
               : 0;
 
-          // ---------- NCPL ----------
           const ncpl =
-            eachData.conversions && eachData.conversions > 0
+            eachData.conversions > 0
               ? Math.round((spendValue / eachData.conversions) * 100) / 100
               : 0;
 
@@ -2267,15 +1586,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             accountNumber: eachData.accountNumber,
             campaignname: eachData.campaign_name,
             adsetname: eachData.adsetName,
-
             date: eachData[specifiedTimeZone],
             "fb-hour": eachData.hour || "",
-            "mnet-hour": eachData.updatedHour, // ✅ only rows with value exist
-
-            // ✅ send spend & revenue ONLY for mnet-hour rows
+            "mnet-hour": eachData.updatedHour, // UNIQUE per row
             spend: spendValue.toFixed(2),
             revenue: revenueData.toFixed(2),
-
             profit: parseFloat(profit),
             fbleads: parseInt(eachData.fbLeads || 0),
             conversions: parseInt(eachData.conversions || 0),
@@ -2287,17 +1602,16 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             rpc,
             cpl,
             ncpl,
-
             adsetid: eachData.adset_id,
             campaignid: eachData.campaign_id,
             timezone: eachData[newtime] || "",
-
             adid: "",
             adname: "",
             actions: "...",
           };
         })
     : [];
+
 
 
             const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
@@ -2317,14 +1631,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 maxNetworkHour.current = getMaxHour(mainData);
             }
 
-            // const filteredByStatus = campaignStatusFilter && campaignStatusFilter.toLowerCase() !== 'all'
-            //     ? filteredData.filter(item => {
-            //         const campaign = Camapignlevelstatus.find(
-            //             c => c?.campaign_id?.toString() === item?.campaignid?.toString()
-            //         );
-            //         return campaign?.status?.toUpperCase() === campaignStatusFilter?.toUpperCase();
-            //     })
-            //     : filteredData;
+       
 
             let newFilterData;
             if (campaignStatusFilter !== "All") {
@@ -2333,9 +1640,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             else {
                 newFilterData = filteredData;
             }
+            newRowDataForFilter.current = filteredData;
 
             setRowData(newFilterData);
-            newRowDataForFilter.current = filteredData;
 
             setLiveFixedFooter([{
                 campaignName: 'Totalsss',
@@ -2395,33 +1702,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             }
         }
     };
-    // const onGridReady = (params, gridId) => {
-    //     gridRef.current = params;
-
-    //     params.api.applyColumnState({ 
-    //         state: columnDefs || [], 
-    //         applyOrder: true 
-    //     });
-    // };
-
-    // // Use useEffect to track changes in toggleStatus
-    // useEffect(() => {
-    //     if (!gridRef.current) return; // Ensure gridRef exists
-
-    //     const gridApi = gridRef.current.api;
-
-    //     const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid1');
-
-    //     if (toggleStatus) {
-    //         gridApi.addEventListener('dragStopped', handleDragStopped);
-    //     } else {
-    //         gridApi.removeEventListener('dragStopped', handleDragStopped);
-    //     }
-
-    //     return () => {
-    //         gridApi.removeEventListener('dragStopped', handleDragStopped);
-    //     };
-    // }, [toggleStatus]);
+   
 
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
@@ -2453,133 +1734,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             </div>
         );
     };
-    // const handleOk = () => {
-    //     if (!newColumnName || !formula) {
-    //         message.error('Please fill in all fields.');
-    //         return;
-    //     }
 
-    //     const lowerCaseFormula = formula.toLowerCase();
-
-    //     try {
-    //         // Define the new column definition
-    //         const newColumnDef = {
-    //             headerName: newColumnName,
-    //             field: newColumnName.toLowerCase(),
-    //             valueGetter: (params) => {
-    //                 if (!params.data) return null;
-    //                 try {
-    //                     const originalKeys = Object.keys(params.data);
-    //                     const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
-    //                     const values = Object.values(params.data);
-
-    //                     const keyMapping = {};
-    //                     sanitizedKeys.forEach((key, index) => {
-    //                         keyMapping[key] = originalKeys[index];
-    //                     });
-
-    //                     // Constructing the function safely using sanitized keys
-    //                     const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
-
-    //                     // Map the values back to their original keys for function execution
-    //                     const mappedValues = sanitizedKeys.map(key => params.data[keyMapping[key]]);
-    //                     return func(...mappedValues);
-    //                 } catch (error) {
-    //                     console.error('Error evaluatings formula:', error);
-    //                     return null;
-    //                 }
-    //             },
-    //             sortable: true,
-    //             filter: true,
-    //             aggFunc: (params) => {
-    //                 try {
-    //                     const values = params.values;
-    //                     const sum = values.reduce((acc, value) => acc + (value || 0), 0);
-
-    //                     return sum; // Replace with other aggregation logic if needed
-    //                 } catch (error) {
-    //                     console.error('Error in aggregation function:', error);
-    //                     return null;
-    //                 }
-    //             },
-    //             cellStyle: { backgroundColor: 'skyblue' },
-    //             headerCellStyle: { backgroundColor: 'skyblue', color: 'black' }
-    //         };
-
-    //         // Update the column definitions
-    //         setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
-    //         columnDefs1.current = [...columnDefs1.current, newColumnDef];
-    //         columnDefs2.current = [...columnDefs2.current, newColumnDef];
-    //         columnDefs3.current = [...columnDefs3.current, newColumnDef];
-
-    //         // Common function to update data
-    //         const updateData = (prevData) => {
-    //             return prevData.map((row) => {
-    //                 const updatedRow = { ...row };
-    //                 try {
-    //                     const originalKeys = Object.keys(row);
-    //                     const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
-    //                     const values = Object.values(row);
-    //                     // console.log(values, "values1");
-
-    //                     const keyMapping = {};
-    //                     sanitizedKeys.forEach((key, index) => {
-    //                         keyMapping[key] = originalKeys[index];
-    //                     });
-
-    //                     const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
-    //                     const mappedValues = sanitizedKeys.map(key => row[keyMapping[key]]);
-    //                     updatedRow[newColumnName.toLowerCase()] = func(...mappedValues);
-    //                 } catch (error) {
-    //                     console.error('Error evaluating formula for data update:', error);
-    //                     updatedRow[newColumnName.toLowerCase()] = null;
-    //                 }
-    //                 return updatedRow;
-    //             });
-    //         };
-
-    //         // Update data with the new column
-    //         setRowData((prevData) => updateData(prevData));
-    //         // setdailyData((prevData) => updateData(prevData));
-    //         // setCampaignData((prevData) => updateData(prevData));
-    //         // setKeywordData((prevData) => updateData(prevData));
-    //         // setSystem1KeywordData((prevData) => updateData(prevData));
-
-    //     } catch (error) {
-    //         console.error('Error adding column:', error);
-    //     }
-    //     setNewColumnName('');
-    //     setFormula('');
-    //     setIsModalOpen(false);
-    // };
-    // const handleCancel = () => {
-    //     setIsModalOpen(false);
-    // };
     const showModal = () => {
         setIsModalOpen(true);
     };
-    // const getMainMenuItems = (params) => {
-    //     const defaultItems = params.defaultItems.slice();
-
-    //     // Find and override the "Reset Columns" option
-    //     const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
-    //     if (resetColumnsItemIndex > -1) {
-    //         defaultItems[resetColumnsItemIndex] = {
-    //             name: 'Reset Columns (Custom)',
-    //             action: () => {
-    //                 changeRRefrst();
-    //             },
-    //             cssClasses: ['custom-reset-columns-item']
-    //         };
-    //         defaultItems.splice(resetColumnsItemIndex + 1, 0, {
-    //             name: 'Add New Column',
-    //             action: showModal,
-    //             cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
-    //         });
-    //     }
-
-    //     return defaultItems;
-    // };
+   
     const gridOptions = useMemo(() => ({
         onColumnMoved: (params) => {
             // if (toggleStatus) {
@@ -2604,12 +1763,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         functionCall1();
         setApiStatus(false);
     }
-    // useEffect(() => {
-    //     if (oneTimeFetch.current) {
-    //         functionCall1();
-    //         oneTimeFetch.current = false;
-    //     }
-    // }, [oneTimeFetch.current]);
+   
 
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
@@ -2619,22 +1773,24 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     }, []);
 
     useEffect(() => {
-        // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
-        console.log(campaignStatusFilter?.toUpperCase())
-        if (campaignStatusFilter !== "All") {
-            const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-            setRowData(filteredByStatus);
-            // newRowDataForFilter.current = filteredByStatus;
-            // console.log(newRowDataForFilter.current)
-        } else {
-            // console.log(newRowDataForFilter.current)
-            setRowData(newRowDataForFilter.current);
-        }
-    }, [campaignStatusFilter]);
+        if (!newRowDataForFilter.current?.length) return; // ✅ guard
+      
+        const data =
+          campaignStatusFilter === "All"
+            ? newRowDataForFilter.current
+            : newRowDataForFilter.current.filter(
+                item =>
+                  item.fbStatus?.toUpperCase() ===
+                  campaignStatusFilter.toUpperCase()
+              );
+      
+        setRowData(data);
+      }, [campaignStatusFilter]);
+      
 
     useEffect(() => {
         // console.log(campaignComments, "campaignComments");
+        if (!newRowDataForFilter.current?.length) return;
         const mainData = newRowDataForFilter.current;
         const filterData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
@@ -2675,43 +1831,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     }
         , [refreshpage]);
 
-    // const onCellClickedLive = (event) => {
-    //     setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
-
-    //     if (event.colDef.field === "adsetname") {
-    //         const value = event.value;
-    //         if (value !== undefined) {
-    //             const url = `/LiveHistory/LiveAdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}`;
-    //             window.open(url, "_blank", "noopener,noreferrer");
-    //         }
-    //     }
-    // };
-
-    // const onRangeSelectionChanged = (params) => {
-    //     const selected = [];
-    //     const rangeSelections = params.api.getCellRanges();
-
-    //     if (rangeSelections) {
-    //         rangeSelections.forEach((range) => {
-    //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
-    //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
-    //             const columns = range.columns.map((col) => col.getColId());
-
-    //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
-    //                 const node = params.api.getDisplayedRowAtIndex(rowIndex);
-
-    //                 if (!node.group && node.data) { // ✅ Ensures only data rows are selected
-    //                     if (!firstSelectedCell) {
-    //                         setFirstSelectedCell({ rowIndex, colId: columns[0] }); // ✅ Ensure first cell is recorded
-    //                     }
-    //                     selected.push({ rowIndex, columns });
-    //                 }
-    //             }
-    //         });
-    //     }
-
-    //     setSelectedCells(selected);
-    // };
+ 
 
 
     const onCellKeyDown = (params) => {
@@ -2788,12 +1908,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         return Array.from(map.values());
     };
 
-    // const onSelectionChanged = (event) => {
-    //     const selectedNodes = event.api.getSelectedNodes();
-    //     const selectedData = selectedNodes.map(node => node.data);
-    //     console.log("Selected Campaigns:", selectedData);
-    //     showCampaignLevel(uniqueByCampaignId(selectedData));
-    // };
+
 
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
@@ -2847,231 +1962,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     }
 
 
-    // return(
-    //                 <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
-    //                     <div style={contentStyle}>
-    //                         {isLoading === true ? (
-    //                             <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
-    //                                 <div className="ag-grid-Loader">
-    //                                     <Audio
-    //                                         height="80"
-    //                                         width="80"
-    //                                         radius="9"
-    //                                         color="green"
-    //                                         ariaLabel="loading"
-    //                                         wrapperStyle
-    //                                         wrapperClass
-    //                                     />
-    //                                 </div>
-    //                             </div>
-    //                         ) : rowData?.filter((each) => {
-    //                             const normalizedCampaign = each.campaignname.trim().toLowerCase();
-    //                             const normalizedInput = inputValue.trim().toLowerCase();
-    //                             return (
-    //                                 normalizedCampaign.startsWith(normalizedInput) ||
-    //                                 normalizedCampaign.includes(normalizedInput) ||
-    //                                 normalizedCampaign.endsWith(normalizedInput)
-    //                             );
-    //                         }
-    //                         )?.length > 0 ? (
-    //                             <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-
-    //                                 <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-    //                                         <Space align="center">
-    //                                             <div className="blinking-circle-1"></div>
-    //                                             <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Live</Text>
-    //                                         </Space>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
-    //                                     </Col>
-    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
-    //                                     </Col>
-    //                                     {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-    //                                         <Text style={{ fontWeight: '600' }}>
-    //                                             Cron/Acc status: {cronStatus.current} /{' '}
-    //                                             <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-    //                                                 {accountStatus.current}
-    //                                             </span>
-    //                                         </Text>
-    //                                     </Col> */}
-    //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-    //                                         <Tooltip
-    //                                         title={
-    //                                             <>
-    //                                                 <div>FbAcc Status: {`${fbCron.current}`}</div>
-    //                                                 <div>RevAcc Status: {`${revenueCron.current}`}</div>
-    //                                                 <Text style={{ fontWeight: '600', color: "white" }}>
-    //                                                     Cron/Acc status: {cronStatus.current} /{' '}
-    //                                                     <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-    //                                                         {accountStatus.current}
-    //                                                     </span>
-    //                                                 </Text>
-    //                                             </>
-    //                                         }
-    //                                         >
-    //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
-    //                                         </Tooltip>
-    //                                     </Col>
-    //                                     {/* <Col>
-    //                                         <Tooltip 
-    //                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
-    //                                             mouseEnterDelay={0} // Tooltip appears after 1 second
-    //                                         >
-    //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
-    //                                         </Tooltip>
-    //                                     </Col> */}
-    //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-    //                                         <Tooltip title="Export to CSV">
-    //                                             <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
-    //                                         </Tooltip>
-    //                                     </Col>
-    //                                 </Row>
-
-    //                                 <AgGridReact
-    //                                     ref={gridRef}
-    //                                     rowData={memorizedRowData}
-    //                                     rowSelection='multiple'
-    //                                     columnDefs={memorizedColumnDef}
-    //                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-    //                                     onCellClicked={onCellClickedLive}
-    //                                     pagination={true}
-    //                                     paginationPageSize={100}
-    //                                     paginationPageSizeSelector={[20, 40, 60, 80, 100]}
-    //                                     suppressAggFuncInHeader={true}
-    //                                     getMainMenuItems={getMainMenuItems}
-
-    //                                     // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-    //                                     // onCellKeyDown={onCellKeyDown}
-    //                                     // domLayout="normal"
-    //                                     // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
-    //                                     // groupIncludeFooter={rowData.length > 0 ? true : false}
-    //                                     autoGroupColumnDef={autoGroupColumnDefLive}
-    //                                     onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-    //                                     gridOptions={{
-    //                                         ...gridOptions,
-    //                                         ensureDomOrder: false,
-    //                                         suppressRowClickSelection: true,
-    //                                         suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-    //                                         enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-    //                                         groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
-    //                                     }}
-    //                                     frameworkComponents={{ GroupCellRenderer }}
-    //                                     groupDisplayType='multipleColumns'
-    //                                     // rowGroupPanelShow='always'
-    //                                     // onFilterChanged={onFilterChanged} // Use the custom filter handler
-    //                                     pinnedBottomRowData={liveFixedFooter}
-    //                                     suppressCellSelection={true}
-    //                                     getRowStyle={(params) => {
-    //                                         if (params.node.rowPinned) {
-
-    //                                             return {
-    //                                                 fontWeight: "bold",
-    //                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
-    //                                                 color: theme === "dark" ? "#fff" : "#000",
-    //                                             };
-    //                                         }
-    //                                         return null; // Keep other row styles unchanged
-    //                                     }}
-    //                                     getCellStyle={(params) => {
-    //                                         const isSelected = selectedCells.some(
-    //                                             (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-    //                                         );
-
-    //                                         // ✅ Ensure first cell inside a group is highlighted
-    //                                         const isFirstSelected = firstSelectedCell &&
-    //                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
-    //                                             firstSelectedCell.colId === params.column.getId();
-
-    //                                         return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-    //                                     }}
-    //                                     onFilterChanged={(params) => {
-    //                                         const api = params.api;
-    //                                         const filteredData = [];
-    //                                         // api.forEachNodeAfterFilterAndSort((node) => {
-    //                                         //     if (!node.rowPinned) {
-    //                                         //         filteredData.push(node.data);
-    //                                         //     }
-    //                                         // });
-    //                                         const normalizedInput = inputValue.trim().toLowerCase();
-
-    //                                         api.forEachNodeAfterFilterAndSort((node) => {
-    //                                             if (node.data && node.data.campaignname) {
-    //                                                 const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-
-    //                                                 // Apply search and filter conditions
-    //                                                 if (
-    //                                                     normalizedCampaign.startsWith(normalizedInput) ||
-    //                                                     normalizedCampaign.includes(normalizedInput) ||
-    //                                                     normalizedCampaign.endsWith(normalizedInput)
-    //                                                 ) {
-    //                                                     filteredData.push(node.data);
-    //                                                 }
-    //                                             }
-    //                                         });
-
-    //                                         const updatedFooter = [
-    //                                             {
-    //                                                 // [`${newtime}Date`]: 'Totals',
-    //                                                 campaignName: 'Total',
-    //                                                 actions: "",
-    //                                                 spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-    //                                                 revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-    //                                                 profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-    //                                                 margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-    //                                                 rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-    //                                                 cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-    //                                                 ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-    //                                                 fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-    //                                                 conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-    //                                                 fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-    //                                                 roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-    //                                                 cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-    //                                                 cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-    //                                                 fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-    //                                                 fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-    //                                                 impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-    //                                                 ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
-    //                                             },
-    //                                         ];
-
-    //                                         setLiveFixedFooter(updatedFooter);
-    //                                     }}
-    //                                 />
-
-    //                             </div>
-    //                         ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-    //                             {apiStatus === true ? 
-    //                             <Result
-    //                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
-    //                             // icon={<SmileOutlined />}
-    //                             title={`API failed to fetch the data. Please click retry button to fetch the data`}
-    //                         extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-    //                         /> : (startDate !== endDate ? <Result
-    //                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
-    //                                 icon={<SmileOutlined />}
-    //                                 title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
-    //                             // extra={<Button type="primary">Next</Button>}
-    //                             /> : <Result
-    //                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
-    //                                 icon={<SmileOutlined />}
-    //                                 title={`No LiveData for ${newaccount} to ${startDate}`}
-    //                             // extra={<Button type="primary">Next</Button>}
-    //                             />)}
-    //                         </div>}
-    //                     </div>
-    //                 </div>
-    // );
-
-    // normalize to array
+    
     const ids = Array.isArray(newaccount)
         ? newaccount
         : (newaccount ? [newaccount] : []);
@@ -3543,14 +2434,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                     </Dropdown>
                                 </Col>
 
-                                {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ fontWeight: '600' }}>
-                                            Cron/Acc status: {cronStatus.current} /{' '}
-                                            <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                {accountStatus.current}
-                                            </span>
-                                        </Text>
-                                    </Col> */}
+                               
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                     <Tooltip
                                         title={
@@ -3559,9 +2443,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
                                                 <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
                                                     Cron status: {cronStatus.current?.toLowerCase()}
-                                                    {/* <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
-                                                        {accountStatus.current}
-                                                    </span> */}
+                                                 
                                                 </Text>
                                                 <div>Account:
                                                     <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
@@ -3581,14 +2463,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                         <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
                                     </Tooltip>
                                 </Col>
-                                {/* <Col>
-                                        <Tooltip 
-                                            title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
-                                            mouseEnterDelay={0} // Tooltip appears after 1 second
-                                        >
-                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
-                                        </Tooltip>
-                                    </Col> */}
+                                
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                     {/* <Tooltip title="Export to CSV"> */}
                                     <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
@@ -3597,23 +2472,13 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             </Row>
                             {rowData.length > 0 ?
                                 (
-                                    // <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                    
 
 
 
                                     <div
                                         className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                                    // style={{
-                                    //     width: '100%',
-                                    //     // borderRadius: 12,
-                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                                    //     padding: 10,
-                                    //     height: 'auto',
-                                    //     boxShadow:
-                                    //     theme === 'dark'
-                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
-                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
-                                    // }}
+                            
                                     >
                                         <div className='table-container'>
                                             <AgGridReact
@@ -3624,7 +2489,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 context={context}
                                                 rowData={memorizedRowData}
                                                 immutableData={true}
-                                                getRowId={params => params.data.id}
+                                                getRowId={(params) =>
+                                                    `${params?.data?.accountNumber}_${params?.data?.campaignid}`
+                                                  }
                                                 rowSelection='multiple'
                                                 columnDefs={memorizedColumnDef}
                                                 defaultColDef={{ ...defaultColDef, suppressMenu: true }}
@@ -3741,41 +2608,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             />
                                         </div>
                                     </div>
-
-
-
-                                    // </div>
                                 ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                                    {/* {apiStatus === true ?
-                                        <Result
-                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                            // icon={<SmileOutlined />}
-                                            title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                                            extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                                        /> : (startDate !== endDate ? <Result
-                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                            icon={<SmileOutlined />}
-                                            title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
-                                        // extra={<Button type="primary">Next</Button>}
-                                        /> : <Result
-                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                            icon={<SmileOutlined />}
-                                            title={`No LiveData for ${newaccount} to ${startDate}`}
-                                        // extra={<Button type="primary">Next</Button>}
-                                        />)} */}
+                                   
                                     <div
                                         className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                                    // style={{
-                                    //     width: '100%',
-                                    //     // borderRadius: 12,
-                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                                    //     padding: 10,
-                                    //     height: 'auto',
-                                    //     boxShadow:
-                                    //     theme === 'dark'
-                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
-                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
-                                    // }}
+                                  
                                     >
                                         <div className='table-container'>
                                             <AgGridReact

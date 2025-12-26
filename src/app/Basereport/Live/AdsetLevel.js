@@ -2138,11 +2138,142 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             //         };
             //     })
             //     : [];
-            const filteredData =
+//             const filteredData =
+//   mainData && mainData.length > 0
+//     ? mainData
+//         // 👉 ONLY rows with mnet-hour exist
+//         .filter(eachData => Boolean(eachData.updatedHour))
+//         .map(eachData => {
+//           const revenueData =
+//             eachData?.estimated_revenue == null ||
+//             isNaN(eachData.estimated_revenue)
+//               ? 0
+//               : Number(parseFloat(eachData.estimated_revenue).toFixed(2));
+
+//           const spend = Number(parseFloat(eachData.spend || 0).toFixed(2));
+//           const profit = Number((revenueData - spend).toFixed(2));
+
+//           const rpc =
+//             !eachData.conversions
+//               ? 0
+//               : Math.round((revenueData / eachData.conversions) * 100) / 100;
+
+//           const cpl =
+//             !eachData.fbLeads
+//               ? 0
+//               : Math.round((spend / eachData.fbLeads) * 100) / 100;
+
+//           const ncpl =
+//             !eachData.conversions
+//               ? 0
+//               : Math.round((spend / eachData.conversions) * 100) / 100;
+
+//           const relatedComment = campaignComments.find(
+//             c =>
+//               c.campaignname === eachData.campaign_name &&
+//               String(c.Account) === String(eachData.accountNumber)
+//           );
+
+//           const category = campaignComments.find(
+//             c =>
+//               c.campaignname === eachData.campaign_name &&
+//               String(c.Account) === String(eachData.accountNumber)
+//           );
+
+//           const campaign_date = Camapignlevelstatus.find(
+//             c =>
+//               String(c.campaign_id) === String(eachData.campaign_id) &&
+//               String(c.accountNumber) === String(eachData.accountNumber)
+//           );
+
+//           const adsetObjectStatus = Camapignlevelstatus
+//             .find(
+//               c =>
+//                 String(c.campaign_id) === String(eachData.campaign_id) &&
+//                 String(c.accountNumber) === String(eachData.accountNumber)
+//             )
+//             ?.adsets?.find(
+//               adset =>
+//                 String(adset.adset_id) === String(eachData.adset_id)
+//             );
+
+//           const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+//           const cpcLinkClicks =
+//             isNaN(fbLClicks) || fbLClicks === 0
+//               ? 0
+//               : Math.round((spend / fbLClicks) * 100) / 100;
+
+//           return {
+//             accountNumber: String(eachData.accountNumber),
+//             campaignname: eachData.campaign_name,
+//             adsetname: eachData.adsetName,
+//             date: eachData[specifiedTimeZone],
+
+//             // ✅ hours
+//             "fb-hour": eachData.hour || "",
+//             "mnet-hour": eachData.updatedHour,
+
+//             // ✅ spend & revenue ONLY for valid mnet-hour
+//             spend,
+//             revenue: revenueData,
+//             profit,
+
+//             fbleads: parseInt(eachData.fbLeads || 0),
+//             conversions: parseInt(eachData.conversions || 0),
+
+//             cpc: parseFloat(eachData.cpc || 0),
+//             cpclinkclicks: cpcLinkClicks,
+//             fbclicks: parseInt(eachData.fbClicks || 0),
+//             fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
+//             impressions: parseInt(eachData.impressions || 0),
+
+//             rpc,
+//             cpl,
+//             ncpl,
+
+//             adsetid: eachData.adset_id,
+//             campaignid: eachData.campaign_id,
+//             timezone: eachData[newtime] || "",
+
+//             comment: relatedComment?.comment || "",
+//             category: category?.category || "",
+
+//             from: campaign_date?.start || "",
+//             to: campaign_date?.end || "",
+
+//             fbCron: eachData.fbCron,
+//             revenueCron: eachData.revenueCron,
+//             accountStatus: eachData.accountStatus,
+//             cronStatus: eachData.cronStatus,
+
+//             fbStatus: adsetObjectStatus?.status || "ACTIVE",
+
+//             adid: "",
+//             adname: "",
+//             actions: "...",
+//             profitloss: "",
+//             M_tq: "",
+//             D_tq: "",
+//           };
+//         })
+//     : [];
+
+const filteredData =
   mainData && mainData.length > 0
-    ? mainData
-        // 👉 ONLY rows with mnet-hour exist
-        .filter(eachData => Boolean(eachData.updatedHour))
+    ? Object.values(
+        mainData
+          // 1️⃣ keep only rows with mnet-hour
+          .filter(eachData => Boolean(eachData.updatedHour))
+          // 2️⃣ deduplicate by account + campaign + adset + hour
+          .reduce((acc, eachData) => {
+            const key = `${eachData.accountNumber}_${eachData.campaign_id}_${eachData.adset_id}_${eachData.updatedHour}`;
+
+            // keep latest record if duplicate comes
+            acc[key] = eachData;
+            return acc;
+          }, {})
+      )
+        // 3️⃣ map unique rows
         .map(eachData => {
           const revenueData =
             eachData?.estimated_revenue == null ||
@@ -2208,46 +2339,33 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             campaignname: eachData.campaign_name,
             adsetname: eachData.adsetName,
             date: eachData[specifiedTimeZone],
-
-            // ✅ hours
             "fb-hour": eachData.hour || "",
             "mnet-hour": eachData.updatedHour,
-
-            // ✅ spend & revenue ONLY for valid mnet-hour
             spend,
             revenue: revenueData,
             profit,
-
             fbleads: parseInt(eachData.fbLeads || 0),
             conversions: parseInt(eachData.conversions || 0),
-
             cpc: parseFloat(eachData.cpc || 0),
             cpclinkclicks: cpcLinkClicks,
             fbclicks: parseInt(eachData.fbClicks || 0),
             fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
             impressions: parseInt(eachData.impressions || 0),
-
             rpc,
             cpl,
             ncpl,
-
             adsetid: eachData.adset_id,
             campaignid: eachData.campaign_id,
             timezone: eachData[newtime] || "",
-
             comment: relatedComment?.comment || "",
             category: category?.category || "",
-
             from: campaign_date?.start || "",
             to: campaign_date?.end || "",
-
             fbCron: eachData.fbCron,
             revenueCron: eachData.revenueCron,
             accountStatus: eachData.accountStatus,
             cronStatus: eachData.cronStatus,
-
             fbStatus: adsetObjectStatus?.status || "ACTIVE",
-
             adid: "",
             adname: "",
             actions: "...",
@@ -2257,6 +2375,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
           };
         })
     : [];
+
 
 
             // pick non-Failed cron/status fields across accounts
