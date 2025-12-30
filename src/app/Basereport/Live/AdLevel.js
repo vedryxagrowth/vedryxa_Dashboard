@@ -491,18 +491,141 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     }
   };
 
+  // const handleBulkAdStatusSubmit = async () => {
+  //   try {
+  //     setConfirmBulkLoading(true);
+
+  //     const token = localStorage.getItem("token");
+
+  //     const filteredItems = leafCampaigns
+  //       .filter(item =>
+  //         bulkStatusAction === "ACTIVE"
+  //           ? item.fbStatus === "PAUSED"
+  //           : item.fbStatus === "ACTIVE"
+  //       )
+  //       .map(item => ({
+  //         status: bulkStatusAction,
+  //         campaign_id: item.campaignid,
+  //         adset_id: item.adsetid,
+  //         ad_id: item.adid,
+  //         accountNumber: String(item.accountNumber),
+  //         name: item.adName,
+  //         email: userdetails?.email
+  //       }));
+
+  //     if (filteredItems.length === 0) {
+  //       message.info("No ads need updating.");
+  //       setIsBulkStatusModalVisible(false);
+  //       setConfirmBulkLoading(false);
+  //       return;
+  //     }
+
+  //     const resp = await apiClient.post(
+  //       "/BulkAdStatusChangeMany",
+  //       { items: filteredItems },
+  //       { headers: { Authorization: token } }
+  //     );
+
+  //     if (resp.status === 200 || resp.status === 201) {
+
+  //       const now = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
+
+  //       // 🔥 UPDATE UI — SAME AS SINGLE UPDATE
+  //       setCampaignComments(prev => {
+  //         let arr = Array.isArray(prev) ? [...prev] : [];
+
+  //         filteredItems.forEach(update => {
+  //           const { campaign_id, adset_id, ad_id, accountNumber, status } = update;
+
+  //           const idx = arr.findIndex(i =>
+  //             String(i.campaignid) === String(campaign_id) &&
+  //             String(i.Account) === String(accountNumber) &&
+  //             String(i.adsetid) === String(adset_id) &&
+  //             String(i.ad_id) === String(ad_id) &&
+  //             i.level === "ad"
+  //           );
+
+  //           if (idx >= 0) {
+  //             arr[idx] = {
+  //               ...arr[idx],
+  //               fbStatus: status,
+  //               editedTime: now
+  //             };
+  //           } else {
+  //             arr.push({
+  //               campaignid: campaign_id,
+  //               Account: accountNumber,
+  //               adsetid: adset_id,
+  //               ad_id: ad_id,
+  //               level: "ad",
+  //               fbStatus: status,
+  //               comment: "",
+  //               usercommit: userdetails?.email,
+  //               editedTime: now
+  //             });
+  //           }
+  //         });
+
+  //         return arr;
+  //       });
+
+  //       message.success(`${filteredItems.length} ad(s) updated.`);
+  //     }
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     message.error("Bulk ad update failed");
+  //   } finally {
+  //     setIsBulkStatusModalVisible(false);
+  //     setConfirmBulkLoading(false);
+  //   }
+  // };
   const handleBulkAdStatusSubmit = async () => {
     try {
       setConfirmBulkLoading(true);
 
       const token = localStorage.getItem("token");
 
+      // const filteredItems = leafCampaigns
+      //   .filter(item =>
+      //     bulkStatusAction === "ACTIVE"
+      //       ? item.fbStatus === "PAUSED"
+      //       : item.fbStatus === "ACTIVE"
+      //   )
+      //   .map(item => ({
+      //     status: bulkStatusAction,
+      //     campaign_id: item.campaignid,
+      //     adset_id: item.adsetid,
+      //     ad_id: item.adid,
+      //     accountNumber: String(item.accountNumber),
+      //     name: item.adName,
+      //     email: userdetails?.email
+      //   }));
+
+      // Build ad-level status lookup WITHOUT fallback
+      const adStatusMap = new Map(
+        campaignComments
+          .filter(item => item.level === "ad" && item.ad_id)
+          .map(item => [
+            String(item.ad_id),
+            item.fbStatus ? String(item.fbStatus).toUpperCase() : "ACTIVE"
+          ])
+      );
+
+      // Filter leaf ads that actually need status change
       const filteredItems = leafCampaigns
-        .filter(item =>
-          bulkStatusAction === "ACTIVE"
-            ? item.fbStatus === "PAUSED"
-            : item.fbStatus === "ACTIVE"
-        )
+        .filter(item => {
+          const adId = String(item.adid);
+
+          // Fallback ONLY if ad does not exist in campaignComments
+          const currentStatus = adStatusMap.has(adId)
+            ? adStatusMap.get(adId)
+            : "ACTIVE";
+
+          return bulkStatusAction === "ACTIVE"
+            ? currentStatus === "PAUSED"
+            : currentStatus === "ACTIVE";
+        })
         .map(item => ({
           status: bulkStatusAction,
           campaign_id: item.campaignid,
@@ -531,8 +654,80 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         const now = moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm:ss A");
 
         // 🔥 UPDATE UI — SAME AS SINGLE UPDATE
-        setCampaignComments(prev => {
-          let arr = Array.isArray(prev) ? [...prev] : [];
+        // setCampaignComments(prev => {
+        //   let arr = Array.isArray(prev) ? [...prev] : [];
+
+        //   filteredItems.forEach(update => {
+        //     const { campaign_id, adset_id, ad_id, accountNumber, status } = update;
+
+        //     const idx = arr.findIndex(i =>
+        //       String(i.campaignid) === String(campaign_id) &&
+        //       String(i.Account) === String(accountNumber) &&
+        //       String(i.adsetid) === String(adset_id) &&
+        //       String(i.ad_id) === String(ad_id) &&
+        //       i.level === "ad"
+        //     );
+
+        //     if (idx >= 0) {
+        //       arr[idx] = {
+        //         ...arr[idx],
+        //         fbStatus: status,
+        //         editedTime: now
+        //       };
+        //     } else {
+        //       arr.push({
+        //         campaignid: campaign_id,
+        //         Account: accountNumber,
+        //         adsetid: adset_id,
+        //         ad_id: ad_id,
+        //         level: "ad",
+        //         fbStatus: status,
+        //         comment: "",
+        //         usercommit: userdetails?.email,
+        //         editedTime: now
+        //       });
+        //     }
+        //   });
+
+        //   if (campaignStatusFilter !== "All") {
+        //     const adStatusMap = new Map(
+        //       arr
+        //         .filter(item => item.level === "ad" && item.ad_id)
+        //         .map(item => [
+        //           String(item.ad_id),
+        //           item.fbStatus ? String(item.fbStatus).toUpperCase() : "ACTIVE"
+        //         ])
+        //     );
+
+        //     const newRowData = newRowDataForFilter.current;
+
+        //     // Attach fbStatus to each row using adStatusMap
+        //     const newRowDataWithFbStatus = newRowData.map(each => {
+        //       const adKey = String(each.adid);
+
+        //       return {
+        //         ...each,
+        //         fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+        //       };
+        //     });
+
+        //     // Final filter by selected status
+        //     const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+        //       item =>
+        //         item.fbStatus.toUpperCase() ===
+        //         campaignStatusFilter?.toUpperCase()
+        //     );
+
+        //     setRowData(filteredRowDataWithStatus);
+        //   }
+
+        //   return arr;
+        // });
+
+        const updatedCampaignComments = (() => {
+          const arr = Array.isArray(campaignComments)
+            ? [...campaignComments]
+            : [];
 
           filteredItems.forEach(update => {
             const { campaign_id, adset_id, ad_id, accountNumber, status } = update;
@@ -556,7 +751,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 campaignid: campaign_id,
                 Account: accountNumber,
                 adsetid: adset_id,
-                ad_id: ad_id,
+                ad_id,
                 level: "ad",
                 fbStatus: status,
                 comment: "",
@@ -567,7 +762,45 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           });
 
           return arr;
-        });
+        })();
+
+        // 2️⃣ Update campaignComments state
+        setCampaignComments(updatedCampaignComments);
+
+        // 3️⃣ Update rowData using the SAME computed data
+        if (campaignStatusFilter !== "All") {
+          const adStatusMap = new Map(
+            updatedCampaignComments
+              .filter(item => item.level === "ad" && item.ad_id)
+              .map(item => [
+                String(item.ad_id),
+                item.fbStatus
+                  ? String(item.fbStatus).toUpperCase()
+                  : "ACTIVE"
+              ])
+          );
+          const newRowData = newRowDataForFilter.current;
+
+          // Attach fbStatus to each row using adStatusMap
+          const newRowDataWithFbStatus = newRowData.map(each => {
+            const adKey = String(each.adid);
+
+            return {
+              ...each,
+              fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+            };
+          });
+
+          // Final filter by selected status
+          const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+            item =>
+              item.fbStatus.toUpperCase() ===
+              campaignStatusFilter?.toUpperCase()
+          );
+
+          setRowData(filteredRowDataWithStatus);
+
+        }
 
         message.success(`${filteredItems.length} ad(s) updated.`);
       }
@@ -671,6 +904,16 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
+    valueFormatter: (params) => {
+      // GROUP ROW
+      if (params.node?.group) {
+        const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+        return firstChild?.adname ?? params.node.key;
+      }
+
+      // LEAF ROW
+      return params.value;
+    },
     // filter: "agTextColumnFilter",
     // filterValueGetter: (params) => {
     //   if (params.node.group) {
@@ -982,8 +1225,10 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             );
             if (response.status === 200 || response.status === 201) {
               setConfirmLoading(false);
-              setCampaignComments(prev => {
-                const arr = Array.isArray(prev) ? [...prev] : [];
+              const updatedCampaignComments = (() => {
+                const arr = Array.isArray(campaignComments)
+                  ? [...campaignComments]
+                  : [];
 
                 const match = arr.findIndex(
                   i =>
@@ -991,26 +1236,94 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                     String(i?.Account) === String(rowAccount) &&
                     String(i?.adsetid) === String(adsetid) &&
                     String(i?.ad_id) === String(adid) &&
-                    String(i?.level) === 'ad'
+                    String(i?.level) === "ad"
                 );
 
+                const fbStatus = nextChecked ? "ACTIVE" : "PAUSED";
+
                 if (match >= 0) {
-                  arr[match] = { ...arr[match], fbStatus: nextChecked ? "ACTIVE" : "PAUSED" };
+                  arr[match] = {
+                    ...arr[match],
+                    fbStatus
+                  };
                 } else {
                   arr.push({
                     campaignid,
                     Account: rowAccount,
                     adsetid,
                     ad_id: adid,
-                    level: 'ad',
+                    level: "ad",
                     comment: "",
                     usercommit: "",
-                    fbStatus: nextChecked ? "ACTIVE" : "PAUSED",
+                    fbStatus
                   });
                 }
 
                 return arr;
-              });
+              })();
+              setCampaignComments(updatedCampaignComments);
+              if (campaignStatusFilter !== "All") {
+                const adStatusMap = new Map(
+                  updatedCampaignComments
+                    .filter(item => item.level === "ad" && item.ad_id)
+                    .map(item => [
+                      String(item.ad_id),
+                      item.fbStatus
+                        ? String(item.fbStatus).toUpperCase()
+                        : "ACTIVE"
+                    ])
+                );
+                const newRowData = newRowDataForFilter.current;
+
+                // Attach fbStatus to each row using adStatusMap
+                const newRowDataWithFbStatus = newRowData.map(each => {
+                  const adKey = String(each.adid);
+
+                  return {
+                    ...each,
+                    fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+                  };
+                });
+
+                // Final filter by selected status
+                const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+                  item =>
+                    item.fbStatus.toUpperCase() ===
+                    campaignStatusFilter?.toUpperCase()
+                );
+
+                setRowData(filteredRowDataWithStatus);
+
+              }
+              // setCampaignComments(prev => {
+              //   const arr = Array.isArray(prev) ? [...prev] : [];
+
+              //   const match = arr.findIndex(
+              //     i =>
+              //       String(i?.campaignid) === String(campaignid) &&
+              //       String(i?.Account) === String(rowAccount) &&
+              //       String(i?.adsetid) === String(adsetid) &&
+              //       String(i?.ad_id) === String(adid) &&
+              //       String(i?.level) === 'ad'
+              //   );
+
+              //   if (match >= 0) {
+              //     arr[match] = { ...arr[match], fbStatus: nextChecked ? "ACTIVE" : "PAUSED" };
+              //   } else {
+              //     arr.push({
+              //       campaignid,
+              //       Account: rowAccount,
+              //       adsetid,
+              //       ad_id: adid,
+              //       level: 'ad',
+              //       comment: "",
+              //       usercommit: "",
+              //       fbStatus: nextChecked ? "ACTIVE" : "PAUSED",
+              //     });
+              //   }
+
+              //   return arr;
+              // });
               setIsAdidModalVisibles(false);
             }
 
@@ -1997,249 +2310,249 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       //     )
       //   })
       //   : null;
-  //     const filteredData =
-  // mainData && mainData.length > 0
-  //   ? mainData
-  //       // 👉 ONLY rows with mnet-hour exist
-  //       .filter(eachData => Boolean(eachData.updatedHour))
-  //       .map((eachData) => {
+      //     const filteredData =
+      // mainData && mainData.length > 0
+      //   ? mainData
+      //       // 👉 ONLY rows with mnet-hour exist
+      //       .filter(eachData => Boolean(eachData.updatedHour))
+      //       .map((eachData) => {
 
-  //         // ---------- Revenue ----------
-  //         let revenueData = 0;
-  //         if (
-  //           eachData.estimated_revenue !== null &&
-  //           eachData.estimated_revenue !== undefined &&
-  //           !isNaN(eachData.estimated_revenue)
-  //         ) {
-  //           revenueData = parseFloat(eachData.estimated_revenue);
-  //         }
+      //         // ---------- Revenue ----------
+      //         let revenueData = 0;
+      //         if (
+      //           eachData.estimated_revenue !== null &&
+      //           eachData.estimated_revenue !== undefined &&
+      //           !isNaN(eachData.estimated_revenue)
+      //         ) {
+      //           revenueData = parseFloat(eachData.estimated_revenue);
+      //         }
 
-  //         // ---------- Spend ----------
-  //         const spend = parseFloat(eachData.spend || 0);
+      //         // ---------- Spend ----------
+      //         const spend = parseFloat(eachData.spend || 0);
 
-  //         // ---------- Profit ----------
-  //         const profit = (revenueData - spend).toFixed(2);
+      //         // ---------- Profit ----------
+      //         const profit = (revenueData - spend).toFixed(2);
 
-  //         // ---------- RPC ----------
-  //         const rpc =
-  //           eachData.conversions && eachData.conversions !== 0
-  //             ? Math.round((revenueData / eachData.conversions) * 100) / 100
-  //             : 0;
+      //         // ---------- RPC ----------
+      //         const rpc =
+      //           eachData.conversions && eachData.conversions !== 0
+      //             ? Math.round((revenueData / eachData.conversions) * 100) / 100
+      //             : 0;
 
-  //         // ---------- CPL ----------
-  //         const cpl =
-  //           eachData.fbLeads && eachData.fbLeads !== 0
-  //             ? Math.round((spend / eachData.fbLeads) * 100) / 100
-  //             : 0;
+      //         // ---------- CPL ----------
+      //         const cpl =
+      //           eachData.fbLeads && eachData.fbLeads !== 0
+      //             ? Math.round((spend / eachData.fbLeads) * 100) / 100
+      //             : 0;
 
-  //         // ---------- NCPL ----------
-  //         const ncpl =
-  //           eachData.conversions && eachData.conversions !== 0
-  //             ? Math.round((spend / eachData.conversions) * 100) / 100
-  //             : 0;
+      //         // ---------- NCPL ----------
+      //         const ncpl =
+      //           eachData.conversions && eachData.conversions !== 0
+      //             ? Math.round((spend / eachData.conversions) * 100) / 100
+      //             : 0;
 
-  //         // ---------- Others ----------
-  //         const relatedComment = campaignComments.find(
-  //           comment => comment.campaignname === eachData.campaign_name
-  //         );
+      //         // ---------- Others ----------
+      //         const relatedComment = campaignComments.find(
+      //           comment => comment.campaignname === eachData.campaign_name
+      //         );
 
-  //         const category = campaignComments.find(
-  //           campaign =>
-  //             campaign.campaignname === eachData.campaign_name &&
-  //             campaign.Account === eachData.accountNumber
-  //         );
+      //         const category = campaignComments.find(
+      //           campaign =>
+      //             campaign.campaignname === eachData.campaign_name &&
+      //             campaign.Account === eachData.accountNumber
+      //         );
 
-  //         const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-  //         const cpcLinkClicks =
-  //           isNaN(fbLClicks) || fbLClicks === 0
-  //             ? 0
-  //             : Math.round((spend / fbLClicks) * 100) / 100;
+      //         const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+      //         const cpcLinkClicks =
+      //           isNaN(fbLClicks) || fbLClicks === 0
+      //             ? 0
+      //             : Math.round((spend / fbLClicks) * 100) / 100;
 
-  //         const campaign_date = Camapignlevelstatus.find(
-  //           campaign =>
-  //             campaign.campaign_id === eachData.campaign_id &&
-  //             campaign.accountNumber === eachData.accountNumber
-  //         );
+      //         const campaign_date = Camapignlevelstatus.find(
+      //           campaign =>
+      //             campaign.campaign_id === eachData.campaign_id &&
+      //             campaign.accountNumber === eachData.accountNumber
+      //         );
 
-  //         const getFbStatusKey = campaignComments.find(
-  //           ad =>
-  //             ad.campaignid === eachData.campaign_id &&
-  //             ad.Account === eachData.accountNumber &&
-  //             ad.adsetid === eachData.adset_id &&
-  //             ad.ad_id === eachData.ad_id &&
-  //             ad.level === "ad"
-  //         );
+      //         const getFbStatusKey = campaignComments.find(
+      //           ad =>
+      //             ad.campaignid === eachData.campaign_id &&
+      //             ad.Account === eachData.accountNumber &&
+      //             ad.adsetid === eachData.adset_id &&
+      //             ad.ad_id === eachData.ad_id &&
+      //             ad.level === "ad"
+      //         );
 
-  //         // ---------- FINAL OBJECT ----------
-  //         return {
-  //           accountNumber: String(eachData.accountNumber),
-  //           campaignname: eachData.campaign_name,
-  //           adsetname: eachData.adsetName,
-  //           date: eachData[specifiedTimeZone],
+      //         // ---------- FINAL OBJECT ----------
+      //         return {
+      //           accountNumber: String(eachData.accountNumber),
+      //           campaignname: eachData.campaign_name,
+      //           adsetname: eachData.adsetName,
+      //           date: eachData[specifiedTimeZone],
 
-  //           "fb-hour": eachData.hour,
-  //           "mnet-hour": eachData.updatedHour, // ✅ always exists now
+      //           "fb-hour": eachData.hour,
+      //           "mnet-hour": eachData.updatedHour, // ✅ always exists now
 
-  //           // ✅ spend & revenue only for valid hours
-  //           spend: spend.toFixed(2),
-  //           revenue: revenueData.toFixed(2),
-  //           profit: parseFloat(profit),
+      //           // ✅ spend & revenue only for valid hours
+      //           spend: spend.toFixed(2),
+      //           revenue: revenueData.toFixed(2),
+      //           profit: parseFloat(profit),
 
-  //           fbleads: parseInt(eachData.fbLeads || 0),
-  //           conversions:
-  //             eachData.conversions !== null && eachData.conversions !== 0
-  //               ? parseInt(eachData.conversions)
-  //               : 0,
+      //           fbleads: parseInt(eachData.fbLeads || 0),
+      //           conversions:
+      //             eachData.conversions !== null && eachData.conversions !== 0
+      //               ? parseInt(eachData.conversions)
+      //               : 0,
 
-  //           cpc: parseFloat(eachData.cpc || 0),
-  //           cpclinkclicks: cpcLinkClicks,
-  //           fbclicks: parseInt(eachData.fbClicks || 0),
-  //           fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
-  //           impressions: parseInt(eachData.impressions || 0),
+      //           cpc: parseFloat(eachData.cpc || 0),
+      //           cpclinkclicks: cpcLinkClicks,
+      //           fbclicks: parseInt(eachData.fbClicks || 0),
+      //           fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
+      //           impressions: parseInt(eachData.impressions || 0),
 
-  //           rpc,
-  //           cpl,
-  //           ncpl,
+      //           rpc,
+      //           cpl,
+      //           ncpl,
 
-  //           adsetid: eachData.adset_id,
-  //           campaignid: eachData.campaign_id,
-  //           timezone: eachData[newtime],
+      //           adsetid: eachData.adset_id,
+      //           campaignid: eachData.campaign_id,
+      //           timezone: eachData[newtime],
 
-  //           comment: relatedComment ? relatedComment.comment : null,
+      //           comment: relatedComment ? relatedComment.comment : null,
 
-  //           adid: eachData.ad_id,
-  //           adname: eachData.adName,
+      //           adid: eachData.ad_id,
+      //           adname: eachData.adName,
 
-  //           actions: "...",
+      //           actions: "...",
 
-  //           from: campaign_date?.start || "",
-  //           to: campaign_date?.end || "",
+      //           from: campaign_date?.start || "",
+      //           to: campaign_date?.end || "",
 
-  //           keyword: eachData.keyword,
-  //           category: category?.category || "",
-  //           fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
+      //           keyword: eachData.keyword,
+      //           category: category?.category || "",
+      //           fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
 
-  //           profitloss: "",
-  //           M_tq: "",
-  //           D_tq: "",
-  //         };
-  //       })
-  //   : [];
+      //           profitloss: "",
+      //           M_tq: "",
+      //           D_tq: "",
+      //         };
+      //       })
+      //   : [];
 
-  const filteredData =
-  mainData && mainData.length > 0
-    ? Object.values(
-        mainData
-          // 1️⃣ keep only rows with mnet-hour
-          .filter(eachData => Boolean(eachData.updatedHour))
-          // 2️⃣ REMOVE DUPLICATE HOURS
-          .reduce((acc, eachData) => {
-            const key = `${eachData.accountNumber}_${eachData.campaign_id}_${eachData.adset_id}_${eachData.ad_id}_${eachData.updatedHour}`;
+      const filteredData =
+        mainData && mainData.length > 0
+          ? Object.values(
+            mainData
+              // 1️⃣ keep only rows with mnet-hour
+              .filter(eachData => Boolean(eachData.updatedHour))
+              // 2️⃣ REMOVE DUPLICATE HOURS
+              .reduce((acc, eachData) => {
+                const key = `${eachData.accountNumber}_${eachData.campaign_id}_${eachData.adset_id}_${eachData.ad_id}_${eachData.updatedHour}`;
 
-            // overwrite if duplicate hour comes again
-            acc[key] = eachData;
-            return acc;
-          }, {})
-      )
-        // 3️⃣ map unique rows only
-        .map((eachData) => {
+                // overwrite if duplicate hour comes again
+                acc[key] = eachData;
+                return acc;
+              }, {})
+          )
+            // 3️⃣ map unique rows only
+            .map((eachData) => {
 
-          let revenueData = 0;
-          if (
-            eachData.estimated_revenue !== null &&
-            eachData.estimated_revenue !== undefined &&
-            !isNaN(eachData.estimated_revenue)
-          ) {
-            revenueData = parseFloat(eachData.estimated_revenue);
-          }
+              let revenueData = 0;
+              if (
+                eachData.estimated_revenue !== null &&
+                eachData.estimated_revenue !== undefined &&
+                !isNaN(eachData.estimated_revenue)
+              ) {
+                revenueData = parseFloat(eachData.estimated_revenue);
+              }
 
-          const spend = parseFloat(eachData.spend || 0);
-          const profit = (revenueData - spend).toFixed(2);
+              const spend = parseFloat(eachData.spend || 0);
+              const profit = (revenueData - spend).toFixed(2);
 
-          const rpc =
-            eachData.conversions
-              ? Math.round((revenueData / eachData.conversions) * 100) / 100
-              : 0;
+              const rpc =
+                eachData.conversions
+                  ? Math.round((revenueData / eachData.conversions) * 100) / 100
+                  : 0;
 
-          const cpl =
-            eachData.fbLeads
-              ? Math.round((spend / eachData.fbLeads) * 100) / 100
-              : 0;
+              const cpl =
+                eachData.fbLeads
+                  ? Math.round((spend / eachData.fbLeads) * 100) / 100
+                  : 0;
 
-          const ncpl =
-            eachData.conversions
-              ? Math.round((spend / eachData.conversions) * 100) / 100
-              : 0;
+              const ncpl =
+                eachData.conversions
+                  ? Math.round((spend / eachData.conversions) * 100) / 100
+                  : 0;
 
-          const relatedComment = campaignComments.find(
-            comment => comment.campaignname === eachData.campaign_name
-          );
+              const relatedComment = campaignComments.find(
+                comment => comment.campaignname === eachData.campaign_name
+              );
 
-          const category = campaignComments.find(
-            campaign =>
-              campaign.campaignname === eachData.campaign_name &&
-              campaign.Account === eachData.accountNumber
-          );
+              const category = campaignComments.find(
+                campaign =>
+                  campaign.campaignname === eachData.campaign_name &&
+                  campaign.Account === eachData.accountNumber
+              );
 
-          const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-          const cpcLinkClicks =
-            isNaN(fbLClicks) || fbLClicks === 0
-              ? 0
-              : Math.round((spend / fbLClicks) * 100) / 100;
+              const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+              const cpcLinkClicks =
+                isNaN(fbLClicks) || fbLClicks === 0
+                  ? 0
+                  : Math.round((spend / fbLClicks) * 100) / 100;
 
-          const campaign_date = Camapignlevelstatus.find(
-            campaign =>
-              campaign.campaign_id === eachData.campaign_id &&
-              campaign.accountNumber === eachData.accountNumber
-          );
+              const campaign_date = Camapignlevelstatus.find(
+                campaign =>
+                  campaign.campaign_id === eachData.campaign_id &&
+                  campaign.accountNumber === eachData.accountNumber
+              );
 
-          const getFbStatusKey = campaignComments.find(
-            ad =>
-              ad.campaignid === eachData.campaign_id &&
-              ad.Account === eachData.accountNumber &&
-              ad.adsetid === eachData.adset_id &&
-              ad.ad_id === eachData.ad_id &&
-              ad.level === "ad"
-          );
+              const getFbStatusKey = campaignComments.find(
+                ad =>
+                  ad.campaignid === eachData.campaign_id &&
+                  ad.Account === eachData.accountNumber &&
+                  ad.adsetid === eachData.adset_id &&
+                  ad.ad_id === eachData.ad_id &&
+                  ad.level === "ad"
+              );
 
-          return {
-            accountNumber: String(eachData.accountNumber),
-            campaignname: eachData.campaign_name,
-            adsetname: eachData.adsetName,
-            date: eachData[specifiedTimeZone],
-            "fb-hour": eachData.hour,
-            "mnet-hour": eachData.updatedHour,
-            spend: spend.toFixed(2),
-            revenue: revenueData.toFixed(2),
-            profit: parseFloat(profit),
-            fbleads: parseInt(eachData.fbLeads || 0),
-            conversions: parseInt(eachData.conversions || 0),
-            cpc: parseFloat(eachData.cpc || 0),
-            cpclinkclicks: cpcLinkClicks,
-            fbclicks: parseInt(eachData.fbClicks || 0),
-            fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
-            impressions: parseInt(eachData.impressions || 0),
-            rpc,
-            cpl,
-            ncpl,
-            adsetid: eachData.adset_id,
-            campaignid: eachData.campaign_id,
-            timezone: eachData[newtime],
-            comment: relatedComment ? relatedComment.comment : null,
-            adid: eachData.ad_id,
-            adname: eachData.adName,
-            actions: "...",
-            from: campaign_date?.start || "",
-            to: campaign_date?.end || "",
-            keyword: eachData.keyword,
-            category: category?.category || "",
-            fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
-            profitloss: "",
-            M_tq: "",
-            D_tq: "",
-          };
-        })
-    : [];
+              return {
+                accountNumber: String(eachData.accountNumber),
+                campaignname: eachData.campaign_name,
+                adsetname: eachData.adsetName,
+                date: eachData[specifiedTimeZone],
+                "fb-hour": eachData.hour,
+                "mnet-hour": eachData.updatedHour,
+                spend: spend.toFixed(2),
+                revenue: revenueData.toFixed(2),
+                profit: parseFloat(profit),
+                fbleads: parseInt(eachData.fbLeads || 0),
+                conversions: parseInt(eachData.conversions || 0),
+                cpc: parseFloat(eachData.cpc || 0),
+                cpclinkclicks: cpcLinkClicks,
+                fbclicks: parseInt(eachData.fbClicks || 0),
+                fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
+                impressions: parseInt(eachData.impressions || 0),
+                rpc,
+                cpl,
+                ncpl,
+                adsetid: eachData.adset_id,
+                campaignid: eachData.campaign_id,
+                timezone: eachData[newtime],
+                comment: relatedComment ? relatedComment.comment : null,
+                adid: eachData.ad_id,
+                adname: eachData.adName,
+                actions: "...",
+                from: campaign_date?.start || "",
+                to: campaign_date?.end || "",
+                keyword: eachData.keyword,
+                category: category?.category || "",
+                fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
+                profitloss: "",
+                M_tq: "",
+                D_tq: "",
+              };
+            })
+          : [];
 
 
 
@@ -2615,48 +2928,79 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     }
   }, [activeTab, selectedAdsets, selectedCampaigns]);
 
+
   useEffect(() => {
     // functionCall1();
     console.log(campaignStatusFilter, "campaignStatusFilter");
     if (campaignStatusFilter !== "All") {
-      const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-      setRowData(filteredByStatus);
+
+      const adStatusMap = new Map(
+        campaignComments
+          .filter(item => item.level === "ad" && item.ad_id)
+          .map(item => [
+            String(item.ad_id),
+            item.fbStatus ? String(item.fbStatus).toUpperCase() : "ACTIVE"
+          ])
+      );
+
+      const newRowData = newRowDataForFilter.current;
+
+      // Attach fbStatus to each row using adStatusMap
+      const newRowDataWithFbStatus = newRowData.map(each => {
+        const adKey = String(each.adid);
+
+        return {
+          ...each,
+          fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+        };
+      });
+
+      // Final filter by selected status
+      const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+        item =>
+          item.fbStatus.toUpperCase() ===
+          campaignStatusFilter?.toUpperCase()
+      );
+
+      setRowData(filteredRowDataWithStatus);
+      // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+      // setRowData(filteredByStatus);
     } else {
       setRowData(newRowDataForFilter.current);
     }
   }, [campaignStatusFilter]);
 
-  useEffect(() => {
-    // console.log(campaignComments, "campaignComments");
-    // console.log(campaignStatusFilter, "campaignStatusFilter");
-    // console.log(campaignComments.filter(ad => ad.level === 'ad'), "campaignComments.filter(ad => ad.level === 'ad')");
-    const mainData = newRowDataForFilter.current;
-    // console.log(mainData, "mainData");
-    const filterData = mainData && mainData.length > 0 ?
-      mainData.map((eachData) => {
-        const getFbStatusKey = campaignComments.find(ad => ad.campaignid === eachData.campaignid && ad.Account === eachData.accountNumber && ad.adsetid === eachData.adsetid && ad.ad_id === eachData.adid && ad.level === 'ad');
-        // console.log(getFbStatusKey, "getFbStatusKey");
-        // console.log(eachData?.adName, "eachData");
-        return (
-          {
-            ...eachData,
-            fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
-          }
-        )
-      }) : null;
-    newRowDataForFilter.current = filterData;
-    let newFilterData;
-    if (campaignStatusFilter !== "All") {
-      newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-    }
-    else {
-      newFilterData = filterData;
-    }
+  // useEffect(() => {
+  //   // console.log(campaignComments, "campaignComments");
+  //   // console.log(campaignStatusFilter, "campaignStatusFilter");
+  //   // console.log(campaignComments.filter(ad => ad.level === 'ad'), "campaignComments.filter(ad => ad.level === 'ad')");
+  //   const mainData = newRowDataForFilter.current;
+  //   // console.log(mainData, "mainData");
+  //   const filterData = mainData && mainData.length > 0 ?
+  //     mainData.map((eachData) => {
+  //       const getFbStatusKey = campaignComments.find(ad => ad.campaignid === eachData.campaignid && ad.Account === eachData.accountNumber && ad.adsetid === eachData.adsetid && ad.ad_id === eachData.adid && ad.level === 'ad');
+  //       // console.log(getFbStatusKey, "getFbStatusKey");
+  //       // console.log(eachData?.adName, "eachData");
+  //       return (
+  //         {
+  //           ...eachData,
+  //           fbStatus: getFbStatusKey?.fbStatus ?? "ACTIVE",
+  //         }
+  //       )
+  //     }) : null;
+  //   newRowDataForFilter.current = filterData;
+  //   let newFilterData;
+  //   if (campaignStatusFilter !== "All") {
+  //     newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+  //   }
+  //   else {
+  //     newFilterData = filterData;
+  //   }
 
-    setRowData(newFilterData);
-    // newRowDataForFilter.current = filteredData;
-  }
-    , [campaignComments]);
+  //   setRowData(newFilterData);
+  //   // newRowDataForFilter.current = filteredData;
+  // }
+  //   , [campaignComments]);
   // useEffect(() => {
   //   // console.log("test1");
   //   functionCall1();
@@ -3547,7 +3891,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       rowHeight={30}
                       className='custom-grid'
                       rowData={memorizedRowData}
-                      immutableData={true}
+                      // immutableData={true}
                       // getRowId={params => params.data.id}
                       rowSelection='multiple'
                       columnDefs={memorizedColumnDef}
@@ -3562,7 +3906,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
                       suppressAggFuncInHeader={true}
                       getMainMenuItems={getMainMenuItems}
-                      getRowId={(params) => String(params.data.adid)}
+                      useValueFormatterForExport={true}
+                      // getRowId={(params) => String(params.data.adid)}
 
 
                       // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection

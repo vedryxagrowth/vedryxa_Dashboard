@@ -686,13 +686,27 @@ export default function RecommendationsPage({ params }) {
                                                     }}
                                                 >
                                                     <div>
+                                                        {/* <p style={{ margin: 0, fontWeight: 600 }}>
+                                                            {c.campaign_name} - {c.campaign_id}
+                                                        </p> */}
                                                         <p style={{ margin: 0, fontWeight: 600 }}>
                                                             {c.campaign_name}
                                                         </p>
                                                         <p style={{ fontSize: 12 }}>
-                                                            ROI: {c.days.at(-1)?.roi}% | Spend: $
-                                                            {c.days.at(-1)?.spend}
+                                                            Campaign ID: {c.campaign_id}
                                                         </p>
+
+                                                        <p style={{ fontSize: 13 }}>
+                                                            Spend: $
+                                                            {Number(c.days.at(-1)?.spend ?? 0).toFixed(2)} | Revenue: $
+                                                            {Number(c.days.at(-1)?.estimated_revenue ?? 0).toFixed(2)} | Profit: $
+                                                            {(
+                                                                Number(c.days.at(-1)?.estimated_revenue ?? 0) -
+                                                                Number(c.days.at(-1)?.spend ?? 0)
+                                                            ).toFixed(2)} | ROI:{' '}
+                                                            {Number(c.days.at(-1)?.roi ?? 0).toFixed(2)}%
+                                                        </p>
+
                                                     </div>
 
 
@@ -732,51 +746,127 @@ export default function RecommendationsPage({ params }) {
                             </h4>
 
 
-                            {accData.map(c => (
-                                <div
-                                    key={c.campaign_id}
-                                    style={{
-                                        background: bg,
-                                        borderRadius: 10,
-                                        padding: 15,
-                                        marginBottom: 12,
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <div>
-                                        <p style={{ margin: 0, fontWeight: 600 }}>
-                                            {c.campaign_name}
-                                        </p>
-                                        <p style={{ fontSize: 12 }}>
-                                            ROI: {c.days.at(-1)?.roi}% | Spend: $
-                                            {c.days.at(-1)?.spend}
-                                        </p>
-                                    </div>
+                            {activeTab === 'filtration' ? (
+                                accData.map(c => {
+                                    const latestFiltration = c.dailyFiltration?.at(-1);
+
+                                    return (
+                                        <div
+                                            key={c.campaign_id}
+                                            style={{
+                                                background: bg,
+                                                borderRadius: 10,
+                                                padding: 15,
+                                                marginBottom: 12,
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                            }}
+                                        >
+                                            <div>
+                                                <p style={{ margin: 0, fontWeight: 600 }}>
+                                                    {c.campaign_name} - {c.campaign_id}
+                                                </p>
+                                                <p style={{ fontSize: 13 }}>
+                                                    Spend: $
+                                                    {Number(c.days.at(-1)?.spend ?? 0).toFixed(2)} | Revenue: $
+                                                    {Number(c.days.at(-1)?.estimated_revenue ?? 0).toFixed(2)} | Profit: $
+                                                    {(
+                                                        Number(c.days.at(-1)?.estimated_revenue ?? 0) -
+                                                        Number(c.days.at(-1)?.spend ?? 0)
+                                                    ).toFixed(2)} | ROI:{' '}
+                                                    {Number(c.days.at(-1)?.roi ?? 0).toFixed(2)}%
+                                                    {' | '}
+                                                    {latestFiltration ? (
+                                                        <span>
+                                                            Filtration:{' '}
+                                                            {latestFiltration.filtration}%
+                                                        </span>
+                                                    ) : (
+                                                        <span style={{ color: '#9ca3af' }}>
+                                                            No filtration data
+                                                        </span>
+                                                    )}
+                                                </p>
 
 
-                                    <Button
+                                            </div>
+
+                                            <Button
+                                                style={{
+                                                    background: 'transparent',
+                                                    border: `1px solid ${bd}`,
+                                                    borderRadius: 6,
+                                                    padding: '6px 10px',
+                                                    cursor: 'pointer',
+                                                    color: isDark ? '#fff' : '#111827',
+                                                }}
+                                                onClick={() =>
+                                                    window.open(
+                                                        `/DailyAndCampaignHistory/CampaignHistory/${encodeURIComponent(
+                                                            c.campaign_id
+                                                        )}-${acc}-${time}-${resolvedNetwork}`,
+                                                        '_blank'
+                                                    )
+                                                }
+                                            >
+                                                Campaign History
+                                            </Button>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                accData.map(c => (
+                                    <div
+                                        key={c.campaign_id}
                                         style={{
-                                            background: 'transparent',
-                                            border: `1px solid ${bd}`,
-                                            borderRadius: 6,
-                                            padding: '6px 10px',
-                                            cursor: 'pointer',
-                                            color: isDark ? '#fff' : '#111827',
+                                            background: bg,
+                                            borderRadius: 10,
+                                            padding: 15,
+                                            marginBottom: 12,
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
                                         }}
-                                        onClick={() =>
-                                            window.open(
-                                                `/DailyAndCampaignHistory/CampaignHistory/${encodeURIComponent(
-                                                    c.campaign_id
-                                                )}-${acc}-${time}-${resolvedNetwork}`,
-                                                '_blank'
-                                            )
-                                        }
                                     >
-                                        Campaign History
-                                    </Button>
-                                </div>
-                            ))}
+                                        <div>
+                                            <p style={{ margin: 0, fontWeight: 600 }}>
+                                                {c.campaign_name} - {c.campaign_id}
+                                            </p>
+                                            <p style={{ fontSize: 13 }}>
+                                                Spend: $
+                                                {Number(c.days.at(-1)?.spend ?? 0).toFixed(2)} | Revenue: $
+                                                {Number(c.days.at(-1)?.estimated_revenue ?? 0).toFixed(2)} | Profit: $
+                                                {(
+                                                    Number(c.days.at(-1)?.estimated_revenue ?? 0) -
+                                                    Number(c.days.at(-1)?.spend ?? 0)
+                                                ).toFixed(2)} | ROI:{' '}
+                                                {Number(c.days.at(-1)?.roi ?? 0).toFixed(2)}%
+                                            </p>
+                                        </div>
+
+                                        <Button
+                                            style={{
+                                                background: 'transparent',
+                                                border: `1px solid ${bd}`,
+                                                borderRadius: 6,
+                                                padding: '6px 10px',
+                                                cursor: 'pointer',
+                                                color: isDark ? '#fff' : '#111827',
+                                            }}
+                                            onClick={() =>
+                                                window.open(
+                                                    `/DailyAndCampaignHistory/CampaignHistory/${encodeURIComponent(
+                                                        c.campaign_id
+                                                    )}-${acc}-${time}-${resolvedNetwork}`,
+                                                    '_blank'
+                                                )
+                                            }
+                                        >
+                                            Campaign History
+                                        </Button>
+                                    </div>
+                                ))
+                            )}
+
                         </div>
                     );
                 })}

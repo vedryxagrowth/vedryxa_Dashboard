@@ -1,6 +1,6 @@
 "use client"
 import { lazy, useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { redirect,useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import React from 'react';
 import axios from 'axios';
@@ -213,7 +213,7 @@ const MyTablePage = () => {
     const [searchText, setSearchText] = useState("");
     const [campaignComments, setCampaignComments] = useState([]);
     const [networksWithStatus, setNetworksWithStatus] = useState([]);
-    
+
 
     useEffect(() => {
         const fetchNetworksData = async () => {
@@ -434,6 +434,7 @@ const MyTablePage = () => {
     console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
+    const [Rhovered, setRHovered] = useState(false);
 
     const deriveInitial = (dash, stored, nets) => {
         const fromDash = dash?.replace(/\+/g, " ").trim();
@@ -461,7 +462,7 @@ const MyTablePage = () => {
         Array.isArray(initialOne) ? initialOne.map(String) : []
     );
 
-  
+
 
     // console.log("multiple accounts:", selectedValue);
 
@@ -1651,6 +1652,7 @@ const MyTablePage = () => {
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
         },
@@ -1661,6 +1663,7 @@ const MyTablePage = () => {
             sort: true,
             width: 115,
             valueGetter: getFilteration,
+            filter: "agNumberColumnFilter",
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -2004,12 +2007,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -2029,7 +2050,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -2130,6 +2155,7 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            filter: "agNumberColumnFilter",
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
             menuTabs: [],
@@ -2350,7 +2376,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -2394,7 +2420,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2504,7 +2530,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2562,7 +2588,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2679,6 +2705,7 @@ const MyTablePage = () => {
             headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -2690,6 +2717,7 @@ const MyTablePage = () => {
             sortable: true,
             sort: true,
             valueGetter: getFilteration,
+            filter: "agNumberColumnFilter",
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -3156,12 +3184,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -3181,7 +3227,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -3283,6 +3333,7 @@ const MyTablePage = () => {
             },
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
@@ -3452,6 +3503,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             valueFormatter: (params) => `${params.value}%`,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -3478,6 +3530,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             valueFormatter: (params) => `${params.value}%`,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -3492,6 +3545,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             minWidth: 100,
+            filter: "agNumberColumnFilter",
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -4613,6 +4667,7 @@ const MyTablePage = () => {
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
         },
@@ -4620,7 +4675,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -5456,12 +5511,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -5481,7 +5554,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -5679,6 +5756,7 @@ const MyTablePage = () => {
             },
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
@@ -5746,7 +5824,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5761,7 +5839,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5780,7 +5858,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0,
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5795,7 +5873,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5911,7 +5989,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5969,7 +6047,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6120,7 +6198,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -6137,6 +6215,7 @@ const MyTablePage = () => {
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             hide: true,
@@ -6314,7 +6393,7 @@ const MyTablePage = () => {
             field: 'adsetname',
             sortable: true,
             minWidth: 450,
-            filter: 'agSetColumnFilter',
+            filter: 'agTextColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
@@ -6626,12 +6705,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -6651,7 +6748,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -6850,6 +6951,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -6918,7 +7020,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6933,7 +7035,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6952,7 +7054,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0,
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6967,7 +7069,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7083,7 +7185,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7141,7 +7243,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7299,7 +7401,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -7316,6 +7418,7 @@ const MyTablePage = () => {
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             hide: true,
@@ -7674,7 +7777,7 @@ const MyTablePage = () => {
             field: 'adsetname',
             sortable: true,
             minWidth: 450,
-            filter: 'agSetColumnFilter',
+            filter: 'agTextColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
@@ -8024,12 +8127,32 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
                     );
                 }
 
@@ -8049,7 +8172,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -8190,6 +8317,7 @@ const MyTablePage = () => {
                 return '';
             },
             minWidth: 110,
+            filter: "agNumberColumnFilter",
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
@@ -8323,7 +8451,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8439,7 +8567,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8497,7 +8625,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8622,7 +8750,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -8636,7 +8764,7 @@ const MyTablePage = () => {
             field: 'filteration',
             width: 115,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
@@ -9480,12 +9608,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -9505,7 +9651,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -9700,6 +9850,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -9746,7 +9897,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -9761,7 +9912,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -9780,7 +9931,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -9790,7 +9941,7 @@ const MyTablePage = () => {
             filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -9848,6 +9999,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             valueFormatter: (params) => `${params.value}%`,
+            filter: 'agNumberColumnFilter',
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -9865,7 +10017,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -10005,7 +10157,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -10018,7 +10170,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -10555,12 +10707,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -10580,7 +10750,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -10776,6 +10950,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -10822,7 +10997,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -10837,7 +11012,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -10856,7 +11031,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -10866,7 +11041,7 @@ const MyTablePage = () => {
             filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -10923,6 +11098,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
+            filter: 'agNumberColumnFilter',
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -10941,7 +11117,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -11059,7 +11235,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -11073,6 +11249,7 @@ const MyTablePage = () => {
             field: 'filteration',
             width: 115,
             sortable: true,
+            filter: "agNumberColumnFilter",
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
@@ -11251,7 +11428,7 @@ const MyTablePage = () => {
             // hide: true,
             sortable: true,
             minWidth: 450,
-            filter: 'agSetColumnFilter',
+            filter: 'agTextColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
@@ -11513,7 +11690,7 @@ const MyTablePage = () => {
                     setOpen(false);
                 };
 
-                
+
                 const saveInline = async () => {
                     const row = getRow();
                     if (!row) return;
@@ -11522,7 +11699,7 @@ const MyTablePage = () => {
                     setEditing(false);
                 };
 
-               
+
                 const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
@@ -11567,15 +11744,33 @@ const MyTablePage = () => {
                     message.success("Category updated");
                 };
 
-               
+
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -11595,7 +11790,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -11698,6 +11897,7 @@ const MyTablePage = () => {
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
             menuTabs: [],
+            filter: "agNumberColumnFilter",
             headerClass: 'hide-menu', // Add a custom class
         },
         date: {
@@ -11842,6 +12042,7 @@ const MyTablePage = () => {
             },
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "CTR = (FBClicks / Impressions) * 100",
@@ -11858,7 +12059,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -11969,7 +12170,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -11982,7 +12183,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -12903,12 +13104,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -12928,7 +13147,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -13131,6 +13354,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -13232,7 +13456,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -13354,7 +13578,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -13415,7 +13639,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -14123,12 +14347,30 @@ const MyTablePage = () => {
 
                 if (props.value && !editing) {
                     return (
-                        <span
-                            onClick={() => setEditing(true)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {props.value}
-                        </span>
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
                     );
                 }
 
@@ -14148,7 +14390,11 @@ const MyTablePage = () => {
                 return (
                     <>
                         <PlusOutlined
-                            onClick={openModal}
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
                             style={{ cursor: "pointer" }}
                         />
 
@@ -15043,7 +15289,7 @@ const MyTablePage = () => {
         setTime(value);
         setTimezoneChanged(true);
     }
-  
+
     const onClickButton = async () => {
         // Clear search input if account was changed
         if (accountChanged || dateChanged || timezoneChanged) {
@@ -16599,53 +16845,100 @@ const MyTablePage = () => {
                         
                     </Col> */}
                     <Col>
-  <Button
-    type="primary"
-    onClick={onClickButton} // Apply action
-    onMouseEnter={() => setHovered(true)}
-    onMouseLeave={() => setHovered(false)}
-    style={{
-      backgroundColor: hovered ? "#91C25F" : "transparent",
-      border: "1px solid #4CAF50",
-      borderRadius: "6px",
-      color: theme === "dark" ? "#ffffff" : "#000000",
-      padding: "0 12px",
-      height: "32px",
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      transition: "all 0.15s ease-in-out",
-    }}
-  >
-    <span>Apply</span>
+                        <Button
+                            type="primary"
+                            onClick={onClickButton} // Apply action
+                            onMouseEnter={() => setHovered(true)}
+                            onMouseLeave={() => setHovered(false)}
+                            style={{
+                                backgroundColor: hovered ? "#91C25F" : "transparent",
+                                border: "1px solid #4CAF50",
+                                borderRadius: "6px",
+                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                padding: "0 12px",
+                                height: "32px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                transition: "all 0.15s ease-in-out",
+                            }}
+                        >
+                            Apply
 
-    {/* Divider */}
-    <span style={{ opacity: 0.4 }}>|</span>
+                            {/* Divider */}
+                            {/* <span style={{ opacity: 0.4 }}>|</span> */}
 
-    {/* <RightOutlined
+                            {/* <RightOutlined
       onClick={(e) => {
         e.stopPropagation(); 
         router.push("/Basereport");
       }}
       style={{ cursor: "pointer" }}
     /> */}
-   <Tooltip title="Revenue base report">
-      <span
-        onClick={(e) => {
-          e.stopPropagation(); // 🔴 prevent Apply click
-          router.push("/Basereport");
-        }}
-        style={{
-          cursor: "pointer",
-          fontWeight: "600",
-          padding: "0 4px",
-        }}
-      >
-        R
-      </span>
-    </Tooltip>
-  </Button>
-</Col>
+                            {/* <Tooltip title="Revenue base report">
+                                <span
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push("/Basereport");
+                                    }}
+                                    style={{
+                                        cursor: "pointer",
+                                        fontWeight: "600",
+                                        padding: "0 4px",
+                                    }}
+                                >
+                                    R
+                                </span>
+                            </Tooltip> */}
+                        </Button>
+                    </Col>
+                    {revenuePratner !== "FB_TonicRsoc" && (
+                        <Col>
+                            <Button
+                                type="primary"
+                                onMouseEnter={() => setRHovered(true)}
+                                onMouseLeave={() => setRHovered(false)}
+                                style={{
+                                    backgroundColor: Rhovered
+                                        ? theme === "dark"
+                                            ? "rgba(24,144,255,0.06)"   
+                                            : "#e6f7ff"   
+                                        : "transparent",
+                                    border: '1px solid #91d5ff',
+                                    borderRadius: "6px",
+                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                    padding: "0 12px",
+                                    height: "32px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    transition: "all 0.15s ease-in-out",
+                                }}
+                            >
+                                <Tooltip title="Revenue base report" overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}>
+                                    <span
+                                        onClick={(e) => {
+                                            // e.stopPropagation();
+                                            router.push("/Basereport");
+                                        }}
+                                        style={{
+                                            cursor: "pointer",
+                                            fontWeight: "600",
+                                            padding: "0 4px",
+                                        }}
+                                    >
+                                        R
+                                    </span>
+                                </Tooltip>
+                            </Button>
+                        </Col>
+                    )}
 
 
                     <div className='Dashboard-Details-2'>
@@ -16909,14 +17202,14 @@ const MyTablePage = () => {
                                     trigger={['click']}
                                     onOpenChange={(open) => {
                                         if (open && !aiRequested) {
-                                            setAiRequested(true); // 🚀 API fires here
+                                            setAiRequested(true);
                                         }
                                     }}
                                 >
                                     <Button
                                         type="default"
                                         icon={<FaRobot style={{ fontSize: 20 }} />}
-                                        loading={aiLoading}   // ✅ use loading, not disabled
+                                        loading={aiLoading}
                                         style={{
                                             borderRadius: 8,
                                             background: theme === 'dark'
