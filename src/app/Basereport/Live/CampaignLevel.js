@@ -407,11 +407,37 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
             const token = localStorage.getItem("token");
 
-            const filteredItems = leafCampaigns.filter(item =>
-                bulkStatusAction === "ACTIVE"
-                    ? item.fbStatus === "PAUSED"
-                    : item.fbStatus === "ACTIVE"
-            )
+            // const filteredItems = leafCampaigns.filter(item =>
+            //     bulkStatusAction === "ACTIVE"
+            //         ? item.fbStatus === "PAUSED"
+            //         : item.fbStatus === "ACTIVE"
+            // )
+            //     .map(item => ({
+            //         status: bulkStatusAction,
+            //         campaign_id: item.campaignid,
+            //         accountNumber: String(item.accountNumber),
+            //         name: item.campaignname,
+            //         email: userdetails?.email,
+            //     }));
+
+            const campaignStatusMap = new Map(
+                Camapignlevelstatus.map(item => [
+                    String(item.campaign_id),
+                    item.status?.toUpperCase()
+                ])
+            );
+
+            // Filter leaf campaigns that actually need status change
+            const filteredItems = leafCampaigns
+                .filter(item => {
+                    const campaignId = String(item.campaignid);
+                    const currentStatus =
+                        campaignStatusMap.get(campaignId) || "ACTIVE";
+
+                    return bulkStatusAction === "ACTIVE"
+                        ? currentStatus === "PAUSED"
+                        : currentStatus === "ACTIVE";
+                })
                 .map(item => ({
                     status: bulkStatusAction,
                     campaign_id: item.campaignid,
@@ -437,8 +463,10 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
             if (resp.status === 200 || resp.status === 201) {
-                setCamapignlevelstatus(prev => {
-                    const arr = [...prev];
+                const updatedCampaignLevelStatus = (() => {
+                    const arr = Array.isArray(Camapignlevelstatus)
+                        ? [...Camapignlevelstatus]
+                        : [];
 
                     filteredItems.forEach(update => {
                         const idx = arr.findIndex(
@@ -448,12 +476,50 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         );
 
                         if (idx !== -1) {
-                            arr[idx] = { ...arr[idx], status: bulkStatusAction };
+                            arr[idx] = {
+                                ...arr[idx],
+                                status: bulkStatusAction
+                            };
                         }
                     });
 
                     return arr;
-                });
+                })();
+                setCamapignlevelstatus(updatedCampaignLevelStatus);
+                if (campaignStatusFilter !== "All") {
+                    const campaignStatusMap = new Map(
+                        updatedCampaignLevelStatus.map(item => [
+                            String(item.campaign_id),
+                            item.status?.toUpperCase()
+                        ])
+                    );
+
+                    const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                        campaignStatusMap.get(String(row.campaignid)) ===
+                        campaignStatusFilter?.toUpperCase()
+                    );
+
+                    setRowData(filteredRowObjects);
+                }
+
+
+                // setCamapignlevelstatus(prev => {
+                //     const arr = [...prev];
+
+                //     filteredItems.forEach(update => {
+                //         const idx = arr.findIndex(
+                //             c =>
+                //                 String(c.campaign_id) === String(update.campaign_id) &&
+                //                 String(c.accountNumber) === String(update.accountNumber)
+                //         );
+
+                //         if (idx !== -1) {
+                //             arr[idx] = { ...arr[idx], status: bulkStatusAction };
+                //         }
+                //     });
+
+                //     return arr;
+                // });
 
                 message.success(
                     `${filteredItems.length} campaign(s) updated to ${bulkStatusAction.toLowerCase()}`
@@ -564,7 +630,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
-      
+        valueFormatter: (params) => {
+            // GROUP ROW
+            if (params.node?.group) {
+                const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+                return firstChild?.adname ?? params.node.key;
+            }
+
+            // LEAF ROW
+            return params.value;
+        },
+
         comparator: (groupKeyA, groupKeyB, nodeA, nodeB) => {
 
             // get first leaf row of group A
@@ -604,7 +680,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         },
 
 
-     
+
 
 
 
@@ -708,7 +784,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
 
-             
+
 
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
@@ -759,7 +835,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 const statusKey = `${rowAccount}-${campaignid}`;
 
                 const [switchOn, setSwitchOn] = useState("false");
-             
+
 
                 React.useEffect(() => {
                     setUniversalObject(campaignComments.find(d => d.level === "campaign" && d.campaignid === campaignid && d.Account === rowAccount));
@@ -869,7 +945,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     }
                 };
 
-              
+
 
 
                 const sendEditedCommentToAPI = async (logData) => {
@@ -890,7 +966,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     }
                 };
 
-               
+
 
                 const handleCancels = () => {
                     setIsModalVisibles(false);
@@ -958,7 +1034,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         setPinned(updatedPinStatus);
                     }
                 };
-               
+
                 const handleOks = async () => {
                     const body = {
                         accountNumber: rowAccount,
@@ -1033,7 +1109,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             if (match >= 0) {
                                 arr[match] = { ...arr[match], comment: "", usercommit: userdetails?.email, editedTime: timeStamp };
                             }
-                       
+
 
                             return arr;
                         });
@@ -1125,8 +1201,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             pinned={pinned}
                             universalOject={universalOject}
                         />
-                        
-                       
+
+
                         {universalOject?.comment && (
                             <Tooltip
                                 // title={relatedComment || 'No comment available'}
@@ -1442,175 +1518,175 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             //         };
             //     })
             //     : null;
-//             const filteredData =
-//   mainData && mainData.length > 0
-//     ? mainData
-//         // ✅ STEP 1: keep only rows where mnet-hour exists
-//         .filter(eachData => eachData.updatedHour) 
-//         .map((eachData) => {
+            //             const filteredData =
+            //   mainData && mainData.length > 0
+            //     ? mainData
+            //         // ✅ STEP 1: keep only rows where mnet-hour exists
+            //         .filter(eachData => eachData.updatedHour) 
+            //         .map((eachData) => {
 
-//           // ---------- Revenue ----------
-//           let revenueData = 0;
-//           if (
-//             eachData.estimated_revenue !== null &&
-//             eachData.estimated_revenue !== undefined &&
-//             !isNaN(eachData.estimated_revenue)
-//           ) {
-//             revenueData = parseFloat(eachData.estimated_revenue);
-//           }
+            //           // ---------- Revenue ----------
+            //           let revenueData = 0;
+            //           if (
+            //             eachData.estimated_revenue !== null &&
+            //             eachData.estimated_revenue !== undefined &&
+            //             !isNaN(eachData.estimated_revenue)
+            //           ) {
+            //             revenueData = parseFloat(eachData.estimated_revenue);
+            //           }
 
-//           // ---------- Spend ----------
-//           const spendValue = !isNaN(eachData.spend)
-//             ? parseFloat(eachData.spend)
-//             : 0;
+            //           // ---------- Spend ----------
+            //           const spendValue = !isNaN(eachData.spend)
+            //             ? parseFloat(eachData.spend)
+            //             : 0;
 
-//           // ---------- Profit ----------
-//           const profit = (revenueData - spendValue).toFixed(2);
+            //           // ---------- Profit ----------
+            //           const profit = (revenueData - spendValue).toFixed(2);
 
-//           // ---------- RPC ----------
-//           const rpc =
-//             eachData.conversions && eachData.conversions > 0
-//               ? Math.round((revenueData / eachData.conversions) * 100) / 100
-//               : 0;
+            //           // ---------- RPC ----------
+            //           const rpc =
+            //             eachData.conversions && eachData.conversions > 0
+            //               ? Math.round((revenueData / eachData.conversions) * 100) / 100
+            //               : 0;
 
-//           // ---------- CPL ----------
-//           const cpl =
-//             eachData.fbLeads && eachData.fbLeads > 0
-//               ? Math.round((spendValue / eachData.fbLeads) * 100) / 100
-//               : 0;
+            //           // ---------- CPL ----------
+            //           const cpl =
+            //             eachData.fbLeads && eachData.fbLeads > 0
+            //               ? Math.round((spendValue / eachData.fbLeads) * 100) / 100
+            //               : 0;
 
-//           // ---------- NCPL ----------
-//           const ncpl =
-//             eachData.conversions && eachData.conversions > 0
-//               ? Math.round((spendValue / eachData.conversions) * 100) / 100
-//               : 0;
+            //           // ---------- NCPL ----------
+            //           const ncpl =
+            //             eachData.conversions && eachData.conversions > 0
+            //               ? Math.round((spendValue / eachData.conversions) * 100) / 100
+            //               : 0;
 
-//           const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-//           const cpcLinkClicks =
-//             fbLClicks > 0
-//               ? Math.round((spendValue / fbLClicks) * 100) / 100
-//               : 0;
+            //           const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+            //           const cpcLinkClicks =
+            //             fbLClicks > 0
+            //               ? Math.round((spendValue / fbLClicks) * 100) / 100
+            //               : 0;
 
-//           return {
-//             accountNumber: eachData.accountNumber,
-//             campaignname: eachData.campaign_name,
-//             adsetname: eachData.adsetName,
+            //           return {
+            //             accountNumber: eachData.accountNumber,
+            //             campaignname: eachData.campaign_name,
+            //             adsetname: eachData.adsetName,
 
-//             date: eachData[specifiedTimeZone],
-//             "fb-hour": eachData.hour || "",
-//             "mnet-hour": eachData.updatedHour, // ✅ only rows with value exist
+            //             date: eachData[specifiedTimeZone],
+            //             "fb-hour": eachData.hour || "",
+            //             "mnet-hour": eachData.updatedHour, // ✅ only rows with value exist
 
-//             // ✅ send spend & revenue ONLY for mnet-hour rows
-//             spend: spendValue.toFixed(2),
-//             revenue: revenueData.toFixed(2),
+            //             // ✅ send spend & revenue ONLY for mnet-hour rows
+            //             spend: spendValue.toFixed(2),
+            //             revenue: revenueData.toFixed(2),
 
-//             profit: parseFloat(profit),
-//             fbleads: parseInt(eachData.fbLeads || 0),
-//             conversions: parseInt(eachData.conversions || 0),
-//             cpc: parseFloat(eachData.cpc || 0),
-//             cpclinkclicks: cpcLinkClicks,
-//             fbclicks: parseInt(eachData.fbClicks || 0),
-//             fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
-//             impressions: parseInt(eachData.impressions || 0),
-//             rpc,
-//             cpl,
-//             ncpl,
+            //             profit: parseFloat(profit),
+            //             fbleads: parseInt(eachData.fbLeads || 0),
+            //             conversions: parseInt(eachData.conversions || 0),
+            //             cpc: parseFloat(eachData.cpc || 0),
+            //             cpclinkclicks: cpcLinkClicks,
+            //             fbclicks: parseInt(eachData.fbClicks || 0),
+            //             fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
+            //             impressions: parseInt(eachData.impressions || 0),
+            //             rpc,
+            //             cpl,
+            //             ncpl,
 
-//             adsetid: eachData.adset_id,
-//             campaignid: eachData.campaign_id,
-//             timezone: eachData[newtime] || "",
+            //             adsetid: eachData.adset_id,
+            //             campaignid: eachData.campaign_id,
+            //             timezone: eachData[newtime] || "",
 
-//             adid: "",
-//             adname: "",
-//             actions: "...",
-//           };
-//         })
-//     : [];
+            //             adid: "",
+            //             adname: "",
+            //             actions: "...",
+            //           };
+            //         })
+            //     : [];
 
 
-const filteredData =
-  mainData && mainData.length > 0
-    ? Object.values(
-        mainData
-          // 1️⃣ only rows with mnet-hour
-          .filter(eachData => eachData.updatedHour)
-          // 2️⃣ DEDUPLICATE by account + campaign + hour
-          .reduce((acc, eachData) => {
-            const key = `${eachData.accountNumber}_${eachData.campaign_id}_${eachData.updatedHour}`;
+            const filteredData =
+                mainData && mainData.length > 0
+                    ? Object.values(
+                        mainData
+                            // 1️⃣ only rows with mnet-hour
+                            .filter(eachData => eachData.updatedHour)
+                            // 2️⃣ DEDUPLICATE by account + campaign + hour
+                            .reduce((acc, eachData) => {
+                                const key = `${eachData.accountNumber}_${eachData.campaign_id}_${eachData.updatedHour}`;
 
-            // keep latest entry (override duplicates)
-            acc[key] = eachData;
-            return acc;
-          }, {})
-      )
-        // 3️⃣ map unique rows
-        .map(eachData => {
+                                // keep latest entry (override duplicates)
+                                acc[key] = eachData;
+                                return acc;
+                            }, {})
+                    )
+                        // 3️⃣ map unique rows
+                        .map(eachData => {
 
-          let revenueData = 0;
-          if (
-            eachData.estimated_revenue !== null &&
-            eachData.estimated_revenue !== undefined &&
-            !isNaN(eachData.estimated_revenue)
-          ) {
-            revenueData = parseFloat(eachData.estimated_revenue);
-          }
+                            let revenueData = 0;
+                            if (
+                                eachData.estimated_revenue !== null &&
+                                eachData.estimated_revenue !== undefined &&
+                                !isNaN(eachData.estimated_revenue)
+                            ) {
+                                revenueData = parseFloat(eachData.estimated_revenue);
+                            }
 
-          const spendValue = !isNaN(eachData.spend)
-            ? parseFloat(eachData.spend)
-            : 0;
+                            const spendValue = !isNaN(eachData.spend)
+                                ? parseFloat(eachData.spend)
+                                : 0;
 
-          const profit = (revenueData - spendValue).toFixed(2);
+                            const profit = (revenueData - spendValue).toFixed(2);
 
-          const rpc =
-            eachData.conversions > 0
-              ? Math.round((revenueData / eachData.conversions) * 100) / 100
-              : 0;
+                            const rpc =
+                                eachData.conversions > 0
+                                    ? Math.round((revenueData / eachData.conversions) * 100) / 100
+                                    : 0;
 
-          const cpl =
-            eachData.fbLeads > 0
-              ? Math.round((spendValue / eachData.fbLeads) * 100) / 100
-              : 0;
+                            const cpl =
+                                eachData.fbLeads > 0
+                                    ? Math.round((spendValue / eachData.fbLeads) * 100) / 100
+                                    : 0;
 
-          const ncpl =
-            eachData.conversions > 0
-              ? Math.round((spendValue / eachData.conversions) * 100) / 100
-              : 0;
+                            const ncpl =
+                                eachData.conversions > 0
+                                    ? Math.round((spendValue / eachData.conversions) * 100) / 100
+                                    : 0;
 
-          const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-          const cpcLinkClicks =
-            fbLClicks > 0
-              ? Math.round((spendValue / fbLClicks) * 100) / 100
-              : 0;
+                            const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                            const cpcLinkClicks =
+                                fbLClicks > 0
+                                    ? Math.round((spendValue / fbLClicks) * 100) / 100
+                                    : 0;
 
-          return {
-            accountNumber: eachData.accountNumber,
-            campaignname: eachData.campaign_name,
-            adsetname: eachData.adsetName,
-            date: eachData[specifiedTimeZone],
-            "fb-hour": eachData.hour || "",
-            "mnet-hour": eachData.updatedHour, // UNIQUE per row
-            spend: spendValue.toFixed(2),
-            revenue: revenueData.toFixed(2),
-            profit: parseFloat(profit),
-            fbleads: parseInt(eachData.fbLeads || 0),
-            conversions: parseInt(eachData.conversions || 0),
-            cpc: parseFloat(eachData.cpc || 0),
-            cpclinkclicks: cpcLinkClicks,
-            fbclicks: parseInt(eachData.fbClicks || 0),
-            fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
-            impressions: parseInt(eachData.impressions || 0),
-            rpc,
-            cpl,
-            ncpl,
-            adsetid: eachData.adset_id,
-            campaignid: eachData.campaign_id,
-            timezone: eachData[newtime] || "",
-            adid: "",
-            adname: "",
-            actions: "...",
-          };
-        })
-    : [];
+                            return {
+                                accountNumber: eachData.accountNumber,
+                                campaignname: eachData.campaign_name,
+                                adsetname: eachData.adsetName,
+                                date: eachData[specifiedTimeZone],
+                                "fb-hour": eachData.hour || "",
+                                "mnet-hour": eachData.updatedHour, // UNIQUE per row
+                                spend: spendValue.toFixed(2),
+                                revenue: revenueData.toFixed(2),
+                                profit: parseFloat(profit),
+                                fbleads: parseInt(eachData.fbLeads || 0),
+                                conversions: parseInt(eachData.conversions || 0),
+                                cpc: parseFloat(eachData.cpc || 0),
+                                cpclinkclicks: cpcLinkClicks,
+                                fbclicks: parseInt(eachData.fbClicks || 0),
+                                fblinkclicks: parseInt(eachData.fbLinkClicks || 0),
+                                impressions: parseInt(eachData.impressions || 0),
+                                rpc,
+                                cpl,
+                                ncpl,
+                                adsetid: eachData.adset_id,
+                                campaignid: eachData.campaign_id,
+                                timezone: eachData[newtime] || "",
+                                adid: "",
+                                adname: "",
+                                actions: "...",
+                            };
+                        })
+                    : [];
 
 
 
@@ -1631,7 +1707,7 @@ const filteredData =
                 maxNetworkHour.current = getMaxHour(mainData);
             }
 
-       
+
 
             let newFilterData;
             if (campaignStatusFilter !== "All") {
@@ -1702,7 +1778,7 @@ const filteredData =
             }
         }
     };
-   
+
 
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
@@ -1738,7 +1814,7 @@ const filteredData =
     const showModal = () => {
         setIsModalOpen(true);
     };
-   
+
     const gridOptions = useMemo(() => ({
         onColumnMoved: (params) => {
             // if (toggleStatus) {
@@ -1763,7 +1839,7 @@ const filteredData =
         functionCall1();
         setApiStatus(false);
     }
-   
+
 
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
@@ -1772,55 +1848,118 @@ const filteredData =
         }
     }, []);
 
-    useEffect(() => {
-        if (!newRowDataForFilter.current?.length) return; // ✅ guard
-      
-        const data =
-          campaignStatusFilter === "All"
-            ? newRowDataForFilter.current
-            : newRowDataForFilter.current.filter(
-                item =>
-                  item.fbStatus?.toUpperCase() ===
-                  campaignStatusFilter.toUpperCase()
-              );
-      
-        setRowData(data);
-      }, [campaignStatusFilter]);
-      
+    // useEffect(() => {
+    //     if (!newRowDataForFilter.current?.length) return; // ✅ guard
 
-    useEffect(() => {
-        // console.log(campaignComments, "campaignComments");
-        if (!newRowDataForFilter.current?.length) return;
-        const mainData = newRowDataForFilter.current;
-        const filterData = mainData && mainData.length > 0 ?
-            mainData.map((eachData) => {
-                const adsetObjectStatus = Camapignlevelstatus
-                    .find(item =>
-                        String(item.campaign_id) === String(eachData.campaignid) &&
-                        String(item.accountNumber) === String(eachData.accountNumber)
-                    );
-                return (
-                    {
-                        ...eachData,
-                        fbStatus: adsetObjectStatus?.status || "ACTIVE",
-                    }
-                )
-            }) : null;
-        newRowDataForFilter.current = filterData;
-        let newFilterData;
+    //     const data =
+    //         campaignStatusFilter === "All"
+    //             ? newRowDataForFilter.current
+    //             : newRowDataForFilter.current.filter(
+    //                 item =>
+    //                     item.fbStatus?.toUpperCase() ===
+    //                     campaignStatusFilter.toUpperCase()
+    //             );
+
+    //     setRowData(data);
+    // }, [campaignStatusFilter]);
+
+  useEffect(() => {
+        // functionCall1();
+        console.log(campaignStatusFilter, "campaignStatusFilter");
+        console.log(campaignStatusFilter?.toUpperCase())
         if (campaignStatusFilter !== "All") {
-            console.log("testing 4444");
-            newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-        }
-        else {
-            newFilterData = filterData;
-        }
+            // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            // Filter grid rows by campaign status
+            // const listOfUniqueCampaignids = [
+            //     ...new Set(
+            //         newRowDataForFilter.current
+            //             .map(item => item.campaignid)
+            //             .filter(Boolean)
+            //     )
+            // ];
 
-        setRowData(newFilterData);
-        // newRowDataForFilter.current = filteredData;
-        console.log("testing 4444");
-    }
-        , [Camapignlevelstatus]);
+            // const campaignStatusMap = Camapignlevelstatus.reduce((acc, item) => {
+            //     acc[String(item.campaign_id)] = item.status;
+            //     return acc;
+            // }, {});
+
+            // const campaignIdWithStatus = listOfUniqueCampaignids.map(campaignId => ({
+            //     campaignId: String(campaignId),
+            //     status: campaignStatusMap[String(campaignId)] || "UNKNOWN"
+            // }));
+
+            // const filteredCampaignIds = campaignIdWithStatus
+            //     .filter(
+            //         item =>
+            //             item.status?.toUpperCase() ===
+            //             campaignStatusFilter?.toUpperCase()
+            //     )
+            //     .map(item => item.campaignId);
+
+            // const filteredCampaignIdSet = new Set(filteredCampaignIds);
+
+            // const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+            //     filteredCampaignIdSet.has(String(row.campaignid))
+            // );
+
+            // Filter grid rows by campaign status
+            const campaignStatusMap = new Map(
+                Camapignlevelstatus.map(item => [
+                    String(item.campaign_id),
+                    item.status?.toUpperCase()
+                ])
+            );
+
+            const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                campaignStatusMap.get(String(row.campaignid)) ===
+                campaignStatusFilter?.toUpperCase()
+            );
+
+            // filteredRowObjects is the final filtered grid data
+
+            setRowData(filteredRowObjects);
+            // setRowData(filteredByStatus);
+            // newRowDataForFilter.current = filteredByStatus;
+            // console.log(newRowDataForFilter.current)
+        } else {
+            // console.log(newRowDataForFilter.current)
+            setRowData(newRowDataForFilter.current);
+        }
+    }, [campaignStatusFilter]);
+
+    // useEffect(() => {
+    //     // console.log(campaignComments, "campaignComments");
+    //     if (!newRowDataForFilter.current?.length) return;
+    //     const mainData = newRowDataForFilter.current;
+    //     const filterData = mainData && mainData.length > 0 ?
+    //         mainData.map((eachData) => {
+    //             const adsetObjectStatus = Camapignlevelstatus
+    //                 .find(item =>
+    //                     String(item.campaign_id) === String(eachData.campaignid) &&
+    //                     String(item.accountNumber) === String(eachData.accountNumber)
+    //                 );
+    //             return (
+    //                 {
+    //                     ...eachData,
+    //                     fbStatus: adsetObjectStatus?.status || "ACTIVE",
+    //                 }
+    //             )
+    //         }) : null;
+    //     newRowDataForFilter.current = filterData;
+    //     let newFilterData;
+    //     if (campaignStatusFilter !== "All") {
+    //         console.log("testing 4444");
+    //         newFilterData = filterData?.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+    //     }
+    //     else {
+    //         newFilterData = filterData;
+    //     }
+
+    //     setRowData(newFilterData);
+    //     // newRowDataForFilter.current = filteredData;
+    //     console.log("testing 4444");
+    // }
+    //     , [Camapignlevelstatus]);
 
     useEffect(() => {
         if (refreshpage === "Refresh11") {
@@ -1831,7 +1970,7 @@ const filteredData =
     }
         , [refreshpage]);
 
- 
+
 
 
     const onCellKeyDown = (params) => {
@@ -1962,7 +2101,7 @@ const filteredData =
     }
 
 
-    
+
     const ids = Array.isArray(newaccount)
         ? newaccount
         : (newaccount ? [newaccount] : []);
@@ -2434,7 +2573,7 @@ const filteredData =
                                     </Dropdown>
                                 </Col>
 
-                               
+
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                     <Tooltip
                                         title={
@@ -2443,7 +2582,7 @@ const filteredData =
                                                 <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
                                                 <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
                                                     Cron status: {cronStatus.current?.toLowerCase()}
-                                                 
+
                                                 </Text>
                                                 <div>Account:
                                                     <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
@@ -2463,7 +2602,7 @@ const filteredData =
                                         <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
                                     </Tooltip>
                                 </Col>
-                                
+
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                     {/* <Tooltip title="Export to CSV"> */}
                                     <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
@@ -2472,13 +2611,13 @@ const filteredData =
                             </Row>
                             {rowData.length > 0 ?
                                 (
-                                    
+
 
 
 
                                     <div
                                         className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                            
+
                                     >
                                         <div className='table-container'>
                                             <AgGridReact
@@ -2488,10 +2627,10 @@ const filteredData =
                                                 className='custom-grid'
                                                 context={context}
                                                 rowData={memorizedRowData}
-                                                immutableData={true}
-                                                getRowId={(params) =>
-                                                    `${params?.data?.accountNumber}_${params?.data?.campaignid}`
-                                                  }
+                                                // immutableData={true}
+                                                // getRowId={(params) =>
+                                                //     `${params?.data?.accountNumber}_${params?.data?.campaignid}`
+                                                //   }
                                                 rowSelection='multiple'
                                                 columnDefs={memorizedColumnDef}
                                                 defaultColDef={{ ...defaultColDef, suppressMenu: true }}
@@ -2504,6 +2643,7 @@ const filteredData =
                                                 groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                                                 suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
                                                 // rowSelection="multiple"
+                                                useValueFormatterForExport={true}
 
                                                 // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
                                                 // onCellKeyDown={onCellKeyDown}
@@ -2609,10 +2749,10 @@ const filteredData =
                                         </div>
                                     </div>
                                 ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                                   
+
                                     <div
                                         className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                                  
+
                                     >
                                         <div className='table-container'>
                                             <AgGridReact

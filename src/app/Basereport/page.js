@@ -1,6 +1,6 @@
 "use client"
 import { lazy, useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { redirect,useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import React from 'react';
 import axios from 'axios';
@@ -41,6 +41,24 @@ const newtworkCollections = {
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism"
 }
+const networkCollectionsForAiAssistant = {
+    FB_Mnet: 'Facebook_Mnet_Daily',
+    FB_MnetBing: 'Facebook_MnetBing_Daily',
+    FB_Enki: 'Facebook_Enki',
+    FB_System1: 'Facebook_System1',
+    FB_Rsoc: 'Facebook_Rsoc',
+    FB_Tonic: 'Facebook_Tonic',
+    FB_DomainActive: 'Facebook_DActive_Names',
+    FB_Bodies: 'Facebook_Bodies',
+    FB_Bodies1: 'Facebook_Bodies1',
+    Newsbreak_DA: 'Newsbreak_DomainActive',
+    FB_Tonic1: 'Facebook_Tonic1',
+    FB_Sedo: 'Facebook_Sedo',
+    FB_Inmobi: 'Facebook_Inmobi',
+    FB_TonicRsoc: 'Facebook_TonicRsoc',
+    FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
+    FB_CodeFuel: 'Facebook_CodeFuel_Daily',
+};
 
 const LiveReports = React.lazy(() => import('./Live/Live'));
 const DailyReports = React.lazy(() => import('../componentsOfReports/Daily'));
@@ -412,6 +430,7 @@ const MyTablePage = () => {
     console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
+    const [Rhovered, setRHovered] = useState(false);
 
     const deriveInitial = (dash, stored, nets) => {
         const fromDash = dash?.replace(/\+/g, " ").trim();
@@ -2196,7 +2215,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -2240,7 +2259,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2350,7 +2369,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2408,7 +2427,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -4290,6 +4309,7 @@ const MyTablePage = () => {
                 return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
             },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             sortable: true,
@@ -4305,6 +4325,7 @@ const MyTablePage = () => {
                 return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
             },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             sortable: true,
@@ -4322,7 +4343,7 @@ const MyTablePage = () => {
         cpm: {
             headerName: 'CPM',
             field: 'cpm',
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
@@ -4336,7 +4357,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -4999,91 +5020,246 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value} overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                            // fontWeight: 500,
+                        }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -5265,6 +5441,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -5333,7 +5510,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5348,7 +5525,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5366,8 +5543,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
             },
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5382,7 +5559,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5498,7 +5675,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5556,7 +5733,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5666,6 +5843,7 @@ const MyTablePage = () => {
                 return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
             },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             sortable: true,
@@ -5681,6 +5859,7 @@ const MyTablePage = () => {
                 return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
             },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             sortable: true,
@@ -5707,7 +5886,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -5724,6 +5903,7 @@ const MyTablePage = () => {
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             hide: true,
@@ -6039,99 +6219,252 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value} overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                            // fontWeight: 500,
+                        }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-        }
-
-        ,
+        },
         from: {
             // headerName: 'Start',
             // field: 'from',
@@ -6307,6 +6640,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -6375,7 +6709,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6389,8 +6723,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6408,8 +6742,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0,
             },
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6424,7 +6758,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6540,7 +6874,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6598,7 +6932,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6641,7 +6975,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
             minWidth: 180,
             spanRows: true,
-            filter: "agTextColumnFilter",
+
             // hide: true,
             // rowGroup: true,
             // enableRowGroup: true,
@@ -6756,7 +7090,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -7193,15 +7527,15 @@ const MyTablePage = () => {
             field: 'category',
             minWidth: 110,
             sortable: true,
-            // filter: 'agSetColumnFilter',
             filter: "agTextColumnFilter",
 
+            // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
                 if (!params.value) return '';
                 return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
             },
 
-
+            // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 const capitalize = (val) =>
                     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
@@ -7214,7 +7548,7 @@ const MyTablePage = () => {
                     return capitalize(campaign?.category);
                 }
 
-
+                // ✅ For normal (leaf) rows
                 return capitalize(params.data?.category);
             },
 
@@ -7261,6 +7595,8 @@ const MyTablePage = () => {
                     params.success && params.success(Array.from(uniqueCategories));
                 },
             },
+
+            // ✅ Safe comparator for sorting (group-aware)
             comparator: (valueA, valueB, nodeA, nodeB) => {
                 const isGroupA = nodeA?.group;
                 const isGroupB = nodeB?.group;
@@ -7271,131 +7607,252 @@ const MyTablePage = () => {
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
 
-
+            // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const isGroupRow = !!props?.node?.groupData;
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                // campaign id + campaign name for this row/group
-                const campaignId = isGroupRow
-                    ? props?.node?.allLeafChildren?.[0]?.data?.campaignid
-                    : props?.data?.campaignid;
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
-                const rowAccountNumber = isGroupRow
-                    ? props?.node?.allLeafChildren?.[0]?.data?.accountNumber
-                    : props?.data?.accountNumber;
-
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
-
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber) return;
-                    // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
-                    // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
-                    // const matchedAdset = Camapignlevelstatus.find(
-                    //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
-                    // );
-                    const matchedAdset = campaignComments
-                        .find(item =>
-                            String(item.campaignid) === String(campaignId) &&
-                            String(item.Account) === String(rowAccountNumber) &&
-                            String(item.level) === "campaign"
-                        );
-                    if (matchedAdset) {
-                        setCategory(matchedAdset?.category || "");
-                    }
-                }, [campaignComments]);
-
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
+                        return arr;
+                    });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    }
-
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value} overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                            // fontWeight: 500,
+                        }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
-
-
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -7652,7 +8109,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7768,7 +8225,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7826,7 +8283,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7951,7 +8408,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -7965,7 +8422,7 @@ const MyTablePage = () => {
             field: 'filteration',
             width: 115,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
@@ -8635,92 +9092,246 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                        return arr;
+                    });
 
-                    }
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value} overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                            // fontWeight: 500,
+                        }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -8945,8 +9556,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -8960,8 +9571,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -8979,8 +9590,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -9065,7 +9676,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -9205,7 +9816,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -9218,7 +9829,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -9582,91 +10193,245 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value} overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                            // fontWeight: 500,
+                        }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -9891,8 +10656,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -9906,8 +10671,8 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -9925,8 +10690,8 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0,
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
-            // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
+            // filter: "agTextColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -10011,7 +10776,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -10468,90 +11233,246 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
-                    setOpen(false);
+                        return arr;
+                    });
+
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value} overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                            // fontWeight: 500,
+                        }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -10799,7 +11720,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -10833,7 +11754,7 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
-   const columnDefsObject2 = {
+    const columnDefsObject2 = {
         accountNumber: {
             headerName: 'Account',
             field: 'accountNumber',
@@ -10910,7 +11831,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -10923,7 +11844,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -11564,19 +12485,16 @@ const MyTablePage = () => {
             sortable: true,
             filter: "agTextColumnFilter",
 
-
             // ✅ Helper: Capitalize the first letter only
             valueFormatter: (params) => {
                 if (!params.value) return '';
                 return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
             },
 
-
             // ✅ Show category for both grouped and normal rows
             valueGetter: (params) => {
                 const capitalize = (val) =>
                     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
-
 
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
@@ -11586,18 +12504,15 @@ const MyTablePage = () => {
                     return capitalize(campaign?.category);
                 }
 
-
                 // ✅ For normal (leaf) rows
                 return capitalize(params.data?.category);
             },
-
 
             // ✅ Filter uses same logic as valueGetter
             filterValueGetter: (params) => {
                 const capitalize = (val) =>
                     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
 
-
                 if (params.node.group) {
                     const firstChild = params.node.allLeafChildren?.[0];
                     const account = firstChild?.data?.accountNumber;
@@ -11606,22 +12521,18 @@ const MyTablePage = () => {
                     return capitalize(campaign?.category);
                 }
 
-
                 // ✅ Include leaf rows in filtering
                 return capitalize(params.data?.category);
             },
-
 
             // ✅ Dynamic filter list (from both grouped + leaf rows)
             filterParams: {
                 values: (params) => {
                     const uniqueCategories = new Set();
 
-
                     params.api.forEachNode((node) => {
                         const capitalize = (val) =>
                             val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
-
 
                         if (node.group) {
                             const firstChild = node.allLeafChildren?.[0];
@@ -11636,12 +12547,10 @@ const MyTablePage = () => {
                         }
                     });
 
-
                     // params.success(Array.from(uniqueCategories));
                     params.success && params.success(Array.from(uniqueCategories));
                 },
             },
-
 
             // ✅ Safe comparator for sorting (group-aware)
             comparator: (valueA, valueB, nodeA, nodeB) => {
@@ -11654,108 +12563,250 @@ const MyTablePage = () => {
                 return valueA?.localeCompare?.(valueB) ?? 0;
             },
 
-
             // ✅ Optional — hide empty leaf cells (if any)
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
-
-                    const payload = {
-                        accountNumber: row.accountNumber,
-                        campaignid: row.campaignid,
-                        level: "campaign",
-                        category,
-                    };
-
-
-                    try {
-                        const token = localStorage.getItem("token");
-
-
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
-                        );
-
-
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
-                        });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
-
-
-                    }
-
-
+                    await saveApi(row, category);
                     setOpen(false);
                 };
 
 
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category: catValue,
+                    };
+
+                    const token = localStorage.getItem("token");
+
+                    await apiClient.post(
+                        "/UpdateCategoryNew",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
+                        );
+
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
+                        });
+
+                        return arr;
+                    });
+
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
+                };
+
+
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value} overlayInnerStyle={{
+                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            border: '1px solid #ccc',
+                            borderRadius: 6,
+                            // fontWeight: 500,
+                        }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
                 return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
                         >
-                            <PlusOutlined />
-                        </span>
-
-
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -11986,7 +13037,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
-        spend:{
+        spend: {
             headerName: 'Spend',
             field: 'spend',
             minWidth: 105,
@@ -12044,7 +13095,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -12059,7 +13110,7 @@ const MyTablePage = () => {
 
 
         },
-        fbleads:{
+        fbleads: {
             headerName: 'FBLeads',
             field: 'fbleads',
             minWidth: 105,
@@ -12072,7 +13123,7 @@ const MyTablePage = () => {
 
 
         },
-        conversions:{
+        conversions: {
             headerName: 'Conv',
             field: 'conversions',
             minWidth: 85,
@@ -12166,7 +13217,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -12227,7 +13278,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -12278,8 +13329,8 @@ const MyTablePage = () => {
         },
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: "agNumberColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: "agNumberColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
 
@@ -12402,7 +13453,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Profit/Revenue)*100',
             valueGetter: getCpm,
@@ -12418,6 +13469,7 @@ const MyTablePage = () => {
             sortable: true,
             sortable: true,
             valueGetter: getFilteration,
+            filter: "agNumberColumnFilter",
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -13084,7 +14136,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', minWidth: 80, field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'CPL = Spend / FBLeads', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ncpl: { headerName: 'NCPL', minWidth: 90, field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'NCPL = Spend / Conversions', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -14402,9 +15454,15 @@ const MyTablePage = () => {
     );
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState(null);
-    const [recDataByAccount, setRecDataByAccount] = useState({});
-    const [recAccounts, setRecAccounts] = useState([]);
-    const network = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]
+    const [aiSummary, setAiSummary] = useState(null);
+    const [aiRequested, setAiRequested] = useState(false);
+
+
+
+
+    const network = networkFromDashboard ?? storedData?.revenuePratner ?? networks[0];
+
+
     function buildAiAssistantHref(selectedValue, network, time) {
         const accounts = Array.isArray(selectedValue)
             ? selectedValue
@@ -14413,11 +15471,13 @@ const MyTablePage = () => {
                 .map(s => s.trim())
                 .filter(Boolean);
 
+
         if (!accounts.length) return '';
         const accountsParam = encodeURIComponent(accounts.join(','));
         const qs = new URLSearchParams();
         if (network) qs.set('network', String(network));
         if (time) qs.set('time', String(time));
+
 
         const q = qs.toString();
         return q
@@ -14425,194 +15485,261 @@ const MyTablePage = () => {
             : `/AiAssistant/${accountsParam}`;
     }
 
+
+    function resolveAiNetwork(network) {
+        if (!network) return network;
+
+
+
+
+        if (networkCollectionsForAiAssistant[network]) {
+            return networkCollectionsForAiAssistant[network];
+        }
+
+
+        return network;
+    }
+
+
     useEffect(() => {
+        if (!aiRequested) return; // 🔑 stop auto call on page load
+
+
         const accounts = Array.isArray(newaccount)
             ? newaccount
-            : String(newaccount || '').split(',').map(s => s.trim()).filter(Boolean);
+            : String(newaccount || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+
 
         if (!accounts.length) {
-            setRecDataByAccount({});
-            setRecAccounts([]);
-            setAiLoading(false);
+            setAiSummary(null);
             setAiError(null);
+            setAiLoading(false);
             return;
         }
 
-        // const url =
-        //     accounts.length === 1
-        //         ? `https://prodapis.adsgoat.in/Recommendations/${encodeURIComponent(accounts[0])}`
-        //         : `https://prodapis.adsgoat.in/Recommendations?accounts=${accounts.join(',')}`;
 
-        // const token = localStorage.getItem('token');
+        const resolvedNetwork = resolveAiNetwork(network);
+
 
         (async () => {
             try {
-                setInitialLoading(true);
                 setAiLoading(true);
                 setAiError(null);
 
-                const headers = {};
-                if (token) {
-                    headers['Authorization'] = token;
-                }
-
-                const authHeaders = { headers: { Authorization: localStorage.getItem("token") } };
 
                 const res = await axios.post(
-                    `https://prodapis.adsgoat.in/Recommendations`,
-                    { "accounts": accounts, ...(accounts.length > 1 ? { "merge": true, "includeAccounts": true } : {}) },
-                    authHeaders
+                    'https://prodapis.adsgoat.in/AiCampaignRecommendations',
+                    {
+                        accountNumbers: accounts,
+                        network: resolvedNetwork,
+                        timezone: time,
+                    },
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token'),
+                        },
+                    }
                 );
-                if (res.status === 404) {
-                    setRecDataByAccount({});
-                    setRecAccounts([]);
-                    setAiLoading(false);
-                    return;
-                }
 
-                // if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                const data = res.data;
-                setRecDataByAccount(data);
-                // setRecAccounts(accounts.filter(acc => data?.[acc]));
-                const validAccounts = accounts.filter(acc => {
-                    const accountData = data?.[acc];
-                    if (!accountData) return false;
-
-                    const hasConditions = Array.isArray(accountData.condition) && accountData.condition.length > 0;
-                    const hasSummary = accountData.summary && Object.keys(accountData.summary).length > 0;
-
-                    return hasConditions || hasSummary;
-                });
-
-                setRecAccounts(validAccounts);
-                setInitialLoading(false);
+                setAiSummary(res.data?.summary || null);
             } catch (e) {
-                setInitialLoading(false);
-                setAiError(e.message || 'Failed to load');
-                setRecDataByAccount({});
-                setRecAccounts([]);
+                setAiError(e.message || 'Failed to load AI recommendations');
+                setAiSummary(null);
             } finally {
                 setAiLoading(false);
-                setInitialLoading(false);
             }
         })();
-    }, [newaccount]);
+    }, [aiRequested, newaccount, network, time]);
+
+
+    useEffect(() => {
+        setAiRequested(false);
+        setAiSummary(null);
+    }, [newaccount, network, time]);
+
+
+    function buildConditionsFromSummary(summary) {
+        if (!summary) return [];
+
+
+        const conditions = [];
+
+
+        if (summary.pause_loss_makers > 0) {
+            conditions.push({
+                key: 'pause_loss_makers',
+                title: 'Pause Loss Makers',
+                count: summary.pause_loss_makers,
+                desc: 'campaigns losing money consistently',
+            });
+        }
+
+
+        if (summary.scale_winners > 0) {
+            conditions.push({
+                key: 'scale_winners',
+                title: 'Scale Winners',
+                count: summary.scale_winners,
+                desc: 'high ROI campaigns',
+            });
+        }
+
+
+        if (summary.reallocate_budget?.low_performers > 0) {
+            conditions.push({
+                key: 'reallocate_low',
+                title: 'Reallocate Budget (Low)',
+                count: summary.reallocate_budget.low_performers,
+                desc: 'low performing campaigns',
+            });
+        }
+
+
+        if (summary.reallocate_budget?.high_performers > 0) {
+            conditions.push({
+                key: 'reallocate_high',
+                title: 'Reallocate Budget (High)',
+                count: summary.reallocate_budget.high_performers,
+                desc: 'top performing campaigns',
+            });
+        }
+
+
+        if (summary.risk_alert > 0) {
+            conditions.push({
+                key: 'risk_alert',
+                title: 'Risk Alerts',
+                count: summary.risk_alert,
+                desc: 'early performance decline',
+            });
+        }
+        if (summary.filtration > 0) {
+            conditions.push({
+                title: 'Filteration',
+                count: summary.filtration,
+                desc: 'Filtered campaigns',
+            })
+        }
+
+        return conditions;
+    }
     const aiItems = useMemo(() => {
         if (aiLoading) {
-            return [
-                {
-                    key: 'loading',
-                    disabled: true,
-                    label: (
-                        <span style={{ fontSize: 13, color: theme === 'dark' ? '#bbb' : '#666' }}>
-                            Loading recommendations…
-                        </span>
-                    ),
-                },
-            ];
-        }
-        // if (aiError) {
-        //     return [
-        //         {
-        //             key: 'error',
-        //             disabled: true,
-        //             label: (
-        //                 <span style={{ fontSize: 13, color: '#d4380d' }}>
-        //                     Error: {aiError}
-        //                 </span>
-        //             ),
-        //         },
-        //     ];
-        // }
-        if (recAccounts.length === 0) {
-            return [
-                {
-                    key: 'empty',
-                    disabled: true,
-                    label: (
-                        <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
-                            No recommendations found (last 2 days).
-                        </span>
-                    ),
-                },
-            ];
-        }
-        // const first = recDataByAccount[recAccounts[0]] || {};
-        // const condition = Array.isArray(first.condition) ? first.condition : [];
-        // Collect all conditions across valid accounts
-        const allConditions = new Set();
-        recAccounts.forEach(acc => {
-            const accConditions = recDataByAccount[acc]?.condition || [];
-            accConditions.forEach(c => allConditions.add(c));
-        });
-        const condition = Array.from(allConditions);
-
-        const totals = {};
-        condition.forEach(k => (totals[k] = 0));
-        recAccounts.forEach(acc => {
-            const s = recDataByAccount[acc]?.summary;
-            if (!s) return;
-            condition.forEach(k => {
-                totals[k] += Number(s?.[k]?.count || 0);
-            });
-        });
-        const LABEL_TEXT_BY_CONDITION = {
-            highROI: 'campaigns showing ROI > 20%',
-            lowROI: 'campaigns showing ROI < -20%',
-            lowCTR: 'campaigns showing CTR < 3%',
-        };
-        const buildQuery = (obj) => {
-            const qs = new URLSearchParams();
-            Object.entries(obj).forEach(([k, v]) => {
-                if (v !== undefined && v !== null && String(v).trim() !== '') {
-                    qs.set(k, String(v));
-                }
-            });
-            return qs.toString();
-        };
-
-        const arr = condition.map((k, idx) => {
-            const text = LABEL_TEXT_BY_CONDITION[k] || 'campaigns';
-            return {
-                key: String(idx + 1),
+            return [{
+                key: 'loading',
+                disabled: true,
                 label: (
-                    <div>
-                        <strong>{k} Campaigns</strong>
-                        <div style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#888' }}>
-                            {totals[k]} {text}
-                        </div>
-                    </div>
+                    <span style={{ fontSize: 13, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                        Loading recommendations…
+                    </span>
                 ),
-            };
-        });
-        arr.push({
+            }];
+        }
+
+
+        if (aiError) {
+            return [{
+                key: 'error',
+                disabled: true,
+                label: (
+                    <span style={{ fontSize: 12, color: '#d4380d' }}>
+                        Failed to load recommendations
+                    </span>
+                ),
+            }];
+        }
+
+
+        if (!aiSummary) {
+            return [{
+                key: 'empty',
+                disabled: true,
+                label: (
+                    <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                        No recommendations found (last 4 days).
+                    </span>
+                ),
+            }];
+        }
+
+
+        const conditions = buildConditionsFromSummary(aiSummary);
+
+
+        if (!conditions.length) {
+            return [{
+                key: 'empty',
+                disabled: true,
+                label: (
+                    <span style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#666' }}>
+                        No recommendations found (last 4 days).
+                    </span>
+                ),
+            }];
+        }
+
+
+        const items = conditions.map((c, idx) => ({
+            key: String(idx + 1),
+            label: (
+                <div>
+                    <strong>{c.title}</strong>
+                    <div style={{ fontSize: 12, color: theme === 'dark' ? '#bbb' : '#888' }}>
+                        {c.count} {c.desc}
+                    </div>
+                </div>
+            ),
+        }));
+
+
+        items.push({
             type: 'divider',
             style: {
-                border: theme === 'dark' ? '1px solid #ccc' : '1px solid #f0f0f0',
+                border: theme === 'dark' ? '1px solid #333' : '1px solid #f0f0f0',
                 margin: '6px 0',
             },
         });
 
 
-        arr.push({
+        items.push({
             key: 'view-all',
             label: (
                 <Button
                     type="link"
                     onClick={() => {
-                        const href = buildAiAssistantHref(selectedValue, network, time);
-                        if (href) window.open(href, '_blank', 'noopener,noreferrer');
+                        const resolvedNetwork = resolveAiNetwork(network);
+
+
+                        const href = buildAiAssistantHref(
+                            newaccount,
+                            resolvedNetwork,
+                            time
+                        );
+
+
+                        if (href) {
+                            window.open(href, '_blank', 'noopener,noreferrer');
+                        }
                     }}
-                    style={{ color: theme === 'dark' ? '#52c41a' : '#389e0d', padding: 0 }}
+
+
+                    style={{
+                        color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                        padding: 0,
+                    }}
                 >
                     View All Recommendations
                 </Button>
             ),
         });
 
-        return arr;
-    }, [aiLoading, aiError, recAccounts, recDataByAccount, theme]);
+
+        return items;
+    }, [aiLoading, aiError, aiSummary, theme, selectedValue, network, time]);
 
     return (
         <div className='reports-container'>
@@ -14994,55 +16121,101 @@ const MyTablePage = () => {
                             }}
                     /> */}
                     <Col>
-  <Button
-    type="primary"
-    onClick={onClickButton}
-    onMouseEnter={() => setHovered(true)}
-    onMouseLeave={() => setHovered(false)}
-    style={{
-      backgroundColor: hovered ? "#91C25F" : "transparent",
-      border: "1px solid #4CAF50",
-      borderRadius: "6px",
-      color: theme === "dark" ? "#ffffff" : "#000000",
-      padding: "0 12px",
-      height: "32px",
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      transition: "all 0.15s ease-in-out",
-    }}
-  >
-    <span>Apply</span>
+                        <Button
+                            type="primary"
+                            onClick={onClickButton}
+                            onMouseEnter={() => setHovered(true)}
+                            onMouseLeave={() => setHovered(false)}
+                            style={{
+                                backgroundColor: hovered ? "#91C25F" : "transparent",
+                                border: "1px solid #4CAF50",
+                                borderRadius: "6px",
+                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                padding: "0 12px",
+                                height: "32px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                transition: "all 0.15s ease-in-out",
+                            }}
+                        >
+                            Apply
 
-    {/* Divider */}
-    <span style={{ opacity: 0.4 }}>|</span>
+                            {/* Divider */}
+                            {/* <span style={{ opacity: 0.4 }}>|</span> */}
 
-    {/* Arrow action */}
-    {/* <LeftOutlined
+                            {/* Arrow action */}
+                            {/* <LeftOutlined
       onClick={(e) => {
         e.stopPropagation(); // 🔴 prevents Apply click
         router.push("/Reports");
       }}
       style={{ cursor: "pointer" }}
     /> */}
-     <Tooltip title="Spend base report">
-      <span
-        onClick={(e) => {
-          e.stopPropagation(); // ✅ prevent Apply click
-          router.push("/Reports");
-        }}
-        style={{
-          cursor: "pointer",
-          fontWeight: "600",
-          color: theme === "dark" ? "#ffffff" : "#000000",
-        }}
-      >
-        S
-      </span>
-    </Tooltip>
-  </Button>
-</Col>
+                            {/* <Tooltip title="Spend base report"> */}
+                            {/* <span
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // ✅ prevent Apply click
+                                        router.push("/Reports");
+                                    }}
+                                    style={{
+                                        cursor: "pointer",
+                                        fontWeight: "600",
+                                        color: theme === "dark" ? "#ffffff" : "#000000",
+                                    }}
+                                >
+                                    S
+                                </span>
+                            </Tooltip> */}
+                        </Button>
 
+                    </Col>
+                    <Col>
+                        {revenuePratner !== "FB_TonicRsoc" && (
+                            <Button
+                                type="primary"
+                                onMouseEnter={() => setRHovered(true)}
+                                onMouseLeave={() => setRHovered(false)}
+                                style={{
+                                    backgroundColor: Rhovered
+                                        ? theme === "dark"
+                                            ? "rgba(24,144,255,0.06)"
+                                            : "#e6f7ff"
+                                        : "transparent",
+                                    border: '1px solid #91d5ff',
+                                    borderRadius: "6px",
+                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                    padding: "0 12px",
+                                    height: "32px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    transition: "all 0.15s ease-in-out",
+                                }}>
+                                <Tooltip title="Spend base report" overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}>
+                                    <span
+                                        onClick={(e) => {
+                                            // e.stopPropagation(); // ✅ prevent Apply click
+                                            router.push("/Reports");
+                                        }}
+                                        style={{
+                                            cursor: "pointer",
+                                            fontWeight: "600",
+                                            color: theme === "dark" ? "#ffffff" : "#000000",
+                                        }}
+                                    >
+                                        S
+                                    </span>
+                                </Tooltip>
+                            </Button>
+                        )}
+                    </Col>
 
                     <div className='Dashboard-Details-2'>
                         <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
@@ -15272,7 +16445,7 @@ const MyTablePage = () => {
                                         AI Assistant
                                     </Button>
                                 </Tooltip> */}
-                                <Dropdown
+                                {/* <Dropdown
                                     menu={{
                                         items: aiItems,
                                         className: theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light',
@@ -15294,8 +16467,39 @@ const MyTablePage = () => {
                                     >
                                         AI Assistant
                                     </Button>
+                                </Dropdown> */}
+                                <Dropdown
+                                    menu={{
+                                        items: aiItems,
+                                        className: theme === 'dark'
+                                            ? 'custom-dropdown-menu-dark'
+                                            : 'custom-dropdown-menu-light',
+                                    }}
+                                    trigger={['click']}
+                                    onOpenChange={(open) => {
+                                        if (open && !aiRequested) {
+                                            setAiRequested(true); // 🚀 API fires here
+                                        }
+                                    }}
+                                >
+                                    <Button
+                                        type="default"
+                                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                                        loading={aiLoading}   // ✅ use loading, not disabled
+                                        style={{
+                                            borderRadius: 8,
+                                            background: theme === 'dark'
+                                                ? 'rgba(82,196,26,0.06)'
+                                                : '#f0fdf4',
+                                            border: '1px solid #4CAF50',
+                                            color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                                            fontWeight: 500,
+                                            marginRight: '5px',
+                                        }}
+                                    >
+                                        AI Assistant
+                                    </Button>
                                 </Dropdown>
-
                                 <Tooltip
                                     title={`🍳 This feature is cooking—almost ready to serve 😜`}
                                     overlayInnerStyle={{
