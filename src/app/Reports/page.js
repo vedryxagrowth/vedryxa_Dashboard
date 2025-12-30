@@ -60,6 +60,7 @@ const networkCollectionsForAiAssistant = {
     FB_TonicRsoc: 'Facebook_TonicRsoc',
     FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
+    FB_Predicto: 'Facebook_Predicto_Daily',
 };
 
 
