@@ -5,7 +5,11 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge, Menu, Dropdown, Tooltip, Space } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined, PictureOutlined, LikeOutlined,
+    CommentOutlined,
+    ShareAltOutlined
+} from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -166,6 +170,9 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     const [confirmBulkLoading, setConfirmBulkLoading] = useState(false);
     const [bulkOpen, setBulkOpen] = useState(false);
     const [bulkCategory, setBulkCategory] = useState("");
+    const [campaignIds, setCampaignIds] = useState([]);
+    const [adLevelCreatives, setAdLevelCreatives] = useState([]);
+
 
     // useEffect to show selected campaigns after clearing search
     // useEffect(() => {
@@ -959,6 +966,13 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     }
                     return params.node.key; // fallback to campaignid
                 })();
+                const leafData = params.node.group
+                    ? params.node.allLeafChildren?.[0]?.data
+                    : params.data;
+
+                const currentCampaignId = leafData?.campaignid;
+                const currentAccount = leafData?.accountNumber;
+                const currentAdsetId = leafData?.adsetid;
 
                 const firstColumnValue = adsetNameGroup;  // campaign name
                 const campaignName = adsetNameGroup;
@@ -1100,6 +1114,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 const [comment, setComment] = useState(relatedComment || '');
                 const [universalOject, setUniversalObject] = React.useState(null)
                 const [confirmLoading, setConfirmLoading] = React.useState(false);
+                const [selectedCampaignCreatives, setSelectedCampaignCreatives] = useState([]);
+                const [creativeModalOpen, setCreativeModalOpen] = useState(false);
                 // const [starred, setStarred] = useState(isStarred);
                 // const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
@@ -2149,6 +2165,60 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 //         </Tooltip>
                 //     );
                 // };
+                const adLevelCreatives = params.context?.adLevelCreatives || [];
+                const campaignCreative = adLevelCreatives.find(
+                    c =>
+                        String(c.campaignId) === String(currentCampaignId) &&
+                        String(c.accountNumber) === String(currentAccount)
+                );
+
+                const adsetCreative = campaignCreative?.adsets?.find(
+                    a => String(a.adsetId) === String(currentAdsetId)
+                );
+
+                const creatives = adsetCreative?.ads || [];
+                const CreativeTooltip = () => {
+                    if (!adLevelCreatives.length) {
+                        return <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>Loading creatives…</div>;
+                    }
+
+                    if (!creatives.length) {
+                        return <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>No creatives for this adset</div>;
+                    }
+
+                    return (
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(2, 1fr)",
+                                gap: 5,
+                                maxWidth: 280
+                            }}
+                        >
+                            {creatives.map((ad, i) => (
+                                <img
+                                    key={i}
+                                    src={ad.image}
+                                    alt={ad.headline || "Creative"}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCampaignCreatives(creatives);
+                                        setCreativeModalOpen(true);
+                                    }}
+                                    style={{
+                                        width: 50,
+                                        height: 50,
+                                        objectFit: "cover",
+                                        borderRadius: 2,
+                                        border: "1px solid #ccc",
+                                        cursor: "pointer",
+                                    }}
+                                />
+
+                            ))}
+                        </div>
+                    );
+                };
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -2309,6 +2379,243 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
+                        <Tooltip
+                            title={<CreativeTooltip />}
+                            placement="right"
+                            overlayInnerStyle={{
+                                backgroundColor: theme === "dark" ? "#111" : "#fff",
+                                border: "1px solid #ccc",
+                                borderRadius: 8,
+                                padding: 10
+                            }}
+                        >
+                            <PictureOutlined
+                                className={
+                                    theme === "dark"
+                                        ? creatives.length > 0
+                                            ? "black-icon-creatives"
+                                            : "black-icon-creatives1"
+                                        : ""
+                                }
+
+                                style={{
+                                    cursor: "pointer",
+                                    color: creatives.length ? "#1890ff" : "#aaa",
+                                    fontSize: 12,
+                                    marginRight: '5px'
+                                }}
+                            />
+                        </Tooltip>
+                        <Modal
+                            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                            open={creativeModalOpen}
+                            onCancel={() => {
+                                setCreativeModalOpen(false);
+                                setSelectedCampaignCreatives([]);
+                            }}
+                            footer={null}
+                            width={350}
+                            closable
+                            bodyStyle={{
+                                padding: 0,
+                                background: theme === "dark" ? "#18191a" : "#fff",
+                                overflowY: "auto",
+                                maxHeight: "85vh",
+                            }}
+                            style={{ top: 15 }}
+                        >
+                            {selectedCampaignCreatives.map((selectedCreative, idx) => (
+                                <div key={idx}>
+
+
+                                    <div style={{ padding: "8px 10px" }}>
+                                        <div style={{ display: "flex", alignItems: "center" }}>
+                                            <img
+                                                src={selectedCreative.image}
+                                                alt="page"
+                                                style={{
+                                                    width: 35,
+                                                    height: 35,
+                                                    borderRadius: "50%",
+                                                    objectFit: "cover",
+                                                }}
+                                            />
+
+                                            <div style={{ flex: 1, marginLeft: 6 }}>
+                                                <div
+                                                    style={{
+                                                        fontWeight: 600,
+                                                        fontSize: 10,
+                                                        color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                    }}
+                                                >
+                                                    {selectedCreative.adName || "-"}
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        fontSize: 10,
+                                                        color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                                                    }}
+                                                >
+                                                    Sponsored <GlobalOutlined />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {selectedCreative.message && (
+                                            <div
+                                                style={{
+                                                    marginTop: 2,
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                }}
+                                            >
+                                                {selectedCreative.message}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <img
+                                        src={selectedCreative.image}
+                                        alt="creative"
+                                        style={{
+                                            width: "100%",
+                                            height: "auto",
+                                            objectFit: "cover",
+                                            display: "block",
+                                        }}
+                                    />
+                                    <div style={{ padding: "8px 10px" }}>
+                                        {selectedCreative.headline && (
+                                            <div
+                                                style={{
+                                                    fontSize: 8,
+                                                    fontWeight: 600,
+                                                    color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                    marginBottom: 2,
+                                                }}
+                                            >
+                                                {selectedCreative.headline}
+                                            </div>
+                                        )}
+
+                                        {selectedCreative.description && (
+                                            <div
+                                                style={{
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                                                    marginBottom: 4,
+                                                }}
+                                            >
+                                                {selectedCreative.description}
+                                            </div>
+                                        )}
+
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                gap: 6,
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#b0b3b8" : "#525456",
+                                                    wordBreak: "break-word",
+                                                }}
+                                            >
+                                                {selectedCreative.websiteUrl
+                                                    ? new URL(selectedCreative.websiteUrl).hostname
+                                                    : "-"}
+                                            </div>
+
+                                            {selectedCreative.websiteUrl && (
+                                                <a
+                                                    href={selectedCreative.websiteUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ textDecoration: "none" }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            padding: "5px 12px",
+                                                            background: "#91C25F",
+                                                            color: "#000",
+                                                            borderRadius: 18,
+                                                            fontSize: 8,
+                                                            fontWeight: 600,
+                                                            whiteSpace: "nowrap",
+                                                        }}
+                                                    >
+                                                        Learn more
+                                                    </div>
+                                                </a>
+                                            )}
+                                        </div>
+
+                                        {selectedCreative.websiteUrl && (
+                                            <div
+                                                style={{
+                                                    marginTop: 2,
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                                                    wordBreak: "break-all",
+                                                }}
+                                            >
+                                                <a
+                                                    href={selectedCreative.websiteUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                                                        textDecoration: "none",
+                                                    }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {selectedCreative.websiteUrl}
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div
+                                        style={{
+                                            borderTop: theme === "dark"
+                                                ? "1px solid #3a3b3c"
+                                                : "1px solid #ddd",
+                                            display: "flex",
+                                            justifyContent: "space-around",
+                                            padding: "8px 0",
+                                            fontSize: 10,
+                                            color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                                        }}
+                                    >
+                                        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                                            <LikeOutlined style={{ marginRight: 5, fontSize: 12 }} />
+                                            Like
+                                        </div>
+                                        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                                            <CommentOutlined style={{ marginRight: 5, fontSize: 12 }} />
+                                            Comment
+                                        </div>
+                                        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                                            <ShareAltOutlined style={{ marginRight: 5, fontSize: 12 }} />
+                                            Share
+                                        </div>
+                                    </div>
+
+                                    {idx < selectedCampaignCreatives.length - 1 && (
+                                        <div
+                                            style={{
+                                                height: 8,
+                                                background: theme === "dark" ? "#303031ff" : "#e0e2e3ff",
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </Modal>
                         <LinkOutlined
                             onClick={() => {
                                 const url = `/DailyAndCampaignHistory/AdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -2461,6 +2768,23 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             // You had a filter to skip rows where ad_clicks > 0
             const mainData = resp.data || [];
+
+            const campaignsByAccount = {};
+            mainData.forEach(item => {
+                const account = String(item.accountNumber);
+                const campaignId = String(item.campaign_id);
+
+                if (!account || !campaignId) return;
+
+                if (!campaignsByAccount[account]) {
+                    campaignsByAccount[account] = [];
+                }
+
+                if (!campaignsByAccount[account].includes(campaignId)) {
+                    campaignsByAccount[account].push(campaignId);
+                }
+            });
+            setCampaignIds(campaignsByAccount);
 
             const getValidField = (field) => {
                 for (const item of mainData) {
@@ -2696,6 +3020,54 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             setLoading1(false);
         }
     }
+    useEffect(() => {
+        console.log(campaignIds, "campaignIds updated");
+    }, [campaignIds]);
+    useEffect(() => {
+        if (!campaignIds || Object.keys(campaignIds).length === 0) return;
+
+        const fetchCreatives = async () => {
+            const token = localStorage.getItem("token");
+            try {
+                const creativesData = await sendCreativesRequest(
+                    campaignIds,
+                    token
+                );
+
+                console.log('Final creatives data:', creativesData);
+                setAdLevelCreatives(creativesData)
+
+            } catch (err) {
+                console.error('Creatives fetch failed', err);
+            }
+        };
+
+        fetchCreatives();
+    }, [campaignIds]);
+    const sendCreativesRequest = async (campaignIdsByAccount, token) => {
+        if (!campaignIdsByAccount || typeof campaignIdsByAccount !== "object") return [];
+
+
+        const items = Object.entries(campaignIdsByAccount).map(
+            ([accountNumber, campaignIds]) => ({
+                accountNumber: String(accountNumber),
+                campaignIds: campaignIds.map(String)
+            })
+        );
+
+        const resp = await apiClient.post(
+            "https://prodapis.adsgoat.in/Creatives/get",
+            { items },
+            {
+                headers: {
+                    Authorization: token
+                }
+            }
+        );
+
+        return resp.data?.data || [];
+    };
+
     const defaultColDef = {
         comparator: (valueA, valueB) => {
             // Default comparator for handling null or undefined values
@@ -3569,7 +3941,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 ref={gridRef1}
                                                 className='custom-grid'
                                                 rowHeight={30}
-                                                context={context}
+                                                // context={context}
+
+                                                context={{
+                                                    ...context,
+                                                    adLevelCreatives,
+                                                }}
                                                 rowData={memorizedDailyData}
                                                 useValueFormatterForExport={true}
                                                 // immutableData={true}
@@ -3706,7 +4083,11 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                             ref={gridRef1}
                                             className='custom-grid'
                                             rowHeight={30}
-                                            context={context}
+                                            // context={context}
+                                            context={{
+                                                ...context,
+                                                adLevelCreatives,
+                                            }}
                                             rowData={[]}
                                             columnDefs={memorizedColumnDef1}
                                             onCellClicked={onCellClicked}

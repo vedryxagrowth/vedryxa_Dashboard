@@ -1348,7 +1348,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 <CalculateOutlined size={20} style={{ marginRight: '10px' }} />
               </button>}
 
-               {userdetails?.role !== "Revenue_Partner" && <button style={{
+              {userdetails?.role !== "Revenue_Partner" && <button style={{
                 padding: '0px', margin: '0px',
                 backgroundColor: theme === "dark" &&
                   "transparent"
@@ -1385,11 +1385,11 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
                   "transparent"
               }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <StickyNote2Outlined size={20} style={{ marginRight: '10px' ,marginLeft:'10px'}} />
+                <StickyNote2Outlined size={20} style={{ marginRight: '10px', marginLeft: '10px' }} />
               </button>}
 
 
-             
+
 
               <button
                 onClick={toggleTheme}
@@ -1402,7 +1402,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 {darkMode ? (
                   <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }} />
                 ) : (
-                  <MoonIcon size={20}  className="icon moon-icon" style={{ width: "20px", height: "20px",fontSize:'20px' }} />
+                  <MoonIcon size={20} className="icon moon-icon" style={{ width: "20px", height: "20px", fontSize: '20px' }} />
                 )}
               </button>
               <h2
@@ -1817,6 +1817,8 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
   const { setuserdetails } = useTokenContext();
   const { apiClient } = useTokenContext();
   const [topbarStatus, setTopbarStatus] = useState(false);
+  const [loginError, setLoginError] = useState(false);
+
 
   const isCalledRef = useRef(false);  // To ensure getUsersData API is called only once
 
@@ -2272,6 +2274,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 <Form.Item style={{ marginBottom: '0' }}>
                   <Button
                     htmlType="submit"
+                    onClick={() => setLoginError(true)}
                     style={{
                       width: '100%',
                       backgroundColor: '#4CAF50',
@@ -2280,14 +2283,26 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                       fontWeight: 'bold',
                       //  cursor: 'not-allowed',
                       transition: 'none',
-                      pointerEvents: 'none',
-
+                      // pointerEvents: 'none',
                     }}
 
                   >
                     Sign In
                   </Button>
                 </Form.Item>
+                {loginError && (
+                  <div
+                    style={{
+                      marginTop: 6,
+                      color: "#ff4d4f",
+                      fontSize: 12,
+                      textAlign: "center",
+                    }}
+                  >
+                    Login with Google if permitted. Otherwise, contact your admin.
+                  </div>
+                )}
+
               </Form>
 
               <div style={{ textAlign: 'center', fontSize: '13px', marginTop: '18px' }}>
