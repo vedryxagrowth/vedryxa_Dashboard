@@ -13646,7 +13646,7 @@ const MyTablePage = () => {
     }, [campaignsStatus, commentsStatus, columnStructureStatus, allCampaignsStatus]);
 
     const functionCall = async (account) => {
-        // await functionCallForAllCampaignsData();
+        await functionCallForAllCampaignsData();
         await functionCallForCampaigns(account);
         await functionCallForCommnets(account);
         await functionCallForUserColumnStructure();
