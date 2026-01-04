@@ -64,7 +64,7 @@ const networkCollectionsForAiAssistant = {
 
 const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
 const DailyReports = React.lazy(() => import('../componentsOfReports/Daily'));
-const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampaigns'));
+// const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampaigns'));
 const DAKeywordReports = React.lazy(() => import('../componentsOfReports/DAKeywords'));
 const System1KeywordReports = React.lazy(() => import('../componentsOfReports/System1Keywords'));
 const TonicKeywordReports = React.lazy(() => import('../componentsOfReports/Tonic1Keywords'));
@@ -13646,7 +13646,7 @@ const MyTablePage = () => {
     }, [campaignsStatus, commentsStatus, columnStructureStatus, allCampaignsStatus]);
 
     const functionCall = async (account) => {
-        await functionCallForAllCampaignsData();
+        // await functionCallForAllCampaignsData();
         await functionCallForCampaigns(account);
         await functionCallForCommnets(account);
         await functionCallForUserColumnStructure();
@@ -15742,36 +15742,36 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            <Tabs.TabPane key="3">
-                                <CampaignReports
-                                    startDate={newStartDate}
-                                    endDate={newendDate}
-                                    newaccount={newaccount}
-                                    newtime={newtime}
-                                    newRevenuePratner={newRevenuePratner}
-                                    inputValue={inputValue}
-                                    newAccountName={newAccountName}
-                                    columnDefs={columnDefs2}
-                                    fetchData={allProfitLossArray}
-                                    campaignComments={campaignComments}
-                                    campaignStatusFilter={campaignStatusFilter}
-                                    campaignStatusLabel={campaignStatusLabel}
-                                    Camapignlevelstatus={Camapignlevelstatus}
-                                    changeRRefrst={resetColumnStructure}
-                                    debouncedHandleColumnMove={debouncedHandleColumnMove}
-                                    userdetails={userdetails}
-                                    refreshComments={refreshComments}
-                                    refreshpage={refreshContent}
-                                    getMainMenuItems={getMainMenuItems}
-                                    toggleStatus={checked}
-                                    handleChangeToggle={handleChangeToggle}
-                                    theme={theme}
-                                    handleChangeInput={handleChangeInput}
-                                    handleBlur={handleBlur}
-                                    onClickRefresh={onClickRefresh}
-                                    accountsAccess={accountsAccess}
-                                />
-                            </Tabs.TabPane>
+                            // <Tabs.TabPane key="3">
+                            //     <CampaignReports
+                            //         startDate={newStartDate}
+                            //         endDate={newendDate}
+                            //         newaccount={newaccount}
+                            //         newtime={newtime}
+                            //         newRevenuePratner={newRevenuePratner}
+                            //         inputValue={inputValue}
+                            //         newAccountName={newAccountName}
+                            //         columnDefs={columnDefs2}
+                            //         fetchData={allProfitLossArray}
+                            //         campaignComments={campaignComments}
+                            //         campaignStatusFilter={campaignStatusFilter}
+                            //         campaignStatusLabel={campaignStatusLabel}
+                            //         Camapignlevelstatus={Camapignlevelstatus}
+                            //         changeRRefrst={resetColumnStructure}
+                            //         debouncedHandleColumnMove={debouncedHandleColumnMove}
+                            //         userdetails={userdetails}
+                            //         refreshComments={refreshComments}
+                            //         refreshpage={refreshContent}
+                            //         getMainMenuItems={getMainMenuItems}
+                            //         toggleStatus={checked}
+                            //         handleChangeToggle={handleChangeToggle}
+                            //         theme={theme}
+                            //         handleChangeInput={handleChangeInput}
+                            //         handleBlur={handleBlur}
+                            //         onClickRefresh={onClickRefresh}
+                            //         accountsAccess={accountsAccess}
+                            //     />
+                            // </Tabs.TabPane>
 
                             <Tabs.TabPane key="4">
                                 <AgencyAndBMNameReports
