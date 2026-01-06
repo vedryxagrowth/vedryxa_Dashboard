@@ -1590,6 +1590,7 @@ const App = () => {
     FB_Bodies1: "Facebook_Bodies1",
     Newsbreak_DA: "Newsbreak_DomainActive",
   };
+  const filteredCampaigns = getFilteredMultipleAdsetCampaigns();
 
   const handleEditClickMultipleAdsetData = (record, status) => {
     // console.log(record, "viewdata campaign")
@@ -3855,6 +3856,7 @@ const App = () => {
           justify="space-between"
           style={{ flexWrap: "wrap", rowGap: "12px" }}
         >
+
           <Col
             style={{
               display: "flex",
@@ -4079,6 +4081,20 @@ const App = () => {
               alignItems: "center",
             }}
           >
+            {getFilteredMultipleAdsetCampaigns().length > 0 && (
+              <div
+                style={{
+                  textAlign: "right",
+                  fontSize: "13px",
+                  paddingRight: "8px",
+                  color: theme === "dark" ? "#e4e6eb" : "#050505",
+                }}
+              >
+                Total Campaigns: {getFilteredMultipleAdsetCampaigns().length}
+              </div>
+            )}
+
+
             {/* 🔹 Status Filter */}
             <Input
               placeholder="Search..."

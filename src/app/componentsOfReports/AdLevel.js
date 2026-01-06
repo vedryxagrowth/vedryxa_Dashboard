@@ -4,7 +4,11 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Space, Tooltip, Menu, Dropdown } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined, PictureOutlined, LikeOutlined,
+  CommentOutlined,
+  ShareAltOutlined,
+} from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -178,6 +182,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
   const [confirmBulkLoading, setConfirmBulkLoading] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkCategory, setBulkCategory] = useState("");
+  const [campaignIds, setCampaignIds] = useState([]);
+  const [adLevelCreatives, setAdLevelCreatives] = useState([]);
   useEffect(() => {
     setLiveFixedFooter([
       {
@@ -1087,6 +1093,14 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       innerRenderer: (params) => {
         if (params.node.footer) return 'Total';
 
+        const leafData = params.node.group
+          ? params.node.allLeafChildren?.[0]?.data
+          : params.data;
+        const rowCampaignId = leafData?.campaignid;
+        const rowAdsetId = leafData?.adsetid;
+        const rowAdId = leafData?.adid;
+        const rowAccountNumber = leafData?.accountNumber;
+
         // group key rendered in the cell
         const firstColumnValue = params.node.allLeafChildren?.[0]?.data?.adname || "";
         const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
@@ -1173,6 +1187,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         const [nextChecked, setNextChecked] = React.useState(false);
         const [universalOject, setUniversalObject] = React.useState(null)
         const [confirmLoading, setConfirmLoading] = React.useState(false);
+        const [selectedCampaignCreatives, setSelectedCampaignCreatives] = useState([]);
+        const [creativeModalOpen, setCreativeModalOpen] = useState(false);
 
         // comment state will be initialized on open from the UI value
         const [comment, setComment] = React.useState(relatedComment || '');
@@ -2086,6 +2102,64 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           );
         };
 
+        const adLevelCreatives = params.context?.adLevelCreatives || [];
+
+        const matchedAd =
+          adLevelCreatives
+            .find(
+              c =>
+                String(c.campaignId) === String(rowCampaignId) &&
+                String(c.accountNumber) === String(rowAccountNumber)
+            )
+            ?.adsets
+            ?.find(
+              a => String(a.adsetId) === String(rowAdsetId)
+            )
+            ?.ads
+            ?.find(
+              ad => String(ad.adId) === String(rowAdId)
+            ) || null;
+
+        const hasCreative = !!matchedAd;
+
+        const CreativeTooltip = () => {
+          if (!adLevelCreatives.length) {
+            return (
+              <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>
+                Loading creatives…
+              </div>
+            );
+          }
+
+          if (!matchedAd) {
+            return (
+              <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>
+                No creative for this ad
+              </div>
+            );
+          }
+
+          return (
+            <img
+              src={matchedAd.image}
+              alt={matchedAd.headline || "Creative"}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedCampaignCreatives([matchedAd])
+                setCreativeModalOpen(true);
+              }}
+              style={{
+                width: 60,
+                height: 60,
+                objectFit: "cover",
+                borderRadius: 4,
+                border: "1px solid #ccc",
+                cursor: "pointer",
+              }}
+            />
+          );
+        };
+
         // formatted edited time for comment hover (guard against undefined)
         const editedTimeDisplay =
           editUserANdTime?.editedTime
@@ -2195,7 +2269,230 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
               />
             </Tooltip>
+            <Tooltip
+              title={<CreativeTooltip />}
+              placement="right"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#111" : "#fff",
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                padding: 8,
+              }}
+            >
+              <PictureOutlined
+                className={
+                  theme === "dark"
+                    ? hasCreative
+                      ? "black-icon-creatives"
+                      : "black-icon-creatives1"
+                    : ""
+                }
+                style={{
+                  cursor: hasCreative ? "pointer" : "not-allowed",
+                  color: hasCreative ? "#1890ff" : "#aaa",
+                  fontSize: 12,
+                  marginRight: '5px',
+                }}
+              />
+            </Tooltip>
+            <Modal
+              className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+              open={creativeModalOpen}
+              onCancel={() => {
+                setCreativeModalOpen(false);
+                setSelectedCampaignCreatives([]);
+              }}
+              footer={null}
+              width={350}
+              closable
+              bodyStyle={{
+                padding: 0,
+                background: theme === "dark" ? "#18191a" : "#fff",
+                maxHeight: "87vh",
+              }}
+              style={{ top: 12 }}
+            >
+              {selectedCampaignCreatives.map((selectedCreative, idx) => (
+                <div key={idx}>
 
+                  <div style={{ padding: "8px 10px" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <img
+                        src={selectedCreative.image}
+                        alt="page"
+                        style={{
+                          width: 35,
+                          height: 35,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+
+                      <div style={{ flex: 1, marginLeft: 6 }}>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            fontSize: 10,
+                            color: theme === "dark" ? "#e4e6eb" : "#050505",
+                          }}
+                        >
+                          {selectedCreative.adName || "-"}
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 8,
+                            color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                          }}
+                        >
+                          Sponsored <GlobalOutlined />
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedCreative.message && (
+                      <div
+                        style={{
+                          marginTop: 2,
+                          fontSize: 8,
+                          color: theme === "dark" ? "#e4e6eb" : "#050505",
+                        }}
+                      >
+                        {selectedCreative.message}
+                      </div>
+                    )}
+                  </div>
+                  <img
+                    src={selectedCreative.image}
+                    alt="creative"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                  <div style={{ padding: "8px 10px" }}>
+                    {selectedCreative.headline && (
+                      <div
+                        style={{
+                          fontSize: 8,
+                          fontWeight: 600,
+                          color: theme === "dark" ? "#e4e6eb" : "#050505",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {selectedCreative.headline}
+                      </div>
+                    )}
+
+                    {selectedCreative.description && (
+                      <div
+                        style={{
+                          fontSize: 8,
+                          color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {selectedCreative.description}
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 8,
+                          color: theme === "dark" ? "#b0b3b8" : "#525456",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {selectedCreative.websiteUrl
+                          ? new URL(selectedCreative.websiteUrl).hostname
+                          : "-"}
+                      </div>
+
+                      {selectedCreative.websiteUrl && (
+                        <a
+                          href={selectedCreative.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ textDecoration: "none" }}
+                        >
+                          <div
+                            style={{
+                              padding: "5px 12px",
+                              background: "#91C25F",
+                              color: "#000",
+                              borderRadius: 18,
+                              fontSize: 10,
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            Learn more
+                          </div>
+                        </a>
+                      )}
+                    </div>
+                    {selectedCreative.websiteUrl && (
+                      <div
+                        style={{
+                          marginTop: 2,
+                          fontSize: 8,
+                          color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                          wordBreak: "break-all",
+                        }}
+                      >
+                        <a
+                          href={selectedCreative.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                            textDecoration: "none",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {selectedCreative.websiteUrl}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      borderTop: theme === "dark"
+                        ? "1px solid #3a3b3c"
+                        : "1px solid #ddd",
+                      display: "flex",
+                      justifyContent: "space-around",
+                      padding: "8px 0",
+                      fontSize: 10,
+                      color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <LikeOutlined style={{ marginRight: 6, fontSize: 12 }} />
+                      Like
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <CommentOutlined style={{ marginRight: 6, fontSize: 12 }} />
+                      Comment
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <ShareAltOutlined style={{ marginRight: 6, fontSize: 12 }} />
+                      Share
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Modal>
             <LinkOutlined
               onClick={() => {
                 const url = `/LiveHistory/LiveAdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${rowAccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -2367,6 +2664,24 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       const mainData = tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
       // console.log(mainData1, "mainData1");
       console.log(mainData, "mainData");
+
+      const campaignsByAccount = {};
+      mainData1.forEach(item => {
+        const account = String(item.accountNumber);
+        const campaignId = String(item.campaign_id);
+
+        if (!account || !campaignId) return;
+
+        if (!campaignsByAccount[account]) {
+          campaignsByAccount[account] = [];
+        }
+
+        if (!campaignsByAccount[account].includes(campaignId)) {
+          campaignsByAccount[account].push(campaignId);
+        }
+      });
+      setCampaignIds(campaignsByAccount);
+
       const specifiedTimeZone = selectTimezone[newtime];
       const filteredData = mainData && mainData.length > 0 ?
         mainData.map((eachData) => {
@@ -2554,6 +2869,55 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       setLoading(false);
     }
   };
+  useEffect(() => {
+    console.log(campaignIds, "campaignIds updated");
+  }, [campaignIds]);
+  useEffect(() => {
+    if (!campaignIds || Object.keys(campaignIds).length === 0) return;
+
+    const fetchCreatives = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const creativesData = await sendCreativesRequest(
+          campaignIds,
+          token
+        );
+
+        console.log('Final creatives data:', creativesData);
+        setAdLevelCreatives(creativesData)
+
+      } catch (err) {
+        console.error('Creatives fetch failed', err);
+      }
+    };
+
+    fetchCreatives();
+  }, [campaignIds]);
+
+  const sendCreativesRequest = async (campaignIdsByAccount, token) => {
+    if (!campaignIdsByAccount || typeof campaignIdsByAccount !== "object") return [];
+
+    // 🔹 build single payload
+    const items = Object.entries(campaignIdsByAccount).map(
+      ([accountNumber, campaignIds]) => ({
+        accountNumber: String(accountNumber),
+        campaignIds: campaignIds.map(String)
+      })
+    );
+
+    const resp = await apiClient.post(
+      "https://prodapis.adsgoat.in/Creatives/get",
+      { items },
+      {
+        headers: {
+          Authorization: token
+        }
+      }
+    );
+
+    return resp.data?.data || [];
+  };
+
   const defaultColDef = {
     comparator: (valueA, valueB) => {
       // Default comparator for handling null or undefined values
@@ -3799,7 +4163,11 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       onSelectionChanged={onSelectionChanged}
                       groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                       suppressRowClickSelection={true}
-                      context={context}
+                      // context={context}
+                      context={{
+                        ...context,
+                        adLevelCreatives,
+                      }}
                       pagination={true}
                       paginationPageSize={200}
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
@@ -3929,7 +4297,11 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       onSelectionChanged={onSelectionChanged}
                       groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                       suppressRowClickSelection={true}
-                      context={context}
+                      // context={context}
+                      context={{
+                        ...context,
+                        adLevelCreatives,
+                      }}
                       pagination={true}
                       paginationPageSize={200}
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
