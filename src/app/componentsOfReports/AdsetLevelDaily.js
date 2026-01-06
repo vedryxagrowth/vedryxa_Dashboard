@@ -1263,6 +1263,19 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     setIsAdsetModalVisibles(true);
                     setConfirmLoading(true);
                     try {
+                        const payloadForActivity = {
+                            editType: "Status",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset status updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+                        }
                         const token = localStorage.getItem("token");
                         const payload = {
                             status: desired ? "ACTIVE" : "PAUSED",
@@ -1271,8 +1284,9 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             campaign_id: campaignid,
                             adset_id: adsetid,
                             email: userdetails?.email,
+                            activity: payloadForActivity
                         };
-                        const response = await apiClient.post(`/NewBulkAdsetStatusChange`, payload,
+                        const response = await apiClient.post(`http://localhost:8000/NewBulkAdsetStatusChangeWithHistory`, payload,
                             { headers: { Authorization: token } }
                         );
 
@@ -1442,6 +1456,19 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                         //     userPin: userdetails?.email,
                         //     comment: comment || ''
                         // };
+                        const payloadForActivity = {
+                            editType: "Pin",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset pin updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From ${next ? "unpin" : "pin"} to ${next ? "pin" : "unpin"}`,
+                        }
                         const body = {
                             accountNumber: rowAccount,
                             campaignname: campaignName,
@@ -1449,11 +1476,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             adsetid,
                             userPin: userdetails?.email,
                             comment: comment || '',
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('/NewPinBulk', body)
-                            : await apiClient.post('/NewUnpinBulk', body);
+                            ? await apiClient.post('http://localhost:8000/NewPinBulkWithHistory', body)
+                            : await apiClient.post('http://localhost:8000/NewUnpinBulkWithHistory', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1595,14 +1623,28 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                         //     comment,
                         //     usercommit: userdetails?.email,
                         // });
-                        const newResponse = await apiClient.post('/Comments/upsert', {
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset comment updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        }
+                        const newResponse = await apiClient.post('http://localhost:8000/Comments/upsert/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
                             adsetid,
                             comment,
                             usercommit: userdetails?.email,
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         });
                         // persist in Map (stable across tabs)
                         // commentMap?.set(statusKey, {
@@ -1728,14 +1770,28 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 };
                 const handleDelete = async () => {
                     try {
-                        const newResponse = await apiClient.post('/New/Comments/delete', {
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset comment updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        }
+                        const newResponse = await apiClient.post('http://localhost:8000/New/Comments/delete/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
                             adsetid,
                             // comment,
                             usercommit: userdetails?.email,
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         });
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {

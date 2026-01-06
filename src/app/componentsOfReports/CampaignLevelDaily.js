@@ -1821,6 +1821,17 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           setConfirmLoading(true);
           try {
             const token = localStorage.getItem("token");
+            const payloadForActivity = {
+              editType: "Status",
+              campaignid: campaignid,       // cents
+              Account: String(pendingAccount),    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Campain status updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+            }
             const payload = {
               status: desired ? "ACTIVE" : "PAUSED",
               id: params.data?.identifier,
@@ -1829,10 +1840,11 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
               adset_id: adsetid,
               name: campaignName,
               email: userdetails?.email,
+              activity: payloadForActivity,
             };
 
             const response = await apiClient.post(
-              `/BulkCampaignStatusChange`,
+              `http://localhost:8000/BulkCampaignStatusChangeWithHistory`,
               payload,
               { headers: { Authorization: token } }
             );
@@ -1992,15 +2004,27 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
         // 💬 BULK comment upsert (per campaign + optional adset)
         const upsertCommentBulk = async ({ text }) => {
+          const payloadForActivity = {
+            editType: "Comment",
+            campaignid: campaignid,       // cents
+            Account: rowAccount,    // ✅ update *this* row’s account
+            campaignname: campaignName,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Campaign pin updated",
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+          }
           const newResponse = await apiClient.post(
-            '/Comments/upsert',
+            'http://localhost:8000/Comments/upsert/History',
             {
               accountNumber: rowAccount,
               campaignname: campaignName,
               campaignid,
               comment,
               usercommit: userdetails?.email,
-              level: "campaign"
+              level: "campaign",
+              activity: payloadForActivity,
             },
             authHeaders
           );
@@ -2041,15 +2065,27 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
         // delete comment (bulk)
         const handleDelete = async () => {
           try {
+            const payloadForActivity = {
+              editType: "Comment",
+              campaignid: campaignid,       // cents
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Campaign comment cleared",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             const newResponse = await apiClient.post(
-              '/New/Comments/delete',
+              'http://localhost:8000/New/Comments/delete/History',
               {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
                 campaignid,
                 // comment,
                 usercommit: userdetails?.email,
-                level: "campaign"
+                level: "campaign",
+                activity: payloadForActivity,
               },
               authHeaders
             );
@@ -2183,16 +2219,28 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
         const handlePinClick = async (cName, cId, aId, currentPinStatus) => {
           const updatedPinStatus = !currentPinStatus;
           try {
+            const payloadForActivity = {
+              editType: "Pin",
+              campaignid: campaignid,       // cents
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Campaign pin updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             if (updatedPinStatus) {
               const resp = await apiClient.post(
-                '/NewPinBulk',
+                'http://localhost:8000/NewPinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
                   campaignid,
                   userPin: userdetails?.email,
                   comment: comment || '',
-                  level: "campaign"
+                  level: "campaign",
+                  activity: payloadForActivity,
                 },
                 authHeaders
               );
@@ -2236,14 +2284,15 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
               }
             } else {
               const resp = await apiClient.post(
-                '/NewUnpinBulk',
+                'http://localhost:8000/NewUnpinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
                   campaignid,
                   userPin: userdetails?.email,
                   comment: comment || '',
-                  level: "campaign"
+                  level: "campaign",
+                  activity: payloadForActivity,
                 },
                 authHeaders
               );

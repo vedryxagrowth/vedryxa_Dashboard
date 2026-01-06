@@ -1090,6 +1090,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         // group key rendered in the cell
         const firstColumnValue = params.node.allLeafChildren?.[0]?.data?.adname || "";
         const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+        const adsetName = params.node.allLeafChildren?.[0]?.data?.adsetname || "";
         const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
 
         let campaignid, adsetid, adid, rowAccount;
@@ -1271,8 +1272,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           // refreshThisCell();
 
           try {
+            const payloadForActivity = {
+              editType: "Status",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,ad_id: adid,
+              adname: adName,
+              adsetname: adsetName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad status updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              updateDetail: `From ${nextChecked ? "Inactive" : "Active"} to ${nextChecked ? "Active" : "Inactive"}`,
+            }
             const response = await apiClient.post(
-              `/NewAdStatusChange`,
+              `http://localhost:8000/NewAdStatusChangeWithHistory`,
               {
                 status: nextChecked ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1281,7 +1296,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 campaign_id: campaignid,
                 adset_id: adsetid,
                 email: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity,
               },
               authHeaders
             );
@@ -1516,8 +1532,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         };
 
         const upsertCommentBulk = async ({ text }) => {
+          const payloadForActivity = {
+            editType: "Comment",
+            campaignid: campaignid,       // cents
+            adsetid: adsetid,
+            ad_id: adid,
+            Account: rowAccount,    // ✅ update *this* row’s account
+            campaignname: campaignName,
+            adsetname: adsetName,
+            adname: adName,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Ad comment updated",
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+          }
           const newResponse = await apiClient.post(
-            '/Comments/upsert',
+            'http://localhost:8000/Comments/upsert/History',
             {
               accountNumber: rowAccount,
               campaignname: adName,
@@ -1526,7 +1557,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               ad_id: adid,
               comment: text,
               usercommit: userdetails?.email,
-              level: "ad"
+              level: "ad",
+              activity: payloadForActivity
             },
             authHeaders
           );
@@ -1566,8 +1598,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
         const handleDelete = async () => {
           try {
+            const payloadForActivity = {
+              editType: "Comment",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              ad_id: adid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              adsetname: adsetName,
+              adname: adName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad comment updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             const response = await apiClient.post(
-              '/New/Comments/delete',
+              'http://localhost:8000/New/Comments/delete/History',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1576,7 +1623,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 ad_id: adid,
                 // comment: text,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               },
               authHeaders
             );
@@ -1768,8 +1816,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
           try {
             if (updatedPinStatus) {
+              const payloadForActivity = {
+                editType: "Pin",
+                campaignid: campaignid,       // cents
+                adsetid: adsetid,
+                ad_id: adid,
+                Account: rowAccount,    // ✅ update *this* row’s account
+                campaignname: campaignName,
+                adsetname: adsetName,
+                adname: adName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+              }
               const newResponse = await apiClient.post(
-                '/NewPinBulk',
+                'http://localhost:8000/NewPinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -1778,7 +1841,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                   ad_id: adid,
                   userPin: userdetails?.email,
                   comment: comment || '',
-                  level: "ad"
+                  level: "ad",
+                  activity: payloadForActivity
                 },
                 authHeaders
               );
@@ -1816,8 +1880,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               }
               message.success("pinned!");
             } else {
+              const payloadForActivity = {
+                editType: "Pin",
+                campaignid: campaignid,       // cents
+                adsetid: adsetid,
+                ad_id: adid,
+                Account: rowAccount,    // ✅ update *this* row’s account
+                campaignname: campaignName,
+                adsetname: adsetName,
+                adname: adName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+              }
               const newResponse = await apiClient.post(
-                '/NewUnpinBulk',
+                'http://localhost:8000/NewUnpinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -1826,7 +1905,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                   ad_id: adid,
                   userPin: userdetails?.email,
                   comment: comment || '',
-                  level: "ad"
+                  level: "ad",
+                  activity: payloadForActivity
                 },
                 authHeaders
               );
