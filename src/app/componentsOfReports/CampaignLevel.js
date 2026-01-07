@@ -1176,6 +1176,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     setConfirmLoading(true);
                     try {
                         const token = localStorage.getItem("token");
+                        const payloadForActivity = {
+                            editType: "Status",
+                            campaignid: campaignid,       // cents
+                            Account: String(pendingAccount),    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Campain status updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+                        }
                         const payload = {
                             status: desired ? "ACTIVE" : "PAUSED",
                             id: params.data?.identifier,
@@ -1184,10 +1195,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             adset_id: adsetid,
                             name: campaignName,
                             email: userdetails?.email,
+                            activity: payloadForActivity,
                         };
 
                         const response = await apiClient.post(
-                            `/BulkCampaignStatusChange`,
+                            `/BulkCampaignStatusChangeWithHistory`,
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -1577,18 +1589,31 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
                     const updatedPinStatus = !currentPinStatus;
 
+                    const payloadForActivity = {
+                        editType: "Pin",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign pin updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
+
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         userPin: userdetails?.email,
                         comment: comment || '',
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('/NewPinBulk', body)
-                        : await apiClient.post('/NewUnpinBulk', body);
+                        ? await apiClient.post('/NewPinBulkWithHistory', body)
+                        : await apiClient.post('/NewUnpinBulkWithHistory', body);
 
                     if (resp.status === 200 || resp.status === 201) {
                         // if (newResponse.status === 200 || newResponse.status === 201) {
@@ -1752,15 +1777,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 //     handlePinClick(cName, cId, aId, currentPinStatus);
                 // };
                 const handleOks = async () => {
+                    const payloadForActivity = {
+                        editType: "Comment",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign pin updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         comment,
                         usercommit: userdetails?.email,
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/Comments/upsert', body);
+                    const newResponse = await apiClient.post('/Comments/upsert/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1799,15 +1836,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 };
 
                 const handleDelete = async () => {
+                    const payloadForActivity = {
+                        editType: "Comment",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign comment cleared",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         // comment,
                         usercommit: userdetails?.email,
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/New/Comments/delete', body);
+                    const newResponse = await apiClient.post('/New/Comments/delete/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];

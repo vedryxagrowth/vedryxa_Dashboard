@@ -23,6 +23,7 @@ import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
+import { Account } from 'aws-sdk';
 
 
 const newtworkCollections = {
@@ -353,8 +354,20 @@ const MyTablePage = () => {
 
     const [account, setAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
-    const [time, setTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
-
+    const [time, setTime] = useState(
+        timeFromDashboard
+            ? timeFromDashboard
+            : storedData
+                ? storedData?.time
+                : revenuePratner === "FB_Predicto"
+                    ? "EDT"
+                    : revenuePratner === "FB_Sedo"
+                        ? "CET"
+                        : revenuePratner === "FB_DomainActive" ||
+                            revenuePratner === "FB_Tonic1"
+                            ? "PDT"
+                            : "UTC"
+    );
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
@@ -364,8 +377,20 @@ const MyTablePage = () => {
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
     console.log(newAccountName);
-    const [newtime, setNewTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
-
+    const [newtime, setNewTime] = useState(
+        timeFromDashboard
+            ? timeFromDashboard
+            : storedData
+                ? storedData?.time
+                : revenuePratner === "FB_Predicto"
+                    ? "EDT"
+                    : revenuePratner === "FB_Sedo"
+                        ? "CET"
+                        : revenuePratner === "FB_DomainActive" ||
+                            revenuePratner === "FB_Tonic1"
+                            ? "PDT"
+                            : "UTC"
+    );
     const [pageSize, setPageSize] = useState(1);
 
     const hasFetched = useRef(false);
@@ -1962,17 +1987,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -3139,17 +3175,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -4963,6 +5010,7 @@ const MyTablePage = () => {
 
                 const handleOk = async () => {
 
+
                     const campaignname = groupedData?.[0]?.campaignname;
                     const campaignActualSpend = Camapignlevelstatus
                         .find(item =>
@@ -4971,6 +5019,10 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
+                    const bidAmountValue = Math.round(parseFloat(bidAmount) * 100);
+                    const changeBudgetValue = Math.round(parseFloat(changeBudget) * 100);
+                    const previousBudget = campaignActualSpend?.budget?.daily_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.daily_budget)) :
+                        campaignActualSpend?.budget?.lifetime_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.lifetime_budget)) : 0;
 
                     const payload = {
                         adsetId,
@@ -4986,19 +5038,45 @@ const MyTablePage = () => {
                         changeBudget !== undefined &&
                         changeBudget !== '' &&
                         !isNaN(changeBudget) &&
-                        parseFloat(changeBudget) > 0 // <- this is critical
+                        parseFloat(changeBudget) > 0 &&// <- this is critical&&
+                        changeBudgetValue !== previousBudget
                     ) {
                         payload.budget = parseFloat(changeBudget) * 100;
+                        payload.activity = {
+                            editType: "Budget",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset budget updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
+                            budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+                                campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        }
                     }
 
                     if (
                         bidAmount !== undefined &&
                         bidAmount !== '' &&
                         !isNaN(bidAmount) &&
-                        parseFloat(bidAmount) * 100 >= 1
+                        parseFloat(bidAmount) * 100 >= 1 &&
+                        bidAmountValue !== campaignActualSpend?.bid_amount
                     ) {
                         // payload.bidAmount = parseFloat(bidAmount) * 100;
                         payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
+                        payload.bidactivity = {
+                            editType: "Bid",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset bid strategy updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${(Number(campaignActualSpend?.bid_amount) / 100)} to $${Math.round(bidAmount * 100) / 100}`,
+                        }
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -5012,7 +5090,7 @@ const MyTablePage = () => {
 
                     try {
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
+                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -5466,17 +5544,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    };
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -6660,17 +6749,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    };
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -7650,6 +7750,20 @@ const MyTablePage = () => {
                     const campaignIdFinal = target?.campaignid;
                     const campaignnameFinal = target?.campaignname;
 
+                    const payloadForActivity = {
+                        editType: "Budget",
+                        campaignid: campaignIdFinal,       // cents
+                        Account: String(rowAccountNumber),    // ✅ update *this* row’s account
+                        campaignname: campaignnameFinal,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign budget updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
+                        budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                    }
+
                     const payload = {
                         campaignId: campaignIdFinal,
                         budget: Number(changeBudget) * 100,         // cents
@@ -7658,6 +7772,7 @@ const MyTablePage = () => {
                         updatedby: params.context?.userdetails?.email,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        activity: payloadForActivity,
                     };
 
                     if (!payload.campaignId || !payload.accountNumber) {
@@ -7666,7 +7781,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/new/update/campaign/budget', payload);
+                        await apiClient.post('/update/campaign/budget/history', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -8082,17 +8197,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,
+                        Account: row.accountNumber,
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -9055,6 +9181,7 @@ const MyTablePage = () => {
                 const handleOk = async () => {
                     // setIsModalVisible(false);
                     const campaignname = groupedData?.[0]?.campaignname;
+                    const adsetname = groupedData?.[0]?.adsetname;
 
                     console.log("Submitting budget change:", groupedData);
 
@@ -9065,12 +9192,16 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
-
+                    const bidAmountValue = Math.round(parseFloat(bidAmount) * 100);
+                    const changeBudgetValue = Math.round(parseFloat(changeBudget) * 100);
+                    const previousBudget = campaignActualSpend?.budget?.daily_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.daily_budget)) :
+                        campaignActualSpend?.budget?.lifetime_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.lifetime_budget)) : 0;
                     const payload = {
                         adsetId,
                         campaignId,
                         accountNumber: accountNumber,
                         campaignname,
+                        adsetname,
                         updatedby: userdetails?.email,
                         budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
@@ -9080,19 +9211,45 @@ const MyTablePage = () => {
                         changeBudget !== undefined &&
                         changeBudget !== '' &&
                         !isNaN(changeBudget) &&
-                        parseFloat(changeBudget) > 0 // <- this is critical
+                        parseFloat(changeBudget) > 0 &&
+                        changeBudgetValue !== previousBudget
                     ) {
                         payload.budget = parseFloat(changeBudget) * 100;
+                        payload.activity = {
+                            editType: "Budget",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset budget updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
+                            budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+                                campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        }
                     }
 
                     if (
                         bidAmount !== undefined &&
                         bidAmount !== '' &&
                         !isNaN(bidAmount) &&
-                        parseFloat(bidAmount) * 100 >= 1
+                        parseFloat(bidAmount) * 100 >= 1 &&
+                        bidAmountValue !== campaignActualSpend?.bid_amount
                     ) {
                         // payload.bidAmount = parseFloat(bidAmount) * 100;
                         payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
+                        payload.bidactivity = {
+                            editType: "Bid",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset bid strategy updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${(Number(campaignActualSpend?.bid_amount) / 100)} to $${Math.round(bidAmount * 100) / 100}`,
+                        }
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -9111,7 +9268,7 @@ const MyTablePage = () => {
 
                         // changeRRefrst();
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
+                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -9563,17 +9720,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -10662,17 +10830,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -11702,17 +11881,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -12626,6 +12816,19 @@ const MyTablePage = () => {
                     const campaignIdFinal = target?.campaignid;
                     const campaignnameFinal = target?.campaignname;
 
+                    const payloadForActivity = {
+                        editType: "Budget",
+                        campaignid: campaignIdFinal,       // cents
+                        Account: String(rowAccountNumber),    // ✅ update *this* row’s account
+                        campaignname: campaignnameFinal,
+                        updatedBy: params.context?.userdetails?.email,
+                        updateType: "Campain budget updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
+                        budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                    }
+
 
                     const payload = {
                         campaignId: campaignIdFinal,
@@ -12635,7 +12838,10 @@ const MyTablePage = () => {
                         updatedby: params.context?.userdetails?.email,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        activity: payloadForActivity,
                     };
+
+
 
 
                     if (!payload.campaignId || !payload.accountNumber) {
@@ -12645,7 +12851,7 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/new/update/campaign/budget', payload);
+                        await apiClient.post('/update/campaign/budget/history', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -13059,17 +13265,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -14302,17 +14519,28 @@ const MyTablePage = () => {
 
 
                 const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
                         category: catValue,
+                        activity: payloadForActivity,
                     };
 
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -15006,10 +15234,11 @@ const MyTablePage = () => {
         try {
             // setInitialLoading(true);
             setAllCampaignsStatus(false);
-            const fetchData = await apiClient.get(
-                `/AllCampaigns?accountNumber=${newaccount}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
-            );
-            setAllProfitLossArray(fetchData?.data);
+            // const fetchData = await apiClient.get(
+            //     `/AllCampaigns?accountNumber=${newaccount}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
+            // );
+            // setAllProfitLossArray(fetchData?.data);
+            setAllProfitLossArray([]);
             setAllCampaignsStatus(true);
         }
         catch (err) {
@@ -15269,9 +15498,22 @@ const MyTablePage = () => {
         setnewAccountName((accountsAccess[0].accountName))
 
         // ⏰ set timezone
-        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
-            ? setTime("PDT")
+        value === "FB_Rsoc" ||
+            value === "FB_Tonic" ||
+            value === "FB_DomainActive" ||
+            value === "FB_Tonic1" ||
+            value === "FB_TonicRsoc" ||
+            value === "FB_Predicto" ||
+            value === "FB_Sedo"
+            ? setTime(
+                value === "FB_Predicto"
+                    ? "EDT"
+                    : value === "FB_Sedo"
+                        ? "CET"
+                        : "PDT"
+            )
             : setTime("UTC");
+
 
         // ✅ pick first active account
         const firstActive = accountsAccess.find(acc => acc.status === "Active");
@@ -15373,7 +15615,8 @@ const MyTablePage = () => {
         'CDT',
         'AST',
         'DST',
-        'CEST'
+        'CEST',
+        'CET'
     ];
 
 
@@ -15494,7 +15737,7 @@ const MyTablePage = () => {
 
     const onClickRefresh = async () => {
         // console.log(activeTab);
-        await functionCallForAllCampaignsData();
+        // await functionCallForAllCampaignsData();
 
         refreshComponent(activeTab);
         // refreshGrid(gridRef);  // Refresh gridRef
@@ -15894,7 +16137,7 @@ const MyTablePage = () => {
     const items = [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
-        { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
+        // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
@@ -16893,7 +17136,7 @@ const MyTablePage = () => {
                             </Tooltip> */}
                         </Button>
                     </Col>
-                    {revenuePratner !== "FB_TonicRsoc" && (
+                    {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing") && (
                         <Col>
                             <Button
                                 type="primary"
@@ -16902,8 +17145,8 @@ const MyTablePage = () => {
                                 style={{
                                     backgroundColor: Rhovered
                                         ? theme === "dark"
-                                            ? "rgba(24,144,255,0.06)"   
-                                            : "#e6f7ff"   
+                                            ? "rgba(24,144,255,0.06)"
+                                            : "#e6f7ff"
                                         : "transparent",
                                     border: '1px solid #91d5ff',
                                     borderRadius: "6px",
@@ -17399,7 +17642,7 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            <Tabs.TabPane key="3">
+                            {/* <Tabs.TabPane key="3">
                                 <CampaignReports
                                     startDate={newStartDate}
                                     endDate={newendDate}
@@ -17428,7 +17671,7 @@ const MyTablePage = () => {
                                     onClickRefresh={onClickRefresh}
                                     accountsAccess={accountsAccess}
                                 />
-                            </Tabs.TabPane>
+                            </Tabs.TabPane> */}
 
                             <Tabs.TabPane key="4">
                                 <AgencyAndBMNameReports

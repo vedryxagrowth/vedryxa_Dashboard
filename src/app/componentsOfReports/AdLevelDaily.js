@@ -1094,6 +1094,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         const firstColumnValue = params.node.allLeafChildren?.[0]?.data?.adname || ""; // group key (Ad name)
         const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+        const adsetName = params.node.allLeafChildren?.[0]?.data?.adsetname || "";
         const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
 
         let campaignid, adsetid, adid, rowAccount;
@@ -1261,8 +1262,23 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           setIsAdidModalVisibles(true);
           setConfirmLoading(true);
           try {
+            const payloadForActivity = {
+              editType: "Status",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              ad_id: adid,
+              adname: adName,
+              adsetname: adsetName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad status updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+            }
             const newResponse = await apiClient.post(
-              `/NewAdStatusChange`,
+              `/NewAdStatusChangeWithHistory`,
               {
                 status: desired ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1271,7 +1287,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 campaign_id: campaignid,
                 adset_id: adsetid,
                 email: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               },
               authHeaders
             );
@@ -1511,9 +1528,24 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
         const handlePinClick = async (_campName, campid, asetid, current) => {
           const next = !current;
           setPinned(next); // optimistic
+          const payloadForActivity = {
+            editType: "Pin",
+            campaignid: campaignid,       // cents
+            adsetid: adsetid,
+            ad_id: adid,
+            Account: rowAccount,    // ✅ update *this* row’s account
+            campaignname: campaignName,
+            adsetname: adsetName,
+            adname: adName,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Ad pin updated",
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+            updateDetail: `From ${next ? "unpin" : "pin"} to ${next ? "pin" : "unpin"}`,
+          }
           try {
             if (next) {
-              const newResponse = await apiClient.post('/NewPinBulk', {
+              const newResponse = await apiClient.post('/NewPinBulkWithHistory', {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
                 campaignid,
@@ -1521,7 +1553,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 ad_id: adid,
                 userPin: userdetails?.email,
                 comment: comment || '',
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               }, authHeaders);
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
@@ -1556,7 +1589,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 });
               }
             } else {
-              const newResponse = await apiClient.post('/NewUnpinBulk', {
+              const newResponse = await apiClient.post('/NewUnpinBulkWithHistory', {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
                 campaignid,
@@ -1564,7 +1597,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 ad_id: adid,
                 userPin: userdetails?.email,
                 comment: comment || '',
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               }, authHeaders);
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
@@ -1706,8 +1740,23 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         const handleOks = async () => {
           try {
+            const payloadForActivity = {
+              editType: "Comment",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              ad_id: adid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              adsetname: adsetName,
+              adname: adName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad comment updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             const newResponse = await apiClient.post(
-              '/Comments/upsert',
+              '/Comments/upsert/History',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1716,7 +1765,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 ad_id: adid,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               },
               authHeaders
             );
@@ -1857,7 +1907,22 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         const handleDelete = async () => {
           try {
-            const newResponse = await apiClient.post('/New/Comments/delete', {
+            const payloadForActivity = {
+              editType: "Comment",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              ad_id: adid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              adsetname: adsetName,
+              adname: adName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad comment updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
+            const newResponse = await apiClient.post('/New/Comments/delete/History', {
               accountNumber: rowAccount,
               campaignname: adName,
               campaignid,
@@ -1865,7 +1930,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               ad_id: adid,
               // comment: comment,
               usercommit: userdetails?.email,
-              level: "ad"
+              level: "ad",
+              activity: payloadForActivity
             }, authHeaders);
             if (newResponse.status === 200 || newResponse.status === 201) {
               setCampaignComments(prev => {
