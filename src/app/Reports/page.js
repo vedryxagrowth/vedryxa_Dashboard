@@ -354,8 +354,20 @@ const MyTablePage = () => {
 
     const [account, setAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
-    const [time, setTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
-
+    const [time, setTime] = useState(
+        timeFromDashboard
+            ? timeFromDashboard
+            : storedData
+                ? storedData?.time
+                : revenuePratner === "FB_Predicto"
+                    ? "EDT"
+                    : revenuePratner === "FB_Sedo"
+                        ? "CET"
+                        : revenuePratner === "FB_DomainActive" ||
+                            revenuePratner === "FB_Tonic1"
+                            ? "PDT"
+                            : "UTC"
+    );
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
@@ -365,8 +377,20 @@ const MyTablePage = () => {
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
     console.log(newAccountName);
-    const [newtime, setNewTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
-
+    const [newtime, setNewTime] = useState(
+        timeFromDashboard
+            ? timeFromDashboard
+            : storedData
+                ? storedData?.time
+                : revenuePratner === "FB_Predicto"
+                    ? "EDT"
+                    : revenuePratner === "FB_Sedo"
+                        ? "CET"
+                        : revenuePratner === "FB_DomainActive" ||
+                            revenuePratner === "FB_Tonic1"
+                            ? "PDT"
+                            : "UTC"
+    );
     const [pageSize, setPageSize] = useState(1);
 
     const hasFetched = useRef(false);
@@ -1984,7 +2008,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -3172,7 +3196,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -5066,7 +5090,7 @@ const MyTablePage = () => {
 
                     try {
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('http://localhost:8000/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -5541,7 +5565,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -6746,7 +6770,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -7757,7 +7781,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('http://localhost:8000/update/campaign/budget/history', payload);
+                        await apiClient.post('/update/campaign/budget/history', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -8194,7 +8218,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -9244,7 +9268,7 @@ const MyTablePage = () => {
 
                         // changeRRefrst();
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('http://localhost:8000/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -9717,7 +9741,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -10827,7 +10851,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -11878,7 +11902,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -12827,7 +12851,7 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('http://localhost:8000/update/campaign/budget/history', payload);
+                        await apiClient.post('/update/campaign/budget/history', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -13262,7 +13286,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -14516,7 +14540,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "http://localhost:8000/UpdateCategoryAndStoreHistory",
+                        "/UpdateCategoryAndStoreHistory",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -15474,9 +15498,22 @@ const MyTablePage = () => {
         setnewAccountName((accountsAccess[0].accountName))
 
         // ⏰ set timezone
-        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
-            ? setTime("PDT")
+        value === "FB_Rsoc" ||
+            value === "FB_Tonic" ||
+            value === "FB_DomainActive" ||
+            value === "FB_Tonic1" ||
+            value === "FB_TonicRsoc" ||
+            value === "FB_Predicto" ||
+            value === "FB_Sedo"
+            ? setTime(
+                value === "FB_Predicto"
+                    ? "EDT"
+                    : value === "FB_Sedo"
+                        ? "CET"
+                        : "PDT"
+            )
             : setTime("UTC");
+
 
         // ✅ pick first active account
         const firstActive = accountsAccess.find(acc => acc.status === "Active");
@@ -15578,7 +15615,8 @@ const MyTablePage = () => {
         'CDT',
         'AST',
         'DST',
-        'CEST'
+        'CEST',
+        'CET'
     ];
 
 
@@ -17098,7 +17136,7 @@ const MyTablePage = () => {
                             </Tooltip> */}
                         </Button>
                     </Col>
-                    {revenuePratner !== "FB_TonicRsoc" && (
+                    {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing") && (
                         <Col>
                             <Button
                                 type="primary"

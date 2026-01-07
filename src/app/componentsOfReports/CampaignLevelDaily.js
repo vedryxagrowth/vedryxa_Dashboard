@@ -1857,7 +1857,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
             };
 
             const response = await apiClient.post(
-              `http://localhost:8000/BulkCampaignStatusChangeWithHistory`,
+              `/BulkCampaignStatusChangeWithHistory`,
               payload,
               { headers: { Authorization: token } }
             );
@@ -2029,7 +2029,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
-            'http://localhost:8000/Comments/upsert/History',
+            '/Comments/upsert/History',
             {
               accountNumber: rowAccount,
               campaignname: campaignName,
@@ -2090,7 +2090,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const newResponse = await apiClient.post(
-              'http://localhost:8000/New/Comments/delete/History',
+              '/New/Comments/delete/History',
               {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
@@ -2245,7 +2245,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
             }
             if (updatedPinStatus) {
               const resp = await apiClient.post(
-                'http://localhost:8000/NewPinBulkWithHistory',
+                '/NewPinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2297,7 +2297,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
               }
             } else {
               const resp = await apiClient.post(
-                'http://localhost:8000/NewUnpinBulkWithHistory',
+                '/NewUnpinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,

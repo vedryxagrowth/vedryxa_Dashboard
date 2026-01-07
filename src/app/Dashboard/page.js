@@ -57,6 +57,25 @@ const newtworkCollections = {
     "FB_Predicto": "Facebook_Predicto_Daily"
 }
 
+const NetworkDefaultTimezones = {
+    "FB_Mnet": "UTC",
+    "FB_MnetBing": "UTC",
+    "FB_Enki": "UTC",
+    "FB_System1": 'UTC',
+    "FB_Rsoc": 'PDT',
+    "FB_Tonic": 'PDT',
+    "FB_DomainActive": "PDT",
+    "FB_Bodies": "UTC",
+    "FB_Bodies1": "UTC",
+    "Newsbreak_DA": "PDT",
+    "FB_Tonic1": "PDT",
+    "FB_Sedo": "CET",
+    "FB_TonicRsoc": "PDT",
+    "FB_InuvoPrism": "PDT",
+    "FB_CodeFuel": "UTC",
+    "FB_Predicto": "EDT"
+}
+
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 import { generate } from '@ant-design/colors'; // For dynamic color generation
 import { CheckCircleFilled, CloseCircleFilled, CloseCircleOutlined, ReloadOutlined, CopyOutlined } from "@ant-design/icons";
@@ -117,7 +136,8 @@ const timezones = [
     'CDT',
     'AST',
     'DST',
-    'CEST'
+    'CEST',
+    'CET'
 ];
 
 const rangePresets = [
@@ -1036,7 +1056,7 @@ const Dashboard = () => {
     // const toggleTheme = () => {
     //     setDarkMode(!darkMode);
     // };
-    const [time, setTime] = useState('UTC');
+    const [time, setTime] = useState(NetworkDefaultTimezones[defaultCategory]);
 
     const [newagencyNameReport, setAgencyNameReport] = useState([]);
 
@@ -2223,7 +2243,16 @@ const Dashboard = () => {
         // Check if only 'FB_Tonic' is selected and update the timezone
         if (newCategories.length === 1 && newCategories[0] === 'FB_Tonic') {
             setTime('PDT'); // Change to PDT when FB_Tonic is selected
-        } else {
+        } else if(newCategories.length === 1 && newCategories[0] === 'FB_Tonic1'){
+            setTime('PDT')
+        }else if(newCategories.length === 1 && newCategories[0] === 'FB_TonicRsoc'){
+            setTime('PDT')
+        }else if(newCategories.length === 1 && newCategories[0] === 'FB_Predicto'){
+            setTime('EDT')
+        }else if(newCategories.length === 1 && newCategories[0] === 'FB_Sedo'){
+            setTime('CET')
+        }
+        else {
             setTime('UTC'); // Default to UTC otherwise
         }
     };

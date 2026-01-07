@@ -1278,7 +1278,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
             }
             const newResponse = await apiClient.post(
-              `http://localhost:8000/NewAdStatusChangeWithHistory`,
+              `/NewAdStatusChangeWithHistory`,
               {
                 status: desired ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1545,7 +1545,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           }
           try {
             if (next) {
-              const newResponse = await apiClient.post('http://localhost:8000/NewPinBulkWithHistory', {
+              const newResponse = await apiClient.post('/NewPinBulkWithHistory', {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
                 campaignid,
@@ -1589,7 +1589,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 });
               }
             } else {
-              const newResponse = await apiClient.post('http://localhost:8000/NewUnpinBulkWithHistory', {
+              const newResponse = await apiClient.post('/NewUnpinBulkWithHistory', {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
                 campaignid,
@@ -1756,7 +1756,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const newResponse = await apiClient.post(
-              'http://localhost:8000/Comments/upsert/History',
+              '/Comments/upsert/History',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1922,7 +1922,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
-            const newResponse = await apiClient.post('http://localhost:8000/New/Comments/delete/History', {
+            const newResponse = await apiClient.post('/New/Comments/delete/History', {
               accountNumber: rowAccount,
               campaignname: adName,
               campaignid,

@@ -1303,7 +1303,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               updateDetail: `From ${nextChecked ? "Inactive" : "Active"} to ${nextChecked ? "Active" : "Inactive"}`,
             }
             const response = await apiClient.post(
-              `http://localhost:8000/NewAdStatusChangeWithHistory`,
+              `/NewAdStatusChangeWithHistory`,
               {
                 status: nextChecked ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1564,7 +1564,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
-            'http://localhost:8000/Comments/upsert/History',
+            '/Comments/upsert/History',
             {
               accountNumber: rowAccount,
               campaignname: adName,
@@ -1630,7 +1630,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const response = await apiClient.post(
-              'http://localhost:8000/New/Comments/delete/History',
+              '/New/Comments/delete/History',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1848,7 +1848,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
               }
               const newResponse = await apiClient.post(
-                'http://localhost:8000/NewPinBulkWithHistory',
+                '/NewPinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -1912,7 +1912,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
               }
               const newResponse = await apiClient.post(
-                'http://localhost:8000/NewUnpinBulkWithHistory',
+                '/NewUnpinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,

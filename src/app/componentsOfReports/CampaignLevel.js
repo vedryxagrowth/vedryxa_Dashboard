@@ -1199,7 +1199,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         };
 
                         const response = await apiClient.post(
-                            `http://localhost:8000/BulkCampaignStatusChangeWithHistory`,
+                            `/BulkCampaignStatusChangeWithHistory`,
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -1612,8 +1612,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('http://localhost:8000/NewPinBulkWithHistory', body)
-                        : await apiClient.post('http://localhost:8000/NewUnpinBulkWithHistory', body);
+                        ? await apiClient.post('/NewPinBulkWithHistory', body)
+                        : await apiClient.post('/NewUnpinBulkWithHistory', body);
 
                     if (resp.status === 200 || resp.status === 201) {
                         // if (newResponse.status === 200 || newResponse.status === 201) {
@@ -1797,7 +1797,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('http://localhost:8000/Comments/upsert/History', body);
+                    const newResponse = await apiClient.post('/Comments/upsert/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1856,7 +1856,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('http://localhost:8000/New/Comments/delete/History', body);
+                    const newResponse = await apiClient.post('/New/Comments/delete/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];

@@ -1196,7 +1196,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             email: userdetails?.email,
                             activity: payloadForActivity
                         };
-                        const response = await apiClient.post(`http://localhost:8000/NewBulkAdsetStatusChangeWithHistory`, payload,
+                        const response = await apiClient.post(`/NewBulkAdsetStatusChangeWithHistory`, payload,
                             { headers: { Authorization: token } }
                         );
 
@@ -1454,8 +1454,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('http://localhost:8000/NewPinBulkWithHistory', body)
-                            : await apiClient.post('http://localhost:8000/NewUnpinBulkWithHistory', body);
+                            ? await apiClient.post('/NewPinBulkWithHistory', body)
+                            : await apiClient.post('/NewUnpinBulkWithHistory', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1613,7 +1613,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                     }
                     try {
-                        const newResponse = await apiClient.post('http://localhost:8000/Comments/upsert/History', {
+                        const newResponse = await apiClient.post('/Comments/upsert/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
@@ -1751,7 +1751,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('http://localhost:8000/New/Comments/delete/History', {
+                        const newResponse = await apiClient.post('/New/Comments/delete/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
