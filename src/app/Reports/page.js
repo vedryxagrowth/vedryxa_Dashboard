@@ -1,13 +1,13 @@
 "use client"
 import { lazy, useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, RightOutlined } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -23,6 +23,8 @@ import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
+import { Account } from 'aws-sdk';
+
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
@@ -59,6 +61,7 @@ const networkCollectionsForAiAssistant = {
     FB_TonicRsoc: 'Facebook_TonicRsoc',
     FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
+    FB_Predicto: 'Facebook_Predicto_Daily',
 };
 
 
@@ -76,6 +79,7 @@ const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAd
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 
 const MyTablePage = () => {
+    const router = useRouter();
     const { userdetails, theme, apiClient } = useTokenContext();
     const params = new URLSearchParams(window.location.search);
 
@@ -211,6 +215,7 @@ const MyTablePage = () => {
     const [searchText, setSearchText] = useState("");
     const [campaignComments, setCampaignComments] = useState([]);
     const [networksWithStatus, setNetworksWithStatus] = useState([]);
+
 
     useEffect(() => {
         const fetchNetworksData = async () => {
@@ -349,8 +354,20 @@ const MyTablePage = () => {
 
     const [account, setAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
-    const [time, setTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
-
+    const [time, setTime] = useState(
+        timeFromDashboard
+            ? timeFromDashboard
+            : storedData
+                ? storedData?.time
+                : revenuePratner === "FB_Predicto"
+                    ? "EDT"
+                    : revenuePratner === "FB_Sedo"
+                        ? "CET"
+                        : revenuePratner === "FB_DomainActive" ||
+                            revenuePratner === "FB_Tonic1"
+                            ? "PDT"
+                            : "UTC"
+    );
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
@@ -360,8 +377,20 @@ const MyTablePage = () => {
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
     console.log(newAccountName);
-    const [newtime, setNewTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
-
+    const [newtime, setNewTime] = useState(
+        timeFromDashboard
+            ? timeFromDashboard
+            : storedData
+                ? storedData?.time
+                : revenuePratner === "FB_Predicto"
+                    ? "EDT"
+                    : revenuePratner === "FB_Sedo"
+                        ? "CET"
+                        : revenuePratner === "FB_DomainActive" ||
+                            revenuePratner === "FB_Tonic1"
+                            ? "PDT"
+                            : "UTC"
+    );
     const [pageSize, setPageSize] = useState(1);
 
     const hasFetched = useRef(false);
@@ -431,6 +460,7 @@ const MyTablePage = () => {
     console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
+    const [Rhovered, setRHovered] = useState(false);
 
     const deriveInitial = (dash, stored, nets) => {
         const fromDash = dash?.replace(/\+/g, " ").trim();
@@ -457,6 +487,8 @@ const MyTablePage = () => {
     const [selectedValue, setSelectedValue] = useState(
         Array.isArray(initialOne) ? initialOne.map(String) : []
     );
+
+
 
     // console.log("multiple accounts:", selectedValue);
 
@@ -1646,6 +1678,7 @@ const MyTablePage = () => {
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
         },
@@ -1656,6 +1689,7 @@ const MyTablePage = () => {
             sort: true,
             width: 115,
             valueGetter: getFilteration,
+            filter: "agNumberColumnFilter",
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -1822,94 +1856,257 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const [row, setRow] = useState(null);
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
+                        return arr;
+                    });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    }
-
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -1995,6 +2192,7 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            filter: "agNumberColumnFilter",
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
             menuTabs: [],
@@ -2215,7 +2413,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -2259,7 +2457,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2369,7 +2567,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2427,7 +2625,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2544,6 +2742,7 @@ const MyTablePage = () => {
             headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -2555,6 +2754,7 @@ const MyTablePage = () => {
             sortable: true,
             sort: true,
             valueGetter: getFilteration,
+            filter: "agNumberColumnFilter",
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -2844,94 +3044,257 @@ const MyTablePage = () => {
             },
 
             // ✅ Optional — hide empty leaf cells (if any)
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -3018,6 +3381,7 @@ const MyTablePage = () => {
             },
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
@@ -3187,6 +3551,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             valueFormatter: (params) => `${params.value}%`,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -3213,6 +3578,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             valueFormatter: (params) => `${params.value}%`,
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -3227,6 +3593,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             minWidth: 100,
+            filter: "agNumberColumnFilter",
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -4348,6 +4715,7 @@ const MyTablePage = () => {
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
         },
@@ -4355,7 +4723,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -4642,6 +5010,7 @@ const MyTablePage = () => {
 
                 const handleOk = async () => {
 
+
                     const campaignname = groupedData?.[0]?.campaignname;
                     const campaignActualSpend = Camapignlevelstatus
                         .find(item =>
@@ -4650,6 +5019,10 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
+                    const bidAmountValue = Math.round(parseFloat(bidAmount) * 100);
+                    const changeBudgetValue = Math.round(parseFloat(changeBudget) * 100);
+                    const previousBudget = campaignActualSpend?.budget?.daily_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.daily_budget)) :
+                        campaignActualSpend?.budget?.lifetime_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.lifetime_budget)) : 0;
 
                     const payload = {
                         adsetId,
@@ -4665,19 +5038,45 @@ const MyTablePage = () => {
                         changeBudget !== undefined &&
                         changeBudget !== '' &&
                         !isNaN(changeBudget) &&
-                        parseFloat(changeBudget) > 0 // <- this is critical
+                        parseFloat(changeBudget) > 0 &&// <- this is critical&&
+                        changeBudgetValue !== previousBudget
                     ) {
                         payload.budget = parseFloat(changeBudget) * 100;
+                        payload.activity = {
+                            editType: "Budget",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset budget updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
+                            budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+                                campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        }
                     }
 
                     if (
                         bidAmount !== undefined &&
                         bidAmount !== '' &&
                         !isNaN(bidAmount) &&
-                        parseFloat(bidAmount) * 100 >= 1
+                        parseFloat(bidAmount) * 100 >= 1 &&
+                        bidAmountValue !== campaignActualSpend?.bid_amount
                     ) {
                         // payload.bidAmount = parseFloat(bidAmount) * 100;
                         payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
+                        payload.bidactivity = {
+                            editType: "Bid",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset bid strategy updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${(Number(campaignActualSpend?.bid_amount) / 100)} to $${Math.round(bidAmount * 100) / 100}`,
+                        }
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -4691,7 +5090,7 @@ const MyTablePage = () => {
 
                     try {
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
+                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -5018,91 +5417,253 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    };
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -5285,6 +5846,7 @@ const MyTablePage = () => {
             },
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
@@ -5352,7 +5914,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5367,7 +5929,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5386,7 +5948,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0,
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -5401,7 +5963,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5517,7 +6079,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5575,7 +6137,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5726,7 +6288,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -5743,6 +6305,7 @@ const MyTablePage = () => {
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             hide: true,
@@ -5920,7 +6483,7 @@ const MyTablePage = () => {
             field: 'adsetname',
             sortable: true,
             minWidth: 450,
-            filter: 'agSetColumnFilter',
+            filter: 'agTextColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
@@ -6058,91 +6621,254 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    };
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -6326,6 +7052,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -6394,7 +7121,7 @@ const MyTablePage = () => {
             minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
-            filter: "agTextColumnFilter", // Keep filter active
+            filter: "agNumberColumnFilter", // Keep filter active
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6409,7 +7136,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6428,7 +7155,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0,
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             suppressMenu: true,
             menuTabs: [],
@@ -6443,7 +7170,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6559,7 +7286,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6617,7 +7344,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6775,7 +7502,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -6792,6 +7519,7 @@ const MyTablePage = () => {
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
             hide: true,
@@ -7022,6 +7750,20 @@ const MyTablePage = () => {
                     const campaignIdFinal = target?.campaignid;
                     const campaignnameFinal = target?.campaignname;
 
+                    const payloadForActivity = {
+                        editType: "Budget",
+                        campaignid: campaignIdFinal,       // cents
+                        Account: String(rowAccountNumber),    // ✅ update *this* row’s account
+                        campaignname: campaignnameFinal,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign budget updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
+                        budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                    }
+
                     const payload = {
                         campaignId: campaignIdFinal,
                         budget: Number(changeBudget) * 100,         // cents
@@ -7030,6 +7772,7 @@ const MyTablePage = () => {
                         updatedby: params.context?.userdetails?.email,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        activity: payloadForActivity,
                     };
 
                     if (!payload.campaignId || !payload.accountNumber) {
@@ -7038,7 +7781,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/new/update/campaign/budget', payload);
+                        await apiClient.post('/update/campaign/budget/history', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -7150,7 +7893,7 @@ const MyTablePage = () => {
             field: 'adsetname',
             sortable: true,
             minWidth: 450,
-            filter: 'agSetColumnFilter',
+            filter: 'agTextColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
@@ -7294,127 +8037,290 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const isGroupRow = !!props?.node?.groupData;
+
+            //     // campaign id + campaign name for this row/group
+            //     const campaignId = isGroupRow
+            //         ? props?.node?.allLeafChildren?.[0]?.data?.campaignid
+            //         : props?.data?.campaignid;
+
+            //     // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+            //     const rowAccountNumber = isGroupRow
+            //         ? props?.node?.allLeafChildren?.[0]?.data?.accountNumber
+            //         : props?.data?.accountNumber;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     useEffect(() => {
+            //         if (!campaignId || !rowAccountNumber) return;
+            //         // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+            //         // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+            //         // const matchedAdset = Camapignlevelstatus.find(
+            //         //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+            //         // );
+            //         const matchedAdset = campaignComments
+            //             .find(item =>
+            //                 String(item.campaignid) === String(campaignId) &&
+            //                 String(item.Account) === String(rowAccountNumber) &&
+            //                 String(item.level) === "campaign"
+            //             );
+            //         if (matchedAdset) {
+            //             setCategory(matchedAdset?.category || "");
+            //         }
+            //     }, [campaignComments]);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
+
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const isGroupRow = !!props?.node?.groupData;
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                // campaign id + campaign name for this row/group
-                const campaignId = isGroupRow
-                    ? props?.node?.allLeafChildren?.[0]?.data?.campaignid
-                    : props?.data?.campaignid;
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
-                const rowAccountNumber = isGroupRow
-                    ? props?.node?.allLeafChildren?.[0]?.data?.accountNumber
-                    : props?.data?.accountNumber;
-
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
-
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber) return;
-                    // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
-                    // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
-                    // const matchedAdset = Camapignlevelstatus.find(
-                    //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
-                    // );
-                    const matchedAdset = campaignComments
-                        .find(item =>
-                            String(item.campaignid) === String(campaignId) &&
-                            String(item.Account) === String(rowAccountNumber) &&
-                            String(item.level) === "campaign"
-                        );
-                    if (matchedAdset) {
-                        setCategory(matchedAdset?.category || "");
-                    }
-                }, [campaignComments]);
-
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,
+                        Account: row.accountNumber,
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
+                        return arr;
+                    });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    }
-
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
-
-
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -7538,6 +8444,7 @@ const MyTablePage = () => {
                 return '';
             },
             minWidth: 110,
+            filter: "agNumberColumnFilter",
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
@@ -7671,7 +8578,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7787,7 +8694,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7845,7 +8752,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7970,7 +8877,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -7984,7 +8891,7 @@ const MyTablePage = () => {
             field: 'filteration',
             width: 115,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
@@ -8274,6 +9181,7 @@ const MyTablePage = () => {
                 const handleOk = async () => {
                     // setIsModalVisible(false);
                     const campaignname = groupedData?.[0]?.campaignname;
+                    const adsetname = groupedData?.[0]?.adsetname;
 
                     console.log("Submitting budget change:", groupedData);
 
@@ -8284,12 +9192,16 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
-
+                    const bidAmountValue = Math.round(parseFloat(bidAmount) * 100);
+                    const changeBudgetValue = Math.round(parseFloat(changeBudget) * 100);
+                    const previousBudget = campaignActualSpend?.budget?.daily_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.daily_budget)) :
+                        campaignActualSpend?.budget?.lifetime_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.lifetime_budget)) : 0;
                     const payload = {
                         adsetId,
                         campaignId,
                         accountNumber: accountNumber,
                         campaignname,
+                        adsetname,
                         updatedby: userdetails?.email,
                         budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
@@ -8299,19 +9211,45 @@ const MyTablePage = () => {
                         changeBudget !== undefined &&
                         changeBudget !== '' &&
                         !isNaN(changeBudget) &&
-                        parseFloat(changeBudget) > 0 // <- this is critical
+                        parseFloat(changeBudget) > 0 &&
+                        changeBudgetValue !== previousBudget
                     ) {
                         payload.budget = parseFloat(changeBudget) * 100;
+                        payload.activity = {
+                            editType: "Budget",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset budget updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
+                            budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+                                campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        }
                     }
 
                     if (
                         bidAmount !== undefined &&
                         bidAmount !== '' &&
                         !isNaN(bidAmount) &&
-                        parseFloat(bidAmount) * 100 >= 1
+                        parseFloat(bidAmount) * 100 >= 1 &&
+                        bidAmountValue !== campaignActualSpend?.bid_amount
                     ) {
                         // payload.bidAmount = parseFloat(bidAmount) * 100;
                         payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
+                        payload.bidactivity = {
+                            editType: "Bid",
+                            campaignid: campaignId,       // cents
+                            Account: String(accountNumber),    // ✅ update *this* row’s account
+                            campaignname: campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset bid strategy updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From $${(Number(campaignActualSpend?.bid_amount) / 100)} to $${Math.round(bidAmount * 100) / 100}`,
+                        }
                     }
 
                     const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
@@ -8330,7 +9268,7 @@ const MyTablePage = () => {
 
                         // changeRRefrst();
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
+                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -8654,92 +9592,254 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                        return arr;
+                    });
 
-                    }
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -8919,6 +10019,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -8965,7 +10066,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -8980,7 +10081,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -8999,7 +10100,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -9009,7 +10110,7 @@ const MyTablePage = () => {
             filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -9067,6 +10168,7 @@ const MyTablePage = () => {
                 return valueA - valueB;
             },
             valueFormatter: (params) => `${params.value}%`,
+            filter: 'agNumberColumnFilter',
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -9084,7 +10186,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -9224,7 +10326,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -9237,7 +10339,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -9601,93 +10703,256 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
+                        return arr;
+                    });
 
-                    setOpen(false);
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -9865,6 +11130,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -9911,7 +11177,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter, // Format display as currency
             comparator: numberComparator,
             suppressMenu: true,
@@ -9926,7 +11192,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -9945,7 +11211,7 @@ const MyTablePage = () => {
                 'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             // filter: "agNumberColumnFilter",
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
             comparator: numberComparator,
             suppressMenu: true,
@@ -9955,7 +11221,7 @@ const MyTablePage = () => {
             filterValueGetter: (params) => parseFloat(params.data.spend || 0),
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agTextColumnFilter',
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
             minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -10012,6 +11278,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
+            filter: 'agNumberColumnFilter',
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -10030,7 +11297,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -10148,7 +11415,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -10162,6 +11429,7 @@ const MyTablePage = () => {
             field: 'filteration',
             width: 115,
             sortable: true,
+            filter: "agNumberColumnFilter",
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
             suppressMenu: true,
@@ -10340,7 +11608,7 @@ const MyTablePage = () => {
             // hide: true,
             sortable: true,
             minWidth: 450,
-            filter: 'agSetColumnFilter',
+            filter: 'agTextColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
                 suppressAndOrCondition: true,
@@ -10487,90 +11755,252 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
 
-                    }
-                    setOpen(false);
+                        return arr;
+                    });
+
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -10658,6 +12088,7 @@ const MyTablePage = () => {
             cellStyle: { fontWeight: 'bold' },
             suppressMenu: true,
             menuTabs: [],
+            filter: "agNumberColumnFilter",
             headerClass: 'hide-menu', // Add a custom class
         },
         date: {
@@ -10802,6 +12233,7 @@ const MyTablePage = () => {
             },
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
+            filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "CTR = (FBClicks / Impressions) * 100",
@@ -10818,7 +12250,7 @@ const MyTablePage = () => {
         cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
         fmargin: {
-            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agTextColumnFilter",
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
             minWidth: 120,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
@@ -10929,7 +12361,7 @@ const MyTablePage = () => {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             minWidth: 90,
             headerTooltip: '(Spend/Impressions)*1000',
             valueGetter: getCpm,
@@ -10942,7 +12374,7 @@ const MyTablePage = () => {
             headerName: "Filteration",
             field: 'filteration',
             width: 115,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             sortable: true,
             valueGetter: getFilteration,
             valueFormatter: params => `${params.value || 0}%`,
@@ -11384,6 +12816,19 @@ const MyTablePage = () => {
                     const campaignIdFinal = target?.campaignid;
                     const campaignnameFinal = target?.campaignname;
 
+                    const payloadForActivity = {
+                        editType: "Budget",
+                        campaignid: campaignIdFinal,       // cents
+                        Account: String(rowAccountNumber),    // ✅ update *this* row’s account
+                        campaignname: campaignnameFinal,
+                        updatedBy: params.context?.userdetails?.email,
+                        updateType: "Campain budget updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
+                        budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
+                            campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                    }
+
 
                     const payload = {
                         campaignId: campaignIdFinal,
@@ -11393,7 +12838,10 @@ const MyTablePage = () => {
                         updatedby: params.context?.userdetails?.email,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+                        activity: payloadForActivity,
                     };
+
+
 
 
                     if (!payload.campaignId || !payload.accountNumber) {
@@ -11403,7 +12851,7 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/new/update/campaign/budget', payload);
+                        await apiClient.post('/update/campaign/budget/history', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -11678,103 +13126,265 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+
+            //         }
+
+
+            //         setOpen(false);
+            //     };
+
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
 
-
-                const getRow = () => {
-                    return props.node.group
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
-
-                    const payload = {
-                        accountNumber: row.accountNumber,
-                        campaignid: row.campaignid,
-                        level: "campaign",
-                        category,
-                    };
-
-
-                    try {
-                        const token = localStorage.getItem("token");
-
-
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
-                        );
-
-
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
-                        });
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
-
-
-                    }
-
-
+                    await saveApi(row, category);
                     setOpen(false);
                 };
 
 
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category: catValue,
+                        activity: payloadForActivity,
+                    };
+
+                    const token = localStorage.getItem("token");
+
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
+                        );
+
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
+                        });
+
+                        return arr;
+                    });
+
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
+                };
+
+
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
                 return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
                         >
-                            <PlusOutlined />
-                        </span>
-
-
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -11962,6 +13572,7 @@ const MyTablePage = () => {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
             cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -12063,7 +13674,7 @@ const MyTablePage = () => {
             minWidth: 100,
             valueGetter: getMargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -12185,7 +13796,7 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             minWidth: 100,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -12246,7 +13857,7 @@ const MyTablePage = () => {
             minWidth: 120,
             valueGetter: getFmargin,
             sortable: true,
-            filter: "agTextColumnFilter",
+            filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -12780,92 +14391,254 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group && !params.value,
             },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
             cellRenderer: (props) => {
-                if (props.node.rowPinned || props.node.footer) return "";
-                if (props.value) return props.value;
+                if (props.node.rowPinned || props.node.footer) return null;
 
-                const [open, setOpen] = useState(false);
-                const [category, setCategory] = useState("");
-                const [row, setRow] = useState(null);
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
 
-                const getRow = () => {
-                    return props.node.group
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
                         ? props.node.allLeafChildren?.[0]?.data
                         : props.node.data;
-                };
 
-                const onEdit = () => {
-                    const r = getRow();
-                    setRow(r);
-                    setCategory(r?.category || "");
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
                     setOpen(true);
                 };
 
-                const save = async () => {
+                const saveFromModal = async () => {
+                    const row = getRow();
                     if (!row) return;
 
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.email || "Unknown",
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
                     const payload = {
                         accountNumber: row.accountNumber,
                         campaignid: row.campaignid,
                         level: "campaign",
-                        category,
+                        category: catValue,
+                        activity: payloadForActivity,
                     };
 
-                    try {
-                        const token = localStorage.getItem("token");
+                    const token = localStorage.getItem("token");
 
-                        await apiClient.post(
-                            "/UpdateCategoryNew",
-                            payload,
-                            { headers: { Authorization: token } }
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
                         );
 
-                        setCampaignComments((prev) => {
-                            const arr = [...prev];
-                            const idx = arr.findIndex(
-                                (i) =>
-                                    i.campaignid == payload.campaignid &&
-                                    i.Account == payload.accountNumber &&
-                                    i.level == "campaign"
-                            );
-                            if (idx >= 0) {
-                                arr[idx].category = payload.category;
-                            } else {
-                                arr.push({
-                                    campaignid: payload.campaignid,
-                                    Account: payload.accountNumber,
-                                    level: "campaign",
-                                    category: payload.category,
-                                });
-                            }
-                            return arr;
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
                         });
 
-                        const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
-                        commentsMap.set(key, { category: payload.category });
-                        message.success("Category updated");
-                    } catch (err) {
-                        console.error(err);
-                        message.error("Failed to update category");
+                        return arr;
+                    });
 
-                    }
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
 
-                    setOpen(false);
+                    message.success("Category updated");
                 };
 
-                return (
-                    <div>
-                        <span
-                            onClick={onEdit}
-                            style={{ cursor: "pointer", }}
-                        >
-                            <PlusOutlined />
-                        </span>
 
-                        <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
-                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
                         </Modal>
-                    </div>
+                    </>
                 );
             },
             suppressMenu: true,
@@ -13461,10 +15234,11 @@ const MyTablePage = () => {
         try {
             // setInitialLoading(true);
             setAllCampaignsStatus(false);
-            const fetchData = await apiClient.get(
-                `/AllCampaigns?accountNumber=${newaccount}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
-            );
-            setAllProfitLossArray(fetchData?.data);
+            // const fetchData = await apiClient.get(
+            //     `/AllCampaigns?accountNumber=${newaccount}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
+            // );
+            // setAllProfitLossArray(fetchData?.data);
+            setAllProfitLossArray([]);
             setAllCampaignsStatus(true);
         }
         catch (err) {
@@ -13724,9 +15498,22 @@ const MyTablePage = () => {
         setnewAccountName((accountsAccess[0].accountName))
 
         // ⏰ set timezone
-        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc"
-            ? setTime("PDT")
+        value === "FB_Rsoc" ||
+            value === "FB_Tonic" ||
+            value === "FB_DomainActive" ||
+            value === "FB_Tonic1" ||
+            value === "FB_TonicRsoc" ||
+            value === "FB_Predicto" ||
+            value === "FB_Sedo"
+            ? setTime(
+                value === "FB_Predicto"
+                    ? "EDT"
+                    : value === "FB_Sedo"
+                        ? "CET"
+                        : "PDT"
+            )
             : setTime("UTC");
+
 
         // ✅ pick first active account
         const firstActive = accountsAccess.find(acc => acc.status === "Active");
@@ -13828,7 +15615,8 @@ const MyTablePage = () => {
         'CDT',
         'AST',
         'DST',
-        'CEST'
+        'CEST',
+        'CET'
     ];
 
 
@@ -13949,7 +15737,7 @@ const MyTablePage = () => {
 
     const onClickRefresh = async () => {
         // console.log(activeTab);
-        await functionCallForAllCampaignsData();
+        // await functionCallForAllCampaignsData();
 
         refreshComponent(activeTab);
         // refreshGrid(gridRef);  // Refresh gridRef
@@ -14349,7 +16137,7 @@ const MyTablePage = () => {
     const items = [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
-        { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
+        // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
@@ -14798,7 +16586,13 @@ const MyTablePage = () => {
                 desc: 'early performance decline',
             });
         }
-
+        if (summary.filtration > 0) {
+            conditions.push({
+                title: 'Filteration',
+                count: summary.filtration,
+                desc: 'Filtered campaigns',
+            })
+        }
 
         return conditions;
     }
@@ -15264,7 +17058,7 @@ const MyTablePage = () => {
 
                     {/* Apply Button */}
 
-                    <Col>
+                    {/* <Col>
                         <Button
                             type='primary'
                             onClick={onClickButton}
@@ -15283,7 +17077,113 @@ const MyTablePage = () => {
                         >
                             Apply
                         </Button>
+                        <Button
+  icon={<RightOutlined />}
+  onClick={() => router.push("/Basereport")}
+  style={{
+    border: "1px solid #4CAF50",
+    borderRadius: "6px",
+    height: "32px",
+  }}
+/>
+                        
+                    </Col> */}
+                    <Col>
+                        <Button
+                            type="primary"
+                            onClick={onClickButton} // Apply action
+                            onMouseEnter={() => setHovered(true)}
+                            onMouseLeave={() => setHovered(false)}
+                            style={{
+                                backgroundColor: hovered ? "#91C25F" : "transparent",
+                                border: "1px solid #4CAF50",
+                                borderRadius: "6px",
+                                color: theme === "dark" ? "#ffffff" : "#000000",
+                                padding: "0 12px",
+                                height: "32px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                transition: "all 0.15s ease-in-out",
+                            }}
+                        >
+                            Apply
+
+                            {/* Divider */}
+                            {/* <span style={{ opacity: 0.4 }}>|</span> */}
+
+                            {/* <RightOutlined
+      onClick={(e) => {
+        e.stopPropagation(); 
+        router.push("/Basereport");
+      }}
+      style={{ cursor: "pointer" }}
+    /> */}
+                            {/* <Tooltip title="Revenue base report">
+                                <span
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push("/Basereport");
+                                    }}
+                                    style={{
+                                        cursor: "pointer",
+                                        fontWeight: "600",
+                                        padding: "0 4px",
+                                    }}
+                                >
+                                    R
+                                </span>
+                            </Tooltip> */}
+                        </Button>
                     </Col>
+                    {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing") && (
+                        <Col>
+                            <Button
+                                type="primary"
+                                onMouseEnter={() => setRHovered(true)}
+                                onMouseLeave={() => setRHovered(false)}
+                                style={{
+                                    backgroundColor: Rhovered
+                                        ? theme === "dark"
+                                            ? "rgba(24,144,255,0.06)"
+                                            : "#e6f7ff"
+                                        : "transparent",
+                                    border: '1px solid #91d5ff',
+                                    borderRadius: "6px",
+                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                    padding: "0 12px",
+                                    height: "32px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    transition: "all 0.15s ease-in-out",
+                                }}
+                            >
+                                <Tooltip title="Revenue base report" overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}>
+                                    <span
+                                        onClick={(e) => {
+                                            // e.stopPropagation();
+                                            router.push("/Basereport");
+                                        }}
+                                        style={{
+                                            cursor: "pointer",
+                                            fontWeight: "600",
+                                            padding: "0 4px",
+                                        }}
+                                    >
+                                        R
+                                    </span>
+                                </Tooltip>
+                            </Button>
+                        </Col>
+                    )}
+
 
                     <div className='Dashboard-Details-2'>
                         <Col flex="auto" style={{ textAlign: "right", marginLeft: "auto" }}>
@@ -15536,7 +17436,7 @@ const MyTablePage = () => {
                                         AI Assistant
                                     </Button>
                                 </Dropdown> */}
-                                  <Dropdown
+                                <Dropdown
                                     menu={{
                                         items: aiItems,
                                         className: theme === 'dark'
@@ -15546,14 +17446,14 @@ const MyTablePage = () => {
                                     trigger={['click']}
                                     onOpenChange={(open) => {
                                         if (open && !aiRequested) {
-                                            setAiRequested(true); // 🚀 API fires here
+                                            setAiRequested(true);
                                         }
                                     }}
                                 >
                                     <Button
                                         type="default"
                                         icon={<FaRobot style={{ fontSize: 20 }} />}
-                                        loading={aiLoading}   // ✅ use loading, not disabled
+                                        loading={aiLoading}
                                         style={{
                                             borderRadius: 8,
                                             background: theme === 'dark'
@@ -15742,7 +17642,7 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            <Tabs.TabPane key="3">
+                            {/* <Tabs.TabPane key="3">
                                 <CampaignReports
                                     startDate={newStartDate}
                                     endDate={newendDate}
@@ -15771,7 +17671,7 @@ const MyTablePage = () => {
                                     onClickRefresh={onClickRefresh}
                                     accountsAccess={accountsAccess}
                                 />
-                            </Tabs.TabPane>
+                            </Tabs.TabPane> */}
 
                             <Tabs.TabPane key="4">
                                 <AgencyAndBMNameReports

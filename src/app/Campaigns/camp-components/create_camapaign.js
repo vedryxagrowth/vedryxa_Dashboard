@@ -28,6 +28,7 @@ import {
   ShareAltOutlined,
   CommentOutlined,
   LikeOutlined,
+  LinkOutlined,
   MoreOutlined,
   CloseOutlined,
   GlobalOutlined,
@@ -616,6 +617,16 @@ const AccountForm = ({
     setIndexValueForAccount(val);
     setDefaultURLBuilder(defaultUrlData);
   };
+  const onClickLinkView = (index) => {
+    // setIsModalVisibleForURLBuilder(true);
+    const val = form.getFieldValue(["adsets", index, account, "Website_URL"])
+    const newVal = val ? val.trim() : ""
+    if (newVal.startsWith("https")) {
+      window.open(newVal, "_blank", "noopener,noreferrer");
+    }
+    // setIndexValueForAccount(val);
+    // setDefaultURLBuilder(defaultUrlData);
+  };
 
   const onClickSetToAllAccounts = () => {
     const currentAdsets = form.getFieldValue("adsets") || [];
@@ -654,8 +665,45 @@ const AccountForm = ({
     });
   }
 
+  const onClickRemoveToAllAccounts = () => {
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = [...currentAdsets];
+    // if (network === "FB_Mnet" || network === "FB_DomainActive") {
+    //   setCaption(text.split("//")[1].split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("//")[1].split("/")[0],
+    //     }
+    //   };
+    // } else {
+    //   setCaption(text.split("/")[0]);
+    //   updatedAdsets[index] = {
+    //     ...updatedAdsets[index],
+    //     [account]: {
+    //       Website_URL: text,
+    //       Caption: text.split("/")[0],
+    //     }
+    //   };
+    // }
+    for (const newAccount of allAccounts) {
+      updatedAdsets[index] = {
+        ...updatedAdsets[index],
+        [newAccount]: {
+          Website_URL: "",
+          Caption: "",
+        }
+      };
+    }
+    // Update the form with the new adsets
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
+  }
 
-  const getUrlBuilder = useMemo(() => {
+  const getUrlBuilder = () => {
+    // useMemo(() => {
     // return (extraString) => {
     switch (network) {
       case "FB_Mnet":
@@ -694,8 +742,9 @@ const AccountForm = ({
           />
         );
     }
-    // }
-  }, [network, account, defaultURLBuilder, indexValueForAccount, onReturnUrl]);
+  }
+  // }
+  // }, [network, account, defaultURLBuilder, indexValueForAccount, onReturnUrl]);
 
   // useEffect(() => {
   //   if (selectedIndex === account) {
@@ -750,6 +799,10 @@ const AccountForm = ({
               style={{ cursor: "pointer" }}
               onClick={() => onClickEdit(index)}
             />
+            <LinkOutlined
+              style={{ cursor: "pointer", marginLeft: "20px" }}
+              onClick={() => onClickLinkView(index)}
+            />
 
             {allAccounts.length > 1 && (
               <Popconfirm
@@ -759,7 +812,7 @@ const AccountForm = ({
                 }}
                 description={
                   <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
-                    Are you sure to add website url and display link all accounts?
+                    Are you sure to add website url and display link for all accounts?
                   </div>
                 }
                 okText={
@@ -774,6 +827,31 @@ const AccountForm = ({
                   border: "1px solid #91C25F", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
                   backgroundColor: "transparent", marginLeft: "50px"
                 }}>Set to All Accounts</Button>
+              </Popconfirm>
+            )}
+            {allAccounts.length > 1 && (
+              <Popconfirm
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                  color: theme === "dark" ? "#fff" : "#333",
+                }}
+                description={
+                  <div style={{ color: theme === "dark" ? "#fff" : "#333" }}>
+                    Are you sure to remove website url and display link for all accounts?
+                  </div>
+                }
+                okText={
+                  <div onClick={onClickRemoveToAllAccounts}>
+                    Yes
+                  </div>
+                }
+                cancelText="No"
+              >
+
+                <Button style={{
+                  border: "1px solid #f7370cff", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                  backgroundColor: "transparent", marginLeft: "10px"
+                }}>Clear All</Button>
               </Popconfirm>
             )}
             {/* <div style={style}> */}
@@ -815,7 +893,7 @@ const AccountForm = ({
         }}
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
-        {getUrlBuilder}
+        {getUrlBuilder()}
       </Modal>
       {/* </Form> */}
     </div>

@@ -33,7 +33,8 @@ const revenuePartnerNames = {
     "Sedo": "FB_Sedo",
     "Tonic_Rsoc": "FB_TonicRsoc",
     "Inuvo_Prism": "FB_InuvoPrism",
-    "Code_Fuel": "FB_CodeFuel"
+    "Code_Fuel": "FB_CodeFuel",
+    "Predicto": "FB_Predicto"
 };
 
 
@@ -52,7 +53,27 @@ const newtworkCollections = {
     "FB_Sedo": "Facebook_Sedo",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
-    "FB_CodeFuel": "Facebook_CodeFuel_Daily"
+    "FB_CodeFuel": "Facebook_CodeFuel_Daily",
+    "FB_Predicto": "Facebook_Predicto_Daily"
+}
+
+const NetworkDefaultTimezones = {
+    "FB_Mnet": "UTC",
+    "FB_MnetBing": "UTC",
+    "FB_Enki": "UTC",
+    "FB_System1": 'UTC',
+    "FB_Rsoc": 'PDT',
+    "FB_Tonic": 'PDT',
+    "FB_DomainActive": "PDT",
+    "FB_Bodies": "UTC",
+    "FB_Bodies1": "UTC",
+    "Newsbreak_DA": "PDT",
+    "FB_Tonic1": "PDT",
+    "FB_Sedo": "CET",
+    "FB_TonicRsoc": "PDT",
+    "FB_InuvoPrism": "PDT",
+    "FB_CodeFuel": "UTC",
+    "FB_Predicto": "EDT"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -115,7 +136,8 @@ const timezones = [
     'CDT',
     'AST',
     'DST',
-    'CEST'
+    'CEST',
+    'CET'
 ];
 
 const rangePresets = [
@@ -1034,7 +1056,7 @@ const Dashboard = () => {
     // const toggleTheme = () => {
     //     setDarkMode(!darkMode);
     // };
-    const [time, setTime] = useState('UTC');
+    const [time, setTime] = useState(NetworkDefaultTimezones[defaultCategory]);
 
     const [newagencyNameReport, setAgencyNameReport] = useState([]);
 
@@ -1418,11 +1440,11 @@ const Dashboard = () => {
     }
 
     function getTotalNcpl(fullData, collectionName) {
-        return Math.round((getTotalEstimatedSpend(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100;
+        return getTotalConversions(fullData, collectionName) > 0 ? Math.round((getTotalEstimatedSpend(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100 : 0;
     }
 
     function getTotalRpc(fullData, collectionName) {
-        return Math.round((getTotalEstimatedRevenue(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100;
+        return getTotalConversions(fullData, collectionName) > 0 ? Math.round((getTotalEstimatedRevenue(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100 : 0;
     }
 
     function getTotalCpl(fullData) {
@@ -1457,6 +1479,9 @@ const Dashboard = () => {
                 }
                 else if (key === "FB_CodeFuel") {
                     newKey = "Facebook_CodeFuel_Daily"
+                }
+                else if (key === "FB_Predicto") {
+                    newKey = "Facebook_Predicto_Daily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 
@@ -2218,7 +2243,16 @@ const Dashboard = () => {
         // Check if only 'FB_Tonic' is selected and update the timezone
         if (newCategories.length === 1 && newCategories[0] === 'FB_Tonic') {
             setTime('PDT'); // Change to PDT when FB_Tonic is selected
-        } else {
+        } else if(newCategories.length === 1 && newCategories[0] === 'FB_Tonic1'){
+            setTime('PDT')
+        }else if(newCategories.length === 1 && newCategories[0] === 'FB_TonicRsoc'){
+            setTime('PDT')
+        }else if(newCategories.length === 1 && newCategories[0] === 'FB_Predicto'){
+            setTime('EDT')
+        }else if(newCategories.length === 1 && newCategories[0] === 'FB_Sedo'){
+            setTime('CET')
+        }
+        else {
             setTime('UTC'); // Default to UTC otherwise
         }
     };
@@ -2954,6 +2988,16 @@ const Dashboard = () => {
         cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
         autoHeight: true,
         filter: "agTextColumnFilter",
+        valueFormatter: (params) => {
+            // GROUP ROW
+            if (params.node?.group) {
+                const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+                return firstChild?.campaign_name ?? params.node.key;
+            }
+
+            // LEAF ROW
+            return params.value;
+        },
         filterValueGetter: (params) => {
             if (params.node.group) {
                 // Use the group key (campaign name)
@@ -6651,7 +6695,7 @@ const Dashboard = () => {
                                                             color: theme === 'dark' ? '#fff' : '#111827',
                                                         }}
                                                     >
-                                                        Overall report
+                                                        Project report
                                                     </h3>
                                                 </Col>
 
@@ -6746,6 +6790,7 @@ const Dashboard = () => {
                                                     enableRangeSelection={true}
                                                     onGridReady={(params) => { window.__top5 = params.api; }}
                                                     onFilterChanged={onFilterChanged}
+                                                    overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                 />
                                             </div>
                                         </div>
@@ -6781,7 +6826,7 @@ const Dashboard = () => {
                                                             color: theme === 'dark' ? '#fff' : '#111827',
                                                         }}
                                                     >
-                                                        Accounts
+                                                        Ad accounts
                                                     </h3>
                                                 </Col>
                                             </Row>
@@ -6829,6 +6874,7 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                     />
                                                 </Tabs.TabPane>
 
@@ -6870,6 +6916,7 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                     />
                                                 </Tabs.TabPane>
 
@@ -6921,6 +6968,7 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                     />
                                                 </Tabs.TabPane>
 
@@ -6972,6 +7020,7 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                     />
                                                 </Tabs.TabPane>
 
@@ -7023,6 +7072,7 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>
@@ -7059,7 +7109,7 @@ const Dashboard = () => {
                                                             color: theme === 'dark' ? '#fff' : '#111827',
                                                         }}
                                                     >
-                                                        Top 5 campaigns
+                                                        Top campaigns
                                                     </h3>
                                                 </Col>
                                             </Row>
@@ -7072,7 +7122,7 @@ const Dashboard = () => {
                                                 <Tabs.TabPane key="1">
                                                     <AgGridReact
                                                         className="custom-grid"
-                                                        domLayout="autoHeight"
+                                                        domLayout="auto"
                                                         rowData={top5Campaigns}
                                                         columnDefs={columnDefs2}
                                                         enableCharts={true}
@@ -7107,8 +7157,9 @@ const Dashboard = () => {
                                                         getRowHeight={() => 32}
                                                         onCellClicked={onCellClicked}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
-
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                         onFilterChanged={onFilterChanged}
+                                                        useValueFormatterForExport={true}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -7151,8 +7202,9 @@ const Dashboard = () => {
                                                         enableCharts={true}
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
-
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                         onFilterChanged={onFilterChanged}
+                                                        useValueFormatterForExport={true}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -7195,6 +7247,8 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
+                                                        useValueFormatterForExport={true}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -7237,6 +7291,8 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
+                                                        useValueFormatterForExport={true}
                                                     />
                                                 </Tabs.TabPane>
 
@@ -7279,6 +7335,8 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
+                                                        useValueFormatterForExport={true}
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>
@@ -7364,6 +7422,7 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                     />
                                                 </Tabs.TabPane>
 
@@ -7406,6 +7465,7 @@ const Dashboard = () => {
                                                         enableRangeSelection={true}
                                                         onGridReady={(params) => { window.__top5 = params.api; }}
                                                         onFilterChanged={onFilterChanged}
+                                                        overlayNoRowsTemplate="<span>No data available for the selected date</span>"
                                                     />
                                                 </Tabs.TabPane>
                                             </Tabs>

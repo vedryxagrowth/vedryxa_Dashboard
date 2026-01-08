@@ -197,7 +197,7 @@ const RequestComponent = ({ network, adAccounts, NetworkData }) => {
                 </Flex> */}
         </div>;
     }
-    // const [selectedPath, setSelectedPath] = useState(userdetails?.role === "Special_User" ? newdomainMapping[network]?.[0] : domainMapping[network]?.[0]);
+    // const [selectedPath, setSelectedPath] = useState(userdetails?.role === "Special_User" ? newdomainMapping[network]?.[0] : domainMapping[network]?.[0]....);
     const [selectedPath, setSelectedPath] = useState(
         userdetails?.role === "Special_User"
             ? newdomainMapping[network]?.[0]?.value

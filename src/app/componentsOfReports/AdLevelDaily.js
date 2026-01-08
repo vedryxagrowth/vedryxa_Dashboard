@@ -5,7 +5,11 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Spin, Badge, Tooltip, Space, Menu, Dropdown } from 'antd';
-import { NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  NumberOutlined, GlobalOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined, PictureOutlined, LikeOutlined,
+  CommentOutlined,
+  ShareAltOutlined,
+} from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -164,6 +168,9 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
   const [confirmBulkLoading, setConfirmBulkLoading] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkCategory, setBulkCategory] = useState("");
+  const [campaignIds, setCampaignIds] = useState([]);
+  const [adLevelCreatives, setAdLevelCreatives] = useState([]);
+
 
   useEffect(() => {
     // const groupedTQMap = new Map();
@@ -806,6 +813,86 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     setBulkOpen(true);
     setBulkCategory("");
   };
+  // const saveBulkCategory = async () => {
+  //   if (!bulkCategory.trim()) {
+  //     message.warning("Enter category");
+  //     return;
+  //   }
+
+  //   const token = localStorage.getItem("token");
+  //   const items = leafCampaigns
+  //     .filter(item => !item.category || item.category.trim() === "")
+  //     .map(item => ({
+  //       accountNumber: item.accountNumber,
+  //       campaignid: item.campaignid,
+  //       level: "campaign",
+  //       campaignname: item.campaignname,
+  //     }));
+
+  //   if (items.length === 0) {
+  //     message.info("All selected campaigns already have a category. Nothing to update.");
+  //     setBulkOpen(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+  //     await apiClient.post(
+  //       "/BulkUpdateCategory",
+  //       { items, category: bulkCategory },
+  //       { headers: { Authorization: token } }
+  //     );
+  //     setCampaignComments(prev => {
+  //       const arr = [...prev];
+  //       setLeafCampaigns(prev =>
+  //         prev.map(item =>
+  //           (!item.category || item.category.trim() === "")
+  //             ? { ...item, category: bulkCategory }
+  //             : item
+  //         )
+  //       )
+  //       items.forEach(item => {
+  //         const idx = arr.findIndex(
+  //           i =>
+  //             String(i.campaignid) === String(item.campaignid) &&
+  //             String(i.Account) === String(item.accountNumber) &&
+  //             i.level === "campaign"
+  //         );
+
+  //         if (idx >= 0) {
+  //           if (arr[idx] && arr[idx].category) {
+  //             arr[idx].category = arr[idx].category;
+  //           } else {
+  //             arr[idx].category = bulkCategory;
+  //           }
+
+  //         } else {
+  //           arr.push({
+  //             campaignid: item.campaignid,
+  //             Account: item.accountNumber,
+  //             level: "campaign",
+  //             category: bulkCategory
+  //           });
+  //         }
+  //       });
+
+  //       return arr;
+  //     });
+  //     leafCampaigns.forEach(item => {
+  //       const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+  //       commentsMap.set(key, { category: bulkCategory });
+  //     });
+
+  //     message.success({ content: "Category updated!", key: "bulkCategory" });
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     message.error("Failed to update category");
+  //   }
+
+  //   setBulkOpen(false);
+  // };
   const saveBulkCategory = async () => {
     if (!bulkCategory.trim()) {
       message.warning("Enter category");
@@ -813,17 +900,17 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     }
 
     const token = localStorage.getItem("token");
-    const items = leafCampaigns
-      .filter(item => !item.category || item.category.trim() === "")
-      .map(item => ({
-        accountNumber: item.accountNumber,
-        campaignid: item.campaignid,
-        level: "campaign",
-        campaignname: item.campaignname,
-      }));
+
+
+    const items = leafCampaigns.map(item => ({
+      accountNumber: item.accountNumber,
+      campaignid: item.campaignid,
+      level: "campaign",
+      campaignname: item.campaignname,
+    }));
 
     if (items.length === 0) {
-      message.info("All selected campaigns already have a category. Nothing to update.");
+      message.info("No campaigns selected.");
       setBulkOpen(false);
       return;
     }
@@ -832,19 +919,23 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "/BulkUpdateCategory",
+        "/BulkUpdateCategoryNew",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
+
+
+      setLeafCampaigns(prev =>
+        prev.map(item => ({
+          ...item,
+          category: bulkCategory
+        }))
+      );
+
+
       setCampaignComments(prev => {
         const arr = [...prev];
-        setLeafCampaigns(prev =>
-          prev.map(item =>
-            (!item.category || item.category.trim() === "")
-              ? { ...item, category: bulkCategory }
-              : item
-          )
-        )
+
         items.forEach(item => {
           const idx = arr.findIndex(
             i =>
@@ -854,12 +945,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           );
 
           if (idx >= 0) {
-            if (arr[idx] && arr[idx].category) {
-              arr[idx].category = arr[idx].category;
-            } else {
-              arr[idx].category = bulkCategory;
-            }
-
+            arr[idx].category = bulkCategory;
           } else {
             arr.push({
               campaignid: item.campaignid,
@@ -872,13 +958,14 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         return arr;
       });
+
+
       leafCampaigns.forEach(item => {
         const key = `${item.campaignid}_${item.accountNumber}_campaign`;
         commentsMap.set(key, { category: bulkCategory });
       });
 
       message.success({ content: "Category updated!", key: "bulkCategory" });
-
     } catch (err) {
       console.error(err);
       message.error("Failed to update category");
@@ -894,6 +981,16 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     sortable: true,
     unSortIcon: true,
     headerClass: 'ag-center-header',
+    valueFormatter: (params) => {
+      // GROUP ROW
+      if (params.node?.group) {
+        const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+        return firstChild?.adname ?? params.node.key;
+      }
+
+      // LEAF ROW
+      return params.value;
+    },
     // filter: "agTextColumnFilter",
     // filterValueGetter: (params) => {
     //   if (params.node.group) {
@@ -987,8 +1084,17 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
       innerRenderer: (params) => {
         if (params.node.footer) return 'Total';
 
+        const leafData = params.node.group
+          ? params.node.allLeafChildren?.[0]?.data
+          : params.data;
+        const rowCampaignId = leafData?.campaignid;
+        const rowAdsetId = leafData?.adsetid;
+        const rowAdId = leafData?.adid;
+        const rowAccountNumber = leafData?.accountNumber;
+
         const firstColumnValue = params.node.allLeafChildren?.[0]?.data?.adname || ""; // group key (Ad name)
         const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+        const adsetName = params.node.allLeafChildren?.[0]?.data?.adsetname || "";
         const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
 
         let campaignid, adsetid, adid, rowAccount;
@@ -1066,6 +1172,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
         const [nextChecked, setNextChecked] = React.useState(false);
         const [universalOject, setUniversalObject] = React.useState(null)
         const [confirmLoading, setConfirmLoading] = React.useState(false);
+        const [selectedCampaignCreatives, setSelectedCampaignCreatives] = useState([]);
+        const [creativeModalOpen, setCreativeModalOpen] = useState(false);
 
         React.useEffect(() => {
           setUniversalObject(campaignComments.find(d => d.level === "ad" && d.campaignid === campaignid && d.adsetid === adsetid && d.ad_id === adid && d.Account === rowAccount));
@@ -1154,8 +1262,23 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           setIsAdidModalVisibles(true);
           setConfirmLoading(true);
           try {
+            const payloadForActivity = {
+              editType: "Status",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              ad_id: adid,
+              adname: adName,
+              adsetname: adsetName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad status updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+            }
             const newResponse = await apiClient.post(
-              `/NewAdStatusChange`,
+              `/NewAdStatusChangeWithHistory`,
               {
                 status: desired ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1164,7 +1287,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 campaign_id: campaignid,
                 adset_id: adsetid,
                 email: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               },
               authHeaders
             );
@@ -1404,9 +1528,24 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
         const handlePinClick = async (_campName, campid, asetid, current) => {
           const next = !current;
           setPinned(next); // optimistic
+          const payloadForActivity = {
+            editType: "Pin",
+            campaignid: campaignid,       // cents
+            adsetid: adsetid,
+            ad_id: adid,
+            Account: rowAccount,    // ✅ update *this* row’s account
+            campaignname: campaignName,
+            adsetname: adsetName,
+            adname: adName,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Ad pin updated",
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+            updateDetail: `From ${next ? "unpin" : "pin"} to ${next ? "pin" : "unpin"}`,
+          }
           try {
             if (next) {
-              const newResponse = await apiClient.post('/NewPinBulk', {
+              const newResponse = await apiClient.post('/NewPinBulkWithHistory', {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
                 campaignid,
@@ -1414,7 +1553,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 ad_id: adid,
                 userPin: userdetails?.email,
                 comment: comment || '',
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               }, authHeaders);
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
@@ -1449,7 +1589,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 });
               }
             } else {
-              const newResponse = await apiClient.post('/NewUnpinBulk', {
+              const newResponse = await apiClient.post('/NewUnpinBulkWithHistory', {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
                 campaignid,
@@ -1457,7 +1597,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 ad_id: adid,
                 userPin: userdetails?.email,
                 comment: comment || '',
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               }, authHeaders);
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
@@ -1599,8 +1740,23 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         const handleOks = async () => {
           try {
+            const payloadForActivity = {
+              editType: "Comment",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              ad_id: adid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              adsetname: adsetName,
+              adname: adName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad comment updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             const newResponse = await apiClient.post(
-              '/Comments/upsert',
+              '/Comments/upsert/History',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1609,7 +1765,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 ad_id: adid,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               },
               authHeaders
             );
@@ -1750,7 +1907,22 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         const handleDelete = async () => {
           try {
-            const newResponse = await apiClient.post('/New/Comments/delete', {
+            const payloadForActivity = {
+              editType: "Comment",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              ad_id: adid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              adsetname: adsetName,
+              adname: adName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad comment updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
+            const newResponse = await apiClient.post('/New/Comments/delete/History', {
               accountNumber: rowAccount,
               campaignname: adName,
               campaignid,
@@ -1758,7 +1930,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               ad_id: adid,
               // comment: comment,
               usercommit: userdetails?.email,
-              level: "ad"
+              level: "ad",
+              activity: payloadForActivity
             }, authHeaders);
             if (newResponse.status === 200 || newResponse.status === 201) {
               setCampaignComments(prev => {
@@ -2034,6 +2207,64 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           );
         };
 
+        const adLevelCreatives = params.context?.adLevelCreatives || [];
+
+        const matchedAd =
+          adLevelCreatives
+            .find(
+              c =>
+                String(c.campaignId) === String(rowCampaignId) &&
+                String(c.accountNumber) === String(rowAccountNumber)
+            )
+            ?.adsets
+            ?.find(
+              a => String(a.adsetId) === String(rowAdsetId)
+            )
+            ?.ads
+            ?.find(
+              ad => String(ad.adId) === String(rowAdId)
+            ) || null;
+
+        const hasCreative = !!matchedAd;
+
+        const CreativeTooltip = () => {
+          if (!adLevelCreatives.length) {
+            return (
+              <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>
+                Loading creatives…
+              </div>
+            );
+          }
+
+          if (!matchedAd) {
+            return (
+              <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>
+                No creative for this ad
+              </div>
+            );
+          }
+
+          return (
+            <img
+              src={matchedAd.image}
+              alt={matchedAd.headline || "Creative"}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedCampaignCreatives([matchedAd])
+                setCreativeModalOpen(true);
+              }}
+              style={{
+                width: 60,
+                height: 60,
+                objectFit: "cover",
+                borderRadius: 4,
+                border: "1px solid #ccc",
+                cursor: "pointer",
+              }}
+            />
+          );
+        };
+
         return (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
             <Switch
@@ -2127,7 +2358,230 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
               />
             </Tooltip>
+            <Tooltip
+              title={<CreativeTooltip />}
+              placement="right"
+              overlayInnerStyle={{
+                backgroundColor: theme === "dark" ? "#111" : "#fff",
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                padding: 8,
+              }}
+            >
+              <PictureOutlined
+                className={
+                  theme === "dark"
+                    ? hasCreative
+                      ? "black-icon-creatives"
+                      : "black-icon-creatives1"
+                    : ""
+                }
+                style={{
+                  cursor: hasCreative ? "pointer" : "not-allowed",
+                  color: hasCreative ? "#1890ff" : "#aaa",
+                  fontSize: 12,
+                  marginRight: '5px',
+                }}
+              />
+            </Tooltip>
+            <Modal
+              className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+              open={creativeModalOpen}
+              onCancel={() => {
+                setCreativeModalOpen(false);
+                setSelectedCampaignCreatives([]);
+              }}
+              footer={null}
+              width={350}
+              closable
+              bodyStyle={{
+                padding: 0,
+                background: theme === "dark" ? "#18191a" : "#fff",
+                maxHeight: "87vh",
+              }}
+              style={{ top: 12 }}
+            >
+              {selectedCampaignCreatives.map((selectedCreative, idx) => (
+                <div key={idx}>
 
+                  <div style={{ padding: "8px 10px" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <img
+                        src={selectedCreative.image}
+                        alt="page"
+                        style={{
+                          width: 35,
+                          height: 35,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+
+                      <div style={{ flex: 1, marginLeft: 6 }}>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            fontSize: 10,
+                            color: theme === "dark" ? "#e4e6eb" : "#050505",
+                          }}
+                        >
+                          {selectedCreative.adName || "-"}
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 8,
+                            color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                          }}
+                        >
+                          Sponsored <GlobalOutlined />
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedCreative.message && (
+                      <div
+                        style={{
+                          marginTop: 2,
+                          fontSize: 8,
+                          color: theme === "dark" ? "#e4e6eb" : "#050505",
+                        }}
+                      >
+                        {selectedCreative.message}
+                      </div>
+                    )}
+                  </div>
+                  <img
+                    src={selectedCreative.image}
+                    alt="creative"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                  <div style={{ padding: "8px 10px" }}>
+                    {selectedCreative.headline && (
+                      <div
+                        style={{
+                          fontSize: 8,
+                          fontWeight: 600,
+                          color: theme === "dark" ? "#e4e6eb" : "#050505",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {selectedCreative.headline}
+                      </div>
+                    )}
+
+                    {selectedCreative.description && (
+                      <div
+                        style={{
+                          fontSize: 8,
+                          color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {selectedCreative.description}
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 8,
+                          color: theme === "dark" ? "#b0b3b8" : "#525456",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {selectedCreative.websiteUrl
+                          ? new URL(selectedCreative.websiteUrl).hostname
+                          : "-"}
+                      </div>
+
+                      {selectedCreative.websiteUrl && (
+                        <a
+                          href={selectedCreative.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ textDecoration: "none" }}
+                        >
+                          <div
+                            style={{
+                              padding: "5px 12px",
+                              background: "#91C25F",
+                              color: "#000",
+                              borderRadius: 18,
+                              fontSize: 10,
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            Learn more
+                          </div>
+                        </a>
+                      )}
+                    </div>
+                    {selectedCreative.websiteUrl && (
+                      <div
+                        style={{
+                          marginTop: 2,
+                          fontSize: 8,
+                          color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                          wordBreak: "break-all",
+                        }}
+                      >
+                        <a
+                          href={selectedCreative.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                            textDecoration: "none",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {selectedCreative.websiteUrl}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      borderTop: theme === "dark"
+                        ? "1px solid #3a3b3c"
+                        : "1px solid #ddd",
+                      display: "flex",
+                      justifyContent: "space-around",
+                      padding: "8px 0",
+                      fontSize: 10,
+                      color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <LikeOutlined style={{ marginRight: 6, fontSize: 12 }} />
+                      Like
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <CommentOutlined style={{ marginRight: 6, fontSize: 12 }} />
+                      Comment
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <ShareAltOutlined style={{ marginRight: 6, fontSize: 12 }} />
+                      Share
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Modal>
             <LinkOutlined
               onClick={() => {
                 const url = `/DailyAndCampaignHistory/AdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${rowAccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -2281,6 +2735,24 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
       );
       const mainData = fetchData.data;
       console.log("MainData:", mainData);
+
+      const campaignsByAccount = {};
+      mainData.forEach(item => {
+        const account = String(item.accountNumber);
+        const campaignId = String(item.campaign_id);
+
+        if (!account || !campaignId) return;
+
+        if (!campaignsByAccount[account]) {
+          campaignsByAccount[account] = [];
+        }
+
+        if (!campaignsByAccount[account].includes(campaignId)) {
+          campaignsByAccount[account].push(campaignId);
+        }
+      });
+      setCampaignIds(campaignsByAccount);
+
       timezone.current = mainData.length > 0 ? mainData[0].accountTimezone : "";
 
       let deviceTqMap = new Map();
@@ -2679,6 +3151,55 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
       setLoading1(false);
     }
   }
+  useEffect(() => {
+    console.log(campaignIds, "campaignIds updated");
+  }, [campaignIds]);
+  useEffect(() => {
+    if (!campaignIds || Object.keys(campaignIds).length === 0) return;
+
+    const fetchCreatives = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const creativesData = await sendCreativesRequest(
+          campaignIds,
+          token
+        );
+
+        console.log('Final creatives data:', creativesData);
+        setAdLevelCreatives(creativesData)
+
+      } catch (err) {
+        console.error('Creatives fetch failed', err);
+      }
+    };
+
+    fetchCreatives();
+  }, [campaignIds]);
+
+  const sendCreativesRequest = async (campaignIdsByAccount, token) => {
+    if (!campaignIdsByAccount || typeof campaignIdsByAccount !== "object") return [];
+
+    // 🔹 build single payload
+    const items = Object.entries(campaignIdsByAccount).map(
+      ([accountNumber, campaignIds]) => ({
+        accountNumber: String(accountNumber),
+        campaignIds: campaignIds.map(String)
+      })
+    );
+
+    const resp = await apiClient.post(
+      "https://prodapis.adsgoat.in/Creatives/get",
+      { items },
+      {
+        headers: {
+          Authorization: token
+        }
+      }
+    );
+
+    return resp.data?.data || [];
+  };
+
   const defaultColDef = {
     comparator: (valueA, valueB) => {
       // Default comparator for handling null or undefined values
@@ -3589,7 +4110,11 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       // getRowId={params => params.data.id}
                       columnDefs={memorizedColumnDef1}
                       onCellClicked={onCellClicked}
-                      context={context}
+                      // context={context}
+                      context={{
+                        ...context,
+                        adLevelCreatives,
+                      }}
                       pagination={true}
                       paginationPageSize={200}
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}
@@ -3602,6 +4127,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       onSelectionChanged={onSelectionChanged}
                       groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                       suppressRowClickSelection={true}
+                      useValueFormatterForExport={true}
                       // groupIncludeFooter={true}
                       // groupIncludeTotalFooter={true}
                       autoGroupColumnDef={autoGroupColumnDef}
@@ -3757,7 +4283,11 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       rowData={[]}
                       columnDefs={memorizedColumnDef1}
                       onCellClicked={onCellClicked}
-                      context={context}
+                      // context={context}
+                      context={{
+                        ...context,
+                        adLevelCreatives,
+                      }}
                       pagination={true}
                       paginationPageSize={200}
                       paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}

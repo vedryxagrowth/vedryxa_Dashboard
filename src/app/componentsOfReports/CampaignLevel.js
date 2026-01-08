@@ -4,7 +4,11 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Dropdown, Tooltip, Space, Menu } from 'antd';
-import { GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined, InfoOutlined, PictureOutlined, LikeOutlined,
+    CommentOutlined,
+    ShareAltOutlined,
+} from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -175,6 +179,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     const [confirmBulkLoading, setConfirmBulkLoading] = useState(false);
     const [bulkOpen, setBulkOpen] = useState(false);
     const [bulkCategory, setBulkCategory] = useState("");
+    const [campaignIds, setCampaignIds] = useState([]);
+    const [adLevelCreatives, setAdLevelCreatives] = useState([]);
 
     // useEffect to show selected campaigns after clearing search
     useEffect(() => {
@@ -336,31 +342,31 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 content: 'Deleting comments for selected campaigns...',
                 key: 'bulkDelete'
             });
- 
- 
+
+
             const items = leafCampaigns.map(item => ({
                 campaignid: item.campaignid
             }));
- 
+
             const body = {
                 accountNumber: leafCampaigns?.[0]?.accountNumber,
                 level: 'campaign',
                 items
             };
- 
+
             const resp = await apiClient.post(
                 '/Comments/bulkdelete',
                 body
             );
- 
+
             if (resp.status === 200 || resp.status === 201) {
                 const timeStamp = moment()
                     .tz('Asia/Kolkata')
                     .format('YYYY-MM-DD hh:mm:ss A');
- 
+
                 setCampaignComments(prev => {
                     const arr = [...prev];
- 
+
                     leafCampaigns.forEach(item => {
                         const idx = arr.findIndex(
                             i =>
@@ -368,7 +374,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                 String(i.Account) === String(item.accountNumber) &&
                                 i.level === 'campaign'
                         );
- 
+
                         if (idx >= 0) {
                             arr[idx] = {
                                 ...arr[idx],
@@ -378,16 +384,16 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             };
                         }
                     });
- 
+
                     return arr;
                 });
- 
+
                 message.success({
                     content: `${leafCampaigns.length} comment(s) deleted successfully`,
                     key: 'bulkDelete',
                     duration: 3
                 });
- 
+
                 setIsBulkCommentModalVisible(false);
             }
         } catch (error) {
@@ -608,6 +614,89 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         setBulkOpen(true);
         setBulkCategory("");
     };
+    // const saveBulkCategory = async () => {
+    //     if (!bulkCategory.trim()) {
+    //         message.warning("Enter category");
+    //         return;
+    //     }
+
+    //     const token = localStorage.getItem("token");
+    //     const items = leafCampaigns
+    //         .filter(item => !item.category || item.category.trim() === "")
+    //         .map(item => ({
+    //             accountNumber: item.accountNumber,
+    //             campaignid: item.campaignid,
+    //             level: "campaign",
+    //             campaignname: item.campaignname,
+    //         }));
+
+    //     if (items.length === 0) {
+    //         message.info("All selected campaigns already have a category. Nothing to update.");
+    //         setBulkOpen(false);
+    //         return;
+    //     }
+
+    //     try {
+    //         message.loading({ content: "Updating category...", key: "bulkCategory" });
+
+    //         await apiClient.post(
+    //             "/BulkUpdateCategory",
+    //             { items, category: bulkCategory },
+    //             { headers: { Authorization: token } }
+    //         );
+    //         setCampaignComments(prev => {
+    //             const arr = [...prev];
+    //             setLeafCampaigns(prev =>
+    //                 prev.map(item =>
+    //                     (!item.category || item.category.trim() === "")
+    //                         ? { ...item, category: bulkCategory }
+    //                         : item
+    //                 )
+    //             )
+    //             items.forEach(item => {
+    //                 const idx = arr.findIndex(
+    //                     i =>
+    //                         String(i.campaignid) === String(item.campaignid) &&
+    //                         String(i.Account) === String(item.accountNumber) &&
+    //                         i.level === "campaign"
+    //                 );
+
+    //                 if (idx >= 0) {
+    //                     if (arr[idx] && arr[idx].category) {
+    //                         arr[idx].category = arr[idx].category;
+    //                     } else {
+    //                         arr[idx].category = bulkCategory;
+    //                     }
+
+    //                 } else {
+    //                     arr.push({
+    //                         campaignid: item.campaignid,
+    //                         Account: item.accountNumber,
+    //                         level: "campaign",
+    //                         category: bulkCategory
+    //                     });
+    //                 }
+    //             });
+
+    //             return arr;
+    //         });
+    //         leafCampaigns.forEach(item => {
+    //             if (!item.category || item.category.trim() === "") {
+    //                 const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+    //                 commentsMap.set(key, { category: bulkCategory });
+    //             }
+    //         });
+
+
+    //         message.success({ content: "Category updated!", key: "bulkCategory" });
+
+    //     } catch (err) {
+    //         console.error(err);
+    //         message.error("Failed to update category");
+    //     }
+
+    //     setBulkOpen(false);
+    // };
     const saveBulkCategory = async () => {
         if (!bulkCategory.trim()) {
             message.warning("Enter category");
@@ -615,17 +704,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         }
 
         const token = localStorage.getItem("token");
-        const items = leafCampaigns
-            .filter(item => !item.category || item.category.trim() === "")
-            .map(item => ({
-                accountNumber: item.accountNumber,
-                campaignid: item.campaignid,
-                level: "campaign",
-                campaignname: item.campaignname,
-            }));
+
+
+        const items = leafCampaigns.map(item => ({
+            accountNumber: item.accountNumber,
+            campaignid: item.campaignid,
+            level: "campaign",
+            campaignname: item.campaignname,
+        }));
 
         if (items.length === 0) {
-            message.info("All selected campaigns already have a category. Nothing to update.");
+            message.info("No campaigns selected.");
             setBulkOpen(false);
             return;
         }
@@ -634,19 +723,23 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "/BulkUpdateCategoryNew",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
+
+
+            setLeafCampaigns(prev =>
+                prev.map(item => ({
+                    ...item,
+                    category: bulkCategory
+                }))
+            );
+
+
             setCampaignComments(prev => {
                 const arr = [...prev];
-                setLeafCampaigns(prev =>
-                    prev.map(item =>
-                        (!item.category || item.category.trim() === "")
-                            ? { ...item, category: bulkCategory }
-                            : item
-                    )
-                )
+
                 items.forEach(item => {
                     const idx = arr.findIndex(
                         i =>
@@ -656,12 +749,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     );
 
                     if (idx >= 0) {
-                        if (arr[idx] && arr[idx].category) {
-                            arr[idx].category = arr[idx].category;
-                        } else {
-                            arr[idx].category = bulkCategory;
-                        }
-
+                        arr[idx].category = bulkCategory;
                     } else {
                         arr.push({
                             campaignid: item.campaignid,
@@ -674,16 +762,14 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                 return arr;
             });
+
+
             leafCampaigns.forEach(item => {
-                if (!item.category || item.category.trim() === "") {
-                    const key = `${item.campaignid}_${item.accountNumber}_campaign`;
-                    commentsMap.set(key, { category: bulkCategory });
-                }
+                const key = `${item.campaignid}_${item.accountNumber}_campaign`;
+                commentsMap.set(key, { category: bulkCategory });
             });
 
-
             message.success({ content: "Category updated!", key: "bulkCategory" });
-
         } catch (err) {
             console.error(err);
             message.error("Failed to update category");
@@ -692,6 +778,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         setBulkOpen(false);
     };
 
+
     const autoGroupColumnDefLive = {
         headerName: 'Campaign name',
         minWidth: 450,
@@ -699,6 +786,16 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
+        valueFormatter: (params) => {
+            // GROUP ROW
+            if (params.node?.group) {
+                const firstChild = params.node.childrenAfterGroup?.[0]?.data;
+                return firstChild?.campaignname ?? params.node.key;
+            }
+
+            // LEAF ROW
+            return params.value;
+        },
         // filter: "agTextColumnFilter",
         // filterValueGetter: (params) => {
         //     if (params.node.group) {
@@ -833,7 +930,13 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 }
                 // console.log(params.value, "value");
                 // console.log(params.node.childrenAfterGroup[0]?.data, "params in campaign level");
+                const leafData = params.node.group
+                    ? params.node.allLeafChildren?.[0]?.data
+                    : params.data;
 
+                const currentCampaignId = leafData?.campaignid;
+                const currentAccount = leafData?.accountNumber;
+                
                 const accountsParam = Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)];
                 let accountNumberToPassHistoryPage;
 
@@ -974,6 +1077,12 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 const [universalOject, setUniversalObject] = React.useState(null)
                 const [confirmLoading, setConfirmLoading] = React.useState(false);
 
+                const [selectedCampaignCreatives, setSelectedCampaignCreatives] = useState([]);
+                const [creativeModalOpen, setCreativeModalOpen] = useState(false);
+
+
+
+
                 const setCamapignlevelstatusFromGrid = params.context?.setCamapignlevelstatus;
                 // get override Map from grid context
                 const overrides = params.context?.campaignStatusOverridesRef?.current; // Map
@@ -1067,6 +1176,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     setConfirmLoading(true);
                     try {
                         const token = localStorage.getItem("token");
+                        const payloadForActivity = {
+                            editType: "Status",
+                            campaignid: campaignid,       // cents
+                            Account: String(pendingAccount),    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Campain status updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+                        }
                         const payload = {
                             status: desired ? "ACTIVE" : "PAUSED",
                             id: params.data?.identifier,
@@ -1075,10 +1195,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             adset_id: adsetid,
                             name: campaignName,
                             email: userdetails?.email,
+                            activity: payloadForActivity,
                         };
 
                         const response = await apiClient.post(
-                            `/BulkCampaignStatusChange`,
+                            `/BulkCampaignStatusChangeWithHistory`,
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -1468,18 +1589,31 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
                     const updatedPinStatus = !currentPinStatus;
 
+                    const payloadForActivity = {
+                        editType: "Pin",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign pin updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
+
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         userPin: userdetails?.email,
                         comment: comment || '',
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('/NewPinBulk', body)
-                        : await apiClient.post('/NewUnpinBulk', body);
+                        ? await apiClient.post('/NewPinBulkWithHistory', body)
+                        : await apiClient.post('/NewUnpinBulkWithHistory', body);
 
                     if (resp.status === 200 || resp.status === 201) {
                         // if (newResponse.status === 200 || newResponse.status === 201) {
@@ -1643,15 +1777,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 //     handlePinClick(cName, cId, aId, currentPinStatus);
                 // };
                 const handleOks = async () => {
+                    const payloadForActivity = {
+                        editType: "Comment",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign pin updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         comment,
                         usercommit: userdetails?.email,
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/Comments/upsert', body);
+                    const newResponse = await apiClient.post('/Comments/upsert/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1690,15 +1836,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 };
 
                 const handleDelete = async () => {
+                    const payloadForActivity = {
+                        editType: "Comment",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign comment cleared",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         // comment,
                         usercommit: userdetails?.email,
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/New/Comments/delete', body);
+                    const newResponse = await apiClient.post('/New/Comments/delete/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1762,6 +1920,62 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         </Tooltip>
                     );
                 };
+                const adLevelCreatives = params.context?.adLevelCreatives || [];
+
+                const campaignCreative = adLevelCreatives.find(
+                    c =>
+                        String(c.campaignId) === String(currentCampaignId) &&
+                        String(c.accountNumber) === String(currentAccount)
+                );
+
+                const creatives =
+                    campaignCreative?.adsets?.flatMap(adset => adset.ads) || [];
+
+
+                const CreativeTooltip = () => {
+                    if (!adLevelCreatives.length) {
+                        return <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>Loading creatives…</div>;
+                    }
+
+                    if (!creatives.length) {
+                        return <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>No creatives for this campaign</div>;
+                    }
+
+                    return (
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(2, 1fr)",
+                                gap: 5,
+                                maxWidth: 280
+                            }}
+                        >
+                            {creatives.map((ad, i) => (
+                                <img
+                                    key={i}
+                                    src={ad.image}
+                                    alt={ad.headline || "Creative"}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCampaignCreatives(creatives);
+                                        setCreativeModalOpen(true);
+                                    }}
+                                    style={{
+                                        width: 50,
+                                        height: 50,
+                                        objectFit: "cover",
+                                        borderRadius: 2,
+                                        border: "1px solid #ccc",
+                                        cursor: "pointer",
+                                    }}
+                                />
+
+                            ))}
+                        </div>
+                    );
+                };
+
+
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -1935,6 +2149,245 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                 style={{ cursor: 'pointer', marginLeft: '2px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
+                        <Tooltip
+                            title={<CreativeTooltip />}
+                            placement="right"
+                            overlayInnerStyle={{
+                                backgroundColor: theme === "dark" ? "#111" : "#fff",
+                                border: "1px solid #ccc",
+                                borderRadius: 8,
+                                padding: 10
+                            }}
+                        >
+                            <PictureOutlined
+                                className={
+                                    theme === "dark"
+                                        ? creatives.length > 0
+                                            ? "black-icon-creatives"
+                                            : "black-icon-creatives1"
+                                        : ""
+                                }
+
+                                style={{
+                                    cursor:creatives.length > 0 ? "pointer" : "not-allowed",
+                                    color: creatives.length ? "#1890ff" : "#aaa",
+                                    fontSize: 12,
+                                    marginRight: '5px'
+                                }}
+                            />
+                        </Tooltip>
+                        <Modal
+                            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+                            open={creativeModalOpen}
+                            onCancel={() => {
+                                setCreativeModalOpen(false);
+                                setSelectedCampaignCreatives([]);
+                            }}
+                            footer={null}
+                            width={350}
+                            closable
+                            bodyStyle={{
+                                padding: 0,
+                                background: theme === "dark" ? "#18191a" : "#fff",
+                                overflowY: "auto",
+                                maxHeight: "85vh",
+                            }}
+                            style={{ top: 15 }}
+                        >
+                            {selectedCampaignCreatives.map((selectedCreative, idx) => (
+                                <div key={idx}>
+
+                                  
+                                    <div style={{ padding: "8px 10px" }}>
+                                        <div style={{ display: "flex", alignItems: "center" }}>
+                                            <img
+                                                src={selectedCreative.image}
+                                                alt="page"
+                                                style={{
+                                                    width: 35,
+                                                    height: 35,
+                                                    borderRadius: "50%",
+                                                    objectFit: "cover",
+                                                }}
+                                            />
+
+                                            <div style={{ flex: 1, marginLeft: 6 }}>
+                                                <div
+                                                    style={{
+                                                        fontWeight: 600,
+                                                        fontSize: 10,
+                                                        color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                    }}
+                                                >
+                                                    {selectedCreative.adName || "-"}
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        fontSize: 10,
+                                                        color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                                                    }}
+                                                >
+                                                    Sponsored <GlobalOutlined />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {selectedCreative.message && (
+                                            <div
+                                                style={{
+                                                    marginTop: 2,
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                }}
+                                            >
+                                                {selectedCreative.message}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <img
+                                        src={selectedCreative.image}
+                                        alt="creative"
+                                        style={{
+                                            width: "100%",
+                                            height: "auto",
+                                            objectFit: "cover",
+                                            display: "block",
+                                        }}
+                                    />
+                                    <div style={{ padding: "8px 10px" }}>
+                                        {selectedCreative.headline && (
+                                            <div
+                                                style={{
+                                                    fontSize: 8,
+                                                    fontWeight: 600,
+                                                    color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                    marginBottom: 2,
+                                                }}
+                                            >
+                                                {selectedCreative.headline}
+                                            </div>
+                                        )}
+
+                                        {selectedCreative.description && (
+                                            <div
+                                                style={{
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                                                    marginBottom: 4,
+                                                }}
+                                            >
+                                                {selectedCreative.description}
+                                            </div>
+                                        )}
+
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                gap: 6,
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#b0b3b8" : "#525456",
+                                                    wordBreak: "break-word",
+                                                }}
+                                            >
+                                                {selectedCreative.websiteUrl
+                                                    ? new URL(selectedCreative.websiteUrl).hostname
+                                                    : "-"}
+                                            </div>
+
+                                            {selectedCreative.websiteUrl && (
+                                                <a
+                                                    href={selectedCreative.websiteUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ textDecoration: "none" }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            padding: "5px 12px",
+                                                            background: "#91C25F",
+                                                            color: "#000",
+                                                            borderRadius: 18,
+                                                            fontSize: 8,
+                                                            fontWeight: 600,
+                                                            whiteSpace: "nowrap",
+                                                        }}
+                                                    >
+                                                        Learn more
+                                                    </div>
+                                                </a>
+                                            )}
+                                        </div>
+
+                                        {selectedCreative.websiteUrl && (
+                                            <div
+                                                style={{
+                                                    marginTop: 2,
+                                                    fontSize: 8,
+                                                    color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                                                    wordBreak: "break-all",
+                                                }}
+                                            >
+                                                <a
+                                                    href={selectedCreative.websiteUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        color: theme === "dark" ? "#2e89ff" : "#1877f2",
+                                                        textDecoration: "none",
+                                                    }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {selectedCreative.websiteUrl}
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div
+                                        style={{
+                                            borderTop: theme === "dark"
+                                                ? "1px solid #3a3b3c"
+                                                : "1px solid #ddd",
+                                            display: "flex",
+                                            justifyContent: "space-around",
+                                            padding: "8px 0",
+                                            fontSize: 10,
+                                            color: theme === "dark" ? "#b0b3b8" : "#65676b",
+                                        }}
+                                    >
+                                        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                                            <LikeOutlined style={{ marginRight: 5, fontSize: 12}} />
+                                            Like
+                                        </div>
+                                        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                                            <CommentOutlined style={{ marginRight: 5, fontSize: 12 }} />
+                                            Comment
+                                        </div>
+                                        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                                            <ShareAltOutlined style={{ marginRight: 5, fontSize: 12 }} />
+                                            Share
+                                        </div>
+                                    </div>
+
+                                    {idx < selectedCampaignCreatives.length - 1 && (
+                                        <div
+                                            style={{
+                                                height: 8,
+                                                background: theme === "dark" ? "#303031ff" : "#e0e2e3ff",
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </Modal>
+
+
                         <LinkOutlined
                             onClick={() => {
                                 const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -2283,7 +2736,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 accountNumbers: accountsParam,   // <= ['111', '222'] or ['111'] for single
             });
 
+
             const mainData1 = resp.data;
+
+            const campaignsByAccount = {};
+
+            mainData1.forEach(item => {
+                const account = String(item.accountNumber);
+                const campaignId = String(item.campaign_id);
+
+                if (!account || !campaignId) return;
+
+                if (!campaignsByAccount[account]) {
+                    campaignsByAccount[account] = [];
+                }
+
+                if (!campaignsByAccount[account].includes(campaignId)) {
+                    campaignsByAccount[account].push(campaignId);
+                }
+            });
+
+            setCampaignIds(campaignsByAccount);
 
             // --- keep your existing logic below this line unchanged ---
             const mainData = mainData1;
@@ -2441,6 +2914,53 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             setApiStatus(true);
             setLoading(false);
         }
+    };
+
+    useEffect(() => {
+        console.log(campaignIds, "campaignIds updated");
+    }, [campaignIds]);
+    useEffect(() => {
+        if (!campaignIds || Object.keys(campaignIds).length === 0) return;
+
+        const fetchCreatives = async () => {
+            const token = localStorage.getItem("token");
+            try {
+                const creativesData = await sendCreativesRequest(
+                    campaignIds,
+                    token
+                );
+
+                console.log('Final creatives data:', creativesData);
+                setAdLevelCreatives(creativesData)
+
+            } catch (err) {
+                console.error('Creatives fetch failed', err);
+            }
+        };
+
+        fetchCreatives();
+    }, [campaignIds]);
+
+    const sendCreativesRequest = async (campaignIdsByAccount, token) => {
+        if (!campaignIdsByAccount || typeof campaignIdsByAccount !== "object") return [];
+        const items = Object.entries(campaignIdsByAccount).map(
+            ([accountNumber, campaignIds]) => ({
+                accountNumber: String(accountNumber),
+                campaignIds: campaignIds.map(String)
+            })
+        );
+
+        const resp = await apiClient.post(
+            "https://prodapis.adsgoat.in/Creatives/get",
+            { items },
+            {
+                headers: {
+                    Authorization: token
+                }
+            }
+        );
+
+        return resp.data?.data || [];
     };
 
     const defaultColDef = {
@@ -3369,7 +3889,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 open={isBulkCommentModalVisible}
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
-                                                footer={[ 
+                                                footer={[
                                                     <Button key="Delete" onClick={handleBulkDeleteComments}>
                                                         Delete
                                                     </Button>,
@@ -3748,7 +4268,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 suppressReactUi={true}
                                                 rowHeight={30}
                                                 className='custom-grid'
-                                                context={context}
+                                                // context={context}
+                                                context={{
+                                                    ...context,
+                                                    adLevelCreatives,
+                                                }}
                                                 rowData={memorizedRowData}
                                                 // immutableData={true}
                                                 // getRowId={params => params.data.id}
@@ -3910,12 +4434,18 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 suppressReactUi={true}
                                                 rowHeight={30}
                                                 className='custom-grid'
-                                                context={context}
+                                                // context={context}
+                                                context={{
+                                                    ...context,
+                                                    adLevelCreatives,
+                                                }}
+
                                                 rowData={[]}
                                                 rowSelection='multiple'
                                                 columnDefs={memorizedColumnDef}
                                                 defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                                 onCellClicked={onCellClickedLive}
+                                                useValueFormatterForExport={true}
                                                 pagination={true}
                                                 paginationPageSize={200}
                                                 paginationPageSizeSelector={[20, 40, 60, 80, 100, 150, 200]}

@@ -4164,4 +4164,12 @@ select:focus,
   text-overflow: ellipsis;
   white-space: nowrap;
   padding-left: 8px;
+
+}
+
+body.dark-mode .black-icon-creatives.anticon svg {
+  color: #1890ff !important;
+}
+body.dark-mode .black-icon-creatives1.anticon svg {
+  color: #aaa !important;
 }
