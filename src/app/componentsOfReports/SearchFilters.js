@@ -223,6 +223,8 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
         FB_TonicRsoc: 'Facebook_TonicRsoc',
         FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
         FB_CodeFuel: 'Facebook_CodeFuel_Daily',
+        FB_Predicto: "Facebook_Predicto_Daily",
+        FB_Affinity: "Facebook_Affinity_Daily"
     };
 
     const [aiLoading, setAiLoading] = useState(false);
@@ -344,7 +346,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                 desc: 'early performance decline',
             });
         }
-        if (summary.filtration> 0) {
+        if (summary.filtration > 0) {
             conditions.push({
                 title: 'Filteration',
                 count: summary.filtration,

@@ -62,7 +62,28 @@ const networkCollectionsForAiAssistant = {
     FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
     FB_Predicto: 'Facebook_Predicto_Daily',
+    FB_Affinity: 'Facebook_Affinity_Daily',
 };
+
+const NetworkDefaultTimezones = {
+    "FB_Mnet": "UTC",
+    "FB_MnetBing": "UTC",
+    "FB_Enki": "UTC",
+    "FB_System1": 'UTC',
+    "FB_Rsoc": 'PDT',
+    "FB_Tonic": 'PDT',
+    "FB_DomainActive": "PDT",
+    "FB_Bodies": "UTC",
+    "FB_Bodies1": "UTC",
+    "Newsbreak_DA": "PDT",
+    "FB_Tonic1": "PDT",
+    "FB_Sedo": "CET",
+    "FB_TonicRsoc": "PDT",
+    "FB_InuvoPrism": "PDT",
+    "FB_CodeFuel": "UTC",
+    "FB_Predicto": "EDT",
+    "FB_Affinity": "PDT"
+}
 
 
 const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
@@ -359,14 +380,7 @@ const MyTablePage = () => {
             ? timeFromDashboard
             : storedData
                 ? storedData?.time
-                : revenuePratner === "FB_Predicto"
-                    ? "EDT"
-                    : revenuePratner === "FB_Sedo"
-                        ? "CET"
-                        : revenuePratner === "FB_DomainActive" ||
-                            revenuePratner === "FB_Tonic1"
-                            ? "PDT"
-                            : "UTC"
+                : NetworkDefaultTimezones[revenuePratner] || "UTC"
     );
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
@@ -382,14 +396,7 @@ const MyTablePage = () => {
             ? timeFromDashboard
             : storedData
                 ? storedData?.time
-                : revenuePratner === "FB_Predicto"
-                    ? "EDT"
-                    : revenuePratner === "FB_Sedo"
-                        ? "CET"
-                        : revenuePratner === "FB_DomainActive" ||
-                            revenuePratner === "FB_Tonic1"
-                            ? "PDT"
-                            : "UTC"
+                : NetworkDefaultTimezones[revenuePratner] || "UTC"
     );
     const [pageSize, setPageSize] = useState(1);
 
@@ -15498,23 +15505,23 @@ const MyTablePage = () => {
         setnewAccountName((accountsAccess[0].accountName))
 
         // ⏰ set timezone
-        value === "FB_Rsoc" ||
-            value === "FB_Tonic" ||
-            value === "FB_DomainActive" ||
-            value === "FB_Tonic1" ||
-            value === "FB_TonicRsoc" ||
-            value === "FB_Predicto" ||
-            value === "FB_Sedo"
-            ? setTime(
-                value === "FB_Predicto"
-                    ? "EDT"
-                    : value === "FB_Sedo"
-                        ? "CET"
-                        : "PDT"
-            )
-            : setTime("UTC");
+        // value === "FB_Rsoc" ||
+        //     value === "FB_Tonic" ||
+        //     value === "FB_DomainActive" ||
+        //     value === "FB_Tonic1" ||
+        //     value === "FB_TonicRsoc" ||
+        //     value === "FB_Predicto" ||
+        //     value === "FB_Sedo"
+        //     ? setTime(
+        //         value === "FB_Predicto"
+        //             ? "EDT"
+        //             : value === "FB_Sedo"
+        //                 ? "CET"
+        //                 : "PDT"
+        //     )
+        //     : setTime("UTC");
 
-
+        setTime(NetworkDefaultTimezones[value] || "UTC")
         // ✅ pick first active account
         const firstActive = accountsAccess.find(acc => acc.status === "Active");
         if (firstActive) {
