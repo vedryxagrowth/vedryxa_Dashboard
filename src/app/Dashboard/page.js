@@ -34,7 +34,8 @@ const revenuePartnerNames = {
     "Tonic_Rsoc": "FB_TonicRsoc",
     "Inuvo_Prism": "FB_InuvoPrism",
     "Code_Fuel": "FB_CodeFuel",
-    "Predicto": "FB_Predicto"
+    "Predicto": "FB_Predicto",
+    "Affinity":"FB_Affinity"
 };
 
 
@@ -54,7 +55,8 @@ const newtworkCollections = {
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
-    "FB_Predicto": "Facebook_Predicto_Daily"
+    "FB_Predicto": "Facebook_Predicto_Daily",
+    "FB_Affinity":"Facebook_Affinity_Daily"
 }
 
 const NetworkDefaultTimezones = {
@@ -73,7 +75,8 @@ const NetworkDefaultTimezones = {
     "FB_TonicRsoc": "PDT",
     "FB_InuvoPrism": "PDT",
     "FB_CodeFuel": "UTC",
-    "FB_Predicto": "EDT"
+    "FB_Predicto": "EDT",
+    "FB_Affinity": "PDT"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -324,7 +327,7 @@ const RevenuePartnerDashboard = () => {
 
     const items = [
         { key: '1', label: 'Data', content: 'Content for Data' },
-        ...(revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet"
+        ...(revenuePratner && revenuePratner.length === 1 && (revenuePratner[0] === "Mnet" || revenuePratner[0] === "Mnet_Daily")
             ? [{ key: '2', label: 'Domain', content: 'Content for Domain data' }]
             : [])
     ];
@@ -399,7 +402,7 @@ const RevenuePartnerDashboard = () => {
 
             },
             {
-                field: `${timeZoneForColumnDefs.current}Date`,
+                field: `date`,
                 headerName: 'Date',
                 flex: 5,
                 minWidth: 100,
@@ -788,7 +791,7 @@ const RevenuePartnerDashboard = () => {
                             />
                         </ConfigProvider>
                     </Col>
-                    <Col xs={12} sm={12} md={4} lg={3}>
+                    {/* <Col xs={12} sm={12} md={4} lg={3}>
                         <Select
                             placeholder="Select timezone"
                             onChange={onChangeTime}
@@ -798,7 +801,7 @@ const RevenuePartnerDashboard = () => {
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                         />
-                    </Col>
+                    </Col> */}
                     <Col xs={12} sm={12} md={2}>
                         <Button onClick={onClickSubmit} style={{ backgroundColor: '#91C25F', color: "black", fontWeight: '600', border: ' 1px solid #4caf50' }}>
                             Submit
@@ -883,7 +886,7 @@ const RevenuePartnerDashboard = () => {
                         )
                     )}
                 </div>
-                {revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet" &&
+                {revenuePratner && revenuePratner.length === 1 && (revenuePratner[0] === "Mnet" || revenuePratner[0] === "Mnet_Daily") &&
 
                     <div>
                         {loading1 ? (
@@ -1482,6 +1485,9 @@ const Dashboard = () => {
                 }
                 else if (key === "FB_Predicto") {
                     newKey = "Facebook_Predicto_Daily"
+                }
+                else if (key === "FB_Affinity") {
+                    newKey = "Facebook_Affinity_Daily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 
@@ -2241,18 +2247,23 @@ const Dashboard = () => {
         });
 
         // Check if only 'FB_Tonic' is selected and update the timezone
-        if (newCategories.length === 1 && newCategories[0] === 'FB_Tonic') {
-            setTime('PDT'); // Change to PDT when FB_Tonic is selected
-        } else if(newCategories.length === 1 && newCategories[0] === 'FB_Tonic1'){
-            setTime('PDT')
-        }else if(newCategories.length === 1 && newCategories[0] === 'FB_TonicRsoc'){
-            setTime('PDT')
-        }else if(newCategories.length === 1 && newCategories[0] === 'FB_Predicto'){
-            setTime('EDT')
-        }else if(newCategories.length === 1 && newCategories[0] === 'FB_Sedo'){
-            setTime('CET')
-        }
-        else {
+        // if (newCategories.length === 1 && newCategories[0] === 'FB_Tonic') {
+        //     setTime('PDT'); // Change to PDT when FB_Tonic is selected
+        // } else if(newCategories.length === 1 && newCategories[0] === 'FB_Tonic1'){
+        //     setTime('PDT')
+        // }else if(newCategories.length === 1 && newCategories[0] === 'FB_TonicRsoc'){
+        //     setTime('PDT')
+        // }else if(newCategories.length === 1 && newCategories[0] === 'FB_Predicto'){
+        //     setTime('EDT')
+        // }else if(newCategories.length === 1 && newCategories[0] === 'FB_Sedo'){
+        //     setTime('CET')
+        // }
+        // else {
+        //     setTime('UTC'); // Default to UTC otherwise
+        // }
+        if(newCategories.length === 1){
+            setTime(NetworkDefaultTimezones[newCategories[0]] || "UTC")
+        }else {
             setTime('UTC'); // Default to UTC otherwise
         }
     };
