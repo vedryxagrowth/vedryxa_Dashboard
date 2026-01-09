@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Card, Tooltip, Skeleton } from "antd";
 import { useTokenContext } from "../components/parent";
+import moment from "moment-timezone";
 
 const UserTable = () => {
   const { theme } = useTokenContext();
@@ -39,9 +40,9 @@ const UserTable = () => {
       sorter: (a, b) => a.name.localeCompare(b.name),
       filters: data
         ? Array.from(new Set(data.map((item) => item.name))).map((name) => ({
-            text: name,
-            value: name,
-          }))
+          text: name,
+          value: name,
+        }))
         : [],
       onFilter: (value, record) => record.name === value,
     },
@@ -49,7 +50,9 @@ const UserTable = () => {
       title: "Last timestamp",
       dataIndex: "timestamp",
       key: "timestamp",
-      sorter: (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
+      sorter: (a, b) =>
+        moment(b.timestamp, "DD/MM/YYYY, hh:mm:ss a", true).valueOf() -
+        moment(a.timestamp, "DD/MM/YYYY, hh:mm:ss a", true).valueOf(),
     },
     {
       title: "IP address",
@@ -58,9 +61,9 @@ const UserTable = () => {
       sorter: (a, b) => a.ip.localeCompare(b.ip),
       filters: data
         ? Array.from(new Set(data.map((item) => item.ip))).map((ip) => ({
-            text: ip,
-            value: ip,
-          }))
+          text: ip,
+          value: ip,
+        }))
         : [],
       onFilter: (value, record) => record.ip === value,
       render: (ip, record) => {
@@ -121,21 +124,20 @@ const UserTable = () => {
         ),
       filters: data
         ? Array.from(
-            new Set(
-              data.map(
-                (item) =>
-                  `${item.location?.city || ""}, ${item.location?.regionName || ""}`
-              )
+          new Set(
+            data.map(
+              (item) =>
+                `${item.location?.city || ""}, ${item.location?.regionName || ""}`
             )
-          ).map((location) => ({
-            text: location,
-            value: location,
-          }))
+          )
+        ).map((location) => ({
+          text: location,
+          value: location,
+        }))
         : [],
       onFilter: (value, record) =>
-        `${record.location?.city || ""}, ${
-          record.location?.regionName || ""
-        }`.includes(value),
+        `${record.location?.city || ""}, ${record.location?.regionName || ""
+          }`.includes(value),
       render: (location) =>
         location && location.city && location.regionName && location.country
           ? `${location.city}, ${location.regionName}, ${location.country}`
@@ -149,11 +151,11 @@ const UserTable = () => {
         (a.device?.type || "").localeCompare(b.device?.type || ""),
       filters: data
         ? Array.from(
-            new Set(data.map((item) => item.device?.type || "Unknown"))
-          ).map((type) => ({
-            text: type,
-            value: type,
-          }))
+          new Set(data.map((item) => item.device?.type || "Unknown"))
+        ).map((type) => ({
+          text: type,
+          value: type,
+        }))
         : [],
       onFilter: (value, record) => record.device?.type === value,
       render: (type) => (type ? type : "Unknown"),
@@ -161,11 +163,23 @@ const UserTable = () => {
   ];
 
   // Group data by user name and get the most recent activity for each user
+  // const groupedData = Object.values(
+  //   data.reduce((acc, curr) => {
+  //     if (
+  //       !acc[curr.name] ||
+  //       new Date(curr.timestamp) > new Date(acc[curr.name].timestamp)
+  //     ) {
+  //       acc[curr.name] = { ...curr }; // Store the most recent activity
+  //     }
+  //     return acc;
+  //   }, {})
+  // );
   const groupedData = Object.values(
     data.reduce((acc, curr) => {
       if (
         !acc[curr.name] ||
-        new Date(curr.timestamp) > new Date(acc[curr.name].timestamp)
+        moment(curr.timestamp, "DD/MM/YYYY, hh:mm:ss a", true).valueOf() >
+        moment(acc[curr.name].timestamp, "DD/MM/YYYY, hh:mm:ss a", true).valueOf()
       ) {
         acc[curr.name] = { ...curr }; // Store the most recent activity
       }
@@ -173,14 +187,20 @@ const UserTable = () => {
     }, {})
   );
 
+
   // Sort grouped data by the most recent timestamp (descending)
-  groupedData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  // groupedData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  groupedData.sort(
+    (a, b) =>
+      moment(b.timestamp, "DD/MM/YYYY, hh:mm:ss a", true).valueOf() -
+      moment(a.timestamp, "DD/MM/YYYY, hh:mm:ss a", true).valueOf()
+  );
 
   return loading ? (
     <div style={{ padding: 24 }}>
       <Skeleton active paragraph={{ rows: 10 }} />
     </div>
-  ) :  (
+  ) : (
     <Table
       className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
       columns={columns}
@@ -194,7 +214,12 @@ const UserTable = () => {
           <div style={{ display: "flex", overflowX: "auto", gap: "16px" }}>
             {data
               .filter((activity) => activity.name === record.name)
-              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort user activities
+              // .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort user activities
+              .sort(
+                (a, b) =>
+                  moment(b.timestamp, "DD/MM/YYYY, hh:mm:ss a").valueOf() -
+                  moment(a.timestamp, "DD/MM/YYYY, hh:mm:ss a").valueOf()
+              )
               .map((activity) => {
                 const { lat, lon } = activity.location || {};
                 const mapUrl =
@@ -231,7 +256,7 @@ const UserTable = () => {
                         }
                       >
                         <strong>IP address:</strong>{" "}
-                        <span style={{backgroundColor: theme === "dark" ? " #91C25F" : "#91C25F"}}>{activity.ip || "Unknown"}</span>
+                        <span style={{ backgroundColor: theme === "dark" ? " #91C25F" : "#91C25F" }}>{activity.ip || "Unknown"}</span>
                       </Tooltip>
                     </p>
                     <p>
@@ -242,7 +267,7 @@ const UserTable = () => {
                       {activity.location?.zip || "Unknown"})
                     </p>
                     <p>
-                      <strong style={{backgroundColor:theme === "dark" ? "#91C25F" : " #91C25F"}}>Device:</strong> {activity.device?.type || "Unknown"}
+                      <strong style={{ backgroundColor: theme === "dark" ? "#91C25F" : " #91C25F" }}>Device:</strong> {activity.device?.type || "Unknown"}
                     </p>
                     <p>
                       <strong>User agent:</strong>{" "}
@@ -255,7 +280,7 @@ const UserTable = () => {
         ),
       }}
       scroll={{ x: 1200, y: 500 }} // Enable scrolling
-      // loading={loading}
+    // loading={loading}
     />
   );
 };
