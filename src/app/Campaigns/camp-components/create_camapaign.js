@@ -1236,6 +1236,9 @@ const AdsetComponent = ({
   const [editedImages, setEditedImages] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
   const [budget, setBudget] = useState(adset?.DailyAdd_amount || 0)
+
+  const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
+
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -1243,9 +1246,99 @@ const AdsetComponent = ({
   console.log(adset, "adset in adset component");
   console.log(defaultUrlData, "defaultUrlData in adset component");
 
-  const showScheduling =
-    budgetType === "lifetime" && !CampaignBudgetActive && !!adSchedulingToShow[index];
-    
+  const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  const [selected, setSelected] = useState({});
+  const [dragging, setDragging] = useState(false);
+  const [adsetSchedule, setAdsetSchedule] = useState([]);
+  const handleMouseDown = (day, hour) => {
+    setDragging(true);
+    toggleCell(day, hour);
+  };
+
+  const handleMouseEnter = (day, hour) => {
+    if (!dragging) return;
+    toggleCell(day, hour);
+  };
+
+  const handleMouseUp = () => {
+    setDragging(false);
+  };
+
+
+  const toggleCell = (day, hour) => {
+    const key = `${day}-${hour}`;
+
+    setSelected(prev => ({
+      ...prev,
+      [key]: !prev[key]   
+    }));
+  };
+
+
+  const groupByDay = () => {
+    const map = {};
+
+    Object.keys(selected).forEach(key => {
+      if (!selected[key]) return;
+
+      const [day, hour] = key.split("-").map(Number);
+
+      if (!map[day]) map[day] = [];
+      map[day].push(hour);
+    });
+
+    Object.keys(map).forEach(day => {
+      map[day].sort((a, b) => a - b);
+    });
+
+    return map;
+  };
+
+
+  const buildAdsetSchedule = (timezoneType) => {
+    const dayMap = groupByDay();
+    const schedules = [];
+
+    Object.entries(dayMap).forEach(([day, hours]) => {
+      let start = hours[0];
+      let prev = hours[0];
+
+      for (let i = 1; i <= hours.length; i++) {
+        const current = hours[i];
+
+        if (current !== prev + 1) {
+          schedules.push({
+            start_minute: start * 60,
+            end_minute: (prev + 1) * 60,
+            days: [Number(day)],
+            timezone_type: timezoneType
+          });
+
+          start = current;
+        }
+
+        prev = current;
+      }
+    });
+
+    return schedules;
+  };
+  const timezoneType = Form.useWatch("timezone_type", form);
+
+  useEffect(() => {
+    if (!timezoneType) {
+      setAdsetSchedule([]);
+      return;
+    }
+
+    const schedule = buildAdsetSchedule(selected, timezoneType);
+    setAdsetSchedule(schedule);
+
+  }, [selected, timezoneType]);
+
+
+
+
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
@@ -1261,6 +1354,8 @@ const AdsetComponent = ({
 
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
+  const showScheduling =
+    budgetType === "lifetime" && !CampaignBudgetActive && !!adSchedulingToShow[index];
 
   const Bid_strategy_values = [
     {
@@ -3125,8 +3220,28 @@ const AdsetComponent = ({
 
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
-            required={!CampaignBudgetActive}
-            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
+            // required={!CampaignBudgetActive}
+            // label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
+            label={
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "#B4B4B4" }}>
+                  {`${budgetType.charAt(0).toUpperCase()}${budgetType
+                    .slice(1)
+                    .toLowerCase()} budget`}
+                </span>
+
+                <Switch
+                  size="small"
+                  checked={!!adSchedulingToShow[index]}
+                  onChange={(checked) => {
+                    setAdSchedulingToShow((prev) => ({
+                      ...prev,
+                      [index]: checked,
+                    }));
+                  }}
+                />
+              </div>
+            }
             initialValue={0}
             // validateTrigger={["onBlur"]}
             // re-run validation whenever campaign-level Daily_amount changes
