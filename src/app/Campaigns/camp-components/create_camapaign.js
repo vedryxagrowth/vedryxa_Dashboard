@@ -1243,6 +1243,9 @@ const AdsetComponent = ({
   console.log(adset, "adset in adset component");
   console.log(defaultUrlData, "defaultUrlData in adset component");
 
+  const showScheduling =
+    budgetType === "lifetime" && !CampaignBudgetActive && !!adSchedulingToShow[index];
+    
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
@@ -3356,6 +3359,67 @@ const AdsetComponent = ({
                 }
               />
             </Form.Item>
+          )}
+          {showScheduling && (
+            <>
+              {/* Time Zone */}
+              <Form.Item
+                name="timezone_type"
+                label={<span style={{ color: "#B4B4B4" }}>Time Zone</span>}
+                rules={[{ required: true, message: "Please select a time zone" }]}
+              >
+                <Select
+                  options={[
+                    { value: "USER", label: "Viewer’s time zone" },
+                    { value: "ADVERTISER", label: "Ad account time zone" },
+                  ]}
+                  dropdownClassName={theme === "dark" && "custom-dropdown"}
+                  className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                />
+              </Form.Item>
+
+              {/* Schedule Grid */}
+              <div
+                className="schedule-grid"
+                onMouseUp={handleMouseUp}
+              >
+                <div className="row header">
+                  <div className="day-cell" />
+                  {Array.from({ length: 24 }).map((_, h) => (
+                    <div key={h} className="hour-label">
+                      {h % 3 === 0
+                        ? h === 0
+                          ? "12 am"
+                          : h < 12
+                            ? `${h} am`
+                            : h === 12
+                              ? "12 pm"
+                              : `${h - 12} pm`
+                        : ""}
+                    </div>
+                  ))}
+                </div>
+
+                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, d) => (
+                  <div key={day} className="row">
+                    <div className="day-cell">{day}</div>
+
+                    {Array.from({ length: 24 }).map((_, h) => {
+                      const key = `${d}-${h}`;
+                      return (
+                        <div
+                          key={h}
+                          className={`hour-cell ${selected[key] ? "active" : ""
+                            } ${h % 3 === 0 ? "group-start" : ""}`}
+                          onMouseDown={() => handleMouseDown(d, h)}
+                          onMouseEnter={() => handleMouseEnter(d, h)}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
         <span
