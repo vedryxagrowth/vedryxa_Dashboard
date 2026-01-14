@@ -2665,7 +2665,7 @@ const AdsetComponent = ({
   const currentDate = dayjs();
   const after30Days = currentDate.add(30, "day");
 
-  const filesForDynamicCreative = (view && adset.is_dynamic_creative) ? adset.addlevel[0]?.filename?.map(item => ({url:item.filename})) : [];
+  const filesForDynamicCreative = (view && adset.is_dynamic_creative) ? adset.addlevel[0]?.filename?.map(item => ({ url: item.filename })) : [];
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
@@ -3211,13 +3211,16 @@ const AdsetComponent = ({
         const max = numbers.length > 0 ? Math.max(...numbers) : 0;
         return max + 1;
       };
+      const previousPageId =
+        list.length > 0 ? list[0].page_id : form.getFieldValue("page_id");
       const nextAddNumber = list?.length + 1 || getNextAddNumber(list);
       const newAds = mapped.map((item, i) => ({
         id: item.id,
         AddName: `${addName}_${nextAddNumber + i}`,
         filename: item,
         uid: item.uid,
-        page_id: form.getFieldValue("page_id"),
+        // page_id: form.getFieldValue("page_id"),
+        page_id: previousPageId,
         message: primaryText,
         headline: headline,
         Description: description,
@@ -3535,7 +3538,7 @@ const AdsetComponent = ({
                 />
               </div>
             )}
-            {(view && adset.is_dynamic_creative) && (<div style={{display:"flex", alignItems:"center"}}>
+            {(view && adset.is_dynamic_creative) && (<div style={{ display: "flex", alignItems: "center" }}>
               <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
               <Form.Item
                 name={["adsets", index, "isDynamicCreative"]}
@@ -3553,21 +3556,21 @@ const AdsetComponent = ({
                   disabled
                   checked={adset?.is_dynamic_creative}
                   style={{ backgroundColor: adset.is_dynamic_creative ? "#91C25F" : undefined }}
-                  // onClick={(checked, e) => e.stopPropagation()}
-                  // onChange={(checked) => {
-                  //   console.log("Dynamic Creative:", checked);
+                // onClick={(checked, e) => e.stopPropagation()}
+                // onChange={(checked) => {
+                //   console.log("Dynamic Creative:", checked);
 
-                  //   // if (!checked) {
-                  //   // Example: clear dynamic creative assets
-                  //   form.setFieldsValue({
-                  //     adsets: {
-                  //       [index]: {
-                  //         isDynamicCreative: checked,
-                  //       },
-                  //     },
-                  //   });
-                  //   // }
-                  // }}
+                //   // if (!checked) {
+                //   // Example: clear dynamic creative assets
+                //   form.setFieldsValue({
+                //     adsets: {
+                //       [index]: {
+                //         isDynamicCreative: checked,
+                //       },
+                //     },
+                //   });
+                //   // }
+                // }}
                 />
               </Form.Item>
             </div>)}
@@ -6093,7 +6096,7 @@ const AdsetComponent = ({
 
                 <div style={{ flex: "30%" }}>
                   {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0
-                    ? 
+                    ?
                     selectedFiles[adset.id].map((file, i) => (
                       <Badge
                         key={i}
@@ -6716,7 +6719,7 @@ const AdsetComponent = ({
                         </div>
                       </Badge>
                     ))) : null}
-                  
+
                 </div>
               </div>
             )}

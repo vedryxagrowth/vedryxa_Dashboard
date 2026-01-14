@@ -329,7 +329,20 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             campaignid: item.campaignid,
             adsetid: item.adsetid,
             level: "adset",
-            userPin: userdetails?.email
+            userPin: userdetails?.email,
+            activity: {
+                editType: "Pin",
+                campaignid: item.campaignid,       // cents
+                adsetid: item.adsetid,
+                Account: item.accountNumber,    // ✅ update *this* row’s account
+                campaignname: item.campaignname,
+                adsetname: item.adsetname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Adset pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From "${action === "pin" ? "unpin" : "pin"}" to "${action === "pin" ? "pin" : "unpin"}"`,
+            }
         }));
 
         message.loading(
@@ -339,8 +352,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
         const apiUrl =
             action === "pin"
-                ? "/SmartPinBulk"
-                : "/SmartUnpinBulk";
+                ? "/SmartPinBulkWithHitory"
+                : "/SmartUnpinBulkWithHistory";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -399,6 +412,19 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             const items = leafCampaigns.map(item => ({
                 campaignid: item.campaignid,
                 adsetid: item.adsetid,
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    adsetid: item.adsetid,
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    adsetname: item.adsetname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Adset comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
             const body = {
@@ -408,7 +434,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdelete',
+                '/Comments/bulkdeleteWithHistory',
                 body
             );
 
@@ -472,11 +498,24 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 campaignname: item.adsetname,
                 comment,
                 usercommit: userdetails?.email,
-                level: "adset"
+                level: "adset",
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    adsetid: item.adsetid,
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    adsetname: item.adsetname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Adset pin updated",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNew',
+                '/Comments/upsertBulkNewWithHistory',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -582,7 +621,20 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     adset_id: item.adsetid,
                     accountNumber: String(item.accountNumber),
                     name: item.adsetname,
-                    email: userdetails?.email
+                    email: userdetails?.email,
+                    activity: {
+                        editType: "Status",
+                        campaignid: item.campaignid,       // cents
+                        adsetid: item.adsetid,
+                        Account: String(item.accountNumber),    // ✅ update *this* row’s account
+                        campaignname: item.campaignname,
+                        adsetname: item.adsetname,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Adset status updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
+                    }
                 }));
 
 
@@ -594,7 +646,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }
 
             const resp = await apiClient.post(
-                "/BulkAdsetStatusChangeMany",
+                "/BulkAdsetStatusChangeManyWithHistory",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -780,6 +832,17 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             campaignid: item.campaignid,
             level: "campaign",
             campaignname: item.campaignname,
+            activity: {
+                editType: "Category",
+                campaignid: item.campaignid,       // cents
+                Account: item.accountNumber,    // ✅ update *this* row’s account
+                campaignname: item.campaignname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Category comment cleared",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
         }));
 
         if (items.length === 0) {
@@ -792,7 +855,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNew",
+                "/BulkUpdateCategoryNewWithHistory",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1290,7 +1353,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset status updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
                         }
                         const token = localStorage.getItem("token");
@@ -1483,8 +1546,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset pin updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
-                            updateDetail: `From ${next ? "unpin" : "pin"} to ${next ? "pin" : "unpin"}`,
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `From "${next ? "unpin" : "pin"}" to "${next ? "pin" : "unpin"}"`,
                         }
                         const body = {
                             accountNumber: rowAccount,
@@ -1650,7 +1713,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset comment updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
                         const newResponse = await apiClient.post('/Comments/upsert/History', {
@@ -1797,7 +1860,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset comment updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
                         const newResponse = await apiClient.post('/New/Comments/delete/History', {

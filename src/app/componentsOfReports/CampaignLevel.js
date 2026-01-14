@@ -277,7 +277,18 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             campaignid: item.campaignid,
             campaignname: item.campaignname,
             level: item.level,
-            userPin: userdetails?.email
+            userPin: userdetails?.email,
+            activity: {
+                editType: "Pin",
+                campaignid: item.campaignid,
+                Account: item.accountNumber,    // ✅ update *this* row’s account
+                campaignname: item.campaignname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Campaign pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From "${action === "pin" ? "unpin" : "pin"}" to "${action === "pin" ? "pin" : "unpin"}"`,
+            }
         }));
 
         message.loading(`${action === "pin" ? "Pinning" : "Unpinning"} selected campaigns...`, 0);
@@ -285,9 +296,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         let apiUrl = "";
 
         if (action === "pin") {
-            apiUrl = "/SmartPinBulk";
+            apiUrl = "/SmartPinBulkWithHitory";
         } else if (action === "unpin") {
-            apiUrl = "/SmartUnpinBulk";
+            apiUrl = "/SmartUnpinBulkWithHistory";
         }
 
         const res = await apiClient.post(apiUrl, {
@@ -345,17 +356,29 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
             const items = leafCampaigns.map(item => ({
-                campaignid: item.campaignid
+                campaignid: item.campaignid,
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Campaign comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
             const body = {
                 accountNumber: leafCampaigns?.[0]?.accountNumber,
                 level: 'campaign',
-                items
+                items,
+
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdelete',
+                '/Comments/bulkdeleteWithHistory',
                 body
             );
 
@@ -419,10 +442,22 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 comment,
                 usercommit: userdetails?.email,
                 level: item.level,
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Campaign pin updated",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
+
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNew',
+                '/Comments/upsertBulkNewWithHistory',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -519,6 +554,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     accountNumber: String(item.accountNumber),
                     name: item.campaignname,
                     email: userdetails?.email,
+                    activity: {
+                        editType: "Status",
+                        campaignid: item.campaignid,
+                        Account: String(item.accountNumber),    // ✅ update *this* row’s account
+                        campaignname: item.campaignname,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign status updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
+                    }
                 }));
 
 
@@ -531,7 +577,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
             const resp = await apiClient.post(
-                "/BulkCampaignStatusChangeMany",
+                "/BulkCampaignStatusChangeManyWithHistory",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -711,6 +757,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             campaignid: item.campaignid,
             level: "campaign",
             campaignname: item.campaignname,
+            activity: {
+                editType: "Category",
+                campaignid: item.campaignid,       // cents
+                Account: item.accountNumber,    // ✅ update *this* row’s account
+                campaignname: item.campaignname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Category comment cleared",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
         }));
 
         if (items.length === 0) {
@@ -723,7 +780,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNew",
+                "/BulkUpdateCategoryNewWithHistory",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -936,7 +993,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                 const currentCampaignId = leafData?.campaignid;
                 const currentAccount = leafData?.accountNumber;
-                
+
                 const accountsParam = Array.isArray(newaccount) ? newaccount.map(String) : [String(newaccount)];
                 let accountNumberToPassHistoryPage;
 
@@ -1184,7 +1241,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Campain status updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
                         }
                         const payload = {
@@ -1597,8 +1654,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         updatedBy: userdetails?.userName,
                         updatedUserEmail: userdetails?.email,
                         updateType: "Campaign pin updated",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
-                        updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: `From "${updatedPinStatus ? "unpin" : "pin"}" to "${updatedPinStatus ? "pin" : "unpin"}"`,
                     }
 
                     const body = {
@@ -1785,7 +1842,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         updatedBy: userdetails?.userName,
                         updatedUserEmail: userdetails?.email,
                         updateType: "Campaign pin updated",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                     }
                     const body = {
@@ -1844,7 +1901,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         updatedBy: userdetails?.userName,
                         updatedUserEmail: userdetails?.email,
                         updateType: "Campaign comment cleared",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                     }
                     const body = {
@@ -2169,7 +2226,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                 }
 
                                 style={{
-                                    cursor:creatives.length > 0 ? "pointer" : "not-allowed",
+                                    cursor: creatives.length > 0 ? "pointer" : "not-allowed",
                                     color: creatives.length ? "#1890ff" : "#aaa",
                                     fontSize: 12,
                                     marginRight: '5px'
@@ -2197,7 +2254,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             {selectedCampaignCreatives.map((selectedCreative, idx) => (
                                 <div key={idx}>
 
-                                  
+
                                     <div style={{ padding: "8px 10px" }}>
                                         <div style={{ display: "flex", alignItems: "center" }}>
                                             <img
@@ -2362,7 +2419,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                         }}
                                     >
                                         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                                            <LikeOutlined style={{ marginRight: 5, fontSize: 12}} />
+                                            <LikeOutlined style={{ marginRight: 5, fontSize: 12 }} />
                                             Like
                                         </div>
                                         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
