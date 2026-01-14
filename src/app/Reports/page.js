@@ -2701,6 +2701,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
+            hide: true,
             sortable: false,
             filter: false,
             enableSorting: false,
@@ -3704,6 +3705,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
+            hide: true,
             sortable: false,
             filter: false,
             enableSorting: false,
@@ -12847,7 +12849,11 @@ const MyTablePage = () => {
 
                 return (
                     <div>
-                        <HistoryOutlined />
+                        <HistoryOutlined onClick={() => {
+                            setHistoryOpen(true);
+                            setSelectedCampaignIdForHistory(campaignId);
+                            setSelectedAccountForHistory(rowAccountNumber)
+                        }} />
                     </div>
                 );
             },
@@ -14560,7 +14566,11 @@ const MyTablePage = () => {
 
                 return (
                     <div>
-                        <HistoryOutlined />
+                        <HistoryOutlined onClick={() => {
+                            setHistoryOpen(true);
+                            setSelectedCampaignIdForHistory(campaignId);
+                            setSelectedAccountForHistory(rowAccountNumber)
+                        }} />
                     </div>
                 );
             },
@@ -15568,6 +15578,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
+            hide: true,
             sortable: false,
             filter: false,
             enableSorting: false,
