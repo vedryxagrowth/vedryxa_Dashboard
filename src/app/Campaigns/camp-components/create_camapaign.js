@@ -1210,6 +1210,11 @@ const AdsetComponent = ({
   defaultUrlData,
   setDefaultUrlData,
   budgetType,
+  setAdsetSchedule,
+  adSchedulingToShow,
+  selectedByAdset,
+  setAdSchedulingToShow,
+  setSelectedByAdset,
   page,
   pixel,
   geo,
@@ -1236,12 +1241,173 @@ const AdsetComponent = ({
   const [editedImages, setEditedImages] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
   const [budget, setBudget] = useState(adset?.DailyAdd_amount || 0)
+
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
   console.log(selectedPositions?.[adset.id]);
   console.log(adset, "adset in adset component");
   console.log(defaultUrlData, "defaultUrlData in adset component");
+
+
+  const [dragging, setDragging] = useState(false);
+  const selected = selectedByAdset[adset.id] || {};
+  const handleMouseDown = (day, hour) => {
+    setDragging(true);
+    toggleCell(day, hour);
+  };
+  const handleMouseEnter = (day, hour) => {
+    if (!dragging) return;
+    toggleCell(day, hour);
+  };
+  const handleMouseUp = () => {
+    setDragging(false);
+  };
+  const toggleCell = (day, hour) => {
+    const key = `${day}-${hour}`;
+
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [adset.id]: {
+        ...(prev[adset.id] || {}),
+        [key]: !prev[adset.id]?.[key]
+      }
+    }));
+  };
+  const groupByDay = (selected) => {
+    const map = {};
+
+    Object.keys(selected).forEach(key => {
+      if (!selected[key]) return;
+
+      const [day, hour] = key.split("-").map(Number);
+
+      if (!map[day]) map[day] = [];
+      map[day].push(hour);
+    });
+
+    Object.values(map).forEach(hours =>
+      hours.sort((a, b) => a - b)
+    );
+
+    return map;
+  };
+  const timezoneType =
+    form.getFieldValue(["adsets", index, "timezone_type"]);
+
+  // const buildAdsetSchedule = (selected, timezoneType) => {
+  //   const dayMap = groupByDay(selected);
+  //   const schedules = [];
+
+  //   Object.entries(dayMap).forEach(([day, hours]) => {
+  //     let start = hours[0];
+  //     let prev = hours[0];
+
+  //     for (let i = 1; i <= hours.length; i++) {
+  //       const current = hours[i];
+
+  //       if (current !== prev + 1) {
+  //         schedules.push({
+  //           start_minute: start * 60,
+  //           end_minute: (prev + 1) * 60,
+  //           days: [(Number(day) + 1) % 7],
+
+  //           timezone_type: timezoneType
+  //         });
+
+  //         start = current;
+  //       }
+
+  //       prev = current;
+  //     }
+  //   });
+
+  //   return schedules;
+  // };
+  const buildAdsetSchedule = (selected, timezoneType) => {
+    const dayMap = groupByDay(selected);
+    const slotMap = {};
+
+    Object.entries(dayMap).forEach(([day, hours]) => {
+      let start = hours[0];
+      let prev = hours[0];
+
+      for (let i = 1; i <= hours.length; i++) {
+        const current = hours[i];
+
+        if (current !== prev + 1) {
+          const startMin = start * 60;
+          const endMin = (prev + 1) * 60;
+          const fbDay = (Number(day) + 1) % 7;
+
+          const slotKey = `${startMin}-${endMin}`;
+
+          if (!slotMap[slotKey]) {
+            slotMap[slotKey] = new Set();
+          }
+
+          slotMap[slotKey].add(fbDay);
+
+          start = current;
+        }
+
+        prev = current;
+      }
+    });
+    return Object.entries(slotMap).map(([key, daySet]) => {
+      const [start_minute, end_minute] = key.split("-").map(Number);
+
+      return {
+        start_minute,
+        end_minute,
+        days: Array.from(daySet).sort(),
+        timezone_type: timezoneType
+      };
+    });
+  };
+
+  const handleEveryDayToggle = (hour) => {
+    setSelectedByAdset(prev => {
+      const current = prev[adset.id] || {};
+
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
+
+      const updated = { ...current };
+
+      [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+        updated[`${d}-${hour}`] = !allSelected;
+      });
+
+      return {
+        ...prev,
+        [adset.id]: updated
+      };
+    });
+  };
+
+  useEffect(() => {
+    if (!adset?.id || !timezoneType) return;
+
+    const schedule = buildAdsetSchedule(
+      selectedByAdset[adset.id] || {},
+      timezoneType
+    );
+
+    setAdsetSchedule(prev => ({
+      ...prev,
+      [adset.id]: schedule
+    }));
+
+  }, [selectedByAdset, adset.id, timezoneType]);
+
+
+
+
+
+
+
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
@@ -1258,6 +1424,8 @@ const AdsetComponent = ({
 
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
+  const showScheduling =
+    budgetType === "lifetime" && !CampaignBudgetActive && !!adSchedulingToShow[adset.id];
 
   const Bid_strategy_values = [
     {
@@ -2141,8 +2309,6 @@ const AdsetComponent = ({
       ensure("descriptions");
     }
   }, [isDynamicCreative]);
-
-
 
   useEffect(() => {
     setBudget(adset?.DailyAdd_amount || 0);
@@ -3122,8 +3288,38 @@ const AdsetComponent = ({
 
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
-            required={!CampaignBudgetActive}
-            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
+            // required={!CampaignBudgetActive}
+            // label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
+            label={
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "#B4B4B4" }}>
+                  {`${budgetType.charAt(0).toUpperCase()}${budgetType
+                    .slice(1)
+                    .toLowerCase()} budget`}
+                </span>
+
+                <Tooltip title="Enable Ad Scheduling"
+                  overlayInnerStyle={{
+                    backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                    color: theme === "dark" ? "#fff" : "#333",
+                  }}
+                >
+                  <Switch
+                    size="small"
+                    checked={!!adSchedulingToShow[adset.id]}
+                    style={{
+                      backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
+                    }}
+                    onChange={(checked) => {
+                      setAdSchedulingToShow(prev => ({
+                        ...prev,
+                        [adset.id]: checked,
+                      }));
+                    }}
+                  />
+                </Tooltip>
+              </div>
+            }
             initialValue={0}
             // validateTrigger={["onBlur"]}
             // re-run validation whenever campaign-level Daily_amount changes
@@ -3356,6 +3552,86 @@ const AdsetComponent = ({
                 }
               />
             </Form.Item>
+          )}
+          {showScheduling && (
+            <>
+              {/* Time Zone */}
+              <Form.Item
+                name={["adsets", index, "timezone_type"]}
+                label={<span style={{ color: "#B4B4B4" }}>Time Zone</span>}
+                rules={[{ required: true, message: "Please select a time zone" }]}
+                initialValue={"ADVERTISER"}
+              >
+                <Select
+                  options={[
+                    { value: "USER", label: "Viewer’s time zone" },
+                    { value: "ADVERTISER", label: "Ad account time zone" },
+                  ]}
+                />
+              </Form.Item>
+
+              {/* Schedule Grid */}
+              <div
+                className="schedule-grid"
+                onMouseUp={handleMouseUp}
+              >
+                <div className="row header">
+                  <div className="day-cell" />
+                  {Array.from({ length: 24 }).map((_, h) => (
+                    <div key={h} className="hour-label">
+                      {h % 3 === 0
+                        ? h === 0
+                          ? "12 am"
+                          : h < 12
+                            ? `${h} am`
+                            : h === 12
+                              ? "12 pm"
+                              : `${h - 12} pm`
+                        : ""}
+                    </div>
+                  ))}
+                </div>
+
+                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
+                  <div key={day} className="row">
+                    <div className="day-cell">{day}</div>
+
+                    {Array.from({ length: 24 }).map((_, h) => {
+                      const key = `${d}-${h}`;
+                      return (
+                        <div
+                          key={h}
+                          className={`hour-cell ${selected[key] ? "active" : ""
+                            } ${h % 3 === 0 ? "group-start" : ""}`}
+                          onMouseDown={() => handleMouseDown(d, h)}
+                          onMouseEnter={() => handleMouseEnter(d, h)}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+                {/* Every Day Row */}
+                <div className="row every-day">
+                  <div className="day-cell">Every Day</div>
+
+                  {Array.from({ length: 24 }).map((_, h) => {
+                    const isActive = [0, 1, 2, 3, 4, 5, 6].every(
+                      d => selected[`${d}-${h}`]
+                    );
+
+                    return (
+                      <div
+                        key={h}
+                        className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
+                          }`}
+                        onMouseDown={() => handleEveryDayToggle(h)}
+                      />
+                    );
+                  })}
+                </div>
+
+              </div>
+            </>
           )}
         </div>
         <span
@@ -6294,7 +6570,7 @@ const AdsetComponent = ({
           {getUrlBuilder}
         </Modal>
       </Panel>
-    </Collapse>
+    </Collapse >
   );
 };
 const CreateCampaignDrawer = ({
@@ -6422,6 +6698,9 @@ const CreateCampaignDrawer = ({
   const [budgetType, setBudgetType] = useState("daily");
 
   const watchedAdsets = Form.useWatch("adsets", form) || [];
+  const [adsetSchedule, setAdsetSchedule] = useState({});
+  const [selectedByAdset, setSelectedByAdset] = useState({});
+  const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
 
   // Derived condition name changed to watchedHasAdsetBudget
   const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
@@ -7636,6 +7915,23 @@ const CreateCampaignDrawer = ({
     // ✅ Set both states
     setAdsets(updatedAdsets);
     form.setFieldsValue({ adsets: updatedFormAdsets });
+
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [newId]: { ...(prev[adsetId] || {}) }
+    }));
+
+    setAdsetSchedule(prev => ({
+      ...prev,
+      [newId]: [...(prev[adsetId] || [])]
+    }));
+
+    setAdSchedulingToShow(prev => ({
+      ...prev,
+      [newId]: !!prev[adsetId]
+    }));
+
+
 
     // ✅ Clone media/file states by UUID
     const cloneFiles = (prev, setter) => {
@@ -9138,7 +9434,7 @@ const CreateCampaignDrawer = ({
         }
 
 
-
+        console.log(adsetSchedule, "ads")
         // if (response.ok) {
         message.open({
           type: 'success',
@@ -9169,6 +9465,9 @@ const CreateCampaignDrawer = ({
         setGeos("Geo");
         setPages("Page");
         setPixels("Pixel");
+        setAdSchedulingToShow({});
+        setSelectedByAdset({});
+        setAdsetSchedule({});
       }
     } catch (error) {
       console.error("Error during campaign creation:", error);
@@ -9415,6 +9714,11 @@ const CreateCampaignDrawer = ({
                   Max_Age: values.adsets[i].Max_Age,
                   Gender: parseInt(values.adsets[i].Gender),
                   locales: values.adsets[i].Language,
+                  ...(adSchedulingToShow?.[adsets[i].id] && {
+                    is_day_parting_enabled: true,
+                    pacing_type: ["day_parting"],
+                    adschedule: adsetSchedule?.[adsets[i].id] || []
+                  }),
                   placements: values.adsets[i].placements,
                   ...(values.adsets[i].placements !== "Advance" && {
                     publisher_platforms: values.adsets[i].platforms,
@@ -9571,7 +9875,7 @@ const CreateCampaignDrawer = ({
                 billing_event: values.adsets[i].billing_event,
                 start_time: moment(values.adsets[i].DatePicker.$d)
                   .tz(newImageHash.timeZone)
-                  .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
+                  .format("YYYY-MM-DDTHH:mm:ssZ"),
                 ...(values.adsets[i].DatePickerEnd
                   ? {
                     end_time: moment(values.adsets[i].DatePickerEnd.$d)
@@ -9598,6 +9902,12 @@ const CreateCampaignDrawer = ({
                 Max_Age: values.adsets[i].Max_Age,
                 Gender: parseInt(values.adsets[i].Gender),
                 locales: values.adsets[i].Language,
+                ...(adSchedulingToShow?.[adsets[i].id] && {
+                  is_day_parting_enabled: true,
+                  pacing_type: ["day_parting"],
+                  adschedule: adsetSchedule?.[adsets[i].id] || []
+                }),
+
                 placements: values.adsets[i].placements,
                 ...(values.adsets[i].placements !== "Advance" && {
                   publisher_platforms: values.adsets[i].platforms,
@@ -10302,6 +10612,9 @@ const CreateCampaignDrawer = ({
     setGeos("Geo");
     setPages("Page");
     setPixels("Pixel");
+    setAdSchedulingToShow({});
+    setSelectedByAdset({});
+    setAdsetSchedule({});
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -12195,6 +12508,11 @@ const CreateCampaignDrawer = ({
                   setDefaultUrlData={setDefaultUrlData}
                   defaultUrlData={defaultUrlData}
                   budgetType={budgetType}
+                  setAdsetSchedule={setAdsetSchedule}
+                  adSchedulingToShow={adSchedulingToShow}
+                  selectedByAdset={selectedByAdset}
+                  setAdSchedulingToShow={setAdSchedulingToShow}
+                  setSelectedByAdset={setSelectedByAdset}
                   page={page}
                   pixel={pixel}
                   geo={geo}
@@ -12386,7 +12704,6 @@ const CreateCampaignDrawer = ({
                             }),
                           });
                         }
-
                         message.success("Draft updated successfully for all accounts in this group");
                         setIsEditAccountsModalOpen(false);
                         await postDraftSaveCleanup();
