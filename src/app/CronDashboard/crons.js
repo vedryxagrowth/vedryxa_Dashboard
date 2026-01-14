@@ -97,7 +97,23 @@ const domainMapping = {
         { label: "3.Inuvo_Prism Daily", value: "Inuvo_PrismDaily" },
         { label: "4.Filter live campaign & adset", value: "FbInuvoPrisam" },
         { label: "5.Filter Daily campaign & adset", value: "FbInuvoPrisamDaily" },
-    ]
+    ],
+    FB_Sedo: [
+        { label: "1.Facebook campaign & adset", value: "FacebookSedo" },
+        { label: "2.Sedo", value: "SedoLive" },
+        { label: "3.Filter campaign & adset", value: "FbSedoLive" },
+        { label: "SedoToken", value: "SedoToken" },
+    ],
+    FB_Predicto: [
+        { label: "1.Facebook campaign & adset", value: "FacebookPredicto" },
+        { label: "2.Predicto", value: "PredictoDaily" },
+        { label: "3.Filter campaign & adset", value: "FbPredictoDaily" },
+    ],
+    FB_Affinity: [
+        { label: "1.Facebook campaign & adset", value: "FacebookAffinity" },
+        { label: "2.Affinity", value: "AffinityDaily" },
+        { label: "3.Filter campaign & adset", value: "FbAffinityDaily" },
+    ],
 };
 
 const newdomainMapping = {
@@ -160,7 +176,19 @@ const newdomainMapping = {
         { label: "2.Inuvo_Prism daily", value: "Inuvo_PrismDaily" },
         { label: "3.Live filter campaign & adset", value: "FbInuvoPrisam" },
         { label: "4.Daily filter campign & adset", value: "FbInuvoPrisamDaily" },
-    ]
+    ],
+    FB_Sedo: [
+        { label: "1.Sedo", value: "SedoLive" },
+        { label: "2.Filter campaign & adset", value: "FbSedoLive" },
+    ],
+    FB_Predicto: [
+        { label: "1.Predicto", value: "PredictoDaily" },
+        { label: "2.Filter campaign & adset", value: "FbPredictoDaily" },
+    ],
+    FB_Affinity: [
+        { label: "1.Affinity", value: "AffinityDaily" },
+        { label: "2.Filter campaign & adset", value: "FbAffinityDaily" },
+    ],
 };
 
 // const newdomainMapping ={
