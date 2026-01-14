@@ -2625,6 +2625,11 @@ const AdsetComponent = ({
   setIsAnyAdsetBudgetSet,
   pageIDList,
   pixelIDLIst,
+  setAdsetSchedule,
+  adSchedulingToShow,
+  selectedByAdset,
+  setAdSchedulingToShow,
+  setSelectedByAdset,
   budgetType
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
@@ -2641,6 +2646,8 @@ const AdsetComponent = ({
   const [selectedOption, setSelectedOption] = useState("upload");
   const [editedImages, setEditedImages] = useState({});
   const [viewSingleAd, setViewSingleAd] = useState({});
+  const [dragging, setDragging] = useState(false);
+  const selected = selectedByAdset[adset.id] || {};
 
   console.log(pixelIDLIst, "pixelIDLIst in adset component");
   console.log(pageIDList, "pageIDList in adset component");
@@ -2662,10 +2669,131 @@ const AdsetComponent = ({
   console.log(addlevelData, "addlevelData in adset component");
   console.log(newAddLevelData, "newAddLevelData in adset component");
 
+
+  const handleMouseDown = (day, hour) => {
+    setDragging(true);
+    toggleCell(day, hour);
+  };
+  const handleMouseEnter = (day, hour) => {
+    if (!dragging) return;
+    toggleCell(day, hour);
+  };
+  const handleMouseUp = () => {
+    setDragging(false);
+  };
+  const toggleCell = (day, hour) => {
+    const key = `${day}-${hour}`;
+
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [adset.id]: {
+        ...(prev[adset.id] || {}),
+        [key]: !prev[adset.id]?.[key]
+      }
+    }));
+  };
+  const groupByDay = (selected) => {
+    const map = {};
+
+    Object.keys(selected).forEach(key => {
+      if (!selected[key]) return;
+
+      const [day, hour] = key.split("-").map(Number);
+
+      if (!map[day]) map[day] = [];
+      map[day].push(hour);
+    });
+
+    Object.values(map).forEach(hours =>
+      hours.sort((a, b) => a - b)
+    );
+
+    return map;
+  };
+  const timezoneType =
+    form.getFieldValue(["adsets", index, "timezone_type"]);
+  const buildAdsetSchedule = (selected, timezoneType) => {
+    const dayMap = groupByDay(selected);
+    const slotMap = {};
+
+    Object.entries(dayMap).forEach(([day, hours]) => {
+      let start = hours[0];
+      let prev = hours[0];
+
+      for (let i = 1; i <= hours.length; i++) {
+        const current = hours[i];
+
+        if (current !== prev + 1) {
+          const startMin = start * 60;
+          const endMin = (prev + 1) * 60;
+          const fbDay = (Number(day) + 1) % 7;
+
+          const slotKey = `${startMin}-${endMin}`;
+
+          if (!slotMap[slotKey]) {
+            slotMap[slotKey] = new Set();
+          }
+
+          slotMap[slotKey].add(fbDay);
+
+          start = current;
+        }
+
+        prev = current;
+      }
+    });
+    return Object.entries(slotMap).map(([key, daySet]) => {
+      const [start_minute, end_minute] = key.split("-").map(Number);
+
+      return {
+        start_minute,
+        end_minute,
+        days: Array.from(daySet).sort(),
+        timezone_type: timezoneType
+      };
+    });
+  };
+
+  const handleEveryDayToggle = (hour) => {
+    setSelectedByAdset(prev => {
+      const current = prev[adset.id] || {};
+
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
+
+      const updated = { ...current };
+
+      [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+        updated[`${d}-${hour}`] = !allSelected;
+      });
+
+      return {
+        ...prev,
+        [adset.id]: updated
+      };
+    });
+  };
+
+  useEffect(() => {
+    if (!adset?.id || !timezoneType) return;
+
+    const schedule = buildAdsetSchedule(
+      selectedByAdset[adset.id] || {},
+      timezoneType
+    );
+
+    setAdsetSchedule(prev => ({
+      ...prev,
+      [adset.id]: schedule
+    }));
+
+  }, [selectedByAdset, adset.id, timezoneType]);
+
   const currentDate = dayjs();
   const after30Days = currentDate.add(30, "day");
 
-  const filesForDynamicCreative = (view && adset.is_dynamic_creative) ? adset.addlevel[0]?.filename?.map(item => ({url:item.filename})) : [];
+  const filesForDynamicCreative = (view && adset.is_dynamic_creative) ? adset.addlevel[0]?.filename?.map(item => ({ url: item.filename })) : [];
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
@@ -2786,7 +2914,8 @@ const AdsetComponent = ({
 
   const adsetsValues = form.getFieldValue("adsets") || [];
   const currentValue = adsetsValues[index]?.optimization_goal ?? "";
-
+  const showScheduling =
+    budgetType === "lifetime" && !isCampaignBudgetActive && !!adSchedulingToShow[adset.id];
   const optionsForIndex =
     index === 0
       ? optionsForOptimz_goal
@@ -3420,6 +3549,46 @@ const AdsetComponent = ({
       ]);
     }
   }, [adset?.DailyAdd_amount]);
+  useEffect(() => {
+    if (adset?.is_day_parting_enabled === true) {
+      setAdSchedulingToShow(prev => ({
+        ...prev,
+        [adset.id]: true
+      }));
+    }
+  }, [adset?.is_day_parting_enabled, adset.id]);
+  useEffect(() => {
+    if (!adset?.id || !Array.isArray(adset.adschedule)) return;
+
+    const restored = {};
+
+    adset.adschedule.forEach(s => {
+      if (
+        typeof s.start_minute !== "number" ||
+        typeof s.end_minute !== "number" ||
+        !Array.isArray(s.days)
+      ) return;
+
+      s.days.forEach(fbDay => {
+        const uiDay = (fbDay + 6) % 7;
+
+        for (
+          let m = s.start_minute;
+          m < s.end_minute;
+          m += 60
+        ) {
+          const hour = m / 60;
+          restored[`${uiDay}-${hour}`] = true;
+        }
+      });
+    });
+
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [adset.id]: restored
+    }));
+  }, [adset.id]);
+
 
   const handleFirstOptimizationChange = (value) => {
     // Get current adsets from form
@@ -3535,7 +3704,7 @@ const AdsetComponent = ({
                 />
               </div>
             )}
-            {(view && adset.is_dynamic_creative) && (<div style={{display:"flex", alignItems:"center"}}>
+            {(view && adset.is_dynamic_creative) && (<div style={{ display: "flex", alignItems: "center" }}>
               <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
               <Form.Item
                 name={["adsets", index, "isDynamicCreative"]}
@@ -3553,21 +3722,21 @@ const AdsetComponent = ({
                   disabled
                   checked={adset?.is_dynamic_creative}
                   style={{ backgroundColor: adset.is_dynamic_creative ? "#91C25F" : undefined }}
-                  // onClick={(checked, e) => e.stopPropagation()}
-                  // onChange={(checked) => {
-                  //   console.log("Dynamic Creative:", checked);
+                // onClick={(checked, e) => e.stopPropagation()}
+                // onChange={(checked) => {
+                //   console.log("Dynamic Creative:", checked);
 
-                  //   // if (!checked) {
-                  //   // Example: clear dynamic creative assets
-                  //   form.setFieldsValue({
-                  //     adsets: {
-                  //       [index]: {
-                  //         isDynamicCreative: checked,
-                  //       },
-                  //     },
-                  //   });
-                  //   // }
-                  // }}
+                //   // if (!checked) {
+                //   // Example: clear dynamic creative assets
+                //   form.setFieldsValue({
+                //     adsets: {
+                //       [index]: {
+                //         isDynamicCreative: checked,
+                //       },
+                //     },
+                //   });
+                //   // }
+                // }}
                 />
               </Form.Item>
             </div>)}
@@ -3998,7 +4167,38 @@ const AdsetComponent = ({
           }
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
-            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
+            // label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
+            label={
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "#B4B4B4" }}>
+                  {`${budgetType.charAt(0).toUpperCase()}${budgetType
+                    .slice(1)
+                    .toLowerCase()} budget`}
+                </span>
+
+                <Tooltip title="Enable Ad Scheduling"
+                  overlayInnerStyle={{
+                    backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                    color: theme === "dark" ? "#fff" : "#333",
+                  }}
+                >
+                  <Switch
+                    size="small"
+                    disabled={adset?.Adsetid || view}
+                    checked={!!adSchedulingToShow[adset.id]}
+                    style={{
+                      backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
+                    }}
+                    onChange={(checked) => {
+                      setAdSchedulingToShow(prev => ({
+                        ...prev,
+                        [adset.id]: checked,
+                      }));
+                    }}
+                  />
+                </Tooltip>
+              </div>
+            }
             rules={[
               {
                 required: !(
@@ -4121,6 +4321,91 @@ const AdsetComponent = ({
                 }
               />
             </Form.Item>
+          )}
+          {showScheduling && (
+            <>
+              {/* Time Zone */}
+              <Form.Item
+                name={["adsets", index, "timezone_type"]}
+                label={<span style={{ color: "#B4B4B4" }}>Time Zone</span>}
+                rules={[{ required: true, message: "Please select a time zone" }]}
+                initialValue={adset.adschedule?.[0]?.timezone_type}
+              >
+                <Select
+                  disabled={adset?.Adsetid || view}
+                  options={[
+                    { value: "USER", label: "Viewer’s time zone" },
+                    { value: "ADVERTISER", label: "Ad account time zone" },
+                  ]}
+                />
+              </Form.Item>
+
+              {/* Schedule Grid */}
+              <div
+                className="schedule-grid"
+                onMouseUp={handleMouseUp}
+                style={{
+                  pointerEvents: adset?.Adsetid || view ? "none" : "auto",
+                  cursor: adset?.Adsetid || view ? "not-allowed" : "pointer",
+                }}
+              >
+                <div className="row header">
+                  <div className="day-cell" />
+                  {Array.from({ length: 24 }).map((_, h) => (
+                    <div key={h} className="hour-label">
+                      {h % 3 === 0
+                        ? h === 0
+                          ? "12 am"
+                          : h < 12
+                            ? `${h} am`
+                            : h === 12
+                              ? "12 pm"
+                              : `${h - 12} pm`
+                        : ""}
+                    </div>
+                  ))}
+                </div>
+
+                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
+                  <div key={day} className="row">
+                    <div className="day-cell">{day}</div>
+
+                    {Array.from({ length: 24 }).map((_, h) => {
+                      const key = `${d}-${h}`;
+                      return (
+                        <div
+                          key={h}
+                          className={`hour-cell ${selected[key] ? "active" : ""
+                            } ${h % 3 === 0 ? "group-start" : ""}`}
+                          onMouseDown={() => handleMouseDown(d, h)}
+                          onMouseEnter={() => handleMouseEnter(d, h)}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+                {/* Every Day Row */}
+                <div className="row every-day">
+                  <div className="day-cell">Every Day</div>
+
+                  {Array.from({ length: 24 }).map((_, h) => {
+                    const isActive = [0, 1, 2, 3, 4, 5, 6].every(
+                      d => selected[`${d}-${h}`]
+                    );
+
+                    return (
+                      <div
+                        key={h}
+                        className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
+                          }`}
+                        onMouseDown={() => handleEveryDayToggle(h)}
+                      />
+                    );
+                  })}
+                </div>
+
+              </div>
+            </>
           )}
         </div>
         <span
@@ -6093,7 +6378,7 @@ const AdsetComponent = ({
 
                 <div style={{ flex: "30%" }}>
                   {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0
-                    ? 
+                    ?
                     selectedFiles[adset.id].map((file, i) => (
                       <Badge
                         key={i}
@@ -6716,7 +7001,7 @@ const AdsetComponent = ({
                         </div>
                       </Badge>
                     ))) : null}
-                  
+
                 </div>
               </div>
             )}
@@ -6858,6 +7143,9 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [pixelIDLIst, setPixelIDList] = useState([]);
   const [pageIDList, setPageIDList] = useState([]);
   const [budgetType, setBudgetType] = useState("daily");
+  const [adsetSchedule, setAdsetSchedule] = useState({});
+  const [selectedByAdset, setSelectedByAdset] = useState({});
+  const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
 
   console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
   console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
@@ -7687,6 +7975,21 @@ const EditMultipleAdsetCampaignDrawer = ({
     // ✅ Update both states
     setAdsets(updatedAdsets);
     form.setFieldsValue({ adsets: updatedFormAdsets });
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [newId]: { ...(prev[adsetId] || {}) }
+    }));
+
+    setAdsetSchedule(prev => ({
+      ...prev,
+      [newId]: [...(prev[adsetId] || [])]
+    }));
+
+    setAdSchedulingToShow(prev => ({
+      ...prev,
+      [newId]: !!prev[adsetId]
+    }));
+
 
     // ✅ Clone media/file states by UUID (remove Addid)
     const cloneFiles = (prev, setter) => {
@@ -7725,7 +8028,6 @@ const EditMultipleAdsetCampaignDrawer = ({
         : [],
     }));
 
-    // ✅ Clone positions & publishers
     setSelectedPositions((prev) => ({
       ...prev,
       [newId]: [...(prev[adsetId] || [])],
@@ -8840,6 +9142,9 @@ const EditMultipleAdsetCampaignDrawer = ({
           setSelectedFiles({});
           onClose();
           setSelectedPositions({});
+          setAdSchedulingToShow({});
+          setSelectedByAdset({});
+          setAdsetSchedule({});
           setAdsets([
             { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
           ]);
@@ -9739,11 +10044,35 @@ const EditMultipleAdsetCampaignDrawer = ({
           JSON.stringify(formValuesObject.Language)
         ) {
           AdsetsData["locales"] = formValuesObject.Language;
+          // Day parting (Ad Scheduling)
+          if (adSchedulingToShow?.[formValuesObject.id]) {
+            // SWITCH ON
+            AdsetsData.is_day_parting_enabled = true;
+            AdsetsData.pacing_type = ["day_parting"];
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
+          } else {
+            // SWITCH OFF
+            AdsetsData.is_day_parting_enabled = false;
+            AdsetsData.pacing_type = [];
+            AdsetsData.adschedule = [];
+          }
           AdsetsData["re_lunch_targeting"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["locales"] = formValuesObject.Language;
+          // Day parting (Ad Scheduling)
+          if (adSchedulingToShow?.[formValuesObject.id]) {
+            // SWITCH ON
+            AdsetsData.is_day_parting_enabled = true;
+            AdsetsData.pacing_type = ["day_parting"];
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
+          } else {
+            // SWITCH OFF
+            AdsetsData.is_day_parting_enabled = false;
+            AdsetsData.pacing_type = [];
+            AdsetsData.adschedule = [];
+          }
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -10564,6 +10893,9 @@ const EditMultipleAdsetCampaignDrawer = ({
     setSelectedFilesFromMedia({}); // Clear selected files from media
     setSelectedFiles({}); // Clear all selected files
     setShowBidAmount(false); // Reset showBidAmount state
+    setAdSchedulingToShow({});
+    setSelectedByAdset({});
+    setAdsetSchedule({});
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -12045,6 +12377,11 @@ const EditMultipleAdsetCampaignDrawer = ({
                   accountis={accountis}
                   addlevelData={addlevelData}
                   newAddLevelData={newAddLevelData}
+                  setAdsetSchedule={setAdsetSchedule}
+                  adSchedulingToShow={adSchedulingToShow}
+                  selectedByAdset={selectedByAdset}
+                  setAdSchedulingToShow={setAdSchedulingToShow}
+                  setSelectedByAdset={setSelectedByAdset}
                   setAddLevelData={setAddLevelData}
                   setNewAddLevelData={setNewAddLevelData}
                   setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
