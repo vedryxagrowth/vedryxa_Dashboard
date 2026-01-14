@@ -291,7 +291,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       adsetid: item.adsetid,
       ad_id: item.adid,
       level: "ad",
-      userPin: userdetails?.email
+      userPin: userdetails?.email,
+      activity: {
+        editType: "Pin",
+        campaignid: item.campaignid,       // cents
+        adsetid: item.adsetid,
+        ad_id: item.adid,
+        Account: item.accountNumber,    // ✅ update *this* row’s account
+        campaignname: item.campaignname,
+        adsetname: item.adsetname,
+        adname: item.adName || item.adname,
+        updatedBy: userdetails?.userName,
+        updatedUserEmail: userdetails?.email,
+        updateType: "Ad pin updated",
+        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+        updateDetail: `From "${action === "pin" ? "unpin" : "pin"}" to "${action === "pin" ? "pin" : "unpin"}"`,
+      }
+
     }));
 
     message.loading(
@@ -301,8 +317,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
     const apiUrl =
       action === "pin"
-        ? "/SmartPinBulk"
-        : "/SmartUnpinBulk";
+        ? "/SmartPinBulkWithHitory"
+        : "/SmartUnpinBulkWithHistory";
 
     const res = await apiClient.post(apiUrl, { items: data });
 
@@ -427,7 +443,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       const items = leafCampaigns.map(item => ({
         campaignid: item.campaignid,
         adsetid: item.adsetid,
-        ad_id: item.adid
+        ad_id: item.adid,
+        activity: {
+          editType: "Comment",
+          campaignid: item.campaignid,       // cents
+          adsetid: item.adsetid,
+          ad_id: item.adid,
+          Account: item.accountNumber,    // ✅ update *this* row’s account
+          campaignname: item.campaignname,
+          adsetname: item.adsetname,
+          adname: item.adName,
+          updatedBy: userdetails?.userName,
+          updatedUserEmail: userdetails?.email,
+          updateType: "Ad comment cleared",
+          updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+          // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+        }
       }));
 
       const body = {
@@ -437,7 +468,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       };
 
       const resp = await apiClient.post(
-        '/Comments/bulkdelete',
+        '/Comments/bulkdeleteWithHistory',
         body
       );
 
@@ -503,11 +534,26 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         comment,
         campaignname: item.adName,
         usercommit: userdetails?.email,
-        level: "ad"
+        level: "ad",
+        activity: {
+          editType: "Comment",
+          campaignid: item.campaignid,       // cents
+          adsetid: item.adsetid,
+          ad_id: item.adid,
+          Account: item.accountNumber,    // ✅ update *this* row’s account
+          campaignname: item.campaignname,
+          adsetname: item.adsetname,
+          adname: item.adName,
+          updatedBy: userdetails?.userName,
+          updatedUserEmail: userdetails?.email,
+          updateType: "Ad comment updated",
+          updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+          // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+        }
       }));
 
       const resp = await apiClient.post(
-        '/Comments/upsertBulkNew',
+        '/Comments/upsertBulkNewWithHistory',
         { items, usercommit: userdetails?.email, }
       );
 
@@ -621,7 +667,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           ad_id: item.adid,
           accountNumber: String(item.accountNumber),
           name: item.adName,
-          email: userdetails?.email
+          email: userdetails?.email,
+          activity: {
+            editType: "Status",
+            campaignid: item.campaignid,       // cents
+            adsetid: item.adsetid,
+            Account: String(item.accountNumber),    // ✅ update *this* row’s account
+            campaignname: item.campaignname,
+            ad_id: item.adid,
+            adname: item.adName,
+            adsetname: item.adsetname,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Ad status updated",
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
+          }
         }));
 
       if (filteredItems.length === 0) {
@@ -632,7 +693,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }
 
       const resp = await apiClient.post(
-        "/BulkAdStatusChangeMany",
+        "/BulkAdStatusChangeManyWithHistory",
         { items: filteredItems },
         { headers: { Authorization: token } }
       );
@@ -893,12 +954,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
     const token = localStorage.getItem("token");
 
-
     const items = leafCampaigns.map(item => ({
       accountNumber: item.accountNumber,
       campaignid: item.campaignid,
       level: "campaign",
       campaignname: item.campaignname,
+      activity: {
+        editType: "Category",
+        campaignid: item.campaignid,       // cents
+        Account: item.accountNumber,    // ✅ update *this* row’s account
+        campaignname: item.campaignname,
+        updatedBy: userdetails?.userName,
+        updatedUserEmail: userdetails?.email,
+        updateType: "Campaign category updated",
+        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+        // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+      }
     }));
 
     if (items.length === 0) {
@@ -911,7 +982,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "/BulkUpdateCategoryNew",
+        "/BulkUpdateCategoryNewWithHistory",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
@@ -1293,13 +1364,13 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               campaignid: campaignid,       // cents
               adsetid: adsetid,
               Account: rowAccount,    // ✅ update *this* row’s account
-              campaignname: campaignName,ad_id: adid,
+              campaignname: campaignName, ad_id: adid,
               adname: adName,
               adsetname: adsetName,
               updatedBy: userdetails?.userName,
               updatedUserEmail: userdetails?.email,
               updateType: "Ad status updated",
-              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
               updateDetail: `From ${nextChecked ? "Inactive" : "Active"} to ${nextChecked ? "Active" : "Inactive"}`,
             }
             const response = await apiClient.post(
@@ -1560,7 +1631,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             updatedBy: userdetails?.userName,
             updatedUserEmail: userdetails?.email,
             updateType: "Ad comment updated",
-            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
@@ -1626,7 +1697,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               updatedBy: userdetails?.userName,
               updatedUserEmail: userdetails?.email,
               updateType: "Ad comment updated",
-              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const response = await apiClient.post(
@@ -1844,8 +1915,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updatedBy: userdetails?.userName,
                 updatedUserEmail: userdetails?.email,
                 updateType: "Ad pin updated",
-                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
-                updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From "${updatedPinStatus ? "unpin" : "pin"}" to "${updatedPinStatus ? "pin" : "unpin"}"`,
               }
               const newResponse = await apiClient.post(
                 '/NewPinBulkWithHistory',
@@ -1908,7 +1979,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updatedBy: userdetails?.userName,
                 updatedUserEmail: userdetails?.email,
                 updateType: "Ad pin updated",
-                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                 updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
               }
               const newResponse = await apiClient.post(

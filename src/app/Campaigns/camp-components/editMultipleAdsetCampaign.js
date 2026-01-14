@@ -3340,13 +3340,16 @@ const AdsetComponent = ({
         const max = numbers.length > 0 ? Math.max(...numbers) : 0;
         return max + 1;
       };
+      const previousPageId =
+        list.length > 0 ? list[0].page_id : form.getFieldValue("page_id");
       const nextAddNumber = list?.length + 1 || getNextAddNumber(list);
       const newAds = mapped.map((item, i) => ({
         id: item.id,
         AddName: `${addName}_${nextAddNumber + i}`,
         filename: item,
         uid: item.uid,
-        page_id: form.getFieldValue("page_id"),
+        // page_id: form.getFieldValue("page_id"),
+        page_id: previousPageId,
         message: primaryText,
         headline: headline,
         Description: description,
