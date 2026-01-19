@@ -5414,7 +5414,7 @@ const AdsetComponent = ({
                                         }`,
                                       filename: item,
                                       uid: item.uid,
-                                      page_id: form.getFieldValue("page_id"),
+                                      page_id: form.getFieldValue(["adsets", index, "page_id"]),
                                       message: primaryText,
                                       headline: headline,
                                       Description: description,
