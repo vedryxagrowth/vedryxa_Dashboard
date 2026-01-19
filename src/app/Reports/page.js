@@ -168,7 +168,8 @@ const MyTablePage = () => {
         "cpclinkclicks",
         "adname",
         "adid",
-        "accountNumber"
+        "accountNumber",
+        "history"
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
@@ -6415,6 +6416,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
+            hide: true,
             sortable: false,
             filter: false,
             enableSorting: false,
@@ -7637,6 +7639,7 @@ const MyTablePage = () => {
         history: {
             headerName: 'Activity',
             field: 'history',
+            hide: true,
             minWidth: 90,
             sortable: false,
             filter: false,
@@ -9073,46 +9076,6 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                // const { allCampaignData } = params.context;
-
-                // ✅ find the exact record for (campaignId, rowAccountNumber)
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
-
-                    const matched = Camapignlevelstatus.find(
-                        c =>
-                            String(c.campaign_id) === String(campaignId) &&
-                            String(c.accountNumber) === String(rowAccountNumber)
-                    );
-
-                    setCampaignActualSpend(matched ?? {});
-                    setHasBudget(
-                        !!(
-                            matched?.campaign_budget &&
-                            (matched.campaign_budget.daily_budget != null ||
-                                matched.campaign_budget.lifetime_budget != null)
-                        )
-                    );
-                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
-
-                const onChangeSpendAndStatus = () => {
-                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-
-                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-
-                    if (!campaignId || !campaignname) {
-                        message.error("Campaign info missing");
-                        return;
-                    }
-
-                    // Prefill from the matched record for *this* account
-                    const b = campaignActualSpend?.campaign_budget;
-                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-
-                    setIsModalVisible(true);
-                };
 
 
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
@@ -10578,6 +10541,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
+            hide:  true,
             sortable: false,
             filter: false,
             enableSorting: false,
@@ -10606,48 +10570,6 @@ const MyTablePage = () => {
                 const rowAccountNumber = isGroupRow
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
-
-                // const { allCampaignData } = params.context;
-
-                // ✅ find the exact record for (campaignId, rowAccountNumber)
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
-
-                    const matched = Camapignlevelstatus.find(
-                        c =>
-                            String(c.campaign_id) === String(campaignId) &&
-                            String(c.accountNumber) === String(rowAccountNumber)
-                    );
-
-                    setCampaignActualSpend(matched ?? {});
-                    setHasBudget(
-                        !!(
-                            matched?.campaign_budget &&
-                            (matched.campaign_budget.daily_budget != null ||
-                                matched.campaign_budget.lifetime_budget != null)
-                        )
-                    );
-                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
-
-                const onChangeSpendAndStatus = () => {
-                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-
-                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-
-                    if (!campaignId || !campaignname) {
-                        message.error("Campaign info missing");
-                        return;
-                    }
-
-                    // Prefill from the matched record for *this* account
-                    const b = campaignActualSpend?.campaign_budget;
-                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-
-                    setIsModalVisible(true);
-                };
-
 
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
 
@@ -11764,6 +11686,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
+            hide:  true,
             sortable: false,
             filter: false,
             enableSorting: false,
@@ -11792,48 +11715,6 @@ const MyTablePage = () => {
                 const rowAccountNumber = isGroupRow
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
-
-                // const { allCampaignData } = params.context;
-
-                // ✅ find the exact record for (campaignId, rowAccountNumber)
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
-
-                    const matched = Camapignlevelstatus.find(
-                        c =>
-                            String(c.campaign_id) === String(campaignId) &&
-                            String(c.accountNumber) === String(rowAccountNumber)
-                    );
-
-                    setCampaignActualSpend(matched ?? {});
-                    setHasBudget(
-                        !!(
-                            matched?.campaign_budget &&
-                            (matched.campaign_budget.daily_budget != null ||
-                                matched.campaign_budget.lifetime_budget != null)
-                        )
-                    );
-                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
-
-                const onChangeSpendAndStatus = () => {
-                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-
-                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-
-                    if (!campaignId || !campaignname) {
-                        message.error("Campaign info missing");
-                        return;
-                    }
-
-                    // Prefill from the matched record for *this* account
-                    const b = campaignActualSpend?.campaign_budget;
-                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-
-                    setIsModalVisible(true);
-                };
-
 
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
 
@@ -12803,48 +12684,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                // const { allCampaignData } = params.context;
-
-                // ✅ find the exact record for (campaignId, rowAccountNumber)
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
-
-                    const matched = Camapignlevelstatus.find(
-                        c =>
-                            String(c.campaign_id) === String(campaignId) &&
-                            String(c.accountNumber) === String(rowAccountNumber)
-                    );
-
-                    setCampaignActualSpend(matched ?? {});
-                    setHasBudget(
-                        !!(
-                            matched?.campaign_budget &&
-                            (matched.campaign_budget.daily_budget != null ||
-                                matched.campaign_budget.lifetime_budget != null)
-                        )
-                    );
-                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
-
-                const onChangeSpendAndStatus = () => {
-                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-
-                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-
-                    if (!campaignId || !campaignname) {
-                        message.error("Campaign info missing");
-                        return;
-                    }
-
-                    // Prefill from the matched record for *this* account
-                    const b = campaignActualSpend?.campaign_budget;
-                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-
-                    setIsModalVisible(true);
-                };
-
-
+                
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
 
                 return (
@@ -14520,46 +14360,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                // const { allCampaignData } = params.context;
-
-                // ✅ find the exact record for (campaignId, rowAccountNumber)
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
-
-                    const matched = Camapignlevelstatus.find(
-                        c =>
-                            String(c.campaign_id) === String(campaignId) &&
-                            String(c.accountNumber) === String(rowAccountNumber)
-                    );
-
-                    setCampaignActualSpend(matched ?? {});
-                    setHasBudget(
-                        !!(
-                            matched?.campaign_budget &&
-                            (matched.campaign_budget.daily_budget != null ||
-                                matched.campaign_budget.lifetime_budget != null)
-                        )
-                    );
-                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
-
-                const onChangeSpendAndStatus = () => {
-                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-
-                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-
-                    if (!campaignId || !campaignname) {
-                        message.error("Campaign info missing");
-                        return;
-                    }
-
-                    // Prefill from the matched record for *this* account
-                    const b = campaignActualSpend?.campaign_budget;
-                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-
-                    setIsModalVisible(true);
-                };
+                
 
 
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
@@ -15608,46 +15409,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                // const { allCampaignData } = params.context;
-
-                // ✅ find the exact record for (campaignId, rowAccountNumber)
-                useEffect(() => {
-                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
-
-                    const matched = Camapignlevelstatus.find(
-                        c =>
-                            String(c.campaign_id) === String(campaignId) &&
-                            String(c.accountNumber) === String(rowAccountNumber)
-                    );
-
-                    setCampaignActualSpend(matched ?? {});
-                    setHasBudget(
-                        !!(
-                            matched?.campaign_budget &&
-                            (matched.campaign_budget.daily_budget != null ||
-                                matched.campaign_budget.lifetime_budget != null)
-                        )
-                    );
-                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
-
-                const onChangeSpendAndStatus = () => {
-                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-
-                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
-                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
-
-                    if (!campaignId || !campaignname) {
-                        message.error("Campaign info missing");
-                        return;
-                    }
-
-                    // Prefill from the matched record for *this* account
-                    const b = campaignActualSpend?.campaign_budget;
-                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
-                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
-
-                    setIsModalVisible(true);
-                };
+                
 
 
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
