@@ -62,7 +62,7 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
         } else {
             setData(newDatatoUpdatetoState.filter(item => item.updatedBy === changedByFilter))
         }
-        setData(newDatatoUpdatetoState)
+        // setData(newDatatoUpdatetoState)
     }, [changedByFilter, activityTypeFilter, storageData]);
 
 
@@ -111,8 +111,6 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
 
                 setChangedByOptions([{ label: "Anyone", value: "all" }, ...updatedByOptions])
 
-
-
                 setNewData(newResponseData || []);
                 setData(objectsActivityHistory)
                 setStorageData(objectsActivityHistory)
@@ -136,10 +134,10 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
     }
 
     const columns = [
-        { title: "Activity", dataIndex: "updateType" },
-        { title: "Activity details", dataIndex: "updateDetail" },
+        { title: "Activity", dataIndex: "updateType", align: 'center', },
+        { title: "Activity details", dataIndex: "updateDetail", width: 350, align: 'center' },
         {
-            title: "Item changed", dataIndex: "campaignname",
+            title: "Item changed", dataIndex: "campaignname", align: 'center',
             render: (text, record) => {
                 const level = record.level;
                 let name;
@@ -178,8 +176,8 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
                 );
             },
         },
-        { title: "Changed by", dataIndex: "updatedBy" },
-        { title: "Date and time", dataIndex: "updateAt" },
+        { title: "Changed by", dataIndex: "updatedBy", align: 'center' },
+        { title: "Date and time", dataIndex: "updateAt", align: 'center' },
     ];
 
 
@@ -227,7 +225,7 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
                             { label: "Budget", value: "Budget" },
                             { label: "Campaigns", value: "campaigns" },
                             { label: "Comments", value: "Comment" },
-                            { label: "Category", value: "Cateoty" },
+                            { label: "Category", value: "Category" },
                             { label: "Pin", value: "Pin" },
 
                         ]}
