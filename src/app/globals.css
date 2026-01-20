@@ -1014,11 +1014,11 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result {
 .Badge {
   position: relative;
   background-color: #ec7117;
-  padding: 2px 5px;
+  padding: 3px 5px;
   border-radius: 50%;
   color: white;
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 500;
   top: -17px;
   left: auto;
   right: 13px;
@@ -3938,7 +3938,8 @@ select:focus,
   .inputat400px {
     width: 100px !important;
   }
-  .inputatInsideTable{
+
+  .inputatInsideTable {
     width: 70px !important;
   }
 }
@@ -3947,7 +3948,8 @@ select:focus,
   .inputat400px {
     width: 190px !important;
   }
-  .inputatInsideTable{
+
+  .inputatInsideTable {
     width: 140px !important;
   }
 }
@@ -4056,106 +4058,114 @@ select:focus,
 
 /* responsive only by container width */
 .metrics-container {
-    width: 100%;
-    container-type: inline-size;
-    margin-top: 10px;
+  width: 100%;
+  container-type: inline-size;
+  margin-top: 10px;
 }
 
 /* Default: all 10 cards in ONE row */
 .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 12px;
 }
 
 /* AntD Card override */
 .metric-card {
-    /* background: #f5f5f5 !important; */
-    border-radius: 12px !important;
-    padding: 0 !important; /* remove outer padding */
-    height: auto !important; /* prevent tall cards */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: start;
-    
+  /* background: #f5f5f5 !important; */
+  border-radius: 12px !important;
+  padding: 0 !important;
+  /* remove outer padding */
+  height: auto !important;
+  /* prevent tall cards */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: start;
+
 }
 
 /* REMOVE AntD default padding inside card */
 .metric-card .ant-card-body {
-    padding: 10px !important; /* adjust this to make card height smaller/larger */
+  padding: 10px !important;
+  /* adjust this to make card height smaller/larger */
 }
 
 /* TITLE */
 .metric-title {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-    font-weight: 600;
-    font-size: var(--title-size, 13px);
-    white-space: nowrap;
-    padding-left: var(--title-size, 13px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  font-weight: 600;
+  font-size: var(--title-size, 13px);
+  white-space: nowrap;
+  padding-left: var(--title-size, 13px);
 }
 
 /* DOT */
 .metric-title .dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }
 
 /* VALUE */
 .metric-value {
-    margin-top: 6px;
-    font-weight: 400;
-    white-space: nowrap;
-    font-size: var(--value-size, 18px);
-    padding-left: var(--value-size, 13px);
+  margin-top: 6px;
+  font-weight: 400;
+  white-space: nowrap;
+  font-size: var(--value-size, 18px);
+  padding-left: var(--value-size, 13px);
 }
 
 /* ------------------------------
    Container Shrinks → EXACT 5 cards per row (2 rows)
 -------------------------------- */
 @container (max-width: 1150px) {
-    .metrics-grid {
-        grid-template-columns: repeat(5, 1fr); /* always 5 per row */
-    }
+  .metrics-grid {
+    grid-template-columns: repeat(5, 1fr);
+    /* always 5 per row */
+  }
 }
 
 /* Smaller → reduce font size */
 @container (max-width: 800px) {
-    .metric-card {
-        --title-size: 13px;
-        --value-size: 17px;
-    }
+  .metric-card {
+    --title-size: 13px;
+    --value-size: 17px;
+  }
 }
 
 @container (max-width: 600px) {
-    .metric-card {
-        --title-size: 12px;
-        --value-size: 16px;
-    }
+  .metric-card {
+    --title-size: 12px;
+    --value-size: 16px;
+  }
 }
 
 @container (max-width: 450px) {
-    .metric-card {
-        --title-size: 11px;
-        --value-size: 15px;
-    }
+  .metric-card {
+    --title-size: 11px;
+    --value-size: 15px;
+  }
 }
 
 /* Row height in the Daily tab */
 .header-row {
-  line-height: normal !important;      /* remove that huge inherited line-height */
-  min-height: 45px;                    /* keeps it comfortably tall */
+  line-height: normal !important;
+  /* remove that huge inherited line-height */
+  min-height: 45px;
+  /* keeps it comfortably tall */
   height: auto;
-  display: flex;                       /* use flex for vertical centering */
+  display: flex;
+  /* use flex for vertical centering */
   align-items: center;
   /* padding: 8px 12px; */
   box-sizing: border-box;
   overflow: visible;
 }
+
 /*  */
 .file-name {
   flex: 0 0 160px;
@@ -4170,6 +4180,51 @@ select:focus,
 body.dark-mode .black-icon-creatives.anticon svg {
   color: #1890ff !important;
 }
+
 body.dark-mode .black-icon-creatives1.anticon svg {
   color: #aaa !important;
+}
+
+.schedule-grid {
+  user-select: none;
+  border: 1px solid #d9d9d9;
+  font-size: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns:60px repeat(24, 20px);
+  align-items: center; 
+}
+
+.day-cell {
+  padding: 2px;
+  border-right: 1px solid #e5e5e5;
+  white-space: nowrap;
+  margin-left:5px ;
+}
+
+.hour-label {
+  text-align: center;
+  font-size: 10px;
+  color: #555;
+  white-space: nowrap;
+  line-height: 15px;
+}
+
+
+.hour-cell {
+  height: 10px;
+  background: #f3f8fc;
+  border: 1px solid #e5e5e5;
+  cursor: pointer;
+}
+
+.hour-cell.group-start {
+  border-left: 2px solid #cfd8dc;
+}
+
+.hour-cell.active {
+  background: #7ecfe5;
+  border-color: #3aa7c9;
 }

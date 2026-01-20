@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, RightOutlined } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, RightOutlined, HistoryOutlined } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -98,6 +98,7 @@ const AgencyAndBMNameReports = React.lazy(() => import('../componentsOfReports/A
 const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDomainData'));
 const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAdLive'));
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
+const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
 
 const MyTablePage = () => {
     const router = useRouter();
@@ -167,7 +168,8 @@ const MyTablePage = () => {
         "cpclinkclicks",
         "adname",
         "adid",
-        "accountNumber"
+        "accountNumber",
+        "history"
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
@@ -236,6 +238,10 @@ const MyTablePage = () => {
     const [searchText, setSearchText] = useState("");
     const [campaignComments, setCampaignComments] = useState([]);
     const [networksWithStatus, setNetworksWithStatus] = useState([]);
+    const [historyOpen, setHistoryOpen] = useState(false);
+    const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
+    const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
+
 
 
     useEffect(() => {
@@ -1999,9 +2005,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -2691,6 +2698,90 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu'
         },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            hide: true,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                // const { allCampaignData } = params.context;
+
+                // ✅ find the exact record for (campaignId, rowAccountNumber)
+                useEffect(() => {
+                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
+
+                    const matched = Camapignlevelstatus.find(
+                        c =>
+                            String(c.campaign_id) === String(campaignId) &&
+                            String(c.accountNumber) === String(rowAccountNumber)
+                    );
+
+                    setCampaignActualSpend(matched ?? {});
+                    setHasBudget(
+                        !!(
+                            matched?.campaign_budget &&
+                            (matched.campaign_budget.daily_budget != null ||
+                                matched.campaign_budget.lifetime_budget != null)
+                        )
+                    );
+                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
+
+                const onChangeSpendAndStatus = () => {
+                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+
+                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
+                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
+
+                    if (!campaignId || !campaignname) {
+                        message.error("Campaign info missing");
+                        return;
+                    }
+
+                    // Prefill from the matched record for *this* account
+                    const b = campaignActualSpend?.campaign_budget;
+                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
+                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
+
+                    setIsModalVisible(true);
+                };
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
     };
 
     const columnDefsObjectOfDailyAdID = {
@@ -3187,9 +3278,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -3610,6 +3702,90 @@ const MyTablePage = () => {
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            hide: true,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                // const { allCampaignData } = params.context;
+
+                // ✅ find the exact record for (campaignId, rowAccountNumber)
+                useEffect(() => {
+                    if (!campaignId || !rowAccountNumber || !Array.isArray(Camapignlevelstatus)) return;
+
+                    const matched = Camapignlevelstatus.find(
+                        c =>
+                            String(c.campaign_id) === String(campaignId) &&
+                            String(c.accountNumber) === String(rowAccountNumber)
+                    );
+
+                    setCampaignActualSpend(matched ?? {});
+                    setHasBudget(
+                        !!(
+                            matched?.campaign_budget &&
+                            (matched.campaign_budget.daily_budget != null ||
+                                matched.campaign_budget.lifetime_budget != null)
+                        )
+                    );
+                }, [campaignId, rowAccountNumber, Camapignlevelstatus?.length]);
+
+                const onChangeSpendAndStatus = () => {
+                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+
+                    const grouped = (params.node?.allLeafChildren || []).map(n => n.data);
+                    setGroupedData(grouped.length ? grouped : (params.data ? [params.data] : []));
+
+                    if (!campaignId || !campaignname) {
+                        message.error("Campaign info missing");
+                        return;
+                    }
+
+                    // Prefill from the matched record for *this* account
+                    const b = campaignActualSpend?.campaign_budget;
+                    const budgetCents = b?.daily_budget ?? b?.lifetime_budget ?? null;
+                    onChangeBudget(budgetCents != null ? Number(budgetCents) / 100 : undefined);
+
+                    setIsModalVisible(true);
+                };
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
     };
 
     // const columnDefsObjectOfAdIDCampaignLevel = {
@@ -5019,6 +5195,8 @@ const MyTablePage = () => {
 
 
                     const campaignname = groupedData?.[0]?.campaignname;
+                    const adsetname = groupedData?.[0]?.adsetName;
+                    const adsetid = groupedData?.[0]?.adsetid;
                     const campaignActualSpend = Camapignlevelstatus
                         .find(item =>
                             String(item.campaign_id) === String(campaignId) &&
@@ -5052,12 +5230,14 @@ const MyTablePage = () => {
                         payload.activity = {
                             editType: "Budget",
                             campaignid: campaignId,       // cents
+                            adsetid: adsetid,
                             Account: String(accountNumber),    // ✅ update *this* row’s account
                             campaignname: campaignname,
+                            adsetname: adsetname,
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset budget updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
                             budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
                                 campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
@@ -5076,12 +5256,14 @@ const MyTablePage = () => {
                         payload.bidactivity = {
                             editType: "Bid",
                             campaignid: campaignId,       // cents
+                            adsetid: adsetid,
                             Account: String(accountNumber),    // ✅ update *this* row’s account
                             campaignname: campaignname,
+                            adsetname: adsetname,
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset bid strategy updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             updateDetail: `From $${(Number(campaignActualSpend?.bid_amount) / 100)} to $${Math.round(bidAmount * 100) / 100}`,
                         }
                     }
@@ -5556,9 +5738,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     };
                     const payload = {
@@ -6229,6 +6412,24 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu'
         },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            hide: true,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
     };
 
     const columnDefsObjectAdLevel = {
@@ -6761,9 +6962,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     };
                     const payload = {
@@ -7434,6 +7636,24 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu'
         },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            hide: true,
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
     };
 
     //campaign level live
@@ -7765,7 +7985,7 @@ const MyTablePage = () => {
                         updatedBy: userdetails?.userName,
                         updatedUserEmail: userdetails?.email,
                         updateType: "Campaign budget updated",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
@@ -8209,9 +8429,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,
                         Account: row.accountNumber,
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -8822,6 +9043,54 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu'
         },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined onClick={() => {
+                            setHistoryOpen(true);
+                            setSelectedCampaignIdForHistory(campaignId);
+                            setSelectedAccountForHistory(rowAccountNumber)
+                        }} />
+                    </div>
+                );
+            },
+        },
     };
 
     const columnDefsObjectAdsetLevelDaily = {
@@ -9225,12 +9494,14 @@ const MyTablePage = () => {
                         payload.activity = {
                             editType: "Budget",
                             campaignid: campaignId,       // cents
+                            adsetid: adsetId,
                             Account: String(accountNumber),    // ✅ update *this* row’s account
                             campaignname: campaignname,
+                            adsetname: adsetname,
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset budget updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
                             budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
                                 campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
@@ -9249,12 +9520,14 @@ const MyTablePage = () => {
                         payload.bidactivity = {
                             editType: "Bid",
                             campaignid: campaignId,       // cents
+                            adsetid: adsetId,
                             Account: String(accountNumber),    // ✅ update *this* row’s account
                             campaignname: campaignname,
+                            adsetname: adsetname,
                             updatedBy: userdetails?.userName,
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset bid strategy updated",
-                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             updateDetail: `From $${(Number(campaignActualSpend?.bid_amount) / 100)} to $${Math.round(bidAmount * 100) / 100}`,
                         }
                     }
@@ -9732,9 +10005,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -10263,6 +10537,49 @@ const MyTablePage = () => {
             },
         },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            hide:  true,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
     };
 
     const columnDefsObjectAdLevelDaily = {
@@ -10842,9 +11159,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -11364,6 +11682,49 @@ const MyTablePage = () => {
             },
         },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            hide:  true,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
     };
 
     const columnDefsObject1 = {
@@ -11893,9 +12254,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -12289,6 +12651,53 @@ const MyTablePage = () => {
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined onClick={() => {
+                            setHistoryOpen(true);
+                            setSelectedCampaignIdForHistory(campaignId);
+                            setSelectedAccountForHistory(rowAccountNumber)
+                        }} />
+                    </div>
+                );
+            },
+        },
     };
 
     const columnDefsObject2 = {
@@ -12830,7 +13239,7 @@ const MyTablePage = () => {
                         campaignname: campaignnameFinal,
                         updatedBy: params.context?.userdetails?.email,
                         updateType: "Campain budget updated",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
@@ -13277,9 +13686,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -13917,6 +14327,55 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                
+
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined onClick={() => {
+                            setHistoryOpen(true);
+                            setSelectedCampaignIdForHistory(campaignId);
+                            setSelectedAccountForHistory(rowAccountNumber)
+                        }} />
+                    </div>
+                );
+            },
+        },
     };
 
 
@@ -14531,9 +14990,10 @@ const MyTablePage = () => {
                         campaignid: row.campaignid,       // cents
                         Account: row.accountNumber,    // ✅ update *this* row’s account
                         campaignname: row.campaignname,
-                        updatedBy: userdetails?.email || "Unknown",
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: row.category ? "Campain category updated" : "Campain category created",
-                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm A"),
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
                     }
                     const payload = {
@@ -14915,6 +15375,52 @@ const MyTablePage = () => {
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            hide: true,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                
+
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
     };
 
     const columnDefsObject4 = useMemo(() =>
@@ -17901,6 +18407,12 @@ const MyTablePage = () => {
                 <Input value={newColumnName} placeholder='Enter Column Name' style={{ marginBottom: '10px' }} onChange={(e) => setNewColumnName(e.target.value)} />
                 <Input value={formula} placeholder='Enter Formula' style={{ marginBottom: '10px' }} onChange={(e) => setFormula(e.target.value)} />
             </Modal>
+            <CampaignHistoryModal
+                open={historyOpen}
+                onClose={() => setHistoryOpen(false)}
+                campaignId={selectedCampaignIdForHistory}
+                accountNumber={selectedAccountForHistory}
+            />
 
         </div>
     );

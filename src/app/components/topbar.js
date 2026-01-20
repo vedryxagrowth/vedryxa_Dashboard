@@ -1373,9 +1373,16 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                         className="Badge absolute -top-2 -right-2"
                         variant="destructive"
                       >
-                        {Object.values(notifications)
+                        {/* {Object.values(notifications)
                           .filter(Array.isArray)
-                          .flat().length}
+                          .flat().length} */}
+                        {(() => {
+                          const count = Object.values(notifications)
+                            .filter(Array.isArray)
+                            .flat().length;
+
+                          return count > 99 ? "99+" : count;
+                        })()}
                       </Badge>
                     )}
                 </div>
@@ -1387,9 +1394,6 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
                 <StickyNote2Outlined size={20} style={{ marginRight: '10px', marginLeft: '10px' }} />
               </button>}
-
-
-
 
               <button
                 onClick={toggleTheme}
@@ -1456,9 +1460,16 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                         className="Badge absolute -top-2 -right-2"
                         variant="destructive"
                       >
-                        {Object.values(notifications)
+                        {/* {Object.values(notifications)
                           .filter(Array.isArray)
-                          .flat().length}
+                          .flat().length} */}
+                        {(() => {
+                          const count = Object.values(notifications)
+                            .filter(Array.isArray)
+                            .flat().length;
+
+                          return count > 99 ? "99+" : count;
+                        })()}
                       </Badge>
                     )}
                 </div>
