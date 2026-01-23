@@ -3479,7 +3479,7 @@ const AdsetComponent = ({
             />
           </Form.Item>
 
-          {budgetType !== "daily" &&
+          {budgetType === "lifetime" &&
             <Form.Item
               name={["adsets", index, "DatePickerEnd"]}
               label={<span style={{ color: "#B4B4B4" }}>End Time (IST)</span>}
@@ -6877,7 +6877,7 @@ const CreateCampaignDrawer = ({
       // Category: selectedDraftForShare.Category,
       camapaignlevel: selectedDraftForShare.camapaignlevel,
       adsetlevel_1: selectedDraftForShare.adsetlevel_1,
-      createdby: session?.user?.name,
+      createdby: userdetails?.userName,
     };
 
     const payload = {
@@ -8611,7 +8611,7 @@ const CreateCampaignDrawer = ({
       setPages(draft?.page || "");
       setPixels(draft?.pixel || "");
       setGeos(draft?.geo || "");
-      setBudgetType(draft?.camapaignlevel?.Budget_type || "Daily");
+      setBudgetType(draft?.camapaignlevel?.Budget_type || "daily");
     });
   };
   const handleEditDraft = (draft) => {
@@ -9421,7 +9421,7 @@ const CreateCampaignDrawer = ({
 
         for (const campaign of campaignData) {
           await fetch(
-            "https://www.testapi.adsgoat.in/api/newsubmitFormData",
+            "https://www.testapi.adsgoat.in/api/newsubmitFormDatanew",
             {
               method: "POST",
               headers: {
@@ -9579,7 +9579,7 @@ const CreateCampaignDrawer = ({
                 fbstatus: "No-Live",
                 Category: selectedCategory,
                 camapaignlevel: {
-                  createdby: session?.user?.name,
+                  createdby: userdetails?.userName,
                   Name: values.Name,
                   Objectives: values.Objectives,
                   Special_categories: values.Special_categories,
@@ -9768,7 +9768,7 @@ const CreateCampaignDrawer = ({
               fbstatus: "No-Live",
               Category: selectedCategory,
               camapaignlevel: {
-                createdby: session?.user?.name,
+                createdby: userdetails?.userName,
                 Name: values.Name,
                 Objectives: values.Objectives,
                 Special_categories: values.Special_categories,
@@ -10134,7 +10134,7 @@ const CreateCampaignDrawer = ({
         geo: geo,
         pixel: pixel,
         page: page,
-        createdby: session?.user?.name,
+        createdby: userdetails?.userName,
         createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         camapaignlevel: {
@@ -10325,7 +10325,7 @@ const CreateCampaignDrawer = ({
           ? selectedRef.current
           : {}),
         camapaignlevel: {
-          createdby: session?.user?.name,
+          createdby: userdetails?.userName,
           Name: values.Name,
           Objectives: values.Objectives,
           Special_categories: values.Special_categories,

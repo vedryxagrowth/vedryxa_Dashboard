@@ -72,6 +72,7 @@ import StickyBox from "react-sticky-box";
 import { FaClone, FaEye, FaPenToSquare, FaTrashCan, FaRegCommentDots } from "react-icons/fa6";
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
 import { IoMdCreate } from "react-icons/io";
+const CampaignHistoryModal = React.lazy(() => import('../Campaigns/camp-components/campaignHistory'));
 
 import { Token } from "aws-sdk";
 const { RangePicker } = DatePicker;
@@ -183,6 +184,9 @@ const App = () => {
   const [checkedRowIds, setCheckedRowIds] = useState([]);
   const [checkedRowRecords, setCheckedRowRecords] = useState([]);
   const [commentForBulkComments, setCommentForBulkComments] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
+  const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
 
   console.log(checkedRowRecords);
 
@@ -586,7 +590,7 @@ const App = () => {
       // Construct URL with optional startDate and endDate
       //https://www.testapi.adsgoat.in
       // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
-      let url = `https://www.testapi.adsgoat.in/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      let url = `https://www.testapi.adsgoat.in/api/newGetFormDatanew?accountNumber=${accountNumber}&network=${selectedKey}`;
       if (start && end) {
         url += `&startDate=${start}&endDate=${end}`;
       }
@@ -923,7 +927,7 @@ const App = () => {
     try {
       //https://www.testapi.adsgoat.in
       const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/newupdateApproval/${id}`,
+        `https://www.testapi.adsgoat.in/api/newupdateApprovalnew/${id}`,
         {
           method: "PUT",
           headers: {
@@ -1160,18 +1164,19 @@ const App = () => {
   const onToggleStatusForMultipleAdsets = async (record, checked) => {
     try {
       const token = localStorage.getItem("token");
+      const username = userdetails.userName;
       console.log("Tokensssssssssssssssssssssssss:", token);
 
       // Update status on your backend https://www.testapi.adsgoat.in
       const backendResponse = await fetch(
-        `https://www.testapi.adsgoat.in/api/newstatus/${record?.identifier}`,
+        `https://www.testapi.adsgoat.in/api/newstatusnew/${record?.identifier}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: token,
           },
-          body: JSON.stringify({ Status: checked ? "ACTIVE" : "PAUSED" }),
+          body: JSON.stringify({ Status: checked ? "ACTIVE" : "PAUSED", username: username }),
         }
       );
 
@@ -1292,22 +1297,27 @@ const App = () => {
       if (record && inputValue) {
         try {
           const budgets = inputValue * 100; // Convert input value to the required format (cents)
+          const username = userdetails?.userName;
+          const campaignname = record?.campaign_name;
+          const Account = record?.Account_Number;
+          const BudgetType = record?.budgetType;
 
           // Step 1: Update the daily budget in your backend https://www.testapi.adsgoat.in
           const response = await fetch(
-            `https://www.testapi.adsgoat.in/api/newdailyBudget/${record?.identifier}`,
+            `https://www.testapi.adsgoat.in/api/newdailyBudgetnew/${record?.identifier}`,
             {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
                 Authorization: localStorage.getItem("token"),
               },
-              body: JSON.stringify({ Daily_amount: budgets }),
+              body: JSON.stringify({ Daily_amount: budgets, username: username, campaignname: campaignname, Account: Account, BugetType: BudgetType }),
             }
           );
 
           if (response.ok) {
             console.log("Daily amount updated successfully in backend");
+            console.log(record, "budget")
 
             // Step 2: If campaignId is available, update the budget on Facebook
             if (record.campaignid) {
@@ -1762,7 +1772,7 @@ const App = () => {
       console.log("identifier:", identifier);
 
       await axios.delete(
-        `https://www.testapi.adsgoat.in/api/campaigns/${identifier}`
+        `https://www.testapi.adsgoat.in/api/newcampaigns/${identifier}`
         // { headers: { Authorization: token } } // include if you use auth
       );
 
@@ -2853,20 +2863,23 @@ const App = () => {
         const approval = record?.Approval?.toLowerCase();
         const fbstatus = record?.fbstatus?.toLowerCase();
         const accountNumber = record?.Account_Number;
-        const campaignId = record?.campaignid;
-        const openCampaignHistory = () => {
-          if (!campaignId || !accountNumber) {
+        const identifier = record?.identifier;
+
+        const openCampaignHistory = ({ identifier, accountNumber }) => {
+          if (!identifier || !accountNumber) {
             console.error("Missing campaign ID or account number");
             return;
           }
-          const href = `/Campaigns/CampaignHistory?account=${encodeURIComponent(
-            accountNumber
-          )}&type=Campaign&id=${encodeURIComponent(campaignId)}`;
-          window.open(href, "_blank", "noopener,noreferrer");
+          setSelectedCampaignIdForHistory(identifier);
+          setSelectedAccountForHistory(accountNumber);
+          setHistoryOpen(true);
         };
-        if (fbstatus === "live") {
+        if (record.Approval === "Approved") {
           return (
-            <Tooltip title="View Campaign History">
+            <Tooltip title="View Campaign History" overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+            }}>
               <HistoryOutlined
                 style={{
                   fontSize: 16,
@@ -2875,7 +2888,11 @@ const App = () => {
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  openCampaignHistory();
+                  openCampaignHistory({
+                    accountNumber,
+                    identifier
+
+                  });
                 }}
               />
             </Tooltip>
@@ -3392,10 +3409,10 @@ const App = () => {
       message.warning("Please enter valid comment");
       return;
     }
-
+    const username = userdetails?.userName;
     const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/createcommentForLauncher",
-      { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: commentText, editedTime: editedTime },
+      "https://www.testapi.adsgoat.in/api/newcreatecommentForLauncher",
+      { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: commentText, editedTime: editedTime, username: username },
       {
         headers: {
           "Content-Type": "application/json",
@@ -3443,10 +3460,10 @@ const App = () => {
   }
 
   const handleDelete = async () => {
-
+    const username = userdetails?.userName;
     const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/deleteCommentForLauncher",
-      { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: comment },
+      "https://www.testapi.adsgoat.in/api/newdeleteCommentForLauncher",
+      { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: comment, username: username },
       {
         headers: {
           "Content-Type": "application/json",
@@ -3515,16 +3532,17 @@ const App = () => {
       message.warning("Please enter valid comment");
       return;
     }
-
+    const username = userdetails?.userName;
     const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/bulkCreateCommentForLauncher",
+      "https://www.testapi.adsgoat.in/api/newbulkCreateCommentForLauncher",
       {
         items: checkedRowRecords.map(c => ({
           Account: c.Account_Number,
           campaignid: c.identifier,
           campaignname: c.campaign_name,
           comment: commentText,
-          editedTime: editedTime
+          editedTime: editedTime,
+          username: username
         })),
         level: "Launcher"
       },
@@ -3585,13 +3603,15 @@ const App = () => {
       message.warning("Please select at least one campaign to delete comment");
       return;
     }
-
+    const username = userdetails?.userName;
     const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/bulkDeleteCommentForLauncher",
+      "https://www.testapi.adsgoat.in/api/newbulkDeleteCommentForLauncher",
       {
         items: checkedRowRecords.map(c => ({
           Account: c.Account_Number,
-          campaignid: c.identifier
+          campaignid: c.identifier,
+          campaignname: c.campaign_name,
+          username: username
         })),
         level: "Launcher"
       },
@@ -4769,6 +4789,12 @@ const App = () => {
           onChange={(e) => setCommentForBulkComments(e.target.value)}
         />
       </Modal>
+      <CampaignHistoryModal
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        identifier={selectedCampaignIdForHistory}
+        accountNumber={selectedAccountForHistory}
+      />
     </div>
   );
 };

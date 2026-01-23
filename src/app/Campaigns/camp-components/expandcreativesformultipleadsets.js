@@ -89,7 +89,7 @@ const AdsetCard = ({
     const campaignIdentifier = viewCampaignData?.identifier; // you already have this in scope
     // const adsetIdentifier = adset?.id;                       // your internal adset UUID/id
     const adsetKey = adset?.adsetKey || `adsetlevel_${index + 1}`; // adjust this to your data
-
+    const username = userdetails?.userName;
     if (!campaignIdentifier) {
       message.error("Missing campaign identifier");
       return;
@@ -106,7 +106,7 @@ const AdsetCard = ({
 
     try {
       await axios.post(
-        "https://www.testapi.adsgoat.in/api/toggleAdsetStatus",
+        "https://www.testapi.adsgoat.in/api/newtoggleAdsetStatus",
         {
           // backend should accept these fields:
           campaignRef: campaignIdentifier,   // prefer UUID identifier
@@ -114,6 +114,7 @@ const AdsetCard = ({
           // adsetIdentifier,                   // your internal adset id (used to locate nested adset)
           // adsetId,                           // optional FB adset id (if exists -> call FB)
           newStatus,
+          username: username,
         },
         { headers: { Authorization: token } }
       );
@@ -133,6 +134,7 @@ const AdsetCard = ({
     const newStatus = checked ? "ACTIVE" : "PAUSED";
     const campaignIdentifier = viewCampaignData?.identifier;
     const adIdentifier = currentItem?.id;
+    const username = userdetails?.userName;
 
     if (!campaignIdentifier) return message.error("Missing campaign identifier");
     if (!adsetKey) return message.error("Missing adset key");
@@ -145,8 +147,8 @@ const AdsetCard = ({
 
     try {
       await axios.post(
-        "https://www.testapi.adsgoat.in/api/toggleAdStatus",
-        { campaignRef: campaignIdentifier, adsetKey, adIdentifier, newStatus },
+        "https://www.testapi.adsgoat.in/api/newtoggleAdStatus",
+        { campaignRef: campaignIdentifier, adsetKey, adIdentifier, newStatus, username: username },
         { headers: { Authorization: token } }
       );
       message.success(`Ad ${newStatus.toLowerCase()}`);
@@ -184,7 +186,7 @@ const AdsetCard = ({
     try {
       //https://www.testapi.adsgoat.in
       const response = await axios.post(
-        "https://www.testapi.adsgoat.in/api/newapproveAds",
+        "https://www.testapi.adsgoat.in/api/newapproveAdsnew",
         {
           id: item.id,
           Approved: userdetails.userName, // Assuming userdetails has a name property
@@ -251,13 +253,17 @@ const AdsetCard = ({
 
   const handleConfirmReject = async () => {
     setLoading(true);
+     const username = userdetails?.userName;
     try {
       //https://www.testapi.adsgoat.in
       const response = await axios.post(
-        "https://www.testapi.adsgoat.in/api/newrejectAds",
+        "https://www.testapi.adsgoat.in/api/newrejectAdsnew",
         {
           id: currentItem.id,
           reason: rejectionReason,
+          identifier: viewCampaignData?.identifier,
+          adsetkey:adsetKey,
+          username: username
         },
         {
           headers: {
@@ -392,7 +398,7 @@ const AdsetCard = ({
             }}
           />
 
-          <Tooltip title="View Adset History">
+          {/* <Tooltip title="View Adset History">
             <HistoryOutlined
               style={{
                 fontSize: 16,
@@ -407,7 +413,7 @@ const AdsetCard = ({
                 window.open(url, "_blank"); // opens in new tab
               }}
             />
-          </Tooltip>
+          </Tooltip> */}
 
 
           <Tooltip
@@ -654,7 +660,7 @@ const AdsetCard = ({
                         }}
                       />
 
-                      <Tooltip title="View Ad History">
+                      {/* <Tooltip title="View Ad History">
                         <HistoryOutlined
                           style={{
                             fontSize: 16,
@@ -671,7 +677,7 @@ const AdsetCard = ({
                             window.open(url, "_blank");
                           }}
                         />
-                      </Tooltip>
+                      </Tooltip> */}
 
                       <Tooltip title="More Options">
                         <MoreOutlined
@@ -1273,7 +1279,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
       <div
         style={{ backgroundColor: theme === "dark" ? "#252525ff" : "#E9E9E9" }}
       >
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        {/* <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -1293,7 +1299,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
           >
             New adset
           </Button>
-        </div>
+        </div> */}
 
         <Row
           gutter={[16, 16]}
@@ -1302,7 +1308,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
             flexWrap: "wrap",
             overflowX: "auto",
             padding: "10px",
-            marginTop: "-15px",
+            // marginTop: "15px",
             // backgroundColor: theme === "dark" ? "#252525ff" : "#E9E9E9",
           }}
         >
