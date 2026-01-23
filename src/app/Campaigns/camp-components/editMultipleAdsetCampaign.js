@@ -10066,6 +10066,12 @@ const EditMultipleAdsetCampaignDrawer = ({
             AdsetsData.pacing_type = ["day_parting"];
             AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
           }
+          //  else {
+          //   // SWITCH OFF
+          //   AdsetsData.is_day_parting_enabled = false;
+          //   AdsetsData.pacing_type = [];
+          //   AdsetsData.adschedule = [];
+          // }
           AdsetsData["re_lunch_targeting"] = true;
           send_re_launch_status = true;
           re_lunch = true;
@@ -10077,7 +10083,13 @@ const EditMultipleAdsetCampaignDrawer = ({
             AdsetsData.is_day_parting_enabled = true;
             AdsetsData.pacing_type = ["day_parting"];
             AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
-          }
+          } 
+          // else {
+          //   // SWITCH OFF
+          //   AdsetsData.is_day_parting_enabled = false;
+          //   AdsetsData.pacing_type = [];
+          //   AdsetsData.adschedule = [];
+          // }
         }
         if (
           findMatchingAdset.Adsetid &&
