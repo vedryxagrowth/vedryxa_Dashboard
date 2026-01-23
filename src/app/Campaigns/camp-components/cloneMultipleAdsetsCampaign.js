@@ -3200,7 +3200,7 @@ const AdsetComponent = ({
   //     form.validateFields([['adsets', index, 'MediaContent']]);
   //   };
 
-  const selectedFilesData = (data, index, adsetId = creativeIndex) => {
+  const selectedFilesData = (data, adsetId = creativeIndex) => {
     const mapped = data.map((file, i) => ({
       id: uuidv4(),
       uid: file.uid || `-${Date.now()}-${i}`,
@@ -3242,12 +3242,13 @@ const AdsetComponent = ({
         return max + 1;
       };
       const nextAddNumber = list?.length + 1 || getNextAddNumber(list);
+      const pageId = form.getFieldValue(["adsets", index, "page_id"]);
       const newAds = mapped.map((item, i) => ({
         id: item.id,
         AddName: `${addName}_${nextAddNumber + i}`,
         filename: item,
         uid: item.uid,
-        page_id: form.getFieldValue("page_id"),
+        page_id: pageId,
         message: primaryText,
         headline: headline,
         Description: description,
@@ -3970,7 +3971,7 @@ const AdsetComponent = ({
             />
           </Form.Item>
 
-          {budgetType !== "daily" &&
+          {budgetType === "lifetime" &&
             <Form.Item
               name={["adsets", index, "DatePickerEnd"]}
               label={<span style={{ color: "#B4B4B4" }}>End Time (IST)</span>}
@@ -5129,7 +5130,7 @@ const AdsetComponent = ({
                                         }`,
                                       filename: item,
                                       uid: item.uid,
-                                      page_id: form.getFieldValue("page_id"),
+                                      page_id: form.getFieldValue(["adsets", index, "page_id"]),
                                       message: primaryText,
                                       headline: headline,
                                       Description: description,
@@ -8576,7 +8577,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         // console.log("Campaign Data:", campaignData);
         //https://www.testapi.adsgoat.in
         const response = await fetch(
-          "https://www.testapi.adsgoat.in/api/newsubmitFormData",
+          "https://www.testapi.adsgoat.in/api/newsubmitFormDatanew",
           {
             method: "POST",
             headers: {
@@ -8676,7 +8677,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       // Category: fullCampaignData.Category || "",
       Category: popupInputs.reportCat || category || "",
       camapaignlevel: {
-        createdby: session?.user?.name,
+        createdby: userdetails?.userName,
         Name: values.Name,
         Objectives: values.Objectives,
         Special_categories: values.Special_categories,
@@ -9249,6 +9250,13 @@ const CloneMultipleAdsetCampaignDrawer = ({
         start_time: moment(formValuesObject.DatePicker.$d)
           // .tz(imagehash.timeZone)
           .format("YYYY-MM-DDTHH:mm:ssZ"), //formValuesObject.DatePicker.$d
+        ...(values.adsets[i].DatePickerEnd && budgetType === "lifetime"
+          ? {
+            end_time: moment(values.adsets[i].DatePickerEnd.$d)
+              .tz(newImageHash.timeZone)
+              .format("YYYY-MM-DDTHH:mm:ssZ"),
+          }
+          : {}),
         action_source: formValuesObject.action_source,
         custom_event_type: formValuesObject.custom_event_type,
         pixel_id: formValuesObject.pixel_id,
@@ -9311,7 +9319,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     let AllAdsetsData = {
       // id: uuidv4(),
       // Draft_Name:"",
-      createdby: session?.user?.name,
+      createdby: userdetails?.userName,
       createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
       editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
       camapaignlevel: {
@@ -9484,7 +9492,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
           ? selectedRef.current
           : {}),
         camapaignlevel: {
-          createdby: session?.user?.name,
+          createdby: userdetails?.userName,
           Name: values.Name,
           Objectives: values.Objectives,
           Special_categories: values.Special_categories,

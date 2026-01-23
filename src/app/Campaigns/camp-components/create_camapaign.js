@@ -1214,6 +1214,9 @@ const AdsetComponent = ({
   adSchedulingToShow,
   selectedByAdset,
   setAdSchedulingToShow,
+  setScheduleErrorByAdset,
+  setShowScheduleSubmitError,
+  scheduleErrorByAdset,
   setSelectedByAdset,
   page,
   pixel,
@@ -1386,6 +1389,15 @@ const AdsetComponent = ({
       };
     });
   };
+  const isValidAdSchedule = (schedule = []) =>
+    Array.isArray(schedule) &&
+    schedule.length > 0 &&
+    schedule.every(
+      s =>
+        s.end_minute > s.start_minute &&
+        Array.isArray(s.days) &&
+        s.days.length > 0
+    );
 
   useEffect(() => {
     if (!adset?.id || !timezoneType) return;
@@ -1399,15 +1411,16 @@ const AdsetComponent = ({
       ...prev,
       [adset.id]: schedule
     }));
+    if (isValidAdSchedule(schedule)) {
+      setScheduleErrorByAdset(prev =>
+        prev[adset.id]
+          ? { ...prev, [adset.id]: false }
+          : prev
+      );
+      setShowScheduleSubmitError(false);
+    }
 
   }, [selectedByAdset, adset.id, timezoneType]);
-
-
-
-
-
-
-
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
@@ -3479,7 +3492,7 @@ const AdsetComponent = ({
             />
           </Form.Item>
 
-          {budgetType !== "daily" &&
+          {budgetType === "lifetime" &&
             <Form.Item
               name={["adsets", index, "DatePickerEnd"]}
               label={<span style={{ color: "#B4B4B4" }}>End Time (IST)</span>}
@@ -3571,64 +3584,73 @@ const AdsetComponent = ({
               </Form.Item>
 
               {/* Schedule Grid */}
-              <div
-                className="schedule-grid"
-                onMouseUp={handleMouseUp}
-              >
-                <div className="row header">
-                  <div className="day-cell" />
-                  {Array.from({ length: 24 }).map((_, h) => (
-                    <div key={h} className="hour-label">
-                      {h % 3 === 0
-                        ? h === 0
-                          ? "12 am"
-                          : h < 12
-                            ? `${h} am`
-                            : h === 12
-                              ? "12 pm"
-                              : `${h - 12} pm`
-                        : ""}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  className="schedule-grid"
+                  onMouseUp={handleMouseUp}
+                >
+                  <div className="row header">
+                    <div className="day-cell" />
+                    {Array.from({ length: 24 }).map((_, h) => (
+                      <div key={h} className="hour-label">
+                        {h % 3 === 0
+                          ? h === 0
+                            ? "12 am"
+                            : h < 12
+                              ? `${h} am`
+                              : h === 12
+                                ? "12 pm"
+                                : `${h - 12} pm`
+                          : ""}
+                      </div>
+                    ))}
+                  </div>
+
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
+                    <div key={day} className="row">
+                      <div className="day-cell">{day}</div>
+
+                      {Array.from({ length: 24 }).map((_, h) => {
+                        const key = `${d}-${h}`;
+                        return (
+                          <div
+                            key={h}
+                            className={`hour-cell ${selected[key] ? "active" : ""
+                              } ${h % 3 === 0 ? "group-start" : ""}`}
+                            onMouseDown={() => handleMouseDown(d, h)}
+                            onMouseEnter={() => handleMouseEnter(d, h)}
+                          />
+                        );
+                      })}
                     </div>
                   ))}
-                </div>
-
-                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
-                  <div key={day} className="row">
-                    <div className="day-cell">{day}</div>
+                  {/* Every Day Row */}
+                  <div className="row every-day">
+                    <div className="day-cell">Every Day</div>
 
                     {Array.from({ length: 24 }).map((_, h) => {
-                      const key = `${d}-${h}`;
+                      const isActive = [0, 1, 2, 3, 4, 5, 6].every(
+                        d => selected[`${d}-${h}`]
+                      );
+
                       return (
                         <div
                           key={h}
-                          className={`hour-cell ${selected[key] ? "active" : ""
-                            } ${h % 3 === 0 ? "group-start" : ""}`}
-                          onMouseDown={() => handleMouseDown(d, h)}
-                          onMouseEnter={() => handleMouseEnter(d, h)}
+                          className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
+                            }`}
+                          onMouseDown={() => handleEveryDayToggle(h)}
                         />
                       );
                     })}
                   </div>
-                ))}
-                {/* Every Day Row */}
-                <div className="row every-day">
-                  <div className="day-cell">Every Day</div>
-
-                  {Array.from({ length: 24 }).map((_, h) => {
-                    const isActive = [0, 1, 2, 3, 4, 5, 6].every(
-                      d => selected[`${d}-${h}`]
-                    );
-
-                    return (
-                      <div
-                        key={h}
-                        className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
-                          }`}
-                        onMouseDown={() => handleEveryDayToggle(h)}
-                      />
-                    );
-                  })}
                 </div>
+                {budgetType === "lifetime" &&
+                  scheduleErrorByAdset[adset.id] &&
+                  adSchedulingToShow[adset.id] && (
+                    <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                      Please select at least one valid time slot and day
+                    </div>
+                  )}
 
               </div>
             </>
@@ -6701,6 +6723,9 @@ const CreateCampaignDrawer = ({
   const [adsetSchedule, setAdsetSchedule] = useState({});
   const [selectedByAdset, setSelectedByAdset] = useState({});
   const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
+  const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
+  const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
+
 
   // Derived condition name changed to watchedHasAdsetBudget
   const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
@@ -6877,7 +6902,7 @@ const CreateCampaignDrawer = ({
       // Category: selectedDraftForShare.Category,
       camapaignlevel: selectedDraftForShare.camapaignlevel,
       adsetlevel_1: selectedDraftForShare.adsetlevel_1,
-      createdby: session?.user?.name,
+      createdby: userdetails?.userName,
     };
 
     const payload = {
@@ -8611,7 +8636,7 @@ const CreateCampaignDrawer = ({
       setPages(draft?.page || "");
       setPixels(draft?.pixel || "");
       setGeos(draft?.geo || "");
-      setBudgetType(draft?.camapaignlevel?.Budget_type || "Daily");
+      setBudgetType(draft?.camapaignlevel?.Budget_type || "daily");
     });
   };
   const handleEditDraft = (draft) => {
@@ -9406,13 +9431,13 @@ const CreateCampaignDrawer = ({
       // message.error("Category is required");
       return;
     }
-
     console.log("Form values", formValues);
 
     const campaignData = await MultipleAdsestsFetching(formValues);
     console.log("Campaign Data before adding category:", campaignData);
     // campaignData.Category = selectedCategory;
     //abcd  
+
 
     try {
       if (campaignData) {
@@ -9421,7 +9446,7 @@ const CreateCampaignDrawer = ({
 
         for (const campaign of campaignData) {
           await fetch(
-            "https://www.testapi.adsgoat.in/api/newsubmitFormData",
+            "https://www.testapi.adsgoat.in/api/newsubmitFormDatanew",
             {
               method: "POST",
               headers: {
@@ -9579,7 +9604,7 @@ const CreateCampaignDrawer = ({
                 fbstatus: "No-Live",
                 Category: selectedCategory,
                 camapaignlevel: {
-                  createdby: session?.user?.name,
+                  createdby: userdetails?.userName,
                   Name: values.Name,
                   Objectives: values.Objectives,
                   Special_categories: values.Special_categories,
@@ -9688,7 +9713,7 @@ const CreateCampaignDrawer = ({
                   start_time: moment(values.adsets[i].DatePicker.$d)
                     .tz(newImageHash.timeZone)
                     .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
-                  ...(values.adsets[i].DatePickerEnd
+                  ...(values.adsets[i].DatePickerEnd && budgetType === "lifetime"
                     ? {
                       end_time: moment(values.adsets[i].DatePickerEnd.$d)
                         .tz(newImageHash.timeZone)
@@ -9768,7 +9793,7 @@ const CreateCampaignDrawer = ({
               fbstatus: "No-Live",
               Category: selectedCategory,
               camapaignlevel: {
-                createdby: session?.user?.name,
+                createdby: userdetails?.userName,
                 Name: values.Name,
                 Objectives: values.Objectives,
                 Special_categories: values.Special_categories,
@@ -9876,7 +9901,7 @@ const CreateCampaignDrawer = ({
                 start_time: moment(values.adsets[i].DatePicker.$d)
                   .tz(newImageHash.timeZone)
                   .format("YYYY-MM-DDTHH:mm:ssZ"),
-                ...(values.adsets[i].DatePickerEnd
+                ...(values.adsets[i].DatePickerEnd && budgetType === "lifetime"
                   ? {
                     end_time: moment(values.adsets[i].DatePickerEnd.$d)
                       .tz(newImageHash.timeZone)
@@ -10134,7 +10159,7 @@ const CreateCampaignDrawer = ({
         geo: geo,
         pixel: pixel,
         page: page,
-        createdby: session?.user?.name,
+        createdby: userdetails?.userName,
         createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         camapaignlevel: {
@@ -10325,7 +10350,7 @@ const CreateCampaignDrawer = ({
           ? selectedRef.current
           : {}),
         camapaignlevel: {
-          createdby: session?.user?.name,
+          createdby: userdetails?.userName,
           Name: values.Name,
           Objectives: values.Objectives,
           Special_categories: values.Special_categories,
@@ -12513,6 +12538,9 @@ const CreateCampaignDrawer = ({
                   selectedByAdset={selectedByAdset}
                   setAdSchedulingToShow={setAdSchedulingToShow}
                   setSelectedByAdset={setSelectedByAdset}
+                  scheduleErrorByAdset={scheduleErrorByAdset}
+                  setScheduleErrorByAdset={setScheduleErrorByAdset}
+                  setShowScheduleSubmitError={setShowScheduleSubmitError}
                   page={page}
                   pixel={pixel}
                   geo={geo}
@@ -12798,6 +12826,33 @@ const CreateCampaignDrawer = ({
                           return;
                         }
 
+                        if (budgetType === "lifetime") {
+                          let hasError = false;
+                          const newErrors = {};
+                          Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                            if (!adSchedulingToShow[adsetId]) return;
+                            const schedule = adsetSchedule?.[adsetId] || [];
+                            const isValid =
+                              Array.isArray(schedule) &&
+                              schedule.length > 0 &&
+                              schedule.every(
+                                s =>
+                                  s.end_minute > s.start_minute &&
+                                  Array.isArray(s.days) &&
+                                  s.days.length > 0
+                              );
+                            if (!isValid) {
+                              newErrors[adsetId] = true;
+                              hasError = true;
+                            }
+                          });
+                          if (hasError) {
+                            setScheduleErrorByAdset(newErrors);
+                            setShowScheduleSubmitError(true);
+                            return;
+                          }
+                        }
+
                         try {
                           const values = await form.validateFields();
 
@@ -12858,6 +12913,18 @@ const CreateCampaignDrawer = ({
                     {errors.reportCat && (
                       <div style={{ color: "red", marginTop: "5px" }}>
                         {errors.reportCat}
+                      </div>
+                    )}
+                    {budgetType === "lifetime" && showScheduleSubmitError && (
+                      <div
+                        style={{
+                          color: "red",
+                          marginTop: 6,
+                          fontSize: 12,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Please select at least one valid time slot and day
                       </div>
                     )}
                   </div>

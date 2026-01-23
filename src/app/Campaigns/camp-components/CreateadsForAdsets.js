@@ -74,7 +74,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
   console.log(data, "data from createads component");
   console.log(adsData, "adsData from createads component");
   console.log(network, "network from createads component");
-  const { theme } = useTokenContext();
+  const { theme, userdetails } = useTokenContext();
 
   var token = localStorage.getItem("token")
   console.log(data, "selectedRow")
@@ -693,13 +693,13 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
         data1.videoid = values.videoid;
         data1.thambnailurl = values.thambnailurl;
       }
-
+      const username = userdetails?.userName;
       console.log(data1, "from UI");
       console.log("identifier:", data.identifier);
 
       //https://www.testapi.adsgoat.in
       const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/create-ad/${data.identifier}`,
+        `https://www.testapi.adsgoat.in/api/newcreate-ad/${data.identifier}`,
         {
           method: "PUT",
           headers: {
@@ -707,7 +707,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
             Authorization: token,
           },
           // body: JSON.stringify({ adsetKey: `adsetlevel_${index + 1}`, ...data1 }),
-          body: JSON.stringify({ adsetKey, ...data1 }),
+          body: JSON.stringify({ adsetKey, ...data1, username: username }),
         }
       );
 
@@ -1031,7 +1031,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                   ]}
                   style={{ flex: 3, marginLeft: "1%" }}
                 >
-                  <Input  disabled style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                  <Input disabled style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                 </Form.Item>
               </div>
               <Form.Item

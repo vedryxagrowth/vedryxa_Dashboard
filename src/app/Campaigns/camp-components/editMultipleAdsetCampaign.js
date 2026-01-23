@@ -3299,7 +3299,7 @@ const AdsetComponent = ({
   //     form.validateFields([['adsets', index, 'MediaContent']]);
   //   };
 
-  const selectedFilesData = (data, index, adsetId = creativeIndex) => {
+  const selectedFilesData = (data, adsetId = creativeIndex) => {
     const mapped = data.map((file, i) => ({
       id: uuidv4(),
       uid: file.uid || `-${Date.now()}-${i}`,
@@ -3340,8 +3340,7 @@ const AdsetComponent = ({
         const max = numbers.length > 0 ? Math.max(...numbers) : 0;
         return max + 1;
       };
-      const previousPageId =
-        list.length > 0 ? list[0].page_id : form.getFieldValue("page_id");
+      const pageId = form.getFieldValue(["adsets", index, "page_id"]);
       const nextAddNumber = list?.length + 1 || getNextAddNumber(list);
       const newAds = mapped.map((item, i) => ({
         id: item.id,
@@ -3349,7 +3348,7 @@ const AdsetComponent = ({
         filename: item,
         uid: item.uid,
         // page_id: form.getFieldValue("page_id"),
-        page_id: previousPageId,
+        page_id: pageId,
         message: primaryText,
         headline: headline,
         Description: description,
@@ -7149,6 +7148,8 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [adsetSchedule, setAdsetSchedule] = useState({});
   const [selectedByAdset, setSelectedByAdset] = useState({});
   const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
+  const [objectivevalue, setObjectiveValue] = useState();
+  const isFirstRender = useRef(true);
 
   console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
   console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
@@ -7430,12 +7431,11 @@ const EditMultipleAdsetCampaignDrawer = ({
     // Run only when objectiveValue changes
     if (objectiveValue) {
       const adsets = form.getFieldValue("adsets") || [];
-
       const updatedAdsets = adsets.map((adset) => ({
         ...adset,
         optimization_goal: "OFFSITE_CONVERSIONS",
-        custom_event_type:
-          objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
+        // custom_event_type:
+        //   objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
         action_source: "website",
         billing_event: "IMPRESSIONS",
       }));
@@ -9115,7 +9115,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
     // abcd
     const campaignData = await MultipleAdsestsFetching(formValues);
-
+    const username = userdetails?.userName;
     console.log(fullCampaignData, "fullCampaignData");
 
     console.log("Campaign Data:", campaignData);
@@ -9125,7 +9125,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         // console.log("Campaign Data:", campaignData);
         //https://www.testapi.adsgoat.in
         const response = await fetch(
-          "https://www.testapi.adsgoat.in/api/newEditFormData",
+          "https://www.testapi.adsgoat.in/api/newEditFormDatanew",
           {
             method: "POST",
             headers: {
@@ -9210,6 +9210,9 @@ const EditMultipleAdsetCampaignDrawer = ({
         return item.key;
       });
   }
+  function isSameArray(a = [], b = []) {
+    return JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+  }
 
   const MultipleAdsestsFetching = async (values) => {
     // let AllAdsetsData = {
@@ -9246,7 +9249,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     if (fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
-      AllAdsetsData["camapaignlevel"]["Editedby"] = session?.user?.name;
+      AllAdsetsData["camapaignlevel"]["Editedby"] = userdetails?.userName;
       AllAdsetsData["camapaignlevel"]["EditedDate"] = moment().tz(imagehash.timeZone).format("YYYY-MM-DD");
       AllAdsetsData["camapaignlevel"]["Budget_type"] = budgetType;
       AllAdsetsData["camapaignlevel"]["campaignid"] =
@@ -9337,7 +9340,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     else {
       AllAdsetsData["camapaignlevel"] = {
         createdby: fullCampaignData.camapaignlevel.createdby,
-        Editedby: session?.user?.name,
+        Editedby: userdetails?.userName,
         Name: values.Name,
         Objectives: values.Objectives,
         Special_categories: values.Special_categories,
@@ -9829,17 +9832,22 @@ const EditMultipleAdsetCampaignDrawer = ({
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
           AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
-        } else {
-          AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
-          AdsetsData["re_lunch_adset_name"] = true;
-          send_re_launch_status = true;
         }
+        // else {
+        //   // if (findMatchingAdset.Adsetid) {
+        //   AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
+        //   // AdsetsData["re_lunch_adset_name"] = true;
+        //   // send_re_launch_status = true;
+        //   // }else{
+        //   //   AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
+        //   // }
+        // }
         if (findMatchingAdset.Status) {
           AdsetsData["Status"] = findMatchingAdset.Status;
         }
-        if (findMatchingAdset["re_lunch_adsetname"]) {
-          AdsetsData["re_lunch_adsetname"] =
-            findMatchingAdset["re_lunch_adsetname"];
+        if (findMatchingAdset["re_lunch_adset_name"]) {
+          AdsetsData["re_lunch_adset_name"] =
+            findMatchingAdset["re_lunch_adset_name"];
         }
         if (findMatchingAdset["re_lunch_bid_amount"]) {
           AdsetsData["re_lunch_bid_amount"] =
@@ -9866,7 +9874,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           findMatchingAdset.AdsetName !== formValuesObject.AdsetName
         ) {
           AdsetsData["AdsetName"] = formValuesObject.AdsetName;
-          AdsetsData["re_lunch_adsetname"] = true;
+          AdsetsData["re_lunch_adset_name"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
@@ -9922,7 +9930,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             .format("YYYY-MM-DDTHH:mm:ssZ");
           AdsetsData["action_source"] = formValuesObject.action_source;
           AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
-          AdsetsData["pixel_id"] = findMatchingAdset.pixel_id;
+          AdsetsData["pixel_id"] = formValuesObject.pixel_id;
         }
         if (budgetType === "lifetime") {
           const newEnd = dayjs(formValuesObject.DatePickerEnd)
@@ -9936,10 +9944,12 @@ const EditMultipleAdsetCampaignDrawer = ({
             re_lunch = true;
           }
         }
+        // notice
         if (
           findMatchingAdset.Adsetid &&
           findMatchingAdset.countries &&
-          findMatchingAdset.countries !== formValuesObject.countries
+          // findMatchingAdset.countries !== formValuesObject.countries
+          !isSameArray(findMatchingAdset.countries, formValuesObject.countries)
         ) {
           AdsetsData["countries"] = formValuesObject.countries;
           // if (formValuesObject.Beneficiary) {
@@ -9969,7 +9979,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           const newCountries = formValuesObject.countries;
           if (findMatchingAdset.countries && findMatchingAdset.countries !== newCountries) {
             AdsetsData["countries"] = newCountries;
-            AdsetsData.re_lunch_targeting = true;
+            // AdsetsData.re_lunch_targeting = true;
             send_re_launch_status = true;
             re_lunch = true;
           } else {
@@ -10043,9 +10053,11 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (
           findMatchingAdset.Adsetid &&
           findMatchingAdset.locales &&
-          JSON.stringify(findMatchingAdset.locales) !==
-          JSON.stringify(formValuesObject.Language)
+          // JSON.stringify(findMatchingAdset.locales) !==
+          // JSON.stringify(formValuesObject.Language)
+          !isSameArray(findMatchingAdset.locales, formValuesObject.Language)
         ) {
+
           AdsetsData["locales"] = formValuesObject.Language;
           // Day parting (Ad Scheduling)
           if (adSchedulingToShow?.[formValuesObject.id]) {
@@ -10155,8 +10167,9 @@ const EditMultipleAdsetCampaignDrawer = ({
             console.log(findMatchingAdset.placements);
             AdsetsData["placements"] = formValuesObject.placements;
             if (
-              JSON.stringify(findMatchingAdset.publisher_platforms) !==
-              JSON.stringify(formValuesObject.platforms)
+              // JSON.stringify(findMatchingAdset.publisher_platforms) !==
+              // JSON.stringify(formValuesObject.platforms)
+              !isSameArray(findMatchingAdset.publisher_platforms, formValuesObject.platforms)
             ) {
               AdsetsData["publisher_platforms"] = formValuesObject.platforms;
               AdsetsData["re_lunch_targeting"] = true;
@@ -10166,8 +10179,15 @@ const EditMultipleAdsetCampaignDrawer = ({
               AdsetsData["publisher_platforms"] = formValuesObject.platforms;
             }
             if (
-              JSON.stringify(findMatchingAdset.Facebook_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.Facebook_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Facebook"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.Facebook_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Facebook"
@@ -10190,8 +10210,15 @@ const EditMultipleAdsetCampaignDrawer = ({
                 ) || [];
             }
             if (
-              JSON.stringify(findMatchingAdset.instagram_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.instagram_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Instagram"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.instagram_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Instagram"
@@ -10213,8 +10240,15 @@ const EditMultipleAdsetCampaignDrawer = ({
                 ) || [];
             }
             if (
-              JSON.stringify(findMatchingAdset.audience_network_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.audience_network_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Audience"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.audience_network_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Audience"
@@ -10237,8 +10271,15 @@ const EditMultipleAdsetCampaignDrawer = ({
                 ) || [];
             }
             if (
-              JSON.stringify(findMatchingAdset.messenger_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.messenger_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Messenger"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.messenger_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Messenger"
@@ -10269,8 +10310,12 @@ const EditMultipleAdsetCampaignDrawer = ({
               return item;
             });
             if (
-              JSON.stringify(findMatchingAdset.device_platforms) !==
-              JSON.stringify(formValuesObject.device_platforms)
+              // JSON.stringify(findMatchingAdset.device_platforms) !==
+              // JSON.stringify(formValuesObject.device_platforms)
+              !isSameArray(
+                findMatchingAdset.device_platforms,
+                formValuesObject.device_platforms
+              )
             ) {
               AdsetsData["device_platforms"] =
                 formValuesObject.device_platforms;
@@ -11451,7 +11496,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     try {
       //https://www.testapi.adsgoat.in
       const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/newupdateApproval/${id}`,
+        `https://www.testapi.adsgoat.in/api/newupdateApprovalnew/${id}`,
         {
           method: "PUT",
           headers: {

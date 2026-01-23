@@ -19,6 +19,7 @@ import {
   InputNumber,
   Breadcrumb,
   Popconfirm,
+  Switch
 } from "antd";
 import {
   PlusOutlined,
@@ -543,23 +544,46 @@ function getPositionsByKeys(keys) {
   const keySet = new Set(keys); // Faster lookup
   return allPositions.filter((pos) => keySet.has(pos.key));
 }
+const getFileType = (name = "") => {
+  if (name.endsWith(".jpg")) return "image/jpg";
+  if (name.endsWith(".jpeg")) return "image/jpeg";
+  if (name.endsWith(".png")) return "image/png";
+  return "video/";
+};
 
 const mapped = (data) =>
-  data.map((file, i) => ({
-    id: file?.id,
-    uid: `-${Date.now()}-${i}`,
-    name: file?.filename,
-    status: "done",
-    type: file?.filename?.endsWith(".jpg")
-      ? "image/jpg"
-      : file?.filename?.endsWith(".jpeg")
-        ? "image/jpeg"
-        : file?.filename.endsWith(".png")
-          ? "image/png"
-          : "video/",
-    url: file?.filename,
-    Addid: file?.Addid || null,
-  }));
+  data.flatMap((file, fileIndex) => {
+    const filenames = Array.isArray(file.filename)
+      ? file.filename.map(f => f.filename)
+      : [file.filename];
+
+    return filenames.map((filename, i) => ({
+      id: file.id,
+      uid: `-${Date.now()}-${fileIndex}-${i}`,
+      name: filename,
+      status: "done",
+      type: getFileType(filename),
+      url: filename,
+      Addid: file.Addid || null,
+    }));
+});
+
+// const mapped = (data) =>
+//   data.map((file, i) => ({
+//     id: file?.id,
+//     uid: `-${Date.now()}-${i}`,
+//     name: file?.filename,
+//     status: "done",
+//     type: file?.filename?.endsWith(".jpg")
+//       ? "image/jpg"
+//       : file?.filename?.endsWith(".jpeg")
+//         ? "image/jpeg"
+//         : file?.filename.endsWith(".png")
+//           ? "image/png"
+//           : "video/",
+//     url: file?.filename,
+//     Addid: file?.Addid || null,
+//   }));
 
 const AddComponent = ({
   imagehash,
@@ -4209,6 +4233,44 @@ const AdsetComponent = ({
                   >
                     {adset.AdsetName}
                   </span>
+
+                  {adset?.is_dynamic_creative && (<div style={{ display: "flex", alignItems: "center" }}>
+                    <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
+                    <Form.Item
+                      name={["adsets", index, "isDynamicCreative"]}
+                      valuePropName="checked"
+                      style={{ marginBottom: 0 }}
+                    >
+                      {/* <Switch
+                                    size="small"
+                                    onClick={(checked, e) => {
+                                      e.stopPropagation(); // ⛔ prevent panel collapse
+                                    }}
+                                  /> */}
+                      <Switch
+                        size="small"
+                        disabled
+                        checked={adset?.is_dynamic_creative}
+                        style={{ backgroundColor: adset.is_dynamic_creative ? "#91C25F" : undefined }}
+                      // onClick={(checked, e) => e.stopPropagation()}
+                      // onChange={(checked) => {
+                      //   console.log("Dynamic Creative:", checked);
+
+                      //   // if (!checked) {
+                      //   // Example: clear dynamic creative assets
+                      //   form.setFieldsValue({
+                      //     adsets: {
+                      //       [index]: {
+                      //         isDynamicCreative: checked,
+                      //       },
+                      //     },
+                      //   });
+                      //   // }
+                      // }}
+                      />
+                    </Form.Item>
+                  </div>)}
+ 
 
                   {/* <div>
                                 {index !== 0 && (
