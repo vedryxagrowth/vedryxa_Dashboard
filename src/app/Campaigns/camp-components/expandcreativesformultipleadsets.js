@@ -15,6 +15,7 @@ import {
   Tag,
   Popconfirm,
   Switch,
+  Carousel
 } from "antd";
 import {
   LikeOutlined,
@@ -253,7 +254,7 @@ const AdsetCard = ({
 
   const handleConfirmReject = async () => {
     setLoading(true);
-     const username = userdetails?.userName;
+    const username = userdetails?.userName;
     try {
       //https://www.testapi.adsgoat.in
       const response = await axios.post(
@@ -262,7 +263,7 @@ const AdsetCard = ({
           id: currentItem.id,
           reason: rejectionReason,
           identifier: viewCampaignData?.identifier,
-          adsetkey:adsetKey,
+          adsetkey: adsetKey,
           username: username
         },
         {
@@ -545,95 +546,564 @@ const AdsetCard = ({
 
       {/* Conditional Detail Section */}
 
-      {expanded && adset.addlevel && (
-        <Row
-          gutter={[16, 16]}
-          style={{
-            marginTop: 10,
-            display: "flex",
-            flexWrap: "nowrap",
-            overflow: "auto",
-          }}
-        >
-          {adset.addlevel.map((item, index) => {
+      {expanded
+        ? adset.addlevel && adset.is_dynamic_creative ?
+          (
+            <Row
+              gutter={[16, 16]}
+              style={{
+                marginTop: 10,
+                display: "flex",
+                flexWrap: "nowrap",
+                overflow: "auto",
+              }}
+            >
+              {adset.addlevel.map((item, index) => {
+                const adIsActive =
+                  String(
+                    item?.Ad_Status ?? item?.Status ?? item?.status ?? "PAUSED"
+                  ).toUpperCase() === "ACTIVE";
 
-            const adIsActive =
-              String(item?.Ad_Status ?? item?.Status ?? item?.status ?? "PAUSED").toUpperCase() === "ACTIVE";
 
-            // <div key={index} style={{display:'flex', width:"100%", marginTop:'10px', flexWrap:"wrap"}}>
-            return (
-              <Col span={12}>
-                <Card
-                  title={null}
-                  bordered={false}
-                  style={{
-                    width: "100%",
-                    maxWidth: "280px",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  }}
-                  bodyStyle={{ padding: "0" }}
-                >
-                  <div style={{ padding: "10px 16px" }}>
-                    <div
+                const mediaList = Array.isArray(item?.filename)
+                  ? item.filename
+                  : [];
+
+
+                const hasMultipleCreatives = mediaList.length > 1;
+
+
+                return (
+                  <Col span={15} key={index} style={{ flex: "0 0 auto" }}>
+                    <Card
+                      bordered={false}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginBottom: "10px",
+                        width: "100%",
+                        // maxWidth: 600,
+                        borderRadius: 8,
+                        overflow: "hidden",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                       }}
+                      bodyStyle={{ padding: 0 }}
                     >
-                      <div style={{ marginRight: "10px" }}>
-                        {isImage(item.filename) ? (
-                          <img
-                            src={item?.filename}
-                            alt="page id"
+                      {/* ===== HEADER ===== */}
+                      <div style={{ padding: "10px 16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 10,
+                          }}
+                        >
+                          {/* Avatar */}
+                          <div style={{ marginRight: 10 }}>
+                            {mediaList.length > 0 ? (
+                              isImage(mediaList[0].filename) ? (
+                                <img
+                                  src={mediaList[0].filename}
+                                  alt="media"
+                                  style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: "50%",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              ) : (
+                                <video
+                                  src={mediaList[0].filename}
+                                  width={40}
+                                  height={40}
+                                  style={{
+                                    borderRadius: "50%",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              )
+                            ) : (
+                              <div>No media</div>
+                            )}
+                          </div>
+
+
+                          {/* Title */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 12, fontWeight: "bold" }}>
+                              {item?.AddName || "Consumer finds"}
+                            </div>
+                            <div style={{ fontSize: 12, color: "#888" }}>
+                              {imagehash?.pageName ? (
+                                <>
+                                  {imagehash.pageName}{" "}
+                                  <GlobalOutlined style={{ opacity: 0.6 }} />
+                                </>
+                              ) : (
+                                <GlobalOutlined style={{ opacity: 0.6 }} />
+                              )}
+                            </div>
+                          </div>
+
+
+                          {/* Switch */}
+                          <Switch
+                            checked={adIsActive}
+                            onChange={makeHandleChangeAd(item, adsetKey)}
                             style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
+                              backgroundColor: adIsActive
+                                ? "#91C25F"
+                                : undefined,
+                              transform: "scale(0.8)",
                             }}
                           />
-                        ) : isVideo(item.filename) ? (
-                          <video
-                            src={item?.filename}
-                            width="40"
-                            height="40"
-                            controls
-                            style={{
-                              objectFit: "cover",
-                              borderRadius: "50%",
-                            }}
-                          />
+
+
+                          {/* History */}
+                          <Tooltip title="View Ad History">
+                            <HistoryOutlined
+                              style={{ fontSize: 16, cursor: "pointer" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const accountNumber =
+                                  viewCampaignData?.Account_Number;
+                                const adId = item?.Addid;
+                                if (!accountNumber || !adId) return;
+                                window.open(
+                                  `/Campaigns/CampaignHistory?account=${accountNumber}&type=Ad&id=${adId}`,
+                                  "_blank"
+                                );
+                              }}
+                            />
+                          </Tooltip>
+
+
+                          <Tooltip title="More Options">
+                            <MoreOutlined
+                              style={{ fontSize: 16, cursor: "pointer" }}
+                            />
+                          </Tooltip>
+                        </div>
+
+
+                        {/* <div style={{ fontSize: 14 }}>{item?.message}</div> */}
+                        <div style={{ fontSize: 14 }}>
+                          {Array.isArray(item?.message)
+                            ? item.message.map((msg, i) => (
+                              <React.Fragment key={i}>
+                                {i + 1}.{msg}
+                                <br />
+                              </React.Fragment>
+                            ))
+                            : item?.message}
+                        </div>
+
+
+                      </div>
+
+
+                      {/* ===== CAROUSEL ===== */}
+                      <div
+                        className={
+                          hasMultipleCreatives
+                            ? "multi-creative"
+                            : "single-creative"
+                        }
+                        style={{ width: "100%", height: 200 }}
+                      >
+                        {mediaList.length > 0 ? (
+                          <Carousel dots arrows infinite={false}>
+                            {mediaList.map((media, i) => (
+                              <div key={i} style={{ height: 200 }}>
+                                {isVideo(media.filename) ? (
+                                  <video
+                                    controls
+                                    style={{
+                                      width: "100%",
+                                      height: 200,
+                                      objectFit: "cover",
+                                    }}
+                                  >
+                                    <source
+                                      src={media.filename}
+                                      type="video/mp4"
+                                    />
+                                  </video>
+                                ) : (
+                                  <img
+                                    src={media.filename}
+                                    alt={`creative-${i}`}
+                                    style={{
+                                      width: "100%",
+                                      height: 200,
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            ))}
+                          </Carousel>
                         ) : (
-                          <div>No media available</div>
+                          <div
+                            style={{
+                              textAlign: "center",
+                              padding: 50,
+                            }}
+                          >
+                            No media available
+                          </div>
                         )}
                       </div>
 
-                      <div style={{ flex: "1" }}>
-                        <div style={{ fontWeight: "bold", fontSize: "12px" }}>
-                          {item?.AddName || "Consumer finds"}
+
+                      {/* ===== FOOTER ===== */}
+                      <div style={{ padding: "10px 16px" }}>
+                        {/* <div style={{ fontSize: 12, fontWeight: "bold" }}>
+                          {item?.headline}
+                        </div> */}
+                        <div style={{ fontSize: 12, fontWeight: "bold" }}>
+                          {Array.isArray(item?.headline)
+                            ? item.headline.map((msg, i) => (
+                              <React.Fragment key={i}>
+                                {i + 1}.{msg}
+                                <br />
+                              </React.Fragment>
+                            ))
+                            : item?.headline}
+                        </div>
+
+
+                        {/* <div style={{ fontSize: 12 }}>
+                          {item?.Description}
+                        </div> */}
+                        <div style={{ fontSize: 12 }}>
+                          {Array.isArray(item?.Description)
+                            ? item.Description.map((msg, i) => (
+                              <React.Fragment key={i}>
+                                {i + 1}.{msg}
+                                <br />
+                              </React.Fragment>
+                            ))
+                            : item?.Description}
+                        </div>
+
+
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginTop: "-5px",
+                          marginLeft: "5px",
+                          marginRight: "5px"
+                        }}
+                      >
+                        <div style={{ fontSize: "12px", color: "#888" }}>
+                          {item?.Caption}
+                        </div>
+                        <button
+                          type="button"
+                          style={{
+                            padding: "6px 8px",
+                            borderRadius: "20px",
+                            backgroundColor: "#91C25F",
+                            color: "#000",
+                            border: "none",
+                            cursor: "pointer",
+                            flexShrink: 0,
+                            marginBottom: "5px",
+                          }}
+                          // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
+                          onClick={() => console.log("Learn More clicked:", item)}
+                        >
+                          Learn more
+                        </button>
+                      </div>
+
+
+                      {/* Website URL */}
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#888",
+                          wordWrap: "break-word",
+                          marginTop: "-5px",
+                          marginLeft: "5px",
+                          marginRight: "5px"
+                        }}
+                      >
+                        <GlobalOutlined />{" "}
+                        <a
+                          href={item?.Website_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "blue" }}
+                        >
+                          {item?.Website_URL}
+                        </a>
+                      </div>
+                      {/* Like, Comment, Share */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginLeft: "5px",
+                          marginRight: "5px"
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => console.log("Liked:", item)}
+                        >
+                          <LikeOutlined
+                            style={{ fontSize: "18px", marginRight: "5px" }}
+                          />
+                          <span style={{ fontSize: "14px" }}>Like</span>
                         </div>
                         <div
                           style={{
-                            fontSize: "12px",
-                            color: "#888",
-                            marginTop: "-2px",
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer",
                           }}
+                          onClick={() => console.log("Comment:", item)}
                         >
-                          {imagehash?.pageName ? (
-                            <>
-                              {imagehash.pageName}{" "}
-                              <GlobalOutlined style={{ opacity: "0.6" }} />
-                            </>
-                          ) : (
-                            <GlobalOutlined style={{ opacity: "0.6" }} />
-                          )}
-                          {/* Sponsored <GlobalOutlined style={{ opacity: "0.6", marginLeft: "4px" }} />/ */}
+                          <CommentOutlined
+                            style={{ fontSize: "18px", marginRight: "5px" }}
+                          />
+                          <span style={{ fontSize: "14px" }}>Comment</span>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => console.log("Share:", item)}
+                        >
+                          <ShareAltOutlined
+                            style={{ fontSize: "18px", marginRight: "5px" }}
+                          />
+                          <span style={{ fontSize: "14px" }}>Share</span>
                         </div>
                       </div>
-                      {/* <Switch
+
+
+                      {/* Approve/Reject, Edit/Delete */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          width: "100%",
+                          marginTop: "-8px",
+                          marginLeft: "5px",
+                          marginRight: "5px",
+                          marginBottom: "5px"
+                        }}
+                      >
+                        {/* Edit/Delete buttons (only if not Approved and email is not restricted) */}
+                        {/* {item.status !== "Approved" &&
+                          !restrictedEmails.includes(userdetails.email) && (
+                            <Space
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-evenly",
+                                margin: "5px",
+                              }}
+                            >
+                              <Button
+                                className="dark-icon-button"
+                                shape="circle"
+                                icon={<EditOutlined />}
+                                onClick={() => handleEditClick(item)}
+                              />
+                            </Space>
+                          )} */}
+
+
+                        {/* Approve/Reject buttons (only if the user is not a media buyer and the item is not approved or rejected) */}
+                        {!isMediaBuyer &&
+                          item.status !== "Approved" &&
+                          item.status !== "Rejected" && (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-evenly",
+                                width: "100%",
+                              }}
+                            >
+                              <Button
+                                style={{
+                                  backgroundColor: "#91C25F",
+                                  color: "#000",
+                                  borderColor: "#91C25F",
+                                  borderWidth: "0px",
+                                  margin: "20px",
+                                  padding: "10px",
+                                }}
+                                onClick={() => handleApprove(item)}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                type="primary"
+                                danger
+                                style={{
+                                  margin: "20px",
+                                  borderColor: " #ff6666",
+                                  backgroundColor: "#EC7117",
+                                  padding: "10px",
+                                }}
+                                onClick={() => handleRejectClick(item)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          )}
+
+
+                        {/* Status Display for Approved */}
+                        {item.status === "Approved" && (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              alignItems: "center",
+                              color: "green",
+                              fontWeight: "bold",
+                              marginTop: "10px",
+                            }}
+                          >
+                            <CheckCircleOutlined style={{ marginRight: "5px" }} />
+                            <p style={{ margin: 0 }}>{item.status}</p>
+                          </div>
+                        )}
+
+
+                        {/* Status Display for Rejected */}
+                        {item.status === "Rejected" && (
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              alignItems: "center",
+                              color: "red",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            <Tooltip title={item.rejectionReason}>
+                              <MessageOutlined style={{ marginRight: "5px" }} />
+                            </Tooltip>
+                            <p style={{ margin: 0 }}>
+                              <CloseCircleOutlined style={{ marginLeft: "5px" }} />
+                              {item.status}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  </Col>
+                );
+              })}
+            </Row>
+          )
+          :
+          (
+            <Row
+              gutter={[16, 16]}
+              style={{
+                marginTop: 10,
+                display: "flex",
+                flexWrap: "nowrap",
+                overflow: "auto",
+              }}
+            >
+              {adset.addlevel.map((item, index) => {
+
+
+                const adIsActive =
+                  String(item?.Ad_Status ?? item?.Status ?? item?.status ?? "PAUSED").toUpperCase() === "ACTIVE";
+
+
+                // <div key={index} style={{display:'flex', width:"100%", marginTop:'10px', flexWrap:"wrap"}}>
+                return (
+                  <Col span={12}>
+                    <Card
+                      title={null}
+                      bordered={false}
+                      style={{
+                        width: "100%",
+                        maxWidth: "280px",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                      }}
+                      bodyStyle={{ padding: "0" }}
+                    >
+                      <div style={{ padding: "10px 16px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          <div style={{ marginRight: "10px" }}>
+                            {isImage(item.filename) ? (
+                              <img
+                                src={item?.filename}
+                                alt="page id"
+                                style={{
+                                  width: "40px",
+                                  height: "40px",
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : isVideo(item.filename) ? (
+                              <video
+                                src={item?.filename}
+                                width="40"
+                                height="40"
+                                controls
+                                style={{
+                                  objectFit: "cover",
+                                  borderRadius: "50%",
+                                }}
+                              />
+                            ) : (
+                              <div>No media available</div>
+                            )}
+                          </div>
+
+
+                          <div style={{ flex: "1" }}>
+                            <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                              {item?.AddName || "Consumer finds"}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                color: "#888",
+                                marginTop: "-2px",
+                              }}
+                            >
+                              {imagehash?.pageName ? (
+                                <>
+                                  {imagehash.pageName}{" "}
+                                  <GlobalOutlined style={{ opacity: "0.6" }} />
+                                </>
+                              ) : (
+                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                              )}
+                              {/* Sponsored <GlobalOutlined style={{ opacity: "0.6", marginLeft: "4px" }} />/ */}
+                            </div>
+                          </div>
+                          {/* <Switch
                       // checked={record.Status === "ACTIVE"}
                       // onChange={(checked) => onToggleStatus(record, checked)}
                       checkedChildren="✓"
@@ -647,356 +1117,369 @@ const AdsetCard = ({
                         cursor: "not-allowed",
                       }}
                     /> */}
-                      <Switch
-                        checkedChildren="✓"
-                        unCheckedChildren="✗"
-                        checked={adIsActive}
-                        onChange={makeHandleChangeAd(item, adsetKey)}
-                        style={{
-                          backgroundColor: adIsActive ? "#91C25F" : undefined,
-                          minWidth: 32,
-                          height: 22,
-                          transform: 'scale(0.8)',
-                        }}
-                      />
-
-                      {/* <Tooltip title="View Ad History">
-                        <HistoryOutlined
-                          style={{
-                            fontSize: 16,
-                            color: theme === "dark" ? "#91C25F" : "#37474F",
-                            cursor: "pointer",
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const accountNumber = viewCampaignData?.Account_Number; // campaign's account number
-                            const adId = item?.Addid; // ✅ use item, not ad
-                            if (!adId || !accountNumber)
-                              return console.error("Ad ID or Account missing");
-                            const url = `/Campaigns/CampaignHistory?account=${accountNumber}&type=Ad&id=${adId}`;
-                            window.open(url, "_blank");
-                          }}
-                        />
-                      </Tooltip> */}
-
-                      <Tooltip title="More Options">
-                        <MoreOutlined
-                          style={{ fontSize: "16px", cursor: "pointer" }}
-                        />
-                      </Tooltip>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        color: theme === "dark" ? "white" : "#333",
-                        marginTop: "-8px",
-                      }}
-                    >
-                      {item?.message}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{ width: "100%", height: "200px", marginTop: "-5px" }}
-                  >
-                    {isVideo(item?.filename) ? (
-                      <video
-                        controls
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      >
-                        <source src={item?.filename} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
-                    ) : isImage(item?.filename) ? (
-                      <img
-                        src={item?.filename}
-                        alt="content"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <div style={{ textAlign: "center", padding: "50px" }}>
-                        No media available
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ padding: "10px 16px" }}>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: theme === "dark" ? "white" : "#333",
-                      }}
-                    >
-                      {item?.headline}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: theme === "dark" ? "white" : "#333",
-                        marginBottom: "5px",
-                      }}
-                    >
-                      {item?.Description}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginTop: "-5px",
-                      }}
-                    >
-                      <div style={{ fontSize: "12px", color: "#888" }}>
-                        {item?.Caption}
-                      </div>
-                      <button
-                        type="button"
-                        style={{
-                          padding: "6px 8px",
-                          borderRadius: "20px",
-                          backgroundColor: "#91C25F",
-                          color: "#000",
-                          border: "none",
-                          cursor: "pointer",
-                          flexShrink: 0,
-                          marginBottom: "5px",
-                        }}
-                        // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
-                        onClick={() => console.log("Learn More clicked:", item)}
-                      >
-                        Learn more
-                      </button>
-                    </div>
-
-                    {/* Website URL */}
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#888",
-                        wordWrap: "break-word",
-                        marginTop: "-5px",
-                      }}
-                    >
-                      <GlobalOutlined />{" "}
-                      <a
-                        href={item?.Website_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "blue" }}
-                      >
-                        {item?.Website_URL}
-                      </a>
-                    </div>
-                    {/* Like, Comment, Share */}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => console.log("Liked:", item)}
-                      >
-                        <LikeOutlined
-                          style={{ fontSize: "18px", marginRight: "5px" }}
-                        />
-                        <span style={{ fontSize: "14px" }}>Like</span>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => console.log("Comment:", item)}
-                      >
-                        <CommentOutlined
-                          style={{ fontSize: "18px", marginRight: "5px" }}
-                        />
-                        <span style={{ fontSize: "14px" }}>Comment</span>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => console.log("Share:", item)}
-                      >
-                        <ShareAltOutlined
-                          style={{ fontSize: "18px", marginRight: "5px" }}
-                        />
-                        <span style={{ fontSize: "14px" }}>Share</span>
-                      </div>
-                    </div>
-
-                    {/* Approve/Reject, Edit/Delete */}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%",
-                        marginTop: "-8px",
-                      }}
-                    >
-                      {/* Edit/Delete buttons (only if not Approved and email is not restricted) */}
-                      {item.status !== "Approved" &&
-                        !restrictedEmails.includes(userdetails.email) && (
-                          <Space
+                          <Switch
+                            checkedChildren="✓"
+                            unCheckedChildren="✗"
+                            checked={adIsActive}
+                            onChange={makeHandleChangeAd(item, adsetKey)}
                             style={{
-                              display: "flex",
-                              justifyContent: "space-evenly",
-                              margin: "5px",
+                              backgroundColor: adIsActive ? "#91C25F" : undefined,
+                              minWidth: 32,
+                              height: 22,
+                              transform: 'scale(0.8)',
+                            }}
+                          />
+
+
+                          <Tooltip title="View Ad History">
+                            <HistoryOutlined
+                              style={{
+                                fontSize: 16,
+                                color: theme === "dark" ? "#91C25F" : "#37474F",
+                                cursor: "pointer",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const accountNumber = viewCampaignData?.Account_Number; // campaign's account number
+                                const adId = item?.Addid; // ✅ use item, not ad
+                                if (!adId || !accountNumber)
+                                  return console.error("Ad ID or Account missing");
+                                const url = `/Campaigns/CampaignHistory?account=${accountNumber}&type=Ad&id=${adId}`;
+                                window.open(url, "_blank");
+                              }}
+                            />
+                          </Tooltip>
+
+
+                          <Tooltip title="More Options">
+                            <MoreOutlined
+                              style={{ fontSize: "16px", cursor: "pointer" }}
+                            />
+                          </Tooltip>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            color: theme === "dark" ? "white" : "#333",
+                            marginTop: "-8px",
+                          }}
+                        >
+                          {item?.message}
+                        </div>
+                      </div>
+
+
+                      <div
+                        style={{ width: "100%", height: "200px", marginTop: "-5px" }}
+                      >
+                        {isVideo(item?.filename) ? (
+                          <video
+                            controls
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
                             }}
                           >
-                            <Button
-                              className="dark-icon-button"
-                              shape="circle"
-                              icon={<EditOutlined />}
-                              onClick={() => handleEditClick(item)}
-                            />
-                            {/* {item.status !== "Rejected" && (
-                                                    <Button shape="circle" icon={<DeleteOutlined />} onClick={() => handleDeleteClick(item)} />
-                                                )} */}
-                          </Space>
+                            <source src={item?.filename} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : isImage(item?.filename) ? (
+                          <img
+                            src={item?.filename}
+                            alt="content"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <div style={{ textAlign: "center", padding: "50px" }}>
+                            No media available
+                          </div>
                         )}
+                      </div>
 
-                      {/* Approve/Reject buttons (only if the user is not a media buyer and the item is not approved or rejected) */}
-                      {!isMediaBuyer &&
-                        item.status !== "Approved" &&
-                        item.status !== "Rejected" && (
+
+                      <div style={{ padding: "10px 16px" }}>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            color: theme === "dark" ? "white" : "#333",
+                          }}
+                        >
+                          {item?.headline}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: theme === "dark" ? "white" : "#333",
+                            marginBottom: "5px",
+                          }}
+                        >
+                          {item?.Description}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            marginTop: "-5px",
+                          }}
+                        >
+                          <div style={{ fontSize: "12px", color: "#888" }}>
+                            {item?.Caption}
+                          </div>
+                          <button
+                            type="button"
+                            style={{
+                              padding: "6px 8px",
+                              borderRadius: "20px",
+                              backgroundColor: "#91C25F",
+                              color: "#000",
+                              border: "none",
+                              cursor: "pointer",
+                              flexShrink: 0,
+                              marginBottom: "5px",
+                            }}
+                            // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
+                            onClick={() => console.log("Learn More clicked:", item)}
+                          >
+                            Learn more
+                          </button>
+                        </div>
+
+
+                        {/* Website URL */}
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#888",
+                            wordWrap: "break-word",
+                            marginTop: "-5px",
+                          }}
+                        >
+                          <GlobalOutlined />{" "}
+                          <a
+                            href={item?.Website_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "blue" }}
+                          >
+                            {item?.Website_URL}
+                          </a>
+                        </div>
+                        {/* Like, Comment, Share */}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-evenly",
-                              width: "100%",
+                              alignItems: "center",
+                              cursor: "pointer",
                             }}
+                            onClick={() => console.log("Liked:", item)}
                           >
-                            <Button
-                              style={{
-                                backgroundColor: "#91C25F",
-                                color: "#000",
-                                borderColor: "#91C25F",
-                                borderWidth: "0px",
-                                margin: "20px",
-                                padding: "10px",
-                              }}
-                              onClick={() => handleApprove(item)}
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              type="primary"
-                              danger
-                              style={{
-                                margin: "20px",
-                                borderColor: " #ff6666",
-                                backgroundColor: "#EC7117",
-                                padding: "10px",
-                              }}
-                              onClick={() => handleRejectClick(item)}
-                            >
-                              Reject
-                            </Button>
+                            <LikeOutlined
+                              style={{ fontSize: "18px", marginRight: "5px" }}
+                            />
+                            <span style={{ fontSize: "14px" }}>Like</span>
                           </div>
-                        )}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => console.log("Comment:", item)}
+                          >
+                            <CommentOutlined
+                              style={{ fontSize: "18px", marginRight: "5px" }}
+                            />
+                            <span style={{ fontSize: "14px" }}>Comment</span>
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => console.log("Share:", item)}
+                          >
+                            <ShareAltOutlined
+                              style={{ fontSize: "18px", marginRight: "5px" }}
+                            />
+                            <span style={{ fontSize: "14px" }}>Share</span>
+                          </div>
+                        </div>
 
-                      {/* Status Display for Approved */}
-                      {item.status === "Approved" && (
+
+                        {/* Approve/Reject, Edit/Delete */}
                         <div
                           style={{
                             display: "flex",
-                            justifyContent: "flex-end",
+                            justifyContent: "space-between",
                             alignItems: "center",
-                            color: "green",
-                            fontWeight: "bold",
-                            marginTop: "10px",
+                            width: "100%",
+                            marginTop: "-8px",
                           }}
                         >
-                          <CheckCircleOutlined style={{ marginRight: "5px" }} />
-                          <p style={{ margin: 0 }}>{item.status}</p>
-                        </div>
-                      )}
+                          {/* Edit/Delete buttons (only if not Approved and email is not restricted) */}
+                          {item.status !== "Approved" &&
+                            !restrictedEmails.includes(userdetails.email) && (
+                              <Space
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-evenly",
+                                  margin: "5px",
+                                }}
+                              >
+                                <Button
+                                  className="dark-icon-button"
+                                  shape="circle"
+                                  icon={<EditOutlined />}
+                                  onClick={() => handleEditClick(item)}
+                                />
+                                {/* {item.status !== "Rejected" && (
+                                                    <Button shape="circle" icon={<DeleteOutlined />} onClick={() => handleDeleteClick(item)} />
+                                                )} */}
+                              </Space>
+                            )}
 
-                      {/* Status Display for Rejected */}
-                      {item.status === "Rejected" && (
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                            color: "red",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          <Tooltip title={item.rejectionReason}>
-                            <MessageOutlined style={{ marginRight: "5px" }} />
-                          </Tooltip>
-                          <p style={{ margin: 0 }}>
-                            <CloseCircleOutlined style={{ marginLeft: "5px" }} />
-                            {item.status}
-                          </p>
+
+                          {/* Approve/Reject buttons (only if the user is not a media buyer and the item is not approved or rejected) */}
+                          {!isMediaBuyer &&
+                            item.status !== "Approved" &&
+                            item.status !== "Rejected" && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-evenly",
+                                  width: "100%",
+                                }}
+                              >
+                                <Button
+                                  style={{
+                                    backgroundColor: "#91C25F",
+                                    color: "#000",
+                                    borderColor: "#91C25F",
+                                    borderWidth: "0px",
+                                    margin: "20px",
+                                    padding: "10px",
+                                  }}
+                                  onClick={() => handleApprove(item)}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  type="primary"
+                                  danger
+                                  style={{
+                                    margin: "20px",
+                                    borderColor: " #ff6666",
+                                    backgroundColor: "#EC7117",
+                                    padding: "10px",
+                                  }}
+                                  onClick={() => handleRejectClick(item)}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            )}
+
+
+                          {/* Status Display for Approved */}
+                          {item.status === "Approved" && (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                color: "green",
+                                fontWeight: "bold",
+                                marginTop: "10px",
+                              }}
+                            >
+                              <CheckCircleOutlined style={{ marginRight: "5px" }} />
+                              <p style={{ margin: 0 }}>{item.status}</p>
+                            </div>
+                          )}
+
+
+                          {/* Status Display for Rejected */}
+                          {item.status === "Rejected" && (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                color: "red",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              <Tooltip title={item.rejectionReason}>
+                                <MessageOutlined style={{ marginRight: "5px" }} />
+                              </Tooltip>
+                              <p style={{ margin: 0 }}>
+                                <CloseCircleOutlined style={{ marginLeft: "5px" }} />
+                                {item.status}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </Col>
-            )
-            // </div>
-          })}
-          {!restrictedEmails.includes(userdetails.email) && (
-            <Col span={12} style={{ flex: "0 0 auto" }}>
-              <Card
-                bordered={false}
-                style={{
-                  maxWidth: '280px',
-                  height: '100%',
-                  minHeight: '300px', // matches height with other ad cards
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  backgroundColor: theme === "dark" ? "#333" : '#f5f5f5',
-                  cursor: "pointer"
-                }}
-              >
-                <Button
-                  onClick={createnewads}
-                  type="primary"
-                  icon={<PlusOutlined className="black-icon" />}
-                  style={{
-                    backgroundColor: '#91C25F',
-                    color: "#000",
-                    borderColor: '#91C25F',
-                    borderWidth: "0px",
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                  }}
-                >
-                  New ad
-                </Button>
-              </Card>
-            </Col>
-          )}
-        </Row>
-      )}
+                      </div>
+                    </Card>
+                  </Col>
+                )
+                // </div>
+              })}
+              {!restrictedEmails.includes(userdetails.email) && (
+                <Col span={12} style={{ flex: "0 0 auto" }}>
+                  <Card
+                    bordered={false}
+                    style={{
+                      maxWidth: '280px',
+                      height: '100%',
+                      minHeight: '300px', // matches height with other ad cards
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      backgroundColor: theme === "dark" ? "#333" : '#f5f5f5',
+                      cursor: "pointer"
+                    }}
+                  >
+                    <Button
+                      onClick={createnewads}
+                      type="primary"
+                      icon={<PlusOutlined className="black-icon" />}
+                      style={{
+                        backgroundColor: '#91C25F',
+                        color: "#000",
+                        borderColor: '#91C25F',
+                        borderWidth: "0px",
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      New ad
+                    </Button>
+                  </Card>
+                </Col>
+              )}
+            </Row>
+          )
+        : null
+      }
+
+
       <Modal
         title="Reject ad"
         visible={isRejectModalVisible}

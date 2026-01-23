@@ -13237,7 +13237,8 @@ const MyTablePage = () => {
                         campaignid: campaignIdFinal,       // cents
                         Account: String(rowAccountNumber),    // ✅ update *this* row’s account
                         campaignname: campaignnameFinal,
-                        updatedBy: params.context?.userdetails?.email,
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
                         updateType: "Campain budget updated",
                         updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
@@ -18412,6 +18413,7 @@ const MyTablePage = () => {
                 onClose={() => setHistoryOpen(false)}
                 campaignId={selectedCampaignIdForHistory}
                 accountNumber={selectedAccountForHistory}
+                adAccounts={adAccounts}
             />
 
         </div>

@@ -7,11 +7,29 @@ import { useTokenContext } from '../components/parent';
 
 const { RangePicker } = DatePicker;
 
+const timeZoneShortToFull = {
+    EDT: "America/New_York",
+    UTC: "Atlantic/Azores",
+    EEST: "Europe/Athens",
+    CST: "America/Mexico_City",
+    PDT: "America/Los_Angeles",
+    BST: "Europe/London",
+    GMT: "Africa/Accra",
+    IST: "Asia/Kolkata",
+    MST: "America/Dawson",
+    CDT: "America/Chicago",
+    AST: "America/Puerto_Rico",
+    DST: "Asia/Dubai",
+    HST: "Pacific/Honolulu",
+    EST: "America/Toronto",
+    CEST: "Europe/Paris",
+    CET: 'Europe/Berlin'
+};
 
 /* =========================
 History Modal Component
 ========================= */
-const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
+const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAccounts }) => {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
     const [storageData, setStorageData] = useState([]);
@@ -20,6 +38,19 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
     const [activityTypeFilter, setActivityTypeFilter] = useState("All");
     const [changedByFilter, setChangedByFilter] = useState("all");
     const { apiClient, theme } = useTokenContext();
+
+    const valuesOfAccountsList = Object.values(adAccounts).flat();
+    const accountTimezone = timeZoneShortToFull[valuesOfAccountsList.find(item => item.accountNumber === accountNumber)?.timeZone];
+
+    const convertToTimezoneAndFormat = (date, targetTz) => {
+        const m = moment.tz(date, "DD-MM-YYYY hh:mm A", "Asia/Kolkata");
+
+        return m
+            .tz(targetTz)
+            .isSame(moment().tz(targetTz), "year")
+            ? m.tz(targetTz).format("DD MMM [at] HH:mm")
+            : m.tz(targetTz).format("MMM DD, YYYY [at] h:mm A");
+    };
 
     useEffect(() => {
         if (!activityTypeFilter) return;
@@ -80,6 +111,8 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
                     if (Array.isArray(item?.ActivityHistory)) {
                         const updatedHistory = item.ActivityHistory.map(historyItem => ({
                             ...historyItem,
+                            updateAt: convertToTimezoneAndFormat(historyItem.updateAt, "Asia/Kolkata"),
+                            account: convertToTimezoneAndFormat(historyItem.updateAt, accountTimezone),
                             level: item.level
                         }));
 
@@ -177,7 +210,27 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber }) => {
             },
         },
         { title: "Changed by", dataIndex: "updatedBy", align: 'center' },
-        { title: "Date and time", dataIndex: "updateAt", align: 'center' },
+        {
+            title: "Date and time", dataIndex: "updateAt", align: 'center',
+            render: (text, record) => {
+                return (
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexDirection: "column",
+                            gap: "8px",
+                        }}
+                    >
+                        <span style={{ fontSize: "10px" }}>IST: {record.updateAt}</span>
+                        <span style={{ fontSize: "10px" }}>
+                            Acc TZ: {record.account}
+                        </span>
+                    </div>
+                );
+            }
+        }
     ];
 
 

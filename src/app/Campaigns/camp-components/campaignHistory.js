@@ -1,14 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { DatePicker, Select, Table, Modal, message } from "antd";
-import { CalendarOutlined } from "@ant-design/icons";
+import { Select, Table, Modal, message } from "antd";
 import moment from "moment-timezone";
-import { useTokenContext } from "../../components/parent";
 import { Tooltip } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
+import { useTokenContext } from "../../components/parent";
 
-const { RangePicker } = DatePicker;
+const timeZoneShortToFull = {
+    EDT: "America/New_York",
+    UTC: "Atlantic/Azores",
+    EEST: "Europe/Athens",
+    CST: "America/Mexico_City",
+    PDT: "America/Los_Angeles",
+    BST: "Europe/London",
+    GMT: "Africa/Accra",
+    IST: "Asia/Kolkata",
+    MST: "America/Dawson",
+    CDT: "America/Chicago",
+    AST: "America/Puerto_Rico",
+    DST: "Asia/Dubai",
+    HST: "Pacific/Honolulu",
+    EST: "America/Toronto",
+    CEST: "Europe/Paris",
+    CET: "Europe/Berlin",
+};
 
-const CampaignHistoryModal = ({ open, onClose, identifier }) => {
+
+const CampaignHistoryModal = ({ open, onClose, identifier, adAccounts }) => {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
     const [storageData, setStorageData] = useState([]);
@@ -18,8 +35,29 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
     const [activityTypeFilter, setActivityTypeFilter] = useState("all");
     const [changedByFilter, setChangedByFilter] = useState("all");
 
-    const { apiClient, theme } = useTokenContext();
-    var token = localStorage.getItem("token")
+    const { theme } = useTokenContext();
+    const token = localStorage.getItem("token");
+
+
+    const getAccountTimezone = (accountNumber, adAccounts) => {
+        const accounts = Object.values(adAccounts || {}).flat();
+        const acc = accounts.find(
+            (a) => String(a.accountNumber) === String(accountNumber)
+        );
+        return timeZoneShortToFull[acc?.timeZone] || "Asia/Kolkata";
+    };
+
+    const convertToTimezoneAndFormat = (date, targetTz) => {
+        const m = moment.tz(date, "DD-MM-YYYY hh:mm A", "Asia/Kolkata");
+
+        return m
+            .tz(targetTz)
+            .isSame(moment().tz(targetTz), "year")
+            ? m.tz(targetTz).format("DD MMM [at] HH:mm")
+            : m.tz(targetTz).format("MMM DD, YYYY [at] h:mm A");
+    };
+
+
 
     useEffect(() => {
         let filtered = [...storageData];
@@ -60,9 +98,7 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
         }
 
         if (changedByFilter !== "all") {
-            filtered = filtered.filter(
-                (i) => i.updatedBy === changedByFilter
-            );
+            filtered = filtered.filter((i) => i.updatedBy === changedByFilter);
         }
 
         setData(filtered);
@@ -75,24 +111,38 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
         const fetchHistory = async () => {
             try {
                 setLoading(true);
-                const res = await apiClient.get(
+
+                const res = await fetch(
                     `https://www.testapi.adsgoat.in/api/getCampaignActivityHistory/${identifier}`,
                     {
-                        headers: {
-                            Authorization: token,
-                        },
+                        method: "GET",
+                        headers: { Authorization: token },
                     }
                 );
 
-                if (!res.data?.ok) {
+                const json = await res.json();
+
+                if (!json?.ok) {
                     message.error("Failed to load history");
                     return;
                 }
 
-                const history = res.data.data || [];
+                const history = json.data || [];
+                const accountNumber = json.accountNumber; 
+                const accountTz = getAccountTimezone(accountNumber, adAccounts);
+
+                const formattedHistory = history.map((item) => ({
+                    ...item,
+                    _rawUpdateAt: item.updateAt,
+                    updateAt: convertToTimezoneAndFormat(item.updateAt, "Asia/Kolkata"),
+                    account: convertToTimezoneAndFormat(item.updateAt, accountTz),
+                }));
+
+
+
                 const updatedByOptions = Array.from(
                     new Map(
-                        history
+                        formattedHistory
                             .filter((i) => i.updatedBy)
                             .map((i) => [
                                 i.updatedBy.trim().toLowerCase(),
@@ -106,8 +156,8 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
                     ...updatedByOptions,
                 ]);
 
-                setStorageData(history);
-                setData(history);
+                setStorageData(formattedHistory);
+                setData(formattedHistory);
             } catch (err) {
                 message.error("Failed to load history");
             } finally {
@@ -116,18 +166,19 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
         };
 
         fetchHistory();
-    }, [open, identifier]);
-
+    }, [open, identifier, adAccounts, token]);
 
     const columns = [
         { title: "Activity", dataIndex: "updateType" },
+
         {
             title: "Activity details",
             dataIndex: "updateDetail",
             render: (value) => {
                 if (!value) return null;
+
                 const items = Array.isArray(value) ? value : [value];
-                const filtered = items.filter(item => {
+                const filtered = items.filter((item) => {
                     const text = item.replace(/\s/g, "");
                     return !(
                         text.includes("null→null") ||
@@ -136,51 +187,42 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
                     );
                 });
 
-                if (filtered.length === 0) return null;
+                if (!filtered.length) return null;
+
                 const isLong = filtered.length > 2 || filtered.join("").length > 80;
+
                 const tooltipContent = (
-                    <div style={{ whiteSpace: "pre-line" }}>
+                    <div style={{ maxHeight: 250, overflowY: "auto" }}>
                         {filtered.map((item, i) => (
-                            <div key={i}> {item}</div>
+                            <div key={i}>{item}</div>
                         ))}
                     </div>
                 );
+
                 if (isLong) {
                     return (
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                            }}
-                        >
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <span
                                 style={{
-                                    flex: 1,
-                                    minWidth: 0,
                                     whiteSpace: "nowrap",
                                     overflow: "hidden",
                                     textOverflow: "ellipsis",
+                                    maxWidth: 220,
                                 }}
-                                title={filtered[0]}
                             >
-                                {String(filtered[0])}
+                                {filtered[0]}
                             </span>
-                            <Tooltip title={
-                                <div style={{ maxHeight: 250, overflowY: "auto" }}>
-                                    {tooltipContent}
-                                </div>
-                            } placement="topLeft" overlayInnerStyle={{
-                                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                                color: theme === "dark" ? "#ffffff" : "#000000",
-                            }}>
+                            <Tooltip
+                                title={tooltipContent}
+                                placement="topLeft"
+                                overlayInnerStyle={{
+                                    backgroundColor:
+                                        theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                }}
+                            >
                                 <InfoCircleOutlined
-                                    style={{
-                                        fontSize: 14,
-                                        color: "#1890ff",
-                                        cursor: "pointer",
-                                        flexShrink: 0,
-                                    }}
+                                    style={{ fontSize: 14, color: "#1890ff", cursor: "pointer" }}
                                 />
                             </Tooltip>
                         </div>
@@ -188,14 +230,15 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
                 }
 
                 return (
-                    <div style={{ whiteSpace: "pre-line" }}>
+                    <div>
                         {filtered.map((item, i) => (
                             <div key={i}>{item}</div>
                         ))}
                     </div>
                 );
-            }
+            },
         },
+
         {
             title: "Item changed",
             render: (_, record) => {
@@ -229,8 +272,19 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
                 );
             },
         },
+
         { title: "Changed by", dataIndex: "updatedBy" },
-        { title: "Date and time", dataIndex: "updateAt" },
+
+        {
+            title: "Date and time",
+            align: "center",
+            render: (_, record) => (
+                <div style={{ fontSize: 10 }}>
+                    <div>IST: {record.updateAt}</div>
+                    <div>Acc TZ: {record.account}</div>
+                </div>
+            ),
+        },
     ];
 
 
@@ -242,7 +296,8 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
             centered
             width="90%"
             title="Campaign Activity History"
-            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""
+                }`}
             styles={{
                 body: {
                     height: "80vh",
@@ -274,8 +329,8 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
                         { label: "Category", value: "category" },
                         { label: "Comment", value: "comment" },
                         { label: "Approve", value: "approve" },
-                         { label: "Reject", value: "reject" },
-                        { label: "Edit", value: "edit" }
+                        { label: "Reject", value: "reject" },
+                        { label: "Edit", value: "edit" },
                     ]}
                     onChange={(v) => setActivityTypeFilter(v.value)}
                     style={{ width: 180 }}
@@ -298,8 +353,8 @@ const CampaignHistoryModal = ({ open, onClose, identifier }) => {
                 columns={columns}
                 dataSource={[...data].sort(
                     (a, b) =>
-                        moment(b.updateAt, "DD-MM-YYYY hh:mm A").valueOf() -
-                        moment(a.updateAt, "DD-MM-YYYY hh:mm A").valueOf()
+                        moment(b._rawUpdateAt, "DD-MM-YYYY hh:mm A").valueOf() -
+                        moment(a._rawUpdateAt, "DD-MM-YYYY hh:mm A").valueOf()
                 )}
                 rowKey={(_, i) => i}
                 pagination={false}

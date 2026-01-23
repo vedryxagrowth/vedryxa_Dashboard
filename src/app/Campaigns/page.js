@@ -4793,6 +4793,7 @@ const App = () => {
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
         identifier={selectedCampaignIdForHistory}
+        adAccounts={adAccounts}
         accountNumber={selectedAccountForHistory}
       />
     </div>

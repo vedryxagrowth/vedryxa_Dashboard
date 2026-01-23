@@ -3200,7 +3200,7 @@ const AdsetComponent = ({
   //     form.validateFields([['adsets', index, 'MediaContent']]);
   //   };
 
-  const selectedFilesData = (data,  adsetId = creativeIndex) => {
+  const selectedFilesData = (data, adsetId = creativeIndex) => {
     const mapped = data.map((file, i) => ({
       id: uuidv4(),
       uid: file.uid || `-${Date.now()}-${i}`,
@@ -3971,7 +3971,7 @@ const AdsetComponent = ({
             />
           </Form.Item>
 
-          {budgetType !== "daily" &&
+          {budgetType === "lifetime" &&
             <Form.Item
               name={["adsets", index, "DatePickerEnd"]}
               label={<span style={{ color: "#B4B4B4" }}>End Time (IST)</span>}
@@ -9250,6 +9250,13 @@ const CloneMultipleAdsetCampaignDrawer = ({
         start_time: moment(formValuesObject.DatePicker.$d)
           // .tz(imagehash.timeZone)
           .format("YYYY-MM-DDTHH:mm:ssZ"), //formValuesObject.DatePicker.$d
+        ...(values.adsets[i].DatePickerEnd && budgetType === "lifetime"
+          ? {
+            end_time: moment(values.adsets[i].DatePickerEnd.$d)
+              .tz(newImageHash.timeZone)
+              .format("YYYY-MM-DDTHH:mm:ssZ"),
+          }
+          : {}),
         action_source: formValuesObject.action_source,
         custom_event_type: formValuesObject.custom_event_type,
         pixel_id: formValuesObject.pixel_id,
