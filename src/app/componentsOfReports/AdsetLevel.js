@@ -2668,6 +2668,36 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         }
     };
 
+    function getFBHour(data, startDate, endDate) {
+        const start = new Date(startDate).toISOString().slice(0, 10);
+        const end = new Date(endDate).toISOString().slice(0, 10);
+
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000)
+            .toISOString()
+            .slice(0, 10);
+
+        const fbData = data.filter(
+            item => item.fbCron && item.fbCron !== "Failed" && item.hour
+        );
+        if (!fbData.length) return "00";
+        if (start === end && start === today) {
+            const currentHour = new Date().getHours();
+
+            const todayHours = fbData
+                .map(i => Number(i.hour))
+                .filter(h => h <= currentHour);
+
+            return todayHours.length
+                ? String(Math.max(...todayHours)).padStart(2, "0")
+                : "00";
+        }
+        if (start === end && start === yesterday) {
+            return findMaxHour(fbData);
+        }
+        return findMaxHour(fbData);
+    }
+
     function findMaxHour(data) {
         // Use reduce to find the maximum value of the 'hour' key
         const maxHour = data.reduce((max, obj) => {
@@ -2685,7 +2715,6 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             .map(item => parseInt(item.updatedHour.split(":")[0], 10));
         return hours.length > 0 ? Math.max(...hours) : null;
     }
-
     const adsetStatusMap = useMemo(() => {
         const map = new Map();
 
@@ -2942,8 +2971,25 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     (newFilterData.reduce((a, c) => a + parseFloat(c.impressions || 0), 0) || 1) * 100
                 ).toFixed(2))
             }]);
-
             newRowData.current = filteredData;
+            //added for fb hour
+            const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
+            const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
+            if (mainData.length > 1) {
+                const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
+                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                timezone.current = findRevenueObject.accountTimezone;
+                accountStatus.current = findRevenueObject.accountStatus;
+                cronStatus.current = mainData[0].cronStatus;
+
+                fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
+                revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
+
+                // maxHour.current = findMaxHour(mainData);
+                maxHour.current = getFBHour(mainData, startDate, endDate);
+                maxNetworkHour.current = getMaxHour(mainData);
+            }
+            //ended
             setApiStatus(false);
             setLoading(false);
         } catch (error) {

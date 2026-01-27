@@ -9250,9 +9250,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
         start_time: moment(formValuesObject.DatePicker.$d)
           // .tz(imagehash.timeZone)
           .format("YYYY-MM-DDTHH:mm:ssZ"), //formValuesObject.DatePicker.$d
-        ...(values.adsets[i].DatePickerEnd && budgetType === "lifetime"
+        ...(formValuesObject.DatePickerEnd && budgetType === "lifetime"
           ? {
-            end_time: moment(values.adsets[i].DatePickerEnd.$d)
+            end_time: moment(formValuesObject.DatePickerEnd.$d)
               .tz(newImageHash.timeZone)
               .format("YYYY-MM-DDTHH:mm:ssZ"),
           }
