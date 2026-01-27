@@ -128,7 +128,11 @@ const CampaignHistoryModal = ({ open, onClose, identifier, adAccounts }) => {
                 }
 
                 const history = json.data || [];
-                const accountNumber = json.accountNumber; 
+                // const accountNumber = json.accountNumber; 
+                const accountNumber =
+                    json.accountNumber ||
+                    history?.[0]?.accountNumber ||
+                    history?.[0]?.Account;
                 const accountTz = getAccountTimezone(accountNumber, adAccounts);
 
                 const formattedHistory = history.map((item) => ({
