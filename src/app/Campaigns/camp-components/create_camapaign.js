@@ -3479,7 +3479,7 @@ const AdsetComponent = ({
             />
           </Form.Item>
 
-          {budgetType !== "daily" &&
+          {budgetType === "lifetime" &&
             <Form.Item
               name={["adsets", index, "DatePickerEnd"]}
               label={<span style={{ color: "#B4B4B4" }}>End Time (IST)</span>}
@@ -8611,7 +8611,7 @@ const CreateCampaignDrawer = ({
       setPages(draft?.page || "");
       setPixels(draft?.pixel || "");
       setGeos(draft?.geo || "");
-      setBudgetType(draft?.camapaignlevel?.Budget_type || "Daily");
+      setBudgetType(draft?.camapaignlevel?.Budget_type || "daily");
     });
   };
   const handleEditDraft = (draft) => {
@@ -9688,7 +9688,7 @@ const CreateCampaignDrawer = ({
                   start_time: moment(values.adsets[i].DatePicker.$d)
                     .tz(newImageHash.timeZone)
                     .format("YYYY-MM-DDTHH:mm:ssZ"), //values.adsets[i].DatePicker.$d
-                  ...(values.adsets[i].DatePickerEnd
+                  ...(values.adsets[i].DatePickerEnd && budgetType === "lifetime"
                     ? {
                       end_time: moment(values.adsets[i].DatePickerEnd.$d)
                         .tz(newImageHash.timeZone)
@@ -9876,7 +9876,7 @@ const CreateCampaignDrawer = ({
                 start_time: moment(values.adsets[i].DatePicker.$d)
                   .tz(newImageHash.timeZone)
                   .format("YYYY-MM-DDTHH:mm:ssZ"),
-                ...(values.adsets[i].DatePickerEnd
+                ...(values.adsets[i].DatePickerEnd && budgetType === "lifetime"
                   ? {
                     end_time: moment(values.adsets[i].DatePickerEnd.$d)
                       .tz(newImageHash.timeZone)
