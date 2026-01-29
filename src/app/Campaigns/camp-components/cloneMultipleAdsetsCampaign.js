@@ -2621,6 +2621,15 @@ const AdsetComponent = ({
   pixelIDList,
   budgetType,
   geo,
+  setAdsetSchedule,
+  adSchedulingToShow,
+  selectedByAdset,
+  setAdSchedulingToShow,
+  setScheduleErrorByAdset,
+  setShowScheduleSubmitError,
+  scheduleErrorByAdset,
+  setSelectedByAdset,
+  adSchedulingToShowCampaign,
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2650,6 +2659,148 @@ const AdsetComponent = ({
     selectedFiles[adset.id],
     "selectedFiles for adset id in adset component"
   );
+
+
+  const [dragging, setDragging] = useState(false);
+  const selected = selectedByAdset[adset.id] || {};
+  const handleMouseDown = (day, hour) => {
+    setDragging(true);
+    toggleCell(day, hour);
+  };
+  const handleMouseEnter = (day, hour) => {
+    if (!dragging) return;
+    toggleCell(day, hour);
+  };
+  const handleMouseUp = () => {
+    setDragging(false);
+  };
+  const toggleCell = (day, hour) => {
+    const key = `${day}-${hour}`;
+
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [adset.id]: {
+        ...(prev[adset.id] || {}),
+        [key]: !prev[adset.id]?.[key]
+      }
+    }));
+  };
+  const groupByDay = (selected) => {
+    const map = {};
+
+    Object.keys(selected).forEach(key => {
+      if (!selected[key]) return;
+
+      const [day, hour] = key.split("-").map(Number);
+
+      if (!map[day]) map[day] = [];
+      map[day].push(hour);
+    });
+
+    Object.values(map).forEach(hours =>
+      hours.sort((a, b) => a - b)
+    );
+
+    return map;
+  };
+  const timezoneType =
+    form.getFieldValue(["adsets", index, "timezone_type"]);
+  const buildAdsetSchedule = (selected, timezoneType) => {
+    const dayMap = groupByDay(selected);
+    const slotMap = {};
+
+    Object.entries(dayMap).forEach(([day, hours]) => {
+      let start = hours[0];
+      let prev = hours[0];
+
+      for (let i = 1; i <= hours.length; i++) {
+        const current = hours[i];
+
+        if (current !== prev + 1) {
+          const startMin = start * 60;
+          const endMin = (prev + 1) * 60;
+          const fbDay = (Number(day) + 1) % 7;
+
+          const slotKey = `${startMin}-${endMin}`;
+
+          if (!slotMap[slotKey]) {
+            slotMap[slotKey] = new Set();
+          }
+
+          slotMap[slotKey].add(fbDay);
+
+          start = current;
+        }
+
+        prev = current;
+      }
+    });
+    return Object.entries(slotMap).map(([key, daySet]) => {
+      const [start_minute, end_minute] = key.split("-").map(Number);
+
+      return {
+        start_minute,
+        end_minute,
+        days: Array.from(daySet).sort(),
+        timezone_type: timezoneType
+      };
+    });
+  };
+
+  const handleEveryDayToggle = (hour) => {
+    setSelectedByAdset(prev => {
+      const current = prev[adset.id] || {};
+
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
+
+      const updated = { ...current };
+
+      [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+        updated[`${d}-${hour}`] = !allSelected;
+      });
+
+      return {
+        ...prev,
+        [adset.id]: updated
+      };
+    });
+  };
+  const isValidAdSchedule = (schedule = []) =>
+    Array.isArray(schedule) &&
+    schedule.length > 0 &&
+    schedule.every(
+      s =>
+        s.end_minute > s.start_minute &&
+        Array.isArray(s.days) &&
+        s.days.length > 0
+    );
+
+  useEffect(() => {
+    if (!adset?.id || !timezoneType) return;
+
+    const schedule = buildAdsetSchedule(
+      selectedByAdset[adset.id] || {},
+      timezoneType
+    );
+
+    setAdsetSchedule(prev => ({
+      ...prev,
+      [adset.id]: schedule
+    }));
+    if (isValidAdSchedule(schedule)) {
+      setScheduleErrorByAdset(prev =>
+        prev[adset.id]
+          ? { ...prev, [adset.id]: false }
+          : prev
+      );
+      setShowScheduleSubmitError(false);
+    }
+
+  }, [selectedByAdset, adset.id, timezoneType]);
+
+
   const currentDate = dayjs();
   const after30Days = currentDate.add(30, "day");
   console.log(addlevelData, "addlevelData in adset component");
@@ -2659,6 +2810,17 @@ const AdsetComponent = ({
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
   const isDynamicCreative = Form.useWatch(["adsets", index, "isDynamicCreative"], form);
+
+  const showScheduling =
+    budgetType === "lifetime" && (adSchedulingToShow[adset.id] || adSchedulingToShowCampaign);
+
+  useEffect(() => {
+    if (adSchedulingToShowCampaign || CampaignBudgetActive) {
+      setAdSchedulingToShow({});
+      setScheduleErrorByAdset({});
+      setShowScheduleSubmitError(false);
+    }
+  }, [adSchedulingToShowCampaign || CampaignBudgetActive]);
 
   const Billing_Event_options = {
     OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
@@ -3347,6 +3509,7 @@ const AdsetComponent = ({
   //         });
   //     }
   // }, [adset]);
+
   useEffect(() => {
     if (adset?.DailyAdd_amount !== undefined) {
       form.setFields([
@@ -3357,7 +3520,38 @@ const AdsetComponent = ({
       ]);
     }
   }, [adset?.DailyAdd_amount]);
+  useEffect(() => {
+    if (!adset?.id || !Array.isArray(adset.adschedule)) return;
 
+    const restored = {};
+
+    adset.adschedule.forEach(s => {
+      if (
+        typeof s.start_minute !== "number" ||
+        typeof s.end_minute !== "number" ||
+        !Array.isArray(s.days)
+      ) return;
+
+      s.days.forEach(fbDay => {
+        const uiDay = (fbDay + 6) % 7;
+
+        for (
+          let m = s.start_minute;
+          m < s.end_minute;
+          m += 60
+        ) {
+          const hour = m / 60;
+          restored[`${uiDay}-${hour}`] = true;
+        }
+      });
+    });
+
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [adset.id]: restored
+
+    }));
+  }, [adset.id]);
   //   useEffect(() => {
   //     if (!selectedPublishers?.[adset.id]) return;
 
@@ -3938,7 +4132,33 @@ const AdsetComponent = ({
           <Form.Item
             name={["adsets", index, "DailyAdd_amount"]}
             required={!CampaignBudgetActive}
-            label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+            // label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+            label={
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>
+                <Tooltip title="Enable Ad Scheduling"
+                  overlayInnerStyle={{
+                    backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                    color: theme === "dark" ? "#fff" : "#333",
+                  }}
+                >
+                  <Switch
+                    size="small"
+                    disabled={adSchedulingToShowCampaign || budgetType === "daily" || CampaignBudgetActive}
+                    checked={!!adSchedulingToShow[adset.id]}
+                    style={{
+                      backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
+                    }}
+                    onChange={(checked) => {
+                      setAdSchedulingToShow(prev => ({
+                        ...prev,
+                        [adset.id]: checked,
+                      }));
+                    }}
+                  />
+                </Tooltip>
+              </div>
+            }
             // initialValue={0}
             // validateTrigger={["onBlur"]}
             // re-run validation whenever campaign-level Daily_amount changes
@@ -4111,6 +4331,102 @@ const AdsetComponent = ({
                 }
               />
             </Form.Item>
+          )}
+          {showScheduling && (
+            <>
+              {/* Time Zone */}
+              <Form.Item
+                name={["adsets", index, "timezone_type"]}
+                label={<span style={{ color: "#B4B4B4" }}>Time Zone</span>}
+                rules={[{ required: true, message: "Please select a time zone" }]}
+                initialValue={adset.adschedule?.[0]?.timezone_type || "ADVERTISER"}
+              >
+                <Select
+                  options={[
+                    { value: "USER", label: "Viewer’s time zone" },
+                    { value: "ADVERTISER", label: "Ad account time zone" },
+                  ]}
+                />
+              </Form.Item>
+
+              {/* Schedule Grid */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  className="schedule-grid"
+                  onMouseUp={handleMouseUp}
+                >
+                  <div className="row header">
+                    <div className="day-cell" />
+                    {Array.from({ length: 24 }).map((_, h) => (
+                      <div key={h} className="hour-label">
+                        {h % 3 === 0
+                          ? h === 0
+                            ? "12 am"
+                            : h < 12
+                              ? `${h} am`
+                              : h === 12
+                                ? "12 pm"
+                                : `${h - 12} pm`
+                          : ""}
+                      </div>
+                    ))}
+                  </div>
+
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
+                    <div key={day} className="row">
+                      <div className="day-cell">{day}</div>
+
+                      {Array.from({ length: 24 }).map((_, h) => {
+                        const key = `${d}-${h}`;
+                        return (
+                          <div
+                            key={h}
+                            className={`hour-cell ${selected[key] ? "active" : ""
+                              } ${h % 3 === 0 ? "group-start" : ""}`}
+                            onMouseDown={() => handleMouseDown(d, h)}
+                            onMouseEnter={() => handleMouseEnter(d, h)}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                  {/* Every Day Row */}
+                  <div className="row every-day">
+                    <div className="day-cell">Every Day</div>
+
+                    {Array.from({ length: 24 }).map((_, h) => {
+                      const isActive = [0, 1, 2, 3, 4, 5, 6].every(
+                        d => selected[`${d}-${h}`]
+                      );
+
+                      return (
+                        <div
+                          key={h}
+                          className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
+                            }`}
+                          onMouseDown={() => handleEveryDayToggle(h)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* {budgetType === "lifetime" &&
+                            scheduleErrorByAdset[adset.id] &&
+                            adSchedulingToShow[adset.id] && (
+                              <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                                Please select at least one valid time slot and day
+                              </div>
+                            )} */}
+                {budgetType === "lifetime" &&
+                  scheduleErrorByAdset[adset.id] &&
+                  (adSchedulingToShowCampaign || adSchedulingToShow[adset.id]) && (
+                    <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                      Please select at least one valid time slot and day
+                    </div>
+                  )}
+
+              </div>
+            </>
           )}
         </div>
         <span
@@ -6870,6 +7186,12 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [budgetType, setBudgetType] = useState("daily");
 
   const watchedAdsets = Form.useWatch("adsets", form) || [];
+  const [adsetSchedule, setAdsetSchedule] = useState({});
+  const [selectedByAdset, setSelectedByAdset] = useState({});
+  const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
+  const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
+  const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
+  const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
 
   // Derived condition name changed to watchedHasAdsetBudget
   const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
@@ -7094,6 +7416,26 @@ const CloneMultipleAdsetCampaignDrawer = ({
   //     const anyAdsetFilled = adsets.some(adset => adset.DailyAdd_amount > 0);
   //     setIsAnyAdsetBudgetSet(anyAdsetFilled);
   // }, [adsets]);
+
+  const convertScheduleToGrid = (adschedule = []) => {
+    const selected = {};
+
+    adschedule.forEach(slot => {
+      const startHour = slot.start_minute / 60;
+      const endHour = slot.end_minute / 60;
+
+      slot.days.forEach(fbDay => {
+        const uiDay = (fbDay + 6) % 7;
+
+        for (let h = startHour; h < endHour; h++) {
+          selected[`${uiDay}-${h}`] = true;
+        }
+      });
+    });
+
+    return selected;
+  };
+
   const fetchData = async (selectedRow) => {
     try {
       if (selectedRow) {
@@ -7110,6 +7452,21 @@ const CloneMultipleAdsetCampaignDrawer = ({
         console.log(fullCampaignData)
         setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "Daily")
 
+        const campaign = response?.data?.[0];
+        setAdSchedulingToShowCampaign(
+          !!campaign?.camapaignlevel?.is_day_parting_enabled_campign
+        );
+        const adsetSwitchMap = {};
+
+        Object.keys(campaign || {}).forEach(key => {
+          if (!key.startsWith("adsetlevel_")) return;
+
+          const adset = campaign[key];
+          if (!adset?.id) return;
+
+          adsetSwitchMap[adset.id] = !!adset.is_day_parting_enabled;
+        });
+        setAdSchedulingToShow(adsetSwitchMap);
         setFormValuesFromDraft(response?.data[0]);
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
         //     const selectedOption = item.selectedOption || "creative";
@@ -7645,6 +8002,21 @@ const CloneMultipleAdsetCampaignDrawer = ({
     // ✅ Update both states
     setAdsets(updatedAdsets);
     form.setFieldsValue({ adsets: updatedFormAdsets });
+    
+    setSelectedByAdset(prev => ({
+      ...prev,
+      [newId]: { ...(prev[adsetId] || {}) }
+    }));
+
+    setAdsetSchedule(prev => ({
+      ...prev,
+      [newId]: [...(prev[adsetId] || [])]
+    }));
+
+    setAdSchedulingToShow(prev => ({
+      ...prev,
+      [newId]: !!prev[adsetId]
+    }));
 
     // ✅ Clone media/file states by UUID (remove Addid)
     const cloneFiles = (prev, setter) => {
@@ -8874,6 +9246,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
           setPopupInputs({});
           setBudgetType(" ");
           setSelectedPositions({});
+          setAdSchedulingToShow({});
+          setSelectedByAdset({});
+          setAdsetSchedule({});
+          setAdSchedulingToShowCampaign(false);
           setAdsets([
             { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
           ]);
@@ -8956,6 +9332,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
           ? { Special_categories_countries: values.countries }
           : {}),
         Budget_type: budgetType,
+        ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+          is_day_parting_enabled_campign: true,
+          pacing_type: ["day_parting"]
+        }),
         Bid_strategy: values.Bid_strategy,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
@@ -9571,9 +9951,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //   filename: ad.filename,
             // })),
             filename: newAddLevel.map(m =>
-                  m.imag_hash
-                    ? { filename: m.filename, imag_hash: m.imag_hash }
-                    : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
+              m.imag_hash
+                ? { filename: m.filename, imag_hash: m.imag_hash }
+                : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
             ),
 
             imag_hash: newAddLevel
@@ -9588,13 +9968,13 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //   .filter(ad => ad.videoid)
             //   .map(ad => ({ video_id: ad.videoid })),
             videos: newAddLevel.some(ad => ad.videoid)
-            ? newAddLevel
+              ? newAddLevel
                 .filter(ad => ad.videoid && ad.thambnailurl)
                 .map(ad => ({
                   video_id: ad.videoid,
                   thumbnail_url: ad.thambnailurl,
                 }))
-            : [],
+              : [],
             /* ---------------- Text fields ---------------- */
             // message: newAddLevel.map(ad => ad.message),
             // headline: newAddLevel.map(ad => ad.headline),
@@ -9701,6 +10081,20 @@ const CloneMultipleAdsetCampaignDrawer = ({
         Max_Age: formValuesObject.Max_Age,
         Gender: parseInt(formValuesObject.Gender),
         locales: formValuesObject.Language,
+        ...(adSchedulingToShowCampaign
+          ? {
+            is_day_parting_enabled: true,
+            pacing_type: ["day_parting"],
+            adschedule: adsetSchedule?.[formValuesObject.id] || [],
+          }
+          : adSchedulingToShow?.[formValuesObject.id]
+            ? {
+              is_day_parting_enabled: true,
+              pacing_type: ["day_parting"],
+              adschedule: adsetSchedule?.[formValuesObject.id] || [],
+            }
+            : {}
+        ),
         placements: formValuesObject.placements,
         ...(formValuesObject.placements !== "Advance" && {
           publisher_platforms: formValuesObject.platforms,
@@ -10198,6 +10592,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
     setShowBidAmount(false); // Reset showBidAmount state
     setPopupInputs({}); // Clear popup inputs
     setBudgetType(" ");
+    setAdSchedulingToShow({});
+    setSelectedByAdset({});
+    setAdsetSchedule({});
+    setAdSchedulingToShowCampaign(false);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -11673,8 +12071,27 @@ const CloneMultipleAdsetCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
-
+                    // label={<span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>}
+                    label={<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: "#B4B4B4" }}>{`${budgetType} budget`}</span>
+                      <Tooltip title="Enable Ad Scheduling"
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                          color: theme === "dark" ? "#fff" : "#333",
+                        }}
+                      >
+                        <Switch
+                          size="small"
+                          disabled={budgetType === "daily"}
+                          checked={adSchedulingToShowCampaign}
+                          onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
+                          style={{
+                            backgroundColor: adSchedulingToShowCampaign ? "#91C25F" : undefined,
+                          }}
+                        />
+                      </Tooltip>
+                    </div>
+                    }
                     required={!watchedHasAdsetBudget}
                     rules={[
                       {
@@ -11799,6 +12216,15 @@ const CloneMultipleAdsetCampaignDrawer = ({
                   page={page}
                   pixel={pixel}
                   geo={geo}
+                  setAdsetSchedule={setAdsetSchedule}
+                  adSchedulingToShow={adSchedulingToShow}
+                  selectedByAdset={selectedByAdset}
+                  setAdSchedulingToShow={setAdSchedulingToShow}
+                  setSelectedByAdset={setSelectedByAdset}
+                  scheduleErrorByAdset={scheduleErrorByAdset}
+                  setScheduleErrorByAdset={setScheduleErrorByAdset}
+                  setShowScheduleSubmitError={setShowScheduleSubmitError}
+                  adSchedulingToShowCampaign={adSchedulingToShowCampaign}
                 />
               );
               // <ffff/>
@@ -11870,80 +12296,200 @@ const CloneMultipleAdsetCampaignDrawer = ({
 >
   Submit
 </Button> */}
+
                 {!view && (
-                  <Button
-                    type="primary"
-                    style={{
-                      background: "#91c25f",
-                      minWidth: "200px",
-                      borderWidth: "0px",
-                    }}
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <Button
+                      type="primary"
+                      style={{
+                        background: "#91c25f",
+                        minWidth: "200px",
+                        borderWidth: "0px",
+                      }}
 
-                    onClick={async () => {
-                      const finalCategory = popupInputs.reportCat || fullCampaignData?.Category;
-                      if (!finalCategory) {
-                        setErrors(e => ({ ...e, reportCat: "Report category is required" }));
-                        return;
-                      }
+                      onClick={async () => {
+                        const finalCategory = popupInputs.reportCat || fullCampaignData?.Category;
+                        if (!finalCategory) {
+                          setErrors(e => ({ ...e, reportCat: "Report category is required" }));
+                          return;
+                        }
+                        // if (budgetType === "lifetime") {
+                        //   let hasError = false;
+                        //   const newErrors = {};
+                        //   const isAnySchedulingEnabled =
+                        //     adSchedulingToShowCampaign ||
+                        //     Object.values(adSchedulingToShow || {}).some(Boolean);
+                        //   if (isAnySchedulingEnabled) {
+                        //     if (adSchedulingToShowCampaign) {
+                        //       Object.keys(adsetSchedule || {}).forEach(adsetId => {
+                        //         const schedule = adsetSchedule?.[adsetId] || [];
+                        //         const isValid =
+                        //           Array.isArray(schedule) &&
+                        //           schedule.length > 0 &&
+                        //           schedule.every(
+                        //             s =>
+                        //               s.end_minute > s.start_minute &&
+                        //               Array.isArray(s.days) &&
+                        //               s.days.length > 0
+                        //           );
 
-                      try {
-                        const values = await form.validateFields(); // Validates all form fields
+                        //         if (!isValid) {
+                        //           newErrors[adsetId] = true;
+                        //           hasError = true;
+                        //         }
+                        //       });
+                        //     } else {
+                        //       Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                        //         if (!adSchedulingToShow[adsetId]) return;
 
-                        // Check if campaign-level and adset-level budgets are both zero
-                        const campaignLevelDailyBudget = values.Daily_amount;
-                        const isCampaignBudgetActive =
-                          parseFloat(campaignLevelDailyBudget) > 0;
+                        //         const schedule = adsetSchedule?.[adsetId] || [];
 
-                        // Check if any adset has a budget
-                        const isAnyAdsetBudgetSet = values.adsets.some(
-                          (adset) => parseFloat(adset.DailyAdd_amount) > 0
-                        );
+                        //         const isValid =
+                        //           Array.isArray(schedule) &&
+                        //           schedule.length > 0 &&
+                        //           schedule.every(
+                        //             s =>
+                        //               s.end_minute > s.start_minute &&
+                        //               Array.isArray(s.days) &&
+                        //               s.days.length > 0
+                        //           );
+                        //         if (!isValid) {
+                        //           newErrors[adsetId] = true;
+                        //           hasError = true;
+                        //         }
+                        //       });
+                        //     }
 
-                        // If Campaign Budget is not set, check Adsets
-                        if (!isCampaignBudgetActive) {
-                          const isAllAdsetsFilled = values.adsets.every(
+                        //     if (hasError) {
+                        //       setScheduleErrorByAdset(newErrors);
+                        //       setShowScheduleSubmitError(true);
+                        //       return;
+                        //     }
+                        //   }
+                        //   setScheduleErrorByAdset({});
+                        //   setShowScheduleSubmitError(false);
+                        // }
+
+                        if (budgetType === "lifetime") {
+                          let hasError = false;
+                          const newErrors = {};
+                          if (adSchedulingToShowCampaign) {
+                            adsets.forEach(adset => {
+                              const schedule = adsetSchedule?.[adset.id] || [];
+                              const isValid =
+                                schedule.length > 0 &&
+                                schedule.every(
+                                  s =>
+                                    s.end_minute > s.start_minute &&
+                                    Array.isArray(s.days) &&
+                                    s.days.length > 0
+                                );
+
+                              if (!isValid) {
+                                newErrors[adset.id] = true;
+                                hasError = true;
+                              }
+                            });
+                          } else {
+                            Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                              if (!adSchedulingToShow[adsetId]) return;
+
+                              const schedule = adsetSchedule?.[adsetId] || [];
+                              const isValid =
+                                schedule.length > 0 &&
+                                schedule.every(
+                                  s =>
+                                    s.end_minute > s.start_minute &&
+                                    Array.isArray(s.days) &&
+                                    s.days.length > 0
+                                );
+
+                              if (!isValid) {
+                                newErrors[adsetId] = true;
+                                hasError = true;
+                              }
+                            });
+                          }
+
+                          if (hasError) {
+                            setScheduleErrorByAdset(newErrors);
+                            setShowScheduleSubmitError(true);
+                            return;
+                          }
+                          setScheduleErrorByAdset({});
+                          setShowScheduleSubmitError(false);
+                        }
+                        try {
+                          const values = await form.validateFields(); // Validates all form fields
+
+                          // Check if campaign-level and adset-level budgets are both zero
+                          const campaignLevelDailyBudget = values.Daily_amount;
+                          const isCampaignBudgetActive =
+                            parseFloat(campaignLevelDailyBudget) > 0;
+
+                          // Check if any adset has a budget
+                          const isAnyAdsetBudgetSet = values.adsets.some(
                             (adset) => parseFloat(adset.DailyAdd_amount) > 0
                           );
 
-                          if (!isAllAdsetsFilled) {
-                            throw {
-                              errorFields: [
-                                {
-                                  name: ["Daily_amount"], // The field where error occurs
-                                  errors: [
-                                    "Daily budget cannot be zero on both Adset and Campaign levels",
-                                  ], // The error message
-                                },
-                              ],
-                            };
+                          // If Campaign Budget is not set, check Adsets
+                          if (!isCampaignBudgetActive) {
+                            const isAllAdsetsFilled = values.adsets.every(
+                              (adset) => parseFloat(adset.DailyAdd_amount) > 0
+                            );
+
+                            if (!isAllAdsetsFilled) {
+                              throw {
+                                errorFields: [
+                                  {
+                                    name: ["Daily_amount"], // The field where error occurs
+                                    errors: [
+                                      "Daily budget cannot be zero on both Adset and Campaign levels",
+                                    ], // The error message
+                                  },
+                                ],
+                              };
+                            }
                           }
+
+                          // Clear any previous errors
+                          setSubmitErrors([]);
+                          console.log("Form values:", values); // Log form values to verify
+
+                          // Call the onFinish logic, passing in the values
+                          onFinish(values); // Trigger the existing logic for form submission
+
+                          // Optionally trigger confirmation modal (as per your logic)
+                          setIsModalVisible(true);
+
+                          // Save values if needed
+                          setFormValues(values);
+                          setIsCreateCampaignorDraft("createcampaign");
+                        } catch (err) {
+                          // Catch any validation errors thrown by form.validateFields
+                          const allErrors = err?.errorFields?.map((field) => ({
+                            name: field.name?.[0], // field name
+                            message: field.errors?.[0], // validation message
+                          }));
+                          setSubmitErrors(allErrors); // Capture and show validation errors
                         }
-
-                        // Clear any previous errors
-                        setSubmitErrors([]);
-                        console.log("Form values:", values); // Log form values to verify
-
-                        // Call the onFinish logic, passing in the values
-                        onFinish(values); // Trigger the existing logic for form submission
-
-                        // Optionally trigger confirmation modal (as per your logic)
-                        setIsModalVisible(true);
-
-                        // Save values if needed
-                        setFormValues(values);
-                        setIsCreateCampaignorDraft("createcampaign");
-                      } catch (err) {
-                        // Catch any validation errors thrown by form.validateFields
-                        const allErrors = err?.errorFields?.map((field) => ({
-                          name: field.name?.[0], // field name
-                          message: field.errors?.[0], // validation message
-                        }));
-                        setSubmitErrors(allErrors); // Capture and show validation errors
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>
+                      }}
+                    >
+                      Submit
+                    </Button>
+                    {budgetType === "lifetime" && showScheduleSubmitError && (
+                      <div
+                        style={{
+                          color: "red",
+                          marginTop: 6,
+                          fontSize: 12,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Please select at least one valid time slot and day
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* <Popconfirm
