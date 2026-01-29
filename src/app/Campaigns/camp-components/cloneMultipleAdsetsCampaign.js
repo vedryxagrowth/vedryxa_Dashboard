@@ -21,6 +21,7 @@ import {
   Popconfirm,
   Alert,
   Switch,
+  Descriptions,
 } from "antd";
 import {
   PlusOutlined,
@@ -2657,6 +2658,7 @@ const AdsetComponent = ({
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
+  const isDynamicCreative = Form.useWatch(["adsets", index, "isDynamicCreative"], form);
 
   const Billing_Event_options = {
     OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
@@ -2861,9 +2863,34 @@ const AdsetComponent = ({
         }
       })
     }
+    if (adset?.is_dynamic_creative) {
+      const firstAddLevel = Array.isArray(adset?.addlevel)
+        ? adset.addlevel[0]
+        : null;
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            isDynamicCreative: adset?.is_dynamic_creative ?? false,
+            descriptions: adset?.addlevel[0]?.Description || [],
+            headlines: adset?.addlevel[0]?.headline || [],
+            messages: adset?.addlevel[0]?.message || []
+          },
+        }
+      })
+    } else {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            isDynamicCreative: false,
+            descriptions: [""],
+            headlines: [""],
+            messages: [""]
+          },
+        }
+      })
+    }
 
   }, [adset, index])
-
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -3381,56 +3408,97 @@ const AdsetComponent = ({
             >
               {adset.AdsetPanelName}
             </span>
-
-            {!view && (
-              <div>
-                {index !== 0 && (
-                  <Popconfirm
-                    title="Are you sure to delete this Adset?"
-                    onConfirm={(e) => {
-                      e.stopPropagation(); // Prevent panel collapse
-                      removeAdset(index, adset.id);
+            <div style={{ display: "flex" }} >
+              {/* {adset?.is_dynamic_creative && ( */}
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
+                <Form.Item
+                  name={["adsets", index, "isDynamicCreative"]}
+                  valuePropName="checked"
+                  style={{ marginBottom: 0 }}
+                >
+                  {/* <Switch
+                                  size="small"
+                                  onClick={(checked, e) => {
+                                    e.stopPropagation(); // ⛔ prevent panel collapse
+                                  }}
+                                /> */}
+                  <Switch
+                    size="small"
+                    style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
+                    onClick={(checked, e) => e.stopPropagation()}
+                    onChange={(checked) => {
+                      console.log("Dynamic Creative:", checked);
+                      if (checked) {
+                        setViewSingleAd({});
+                      }
+                      // if (!checked) {
+                      // Example: clear dynamic creative assets
+                      form.setFieldsValue({
+                        adsets: {
+                          [index]: {
+                            isDynamicCreative: checked,
+                          },
+                        },
+                      });
+                      // }
                     }}
-                    okText="Yes"
-                    cancelText="No"
-                    style={{ float: "right", marginLeft: "10px" }}
-                  >
-                    <Button
-                      type="text"
-                      onClick={(e) => e.stopPropagation()} // Prevent panel collapse
-                      icon={<FaTrashCan color="#EC7117" />}
-                    />
-                  </Popconfirm>
-                )}
-                <Button
-                  type="text"
-                  icon={
-                    <PlusOutlined
-                      style={{ color: theme === "dark" ? "#fff" : "#000" }}
-                    />
-                  }
-                  // onClick={() => {
-                  //     const updatedAdsets = adsets.filter((_, i) => i !== index);
-                  //     setAdsets(updatedAdsets);
-                  //     setActiveKey(['1']); // Reset to the first panel
-                  // }}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent panel
-                    addAdset();
-                  }}
-                  style={{ float: "right", marginLeft: "10px" }}
-                />
-                <Button
-                  type="text"
-                  icon={<CopyOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent panel collapse
-                    cloneAdset(adset.id);
-                  }}
-                  style={{ float: "right", marginLeft: "10px" }}
-                />
+                  />
+                </Form.Item>
               </div>
-            )}
+              {/* )} */}
+
+              {!view && (
+                <div>
+
+                  {index !== 0 && (
+                    <Popconfirm
+                      title="Are you sure to delete this Adset?"
+                      onConfirm={(e) => {
+                        e.stopPropagation(); // Prevent panel collapse
+                        removeAdset(index, adset.id);
+                      }}
+                      okText="Yes"
+                      cancelText="No"
+                      style={{ float: "right", marginLeft: "10px" }}
+                    >
+                      <Button
+                        type="text"
+                        onClick={(e) => e.stopPropagation()} // Prevent panel collapse
+                        icon={<FaTrashCan color="#EC7117" />}
+                      />
+                    </Popconfirm>
+                  )}
+                  <Button
+                    type="text"
+                    icon={
+                      <PlusOutlined
+                        style={{ color: theme === "dark" ? "#fff" : "#000" }}
+                      />
+                    }
+                    // onClick={() => {
+                    //     const updatedAdsets = adsets.filter((_, i) => i !== index);
+                    //     setAdsets(updatedAdsets);
+                    //     setActiveKey(['1']); // Reset to the first panel
+                    // }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent panel
+                      addAdset();
+                    }}
+                    style={{ float: "right", marginLeft: "10px" }}
+                  />
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent panel collapse
+                      cloneAdset(adset.id);
+                    }}
+                    style={{ float: "right", marginLeft: "10px" }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         }
         className="adset-collapse-panel"
@@ -4780,7 +4848,7 @@ const AdsetComponent = ({
                   AD LEVEL
                 </span>
 
-                {(newAddLevelData[adset.id] || []).length > 0 && (
+                {(newAddLevelData[adset.id] || []).length > 0 && (!isDynamicCreative) && (
                   <div onClick={(e) => e.stopPropagation()}>
 
                     <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
@@ -5859,7 +5927,79 @@ const AdsetComponent = ({
                       }
                     />
                   </Form.Item>
-                  <Form.Item
+
+                  {isDynamicCreative ? (<Form.List name={["adsets", index, "messages"]}>
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map((field, i) => (
+                          <Form.Item
+                            key={field.key}
+                            label={
+                              i === 0 ? (
+                                <span style={{ color: "#B4B4B4" }}>
+                                  Primary Text
+                                </span>
+                              ) : null
+                            }
+                            required
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                              }}
+                            >
+                              {/* TextArea */}
+                              <Form.Item
+                                {...field}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please enter a primary text!",
+                                  },
+                                ]}
+                                noStyle
+                              >
+                                <TextArea
+                                  placeholder={`Primary text ${i + 1}`}
+                                  autoSize={{ minRows: 2, maxRows: 10 }}
+                                  className={
+                                    theme === "dark"
+                                      ? "custom-input-dark"
+                                      : "custom-input-light"
+                                  }
+                                />
+                              </Form.Item>
+
+                              {/* ➕ Add */}
+                              {i === fields.length - 1 && fields.length < 5 && (
+                                <PlusOutlined
+                                  onClick={() => add("")}
+                                  style={{
+                                    color: "#52c41a",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+
+                              {/* 🗑 Delete */}
+                              {fields.length > 1 && (
+                                <DeleteOutlined
+                                  onClick={() => remove(field.name)}
+                                  style={{
+                                    color: "#ff4d4f",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </Form.Item>
+                        ))}
+                      </>
+                    )}
+                  </Form.List>
+                  ) : (<Form.Item
                     label={
                       <span style={{ color: "#B4B4B4" }}>Primary text</span>
                     }
@@ -5898,7 +6038,7 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
                   {/* <Form.Item
                                     label="Caption"
                                     name="Caption"
@@ -5917,7 +6057,73 @@ const AdsetComponent = ({
 
                                     />
                                 </Form.Item> */}
-                  <Form.Item
+
+                  {isDynamicCreative ? (
+                    <Form.List name={["adsets", index, "headlines"]}>
+                      {(fields, { add, remove }) => (
+                        <>
+                          {fields.map((field, i) => (
+                            <Form.Item
+                              key={field.key}
+                              label={
+                                i === 0 ? (
+                                  <span style={{ color: "#B4B4B4" }}>
+                                    Headline
+                                  </span>
+                                ) : null
+                              }
+                              required
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 8,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Form.Item
+                                  {...field}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please enter a Headline!",
+                                    },
+                                  ]}
+                                  noStyle
+                                >
+                                  <TextArea
+                                    placeholder={`Headline ${i + 1}`}
+                                    autoSize={{ minRows: 2, maxRows: 10 }}
+                                    className={
+                                      theme === "dark"
+                                        ? "custom-input-dark"
+                                        : "custom-input-light"
+                                    }
+                                  />
+                                </Form.Item>
+
+                                {/* ➕ Add */}
+                                {i === fields.length - 1 && fields.length < 5 && (
+                                  <PlusOutlined
+                                    onClick={() => add("")}
+                                    style={{ color: "#52c41a", cursor: "pointer" }}
+                                  />
+                                )}
+
+                                {/* 🗑 Delete */}
+                                {fields.length > 1 && (
+                                  <DeleteOutlined
+                                    onClick={() => remove(field.name)}
+                                    style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                  />
+                                )}
+                              </div>
+                            </Form.Item>
+                          ))}
+                        </>
+                      )}
+                    </Form.List>
+                  ) : (<Form.Item
                     label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                     name={["adsets", index, "headline"]}
                     rules={[
@@ -5954,9 +6160,74 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
 
-                  <Form.Item
+                  {isDynamicCreative ? (
+                    <Form.List name={["adsets", index, "descriptions"]}>
+                      {(fields, { add, remove }) => (
+                        <>
+                          {fields.map((field, i) => (
+                            <Form.Item
+                              key={field.key}
+                              label={
+                                i === 0 ? (
+                                  <span style={{ color: "#B4B4B4" }}>
+                                    Description
+                                  </span>
+                                ) : null
+                              }
+                              required
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 8,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Form.Item
+                                  {...field}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please enter a Description!",
+                                    },
+                                  ]}
+                                  noStyle
+                                >
+                                  <TextArea
+                                    placeholder={`Description ${i + 1}`}
+                                    autoSize={{ minRows: 2, maxRows: 10 }}
+                                    className={
+                                      theme === "dark"
+                                        ? "custom-input-dark"
+                                        : "custom-input-light"
+                                    }
+                                  />
+                                </Form.Item>
+
+                                {/* ➕ Add */}
+                                {i === fields.length - 1 && fields.length < 5 && (
+                                  <PlusOutlined
+                                    onClick={() => add("")}
+                                    style={{ color: "#52c41a", cursor: "pointer" }}
+                                  />
+                                )}
+
+                                {/* 🗑 Delete */}
+                                {fields.length > 1 && (
+                                  <DeleteOutlined
+                                    onClick={() => remove(field.name)}
+                                    style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                  />
+                                )}
+                              </div>
+                            </Form.Item>
+                          ))}
+                        </>
+                      )}
+                    </Form.List>
+                  ) : (<Form.Item
                     label={
                       <span style={{ color: "#B4B4B4" }}>Description</span>
                     }
@@ -5996,7 +6267,7 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
                   <Form.Item
                     label={
                       <div
@@ -9068,108 +9339,173 @@ const CloneMultipleAdsetCampaignDrawer = ({
         return mediaHashArray;
       };
 
+      // const newAddLevel = await Promise.all(
+      //   newAddLevelData[newAdset.id].map(async (item) => {
+      //     console.log(item, "item in newAddLevel");
+      //     const getItem =
+      //       addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
+      //     if (Object.keys(getItem).length > 0) {
+      //       const newUpdatedAd = { id: uuidv4(), page_id: item.page_id };
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.message === getItem.message
+      //       ) {
+      //         newUpdatedAd["message"] = item.message;
+      //       } else {
+      //         newUpdatedAd["message"] = item.message;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.headline === getItem.headline
+      //       ) {
+      //         newUpdatedAd["headline"] = item.headline;
+      //       } else {
+      //         newUpdatedAd["headline"] = item.headline;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Description === getItem.Description
+      //       ) {
+      //         newUpdatedAd["Description"] = item.Description;
+      //       } else {
+      //         newUpdatedAd["Description"] = item.Description;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Caption === getItem.Caption
+      //       ) {
+      //         newUpdatedAd["Caption"] = item.Caption;
+      //       } else {
+      //         newUpdatedAd["Caption"] = item.Caption;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Website_URL === getItem.Website_URL
+      //       ) {
+      //         newUpdatedAd["Website_URL"] = item.Website_URL;
+      //       } else {
+      //         newUpdatedAd["Website_URL"] = item.Website_URL;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.AddName === getItem.AddName
+      //       ) {
+      //         newUpdatedAd["AddName"] = item.AddName;
+      //       } else {
+      //         newUpdatedAd["AddName"] = item.AddName;
+      //         newUpdatedAd["re_lunch_addname"] = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.filename === getItem.filename
+      //       ) {
+      //         newUpdatedAd["filename"] = item.filename;
+      //         if (item.imag_hash) {
+      //           newUpdatedAd["imag_hash"] = item.imag_hash;
+      //         } else {
+      //           newUpdatedAd["videoid"] = getItem.videoid;
+      //           newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+      //         }
+      //       } else {
+      //         re_lunch = true;
+      //         newUpdatedAd["filename"] = item.filename;
+      //         const updatedFilesDeatils = await getFilenameDeatials(
+      //           item.filename
+      //         );
+      //         if (Object.keys(updatedFilesDeatils).length > 0) {
+      //           if (updatedFilesDeatils.imag_hash) {
+      //             newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
+      //             newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+      //             newUpdatedAd["re_lunch"] = true;
+      //           } else if (updatedFilesDeatils.videoid) {
+      //             newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
+      //             newUpdatedAd["thambnailurl"] =
+      //               updatedFilesDeatils.thambnailurl;
+      //             newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+      //             newUpdatedAd["re_lunch"] = true;
+      //           }
+      //         }
+      //       }
+      //       return newUpdatedAd;
+      //     } 
+      //     else {
+      //       const fileData = await getFilenameDeatials(item.filename);
+      //       re_lunch = true;
+      //       const newAd = {
+      //         id: uuidv4(),
+      //         page_id: item.page_id,
+      //         message: item.message,
+      //         headline: item.headline,
+      //         Description: item.Description,
+      //         Caption: item.Caption,
+      //         Website_URL: item.Website_URL,
+      //         AddName: item.AddName,
+      //       };
+      //       if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
+      //         newAd["imag_hash"] = fileData.imag_hash;
+      //         newAd["filename"] = fileData.filename;
+      //       }
+      //       if (Object.keys(fileData).length > 0 && fileData.videoid) {
+      //         newAd["videoid"] = fileData.videoid;
+      //         newAd["filename"] = fileData.filename;
+      //         newAd["thambnailurl"] = fileData.thambnailurl;
+      //       }
+      //       return newAd;
+      //     }
+      //   })
+      // );
+
       const newAddLevel = await Promise.all(
         newAddLevelData[newAdset.id].map(async (item) => {
           console.log(item, "item in newAddLevel");
+
           const getItem =
-            addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
-          if (Object.keys(getItem).length > 0) {
-            const newUpdatedAd = { id: uuidv4(), page_id: item.page_id };
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.message === getItem.message
-            ) {
-              newUpdatedAd["message"] = item.message;
-            } else {
-              newUpdatedAd["message"] = item.message;
-              newUpdatedAd["re_lunch"] = true;
-              re_lunch = true;
+            addlevelData[newAdset.id]?.find((i) => i.id === item.id) || null;
+
+          /* ----------------------------------------------------
+             CASE 1: ID EXISTS
+          ---------------------------------------------------- */
+          if (getItem) {
+            /* ----------------------------------------------
+               1️⃣ If filename is SAME → UPDATE (copy all)
+            ---------------------------------------------- */
+            if (item.filename === getItem.filename) {
+              return {
+                id: uuidv4(),
+                page_id: item.page_id,
+                message: item.message,
+                headline: item.headline,
+                Description: item.Description,
+                Caption: item.Caption,
+                Website_URL: item.Website_URL,
+                AddName: item.AddName,
+                filename: item.filename,
+                ...(item.imag_hash
+                  ? { imag_hash: item.imag_hash }
+                  : {
+                    videoid: getItem.videoid,
+                    thambnailurl: getItem.thambnailurl,
+                  }),
+              };
             }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.headline === getItem.headline
-            ) {
-              newUpdatedAd["headline"] = item.headline;
-            } else {
-              newUpdatedAd["headline"] = item.headline;
-              newUpdatedAd["re_lunch"] = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Description === getItem.Description
-            ) {
-              newUpdatedAd["Description"] = item.Description;
-            } else {
-              newUpdatedAd["Description"] = item.Description;
-              newUpdatedAd["re_lunch"] = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Caption === getItem.Caption
-            ) {
-              newUpdatedAd["Caption"] = item.Caption;
-            } else {
-              newUpdatedAd["Caption"] = item.Caption;
-              newUpdatedAd["re_lunch"] = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Website_URL === getItem.Website_URL
-            ) {
-              newUpdatedAd["Website_URL"] = item.Website_URL;
-            } else {
-              newUpdatedAd["Website_URL"] = item.Website_URL;
-              newUpdatedAd["re_lunch"] = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.AddName === getItem.AddName
-            ) {
-              newUpdatedAd["AddName"] = item.AddName;
-            } else {
-              newUpdatedAd["AddName"] = item.AddName;
-              newUpdatedAd["re_lunch_addname"] = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.filename === getItem.filename
-            ) {
-              newUpdatedAd["filename"] = item.filename;
-              if (item.imag_hash) {
-                newUpdatedAd["imag_hash"] = item.imag_hash;
-              } else {
-                newUpdatedAd["videoid"] = getItem.videoid;
-                newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
-              }
-            } else {
-              re_lunch = true;
-              newUpdatedAd["filename"] = item.filename;
-              const updatedFilesDeatils = await getFilenameDeatials(
-                item.filename
-              );
-              if (Object.keys(updatedFilesDeatils).length > 0) {
-                if (updatedFilesDeatils.imag_hash) {
-                  newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
-                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                  newUpdatedAd["re_lunch"] = true;
-                } else if (updatedFilesDeatils.videoid) {
-                  newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
-                  newUpdatedAd["thambnailurl"] =
-                    updatedFilesDeatils.thambnailurl;
-                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                  newUpdatedAd["re_lunch"] = true;
-                }
-              }
-            }
-            return newUpdatedAd;
-          } else {
-            const fileData = await getFilenameDeatials(item.filename);
-            re_lunch = true;
+
+            /* ----------------------------------------------
+               2️⃣ If filename is DIFFERENT → CREATE
+            ---------------------------------------------- */
+
+            const updatedFilesDeatils = await getFilenameDeatials(item.filename);
+
             const newAd = {
               id: uuidv4(),
               page_id: item.page_id,
@@ -9180,19 +9516,111 @@ const CloneMultipleAdsetCampaignDrawer = ({
               Website_URL: item.Website_URL,
               AddName: item.AddName,
             };
-            if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
-              newAd["imag_hash"] = fileData.imag_hash;
-              newAd["filename"] = fileData.filename;
+
+            if (updatedFilesDeatils?.imag_hash) {
+              newAd.imag_hash = updatedFilesDeatils.imag_hash;
+              newAd.filename = updatedFilesDeatils.filename;
+            } else if (updatedFilesDeatils?.videoid) {
+              newAd.videoid = updatedFilesDeatils.videoid;
+              newAd.thambnailurl = updatedFilesDeatils.thambnailurl;
+              newAd.filename = updatedFilesDeatils.filename;
             }
-            if (Object.keys(fileData).length > 0 && fileData.videoid) {
-              newAd["videoid"] = fileData.videoid;
-              newAd["filename"] = fileData.filename;
-              newAd["thambnailurl"] = fileData.thambnailurl;
-            }
+
             return newAd;
           }
+
+          /* ----------------------------------------------------
+             CASE 2: ID DOES NOT EXIST → CREATE
+          ---------------------------------------------------- */
+
+          const fileData = await getFilenameDeatials(item.filename);
+
+          const newAd = {
+            id: uuidv4(),
+            page_id: item.page_id,
+            message: item.message,
+            headline: item.headline,
+            Description: item.Description,
+            Caption: item.Caption,
+            Website_URL: item.Website_URL,
+            AddName: item.AddName,
+          };
+
+          if (fileData?.imag_hash) {
+            newAd.imag_hash = fileData.imag_hash;
+            newAd.filename = fileData.filename;
+          } else if (fileData?.videoid) {
+            newAd.videoid = fileData.videoid;
+            newAd.thambnailurl = fileData.thambnailurl;
+            newAd.filename = fileData.filename;
+          }
+
+          return newAd;
         })
       );
+
+      const finalAddLevel = formValuesObject?.isDynamicCreative
+        ? [
+          {
+            id: uuidv4(),
+            AddName: formValuesObject.AddName,
+            page_id: formValuesObject?.page_id,
+
+            /* ---------------- Files ---------------- */
+            // filename: newAddLevel.map(ad => ({
+            //   filename: ad.filename,
+            // })),
+            filename: newAddLevel.map(m =>
+                  m.imag_hash
+                    ? { filename: m.filename, imag_hash: m.imag_hash }
+                    : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
+            ),
+
+            imag_hash: newAddLevel
+              .filter(ad => ad.imag_hash)
+              .map(ad => ad.imag_hash),
+
+            images: newAddLevel
+              .filter(ad => ad.imag_hash)
+              .map(ad => ({ hash: ad.imag_hash })),
+
+            // videos: newAddLevel
+            //   .filter(ad => ad.videoid)
+            //   .map(ad => ({ video_id: ad.videoid })),
+            videos: newAddLevel.some(ad => ad.videoid)
+            ? newAddLevel
+                .filter(ad => ad.videoid && ad.thambnailurl)
+                .map(ad => ({
+                  video_id: ad.videoid,
+                  thumbnail_url: ad.thambnailurl,
+                }))
+            : [],
+            /* ---------------- Text fields ---------------- */
+            // message: newAddLevel.map(ad => ad.message),
+            // headline: newAddLevel.map(ad => ad.headline),
+            // Description: newAddLevel.map(ad => ad.Description),
+            message: formValuesObject?.messages,
+            headline: formValuesObject?.headlines,
+            Description: formValuesObject?.descriptions,
+
+            Caption: formValuesObject?.Caption,
+            Website_URL: formValuesObject?.Website_URL,
+
+            call_to_action_types: ["LEARN_MORE"],
+
+            ad_formats: [
+              ...(newAddLevel.some(ad => ad.imag_hash)
+                ? ["SINGLE_IMAGE"]
+                : []),
+              ...(newAddLevel.some(ad => ad.videoid)
+                ? ["SINGLE_VIDEO"]
+                : []),
+            ],
+          },
+        ]
+        : newAddLevel;
+
+
 
       console.log(newAddLevel, "newAddLevel");
 
@@ -9253,13 +9681,18 @@ const CloneMultipleAdsetCampaignDrawer = ({
         ...(formValuesObject.DatePickerEnd && budgetType === "lifetime"
           ? {
             end_time: moment(formValuesObject.DatePickerEnd.$d)
-              .tz(newImageHash.timeZone)
+              .tz(imagehash.timeZone)
               .format("YYYY-MM-DDTHH:mm:ssZ"),
           }
           : {}),
         action_source: formValuesObject.action_source,
         custom_event_type: formValuesObject.custom_event_type,
         pixel_id: formValuesObject.pixel_id,
+        ...(formValuesObject.isDynamicCreative
+          ? {
+            is_dynamic_creative: true
+          }
+          : {}),
         bid_amount: formValuesObject.bid_amount
           ? parseFloat(formValuesObject.bid_amount) * 100
           : 0,
@@ -9303,7 +9736,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
           : {}),
 
         buying_type: "AUCTION",
-        addlevel: newAddLevel || [],
+        addlevel: finalAddLevel || [],
       };
 
       AllAdsetsData = {
@@ -10144,29 +10577,81 @@ const CloneMultipleAdsetCampaignDrawer = ({
       }))
     );
 
+    // setAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+    //   adsetObjects.forEach((adsetObj, index) => {
+    //     const newArray = adsetObj.addlevel.map((item, index) => ({
+    //       ...item,
+    //       AddName: `${adsetObj.AdsetName}_Copy_${index + 1}`,
+    //     }));
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
+
+    // setNewAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+    //   adsetObjects.forEach((adsetObj, index) => {
+    //     const newArray = adsetObj.addlevel.map((item, index) => ({
+    //       ...item,
+    //       AddName: `${adsetObj.AdsetName}_Copy_${index + 1}`,
+    //     }));
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
+
+    const extractFilenames = (filename) => {
+      if (Array.isArray(filename)) {
+        return filename.map(f => f.filename);
+      }
+      return filename ? [filename] : [];
+    };
+
+
+
     setAddLevelData((prev) => {
       const adsetAddLevelData = {};
-      adsetObjects.forEach((adsetObj, index) => {
-        const newArray = adsetObj.addlevel.map((item, index) => ({
-          ...item,
-          AddName: `${adsetObj.AdsetName}_Copy_${index + 1}`,
-        }));
+
+      adsetObjects.forEach((adsetObj) => {
+        const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+          const filenames = extractFilenames(item.filename);
+
+          return filenames.map((name, i) => ({
+            ...item,
+            filename: name,          // normalized single filename
+            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+          }));
+        });
+
         adsetAddLevelData[adsetObj.id] = newArray;
       });
+
       return { ...prev, ...adsetAddLevelData };
     });
 
+
     setNewAddLevelData((prev) => {
       const adsetAddLevelData = {};
-      adsetObjects.forEach((adsetObj, index) => {
-        const newArray = adsetObj.addlevel.map((item, index) => ({
-          ...item,
-          AddName: `${adsetObj.AdsetName}_Copy_${index + 1}`,
-        }));
+
+      adsetObjects.forEach((adsetObj) => {
+        const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+          const filenames = extractFilenames(item.filename);
+
+          return filenames.map((name, i) => ({
+            ...item,
+            filename: name,
+            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+          }));
+        });
+
         adsetAddLevelData[adsetObj.id] = newArray;
       });
+
       return { ...prev, ...adsetAddLevelData };
     });
+
+
 
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
@@ -10237,22 +10722,47 @@ const CloneMultipleAdsetCampaignDrawer = ({
     //     url: file?.url,}
     //     return "";
     // });
+
+    const getFileType = (name = "") => {
+      if (name.endsWith(".jpg")) return "image/jpg";
+      if (name.endsWith(".jpeg")) return "image/jpeg";
+      if (name.endsWith(".png")) return "image/png";
+      return "video/";
+    };
+
     const mapped = (data) =>
-      data.map((file, i) => ({
-        id: file?.id,
-        uid: `-${Date.now()}-${i}`,
-        name: file?.filename,
-        status: "done",
-        type: file?.filename?.endsWith(".jpg")
-          ? "image/jpg"
-          : file?.filename?.endsWith(".jpeg")
-            ? "image/jpeg"
-            : file?.filename?.endsWith(".png")
-              ? "image/png"
-              : "video/",
-        url: file?.filename,
-        Addid: file?.Addid || null,
-      }));
+      data.flatMap((file, fileIndex) => {
+        const filenames = Array.isArray(file.filename)
+          ? file.filename.map(f => f.filename)
+          : [file.filename];
+
+        return filenames.map((filename, i) => ({
+          id: file.id,
+          uid: `-${Date.now()}-${fileIndex}-${i}`,
+          name: filename,
+          status: "done",
+          type: getFileType(filename),
+          url: filename,
+          Addid: file.Addid || null,
+        }));
+      });
+
+    // const mapped = (data) =>
+    //   data.map((file, i) => ({
+    //     id: file?.id,
+    //     uid: `-${Date.now()}-${i}`,
+    //     name: file?.filename,
+    //     status: "done",
+    //     type: file?.filename?.endsWith(".jpg")
+    //       ? "image/jpg"
+    //       : file?.filename?.endsWith(".jpeg")
+    //         ? "image/jpeg"
+    //         : file?.filename?.endsWith(".png")
+    //           ? "image/png"
+    //           : "video/",
+    //     url: file?.filename,
+    //     Addid: file?.Addid || null,
+    //   }));
 
     adsetObjects.forEach((adsetObj) => {
       const uuid = adsetObj.id ?? uuidv4();

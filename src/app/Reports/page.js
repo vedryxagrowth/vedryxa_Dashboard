@@ -5146,6 +5146,14 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
+                    if (matchedAdset?.budget) {
+                        if (Number(matchedAdset.budget.daily_budget) === 0) {
+                            matchedAdset.budget.daily_budget = null;
+                        }
+                        if (Number(matchedAdset.budget.lifetime_budget) === 0) {
+                            matchedAdset.budget.lifetime_budget = null;
+                        }
+                    }
                     if (matchedAdset) {
                         setAdsetInfo(matchedAdset);
                     }
@@ -5169,7 +5177,14 @@ const MyTablePage = () => {
                             )?.adsets.find(adset =>
                                 String(adset.adset_id) === String(initialAdsetId)
                             );
-
+                        if (adset?.budget) {
+                            if (Number(adset.budget.daily_budget) === 0) {
+                                adset.budget.daily_budget = null;
+                            }
+                            if (Number(adset.budget.lifetime_budget) === 0) {
+                                adset.budget.lifetime_budget = null;
+                            }
+                        }
                         if (adset) {
                             const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
                             onChangeBudget(budget);
@@ -5204,6 +5219,14 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
+                    if (campaignActualSpend?.budget) {
+                        if (Number(campaignActualSpend.budget.daily_budget) === 0) {
+                            campaignActualSpend.budget.daily_budget = null;
+                        }
+                        if (Number(campaignActualSpend.budget.lifetime_budget) === 0) {
+                            campaignActualSpend.budget.lifetime_budget = null;
+                        }
+                    }
                     const bidAmountValue = Math.round(parseFloat(bidAmount) * 100);
                     const changeBudgetValue = Math.round(parseFloat(changeBudget) * 100);
                     const previousBudget = campaignActualSpend?.budget?.daily_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.daily_budget)) :
@@ -5238,7 +5261,7 @@ const MyTablePage = () => {
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset budget updated",
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
-                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
+                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${(Number(changeBudget))}`,
                             budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
                                 campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                         }
@@ -7986,7 +8009,7 @@ const MyTablePage = () => {
                         updatedUserEmail: userdetails?.email,
                         updateType: "Campaign budget updated",
                         updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
-                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
+                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${(Number(changeBudget))}`,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                     }
@@ -9405,6 +9428,14 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
+                    if (matchedAdset?.budget) {
+                        if (Number(matchedAdset.budget.daily_budget) === 0) {
+                            matchedAdset.budget.daily_budget = null;
+                        }
+                        if (Number(matchedAdset.budget.lifetime_budget) === 0) {
+                            matchedAdset.budget.lifetime_budget = null;
+                        }
+                    }
                     if (matchedAdset) {
                         setAdsetInfo(matchedAdset);
                     }
@@ -9432,6 +9463,14 @@ const MyTablePage = () => {
                             )?.adsets.find(adset =>
                                 String(adset.adset_id) === String(initialAdsetId)
                             );
+                        if (adset?.budget) {
+                            if (Number(adset.budget.daily_budget) === 0) {
+                                adset.budget.daily_budget = null;
+                            }
+                            if (Number(adset.budget.lifetime_budget) === 0) {
+                                adset.budget.lifetime_budget = null;
+                            }
+                        }
 
                         if (adset) {
                             const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
@@ -9468,6 +9507,14 @@ const MyTablePage = () => {
                         )?.adsets.find(adset =>
                             String(adset.adset_id) === String(initialAdsetId)
                         );
+                    if (campaignActualSpend?.budget) {
+                        if (Number(campaignActualSpend.budget.daily_budget) === 0) {
+                            campaignActualSpend.budget.daily_budget = null;
+                        }
+                        if (Number(campaignActualSpend.budget.lifetime_budget) === 0) {
+                            campaignActualSpend.budget.lifetime_budget = null;
+                        }
+                    }
                     const bidAmountValue = Math.round(parseFloat(bidAmount) * 100);
                     const changeBudgetValue = Math.round(parseFloat(changeBudget) * 100);
                     const previousBudget = campaignActualSpend?.budget?.daily_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.daily_budget)) :
@@ -9502,7 +9549,7 @@ const MyTablePage = () => {
                             updatedUserEmail: userdetails?.email,
                             updateType: "Adset budget updated",
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
-                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget) * 100)}`,
+                            updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${(Number(changeBudget))}`,
                             budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
                                 campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                         }
@@ -10541,7 +10588,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
-            hide:  true,
+            hide: true,
             sortable: false,
             filter: false,
             enableSorting: false,
@@ -11686,7 +11733,7 @@ const MyTablePage = () => {
             headerName: 'Activity',
             field: 'history',
             minWidth: 90,
-            hide:  true,
+            hide: true,
             sortable: false,
             filter: false,
             enableSorting: false,
@@ -12684,7 +12731,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                
+
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
 
                 return (
@@ -13241,7 +13288,7 @@ const MyTablePage = () => {
                         updatedUserEmail: userdetails.email,
                         updateType: "Campain budget updated",
                         updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
-                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${Math.round(Number(changeBudget))}`,
+                        updateDetail: `From $${campaignActualSpend?.campaign_budget?.daily_budget != null ? (Number(campaignActualSpend?.campaign_budget?.daily_budget) / 100) : campaignActualSpend?.campaign_budget?.lifetime_budget != null ? (Number(campaignActualSpend?.campaign_budget?.lifetime_budget) / 100) : 0} to $${(Number(changeBudget))}`,
                         budgetType: campaignActualSpend?.campaign_budget?.daily_budget != null ? 'daily_budget' :
                             campaignActualSpend?.campaign_budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
                     }
@@ -14361,7 +14408,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                
+
 
 
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
@@ -15410,7 +15457,7 @@ const MyTablePage = () => {
                     ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
                     : params?.data?.accountNumber;
 
-                
+
 
 
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
