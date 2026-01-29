@@ -1218,6 +1218,7 @@ const AdsetComponent = ({
   setShowScheduleSubmitError,
   scheduleErrorByAdset,
   setSelectedByAdset,
+  adSchedulingToShowCampaign,
   page,
   pixel,
   geo,
@@ -1438,8 +1439,15 @@ const AdsetComponent = ({
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
   const showScheduling =
-    budgetType === "lifetime" && !CampaignBudgetActive && !!adSchedulingToShow[adset.id];
+    budgetType === "lifetime" && (adSchedulingToShow[adset.id] || adSchedulingToShowCampaign);
 
+  useEffect(() => {
+    if (adSchedulingToShowCampaign || CampaignBudgetActive) {
+      setAdSchedulingToShow({});
+      setScheduleErrorByAdset({});
+      setShowScheduleSubmitError(false);
+    }
+  }, [adSchedulingToShowCampaign || CampaignBudgetActive]);
   const Bid_strategy_values = [
     {
       value: "LOWEST_COST_WITHOUT_CAP",
@@ -3319,6 +3327,7 @@ const AdsetComponent = ({
                 >
                   <Switch
                     size="small"
+                    disabled={adSchedulingToShowCampaign || budgetType === "daily" || CampaignBudgetActive}
                     checked={!!adSchedulingToShow[adset.id]}
                     style={{
                       backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
@@ -3644,9 +3653,16 @@ const AdsetComponent = ({
                     })}
                   </div>
                 </div>
-                {budgetType === "lifetime" &&
+                {/* {budgetType === "lifetime" &&
                   scheduleErrorByAdset[adset.id] &&
                   adSchedulingToShow[adset.id] && (
+                    <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                      Please select at least one valid time slot and day
+                    </div>
+                  )} */}
+                {budgetType === "lifetime" &&
+                  scheduleErrorByAdset[adset.id] &&
+                  (adSchedulingToShowCampaign || adSchedulingToShow[adset.id]) && (
                     <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
                       Please select at least one valid time slot and day
                     </div>
@@ -6725,6 +6741,7 @@ const CreateCampaignDrawer = ({
   const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
   const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
   const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
+  const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
 
 
   // Derived condition name changed to watchedHasAdsetBudget
@@ -6784,6 +6801,7 @@ const CreateCampaignDrawer = ({
       `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
     );
   }, [accountsAccess, searchText]);
+
   useEffect(() => {
     if (userdetails?.adAccounts) {
       const adAccountOptions = Object.keys(userdetails?.adAccounts).map(
@@ -9208,8 +9226,7 @@ const CreateCampaignDrawer = ({
                 console.error("Video upload to Facebook failed");
               }
             }
-          } 
-          else {
+          } else {
             const uniqueId = uuidv4();
             const safeName = `blob_${uniqueId}_${file.name}`;
             const editedImage = editedImages[file.name];
@@ -9219,8 +9236,7 @@ const CreateCampaignDrawer = ({
             s3FileUrl = await uploadFileToS3(fileBlob, safeName, folderPath);
 
             const formData = new FormData();
-            formData.append("file", fileBlob, `${folderPath}/${safeName}`);
-            formData.append("filename", `${folderPath}/${safeName}`);
+            formData.append("file", fileBlob, safeName);
             formData.append("access_token", token);
 
             let response, fbResponse;
@@ -9495,6 +9511,7 @@ const CreateCampaignDrawer = ({
         setAdSchedulingToShow({});
         setSelectedByAdset({});
         setAdsetSchedule({});
+        setAdSchedulingToShowCampaign(false);
       }
     } catch (error) {
       console.error("Error during campaign creation:", error);
@@ -9615,6 +9632,10 @@ const CreateCampaignDrawer = ({
                     : {}),
                   Bid_strategy: values.Bid_strategy,
                   Budget_type: budgetType,
+                  ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+                    is_day_parting_enabled_campign: true,
+                    pacing_type: ["day_parting"]
+                  }),
                   Daily_amount: parseFloat(values.Daily_amount) * 100,
                   Status: values.Status,
                   access_token: newImageHash.token,
@@ -9644,29 +9665,18 @@ const CreateCampaignDrawer = ({
                 const getTheImages = imagesHashArray
                   .map(media => media.imag_hash)
                   .filter(Boolean);
-                // const getTheVidoes = imagesHashArray
-                //   .map(media => media.videoid)
-                //   .filter(Boolean);
-                const getTheVideos = imagesHashArray
-                .filter(media => media.vidoeid && media.thambnailurl)
-                .map(media => ({
-                  video_id: media.vidoeid,
-                  thumbnail_url: media.thambnailurl
-                }));
+                const getTheVidoes = imagesHashArray
+                  .map(media => media.videoid)
+                  .filter(Boolean);
                 // console.log(imageHashArray, "imageHashArray")
                 // console.log(values.adsets[i].isDynamicCreative, "Dynamic creative");
                 const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
                   id: uuidv4(),
                   AddName: `${values.adsets[i].AddName}`,
-                  // filename: imagesHashArray.map(media => ({ filename: media.filename })),
-                  filename: imagesHashArray.map(m =>
-                    m.imag_hash
-                    ? { filename: m.filename, imag_hash: m.imag_hash }
-                    : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
-                  ),
+                  filename: imagesHashArray.map(media => ({ filename: media.filename })),
                   imag_hash: imagesHashArray.map(media => media.imag_hash),
                   images: getTheImages,
-                  videos: getTheVideos.length ? getTheVideos : [],
+                  videos: getTheVidoes,
                   page_id: page_id,
                   message: values?.adsets[i]?.messages,
                   headline: values.adsets[i].headlines,
@@ -9676,7 +9686,7 @@ const CreateCampaignDrawer = ({
                   call_to_action_types: ["LEARN_MORE"],
                   ad_formats: [
                     ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
-                    ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
+                    ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
                   ]
                 }] : imagesHashArray.map((media, index) => {
                   if (media.imag_hash) {
@@ -9752,11 +9762,25 @@ const CreateCampaignDrawer = ({
                   Max_Age: values.adsets[i].Max_Age,
                   Gender: parseInt(values.adsets[i].Gender),
                   locales: values.adsets[i].Language,
-                  ...(adSchedulingToShow?.[adsets[i].id] && {
-                    is_day_parting_enabled: true,
-                    pacing_type: ["day_parting"],
-                    adschedule: adsetSchedule?.[adsets[i].id] || []
-                  }),
+                  // ...(adSchedulingToShow?.[adsets[i].id] && {
+                  //   is_day_parting_enabled: true,
+                  //   pacing_type: ["day_parting"],
+                  //   adschedule: adsetSchedule?.[adsets[i].id] || []
+                  // }),
+                  ...(
+                    adSchedulingToShowCampaign
+                      ? {
+                        adschedule: adsetSchedule?.[adsets[i].id] || [],
+                      }
+                      :
+                      adSchedulingToShow?.[adsets[i].id]
+                        ? {
+                          is_day_parting_enabled: true,
+                          pacing_type: ["day_parting"],
+                          adschedule: adsetSchedule?.[adsets[i].id] || [],
+                        }
+                        : {}
+                  ),
                   placements: values.adsets[i].placements,
                   ...(values.adsets[i].placements !== "Advance" && {
                     publisher_platforms: values.adsets[i].platforms,
@@ -9815,6 +9839,10 @@ const CreateCampaignDrawer = ({
                   : {}),
                 Bid_strategy: values.Bid_strategy,
                 Budget_type: budgetType,
+                ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+                  is_day_parting_enabled_campign: true,
+                  pacing_type: ["day_parting"],
+                }),
                 Daily_amount: parseFloat(values.Daily_amount) * 100,
                 Status: values.Status,
                 access_token: newImageHash.token,
@@ -9844,28 +9872,18 @@ const CreateCampaignDrawer = ({
               const getTheImages = imagesHashArray
                 .map(media => media.imag_hash)
                 .filter(Boolean);
-              // const getTheVidoes = imagesHashArray
-              //   .map(media => ({video_id:media.vidoeid, thumbnail_url: media.thambnailurl}))
-              //   .filter(Boolean);
-              const getTheVideos = imagesHashArray
-                .filter(media => media.vidoeid && media.thambnailurl)
-                .map(media => ({
-                  video_id: media.vidoeid,
-                  thumbnail_url: media.thambnailurl
-                }));
+              const getTheVidoes = imagesHashArray
+                .map(media => media.vidoeid)
+                .filter(Boolean);
               const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
                 id: uuidv4(),
                 AddName: `${values.adsets[i].AddName}`,
-                filename: imagesHashArray.map(m =>
-                  m.imag_hash
-                    ? { filename: m.filename, imag_hash: m.imag_hash }
-                    : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
-                ),
+                filename: imagesHashArray.map(media => ({ filename: media.filename })),
                 // imag_hash: imagesHashArray.map(media => media.imag_hash),
                 imag_hash: imagesHashArray.map(media => media.imag_hash),
 
                 images: getTheImages?.map(item => ({ hash: item })) || [],
-                videos: getTheVideos.length ? getTheVideos : [],
+                videos: getTheVidoes?.map(item => ({ video_id: item })) || [],
                 page_id: page_id,
                 message: values.adsets[i].messages,
                 headline: values.adsets[i].headlines,
@@ -9875,7 +9893,7 @@ const CreateCampaignDrawer = ({
                 call_to_action_types: ["LEARN_MORE"],
                 ad_formats: [
                   ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
-                  ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
+                  ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
                 ]
               }] : imagesHashArray.map((media, index) => {
                 if (media.imag_hash) {
@@ -9950,12 +9968,25 @@ const CreateCampaignDrawer = ({
                 Max_Age: values.adsets[i].Max_Age,
                 Gender: parseInt(values.adsets[i].Gender),
                 locales: values.adsets[i].Language,
-                ...(adSchedulingToShow?.[adsets[i].id] && {
-                  is_day_parting_enabled: true,
-                  pacing_type: ["day_parting"],
-                  adschedule: adsetSchedule?.[adsets[i].id] || []
-                }),
-
+                // ...(adSchedulingToShow?.[adsets[i].id] && {
+                //   is_day_parting_enabled: true,
+                //   pacing_type: ["day_parting"],
+                //   adschedule: adsetSchedule?.[adsets[i].id] || []
+                // }),
+                ...(
+                  adSchedulingToShowCampaign
+                    ? {
+                      adschedule: adsetSchedule?.[adsets[i].id] || [],
+                    }
+                    :
+                    adSchedulingToShow?.[adsets[i].id]
+                      ? {
+                        is_day_parting_enabled: true,
+                        pacing_type: ["day_parting"],
+                        adschedule: adsetSchedule?.[adsets[i].id] || [],
+                      }
+                      : {}
+                ),
                 placements: values.adsets[i].placements,
                 ...(values.adsets[i].placements !== "Advance" && {
                   publisher_platforms: values.adsets[i].platforms,
@@ -10663,6 +10694,7 @@ const CreateCampaignDrawer = ({
     setAdSchedulingToShow({});
     setSelectedByAdset({});
     setAdsetSchedule({});
+    setAdSchedulingToShowCampaign(false);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -12435,8 +12467,26 @@ const CreateCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
-
+                    label={<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
+                      <Tooltip title="Enable Ad Scheduling"
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                          color: theme === "dark" ? "#fff" : "#333",
+                        }}
+                      >
+                        <Switch
+                          size="small"
+                          disabled={budgetType === "daily"}
+                          checked={adSchedulingToShowCampaign}
+                          onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
+                          style={{
+                            backgroundColor: adSchedulingToShowCampaign ? "#91C25F" : undefined,
+                          }}
+                        />
+                      </Tooltip>
+                    </div>
+                    }
                     required={!watchedHasAdsetBudget}
                     rules={[
                       {
@@ -12564,6 +12614,7 @@ const CreateCampaignDrawer = ({
                   scheduleErrorByAdset={scheduleErrorByAdset}
                   setScheduleErrorByAdset={setScheduleErrorByAdset}
                   setShowScheduleSubmitError={setShowScheduleSubmitError}
+                  adSchedulingToShowCampaign={adSchedulingToShowCampaign}
                   page={page}
                   pixel={pixel}
                   geo={geo}
@@ -12849,32 +12900,89 @@ const CreateCampaignDrawer = ({
                           return;
                         }
 
+                        // if (budgetType === "lifetime") {
+                        //   let hasError = false;
+                        //   const newErrors = {};
+                        //   Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                        //     if (!adSchedulingToShow[adsetId]) return;
+                        //     const schedule = adsetSchedule?.[adsetId] || [];
+                        //     const isValid =
+                        //       Array.isArray(schedule) &&
+                        //       schedule.length > 0 &&
+                        //       schedule.every(
+                        //         s =>
+                        //           s.end_minute > s.start_minute &&
+                        //           Array.isArray(s.days) &&
+                        //           s.days.length > 0
+                        //       );
+                        //     if (!isValid) {
+                        //       newErrors[adsetId] = true;
+                        //       hasError = true;
+                        //     }
+                        //   });
+                        //   if (hasError) {
+                        //     setScheduleErrorByAdset(newErrors);
+                        //     setShowScheduleSubmitError(true);
+                        //     return;
+                        //   }
+                        // }
                         if (budgetType === "lifetime") {
                           let hasError = false;
                           const newErrors = {};
-                          Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
-                            if (!adSchedulingToShow[adsetId]) return;
-                            const schedule = adsetSchedule?.[adsetId] || [];
-                            const isValid =
-                              Array.isArray(schedule) &&
-                              schedule.length > 0 &&
-                              schedule.every(
-                                s =>
-                                  s.end_minute > s.start_minute &&
-                                  Array.isArray(s.days) &&
-                                  s.days.length > 0
-                              );
-                            if (!isValid) {
-                              newErrors[adsetId] = true;
-                              hasError = true;
+                          const isAnySchedulingEnabled =
+                            adSchedulingToShowCampaign ||
+                            Object.values(adSchedulingToShow || {}).some(Boolean);
+                          if (isAnySchedulingEnabled) {
+                            if (adSchedulingToShowCampaign) {
+                              Object.keys(adsetSchedule || {}).forEach(adsetId => {
+                                const schedule = adsetSchedule?.[adsetId] || [];
+                                const isValid =
+                                  Array.isArray(schedule) &&
+                                  schedule.length > 0 &&
+                                  schedule.every(
+                                    s =>
+                                      s.end_minute > s.start_minute &&
+                                      Array.isArray(s.days) &&
+                                      s.days.length > 0
+                                  );
+
+                                if (!isValid) {
+                                  newErrors[adsetId] = true;
+                                  hasError = true;
+                                }
+                              });
+                            } else {
+                              Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                                if (!adSchedulingToShow[adsetId]) return;
+
+                                const schedule = adsetSchedule?.[adsetId] || [];
+
+                                const isValid =
+                                  Array.isArray(schedule) &&
+                                  schedule.length > 0 &&
+                                  schedule.every(
+                                    s =>
+                                      s.end_minute > s.start_minute &&
+                                      Array.isArray(s.days) &&
+                                      s.days.length > 0
+                                  );
+                                if (!isValid) {
+                                  newErrors[adsetId] = true;
+                                  hasError = true;
+                                }
+                              });
                             }
-                          });
-                          if (hasError) {
-                            setScheduleErrorByAdset(newErrors);
-                            setShowScheduleSubmitError(true);
-                            return;
+
+                            if (hasError) {
+                              setScheduleErrorByAdset(newErrors);
+                              setShowScheduleSubmitError(true);
+                              return; 
+                            }
                           }
+                          setScheduleErrorByAdset({});
+                          setShowScheduleSubmitError(false);
                         }
+
 
                         try {
                           const values = await form.validateFields();
@@ -13364,5 +13472,6 @@ const CreateCampaignDrawer = ({
     </Modal >
   );
 };
-
 export default CreateCampaignDrawer;
+
+
