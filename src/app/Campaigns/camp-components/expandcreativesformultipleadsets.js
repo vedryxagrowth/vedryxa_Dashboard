@@ -36,6 +36,7 @@ import {
   MinusSquareOutlined,
   ExclamationCircleFilled,
   HistoryOutlined,
+  InfoCircleOutlined
 } from "@ant-design/icons";
 import axios from "axios";
 import { useTokenContext } from "../../components/parent";
@@ -386,6 +387,11 @@ const AdsetCard = ({
               cursor: "not-allowed",
             }}
           /> */}
+          {adset?.is_dynamic_creative && (
+            <Tooltip title="This ad set belongs to dynamic ads">
+              <InfoCircleOutlined style={{ color: "#91C25F", cursor: "pointer" }} />
+            </Tooltip>
+          )}
           <Switch
             checkedChildren="✓"
             unCheckedChildren="✗"

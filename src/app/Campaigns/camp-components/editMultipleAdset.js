@@ -566,7 +566,7 @@ const mapped = (data) =>
       url: filename,
       Addid: file.Addid || null,
     }));
-});
+  });
 
 // const mapped = (data) =>
 //   data.map((file, i) => ({
@@ -2312,19 +2312,30 @@ const AdsetComponent = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
     useState(false);
+  // const [primaryText, setPrimaryText] = useState(
+  //   adset.addlevel[0]?.message || ""
+  // );
   const [primaryText, setPrimaryText] = useState(
-    adset.addlevel[0]?.message || ""
+    Array.isArray(adset?.addlevel?.[0]?.message)
+      ? adset.addlevel[0].message
+      : [adset?.addlevel?.[0]?.message || ""]
   );
-  const [headline, setHeadline] = useState(adset.addlevel[0]?.headline || "");
+  const [headline, setHeadline] = useState(
+    Array.isArray(adset?.addlevel?.[0]?.headline)
+      ? adset.addlevel[0].headline
+      : [adset?.addlevel?.[0]?.headline || ""]
+  );
   const [caption, setCaption] = useState(adset.addlevel[0]?.Caption || "");
   const [description, setDescription] = useState(
-    adset.addlevel[0]?.Description || ""
+    Array.isArray(adset?.addlevel?.[0]?.Description)
+      ? adset.addlevel[0].Description
+      : [adset?.addlevel?.[0]?.Description || ""]
   );
   const [websiteURL, setWebsiteURL] = useState(
     adset.addlevel[0]?.Website_URL || ""
   );
   const [addName, setAddName] = useState(
-    adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || ""
+    adset?.is_dynamic_creative ? adset.addlevel[0].AddName : adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || ""
   );
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
   const [creativeIndex, setCreativeIndex] = useState(null);
@@ -4202,7 +4213,7 @@ const AdsetComponent = ({
             message: adset.addlevel[0].message || "",
             page_id: adset.addlevel[0].page_id || "",
             AddName:
-              adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || "",
+              adset?.is_dynamic_creative ? adset.addlevel[0].AddName : adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || ""
           }}
           layout="vertical"
           disabled={isViewAdset}
@@ -4270,7 +4281,7 @@ const AdsetComponent = ({
                       />
                     </Form.Item>
                   </div>)}
- 
+
 
                   {/* <div>
                                 {index !== 0 && (
@@ -5237,7 +5248,7 @@ const AdsetComponent = ({
                       >
                         AD LEVEL
                       </span>
-                      {(selectedFiles || []).length > 0 && (
+                      {(selectedFiles || []).length > 0 && (!(adset?.is_dynamic_creative)) && (
                         <div onClick={(e) => e.stopPropagation()}>
                           <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
                             <div style={{ display: 'flex' }}>
@@ -6250,43 +6261,30 @@ const AdsetComponent = ({
                           required
                         // tooltip="This is a required field"
                         >
-                          <TextArea
-                            placeholder="Primary text"
-                            autoSize={{ minRows: 2, maxRows: 10 }}
-                            onChange={(e) => {
-                              setPrimaryText(e.target.value);
-                              setNewAddLevelData((prev) => {
-                                return prev.map((item, idx) => ({
-                                  ...item,
-                                  message: `${e.target.value}`,
-                                }));
-                              });
-                            }}
-                            className={
-                              theme === "dark"
-                                ? "custom-input-dark"
-                                : "custom-input-light"
-                            }
-                          />
+                          {primaryText.map((text, index) => (
+                            <TextArea
+                              key={index}
+                              value={text}
+                              placeholder="Primary text"
+                              autoSize={{ minRows: 2, maxRows: 10 }}
+                              style={{ marginBottom: "8px" }}
+                              onChange={(e) => {
+                                setPrimaryText(e.target.value);
+                                setNewAddLevelData((prev) => {
+                                  return prev.map((item, idx) => ({
+                                    ...item,
+                                    message: `${e.target.value}`,
+                                  }));
+                                });
+                              }}
+                              className={
+                                theme === "dark"
+                                  ? "custom-input-dark"
+                                  : "custom-input-light"
+                              }
+                            />
+                          ))}
                         </Form.Item>
-                        {/* <Form.Item
-                                            label="Caption"
-                                            name="Caption"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please enter a Caption!",
-                                                },
-                                            ]}
-                                            required
-                                            tooltip="This is a required field">
-                                            <TextArea
-                                                placeholder="Caption"
-                                                autoSize={{ minRows: 2, maxRows: 10 }}
-                                                onChange={(e) => setCaption(e.target.value)}
-
-                                            />
-                                        </Form.Item> */}
                         <Form.Item
                           label={
                             <span style={{ color: "#B4B4B4" }}>Headline</span>
@@ -6301,24 +6299,29 @@ const AdsetComponent = ({
                           required
                         // tooltip="This is a required field"
                         >
-                          <TextArea
-                            placeholder="Headline"
-                            autoSize={{ minRows: 2, maxRows: 10 }}
-                            onChange={(e) => {
-                              setHeadline(e.target.value);
-                              setNewAddLevelData((prev) => {
-                                return prev.map((item, idx) => ({
-                                  ...item,
-                                  headline: `${e.target.value}`,
-                                }));
-                              });
-                            }}
-                            className={
-                              theme === "dark"
-                                ? "custom-input-dark"
-                                : "custom-input-light"
-                            }
-                          />
+                          {headline.map((text, index) => (
+                            <TextArea
+                              key={index}
+                              value={text}
+                              placeholder="Headline"
+                              style={{ marginBottom: "8px" }}
+                              autoSize={{ minRows: 2, maxRows: 10 }}
+                              onChange={(e) => {
+                                setHeadline(e.target.value);
+                                setNewAddLevelData((prev) => {
+                                  return prev.map((item, idx) => ({
+                                    ...item,
+                                    headline: `${e.target.value}`,
+                                  }));
+                                });
+                              }}
+                              className={
+                                theme === "dark"
+                                  ? "custom-input-dark"
+                                  : "custom-input-light"
+                              }
+                            />
+                          ))}
                         </Form.Item>
 
                         <Form.Item
@@ -6338,24 +6341,29 @@ const AdsetComponent = ({
                           initialValue={"Find More"}
                         // tooltip="This is a required field"
                         >
-                          <TextArea
-                            placeholder="Description"
-                            autoSize={{ minRows: 2, maxRows: 10 }}
-                            onChange={(e) => {
-                              setDescription(e.target.value);
-                              setNewAddLevelData((prev) => {
-                                return prev.map((item, idx) => ({
-                                  ...item,
-                                  Description: `${e.target.value}`,
-                                }));
-                              });
-                            }}
-                            className={
-                              theme === "dark"
-                                ? "custom-input-dark"
-                                : "custom-input-light"
-                            }
-                          />
+                          {description.map((text, index) => (
+                            <TextArea
+                              key={index}
+                              value={text}
+                              placeholder="Description"
+                              style={{ marginBottom: "8px" }}
+                              autoSize={{ minRows: 2, maxRows: 10 }}
+                              onChange={(e) => {
+                                setDescription(e.target.value);
+                                setNewAddLevelData((prev) => {
+                                  return prev.map((item, idx) => ({
+                                    ...item,
+                                    Description: `${e.target.value}`,
+                                  }));
+                                });
+                              }}
+                              className={
+                                theme === "dark"
+                                  ? "custom-input-dark"
+                                  : "custom-input-light"
+                              }
+                            />
+                          ))}
                         </Form.Item>
                         <Form.Item
                           label={

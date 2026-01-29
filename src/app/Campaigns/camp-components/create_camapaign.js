@@ -9208,7 +9208,8 @@ const CreateCampaignDrawer = ({
                 console.error("Video upload to Facebook failed");
               }
             }
-          } else {
+          } 
+          else {
             const uniqueId = uuidv4();
             const safeName = `blob_${uniqueId}_${file.name}`;
             const editedImage = editedImages[file.name];
@@ -9218,7 +9219,8 @@ const CreateCampaignDrawer = ({
             s3FileUrl = await uploadFileToS3(fileBlob, safeName, folderPath);
 
             const formData = new FormData();
-            formData.append("file", fileBlob, safeName);
+            formData.append("file", fileBlob, `${folderPath}/${safeName}`);
+            formData.append("filename", `${folderPath}/${safeName}`);
             formData.append("access_token", token);
 
             let response, fbResponse;
@@ -9642,18 +9644,29 @@ const CreateCampaignDrawer = ({
                 const getTheImages = imagesHashArray
                   .map(media => media.imag_hash)
                   .filter(Boolean);
-                const getTheVidoes = imagesHashArray
-                  .map(media => media.videoid)
-                  .filter(Boolean);
+                // const getTheVidoes = imagesHashArray
+                //   .map(media => media.videoid)
+                //   .filter(Boolean);
+                const getTheVideos = imagesHashArray
+                .filter(media => media.vidoeid && media.thambnailurl)
+                .map(media => ({
+                  video_id: media.vidoeid,
+                  thumbnail_url: media.thambnailurl
+                }));
                 // console.log(imageHashArray, "imageHashArray")
                 // console.log(values.adsets[i].isDynamicCreative, "Dynamic creative");
                 const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
                   id: uuidv4(),
                   AddName: `${values.adsets[i].AddName}`,
-                  filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                  // filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                  filename: imagesHashArray.map(m =>
+                    m.imag_hash
+                    ? { filename: m.filename, imag_hash: m.imag_hash }
+                    : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
+                  ),
                   imag_hash: imagesHashArray.map(media => media.imag_hash),
                   images: getTheImages,
-                  videos: getTheVidoes,
+                  videos: getTheVideos.length ? getTheVideos : [],
                   page_id: page_id,
                   message: values?.adsets[i]?.messages,
                   headline: values.adsets[i].headlines,
@@ -9663,7 +9676,7 @@ const CreateCampaignDrawer = ({
                   call_to_action_types: ["LEARN_MORE"],
                   ad_formats: [
                     ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
-                    ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
+                    ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
                   ]
                 }] : imagesHashArray.map((media, index) => {
                   if (media.imag_hash) {
@@ -9831,18 +9844,28 @@ const CreateCampaignDrawer = ({
               const getTheImages = imagesHashArray
                 .map(media => media.imag_hash)
                 .filter(Boolean);
-              const getTheVidoes = imagesHashArray
-                .map(media => media.vidoeid)
-                .filter(Boolean);
+              // const getTheVidoes = imagesHashArray
+              //   .map(media => ({video_id:media.vidoeid, thumbnail_url: media.thambnailurl}))
+              //   .filter(Boolean);
+              const getTheVideos = imagesHashArray
+                .filter(media => media.vidoeid && media.thambnailurl)
+                .map(media => ({
+                  video_id: media.vidoeid,
+                  thumbnail_url: media.thambnailurl
+                }));
               const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
                 id: uuidv4(),
                 AddName: `${values.adsets[i].AddName}`,
-                filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                filename: imagesHashArray.map(m =>
+                  m.imag_hash
+                    ? { filename: m.filename, imag_hash: m.imag_hash }
+                    : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
+                ),
                 // imag_hash: imagesHashArray.map(media => media.imag_hash),
                 imag_hash: imagesHashArray.map(media => media.imag_hash),
 
                 images: getTheImages?.map(item => ({ hash: item })) || [],
-                videos: getTheVidoes?.map(item => ({ video_id: item })) || [],
+                videos: getTheVideos.length ? getTheVideos : [],
                 page_id: page_id,
                 message: values.adsets[i].messages,
                 headline: values.adsets[i].headlines,
@@ -9852,7 +9875,7 @@ const CreateCampaignDrawer = ({
                 call_to_action_types: ["LEARN_MORE"],
                 ad_formats: [
                   ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
-                  ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
+                  ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
                 ]
               }] : imagesHashArray.map((media, index) => {
                 if (media.imag_hash) {
