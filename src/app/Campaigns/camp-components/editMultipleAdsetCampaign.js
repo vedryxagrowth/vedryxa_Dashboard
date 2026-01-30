@@ -1987,6 +1987,7 @@ const AddComponent = ({
               }
             />
           </Form.Item>
+
           <Form.Item
             label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
             name="message"
@@ -2648,6 +2649,7 @@ const AdsetComponent = ({
   const [viewSingleAd, setViewSingleAd] = useState({});
   const [dragging, setDragging] = useState(false);
   const selected = selectedByAdset[adset.id] || {};
+  const isDynamicCreative = Form.useWatch(["adsets", index, "isDynamicCreative"], form);
 
   console.log(pixelIDLIst, "pixelIDLIst in adset component");
   console.log(pageIDList, "pageIDList in adset component");
@@ -2789,6 +2791,54 @@ const AdsetComponent = ({
     }));
 
   }, [selectedByAdset, adset.id, timezoneType]);
+
+  useEffect(() => {
+    // if (adset?.pixel_id) {
+    //   form.setFieldsValue({
+    //     adsets: {
+    //       [index]: {
+    //         pixel_id: adset.pixel_id
+    //       },
+    //     }
+    //   });
+    // }
+    // if (adset?.addlevel) {
+    //   form.setFieldsValue({
+    //     adsets: {
+    //       [index]: {
+    //         page_id: adset?.addlevel[0]?.page_id || ""
+    //       },
+    //     }
+    //   })
+    // }
+    if (adset?.is_dynamic_creative) {
+      const firstAddLevel = Array.isArray(adset?.addlevel)
+        ? adset.addlevel[0]
+        : null;
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            isDynamicCreative: adset?.is_dynamic_creative ?? false,
+            descriptions: adset?.addlevel[0]?.Description || [],
+            headlines: adset?.addlevel[0]?.headline || [],
+            messages: adset?.addlevel[0]?.message || []
+          },
+        }
+      })
+    } else {
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            isDynamicCreative: false,
+            descriptions: [""],
+            headlines: [""],
+            messages: [""]
+          },
+        }
+      })
+    }
+
+  }, [adset, index])
 
   const currentDate = dayjs();
   const after30Days = currentDate.add(30, "day");
@@ -3657,7 +3707,96 @@ const AdsetComponent = ({
               {adset.AdsetPanelName}
             </span>
 
-            {!view && (
+            <div style={{ display: "flex" }} >
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
+                <Form.Item
+                  name={["adsets", index, "isDynamicCreative"]}
+                  valuePropName="checked"
+                  style={{ marginBottom: 0 }}
+
+                >
+                  {/* <Switch
+                                                size="small"
+                                                onClick={(checked, e) => {
+                                                  e.stopPropagation(); // ⛔ prevent panel collapse
+                                                }}
+                                              /> */}
+                  <Switch
+                    size="small"
+                    disabled={view || adset.Adsetid}
+                    style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
+                    onClick={(checked, e) => e.stopPropagation()}
+                    onChange={(checked) => {
+                      console.log("Dynamic Creative:", checked);
+                      if (checked) {
+                        setViewSingleAd({});
+                      }
+                      // if (!checked) {
+                      // Example: clear dynamic creative assets
+                      form.setFieldsValue({
+                        adsets: {
+                          [index]: {
+                            isDynamicCreative: checked,
+                          },
+                        },
+                      });
+                      // }
+                    }}
+                  />
+                </Form.Item>
+              </div>
+              {!view && (
+                <div>
+                  {index !== 0 && !adset.Adsetid && (
+                    <Popconfirm
+                      title="Are you sure to delete this Adset?"
+                      onConfirm={(e) => {
+                        e.stopPropagation(); // Prevent panel collapse
+                        removeAdset(index, adset.id);
+                      }}
+                      okText="Yes"
+                      cancelText="No"
+                      style={{ float: "right", marginLeft: "10px" }}
+                    >
+                      <Button
+                        type="text"
+                        onClick={(e) => e.stopPropagation()} // Prevent panel collapse
+                        icon={<FaTrashCan color="#EC7117" />}
+                      />
+                    </Popconfirm>
+                  )}
+                  <Button
+                    type="text"
+                    icon={
+                      <PlusOutlined
+                        style={{ color: theme === "dark" ? "#fff" : "#000" }}
+                      />
+                    }
+                    // onClick={() => {
+                    //     const updatedAdsets = adsets.filter((_, i) => i !== index);
+                    //     setAdsets(updatedAdsets);
+                    //     setActiveKey(['1']); // Reset to the first panel
+                    // }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent panel
+                      addAdset();
+                    }}
+                    style={{ float: "right", marginLeft: "10px" }}
+                  />
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent panel collapse
+                      cloneAdset(adset.id);
+                    }}
+                    style={{ float: "right", marginLeft: "10px" }}
+                  />
+                </div>
+              )}
+            </div>
+            {/* {!view && (
               <div>
                 {index !== 0 && !adset.Adsetid && (
                   <Popconfirm
@@ -3705,43 +3844,23 @@ const AdsetComponent = ({
                   style={{ float: "right", marginLeft: "10px" }}
                 />
               </div>
-            )}
-            {(view && adset.is_dynamic_creative) && (<div style={{ display: "flex", alignItems: "center" }}>
+            )} */}
+            {/* {(view && adset.is_dynamic_creative) && (<div style={{ display: "flex", alignItems: "center" }}>
               <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
               <Form.Item
                 name={["adsets", index, "isDynamicCreative"]}
                 valuePropName="checked"
                 style={{ marginBottom: 0 }}
               >
-                {/* <Switch
-                  size="small"
-                  onClick={(checked, e) => {
-                    e.stopPropagation(); // ⛔ prevent panel collapse
-                  }}
-                /> */}
                 <Switch
                   size="small"
                   disabled
                   checked={adset?.is_dynamic_creative}
                   style={{ backgroundColor: adset.is_dynamic_creative ? "#91C25F" : undefined }}
-                // onClick={(checked, e) => e.stopPropagation()}
-                // onChange={(checked) => {
-                //   console.log("Dynamic Creative:", checked);
-
-                //   // if (!checked) {
-                //   // Example: clear dynamic creative assets
-                //   form.setFieldsValue({
-                //     adsets: {
-                //       [index]: {
-                //         isDynamicCreative: checked,
-                //       },
-                //     },
-                //   });
-                //   // }
-                // }}
+                
                 />
               </Form.Item>
-            </div>)}
+            </div>)} */}
           </div>
         }
         className="adset-collapse-panel"
@@ -5064,7 +5183,7 @@ const AdsetComponent = ({
                   AD LEVEL
                 </span>
                 {((newAddLevelData[adset.id] || []).length > 0) &&
-                  !(view && adset.is_dynamic_creative) &&
+                  !(view || isDynamicCreative) &&
                   (
                     <div onClick={(e) => e.stopPropagation()}>
                       <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
@@ -6093,7 +6212,79 @@ const AdsetComponent = ({
                       }
                     />
                   </Form.Item>
-                  <Form.Item
+
+                  {isDynamicCreative ? (<Form.List name={["adsets", index, "messages"]}>
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map((field, i) => (
+                          <Form.Item
+                            key={field.key}
+                            label={
+                              i === 0 ? (
+                                <span style={{ color: "#B4B4B4" }}>
+                                  Primary Text
+                                </span>
+                              ) : null
+                            }
+                            required
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                              }}
+                            >
+                              {/* TextArea */}
+                              <Form.Item
+                                {...field}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please enter a primary text!",
+                                  },
+                                ]}
+                                noStyle
+                              >
+                                <TextArea
+                                  placeholder={`Primary text ${i + 1}`}
+                                  autoSize={{ minRows: 2, maxRows: 10 }}
+                                  className={
+                                    theme === "dark"
+                                      ? "custom-input-dark"
+                                      : "custom-input-light"
+                                  }
+                                />
+                              </Form.Item>
+
+                              {/* ➕ Add */}
+                              {i === fields.length - 1 && fields.length < 5 && (
+                                <PlusOutlined
+                                  onClick={() => add("")}
+                                  style={{
+                                    color: "#52c41a",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+
+                              {/* 🗑 Delete */}
+                              {fields.length > 1 && (
+                                <DeleteOutlined
+                                  onClick={() => remove(field.name)}
+                                  style={{
+                                    color: "#ff4d4f",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </Form.Item>
+                        ))}
+                      </>
+                    )}
+                  </Form.List>
+                  ) : (<Form.Item
                     label={
                       <span style={{ color: "#B4B4B4" }}>Primary text</span>
                     }
@@ -6132,7 +6323,7 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
                   {/* <Form.Item
                                     label="Caption"
                                     name="Caption"
@@ -6151,7 +6342,72 @@ const AdsetComponent = ({
 
                                     />
                                 </Form.Item> */}
-                  <Form.Item
+                  {isDynamicCreative ? (
+                    <Form.List name={["adsets", index, "headlines"]}>
+                      {(fields, { add, remove }) => (
+                        <>
+                          {fields.map((field, i) => (
+                            <Form.Item
+                              key={field.key}
+                              label={
+                                i === 0 ? (
+                                  <span style={{ color: "#B4B4B4" }}>
+                                    Headline
+                                  </span>
+                                ) : null
+                              }
+                              required
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 8,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Form.Item
+                                  {...field}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please enter a Headline!",
+                                    },
+                                  ]}
+                                  noStyle
+                                >
+                                  <TextArea
+                                    placeholder={`Headline ${i + 1}`}
+                                    autoSize={{ minRows: 2, maxRows: 10 }}
+                                    className={
+                                      theme === "dark"
+                                        ? "custom-input-dark"
+                                        : "custom-input-light"
+                                    }
+                                  />
+                                </Form.Item>
+
+                                {/* ➕ Add */}
+                                {i === fields.length - 1 && fields.length < 5 && (
+                                  <PlusOutlined
+                                    onClick={() => add("")}
+                                    style={{ color: "#52c41a", cursor: "pointer" }}
+                                  />
+                                )}
+
+                                {/* 🗑 Delete */}
+                                {fields.length > 1 && (
+                                  <DeleteOutlined
+                                    onClick={() => remove(field.name)}
+                                    style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                  />
+                                )}
+                              </div>
+                            </Form.Item>
+                          ))}
+                        </>
+                      )}
+                    </Form.List>
+                  ) : (<Form.Item
                     label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                     name={["adsets", index, "headline"]}
                     rules={[
@@ -6188,9 +6444,74 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
 
-                  <Form.Item
+                  {isDynamicCreative ? (
+                    <Form.List name={["adsets", index, "descriptions"]}>
+                      {(fields, { add, remove }) => (
+                        <>
+                          {fields.map((field, i) => (
+                            <Form.Item
+                              key={field.key}
+                              label={
+                                i === 0 ? (
+                                  <span style={{ color: "#B4B4B4" }}>
+                                    Description
+                                  </span>
+                                ) : null
+                              }
+                              required
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 8,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Form.Item
+                                  {...field}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please enter a Description!",
+                                    },
+                                  ]}
+                                  noStyle
+                                >
+                                  <TextArea
+                                    placeholder={`Description ${i + 1}`}
+                                    autoSize={{ minRows: 2, maxRows: 10 }}
+                                    className={
+                                      theme === "dark"
+                                        ? "custom-input-dark"
+                                        : "custom-input-light"
+                                    }
+                                  />
+                                </Form.Item>
+
+                                {/* ➕ Add */}
+                                {i === fields.length - 1 && fields.length < 5 && (
+                                  <PlusOutlined
+                                    onClick={() => add("")}
+                                    style={{ color: "#52c41a", cursor: "pointer" }}
+                                  />
+                                )}
+
+                                {/* 🗑 Delete */}
+                                {fields.length > 1 && (
+                                  <DeleteOutlined
+                                    onClick={() => remove(field.name)}
+                                    style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                  />
+                                )}
+                              </div>
+                            </Form.Item>
+                          ))}
+                        </>
+                      )}
+                    </Form.List>
+                  ) : (<Form.Item
                     label={
                       <span style={{ color: "#B4B4B4" }}>Description</span>
                     }
@@ -6230,7 +6551,7 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
                   <Form.Item
                     label={
                       <div
@@ -9410,6 +9731,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         let s3FileUrl = null;
         const folderPath = `${network}/${fullCampaignData.Account_Number}/${fullCampaignData.campaign_name}`;
         const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
+          if (!(fileBlob instanceof Blob)) {
+            const response = await fetch(fileBlob);
+            fileBlob = await response.blob();
+          }
           const fullPath = `${folderPath}/${fileName}`;
           const formData = new FormData();
           formData.append("file", fileBlob, fileName);
@@ -9452,6 +9777,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           );
 
           fileBlob = await response.blob();
+          console.log("blob file test for s3 files");
           s3FileUrl = await uploadFileToS3(fileBlob, file.name, folderPath);
 
           const formData = new FormData();
@@ -9525,6 +9851,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           const uniqueId = uuidv4();
           const safeName = `blob_${uniqueId}_${file.name}`;
           const editedImage = editedImages[file.name];
+          console.log("blob file test for local files");
           fileBlob = editedImage
             ? await fetch(editedImage).then((res) => res.blob())
             : file.originFileObj;
@@ -9632,6 +9959,9 @@ const EditMultipleAdsetCampaignDrawer = ({
         return mediaHashArray;
       };
 
+      console.log(addlevelData, "addlevelData");
+      console.log(newAddLevelData, "newAddLevelData");
+
       const newAddLevel = await Promise.all(
         newAddLevelData[newAdset.id].map(async (item) => {
           console.log(item, "item in newAddLevel");
@@ -9728,6 +10058,14 @@ const EditMultipleAdsetCampaignDrawer = ({
             } else {
               re_lunch = true;
               newUpdatedAd["filename"] = item.filename;
+              console.log(Object.keys(getItem).length > 0 &&
+                item.filename === getItem.filename);
+              console.log(item.filename !== getItem.filename);
+              console.log(Object.keys(getItem).length > 0);
+              console.log(item.filename === getItem.filename);
+              console.log("existing filename is changed");
+              console.log(item.filename, "item.filename");
+              console.log(getItem.filename, "getItem.filename");
               const updatedFilesDeatils = await getFilenameDeatials(
                 item.filename
               );
@@ -9749,6 +10087,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             }
             return newUpdatedAd;
           } else {
+            console.log("new ad created in adlevel");
             const fileData = await getFilenameDeatials(item.filename);
             re_lunch = true;
             send_re_launch_status = true;
@@ -10083,7 +10422,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             AdsetsData.is_day_parting_enabled = true;
             AdsetsData.pacing_type = ["day_parting"];
             AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
-          } 
+          }
           // else {
           //   // SWITCH OFF
           //   AdsetsData.is_day_parting_enabled = false;
@@ -11325,21 +11664,123 @@ const EditMultipleAdsetCampaignDrawer = ({
       }))
     );
 
-    setAddLevelData((prev) => {
-      const adsetAddLevelData = {};
-      adsetObjects.forEach((adsetObj, index) => {
-        adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
-      });
-      return { ...prev, ...adsetAddLevelData };
-    });
+    // setAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+    //   adsetObjects.forEach((adsetObj, index) => {
+    //     adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+    //   });
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
 
-    setNewAddLevelData((prev) => {
+    // setNewAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+    //   adsetObjects.forEach((adsetObj, index) => {
+    //     adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+    //   });
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
+
+    // const extractFilenames = (filename) => {
+    //   if (Array.isArray(filename)) {
+    //     return filename.map(f => f.filename);
+    //   }
+    //   return filename ? [filename] : [];
+    // };
+
+    const extractFilenames = (filename, id) => {
+      if (Array.isArray(filename)) {
+        return filename.map(f => ({
+          filename: f.filename,
+          ...(f.imag_hash
+            ? { imag_hash: f.imag_hash }
+            : {
+              video_id: f.video_id,
+              thambnailurl: f.thambnailurl,
+            }),
+            id:uuidv4(),
+        }));
+      }
+      return filename ? [{filename:filename, id: id}] : [];
+    };
+
+    const buildAdsetAddLevelData = () => {
       const adsetAddLevelData = {};
-      adsetObjects.forEach((adsetObj, index) => {
-        adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+
+      adsetObjects.forEach((adsetObj) => {
+        const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+          const filenames = extractFilenames(item.filename, item.id);
+
+          return filenames.map((name, i) => ({
+            ...item,
+            id: name.id,
+            filename: name.filename,
+            ...(name.imag_hash
+            ? { imag_hash: name.imag_hash }
+            : name.video_id ?{
+              video_id: name.video_id,
+              thambnailurl: name.thambnailurl,
+            } : {}),
+            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+          }));
+        });
+
+        adsetAddLevelData[adsetObj.id] = newArray;
       });
-      return { ...prev, ...adsetAddLevelData };
-    });
+
+      return adsetAddLevelData;
+    };
+    const adsetAddLevelData = buildAdsetAddLevelData();
+
+    setAddLevelData((prev) => ({
+      ...prev,
+      ...adsetAddLevelData,
+    }));
+
+    setNewAddLevelData((prev) => ({
+      ...prev,
+      ...adsetAddLevelData,
+    }));
+
+    // setAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+
+    //   adsetObjects.forEach((adsetObj) => {
+    //     const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+    //       const filenames = extractFilenames(item.filename);
+
+    //       return filenames.map((name, i) => ({
+    //         ...item,
+    //         filename: name,          // normalized single filename
+    //         AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+    //       }));
+    //     });
+
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
+
+
+    // setNewAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+
+    //   adsetObjects.forEach((adsetObj) => {
+    //     const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+    //       const filenames = extractFilenames(item.filename);
+
+    //       return filenames.map((name, i) => ({
+    //         ...item,
+    //         filename: name,
+    //         AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+    //       }));
+    //     });
+
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
 
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
@@ -11403,22 +11844,46 @@ const EditMultipleAdsetCampaignDrawer = ({
     //     url: file?.url,}
     //     return "";
     // });
+    // const mapped = (data) =>
+    //   data.map((file, i) => ({
+    //     id: file?.id,
+    //     uid: `-${Date.now()}-${i}`,
+    //     name: file?.filename,
+    //     status: "done",
+    //     type: file?.filename?.endsWith(".jpg")
+    //       ? "image/jpg"
+    //       : file?.filename?.endsWith(".jpeg")
+    //         ? "image/jpeg"
+    //         : file?.filename?.endsWith(".png")
+    //           ? "image/png"
+    //           : "video/",
+    //     url: file?.filename,
+    //     Addid: file?.Addid || null,
+    //   }));
+
+    const getFileType = (name = "") => {
+      if (name.endsWith(".jpg")) return "image/jpg";
+      if (name.endsWith(".jpeg")) return "image/jpeg";
+      if (name.endsWith(".png")) return "image/png";
+      return "video/";
+    };
+
     const mapped = (data) =>
-      data.map((file, i) => ({
-        id: file?.id,
-        uid: `-${Date.now()}-${i}`,
-        name: file?.filename,
-        status: "done",
-        type: file?.filename?.endsWith(".jpg")
-          ? "image/jpg"
-          : file?.filename?.endsWith(".jpeg")
-            ? "image/jpeg"
-            : file?.filename?.endsWith(".png")
-              ? "image/png"
-              : "video/",
-        url: file?.filename,
-        Addid: file?.Addid || null,
-      }));
+      data.flatMap((file, fileIndex) => {
+        const filenames = Array.isArray(file.filename)
+          ? file.filename.map(f => f.filename)
+          : [file.filename];
+
+        return filenames.map((filename, i) => ({
+          id: file.id,
+          uid: `-${Date.now()}-${fileIndex}-${i}`,
+          name: filename,
+          status: "done",
+          type: getFileType(filename),
+          url: filename,
+          Addid: file.Addid || null,
+        }));
+      });
 
     adsetObjects.forEach((adsetObj) => {
       const uuid = adsetObj.id ?? uuidv4();

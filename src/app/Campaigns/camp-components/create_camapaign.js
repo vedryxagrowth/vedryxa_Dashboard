@@ -9665,7 +9665,7 @@ const CreateCampaignDrawer = ({
                     : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
                   ),
                   imag_hash: imagesHashArray.map(media => media.imag_hash),
-                  images: getTheImages,
+                  images: getTheImages?.map(item => ({ hash: item })) || [],
                   videos: getTheVideos.length ? getTheVideos : [],
                   page_id: page_id,
                   message: values?.adsets[i]?.messages,
