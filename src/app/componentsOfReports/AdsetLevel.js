@@ -229,34 +229,91 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         ])
     }, [memorizedRowData]);
 
-    const onBtExport1 = () => {
-        console.log(gridRef.current.api, "in")
-        const Details = {
-            network: newRevenuePratner,
-            account: newaccount,
-            dateRange: `From ${startDate} to ${endDate}`,
-            type: "Live",
-            email: userdetails?.email,
-            time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-        }
-        gridRef.current.api.exportDataAsCsv({
-            processCellCallback: (params) => {
-                const node = params.node;
-                if (node.group) {
-                    return null;
-                }
-                return params.value;
-            },
-            shouldRowBeSkipped: (params) => {
-                return params.node.group;
-            },
-        });
-        const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
-        }
-        updateDetails();
+    // const onBtExport1 = () => {
+    //     console.log(gridRef.current.api, "in")
+    //     const Details = {
+    //         network: newRevenuePratner,
+    //         account: newaccount,
+    //         dateRange: `From ${startDate} to ${endDate}`,
+    //         type: "Live",
+    //         email: userdetails?.email,
+    //         time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+    //     }
+    //     gridRef.current.api.exportDataAsCsv({
+    //         processCellCallback: (params) => {
+    //             const node = params.node;
+    //             if (node.group) {
+    //                 return null;
+    //             }
+    //             return params.value;
+    //         },
+    //         shouldRowBeSkipped: (params) => {
+    //             return params.node.group;
+    //         },
+    //     });
+    //     const updateDetails = async () => {
+    //         await apiClient.post('/UserExportActivities/', { Details });
+    //     }
+    //     updateDetails();
 
+    // };
+    const onBtExport1 = async () => {
+    console.log(gridRef.current.api, "in");
+
+    const Details = {
+        network: newRevenuePratner,
+        account: newaccount,
+        dateRange: `From ${startDate} to ${endDate}`,
+        type: "Live",
+        email: userdetails?.email,
+        time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
     };
+    const campaignIdNameMap = {};
+    const adsetIdNameMap = {};
+
+    gridRef.current.api.forEachLeafNode(node => {
+        const d = node.data;
+        if (d?.campaignid && d?.campaignname) {
+            campaignIdNameMap[String(d.campaignid)] = d.campaignname;
+        }
+        if (d?.adsetid && d?.adsetname) {
+            adsetIdNameMap[String(d.adsetid)] = d.adsetname;
+        }
+    });
+    gridRef.current.api.exportDataAsCsv({
+        processRowGroupCallback: (params) => {
+            const key = String(params.node.key);
+
+            if (adsetIdNameMap[key]) {
+                return adsetIdNameMap[key];
+            }
+            if (campaignIdNameMap[key]) {
+                return campaignIdNameMap[key];
+            }
+
+            return params.node.key; // fallback
+        },
+        processCellCallback: (params) => {
+            const colId = params.column.getColId();
+
+            if (colId === 'campaignid') {
+                return params.data?.campaignname || params.value;
+            }
+
+            if (colId === 'adsetid') {
+                return params.data?.adsetname || params.value;
+            }
+
+            return params.value;
+        }
+    });
+    try {
+        await apiClient.post('/UserExportActivities/', { Details });
+    } catch (e) {
+        console.error("Export activity log failed", e);
+    }
+};
+
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
         const selectedData = selectedNodes.map(node => node.data);

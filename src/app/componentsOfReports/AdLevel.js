@@ -210,34 +210,92 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     ])
   }, [memorizedRowData]);
 
-  const onBtExport1 = () => {
-    console.log(gridRef.current.api, "in")
-    const Details = {
-      network: newRevenuePratner,
-      account: newaccount,
-      dateRange: `From ${startDate} to ${endDate}`,
-      type: "Live",
-      email: userdetails?.email,
-      time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-    }
-    gridRef.current.api.exportDataAsCsv({
-      processCellCallback: (params) => {
-        const node = params.node;
-        if (node.group) {
-          return null;
-        }
-        return params.value;
-      },
-      shouldRowBeSkipped: (params) => {
-        return params.node.group;
-      },
-    });
-    const updateDetails = async () => {
-      await apiClient.post('/UserExportActivities/', { Details });
-    }
-    updateDetails();
+  // const onBtExport1 = () => {
+  //   console.log(gridRef.current.api, "in")
+  //   const Details = {
+  //     network: newRevenuePratner,
+  //     account: newaccount,
+  //     dateRange: `From ${startDate} to ${endDate}`,
+  //     type: "Live",
+  //     email: userdetails?.email,
+  //     time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+  //   }
+  //   gridRef.current.api.exportDataAsCsv({
+  //     processCellCallback: (params) => {
+  //       const node = params.node;
+  //       if (node.group) {
+  //         return null;
+  //       }
+  //       return params.value;
+  //     },
+  //     shouldRowBeSkipped: (params) => {
+  //       return params.node.group;
+  //     },
+  //   });
+  //   const updateDetails = async () => {
+  //     await apiClient.post('/UserExportActivities/', { Details });
+  //   }
+  //   updateDetails();
 
+  // };
+const onBtExport1 = async () => {
+  console.log(gridRef.current.api, "in");
+
+  const Details = {
+    network: newRevenuePratner,
+    account: newaccount,
+    dateRange: `From ${startDate} to ${endDate}`,
+    type: "Live",
+    email: userdetails?.email,
+    time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
   };
+  const campaignMap = {};
+  const adsetMap = {};
+  const adMap = {};
+
+  gridRef.current.api.forEachLeafNode(node => {
+    const d = node.data;
+    if (!d) return;
+
+    if (d.campaignid && d.campaignname) {
+      campaignMap[String(d.campaignid)] = d.campaignname;
+    }
+    if (d.adsetid && d.adsetname) {
+      adsetMap[String(d.adsetid)] = d.adsetname;
+    }
+    if (d.adid && d.adname) {
+      adMap[String(d.adid)] = d.adname;
+    }
+  });
+  gridRef.current.api.exportDataAsCsv({
+    processRowGroupCallback: (params) => {
+      const key = String(params.node.key);
+
+      if (adMap[key]) return adMap[key];
+      if (adsetMap[key]) return adsetMap[key];
+      if (campaignMap[key]) return campaignMap[key];
+
+      return params.node.key; 
+    },
+    processCellCallback: (params) => {
+      const colId = params.column.getColId();
+      const d = params.data;
+
+      if (!d) return params.value;
+
+      if (colId === "campaignid") return d.campaignname || params.value;
+      if (colId === "adsetid") return d.adsetname || params.value;
+      if (colId === "adid") return d.adname || params.value;
+
+      return params.value;
+    }
+  });
+  try {
+    await apiClient.post("/UserExportActivities/", { Details });
+  } catch (e) {
+    console.error("Export activity failed", e);
+  }
+};
 
   const uniqueByAdId = (arr) => {
     const map = new Map();
