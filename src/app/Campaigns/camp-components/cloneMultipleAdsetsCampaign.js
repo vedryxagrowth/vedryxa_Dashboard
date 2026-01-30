@@ -8002,7 +8002,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     // ✅ Update both states
     setAdsets(updatedAdsets);
     form.setFieldsValue({ adsets: updatedFormAdsets });
-    
+
     setSelectedByAdset(prev => ({
       ...prev,
       [newId]: { ...(prev[adsetId] || {}) }
@@ -9479,6 +9479,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
 
       console.log(formValuesObject, "formValuesObject");
 
+      const toCommaString = (value) =>
+              Array.isArray(value) ? value.join(", ") : value;
+
       //   const newAddLevelData = n || [];
       //   const addlevelData = formValuesObject.addlevelData || [];
 
@@ -9864,9 +9867,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
               return {
                 id: uuidv4(),
                 page_id: item.page_id,
-                message: item.message,
-                headline: item.headline,
-                Description: item.Description,
+                message: toCommaString(item.message),
+                headline: toCommaString(item.headline),
+                Description: toCommaString(item.Description),
                 Caption: item.Caption,
                 Website_URL: item.Website_URL,
                 AddName: item.AddName,
@@ -9889,9 +9892,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
             const newAd = {
               id: uuidv4(),
               page_id: item.page_id,
-              message: item.message,
-              headline: item.headline,
-              Description: item.Description,
+              message: toCommaString(item.message),
+              headline: toCommaString(item.headline),
+              Description: toCommaString(item.Description),
               Caption: item.Caption,
               Website_URL: item.Website_URL,
               AddName: item.AddName,
@@ -9918,9 +9921,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
           const newAd = {
             id: uuidv4(),
             page_id: item.page_id,
-            message: item.message,
-            headline: item.headline,
-            Description: item.Description,
+            message: toCommaString(item.message),
+            headline: toCommaString(item.headline),
+            Description: toCommaString(item.Description),
             Caption: item.Caption,
             Website_URL: item.Website_URL,
             AddName: item.AddName,
@@ -10999,55 +11002,118 @@ const CloneMultipleAdsetCampaignDrawer = ({
     //   return { ...prev, ...adsetAddLevelData };
     // });
 
-    const extractFilenames = (filename) => {
+    // const extractFilenames = (filename) => {
+    //   if (Array.isArray(filename)) {
+    //     return filename.map(f => f.filename);
+    //   }
+    //   return filename ? [filename] : [];
+    // };
+
+    const extractFilenames = (filename, id) => {
       if (Array.isArray(filename)) {
-        return filename.map(f => f.filename);
+        return filename.map(f => ({
+          filename: f.filename,
+          ...(f.imag_hash
+            ? { imag_hash: f.imag_hash }
+            : {
+              video_id: f.video_id,
+              thambnailurl: f.thambnailurl,
+            }),
+          id: uuidv4(),
+        }));
       }
-      return filename ? [filename] : [];
+      return filename ? [{ filename: filename, id: id }] : [];
     };
 
-
-
-    setAddLevelData((prev) => {
+    const buildAdsetAddLevelData = () => {
       const adsetAddLevelData = {};
 
       adsetObjects.forEach((adsetObj) => {
         const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
-          const filenames = extractFilenames(item.filename);
+          const filenames = extractFilenames(item.filename, item.id);
 
           return filenames.map((name, i) => ({
             ...item,
-            filename: name,          // normalized single filename
-            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+            id: name.id,
+            filename: name.filename,
+            ...(name.imag_hash
+              ? { imag_hash: name.imag_hash }
+              : name.video_id ? {
+                video_id: name.video_id,
+                thambnailurl: name.thambnailurl,
+              } : {}),
+            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}_${i + 1}`,
+            ...(
+              adsetObj?.Adsetid &&
+                adsetObj?.is_dynamic_creative === true
+                ? { Addid: null }
+                : {}
+            ),
+
           }));
         });
 
         adsetAddLevelData[adsetObj.id] = newArray;
       });
 
-      return { ...prev, ...adsetAddLevelData };
-    });
+      return adsetAddLevelData;
+    };
+    const adsetAddLevelData = buildAdsetAddLevelData();
+
+    console.log(adsetAddLevelData, "test");
+
+    setAddLevelData((prev) => ({
+      ...prev,
+      ...adsetAddLevelData,
+    }));
+
+    setNewAddLevelData((prev) => ({
+      ...prev,
+      ...adsetAddLevelData,
+    }));
 
 
-    setNewAddLevelData((prev) => {
-      const adsetAddLevelData = {};
 
-      adsetObjects.forEach((adsetObj) => {
-        const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
-          const filenames = extractFilenames(item.filename);
+    // setAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
 
-          return filenames.map((name, i) => ({
-            ...item,
-            filename: name,
-            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
-          }));
-        });
+    //   adsetObjects.forEach((adsetObj) => {
+    //     const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+    //       const filenames = extractFilenames(item.filename);
 
-        adsetAddLevelData[adsetObj.id] = newArray;
-      });
+    //       return filenames.map((name, i) => ({
+    //         ...item,
+    //         filename: name,          // normalized single filename
+    //         AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+    //       }));
+    //     });
 
-      return { ...prev, ...adsetAddLevelData };
-    });
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
+
+
+    // setNewAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+
+    //   adsetObjects.forEach((adsetObj) => {
+    //     const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+    //       const filenames = extractFilenames(item.filename);
+
+    //       return filenames.map((name, i) => ({
+    //         ...item,
+    //         filename: name,
+    //         AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+    //       }));
+    //     });
+
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
 
 
 
@@ -11165,16 +11231,23 @@ const CloneMultipleAdsetCampaignDrawer = ({
     adsetObjects.forEach((adsetObj) => {
       const uuid = adsetObj.id ?? uuidv4();
 
-      updatedSelectedFiles[uuid] = adsetObj.addlevel
-        ? mapped(adsetObj.addlevel)
-        : [];
-      updatedSelectedCreatives[uuid] = adsetObj.addlevel
-        ? mapped(adsetObj.addlevel)
-        : [];
+      // updatedSelectedFiles[uuid] = adsetObj.addlevel
+      //   ? mapped(adsetObj.addlevel)
+      //   : [];
+      // updatedSelectedCreatives[uuid] = adsetObj.addlevel
+      //   ? mapped(adsetObj.addlevel)
+      //   : [];
       updatedSelectedPositions[uuid] = getPositionsByKeys(
         adsetObj.position || []
       );
       updatedSelectedPublishers[uuid] = adsetObj.publisher_platforms || [];
+    });
+
+    Object.entries(adsetAddLevelData).forEach(([key, adsetObj]) => {
+      console.log(key, adsetObj, "keyvalue");
+      console.log(mapped(adsetObj), "mappedvalue");
+      updatedSelectedFiles[key] = mapped(adsetObj) || [];
+      updatedSelectedCreatives[key] = mapped(adsetObj) || [];
     });
 
     setSelectedFiles(updatedSelectedFiles);

@@ -9962,160 +9962,638 @@ const EditMultipleAdsetCampaignDrawer = ({
       console.log(addlevelData, "addlevelData");
       console.log(newAddLevelData, "newAddLevelData");
 
-      const newAddLevelForDynamicAds = []
+      const buildNewDynamicAdPayload = async ({
+        items,
+        oldItems = []
+      }) => {
+        const imagesHashArray = [];
+        const getTheImages = [];
+        const getTheVideos = [];
 
-      const newAddLevel = await Promise.all(
-        newAddLevelData[newAdset.id].map(async (item) => {
-          console.log(item, "item in newAddLevel");
-          const getItem =
-            addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
-          if (Object.keys(getItem).length > 0) {
-            const newUpdatedAd = { id: item.id, page_id: item.page_id };
-            if (Object.keys(getItem).length > 0 && item.Addid) {
-              newUpdatedAd["Addid"] = item.Addid;
-            }
-            if (Object.keys(getItem).length > 0 && item.Ad_Status) {
-              newUpdatedAd["Ad_Status"] = item.Ad_Status;
-            }
-            if (Object.keys(getItem).length > 0 && item.status) {
-              newUpdatedAd["status"] = item.status;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.message === getItem.message
-            ) {
-              newUpdatedAd["message"] = item.message;
-            } else {
-              newUpdatedAd["message"] = item.message;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.headline === getItem.headline
-            ) {
-              newUpdatedAd["headline"] = item.headline;
-            } else {
-              newUpdatedAd["headline"] = item.headline;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Description === getItem.Description
-            ) {
-              newUpdatedAd["Description"] = item.Description;
-            } else {
-              newUpdatedAd["Description"] = item.Description;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Caption === getItem.Caption
-            ) {
-              newUpdatedAd["Caption"] = item.Caption;
-            } else {
-              newUpdatedAd["Caption"] = item.Caption;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Website_URL === getItem.Website_URL
-            ) {
-              newUpdatedAd["Website_URL"] = item.Website_URL;
-            } else {
-              newUpdatedAd["Website_URL"] = item.Website_URL;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.AddName === getItem.AddName
-            ) {
-              newUpdatedAd["AddName"] = item.AddName;
-            } else {
-              newUpdatedAd["AddName"] = item.AddName;
-              newUpdatedAd["re_lunch_addname"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.filename === getItem.filename
-            ) {
-              newUpdatedAd["filename"] = item.filename;
-              if (item.imag_hash) {
-                newUpdatedAd["imag_hash"] = item.imag_hash;
-              } else {
-                newUpdatedAd["videoid"] = getItem.videoid;
-                newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+        for (const item of items) {
+          // 🔍 find old file by filename
+          const oldFile = oldItems.find(o => o.filename === item.filename);
+
+          let fileData;
+
+          // ✅ SAME filename → reuse
+          if (oldFile) {
+            fileData = oldFile;
+          }
+          // ❌ DIFFERENT filename → fetch new
+          else {
+            fileData = await getFilenameDeatials(item.filename);
+          }
+
+          if (!fileData || !Object.keys(fileData).length) continue;
+
+          imagesHashArray.push(fileData);
+
+          if (fileData.imag_hash) {
+            getTheImages.push(fileData.imag_hash);
+          }
+
+          if (fileData.videoid) {
+            getTheVideos.push({
+              video_id: fileData.videoid,
+              thumbnail_url: fileData.thambnailurl,
+            });
+          }
+        }
+        const mainItem = items[0];
+        return [
+          {
+            id: uuidv4(),
+            AddName: newAdset.AddName,
+
+            filename: imagesHashArray.map(m =>
+              m.imag_hash
+                ? { filename: m.filename, imag_hash: m.imag_hash }
+                : {
+                  filename: m.filename,
+                  video_id: m.videoid,
+                  thumbnailurl: m.thambnailurl,
+                }
+            ),
+
+            imag_hash: imagesHashArray
+              .filter(m => m.imag_hash)
+              .map(m => m.imag_hash),
+
+            images: getTheImages?.map(item => ({ hash: item })) || [],
+
+            videos: getTheVideos.length ? getTheVideos : [],
+
+            page_id: mainItem.page_id,
+
+            message: newAdset?.messages,
+            headline: newAdset.headlines,
+            Description: newAdset.descriptions,
+            Caption: mainItem?.Caption,
+            Website_URL: mainItem?.Website_URL,
+
+            call_to_action_types: ["LEARN_MORE"],
+
+            ad_formats: [
+              ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
+              ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
+            ],
+          },
+        ];
+      };
+
+      // const buildDynamicAdPayloadForExistingAdset = async ({
+      //   items,
+      //   oldItems = [],
+      // }) => {
+      //   let re_lunch = false;
+      //   let send_re_launch_status = false;
+
+      //   const updatedAds = await Promise.all(
+      //     items.map(async (item) => {
+      //       const oldItem = oldItems.find(o => o.id === item.id) || {};
+      //       const hasOld = Object.keys(oldItem).length > 0;
+
+      //       const updatedAd = {
+      //         id: item.id,
+      //         page_id: item.page_id,
+      //       };
+
+      //       if (item.Addid) updatedAd.Addid = item.Addid;
+      //       if (item.Ad_Status) updatedAd.Ad_Status = item.Ad_Status;
+      //       if (item.status) updatedAd.status = item.status;
+
+      //       let addNameChanged = false;
+      //       let otherChanged = false;
+
+      //       const fields = [
+      //         "message",
+      //         "headline",
+      //         "Description",
+      //         "Caption",
+      //         "Website_URL",
+      //         "AddName",
+      //       ];
+
+      //       fields.forEach((field) => {
+      //         updatedAd[field] = item[field];
+
+      //         if (!hasOld) return;
+
+      //         if (item[field] !== oldItem[field]) {
+      //           if (field === "AddName") {
+      //             addNameChanged = true;
+      //           } else {
+      //             otherChanged = true;
+      //           }
+      //         }
+      //       });
+
+      //       // 🔑 Apply flags AFTER comparison
+      //       if (addNameChanged) {
+      //         updatedAd.re_lunch_addname = true;
+      //         send_re_launch_status = true;
+      //       }
+
+      //       if (otherChanged) {
+      //         updatedAd.re_lunch = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+
+      //       // 🖼️ / 🎥 FILE HANDLING
+      //       if (hasOld && item.filename === oldItem.filename) {
+      //         updatedAd.filename = item.filename;
+
+      //         if (oldItem.imag_hash) {
+      //           updatedAd.imag_hash = oldItem.imag_hash;
+      //         } else {
+      //           updatedAd.videoid = oldItem.videoid;
+      //           updatedAd.thambnailurl = oldItem.thambnailurl;
+      //         }
+      //       } else {
+      //         const fileData = await getFilenameDeatials(item.filename);
+
+      //         if (Object.keys(fileData).length > 0) {
+      //           updatedAd.filename = fileData.filename;
+      //           updatedAd.re_lunch = true;
+      //           send_re_launch_status = true;
+      //           re_lunch = true;
+
+      //           if (fileData.imag_hash) {
+      //             updatedAd.imag_hash = fileData.imag_hash;
+      //           } else if (fileData.videoid) {
+      //             updatedAd.videoid = fileData.videoid;
+      //             updatedAd.thambnailurl = fileData.thambnailurl;
+      //           }
+      //         }
+      //       }
+
+      //       return updatedAd;
+      //     })
+      //   );
+
+      //   return {
+      //     updatedAds,
+      //     re_lunch,
+      //     send_re_launch_status,
+      //   };
+      // };
+
+      const isSameArray = (a = [], b = []) =>
+        JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+
+      const buildDynamicAdPayloadForExistingAdset = async ({
+        items,
+        oldItems = [],
+        page_id,
+        AddName,
+      }) => {
+        let addNameChanged = false;
+        let otherChanged = false;
+
+        const imagesHashArray = [];
+        const getTheImages = [];
+        const getTheVideos = [];
+
+        // 🔁 Compare TEXT FIELDS (Dynamic ads → shared text)
+        const mainItem = { message: formValuesObject.messages, headline: formValuesObject.headlines, Description: formValuesObject.descriptions, Caption: formValuesObject.Caption, Website_URL: formValuesObject.Website_URL, status: findMatchingAdset?.addlevel[0].status, Addid: findMatchingAdset?.addlevel[0].Addid, Ad_Status: findMatchingAdset?.addlevel[0].Ad_Status };
+        const oldMainItem = { message: findMatchingAdset.messages, headline: findMatchingAdset.headlines, Description: findMatchingAdset.descriptions };
+        const oldAddName = findMatchingAdset?.addlevel[0]?.AddName || "";
+
+        // 🔹 Ad Name check
+        if (AddName !== oldAddName) {
+          addNameChanged = true;
+        }
+
+        // 🔹 Array-based fields
+        const arrayFields = ["message", "headline", "Description"];
+        arrayFields.forEach((field) => {
+          const newVal = mainItem[field] || [];
+          const oldVal = oldMainItem[field] || [];
+          if (!isSameArray(newVal, oldVal)) {
+            otherChanged = true;
+          }
+        });
+
+        // 🔹 String-based fields
+        const stringFields = ["Caption", "Website_URL"];
+        stringFields.forEach((field) => {
+          if (mainItem[field] !== oldMainItem[field]) {
+            otherChanged = true;
+          }
+        });
+
+        // 🖼️ / 🎥 FILE HANDLING
+        for (const item of items) {
+          const oldFile = oldItems.find(o => o.filename === item.filename);
+          let fileData;
+
+          if (oldFile) {
+            fileData = oldFile;
+          } else {
+            fileData = await getFilenameDeatials(item.filename);
+            otherChanged = true;
+          }
+
+          if (!fileData || !Object.keys(fileData).length) continue;
+
+          imagesHashArray.push(fileData);
+
+          if (fileData.imag_hash) {
+            getTheImages.push(fileData.imag_hash);
+          }
+
+          if (fileData.videoid) {
+            getTheVideos.push({
+              video_id: fileData.videoid,
+              thumbnail_url: fileData.thambnailurl,
+            });
+          }
+        }
+
+        // ✅ RETURN ONLY SINGLE OBJECT ARRAY
+        return [
+          {
+            id: uuidv4(),
+            AddName,
+            status: mainItem.status,
+            Addid: mainItem.Addid,
+            Ad_Status: mainItem.Ad_Status,
+
+            filename: imagesHashArray.map(m =>
+              m.imag_hash
+                ? { filename: m.filename, imag_hash: m.imag_hash }
+                : {
+                  filename: m.filename,
+                  video_id: m.videoid,
+                  thumbnailurl: m.thambnailurl,
+                }
+            ),
+
+            imag_hash: imagesHashArray
+              .filter(m => m.imag_hash)
+              .map(m => m.imag_hash),
+
+            images: getTheImages.map(hash => ({ hash })),
+
+            videos: getTheVideos.length ? getTheVideos : [],
+
+            page_id,
+
+            message: mainItem.message,
+            headline: mainItem.headline,
+            Description: mainItem.Description,
+            Caption: mainItem.Caption,
+            Website_URL: mainItem.Website_URL,
+
+            call_to_action_types: ["LEARN_MORE"],
+
+            ad_formats: [
+              ...(getTheImages.length ? ["SINGLE_IMAGE"] : []),
+              ...(getTheVideos.length ? ["SINGLE_VIDEO"] : []),
+            ],
+
+            ...(addNameChanged && { re_lunch_addname: true }),
+            ...(otherChanged && { re_lunch: true }),
+          },
+        ];
+      };
+
+
+
+      let newAddLevel = [];
+
+      if (newAdset.isDynamicCreative) {
+        if (!newAdset.Adsetid) {
+          newAddLevel = await buildNewDynamicAdPayload({
+            items: newAddLevelData[newAdset.id],
+            oldItems: addlevelData[newAdset.id] || [],
+          });
+        }
+        else {
+          newAddLevel = await buildDynamicAdPayloadForExistingAdset({
+            items: newAddLevelData[newAdset.id],
+            oldItems: addlevelData[newAdset.id] || [],
+            page_id: addlevelData[newAdset.id][0]?.page_id,
+            AddName: formValuesObject?.AddName || ""
+          });
+        }
+
+      }
+      else {
+        newAddLevel = await Promise.all(
+          newAddLevelData[newAdset.id].map(async (item) => {
+            console.log(item, "item in newAddLevel");
+            const toCommaString = (value) =>
+              Array.isArray(value) ? value.join(", ") : value;
+            const getItem =
+              addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
+            if (Object.keys(getItem).length > 0) {
+              const newUpdatedAd = { id: item.id, page_id: item.page_id };
+              if (Object.keys(getItem).length > 0 && item.Addid) {
+                newUpdatedAd["Addid"] = item.Addid;
               }
-            } else {
-              re_lunch = true;
-              newUpdatedAd["filename"] = item.filename;
-              console.log(Object.keys(getItem).length > 0 &&
-                item.filename === getItem.filename);
-              console.log(item.filename !== getItem.filename);
-              console.log(Object.keys(getItem).length > 0);
-              console.log(item.filename === getItem.filename);
-              console.log("existing filename is changed");
-              console.log(item.filename, "item.filename");
-              console.log(getItem.filename, "getItem.filename");
-              const updatedFilesDeatils = await getFilenameDeatials(
-                item.filename
-              );
-              if (Object.keys(updatedFilesDeatils).length > 0) {
-                if (updatedFilesDeatils.imag_hash) {
-                  newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
-                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                  newUpdatedAd["re_lunch"] = true;
-                  send_re_launch_status = true;
-                } else if (updatedFilesDeatils.videoid) {
-                  newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
-                  newUpdatedAd["thambnailurl"] =
-                    updatedFilesDeatils.thambnailurl;
-                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                  newUpdatedAd["re_lunch"] = true;
-                  send_re_launch_status = true;
+              if (Object.keys(getItem).length > 0 && item.Ad_Status) {
+                newUpdatedAd["Ad_Status"] = item.Ad_Status;
+              }
+              if (Object.keys(getItem).length > 0 && item.status) {
+                newUpdatedAd["status"] = item.status;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.message === getItem.message
+              ) {
+                newUpdatedAd["message"] = toCommaString(item.message);
+              } else {
+                newUpdatedAd["message"] = toCommaString(item.message);
+                newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.headline === getItem.headline
+              ) {
+                newUpdatedAd["headline"] = toCommaString(item.headline);
+              } else {
+                newUpdatedAd["headline"] = toCommaString(item.headline);
+                newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.Description === getItem.Description
+              ) {
+                newUpdatedAd["Description"] = toCommaString(item.Description);
+              } else {
+                newUpdatedAd["Description"] = toCommaString(item.Description);
+                newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.Caption === getItem.Caption
+              ) {
+                newUpdatedAd["Caption"] = item.Caption;
+              } else {
+                newUpdatedAd["Caption"] = item.Caption;
+                newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.Website_URL === getItem.Website_URL
+              ) {
+                newUpdatedAd["Website_URL"] = item.Website_URL;
+              } else {
+                newUpdatedAd["Website_URL"] = item.Website_URL;
+                newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.AddName === getItem.AddName
+              ) {
+                newUpdatedAd["AddName"] = item.AddName;
+              } else {
+                newUpdatedAd["AddName"] = item.AddName;
+                newUpdatedAd["re_lunch_addname"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.filename === getItem.filename
+              ) {
+                newUpdatedAd["filename"] = item.filename;
+                if (item.imag_hash) {
+                  newUpdatedAd["imag_hash"] = item.imag_hash;
+                } else {
+                  newUpdatedAd["videoid"] = getItem.videoid;
+                  newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+                }
+              } else {
+                re_lunch = true;
+                newUpdatedAd["filename"] = item.filename;
+                console.log(Object.keys(getItem).length > 0 &&
+                  item.filename === getItem.filename);
+                console.log(item.filename !== getItem.filename);
+                console.log(Object.keys(getItem).length > 0);
+                console.log(item.filename === getItem.filename);
+                console.log("existing filename is changed");
+                console.log(item.filename, "item.filename");
+                console.log(getItem.filename, "getItem.filename");
+                const updatedFilesDeatils = await getFilenameDeatials(
+                  item.filename
+                );
+                if (Object.keys(updatedFilesDeatils).length > 0) {
+                  if (updatedFilesDeatils.imag_hash) {
+                    newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
+                    newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+                    newUpdatedAd["re_lunch"] = true;
+                    send_re_launch_status = true;
+                  } else if (updatedFilesDeatils.videoid) {
+                    newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
+                    newUpdatedAd["thambnailurl"] =
+                      updatedFilesDeatils.thambnailurl;
+                    newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+                    newUpdatedAd["re_lunch"] = true;
+                    send_re_launch_status = true;
+                  }
                 }
               }
+              return newUpdatedAd;
+            } else {
+              console.log("new ad created in adlevel");
+              const fileData = await getFilenameDeatials(item.filename);
+              re_lunch = true;
+              send_re_launch_status = true;
+
+              const newAd = {
+                id: item.id,
+                page_id: item.page_id,
+                message: toCommaString(item.message),
+                headline: toCommaString(item.headline),
+                Description: toCommaString(item.Description),
+                Caption: item.Caption,
+                Website_URL: item.Website_URL,
+                AddName: item.AddName,
+              };
+              if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
+                newAd["imag_hash"] = fileData.imag_hash;
+                newAd["filename"] = fileData.filename;
+              }
+              if (Object.keys(fileData).length > 0 && fileData.videoid) {
+                newAd["videoid"] = fileData.videoid;
+                newAd["filename"] = fileData.filename;
+                newAd["thambnailurl"] = fileData.thambnailurl;
+              }
+              return newAd;
             }
-            return newUpdatedAd;
-          } else {
-            console.log("new ad created in adlevel");
-            const fileData = await getFilenameDeatials(item.filename);
-            re_lunch = true;
-            send_re_launch_status = true;
-            const newAd = {
-              id: item.id,
-              page_id: item.page_id,
-              message: item.message,
-              headline: item.headline,
-              Description: item.Description,
-              Caption: item.Caption,
-              Website_URL: item.Website_URL,
-              AddName: item.AddName,
-            };
-            if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
-              newAd["imag_hash"] = fileData.imag_hash;
-              newAd["filename"] = fileData.filename;
-            }
-            if (Object.keys(fileData).length > 0 && fileData.videoid) {
-              newAd["videoid"] = fileData.videoid;
-              newAd["filename"] = fileData.filename;
-              newAd["thambnailurl"] = fileData.thambnailurl;
-            }
-            return newAd;
-          }
-        })
-      );
+          })
+        );
+      }
+
+
+
+
+      // const newAddLevel = await Promise.all(
+      //   newAddLevelData[newAdset.id].map(async (item) => {
+      //     console.log(item, "item in newAddLevel");
+      //     const getItem =
+      //       addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
+      //     if (Object.keys(getItem).length > 0) {
+      //       const newUpdatedAd = { id: item.id, page_id: item.page_id };
+      //       if (Object.keys(getItem).length > 0 && item.Addid) {
+      //         newUpdatedAd["Addid"] = item.Addid;
+      //       }
+      //       if (Object.keys(getItem).length > 0 && item.Ad_Status) {
+      //         newUpdatedAd["Ad_Status"] = item.Ad_Status;
+      //       }
+      //       if (Object.keys(getItem).length > 0 && item.status) {
+      //         newUpdatedAd["status"] = item.status;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.message === getItem.message
+      //       ) {
+      //         newUpdatedAd["message"] = item.message;
+      //       } else {
+      //         newUpdatedAd["message"] = item.message;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.headline === getItem.headline
+      //       ) {
+      //         newUpdatedAd["headline"] = item.headline;
+      //       } else {
+      //         newUpdatedAd["headline"] = item.headline;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Description === getItem.Description
+      //       ) {
+      //         newUpdatedAd["Description"] = item.Description;
+      //       } else {
+      //         newUpdatedAd["Description"] = item.Description;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Caption === getItem.Caption
+      //       ) {
+      //         newUpdatedAd["Caption"] = item.Caption;
+      //       } else {
+      //         newUpdatedAd["Caption"] = item.Caption;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Website_URL === getItem.Website_URL
+      //       ) {
+      //         newUpdatedAd["Website_URL"] = item.Website_URL;
+      //       } else {
+      //         newUpdatedAd["Website_URL"] = item.Website_URL;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.AddName === getItem.AddName
+      //       ) {
+      //         newUpdatedAd["AddName"] = item.AddName;
+      //       } else {
+      //         newUpdatedAd["AddName"] = item.AddName;
+      //         newUpdatedAd["re_lunch_addname"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.filename === getItem.filename
+      //       ) {
+      //         newUpdatedAd["filename"] = item.filename;
+      //         if (item.imag_hash) {
+      //           newUpdatedAd["imag_hash"] = item.imag_hash;
+      //         } else {
+      //           newUpdatedAd["videoid"] = getItem.videoid;
+      //           newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+      //         }
+      //       } else {
+      //         re_lunch = true;
+      //         newUpdatedAd["filename"] = item.filename;
+      //         console.log(Object.keys(getItem).length > 0 &&
+      //           item.filename === getItem.filename);
+      //         console.log(item.filename !== getItem.filename);
+      //         console.log(Object.keys(getItem).length > 0);
+      //         console.log(item.filename === getItem.filename);
+      //         console.log("existing filename is changed");
+      //         console.log(item.filename, "item.filename");
+      //         console.log(getItem.filename, "getItem.filename");
+      //         const updatedFilesDeatils = await getFilenameDeatials(
+      //           item.filename
+      //         );
+      //         if (Object.keys(updatedFilesDeatils).length > 0) {
+      //           if (updatedFilesDeatils.imag_hash) {
+      //             newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
+      //             newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+      //             newUpdatedAd["re_lunch"] = true;
+      //             send_re_launch_status = true;
+      //           } else if (updatedFilesDeatils.videoid) {
+      //             newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
+      //             newUpdatedAd["thambnailurl"] =
+      //               updatedFilesDeatils.thambnailurl;
+      //             newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+      //             newUpdatedAd["re_lunch"] = true;
+      //             send_re_launch_status = true;
+      //           }
+      //         }
+      //       }
+      //       return newUpdatedAd;
+      //     } else {
+      //       console.log("new ad created in adlevel");
+      //       const fileData = await getFilenameDeatials(item.filename);
+      //       re_lunch = true;
+      //       send_re_launch_status = true;
+      //       const newAd = {
+      //         id: item.id,
+      //         page_id: item.page_id,
+      //         message: item.message,
+      //         headline: item.headline,
+      //         Description: item.Description,
+      //         Caption: item.Caption,
+      //         Website_URL: item.Website_URL,
+      //         AddName: item.AddName,
+      //       };
+      //       if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
+      //         newAd["imag_hash"] = fileData.imag_hash;
+      //         newAd["filename"] = fileData.filename;
+      //       }
+      //       if (Object.keys(fileData).length > 0 && fileData.videoid) {
+      //         newAd["videoid"] = fileData.videoid;
+      //         newAd["filename"] = fileData.filename;
+      //         newAd["thambnailurl"] = fileData.thambnailurl;
+      //       }
+      //       return newAd;
+      //     }
+      //   })
+      // );
 
       console.log(newAddLevel, "newAddLevel");
 
@@ -10167,9 +10645,19 @@ const EditMultipleAdsetCampaignDrawer = ({
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
           AdsetsData["Budget_type"] = budgetType;
+          console.log(formValuesObject.isDynamicCreative, "isDynamicCreative");
+          console.log(formValuesObject.is_dynamic_creative, "is_dynamic_creative");
+          console.log(findMatchingAdset.isDynamicCreative, "isDynamicCreative");
+          console.log(findMatchingAdset.is_dynamic_creative, "is_dynamic_creative");
+          if (formValuesObject.isDynamicCreative) AdsetsData["is_dynamic_creative"] = true;
         } else {
           AdsetsData["id"] = formValuesObject.id;
           AdsetsData["Budget_type"] = budgetType;
+          console.log(formValuesObject.isDynamicCreative, "isDynamicCreative");
+          console.log(formValuesObject.is_dynamic_creative, "is_dynamic_creative");
+          console.log(findMatchingAdset.isDynamicCreative, "isDynamicCreative");
+          console.log(findMatchingAdset.is_dynamic_creative, "is_dynamic_creative");
+          if (formValuesObject.isDynamicCreative) AdsetsData["is_dynamic_creative"] = formValuesObject.isDynamicCreative;
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
           AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
@@ -10729,6 +11217,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         AdsetsData["Gender"] = parseInt(formValuesObject.Gender);
         AdsetsData["locales"] = formValuesObject.Language;
         AdsetsData["placements"] = formValuesObject.placements;
+        if (formValuesObject.isDynamicCreative) AdsetsData["is_dynamic_creative"] = true;
         if (formValuesObject.placements !== "Advance") {
           AdsetsData["publisher_platforms"] = formValuesObject.platforms;
           AdsetsData["Facebook_positions"] =
@@ -11699,10 +12188,10 @@ const EditMultipleAdsetCampaignDrawer = ({
               video_id: f.video_id,
               thambnailurl: f.thambnailurl,
             }),
-            id:uuidv4(),
+          id: uuidv4(),
         }));
       }
-      return filename ? [{filename:filename, id: id}] : [];
+      return filename ? [{ filename: filename, id: id }] : [];
     };
 
     const buildAdsetAddLevelData = () => {
@@ -11717,12 +12206,19 @@ const EditMultipleAdsetCampaignDrawer = ({
             id: name.id,
             filename: name.filename,
             ...(name.imag_hash
-            ? { imag_hash: name.imag_hash }
-            : name.video_id ?{
-              video_id: name.video_id,
-              thambnailurl: name.thambnailurl,
-            } : {}),
-            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+              ? { imag_hash: name.imag_hash }
+              : name.video_id ? {
+                video_id: name.video_id,
+                thambnailurl: name.thambnailurl,
+              } : {}),
+            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}_${i + 1}`,
+            ...(
+              adsetObj?.Adsetid &&
+                adsetObj?.is_dynamic_creative === true
+                ? { Addid: null }
+                : {}
+            ),
+
           }));
         });
 
@@ -11732,6 +12228,8 @@ const EditMultipleAdsetCampaignDrawer = ({
       return adsetAddLevelData;
     };
     const adsetAddLevelData = buildAdsetAddLevelData();
+
+    console.log(adsetAddLevelData, "test");
 
     setAddLevelData((prev) => ({
       ...prev,
@@ -11806,7 +12304,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       Language: adsetObj.locales,
       placements: adsetObj.placements,
       position: adsetObj.position || [],
-      AddName: adsetObj.addlevel[0]?.AddName.split("_").slice(0, -1).join("_"),
+      AddName: adsetObj.is_dynamic_creative ? adsetObj.addlevel[0]?.AddName : adsetObj.addlevel[0]?.AddName.split("_").slice(0, -1).join("_"),
       filename: adsetObj.addlevel[0]?.filename,
       message: adsetObj.addlevel[0]?.message,
       headline: adsetObj.addlevel[0]?.headline,
@@ -11890,20 +12388,38 @@ const EditMultipleAdsetCampaignDrawer = ({
     adsetObjects.forEach((adsetObj) => {
       const uuid = adsetObj.id ?? uuidv4();
 
-      updatedSelectedFiles[uuid] = adsetObj.addlevel
-        ? mapped(adsetObj.addlevel)
-        : [];
-      updatedSelectedCreatives[uuid] = adsetObj.addlevel
-        ? mapped(adsetObj.addlevel)
-        : [];
+      console.log(adsetObj, "adsetObj");
+      console.log(mapped(adsetObj.addlevel), "mappedadsetObj");
+
+      // updatedSelectedFiles[uuid] = adsetObj.addlevel
+      //   ? mapped(adsetObj.addlevel)
+      //   : [];
+      // updatedSelectedCreatives[uuid] = adsetObj.addlevel
+      //   ? mapped(adsetObj.addlevel)
+      //   : [];
       updatedSelectedPositions[uuid] = getPositionsByKeys(
         adsetObj.position || []
       );
       updatedSelectedPublishers[uuid] = adsetObj.publisher_platforms || [];
     });
 
+    // adsetAddLevelData.forEach((adsetObj)=> {
+    //   updatedSelectedFiles[adsetObj.id] = mapped(adsetObj.id);
+    //   updatedSelectedCreatives[adsetObj.id] = mapped(adsetObj.id);
+    // });
+
+    Object.entries(adsetAddLevelData).forEach(([key, adsetObj]) => {
+      console.log(key, adsetObj, "keyvalue");
+      console.log(mapped(adsetObj), "mappedvalue");
+      updatedSelectedFiles[key] = mapped(adsetObj) || [];
+      updatedSelectedCreatives[key] = mapped(adsetObj) || [];
+    });
+
+
     setSelectedFiles(updatedSelectedFiles);
     setSelectedFilesFromCreatives(updatedSelectedCreatives);
+    // setSelectedFiles(adsetAddLevelData);
+    // setSelectedFilesFromCreatives(adsetAddLevelData);
     setSelectedPositions(updatedSelectedPositions);
     setSelectedPublishers(updatedSelectedPublishers);
 
