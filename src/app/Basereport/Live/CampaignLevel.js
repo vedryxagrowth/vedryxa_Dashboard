@@ -238,8 +238,36 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         ])
     }, [memorizedRowData]);
 
-    const onBtExport1 = () => {
-        console.log(gridRef.current.api, "in")
+    // const onBtExport1 = () => {
+    //     console.log(gridRef.current.api, "in")
+    //     const Details = {
+    //         network: newRevenuePratner,
+    //         account: newaccount,
+    //         dateRange: `From ${startDate} to ${endDate}`,
+    //         type: "Live",
+    //         email: userdetails?.email,
+    //         time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+    //     }
+    //     gridRef.current.api.exportDataAsCsv({
+    //         processCellCallback: (params) => {
+    //             const node = params.node;
+    //             if (node.group) {
+    //                 return null;
+    //             }
+    //             return params.value;
+    //         },
+    //         shouldRowBeSkipped: (params) => {
+    //             return params.node.group;
+    //         },
+    //     });
+    //     const updateDetails = async () => {
+    //         await apiClient.post('/UserExportActivities/', { Details });
+    //     }
+    //     updateDetails();
+
+    // };
+     const onBtExport1 = async () => {
+        console.log(gridRef.current.api, "in");
         const Details = {
             network: newRevenuePratner,
             account: newaccount,
@@ -247,24 +275,34 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             type: "Live",
             email: userdetails?.email,
             time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-        }
-        gridRef.current.api.exportDataAsCsv({
-            processCellCallback: (params) => {
-                const node = params.node;
-                if (node.group) {
-                    return null;
-                }
-                return params.value;
-            },
-            shouldRowBeSkipped: (params) => {
-                return params.node.group;
-            },
-        });
-        const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
-        }
-        updateDetails();
+        };
+        const campaignIdNameMap = {};
 
+        gridRef.current.api.forEachLeafNode(node => {
+            const d = node.data;
+            if (d?.campaignid && d?.campaignname) {
+                campaignIdNameMap[String(d.campaignid)] = d.campaignname;
+            }
+        });
+        gridRef.current.api.exportDataAsCsv({
+            processRowGroupCallback: (params) => {
+                return campaignIdNameMap[String(params.node.key)] || params.node.key;
+            },
+            processCellCallback: (params) => {
+                const colId = params.column.getColId();
+
+                if (colId === 'campaignid') {
+                    return params.data?.campaignname || params.value;
+                }
+
+                return params.value;
+            }
+        });
+        try {
+            await apiClient.post('/UserExportActivities/', { Details });
+        } catch (err) {
+            console.error("Export activity logging failed", err);
+        }
     };
     const handleBulkSmartPin = async (action) => {
 
