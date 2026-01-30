@@ -9731,10 +9731,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         let s3FileUrl = null;
         const folderPath = `${network}/${fullCampaignData.Account_Number}/${fullCampaignData.campaign_name}`;
         const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
-          if (!(fileBlob instanceof Blob)) {
-            const response = await fetch(fileBlob);
-            fileBlob = await response.blob();
-          }
+          // if (!(fileBlob instanceof Blob)) {
+          //   const response = await fetch(fileBlob);
+          //   fileBlob = await response.blob();
+          // }
           const fullPath = `${folderPath}/${fileName}`;
           const formData = new FormData();
           formData.append("file", fileBlob, fileName);
@@ -9961,6 +9961,8 @@ const EditMultipleAdsetCampaignDrawer = ({
 
       console.log(addlevelData, "addlevelData");
       console.log(newAddLevelData, "newAddLevelData");
+
+      const newAddLevelForDynamicAds = []
 
       const newAddLevel = await Promise.all(
         newAddLevelData[newAdset.id].map(async (item) => {
