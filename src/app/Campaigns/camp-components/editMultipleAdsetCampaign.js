@@ -59,6 +59,7 @@ import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { Campaign } from "@mui/icons-material";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -2629,9 +2630,13 @@ const AdsetComponent = ({
   setAdsetSchedule,
   adSchedulingToShow,
   selectedByAdset,
+  budgetType,
   setAdSchedulingToShow,
+  setScheduleErrorByAdset,
+  setShowScheduleSubmitError,
+  scheduleErrorByAdset,
   setSelectedByAdset,
-  budgetType
+  adSchedulingToShowCampaign,
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2777,6 +2782,16 @@ const AdsetComponent = ({
     });
   };
 
+  const isValidAdSchedule = (schedule = []) =>
+    Array.isArray(schedule) &&
+    schedule.length > 0 &&
+    schedule.every(
+      s =>
+        s.end_minute > s.start_minute &&
+        Array.isArray(s.days) &&
+        s.days.length > 0
+    );
+
   useEffect(() => {
     if (!adset?.id || !timezoneType) return;
 
@@ -2789,6 +2804,14 @@ const AdsetComponent = ({
       ...prev,
       [adset.id]: schedule
     }));
+    if (isValidAdSchedule(schedule)) {
+      setScheduleErrorByAdset(prev =>
+        prev[adset.id]
+          ? { ...prev, [adset.id]: false }
+          : prev
+      );
+      setShowScheduleSubmitError(false);
+    }
 
   }, [selectedByAdset, adset.id, timezoneType]);
 
@@ -2964,8 +2987,17 @@ const AdsetComponent = ({
 
   const adsetsValues = form.getFieldValue("adsets") || [];
   const currentValue = adsetsValues[index]?.optimization_goal ?? "";
+  // const showScheduling =
+  //   budgetType === "lifetime" && !isCampaignBudgetActive && !!adSchedulingToShow[adset.id];
   const showScheduling =
-    budgetType === "lifetime" && !isCampaignBudgetActive && !!adSchedulingToShow[adset.id];
+    budgetType === "lifetime" && (adSchedulingToShow[adset.id] || adSchedulingToShowCampaign);
+  useEffect(() => {
+    if (adSchedulingToShowCampaign || isCampaignBudgetActive) {
+      setAdSchedulingToShow({});
+      setScheduleErrorByAdset({});
+      setShowScheduleSubmitError(false);
+    }
+  }, [adSchedulingToShowCampaign || isCampaignBudgetActive]);
   const optionsForIndex =
     index === 0
       ? optionsForOptimz_goal
@@ -3601,6 +3633,7 @@ const AdsetComponent = ({
       ]);
     }
   }, [adset?.DailyAdd_amount]);
+
   useEffect(() => {
     if (adset?.is_day_parting_enabled === true) {
       setAdSchedulingToShow(prev => ({
@@ -3609,6 +3642,7 @@ const AdsetComponent = ({
       }));
     }
   }, [adset?.is_day_parting_enabled, adset.id]);
+
   useEffect(() => {
     if (!adset?.id || !Array.isArray(adset.adschedule)) return;
 
@@ -4305,7 +4339,7 @@ const AdsetComponent = ({
                 >
                   <Switch
                     size="small"
-                    disabled={adset?.Adsetid || view}
+                    disabled={adSchedulingToShowCampaign || budgetType === "daily" || isCampaignBudgetActive || view || adset?.Adsetid}
                     checked={!!adSchedulingToShow[adset.id]}
                     style={{
                       backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
@@ -4450,7 +4484,7 @@ const AdsetComponent = ({
                 name={["adsets", index, "timezone_type"]}
                 label={<span style={{ color: "#B4B4B4" }}>Time Zone</span>}
                 rules={[{ required: true, message: "Please select a time zone" }]}
-                initialValue={adset.adschedule?.[0]?.timezone_type}
+                initialValue={adset.adschedule?.[0]?.timezone_type || "ADVERTISER"}
               >
                 <Select
                   disabled={adset?.Adsetid || view}
@@ -4462,68 +4496,85 @@ const AdsetComponent = ({
               </Form.Item>
 
               {/* Schedule Grid */}
-              <div
-                className="schedule-grid"
-                onMouseUp={handleMouseUp}
-                style={{
-                  pointerEvents: adset?.Adsetid || view ? "none" : "auto",
-                  cursor: adset?.Adsetid || view ? "not-allowed" : "pointer",
-                }}
-              >
-                <div className="row header">
-                  <div className="day-cell" />
-                  {Array.from({ length: 24 }).map((_, h) => (
-                    <div key={h} className="hour-label">
-                      {h % 3 === 0
-                        ? h === 0
-                          ? "12 am"
-                          : h < 12
-                            ? `${h} am`
-                            : h === 12
-                              ? "12 pm"
-                              : `${h - 12} pm`
-                        : ""}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  className="schedule-grid"
+                  onMouseUp={handleMouseUp}
+                  style={{
+                    pointerEvents: adset?.Adsetid || view ? "none" : "auto",
+                    cursor: adset?.Adsetid || view ? "not-allowed" : "pointer",
+                  }}
+                >
+
+                  <div className="row header">
+                    <div className="day-cell" />
+                    {Array.from({ length: 24 }).map((_, h) => (
+                      <div key={h} className="hour-label">
+                        {h % 3 === 0
+                          ? h === 0
+                            ? "12 am"
+                            : h < 12
+                              ? `${h} am`
+                              : h === 12
+                                ? "12 pm"
+                                : `${h - 12} pm`
+                          : ""}
+                      </div>
+                    ))}
+                  </div>
+
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
+                    <div key={day} className="row">
+                      <div className="day-cell">{day}</div>
+
+                      {Array.from({ length: 24 }).map((_, h) => {
+                        const key = `${d}-${h}`;
+                        return (
+                          <div
+                            key={h}
+                            className={`hour-cell ${selected[key] ? "active" : ""
+                              } ${h % 3 === 0 ? "group-start" : ""}`}
+                            onMouseDown={() => handleMouseDown(d, h)}
+                            onMouseEnter={() => handleMouseEnter(d, h)}
+                          />
+                        );
+                      })}
                     </div>
                   ))}
-                </div>
-
-                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
-                  <div key={day} className="row">
-                    <div className="day-cell">{day}</div>
+                  {/* Every Day Row */}
+                  <div className="row every-day">
+                    <div className="day-cell">Every Day</div>
 
                     {Array.from({ length: 24 }).map((_, h) => {
-                      const key = `${d}-${h}`;
+                      const isActive = [0, 1, 2, 3, 4, 5, 6].every(
+                        d => selected[`${d}-${h}`]
+                      );
+
                       return (
                         <div
                           key={h}
-                          className={`hour-cell ${selected[key] ? "active" : ""
-                            } ${h % 3 === 0 ? "group-start" : ""}`}
-                          onMouseDown={() => handleMouseDown(d, h)}
-                          onMouseEnter={() => handleMouseEnter(d, h)}
+                          className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
+                            }`}
+                          onMouseDown={() => handleEveryDayToggle(h)}
                         />
                       );
                     })}
                   </div>
-                ))}
-                {/* Every Day Row */}
-                <div className="row every-day">
-                  <div className="day-cell">Every Day</div>
-
-                  {Array.from({ length: 24 }).map((_, h) => {
-                    const isActive = [0, 1, 2, 3, 4, 5, 6].every(
-                      d => selected[`${d}-${h}`]
-                    );
-
-                    return (
-                      <div
-                        key={h}
-                        className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
-                          }`}
-                        onMouseDown={() => handleEveryDayToggle(h)}
-                      />
-                    );
-                  })}
                 </div>
+                {/* {budgetType === "lifetime" &&
+                           scheduleErrorByAdset[adset.id] &&
+                           adSchedulingToShow[adset.id] && (
+                             <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                               Please select at least one valid time slot and day
+                             </div>
+                           )} */}
+                {budgetType === "lifetime" &&
+                  scheduleErrorByAdset[adset.id] &&
+                  (adSchedulingToShowCampaign || adSchedulingToShow[adset.id]) && (
+                    <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                      Please select at least one valid time slot and day
+                    </div>
+                  )}
 
               </div>
             </>
@@ -7469,6 +7520,9 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [adsetSchedule, setAdsetSchedule] = useState({});
   const [selectedByAdset, setSelectedByAdset] = useState({});
   const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
+  const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
+  const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
+  const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
   const [objectivevalue, setObjectiveValue] = useState();
   const isFirstRender = useRef(true);
 
@@ -7686,6 +7740,9 @@ const EditMultipleAdsetCampaignDrawer = ({
         console.log("hello viewdata", ...response.data);
         setFullCampaignData(response?.data[0]);
         setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "daily")
+        setAdSchedulingToShowCampaign(
+          response?.data[0]?.camapaignlevel?.is_day_parting_enabled_campign
+        );
         setPopupInputs(prev => ({
           ...prev,
           reportCat: response?.data[0]?.Category  // <-- value coming from API
@@ -9469,6 +9526,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           setAdSchedulingToShow({});
           setSelectedByAdset({});
           setAdsetSchedule({});
+          setAdSchedulingToShowCampaign(false);
           setAdsets([
             { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
           ]);
@@ -9585,6 +9643,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         fullCampaignData.camapaignlevel.Status;
       AllAdsetsData["camapaignlevel"]["Objectives"] =
         fullCampaignData.camapaignlevel.Objectives;
+
       if (fullCampaignData.camapaignlevel.Name === values.Name) {
         AllAdsetsData["camapaignlevel"]["Name"] =
           fullCampaignData.camapaignlevel.Name;
@@ -9656,6 +9715,13 @@ const EditMultipleAdsetCampaignDrawer = ({
           ] = true;
           send_re_launch_status = true;
         }
+
+      }
+      if (budgetType === "lifetime") {
+        if (adSchedulingToShowCampaign) {
+          AllAdsetsData.camapaignlevel.is_day_parting_enabled_campign = true;
+          AllAdsetsData.camapaignlevel.pacing_type = ["day_parting"];
+        }
       }
     }
     else {
@@ -9670,6 +9736,10 @@ const EditMultipleAdsetCampaignDrawer = ({
           : {}),
         Bid_strategy: values.Bid_strategy,
         Budget_type: budgetType,
+        ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+          is_day_parting_enabled_campign: true,
+          pacing_type: ["day_parting"]
+        }),
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
         access_token: imagehash.token,
@@ -10889,36 +10959,34 @@ const EditMultipleAdsetCampaignDrawer = ({
 
           AdsetsData["locales"] = formValuesObject.Language;
           // Day parting (Ad Scheduling)
-          if (adSchedulingToShow?.[formValuesObject.id]) {
-            // SWITCH ON
+          // if (adSchedulingToShow?.[formValuesObject.id]) {
+          //   // SWITCH ON
+          //   AdsetsData.is_day_parting_enabled = true;
+          //   AdsetsData.pacing_type = ["day_parting"];
+          //   AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
+          // }
+          // Day Parting (Ad Scheduling)
+          if (adSchedulingToShowCampaign) {
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+          else if (adSchedulingToShow?.[formValuesObject.id]) {
             AdsetsData.is_day_parting_enabled = true;
             AdsetsData.pacing_type = ["day_parting"];
-            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
           }
-          //  else {
-          //   // SWITCH OFF
-          //   AdsetsData.is_day_parting_enabled = false;
-          //   AdsetsData.pacing_type = [];
-          //   AdsetsData.adschedule = [];
-          // }
           AdsetsData["re_lunch_targeting"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["locales"] = formValuesObject.Language;
-          // Day parting (Ad Scheduling)
-          if (adSchedulingToShow?.[formValuesObject.id]) {
-            // SWITCH ON
+          if (adSchedulingToShowCampaign) {
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+          else if (adSchedulingToShow?.[formValuesObject.id]) {
             AdsetsData.is_day_parting_enabled = true;
             AdsetsData.pacing_type = ["day_parting"];
-            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
           }
-          // else {
-          //   // SWITCH OFF
-          //   AdsetsData.is_day_parting_enabled = false;
-          //   AdsetsData.pacing_type = [];
-          //   AdsetsData.adschedule = [];
-          // }
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -11263,6 +11331,16 @@ const EditMultipleAdsetCampaignDrawer = ({
         }
 
         AdsetsData["buying_type"] = "AUCTION";
+        if (budgetType === "lifetime") {
+          if (adSchedulingToShowCampaign) {
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+          else if (adSchedulingToShow?.[formValuesObject.id]) {
+            AdsetsData.is_day_parting_enabled = true;
+            AdsetsData.pacing_type = ["day_parting"];
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+        }
         AdsetsData["addlevel"] = newAddLevel;
       }
 
@@ -11776,6 +11854,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     setAdSchedulingToShow({});
     setSelectedByAdset({});
     setAdsetSchedule({});
+    setAdSchedulingToShowCampaign(false);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -13286,8 +13365,28 @@ const EditMultipleAdsetCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label={
+                    // label={
+                    //   <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
+                    // }
+                    label={<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
+                      <Tooltip title="Enable Ad Scheduling"
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                          color: theme === "dark" ? "#fff" : "#333",
+                        }}
+                      >
+                        <Switch
+                          size="small"
+                          disabled={budgetType === "daily" || view || fullCampaignData?.camapaignlevel?.campaignid}
+                          checked={adSchedulingToShowCampaign}
+                          onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
+                          style={{
+                            backgroundColor: adSchedulingToShowCampaign ? "#91C25F" : undefined,
+                          }}
+                        />
+                      </Tooltip>
+                    </div>
                     }
                     rules={[
                       {
@@ -13415,6 +13514,10 @@ const EditMultipleAdsetCampaignDrawer = ({
                   selectedByAdset={selectedByAdset}
                   setAdSchedulingToShow={setAdSchedulingToShow}
                   setSelectedByAdset={setSelectedByAdset}
+                  scheduleErrorByAdset={scheduleErrorByAdset}
+                  setScheduleErrorByAdset={setScheduleErrorByAdset}
+                  setShowScheduleSubmitError={setShowScheduleSubmitError}
+                  adSchedulingToShowCampaign={adSchedulingToShowCampaign}
                   setAddLevelData={setAddLevelData}
                   setNewAddLevelData={setNewAddLevelData}
                   setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
@@ -13546,75 +13649,138 @@ const EditMultipleAdsetCampaignDrawer = ({
                     className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
                   />
                 </Modal>
-                {!view && (
-                  <Button
-                    type="primary"
-                    style={{
-                      background: "#91c25f",
-                      minWidth: "200px",
-                      borderWidth: "0px",
-                    }}
-                    onClick={async () => {
-                      try {
-                        const values = await form.validateFields(); // Validates all form fields
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {!view && (
+                    <Button
+                      type="primary"
+                      style={{
+                        background: "#91c25f",
+                        minWidth: "200px",
+                        borderWidth: "0px",
+                      }}
 
-                        // Check if campaign-level and adset-level budgets are both zero
-                        const campaignLevelDailyBudget = values.Daily_amount;
-                        const isCampaignBudgetActive =
-                          parseFloat(campaignLevelDailyBudget) > 0;
+                      onClick={async () => {
+                        if (budgetType === "lifetime") {
+                          let hasError = false;
+                          const newErrors = {};
+                          if (adSchedulingToShowCampaign) {
+                            adsets.forEach(adset => {
+                              const schedule = adsetSchedule?.[adset.id] || [];
+                              const isValid =
+                                schedule.length > 0 &&
+                                schedule.every(
+                                  s =>
+                                    s.end_minute > s.start_minute &&
+                                    Array.isArray(s.days) &&
+                                    s.days.length > 0
+                                );
 
-                        // Check if any adset has a budget
-                        const isAnyAdsetBudgetSet = values.adsets.some(
-                          (adset) => parseFloat(adset.DailyAdd_amount) > 0
-                        );
+                              if (!isValid) {
+                                newErrors[adset.id] = true;
+                                hasError = true;
+                              }
+                            });
+                          } else {
+                            Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                              if (!adSchedulingToShow[adsetId]) return;
 
-                        // If Campaign Budget is not set, check Adsets
-                        if (!isCampaignBudgetActive) {
-                          const isAllAdsetsFilled = values.adsets.every(
+                              const schedule = adsetSchedule?.[adsetId] || [];
+                              const isValid =
+                                schedule.length > 0 &&
+                                schedule.every(
+                                  s =>
+                                    s.end_minute > s.start_minute &&
+                                    Array.isArray(s.days) &&
+                                    s.days.length > 0
+                                );
+
+                              if (!isValid) {
+                                newErrors[adsetId] = true;
+                                hasError = true;
+                              }
+                            });
+                          }
+
+                          if (hasError) {
+                            setScheduleErrorByAdset(newErrors);
+                            setShowScheduleSubmitError(true);
+                            return;
+                          }
+                          setScheduleErrorByAdset({});
+                          setShowScheduleSubmitError(false);
+                        }
+                        try {
+                          const values = await form.validateFields(); // Validates all form fields
+
+                          // Check if campaign-level and adset-level budgets are both zero
+                          const campaignLevelDailyBudget = values.Daily_amount;
+                          const isCampaignBudgetActive =
+                            parseFloat(campaignLevelDailyBudget) > 0;
+
+                          // Check if any adset has a budget
+                          const isAnyAdsetBudgetSet = values.adsets.some(
                             (adset) => parseFloat(adset.DailyAdd_amount) > 0
                           );
 
-                          if (!isAllAdsetsFilled) {
-                            throw {
-                              errorFields: [
-                                {
-                                  name: ["Daily_amount"], // The field where error occurs
-                                  errors: [
-                                    "Daily budget cannot be zero on both Adset and Campaign levels",
-                                  ], // The error message
-                                },
-                              ],
-                            };
+                          // If Campaign Budget is not set, check Adsets
+                          if (!isCampaignBudgetActive) {
+                            const isAllAdsetsFilled = values.adsets.every(
+                              (adset) => parseFloat(adset.DailyAdd_amount) > 0
+                            );
+
+                            if (!isAllAdsetsFilled) {
+                              throw {
+                                errorFields: [
+                                  {
+                                    name: ["Daily_amount"], // The field where error occurs
+                                    errors: [
+                                      "Daily budget cannot be zero on both Adset and Campaign levels",
+                                    ], // The error message
+                                  },
+                                ],
+                              };
+                            }
                           }
+
+                          // Clear any previous errors
+                          setSubmitErrors([]);
+                          console.log("Form values:", values); // Log form values to verify
+
+                          // Call the onFinish logic, passing in the values
+                          onFinish(values); // Trigger the existing logic for form submission
+
+                          // Optionally trigger confirmation modal (as per your logic)
+                          setIsModalVisible(true);
+
+                          // Save values if needed
+                          setFormValues(values);
+                          setIsCreateCampaignorDraft("createcampaign");
+                        } catch (err) {
+                          // Catch any validation errors thrown by form.validateFields
+                          const allErrors = err?.errorFields?.map((field) => ({
+                            name: field.name?.[0], // field name
+                            message: field.errors?.[0], // validation message
+                          }));
+                          setSubmitErrors(allErrors); // Capture and show validation errors
                         }
-
-                        // Clear any previous errors
-                        setSubmitErrors([]);
-                        console.log("Form values:", values); // Log form values to verify
-
-                        // Call the onFinish logic, passing in the values
-                        onFinish(values); // Trigger the existing logic for form submission
-
-                        // Optionally trigger confirmation modal (as per your logic)
-                        setIsModalVisible(true);
-
-                        // Save values if needed
-                        setFormValues(values);
-                        setIsCreateCampaignorDraft("createcampaign");
-                      } catch (err) {
-                        // Catch any validation errors thrown by form.validateFields
-                        const allErrors = err?.errorFields?.map((field) => ({
-                          name: field.name?.[0], // field name
-                          message: field.errors?.[0], // validation message
-                        }));
-                        setSubmitErrors(allErrors); // Capture and show validation errors
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>
-                )}
-
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  )}
+                  {budgetType === "lifetime" && showScheduleSubmitError && (
+                    <div
+                      style={{
+                        color: "red",
+                        marginTop: 6,
+                        fontSize: 12,
+                        fontWeight: 500,
+                      }}
+                    >
+                      Please select at least one valid time slot and day
+                    </div>
+                  )}
+                </div>
                 {/* <Popconfirm
                                     title="Enter required fields"
                                     description={
