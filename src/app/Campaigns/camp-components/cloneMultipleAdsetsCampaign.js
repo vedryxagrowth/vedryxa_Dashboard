@@ -7450,7 +7450,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         console.log("hello viewdata", ...response.data);
         setFullCampaignData(response?.data[0]);
         console.log(fullCampaignData)
-        setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "Daily")
+        setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "daily")
 
         const campaign = response?.data?.[0];
         setAdSchedulingToShowCampaign(
@@ -10086,8 +10086,6 @@ const CloneMultipleAdsetCampaignDrawer = ({
         locales: formValuesObject.Language,
         ...(adSchedulingToShowCampaign
           ? {
-            is_day_parting_enabled: true,
-            pacing_type: ["day_parting"],
             adschedule: adsetSchedule?.[formValuesObject.id] || [],
           }
           : adSchedulingToShow?.[formValuesObject.id]
