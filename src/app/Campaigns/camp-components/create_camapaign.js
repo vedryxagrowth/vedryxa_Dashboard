@@ -9755,11 +9755,11 @@ const CreateCampaignDrawer = ({
                         .format("YYYY-MM-DDTHH:mm:ssZ"),
                     }
                     : {}),
-                    ...(values.adsets[i].isDynamicCreative
-                  ? {
-                    is_dynamic_creative: true
-                  }
-                  : {}),
+                  ...(values.adsets[i].isDynamicCreative
+                    ? {
+                      is_dynamic_creative: true
+                    }
+                    : {}),
                   action_source: values.adsets[i].action_source,
                   custom_event_type: values.adsets[i].custom_event_type,
                   pixel_id: pixel_id,
@@ -9903,10 +9903,10 @@ const CreateCampaignDrawer = ({
                 AddName: `${values.adsets[i].AddName}`,
                 // filename: imagesHashArray.map(media => ({ filename: media.filename })),
                 filename: imagesHashArray.map(m =>
-                    m.imag_hash
+                  m.imag_hash
                     ? { filename: m.filename, imag_hash: m.imag_hash }
                     : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
-                  ),
+                ),
                 // imag_hash: imagesHashArray.map(media => media.imag_hash),
                 imag_hash: imagesHashArray.map(media => media.imag_hash),
                 images: getTheImages?.map(item => ({ hash: item })) || [],
@@ -10254,6 +10254,10 @@ const CreateCampaignDrawer = ({
             : {}),
           Bid_strategy: values.Bid_strategy,
           Budget_type: budgetType,
+          ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+            is_day_parting_enabled_campign: true,
+            pacing_type: ["day_parting"]
+          }),
           Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
           Status: values.Status,
           // access_token: imagehash.token,
@@ -10334,6 +10338,20 @@ const CreateCampaignDrawer = ({
           Max_Age: values.adsets[i].Max_Age || "",
           Gender: parseInt(values.adsets[i].Gender) || 0,
           locales: values.adsets[i].Language || [6],
+          ...(
+            adSchedulingToShowCampaign
+              ? {
+                adschedule: adsetSchedule?.[adsets[i].id] || [],
+              }
+              :
+              adSchedulingToShow?.[adsets[i].id]
+                ? {
+                  is_day_parting_enabled: true,
+                  pacing_type: ["day_parting"],
+                  adschedule: adsetSchedule?.[adsets[i].id] || [],
+                }
+                : {}
+          ),
           placements: values.adsets[i].placements || "Advance",
           ...(values.adsets[i].placements !== "Advance" && {
             publisher_platforms: values.adsets[i].platforms,
@@ -11137,6 +11155,7 @@ const CreateCampaignDrawer = ({
         Max_Age: adsetObj.Max_Age,
         Gender: adsetObj.Gender,
         showPayer: !!adsetObj.payer,
+        timezone_type: adsetObj.adschedule?.[0]?.timezone_type,
         Beneficiary: adsetObj.beneficiary,
         Payer: adsetObj.payer,
         platforms: adsetObj.publisher_platforms || [],
@@ -11276,12 +11295,64 @@ const CreateCampaignDrawer = ({
 
     checkFormCompletion();
   };
+  const adscheduleToGrid = (adschedule = []) => {
+    const restored = {};
+
+    adschedule.forEach(s => {
+      if (
+        typeof s.start_minute !== "number" ||
+        typeof s.end_minute !== "number" ||
+        !Array.isArray(s.days)
+      ) return;
+
+      s.days.forEach(fbDay => {
+        const uiDay = (fbDay + 6) % 7;
+
+        for (let m = s.start_minute; m < s.end_minute; m += 60) {
+          const hour = m / 60;
+          restored[`${uiDay}-${hour}`] = true;
+        }
+      });
+    });
+
+    return restored;
+  };
+
   const onChangeDraft = (value) => {
     const draft = draftsData.find(d => d.draftId === value);
     if (!draft) return;
 
     console.log("Selected Draft:", draft);
     setFormValuesFromDraft(draft);
+    setAdSchedulingToShowCampaign(
+      !!draft?.camapaignlevel?.is_day_parting_enabled_campign || false
+    );
+    setSelectedByAdset(prev => {
+      const updated = { ...prev };
+
+      Object.keys(draft)
+        .filter(key => key.startsWith("adsetlevel_"))
+        .forEach(key => {
+          const adset = draft[key];
+
+          if (adset?.id && Array.isArray(adset.adschedule)) {
+            updated[adset.id] = adscheduleToGrid(adset.adschedule);
+          }
+        });
+
+      return updated;
+    });
+    const adsetSwitchMap = {};
+
+    Object.keys(draft || {}).forEach(key => {
+      if (!key.startsWith("adsetlevel_")) return;
+
+      const adset = draft[key];
+      if (!adset?.id) return;
+
+      adsetSwitchMap[adset.id] = !!adset.is_day_parting_enabled || false;
+    });
+    setAdSchedulingToShow(adsetSwitchMap);
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
@@ -12823,12 +12894,11 @@ const CreateCampaignDrawer = ({
                             Draft_Name: popupInputs.input2,
                           };
 
-                          await fetch("https://www.testapi.adsgoat.in/api/NewupdateDraftSmart", {
+                          await fetch("https://www.testapi.adsgoat.in/api/NewupdateDraftSmartnew", {
                             method: "PATCH",
                             headers: { "Content-Type": "application/json", Authorization: token },
                             body: JSON.stringify({
-                              accountNumber,
-                              // draftId: selectedRef.current.draftId,
+                              accountNumber: accountNumber,
                               groupId: selectedRef.current.groupId,
                               payload: filteredPayload,
                             }),
