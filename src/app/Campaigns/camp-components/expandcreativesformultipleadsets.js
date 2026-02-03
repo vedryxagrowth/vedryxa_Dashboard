@@ -634,7 +634,7 @@ const AdsetCard = ({
 
                           {/* Title */}
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 12, fontWeight: "bold" }}>
+                            <div style={{ fontSize: 12, fontWeight: "bold",  }}>
                               {item?.AddName || "Consumer finds"}
                             </div>
                             <div style={{ fontSize: 12, color: "#888" }}>
@@ -664,7 +664,7 @@ const AdsetCard = ({
 
 
                           {/* History */}
-                          <Tooltip title="View Ad History">
+                          {/* <Tooltip title="View Ad History">
                             <HistoryOutlined
                               style={{ fontSize: 16, cursor: "pointer" }}
                               onClick={(e) => {
@@ -679,7 +679,7 @@ const AdsetCard = ({
                                 );
                               }}
                             />
-                          </Tooltip>
+                          </Tooltip> */}
 
 
                           <Tooltip title="More Options">
@@ -1088,7 +1088,7 @@ const AdsetCard = ({
 
 
                           <div style={{ flex: "1" }}>
-                            <div style={{ fontWeight: "bold", fontSize: "12px" }}>
+                            <div style={{ fontWeight: "bold", fontSize: "12px", maxWidth: "140px",wordBreak: "break-word",overflowWrap: "anywhere", }}>
                               {item?.AddName || "Consumer finds"}
                             </div>
                             <div
@@ -1137,7 +1137,7 @@ const AdsetCard = ({
                           />
 
 
-                          <Tooltip title="View Ad History">
+                          {/* <Tooltip title="View Ad History">
                             <HistoryOutlined
                               style={{
                                 fontSize: 16,
@@ -1154,7 +1154,7 @@ const AdsetCard = ({
                                 window.open(url, "_blank");
                               }}
                             />
-                          </Tooltip>
+                          </Tooltip> */}
 
 
                           <Tooltip title="More Options">

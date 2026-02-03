@@ -52,6 +52,7 @@ import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
+import AffinityUrlBuilder from "./urlbuilder/affinity";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
@@ -643,8 +644,9 @@ const AddComponent = ({
         Caption: text.split("//")[1].split("/")[0],
       });
     } else {
-      setCaption(text.split("/")[0]);
-      form.setFieldsValue({ Website_URL: text, Caption: text.split("/")[0] });
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin)
+      form.setFieldsValue({ Website_URL: text, Caption: new URL(text).origin });
       // updatedAdsets[index] = {
       //     ...updatedAdsets[index],
       //     Website_URL: text,
@@ -808,6 +810,14 @@ const AddComponent = ({
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -2849,13 +2859,26 @@ const AdsetComponent = ({
         }
       })
     } else {
+      const firstAddLevel = Array.isArray(adset?.addlevel)
+        ? adset.addlevel[0]
+        : null;
+      console.log(firstAddLevel, "firstAddLevel when not dynamic creative");
       form.setFieldsValue({
         adsets: {
           [index]: {
             isDynamicCreative: false,
-            descriptions: [""],
-            headlines: [""],
-            messages: [""]
+            // descriptions: [""],
+            // headlines: [""],
+            // messages: [""]
+            descriptions: [
+              firstAddLevel?.Description ?? ""
+            ],
+            headlines: [
+              firstAddLevel?.headline ?? ""
+            ],
+            messages: [
+              firstAddLevel?.message ?? ""
+            ],
           },
         }
       })
@@ -3071,11 +3094,12 @@ const AdsetComponent = ({
         return { ...prev, [key]: next };
       });
     } else {
-      setCaption(text.split("/")[0]);
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin);
       updatedAdsets[index] = {
         ...updatedAdsets[index],
         Website_URL: text,
-        Caption: text.split("/")[0],
+        Caption: new URL(text).origin,
       };
       setNewAddLevelData((prev) => {
         const key = adset.id;
@@ -3123,6 +3147,14 @@ const AdsetComponent = ({
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -6309,7 +6341,7 @@ const AdsetComponent = ({
                               </Form.Item>
 
                               {/* ➕ Add */}
-                              {i === fields.length - 1 && fields.length < 5 && (
+                              {i === fields.length - 1 && fields.length < 5 && (!view) && (
                                 <PlusOutlined
                                   onClick={() => add("")}
                                   style={{
@@ -6320,7 +6352,7 @@ const AdsetComponent = ({
                               )}
 
                               {/* 🗑 Delete */}
-                              {fields.length > 1 && (
+                              {fields.length > 1 && (!view) && (
                                 <DeleteOutlined
                                   onClick={() => remove(field.name)}
                                   style={{
@@ -6438,7 +6470,7 @@ const AdsetComponent = ({
                                 </Form.Item>
 
                                 {/* ➕ Add */}
-                                {i === fields.length - 1 && fields.length < 5 && (
+                                {i === fields.length - 1 && fields.length < 5 && (!view) && (
                                   <PlusOutlined
                                     onClick={() => add("")}
                                     style={{ color: "#52c41a", cursor: "pointer" }}
@@ -6446,7 +6478,7 @@ const AdsetComponent = ({
                                 )}
 
                                 {/* 🗑 Delete */}
-                                {fields.length > 1 && (
+                                {fields.length > 1 && (!view) && (
                                   <DeleteOutlined
                                     onClick={() => remove(field.name)}
                                     style={{ color: "#ff4d4f", cursor: "pointer" }}
@@ -6542,7 +6574,7 @@ const AdsetComponent = ({
                                 </Form.Item>
 
                                 {/* ➕ Add */}
-                                {i === fields.length - 1 && fields.length < 5 && (
+                                {i === fields.length - 1 && fields.length < 5 && (!view) && (
                                   <PlusOutlined
                                     onClick={() => add("")}
                                     style={{ color: "#52c41a", cursor: "pointer" }}
@@ -6550,7 +6582,7 @@ const AdsetComponent = ({
                                 )}
 
                                 {/* 🗑 Delete */}
-                                {fields.length > 1 && (
+                                {fields.length > 1 && (!view) && (
                                   <DeleteOutlined
                                     onClick={() => remove(field.name)}
                                     style={{ color: "#ff4d4f", cursor: "pointer" }}
@@ -8499,11 +8531,12 @@ const EditMultipleAdsetCampaignDrawer = ({
         Caption: text.split("//")[1].split("/")[0],
       };
     } else {
-      setCaption(text.split("/")[0]);
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin);
       updatedAdsets[urlBuilderIndex] = {
         ...updatedAdsets[urlBuilderIndex],
         Website_URL: text,
-        Caption: text.split("/")[0],
+        Caption: new URL(text).origin,
       };
     }
 
@@ -8547,6 +8580,11 @@ const EditMultipleAdsetCampaignDrawer = ({
         return (
           <MnetBingUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
+      case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
@@ -10071,10 +10109,11 @@ const EditMultipleAdsetCampaignDrawer = ({
           }
         }
         const mainItem = items[0];
+        const oldMainItem = oldItems[0];
         return [
           {
             id: uuidv4(),
-            AddName: newAdset.AddName,
+            AddName: newAdset.AdsetName,
 
             filename: imagesHashArray.map(m =>
               m.imag_hash
@@ -10108,6 +10147,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
               ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
             ],
+            ...(oldMainItem.status ? { status: oldMainItem.status } : {}),
           },
         ];
       };
@@ -10377,7 +10417,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["message"] = toCommaString(item.message);
               } else {
                 newUpdatedAd["message"] = toCommaString(item.message);
-                newUpdatedAd["re_lunch"] = true;
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
                 send_re_launch_status = true;
                 re_lunch = true;
               }
@@ -10388,7 +10428,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["headline"] = toCommaString(item.headline);
               } else {
                 newUpdatedAd["headline"] = toCommaString(item.headline);
-                newUpdatedAd["re_lunch"] = true;
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
                 send_re_launch_status = true;
                 re_lunch = true;
               }
@@ -10399,7 +10439,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["Description"] = toCommaString(item.Description);
               } else {
                 newUpdatedAd["Description"] = toCommaString(item.Description);
-                newUpdatedAd["re_lunch"] = true;
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
                 send_re_launch_status = true;
                 re_lunch = true;
               }
@@ -10410,7 +10450,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["Caption"] = item.Caption;
               } else {
                 newUpdatedAd["Caption"] = item.Caption;
-                newUpdatedAd["re_lunch"] = true;
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
                 send_re_launch_status = true;
                 re_lunch = true;
               }
@@ -10421,7 +10461,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["Website_URL"] = item.Website_URL;
               } else {
                 newUpdatedAd["Website_URL"] = item.Website_URL;
-                newUpdatedAd["re_lunch"] = true;
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
                 send_re_launch_status = true;
                 re_lunch = true;
               }
@@ -10432,7 +10472,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["AddName"] = item.AddName;
               } else {
                 newUpdatedAd["AddName"] = item.AddName;
-                newUpdatedAd["re_lunch_addname"] = true;
+                if (item.Addid) newUpdatedAd["re_lunch_addname"] = true;
                 send_re_launch_status = true;
                 re_lunch = true;
               }
@@ -10465,14 +10505,14 @@ const EditMultipleAdsetCampaignDrawer = ({
                   if (updatedFilesDeatils.imag_hash) {
                     newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
                     newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                    newUpdatedAd["re_lunch"] = true;
+                    if (item.Addid) newUpdatedAd["re_lunch"] = true;
                     send_re_launch_status = true;
                   } else if (updatedFilesDeatils.videoid) {
                     newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
                     newUpdatedAd["thambnailurl"] =
                       updatedFilesDeatils.thambnailurl;
                     newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                    newUpdatedAd["re_lunch"] = true;
+                    if (item.Addid) newUpdatedAd["re_lunch"] = true;
                     send_re_launch_status = true;
                   }
                 }

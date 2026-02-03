@@ -52,6 +52,7 @@ import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
+import AffinityUrlBuilder from "./urlbuilder/affinity";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
@@ -806,6 +807,14 @@ const AddComponent = ({
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+        case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -3131,6 +3140,14 @@ const AdsetComponent = ({
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+         case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -8192,6 +8209,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_Tonic1":
         return (
