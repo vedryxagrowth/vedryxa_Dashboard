@@ -56,6 +56,7 @@ import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
+import AffinityUrlBuilder from "./urlbuilder/affinity";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
@@ -592,12 +593,16 @@ const AccountForm = ({
         }
       };
     } else {
-      setCaption(text.split("/")[0]);
+      // console.log(text);
+      // console.log(new URL(text).hostname);
+      // console.log(new URL(text).origin);
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin);
       updatedAdsets[index] = {
         ...updatedAdsets[index],
         [account]: {
           Website_URL: text,
-          Caption: text.split("/")[0],
+          Caption: new URL(text).origin,
         }
       };
     }
@@ -715,6 +720,11 @@ const AccountForm = ({
         //defaultValues
         return (
           <MnetBingUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Affinity":
+        //defaultValues
+        return (
+          <AffinityUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
       case "FB_Tonic1":
         return (
