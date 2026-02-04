@@ -2624,6 +2624,7 @@ const AdsetComponent = ({
   handleFieldChange,
   network,
   accountis,
+  setAdsets,
   handleAdsetChange,
   setSelectedPositions,
   selectedPositions,
@@ -2826,24 +2827,8 @@ const AdsetComponent = ({
   }, [selectedByAdset, adset.id, timezoneType]);
 
   useEffect(() => {
-    // if (adset?.pixel_id) {
-    //   form.setFieldsValue({
-    //     adsets: {
-    //       [index]: {
-    //         pixel_id: adset.pixel_id
-    //       },
-    //     }
-    //   });
-    // }
-    // if (adset?.addlevel) {
-    //   form.setFieldsValue({
-    //     adsets: {
-    //       [index]: {
-    //         page_id: adset?.addlevel[0]?.page_id || ""
-    //       },
-    //     }
-    //   })
-    // }
+    const adsetsFromForm = form.getFieldValue("adsets") || [];
+    const currentAdsetFromForm = adsetsFromForm.find(item => item.id === adset.id) || {};
     if (adset?.is_dynamic_creative) {
       const firstAddLevel = Array.isArray(adset?.addlevel)
         ? adset.addlevel[0]
@@ -2852,9 +2837,9 @@ const AdsetComponent = ({
         adsets: {
           [index]: {
             isDynamicCreative: adset?.is_dynamic_creative ?? false,
-            descriptions: adset?.addlevel[0]?.Description || [],
-            headlines: adset?.addlevel[0]?.headline || [],
-            messages: adset?.addlevel[0]?.message || []
+            descriptions: currentAdsetFromForm.descriptions,
+            headlines: currentAdsetFromForm.headlines,
+            messages: currentAdsetFromForm.messages,
           },
         }
       })
@@ -2867,18 +2852,9 @@ const AdsetComponent = ({
         adsets: {
           [index]: {
             isDynamicCreative: false,
-            // descriptions: [""],
-            // headlines: [""],
-            // messages: [""]
-            descriptions: [
-              firstAddLevel?.Description ?? ""
-            ],
-            headlines: [
-              firstAddLevel?.headline ?? ""
-            ],
-            messages: [
-              firstAddLevel?.message ?? ""
-            ],
+            descriptions: currentAdsetFromForm.descriptions,
+            headlines: currentAdsetFromForm.headlines,
+            messages: currentAdsetFromForm.messages,
           },
         }
       })
@@ -3800,6 +3776,9 @@ const AdsetComponent = ({
                       }
                       // if (!checked) {
                       // Example: clear dynamic creative assets
+                      setAdsets(prevAdsets =>
+                        prevAdsets.map(a => a.id === adset.id ? { ...a, is_dynamic_creative: checked } : a)
+                      );
                       form.setFieldsValue({
                         adsets: {
                           [index]: {
@@ -9972,16 +9951,16 @@ const EditMultipleAdsetCampaignDrawer = ({
           let response, fbResponse;
 
           if (file.type.startsWith("image/")) {
-            response = await axios.post(
-              "https://www.testapi.adsgoat.in/upload",
-              formData,
-              {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            );
+            // response = await axios.post(
+            //   "https://www.testapi.adsgoat.in/upload",
+            //   formData,
+            //   {
+            //     headers: {
+            //       Authorization: localStorage.getItem("token"),
+            //       "Content-Type": "multipart/form-data",
+            //     },
+            //   }
+            // );
 
             //   if (!response.data.imageUrl) {
             //     onError("Error: Image URL not returned from custom API");
@@ -9997,7 +9976,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               { headers: { "Content-Type": "multipart/form-data" } }
             );
 
-            if (response.status === 200 && fbResponse.status === 200) {
+            if (s3FileUrl && fbResponse.status === 200) {
               onSuccess("ok", response);
               mediaHashArray = {
                 filename: s3FileUrl,
@@ -10008,16 +9987,16 @@ const EditMultipleAdsetCampaignDrawer = ({
               console.error("Image upload failed");
             }
           } else if (file.type.startsWith("video/")) {
-            response = await axios.post(
-              "https://www.testapi.adsgoat.in/upload",
-              formData,
-              {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            );
+            // response = await axios.post(
+            //   "https://www.testapi.adsgoat.in/upload",
+            //   formData,
+            //   {
+            //     headers: {
+            //       Authorization: localStorage.getItem("token"),
+            //       "Content-Type": "multipart/form-data",
+            //     },
+            //   }
+            // );
 
             //   if (response.status !== 200) {
             //     onError("error", response);
@@ -12270,6 +12249,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           ? adsetObj.Daily_amount / 100
           : 0,
         Adsetid: adsetObj.Adsetid || "",
+        is_dynamic_creative: adsetObj.is_dynamic_creative || false,
         ...adsetObj, // Spread the adsetObj properties
       }))
     );
@@ -12431,6 +12411,16 @@ const EditMultipleAdsetCampaignDrawer = ({
       Caption: adsetObj.addlevel[0]?.Caption,
       Website_URL: adsetObj.addlevel[0]?.Website_URL,
       MediaContent: adsetObj.addlevel[0] || [],
+      isDynamicCreative: adsetObj.is_dynamic_creative || false,
+      descriptions: Array.isArray(adsetObj.addlevel[0]?.Description) ? adsetObj.addlevel[0]?.Description : [
+        adsetObj.addlevel[0]?.Description ?? ""
+      ],
+      headlines: Array.isArray(adsetObj.addlevel[0]?.headline) ? adsetObj.addlevel[0]?.headline : [
+        adsetObj.addlevel[0]?.headline ?? ""
+      ],
+      messages: Array.isArray(adsetObj.addlevel[0]?.message) ? adsetObj.addlevel[0]?.message : [
+        adsetObj.addlevel[0]?.message ?? ""
+      ],
     }));
 
     // 4. Update the form fields
@@ -13547,6 +13537,8 @@ const EditMultipleAdsetCampaignDrawer = ({
                   handleFieldChange={handleFieldChange}
                   network={network}
                   accountis={accountis}
+                  adsets={adsets}
+                  setAdsets={setAdsets}
                   addlevelData={addlevelData}
                   newAddLevelData={newAddLevelData}
                   setAdsetSchedule={setAdsetSchedule}
