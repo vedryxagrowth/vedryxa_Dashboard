@@ -897,7 +897,7 @@ const AccountForm = ({
         // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
         styles={{
           body: {
-            height: "50vh",
+            height: network === "FB_Affinity" ? "60vh" : "50vh",
             overflowY: "auto",
           },
         }}
@@ -5101,16 +5101,42 @@ const AdsetComponent = ({
                             //   });
                             // }}
                             onChange={(info) => {
-                              const newFiles = info.fileList.map((file) => ({
-                                ...file,
-                                uid: file.uid || `-${Date.now()}`,
-                                source: "media",
-                                thumbUrl:
-                                  file.thumbUrl ||
-                                  (file.originFileObj
-                                    ? URL.createObjectURL(file.originFileObj)
-                                    : undefined),
-                              }));
+                              // const newFiles = info.fileList.map((file) => ({
+                              //   ...file,
+                              //   uid: file.uid || `-${Date.now()}`,
+                              //   status: "done", // ✅ REQUIRED
+                              //   source: "media",
+                              //   thumbUrl:
+                              //     file.thumbUrl ||
+                              //     (file.originFileObj
+                              //       ? URL.createObjectURL(file.originFileObj)
+                              //       : undefined),
+                              // }));
+                              const newFiles = info.fileList.map((file) => {
+                                const isVideo = file.type?.startsWith("video");
+
+                                return {
+                                  ...file,
+                                  uid: file.uid || `-${Date.now()}`,
+                                  status: "done", // ✅ REQUIRED for images & videos
+                                  source: "media",
+                                  // thumbUrl:
+                                  //   file.thumbUrl ||
+                                  //   (file.originFileObj
+                                  //     ? URL.createObjectURL(file.originFileObj)
+                                  //     : undefined),
+                                  // isVideo, // ✅ helps AntD distinguish
+                                  ...(isVideo
+                                    ? {} // ❌ no thumbUrl for video
+                                    : {
+                                      thumbUrl:
+                                        file.thumbUrl ||
+                                        (file.originFileObj
+                                          ? URL.createObjectURL(file.originFileObj)
+                                          : undefined),
+                                    }),
+                                };
+                              });
 
                               setSelectedFiles((prev) => {
                                 const existingUids = new Set(
@@ -5261,6 +5287,102 @@ const AdsetComponent = ({
                             fileList={selectedFilesFromMedia[adset.id] || []}
                             listType="picture"
                             accept="image/*, video/*"
+                            // itemRender={(originNode, file) => {
+                            //   if (file.type?.startsWith("video")) {
+                            //     return (
+                            //       <div
+                            //         style={{
+                            //           display: "flex",
+                            //           alignItems: "center",
+                            //           gap: 12,
+                            //           width: "100%",
+                            //         }}
+                            //       >
+                            //         <video
+                            //           src={file.originFileObj
+                            //             ? URL.createObjectURL(file.originFileObj)
+                            //             : file.url}
+                            //           width={80}
+                            //           height={50}
+                            //           muted
+                            //           preload="metadata"
+                            //           style={{ borderRadius: 4, flexShrink: 0 }}
+                            //         />
+                            //         <span
+                            //           style={{
+                            //             color: theme === "dark" ?"#fff" : "#000" ,
+                            //             width: 160,
+                            //           }}
+                            //         >{file.name}</span>
+                            //       </div>
+                            //     );
+                            //   }
+
+                            //   return originNode; // images stay exactly the same
+                            // }}
+                            itemRender={(originNode, file) => {
+                              const isVideo = file.type?.startsWith("video");
+                              const isImage = file.type?.startsWith("image");
+
+                              if (isVideo || isImage) {
+                                return (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 12,
+                                      width: "100%",
+                                      marginBottom: 10,
+                                      padding: 8,                         // ✅ space inside border
+                                      border: theme === "dark"
+                                        ? "1px solid #444"
+                                        : "1px solid #d9d9d9",            // ✅ light theme border
+                                      borderRadius: 6,                    // ✅ rounded corners
+                                      background: theme === "dark"
+                                        ? "#1f1f1f"
+                                        : "#fff",
+                                    }}
+                                  >
+                                    {isVideo ? (
+                                      <video
+                                        src={file.originFileObj
+                                          ? URL.createObjectURL(file.originFileObj)
+                                          : file.url}
+                                        width={50}
+                                        height={50}
+                                        muted
+                                        preload="metadata"
+                                        style={{ borderRadius: 4, flexShrink: 0 }}
+                                      />
+                                    ) : (
+                                      <img
+                                        src={file.thumbUrl || file.url}
+                                        width={50}
+                                        height={50}
+                                        alt={file.name}
+                                        style={{ borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                                      />
+                                    )}
+
+                                    <span
+                                      style={{
+                                        color: theme === "dark" ? "#fff" : "#000",
+                                        flex: 1,                    // ✅ auto width
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                      }}
+                                    >
+                                      {file.name}
+                                    </span>
+                                  </div>
+                                );
+                              }
+
+                              return originNode; // fallback for other file types
+                            }}
+
+
                           >
                             <Button
                               icon={<UploadOutlined />}
@@ -9252,24 +9374,24 @@ const CreateCampaignDrawer = ({
             let response, fbResponse;
 
             if (file.type.startsWith("image/")) {
-              response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
-                formData,
-                {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                    "Content-Type": "multipart/form-data",
-                  },
-                }
-              );
+              // response = await axios.post(
+              //   "https://www.testapi.adsgoat.in/upload",
+              //   formData,
+              //   {
+              //     headers: {
+              //       Authorization: localStorage.getItem("token"),
+              //       "Content-Type": "multipart/form-data",
+              //     },
+              //   }
+              // );
 
-              if (!response.data.imageUrl) {
-                onError("Error: Image URL not returned from custom API");
-                console.error(
-                  "Image upload to custom API failed, imageUrl missing"
-                );
-                continue;
-              }
+              // if (!response.data.imageUrl) {
+              //   onError("Error: Image URL not returned from custom API");
+              //   console.error(
+              //     "Image upload to custom API failed, imageUrl missing"
+              //   );
+              //   continue;
+              // }
 
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/adimages`,
@@ -9277,7 +9399,7 @@ const CreateCampaignDrawer = ({
                 { headers: { "Content-Type": "multipart/form-data" } }
               );
 
-              if (response.status === 200 && fbResponse.status === 200) {
+              if (s3FileUrl && fbResponse.status === 200) {
                 onSuccess("ok", response);
                 mediaHashArray.push({
                   filename: s3FileUrl,
@@ -9288,22 +9410,22 @@ const CreateCampaignDrawer = ({
                 console.error("Image upload failed");
               }
             } else if (file.type.startsWith("video/")) {
-              response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
-                formData,
-                {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                    "Content-Type": "multipart/form-data",
-                  },
-                }
-              );
+              // response = await axios.post(
+              //   "https://www.testapi.adsgoat.in/upload",
+              //   formData,
+              //   {
+              //     headers: {
+              //       Authorization: localStorage.getItem("token"),
+              //       "Content-Type": "multipart/form-data",
+              //     },
+              //   }
+              // );
 
-              if (response.status !== 200) {
-                onError("error", response);
-                console.error("Video upload to custom API failed");
-                continue;
-              }
+              // if (response.status !== 200) {
+              //   onError("error", response);
+              //   console.error("Video upload to custom API failed");
+              //   continue;
+              // }
 
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/advideos`,

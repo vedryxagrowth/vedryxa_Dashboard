@@ -812,7 +812,7 @@ const AddComponent = ({
             onReturnMessage={onReturnUrl}
           />
         );
-        case "FB_Affinity":
+      case "FB_Affinity":
         return (
           <AffinityUrlBuilder
             defaultValues={websiteURL}
@@ -2615,6 +2615,7 @@ const AdsetComponent = ({
   handleFieldChange,
   network,
   accountis,
+  setAdsets,
   handleAdsetChange,
   setSelectedPositions,
   selectedPositions,
@@ -3016,6 +3017,8 @@ const AdsetComponent = ({
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
   console.log(BeneficiaryAndPayer);
   useEffect(() => {
+    const adsetsFromForm = form.getFieldValue("adsets") || [];
+    const currentAdsetFromForm = adsetsFromForm.find(item => item.id === adset.id ) || {};
     if (adset?.pixel_id) {
       form.setFieldsValue({
         adsets: {
@@ -3038,24 +3041,38 @@ const AdsetComponent = ({
       const firstAddLevel = Array.isArray(adset?.addlevel)
         ? adset.addlevel[0]
         : null;
+      
+
       form.setFieldsValue({
         adsets: {
           [index]: {
             isDynamicCreative: adset?.is_dynamic_creative ?? false,
-            descriptions: adset?.addlevel[0]?.Description || [],
-            headlines: adset?.addlevel[0]?.headline || [],
-            messages: adset?.addlevel[0]?.message || []
+            descriptions: currentAdsetFromForm.descriptions,
+            headlines: currentAdsetFromForm.headlines,
+            messages: currentAdsetFromForm.messages,
           },
         }
       })
     } else {
+      const firstAddLevel = Array.isArray(adset?.addlevel)
+        ? adset.addlevel[0]
+        : null;
       form.setFieldsValue({
         adsets: {
           [index]: {
             isDynamicCreative: false,
-            descriptions: [""],
-            headlines: [""],
-            messages: [""]
+            // descriptions: [
+            //   firstAddLevel?.Description ?? ""
+            // ],
+            // headlines: [
+            //   firstAddLevel?.headline ?? ""
+            // ],
+            // messages: [
+            //   firstAddLevel?.message ?? ""
+            // ],
+            descriptions: currentAdsetFromForm.descriptions,
+            headlines: currentAdsetFromForm.headlines,
+            messages: currentAdsetFromForm.messages,
           },
         }
       })
@@ -3145,7 +3162,7 @@ const AdsetComponent = ({
             onReturnMessage={onReturnUrl}
           />
         );
-         case "FB_Affinity":
+      case "FB_Affinity":
         return (
           <AffinityUrlBuilder
             defaultValues={websiteURL}
@@ -3645,6 +3662,9 @@ const AdsetComponent = ({
                       }
                       // if (!checked) {
                       // Example: clear dynamic creative assets
+                      setAdsets(prevAdsets =>
+                        prevAdsets.map(a => a.id === adset.id ? { ...a, is_dynamic_creative: checked } : a)
+                      );
                       form.setFieldsValue({
                         adsets: {
                           [index]: {
@@ -9501,7 +9521,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       console.log(formValuesObject, "formValuesObject");
 
       const toCommaString = (value) =>
-              Array.isArray(value) ? value.join(", ") : value;
+        Array.isArray(value) ? value.join(", ") : value;
 
       //   const newAddLevelData = n || [];
       //   const addlevelData = formValuesObject.addlevelData || [];
@@ -9648,16 +9668,16 @@ const CloneMultipleAdsetCampaignDrawer = ({
           let response, fbResponse;
 
           if (file.type.startsWith("image/")) {
-            response = await axios.post(
-              "https://www.testapi.adsgoat.in/upload",
-              formData,
-              {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            );
+            // response = await axios.post(
+            //   "https://www.testapi.adsgoat.in/upload",
+            //   formData,
+            //   {
+            //     headers: {
+            //       Authorization: localStorage.getItem("token"),
+            //       "Content-Type": "multipart/form-data",
+            //     },
+            //   }
+            // );
 
             //   if (!response.data.imageUrl) {
             //     onError("Error: Image URL not returned from custom API");
@@ -9673,7 +9693,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
               { headers: { "Content-Type": "multipart/form-data" } }
             );
 
-            if (response.status === 200 && fbResponse.status === 200) {
+            if (s3FileUrl && fbResponse.status === 200) {
               onSuccess("ok", response);
               mediaHashArray = {
                 filename: s3FileUrl,
@@ -9684,16 +9704,16 @@ const CloneMultipleAdsetCampaignDrawer = ({
               console.error("Image upload failed");
             }
           } else if (file.type.startsWith("video/")) {
-            response = await axios.post(
-              "https://www.testapi.adsgoat.in/upload",
-              formData,
-              {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            );
+            // response = await axios.post(
+            //   "https://www.testapi.adsgoat.in/upload",
+            //   formData,
+            //   {
+            //     headers: {
+            //       Authorization: localStorage.getItem("token"),
+            //       "Content-Type": "multipart/form-data",
+            //     },
+            //   }
+            // );
 
             //   if (response.status !== 200) {
             //     onError("error", response);
@@ -10993,6 +11013,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
           ? adsetObj.Daily_amount / 100
           : 0,
         Adsetid: adsetObj.Adsetid || "",
+        is_dynamic_creative: adsetObj.is_dynamic_creative || false,
         ...adsetObj, // Spread the adsetObj properties
       }))
     );
@@ -11164,6 +11185,16 @@ const CloneMultipleAdsetCampaignDrawer = ({
       Caption: adsetObj.addlevel[0]?.Caption,
       Website_URL: adsetObj.addlevel[0]?.Website_URL,
       MediaContent: adsetObj.addlevel[0] || [],
+      isDynamicCreative: adsetObj.is_dynamic_creative || false,
+      descriptions: Array.isArray(adsetObj.addlevel[0]?.Description) ? adsetObj.addlevel[0]?.Description : [
+        adsetObj.addlevel[0]?.Description ?? ""
+      ],
+      headlines: Array.isArray(adsetObj.addlevel[0]?.headline) ? adsetObj.addlevel[0]?.headline : [
+        adsetObj.addlevel[0]?.headline ?? ""
+      ],
+      messages: Array.isArray(adsetObj.addlevel[0]?.message) ? adsetObj.addlevel[0]?.message : [
+        adsetObj.addlevel[0]?.message ?? ""
+      ],
     }));
 
     function getAllAdsetCountries(obj) {
@@ -12296,6 +12327,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                   handleFieldChange={handleFieldChange}
                   network={network}
                   accountis={accountis}
+                  setAdsets={setAdsets}
                   addlevelData={addlevelData}
                   newAddLevelData={newAddLevelData}
                   setAddLevelData={setAddLevelData}

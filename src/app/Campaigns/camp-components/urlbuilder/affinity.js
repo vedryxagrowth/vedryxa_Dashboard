@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Row, Col } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined } from '@ant-design/icons';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Row, Col, Tooltip } from 'antd';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, CopyOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -29,9 +29,10 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
     const [tmpIds, setTmpIds] = useState([]);
     const pixelIds = ['PixelId', 'None'];
     const { theme } = useTokenContext();
+    const [domainExtension, setDomainExtension] = useState('');
+    const [copyMessage, setCopyMessage] = useState('Click to copy');
 
-    // https://munchable.com/article/domain_extension_replace?src=src_replace&pxi=835172915206585&channel=channel_replace&terms=terms_replace&rac=rac_replace&utm_campaign=utm_campaign_replace&sltId=sltId_replace&tmp=tmp_replace
-
+    const DataToSend = "domain_extension_replace?src=src_replace&pxi=835172915206585&channel=channel_replace&terms=terms_replace&rac=rac_replace&utm_campaign=utm_campaign_replace&sltId=sltId_replace&tmp=tmp_replace";
     const getUrlBuilderData = async () => {
         const response = await apiClient.get(`/get/urlbuilderdata?network=Affinity`);
         if (response?.status === 200) {
@@ -41,50 +42,87 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             })) || []);
             setNetworkData(response?.data)
             if (indexValueForAccount) {
+
                 // console.log(defaultValues);
                 // console.log(defaultValues.split("//")[1].split("/")[0]);
-                const DomainUrls = response?.data?.Domains
-                    .filter(item => item.url.includes(indexValueForAccount?.split("//")[1]?.split("/")[0]))
-                    .map(item => item.url);
-                // console.log(DomainUrls);
-                setDomain(DomainUrls[0]);
+                // const DomainUrls = response?.data?.Domains
+                //     .filter(item => item.url.includes(indexValueForAccount?.split("//")[1]?.split("/")[0]))
+                //     .map(item => item.url);
+                // // console.log(DomainUrls);
+                // setDomain(DomainUrls[0]);
 
-                const text = indexValueForAccount?.split("//")[1]?.split("/")[3];
-                const result = text.replace(/\+/g, " ");
-                // console.log(result);
-                setKeyWords(result);
-                console.log(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
-                setChannel(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
-                setMembetId(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
-                setSource(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
-                setGeo(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
+                const domainValue = indexValueForAccount.split("?")[0];
+                const tmpValue = new URL(indexValueForAccount).searchParams.get("tmp");
+                const sltIdValue = new URL(indexValueForAccount).searchParams.get("sltId");
+                const channelValue = new URL(indexValueForAccount).searchParams.get("channel");
+                const utm_campaignValue = new URL(indexValueForAccount).searchParams.get("utm_campaign");
+                const racValue = new URL(indexValueForAccount).searchParams.get("rac");
+                const termsValue = new URL(indexValueForAccount).searchParams.get("terms");
+                const pixelValue = new URL(indexValueForAccount).searchParams.get("pxi");
+                setTerms(termsValue ? termsValue.replace(/%20/g, " ") : "");
+                setKeyWords(utm_campaignValue ? utm_campaignValue.trim().replace(/\+/g, " ") : "");
+                setDomainExtension(domainValue);
+                setRac(racValue || '');
+                setTmp(tmpValue || '9');
+                setChannel(sltIdValue || "1675913170");
+                setChannel_id(channelValue || '');
+                setPixelId(pixelValue ? 'PixelId' : 'None');
                 setSource("fb");
-                if (indexValueForAccount.includes('&trkfb')) { setPixelId('PixelId') } else { setPixelId('None') };
+
+
+                // const text = indexValueForAccount?.split("//")[1]?.split("/")[3];
+                // const result = text.replace(/\+/g, " ");
+                // // console.log(result);
+                // setKeyWords(result);
+                // console.log(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+                // setChannel(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+                // setMembetId(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
+                // setSource(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
+                // setGeo(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
+                // setSource("fb");
+                // if (indexValueForAccount.includes('&trkfb')) { setPixelId('PixelId') } else { setPixelId('None') };
                 // console.log(indexValueForAccount.split("//")[1].split("/")[0]);
                 // const domainData = response 
             } else {
                 if (defaultValues) {
                     console.log(defaultValues);
                     // console.log(defaultValues.split("//")[1].split("/")[0]);
-                    const DomainUrls = response?.data?.Domains
-                        .filter(item => item.url.includes(defaultValues?.split("//")[1]?.split("/")[0]))
-                        .map(item => item.url);
-                    // console.log(DomainUrls);
-                    setDomain(DomainUrls[0]);
+                    // const DomainUrls = response?.data?.Domains
+                    //     .filter(item => item.url.includes(defaultValues?.split("//")[1]?.split("/")[0]))
+                    //     .map(item => item.url);
+                    // // console.log(DomainUrls);
+                    // setDomain(DomainUrls[0]);
 
-                    const text = defaultValues?.split("//")[1]?.split("/")[3];
-                    const result = text.replace(/\+/g, " ");
-                    console.log(result);
-                    setKeyWords("");
-                    console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
-                    setChannel(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
-                    setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
-                    setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
-                    setGeo(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
-                    setSource("fb");
-                    if (defaultValues.includes('&trkfb')) { setPixelId('PixelId') } else { setPixelId('None') };
+                    // const text = defaultValues?.split("//")[1]?.split("/")[3];
+                    // const result = text.replace(/\+/g, " ");
+                    // console.log(result);
+                    // setKeyWords("");
+                    // console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+                    // setChannel(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+                    // setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
+                    // setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
+                    // setGeo(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
+                    // setSource("fb");
+                    // if (defaultValues.includes('&trkfb')) { setPixelId('PixelId') } else { setPixelId('None') };
                     // console.log(defaultValues.split("//")[1].split("/")[0]);
                     // const domainData = response 
+                    const domainValue = defaultValues.split("?")[0];
+                    const tmpValue = new URL(defaultValues).searchParams.get("tmp");
+                    const sltIdValue = new URL(defaultValues).searchParams.get("sltId");
+                    const channelValue = new URL(defaultValues).searchParams.get("channel");
+                    const utm_campaignValue = new URL(defaultValues).searchParams.get("utm_campaign");
+                    const racValue = new URL(defaultValues).searchParams.get("rac");
+                    const termsValue = new URL(defaultValues).searchParams.get("terms");
+                    const pixelValue = new URL(defaultValues).searchParams.get("pxi");
+                    setTerms(termsValue ? termsValue.replace(/%20/g, " ") : "");
+                    setKeyWords(utm_campaignValue ? utm_campaignValue.trim().replace(/\+/g, " ") : "");
+                    setDomainExtension(domainValue);
+                    setRac(racValue || '');
+                    setTmp(tmpValue || '9');
+                    setChannel(sltIdValue || "1675913170");
+                    setChannel_id(channelValue || '');
+                    setPixelId(pixelValue ? 'PixelId' : 'None');
+                    setSource("fb");
                 }
             }
         }
@@ -128,13 +166,13 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         setRac('');
         setTerms('');
         setTmp('9');
-
+        setDomainExtension('');
     }
     console.log(showSubmitButton);
 
     const onClickSubmit = () => {
 
-        if (keywords && channel && domain && source && pixelId) {
+        if (keywords && channel && domainExtension && source && pixelId && channel_id && rac) {
             // const formattedKeywords = keywords.replace(/\s+/g, '+'); praveen 
             const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+'); //s
 
@@ -171,11 +209,11 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
 
             if (pixelId === 'PixelId') {
-                url = domain;
+                url = DataToSend;
             }
             else {
                 // const newDomain = domain.split("&trkfb");
-                url = domain.replace("&pxi=835172915206585", "");
+                url = DataToSend.replace("&pxi=835172915206585", "");
             }
             if (channel === "None") {
                 url = url
@@ -204,10 +242,10 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             }
             if (terms) {
                 url = url.replace("terms_replace", terms.trim().replace(/\s+/g, '%20'));
-            }else{
+            } else {
                 url = url.replace("&terms=terms_replace", "");
             }
-
+            url = url.replace("domain_extension_replace", domainExtension.trim());
             // url = url
             //   .replace("keywords_replace", formattedKeywords)
             //   .replace("chanel_replace", channel)
@@ -215,6 +253,7 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             //   .replace("campaign_id_replace", campaign_id)
             //   .replace("adset_id_replace", adset_id);
             onReturnMessage(url);
+            setErrorMessage(url);
         }
         else {
             setErrorMessage("Please complete all required fields.");
@@ -223,7 +262,7 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
 
     const onClickGet = () => {
 
-        if (keywords && channel && domain && source && pixelId && channel_id && rac) {
+        if (keywords && channel && domainExtension && source && pixelId && channel_id && rac) {
             const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+');
             const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
             const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
@@ -232,11 +271,11 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
 
             if (pixelId === 'PixelId') {
-                url = domain;
+                url = DataToSend;
             }
             else {
                 // const newDomain = domain.split("&trkfb");
-                url = domain.replace("&pxi=835172915206585", "");
+                url = DataToSend.replace("&pxi=835172915206585", "");
             }
             if (channel === "None") {
                 url = url
@@ -265,9 +304,10 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             }
             if (terms) {
                 url = url.replace("terms_replace", terms.trim().replace(/\s+/g, '%20'));
-            }else{
+            } else {
                 url = url.replace("&terms=terms_replace", "");
             }
+            url = url.replace("domain_extension_replace", domainExtension.trim());
             setErrorMessage(url);
         }
         else {
@@ -310,10 +350,22 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         setChannel_id(event.target.value)
     }
 
+    const onChangeDomainExtension = (event) => {
+        setDomainExtension(event.target.value)
+    }
+
+    const onClicktoCopyUrl = () => {
+        navigator.clipboard.writeText(errorMessage);
+        setCopyMessage('Copied!');
+        setTimeout(() => {
+            setCopyMessage("Click to copy");
+        }, 5000);
+    }
+
     return (
         <div style={{ width: '100%' }}>
             <Row style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px' }}>
-                <Col style={{ display: 'flex', flexDirection: 'column' }} span={4}>
+                {/* <Col style={{ display: 'flex', flexDirection: 'column' }} span={4}>
                     <label><span style={{ color: 'red', margin: '2px' }}>*</span>Domain</label>
                     <Select
                         showSearch
@@ -329,7 +381,7 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                     />
-                </Col>
+                </Col> */}
                 <Col style={{ display: 'flex', flexDirection: 'column' }} span={3}>
                     <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Source</label>
                     <Select
@@ -396,6 +448,12 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                     />
                 </Col>
+                <Col span={5}>
+                    <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Channel</label>
+                    <div style={{ width: '100%' }}>
+                        <Input placeholder="channel" style={{ width: '100%', paddingRight: '2px' }} value={channel_id} onChange={onChangeChannel_id} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                    </div>
+                </Col>
                 {/* <Col style={{ display: 'flex', flexDirection: 'column' }} span={5}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Member ID</label>
           <Input placeholder="Member ID" value={memberId} required onChange={onChangeMemberId} />
@@ -406,13 +464,13 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         </Col> */}
             </Row>
             <Row style={{ width: '100%', display: 'flex', justifyContent: "space-between" }}>
-                <Col span={7}>
-                    <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Channel</label>
+                <Col span={12}>
+                    <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Article</label>
                     <div style={{ width: '100%' }}>
-                        <Input placeholder="channel" style={{ width: '100%', paddingRight: '2px' }} value={channel_id} onChange={onChangeChannel_id} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                        <Input placeholder="article" style={{ width: '100%', paddingRight: '2px' }} value={domainExtension} onChange={onChangeDomainExtension} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                     </div>
                 </Col>
-                <Col span={15}>
+                <Col span={11}>
                     <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Utm_campaign</label>
                     <div style={{ width: '100%' }}>
                         <Input placeholder="utm_campaign" style={{ width: '100%', paddingRight: '2px' }} value={keywords} onChange={onChangeKeyword} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
@@ -447,9 +505,23 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
                     {!showSubmitButton && <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} onClick={onClickSubmit}>Submit</Button>}
                 </Col>
             </Row>
-            <Row justify="center" style={{ marginTop: '10px' }}>
-                <Col>
-                    <p style={{ color: errorMessage === "Please complete all required fields." && "red", fontWeight: 600, textAlign: 'center', width: '100%', fontSize: '20px' }}>{errorMessage}</p>
+            <Row justify="center" style={{ marginTop: '10px', width: '100%' }}>
+                <Col style={{ display: "flex", justifyContent: "center", alignItems: "center", width: '100%' }}>
+                    <div style={{ color: errorMessage === "Please complete all required fields." && "red", fontWeight: 600, textAlign: 'center', width: '90%', fontSize: '20px' }}>{errorMessage}</div>
+                    {errorMessage && errorMessage !== "Please complete all required fields." &&
+                        <div style={{ marginLeft: "25px" }}>
+                            <Tooltip title={copyMessage}
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
+                            >
+                                <CopyOutlined onClick={onClicktoCopyUrl} />
+                            </Tooltip>
+                        </div>}
                 </Col>
             </Row>
         </div>
