@@ -11045,14 +11045,14 @@ const EditMultipleAdsetCampaignDrawer = ({
           findMatchingAdset.bid_amount / 100 !== formValuesObject.bid_amount
         ) {
           AdsetsData["bid_amount"] = formValuesObject.bid_amount
-            ? parseFloat(formValuesObject.bid_amount) * 100
+            ? Math.round(parseFloat(formValuesObject.bid_amount) * 100)
             : 0;
           AdsetsData["re_lunch_bid_amount"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["bid_amount"] = formValuesObject.bid_amount
-            ? parseFloat(formValuesObject.bid_amount) * 100
+            ? Math.round(parseFloat(formValuesObject.bid_amount) * 100)
             : 0;
         }
         if (
@@ -11529,7 +11529,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           ? parseFloat(formValuesObject.DailyAdd_amount) * 100
           : "";
         AdsetsData["bid_amount"] = formValuesObject.bid_amount
-          ? parseFloat(formValuesObject.bid_amount) * 100
+          ? Math.round(parseFloat(formValuesObject.bid_amount) * 100)
           : 0;
         AdsetsData["optimization_goal"] = formValuesObject.optimization_goal;
         AdsetsData["billing_event"] = formValuesObject.billing_event;
@@ -11744,7 +11744,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         custom_event_type: values.adsets[i].custom_event_type || "",
         pixel_id: values.pixel_id,
         bid_amount: values.adsets[i].bid_amount
-          ? parseFloat(values.adsets[i].bid_amount) * 100
+          ? Math.round(parseFloat(values.adsets[i].bid_amount) * 100)
           : 0,
         countries: values.adsets[i].countries || "",
         Min_Age: values.adsets[i].Min_Age || "",
@@ -11864,7 +11864,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           custom_event_type: values.custom_event_type,
           pixel_id: values.pixel_id,
           bid_amount: values.bid_amount
-            ? parseFloat(values.bid_amount) * 100
+            ? Math.round(parseFloat(values.bid_amount) * 100)
             : 0,
           countries: values.countries,
           Min_Age: values.Min_Age,
