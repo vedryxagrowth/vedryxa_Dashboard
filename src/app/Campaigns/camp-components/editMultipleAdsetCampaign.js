@@ -1826,6 +1826,76 @@ const AddComponent = ({
                       fileList={selectedFilesFromMedia || []}
                       listType="picture"
                       accept="image/*, video/*"
+                      itemRender={(originNode, file, fileList, actions) => {
+                        const isVideo = file.type?.startsWith("video");
+                        const isImage = file.type?.startsWith("image");
+
+                        if (isVideo || isImage) {
+                          return (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 12,
+                                width: 365,
+                                marginTop: 10,
+                                padding: 8,                         // ✅ space inside border
+                                border: theme === "dark"
+                                  ? "1px solid #444"
+                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                borderRadius: 6,                    // ✅ rounded corners
+                                background: theme === "dark"
+                                  ? "#1f1f1f"
+                                  : "#fff",
+                              }}
+                            >
+                              {isVideo ? (
+                                <video
+                                  src={file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url}
+                                  width={50}
+                                  height={50}
+                                  muted
+                                  preload="metadata"
+                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                />
+                              ) : (
+                                <img
+                                  src={file.thumbUrl || file.url}
+                                  width={50}
+                                  height={50}
+                                  alt={file.name}
+                                  style={{ borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                                />
+                              )}
+
+                              <span
+                                style={{
+                                  color: theme === "dark" ? "#fff" : "#000",
+                                  flex: 1,                    // ✅ auto width
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {file.name}
+                              </span>
+                              {/* ✅ DEFAULT REMOVE FLOW */}
+                              <DeleteOutlined
+                                onClick={actions.remove}
+                                style={{
+                                  cursor: "pointer",
+                                  color: "#ff4d4f",
+                                  fontSize: 16,
+                                }}
+                              />
+                            </div>
+                          );
+                        }
+
+                        return originNode; // fallback for other file types
+                      }}
                     >
                       <Button
                         disabled={selectedFiles.length > 0}
@@ -1862,15 +1932,30 @@ const AddComponent = ({
                           {selectedFilesFromCreatives.map((file, index) => (
                             <div
                               key={index}
+                              // style={{
+                              //   display: "flex",
+                              //   alignItems: "center",
+                              //   marginBottom: 8,
+                              // }}
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                marginBottom: 8,
+                                gap: 12,
+                                width: 365,
+                                marginTop: 10,
+                                padding: 8,                         // ✅ space inside border
+                                border: theme === "dark"
+                                  ? "1px solid #444"
+                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                borderRadius: 6,                    // ✅ rounded corners
+                                background: theme === "dark"
+                                  ? "#1f1f1f"
+                                  : "#fff",
                               }}
                             >
                               {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                               {/* <Tooltip title={file.name}> */}
-                              {file.type?.startsWith("image/") && (
+                              {file.type?.startsWith("image/") ? (
                                 <img
                                   src={
                                     file.originFileObj
@@ -1886,10 +1971,21 @@ const AddComponent = ({
                                     marginLeft: 8,
                                   }}
                                 />
+                              ) : (
+                                <video
+                                  src={file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url}
+                                  width={50}
+                                  height={40}
+                                  muted
+                                  preload="metadata"
+                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                />
                               )}
                               <span
                                 style={{
-                                  maxWidth: 160,
+                                  // maxWidth: 160,
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
@@ -1971,7 +2067,7 @@ const AddComponent = ({
               style={{ flex: "140px" }}
             >
               <Input
-                style={{ width: "23%" }}
+                style={{ width: "60%" }}
                 disabled={true}
                 className={
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
@@ -3448,18 +3544,18 @@ const AdsetComponent = ({
       const next = [...list, ...newAds];
       return { ...prev, [key]: next };
     });
-    form.setFieldsValue({
-      adsets: {
-        [index]: {
-          MediaContent: [
-            ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
-            ...mapped,
-          ],
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [index]: {
+    //       MediaContent: [
+    //         ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
+    //         ...mapped,
+    //       ],
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", index, "MediaContent"]]);
+    // form.validateFields([["adsets", index, "MediaContent"]]);
     setOpenCreativesDrawer(false);
   };
 
@@ -5421,34 +5517,34 @@ const AdsetComponent = ({
                             <Upload
                               //   beforeUpload={() => false}
                               disabled={view}
-                              itemRender={(
-                                originNode,
-                                file,
-                                fileList,
-                                actions
-                              ) => {
-                                console.log(file);
-                                // Show delete icon only if `canDelete: true`
-                                return (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    {originNode}
-                                    {file.canDelete !== false && (
-                                      <Button
-                                        size="small"
-                                        type="text"
-                                        icon={<DeleteOutlined />}
-                                        onClick={() => actions.remove()}
-                                        style={{ marginLeft: 8 }}
-                                      />
-                                    )}
-                                  </div>
-                                );
-                              }}
+                              // itemRender={(
+                              //   originNode,
+                              //   file,
+                              //   fileList,
+                              //   actions
+                              // ) => {
+                              //   console.log(file);
+                              //   // Show delete icon only if `canDelete: true`
+                              //   return (
+                              //     <div
+                              //       style={{
+                              //         display: "flex",
+                              //         alignItems: "center",
+                              //       }}
+                              //     >
+                              //       {originNode}
+                              //       {file.canDelete !== false && (
+                              //         <Button
+                              //           size="small"
+                              //           type="text"
+                              //           icon={<DeleteOutlined />}
+                              //           onClick={() => actions.remove()}
+                              //           style={{ marginLeft: 8 }}
+                              //         />
+                              //       )}
+                              //     </div>
+                              //   );
+                              // }}
                               // onChange={(info) => {
                               //   const newFiles = info.fileList.map((file) => ({
                               //     ...file,
@@ -5985,6 +6081,76 @@ const AdsetComponent = ({
                               showUploadList={{ showRemoveIcon: false }}
                               listType="picture"
                               accept="image/*, video/*"
+                              itemRender={(originNode, file, fileList, actions) => {
+                                const isVideo = file.type?.startsWith("video");
+                                const isImage = file.type?.startsWith("image");
+
+                                if (isVideo || isImage) {
+                                  return (
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 12,
+                                        width: 365,
+                                        marginTop: 10,
+                                        padding: 8,                         // ✅ space inside border
+                                        border: theme === "dark"
+                                          ? "1px solid #444"
+                                          : "1px solid #d9d9d9",            // ✅ light theme border
+                                        borderRadius: 6,                    // ✅ rounded corners
+                                        background: theme === "dark"
+                                          ? "#1f1f1f"
+                                          : "#fff",
+                                      }}
+                                    >
+                                      {isVideo ? (
+                                        <video
+                                          src={file.originFileObj
+                                            ? URL.createObjectURL(file.originFileObj)
+                                            : file.url}
+                                          width={50}
+                                          height={50}
+                                          muted
+                                          preload="metadata"
+                                          style={{ borderRadius: 4, flexShrink: 0 }}
+                                        />
+                                      ) : (
+                                        <img
+                                          src={file.thumbUrl || file.url}
+                                          width={50}
+                                          height={50}
+                                          alt={file.name}
+                                          style={{ borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                                        />
+                                      )}
+
+                                      <span
+                                        style={{
+                                          color: theme === "dark" ? "#fff" : "#000",
+                                          flex: 1,                    // ✅ auto width
+                                          whiteSpace: "nowrap",
+                                          overflow: "hidden",
+                                          textOverflow: "ellipsis",
+                                        }}
+                                      >
+                                        {file.name}
+                                      </span>
+                                      {/* ✅ DEFAULT REMOVE FLOW */}
+                                      <DeleteOutlined
+                                        onClick={actions.remove}
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "#ff4d4f",
+                                          fontSize: 16,
+                                        }}
+                                      />
+                                    </div>
+                                  );
+                                }
+
+                                return originNode; // fallback for other file types
+                              }}
                             >
                               <Button
                                 icon={<UploadOutlined />}
@@ -6021,15 +6187,30 @@ const AdsetComponent = ({
                                       (file, index) => (
                                         <div
                                           key={index}
+                                          // style={{
+                                          //   display: "flex",
+                                          //   alignItems: "center",
+                                          //   marginBottom: 8,
+                                          // }}
                                           style={{
                                             display: "flex",
                                             alignItems: "center",
-                                            marginBottom: 8,
+                                            gap: 12,
+                                            width: 365,
+                                            marginTop: 10,
+                                            padding: 8,                         // ✅ space inside border
+                                            border: theme === "dark"
+                                              ? "1px solid #444"
+                                              : "1px solid #d9d9d9",            // ✅ light theme border
+                                            borderRadius: 6,                    // ✅ rounded corners
+                                            background: theme === "dark"
+                                              ? "#1f1f1f"
+                                              : "#fff",
                                           }}
                                         >
                                           {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                           {/* <Tooltip title={file.name}> */}
-                                          {file.type?.startsWith("image/") && (
+                                          {file.type?.startsWith("image/") ? (
                                             <img
                                               src={
                                                 file.originFileObj
@@ -6047,10 +6228,21 @@ const AdsetComponent = ({
                                                 marginLeft: 8,
                                               }}
                                             />
+                                          ) : (
+                                            <video
+                                              src={file.originFileObj
+                                                ? URL.createObjectURL(file.originFileObj)
+                                                : file.url}
+                                              width={50}
+                                              height={40}
+                                              muted
+                                              preload="metadata"
+                                              style={{ borderRadius: 4, flexShrink: 0 }}
+                                            />
                                           )}
                                           <span
                                             style={{
-                                              maxWidth: 160,
+                                              // maxWidth: 160,
                                               overflow: "hidden",
                                               textOverflow: "ellipsis",
                                               whiteSpace: "nowrap",
@@ -8352,6 +8544,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
     // ✅ Assign the new unique id to the cloned form entry
     clonedFormData.id = newId;
+    delete clonedFormData.Adsetid;
 
     // ✅ Add `_Copy` suffixes if present
     if (clonedFormData.AdsetName) {
@@ -9643,6 +9836,8 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["Category"] = fullCampaignData.Category;
     if (fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
     if (fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
+    if (fullCampaignData.processingNote) AllAdsetsData["processingNote"] = fullCampaignData.processingNote;
+    if (fullCampaignData.startedAt) AllAdsetsData["startedAt"] = fullCampaignData.startedAt;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
       AllAdsetsData["camapaignlevel"]["Editedby"] = userdetails?.userName;
@@ -9780,7 +9975,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
     for (let newAdset of values.adsets) {
       console.log(newAdset, "newAdset");
-      let AdsetsData = { buying_type: "AUCTION" };
+      let AdsetsData = { buying_type: "AUCTION", Budget_type: budgetType };
       const adsetKeys = Object.keys(fullCampaignData).filter((key) =>
         key.startsWith("adsetlevel_")
       );
@@ -10246,14 +10441,37 @@ const EditMultipleAdsetCampaignDrawer = ({
         const getTheVideos = [];
 
         // 🔁 Compare TEXT FIELDS (Dynamic ads → shared text)
-        const mainItem = { message: formValuesObject.messages, headline: formValuesObject.headlines, Description: formValuesObject.descriptions, Caption: formValuesObject.Caption, Website_URL: formValuesObject.Website_URL, status: findMatchingAdset?.addlevel[0].status, Addid: findMatchingAdset?.addlevel[0].Addid, Ad_Status: findMatchingAdset?.addlevel[0].Ad_Status };
-        const oldMainItem = { message: findMatchingAdset.messages, headline: findMatchingAdset.headlines, Description: findMatchingAdset.descriptions };
+
+        // const findMatchingAdset = oldItems[0] || {};
+        // const formValuesObject = items[0] || {};
+
+        // console.log("findMatchingAdset", findMatchingAdset);
+        // console.log("formValuesObject", formValuesObject);
+
+        const mainItem = { message: formValuesObject.messages, headline: formValuesObject.headlines, Description: formValuesObject.descriptions, Caption: formValuesObject.Caption, Website_URL: formValuesObject.Website_URL,  };
+        const oldMainItem = { message: findMatchingAdset?.addlevel[0]?.message || "", headline: findMatchingAdset?.addlevel[0]?.headline || "", Description: findMatchingAdset?.addlevel[0]?.Description , Caption: findMatchingAdset?.addlevel[0]?.Caption, Website_URL: findMatchingAdset?.addlevel[0]?.Website_URL, status: findMatchingAdset?.addlevel[0]?.status, Addid: findMatchingAdset?.addlevel[0]?.Addid, Ad_Status: findMatchingAdset?.addlevel[0]?.Ad_Status };
         const oldAddName = findMatchingAdset?.addlevel[0]?.AddName || "";
+
+        console.log("mainItem", mainItem);
+        console.log("oldMainItem", oldMainItem);
 
         // 🔹 Ad Name check
         if (AddName !== oldAddName) {
+          console.log("Ad Name changed:", { oldAddName, AddName });
           addNameChanged = true;
         }
+
+        const normalizeString = (v) => (v ?? "").trim();
+
+        const normalizeArray = (arr = []) =>
+          arr.map((v) => normalizeString(v)).filter(Boolean);
+
+        const isSameArray = (a = [], b = []) => {
+          const na = normalizeArray(a);
+          const nb = normalizeArray(b);
+
+          return na.length === nb.length && na.every((v, i) => v === nb[i]);
+        };
 
         // 🔹 Array-based fields
         const arrayFields = ["message", "headline", "Description"];
@@ -10261,6 +10479,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           const newVal = mainItem[field] || [];
           const oldVal = oldMainItem[field] || [];
           if (!isSameArray(newVal, oldVal)) {
+            console.log("Array field changed:", { field, newVal, oldVal });
             otherChanged = true;
           }
         });
@@ -10269,9 +10488,31 @@ const EditMultipleAdsetCampaignDrawer = ({
         const stringFields = ["Caption", "Website_URL"];
         stringFields.forEach((field) => {
           if (mainItem[field] !== oldMainItem[field]) {
+            console.log("String field changed:", { field, newVal: mainItem[field], oldVal: oldMainItem[field] });
             otherChanged = true;
           }
         });
+
+        // // 🔹 Array-based fields
+        // const arrayFields = ["message", "headline", "Description"];
+
+        // arrayFields.forEach((field) => {
+        //   if (!isSameArray(mainItem[field], oldMainItem[field])) {
+        //     otherChanged = true;
+        //   }
+        // });
+
+        // // 🔹 String-based fields
+        // const stringFields = ["Caption", "Website_URL"];
+
+        // stringFields.forEach((field) => {
+        //   const newVal = normalizeString(mainItem[field]);
+        //   const oldVal = normalizeString(oldMainItem[field]);
+
+        //   if (newVal !== oldVal) {
+        //     otherChanged = true;
+        //   }
+        // });
 
         // 🖼️ / 🎥 FILE HANDLING
         for (const item of items) {
@@ -10306,9 +10547,9 @@ const EditMultipleAdsetCampaignDrawer = ({
           {
             id: uuidv4(),
             AddName,
-            status: mainItem.status,
-            Addid: mainItem.Addid,
-            Ad_Status: mainItem.Ad_Status,
+            status: oldMainItem.status,
+            Addid: oldMainItem.Addid,
+            Ad_Status: oldMainItem.Ad_Status,
 
             filename: imagesHashArray.map(m =>
               m.imag_hash
@@ -12017,15 +12258,15 @@ const EditMultipleAdsetCampaignDrawer = ({
       form.getFieldValue(["adsets", creativeIndex, "MediaContent"]) || [];
     const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
 
-    form.setFieldsValue({
-      adsets: {
-        [creativeIndex]: {
-          MediaContent: updatedMediaContent,
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [creativeIndex]: {
+    //       MediaContent: updatedMediaContent,
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
+    // form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
   };
 
   console.log("Selected Files:", selectedFiles);
@@ -13512,6 +13753,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             {adsets.map((adset, index) => {
               return (
                 <AdsetComponent
+                  key={adset.id}
                   view={view}
                   theme={theme}
                   setSelectedPublishers={setSelectedPublishers}

@@ -2128,36 +2128,120 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         }
         ,
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to || null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
 
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -2166,20 +2250,60 @@ const MyTablePage = () => {
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -2363,41 +2487,84 @@ const MyTablePage = () => {
                 );
             },
         },
+        // date: {
+        //     headerName: 'Date',
+        //     field: 'date',
+        //     minWidth: 110,
+        //     sortable: true,
+        //     sort: "asc",
+        //     filter: "agDateColumnFilter",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         },
+        //     },
+        // },
         date: {
             headerName: 'Date',
             field: 'date',
             minWidth: 110,
             sortable: true,
-            sort: "asc",
             filter: "agDateColumnFilter",
-            suppressMenu: true,
-            menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         'fb-hour': {
             headerName: 'F-H',
@@ -3400,36 +3567,120 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to || null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
 
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -3438,20 +3689,60 @@ const MyTablePage = () => {
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -3512,38 +3803,81 @@ const MyTablePage = () => {
                 suppressAndOrCondition: true,
             },
         },
+        // date: {
+        //     headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+        //     filter: "agDateColumnFilter",
+        //     sort: "asc",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         }
+        //     },
+        // },
         date: {
-            headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
-            sort: "asc",
-            suppressMenu: true,
-            menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
-                }
+                },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
@@ -5883,152 +6217,276 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        from: {
-            // headerName: 'Start',
-            // field: 'from',
-            // sortable: true,
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     // if (params.node.group) {
-            //     //     const campaignName =
-            //     //         params.node.groupData?.campaignname || params.node.key;
-            //     //     const campaign = campaignMap.get(campaignName);
-            //     //     return campaign && campaign.start
-            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //     //         : '-';
-            //     // }
-            //     // return '';
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
+        // from: {
+        //     // headerName: 'Start',
+        //     // field: 'from',
+        //     // sortable: true,
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     // if (params.node.group) {
+        //     //     //     const campaignName =
+        //     //     //         params.node.groupData?.campaignname || params.node.key;
+        //     //     //     const campaign = campaignMap.get(campaignName);
+        //     //     //     return campaign && campaign.start
+        //     //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //     //         : '-';
+        //     //     // }
+        //     //     // return '';
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
 
-            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
-            //     }
-            //     return params.data?.from || null;
-            // },
-            // valueFormatter: (params) => {
-            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
+        //     //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //     //     }
+        //     //     return params.data?.from || null;
+        //     // },
+        //     // valueFormatter: (params) => {
+        //     //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     // headerName: 'End',
+        //     // field: 'to',
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+        //     //         return campaign && campaign.end
+        //     //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //             : '-';
+        //     //     }
+        //     //     return params.data?.to || null;
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             // console.log(campaign, "campaign");
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
         to: {
-            // headerName: 'End',
-            // field: 'to',
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-            //         return campaign && campaign.end
-            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //             : '-';
-            //     }
-            //     return params.data?.to || null;
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    // console.log(campaign, "campaign");
-
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -6063,41 +6521,84 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date',
+        //     field: 'date',
+        //     minWidth: 110,
+        //     sortable: true,
+        //     // sort: "asc",
+        //     filter: "agDateColumnFilter",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         },
+        //     },
+        // },
         date: {
             headerName: 'Date',
             field: 'date',
             minWidth: 110,
             sortable: true,
-            // sort: "asc",
             filter: "agDateColumnFilter",
-            suppressMenu: true,
-            menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         'fb-hour': {
             headerName: 'F-H',
@@ -7109,152 +7610,276 @@ const MyTablePage = () => {
         }
 
         ,
-        from: {
-            // headerName: 'Start',
-            // field: 'from',
-            // sortable: true,
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     // if (params.node.group) {
-            //     //     const campaignName =
-            //     //         params.node.groupData?.campaignname || params.node.key;
-            //     //     const campaign = campaignMap.get(campaignName);
-            //     //     return campaign && campaign.start
-            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //     //         : '-';
-            //     // }
-            //     // return '';
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
+        // from: {
+        //     // headerName: 'Start',
+        //     // field: 'from',
+        //     // sortable: true,
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     // if (params.node.group) {
+        //     //     //     const campaignName =
+        //     //     //         params.node.groupData?.campaignname || params.node.key;
+        //     //     //     const campaign = campaignMap.get(campaignName);
+        //     //     //     return campaign && campaign.start
+        //     //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //     //         : '-';
+        //     //     // }
+        //     //     // return '';
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
 
-            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
-            //     }
-            //     return params.data?.from || null;
-            // },
-            // valueFormatter: (params) => {
-            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
+        //     //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //     //     }
+        //     //     return params.data?.from || null;
+        //     // },
+        //     // valueFormatter: (params) => {
+        //     //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     // headerName: 'End',
+        //     // field: 'to',
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+        //     //         return campaign && campaign.end
+        //     //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //             : '-';
+        //     //     }
+        //     //     return params.data?.to || null;
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             // console.log(campaign, "campaign");
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
         to: {
-            // headerName: 'End',
-            // field: 'to',
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-            //         return campaign && campaign.end
-            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //             : '-';
-            //     }
-            //     return params.data?.to || null;
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    // console.log(campaign, "campaign");
-
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -7289,41 +7914,84 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date',
+        //     field: 'date',
+        //     minWidth: 110,
+        //     sortable: true,
+        //     // sort: "asc",
+        //     filter: "agDateColumnFilter",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         },
+        //     },
+        // },
         date: {
             headerName: 'Date',
             field: 'date',
             minWidth: 110,
             sortable: true,
-            // sort: "asc",
             filter: "agDateColumnFilter",
-            suppressMenu: true,
-            menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         'fb-hour': {
             headerName: 'F-H',
@@ -8576,100 +9244,224 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // to: {
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             // console.log(campaign, "campaign");
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         to: {
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    // console.log(campaign, "campaign");
-
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -8704,53 +9496,96 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date',
+        //     field: 'date',
+        //     minWidth: 110,
+        //     sortable: true,
+        //     // sort: "asc",
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     // filterParams: {
+        //     //     comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //     //         const dateAsString = cellValue;
+        //     //         if (dateAsString == null) return -1;
+        //     //         const dateParts = dateAsString.split("/");
+        //     //         const cellDate = new Date(
+        //     //             Number(dateParts[2]),
+        //     //             Number(dateParts[1]) - 1,
+        //     //             Number(dateParts[0])
+        //     //         );
+
+        //     //         if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //     //             return 0;
+        //     //         }
+
+        //     //         if (cellDate < filterLocalDateAtMidnight) {
+        //     //             return -1;
+        //     //         }
+
+        //     //         if (cellDate > filterLocalDateAtMidnight) {
+        //     //             return 1;
+        //     //         }
+        //     //         return 0;
+        //     //     },
+        //     // },
+        // },
         date: {
             headerName: 'Date',
             field: 'date',
             minWidth: 110,
             sortable: true,
-            // sort: "asc",
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue is already a Date object
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
-            // filterParams: {
-            //     comparator: (filterLocalDateAtMidnight, cellValue) => {
-            //         const dateAsString = cellValue;
-            //         if (dateAsString == null) return -1;
-            //         const dateParts = dateAsString.split("/");
-            //         const cellDate = new Date(
-            //             Number(dateParts[2]),
-            //             Number(dateParts[1]) - 1,
-            //             Number(dateParts[0])
-            //         );
-
-            //         if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-            //             return 0;
-            //         }
-
-            //         if (cellDate < filterLocalDateAtMidnight) {
-            //             return -1;
-            //         }
-
-            //         if (cellDate > filterLocalDateAtMidnight) {
-            //             return 1;
-            //         }
-            //         return 0;
-            //     },
-            // },
+            headerClass: 'hide-menu',
         },
         'fb-hour': {
             headerName: 'F-H',
@@ -10174,152 +11009,276 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        from: {
-            // headerName: 'Start',
-            // field: 'from',
-            // sortable: true,
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     // if (params.node.group) {
-            //     //     const campaignName =
-            //     //         params.node.groupData?.campaignname || params.node.key;
-            //     //     const campaign = campaignMap.get(campaignName);
-            //     //     return campaign && campaign.start
-            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //     //         : '-';
-            //     // }
-            //     // return '';
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
+        // from: {
+        //     // headerName: 'Start',
+        //     // field: 'from',
+        //     // sortable: true,
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     // if (params.node.group) {
+        //     //     //     const campaignName =
+        //     //     //         params.node.groupData?.campaignname || params.node.key;
+        //     //     //     const campaign = campaignMap.get(campaignName);
+        //     //     //     return campaign && campaign.start
+        //     //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //     //         : '-';
+        //     //     // }
+        //     //     // return '';
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
 
-            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
-            //     }
-            //     return params.data?.from || null;
-            // },
-            // valueFormatter: (params) => {
-            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
+        //     //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //     //     }
+        //     //     return params.data?.from || null;
+        //     // },
+        //     // valueFormatter: (params) => {
+        //     //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     // headerName: 'End',
+        //     // field: 'to',
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+        //     //         return campaign && campaign.end
+        //     //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //             : '-';
+        //     //     }
+        //     //     return params.data?.to || null;
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             // console.log(campaign, "campaign");
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
         to: {
-            // headerName: 'End',
-            // field: 'to',
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-            //         return campaign && campaign.end
-            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //             : '-';
-            //     }
-            //     return params.data?.to || null;
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    // console.log(campaign, "campaign");
-
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -10352,38 +11311,81 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+        //     filter: "agDateColumnFilter",
+        //     // sort: "asc",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         }
+        //     },
+        // },
         date: {
-            headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
-            // sort: "asc",
-            suppressMenu: true,
-            menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
-                }
+                },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
@@ -11329,152 +12331,276 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        from: {
-            // headerName: 'Start',
-            // field: 'from',
-            // minWidth: 110,
-            // sortable: true,
-            // valueGetter: (params) => {
-            //     // if (params.node.group) {
-            //     //     const campaignName =
-            //     //         params.node.groupData?.campaignname || params.node.key;
-            //     //     const campaign = campaignMap.get(campaignName);
-            //     //     return campaign && campaign.start
-            //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //     //         : '-';
-            //     // }
-            //     // return '';
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
+        // from: {
+        //     // headerName: 'Start',
+        //     // field: 'from',
+        //     // minWidth: 110,
+        //     // sortable: true,
+        //     // valueGetter: (params) => {
+        //     //     // if (params.node.group) {
+        //     //     //     const campaignName =
+        //     //     //         params.node.groupData?.campaignname || params.node.key;
+        //     //     //     const campaign = campaignMap.get(campaignName);
+        //     //     //     return campaign && campaign.start
+        //     //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //     //         : '-';
+        //     //     // }
+        //     //     // return '';
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
 
-            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
-            //     }
-            //     return params.data?.from || null;
-            // },
-            // valueFormatter: (params) => {
-            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
+        //     //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //     //     }
+        //     //     return params.data?.from || null;
+        //     // },
+        //     // valueFormatter: (params) => {
+        //     //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     // headerName: 'End',
+        //     // field: 'to',
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+        //     //         return campaign && campaign.end
+        //     //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //             : '-';
+        //     //     }
+        //     //     return params.data?.to || null;
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             // console.log(campaign, "campaign");
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
         to: {
-            // headerName: 'End',
-            // field: 'to',
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-            //         return campaign && campaign.end
-            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //             : '-';
-            //     }
-            //     return params.data?.to || null;
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-                    // console.log(campaign, "campaign");
-
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -11507,38 +12633,81 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+        //     filter: "agDateColumnFilter",
+        //     // sort: "asc",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         }
+        //     },
+        // },
         date: {
-            headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
-            // sort: "asc",
-            suppressMenu: true,
-            menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
-                }
+                },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
@@ -12423,36 +13592,120 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to || null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
 
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -12461,20 +13714,60 @@ const MyTablePage = () => {
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -12507,38 +13800,81 @@ const MyTablePage = () => {
             filter: "agNumberColumnFilter",
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+        //     filter: "agDateColumnFilter",
+        //     sort: "asc",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         }
+        //     },
+        // },
         date: {
-            headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
-            sort: "asc",
-            suppressMenu: true,
-            menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
-                }
+                },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
@@ -13856,165 +15192,290 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // from: {
+        //     // headerName: 'Start',
+        //     // field: 'from',
+        //     // sortable: true,
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     //   if (params.node.group) {
+        //     //     //     const campaignName =
+        //     //     //       params.node.groupData?.campaignname || params.node.key;
+        //     //     //     const campaign = campaignMap.get(campaignName);
+        //     //     //     return campaign && campaign.start
+        //     //     //       ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //     //       : '-';
+        //     //     //   }
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+
+
+        //     //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //     //     }
+        //     //     return params.data?.from || null;
+        //     // },
+        //     // valueFormatter: (params) => {
+        //     //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.campaignid || params.node?.key || "";
+
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     // headerName: 'End',
+        //     // field: 'to',
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+        //     //         return campaign && campaign.end
+        //     //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //             : '-';
+        //     //     }
+        //     //     return params.data?.to || null;
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+
+        //             // console.log(campaign, "campaign");
+
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // }, 
         from: {
-            // headerName: 'Start',
-            // field: 'from',
-            // sortable: true,
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     //   if (params.node.group) {
-            //     //     const campaignName =
-            //     //       params.node.groupData?.campaignname || params.node.key;
-            //     //     const campaign = campaignMap.get(campaignName);
-            //     //     return campaign && campaign.start
-            //     //       ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //     //       : '-';
-            //     //   }
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-
-
-            //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
-            //     }
-            //     return params.data?.from || null;
-            // },
-            // valueFormatter: (params) => {
-            //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
-
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
-            valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
-                if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.campaignid || params.node?.key || "";
 
+            valueGetter: (params) => {
+                let dateStr = null;
+
+                if (params.node.group) {
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
         to: {
-            // headerName: 'End',
-            // field: 'to',
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-            //         return campaign && campaign.end
-            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //             : '-';
-            //     }
-            //     return params.data?.to || null;
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
-
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
-            valueGetter: (params) => {
-                if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
 
+            valueGetter: (params) => {
+                let dateStr = null;
+
+                if (params.node.group) {
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
                     const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-
-
-                    // console.log(campaign, "campaign");
-
-
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-        }, profitloss: {
+        },
+        profitloss: {
             headerName: 'P/L',
             field: 'profitloss',
             minWidth: 110,
@@ -14042,44 +15503,87 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date', field: 'date',
+        //     // sort: 'asc',
+        //     sortable: true,
+        //     filter: "agDateColumnFilter",
+        //     // sort: "asc",
+        //     minWidth: 110,
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         },
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
         date: {
-            headerName: 'Date', field: 'date',
-            // sort: 'asc',
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
             sortable: true,
             filter: "agDateColumnFilter",
-            // sort: "asc",
-            minWidth: 110,
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
         spend: {
             headerName: 'Spend',
@@ -15160,36 +16664,120 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node.groupData?.campaignname || params.node.key;
+        //             const campaign = campaignMap.get(campaignName);
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to || null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         from: {
             headerName: 'Start',
             field: 'from',
             sortable: true,
             minWidth: 110,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
-                // if (params.node.group) {
-                //     const campaignName =
-                //         params.node.groupData?.campaignname || params.node.key;
-                //     const campaign = campaignMap.get(campaignName);
-                //     return campaign && campaign.start
-                //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
-                //         : '-';
-                // }
-                // return '';
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
 
-                    return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
                 }
-                return params.data?.from || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
             valueFormatter: (params) => {
-                return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
             },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -15198,20 +16786,60 @@ const MyTablePage = () => {
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
                     const campaignName =
-                        params.node.groupData?.campaignname || params.node.key;
-                    const campaign = campaignMap.get(campaignName);
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.end || null;
+                } else {
+                    dateStr = params.data?.to || null;
                 }
-                return params.data?.to || null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -15243,35 +16871,78 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
         },
+        // date: {
+        //     headerName: 'Date', field: 'date', minWidth: 120, sortable: true,
+        //     sort: "asc",
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         }
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         date: {
-            headerName: 'Date', field: 'date', minWidth: 120, sortable: true,
-            sort: "asc",
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const dateAsString = cellValue;
-                    if (dateAsString == null) return -1;
-                    const dateParts = dateAsString.split("/");
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
                     const cellDate = new Date(
-                        Number(dateParts[2]),
-                        Number(dateParts[1]) - 1,
-                        Number(dateParts[0])
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
                     );
 
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-                        return 0;
-                    }
-
-                    if (cellDate < filterLocalDateAtMidnight) {
-                        return -1;
-                    }
-
-                    if (cellDate > filterLocalDateAtMidnight) {
-                        return 1;
-                    }
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
-                }
+                },
             },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',

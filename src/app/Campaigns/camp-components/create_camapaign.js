@@ -2199,18 +2199,18 @@ const AdsetComponent = ({
       [adsetId]: [...(prev[adsetId] || []), ...mapped],
     }));
 
-    form.setFieldsValue({
-      adsets: {
-        [index]: {
-          MediaContent: [
-            ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
-            ...mapped,
-          ],
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [index]: {
+    //       MediaContent: [
+    //         ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
+    //         ...mapped,
+    //       ],
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", index, "MediaContent"]]);
+    // form.validateFields([["adsets", index, "MediaContent"]]);
     setOpenCreativesDrawer(false);
   };
 
@@ -5320,7 +5320,7 @@ const AdsetComponent = ({
 
                             //   return originNode; // images stay exactly the same
                             // }}
-                            itemRender={(originNode, file) => {
+                            itemRender={(originNode, file, fileList, actions) => {
                               const isVideo = file.type?.startsWith("video");
                               const isImage = file.type?.startsWith("image");
 
@@ -5332,7 +5332,7 @@ const AdsetComponent = ({
                                       alignItems: "center",
                                       gap: 12,
                                       width: "100%",
-                                      marginBottom: 10,
+                                      marginTop: 10,
                                       padding: 8,                         // ✅ space inside border
                                       border: theme === "dark"
                                         ? "1px solid #444"
@@ -5375,6 +5375,15 @@ const AdsetComponent = ({
                                     >
                                       {file.name}
                                     </span>
+                                    {/* ✅ DEFAULT REMOVE FLOW */}
+                                    <DeleteOutlined
+                                      onClick={actions.remove}
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "#ff4d4f",
+                                        fontSize: 16,
+                                      }}
+                                    />
                                   </div>
                                 );
                               }
@@ -5419,15 +5428,30 @@ const AdsetComponent = ({
                                     (file, index) => (
                                       <div
                                         key={index}
+                                        // style={{
+                                        //   display: "flex",
+                                        //   alignItems: "center",
+                                        //   marginBottom: 8,
+                                        // }}
                                         style={{
                                           display: "flex",
                                           alignItems: "center",
-                                          marginBottom: 8,
+                                          gap: 12,
+                                          width: 365,
+                                          marginTop: 10,
+                                          padding: 8,                         // ✅ space inside border
+                                          border: theme === "dark"
+                                            ? "1px solid #444"
+                                            : "1px solid #d9d9d9",            // ✅ light theme border
+                                          borderRadius: 6,                    // ✅ rounded corners
+                                          background: theme === "dark"
+                                            ? "#1f1f1f"
+                                            : "#fff",
                                         }}
                                       >
                                         {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                         {/* <Tooltip title={file.name}> */}
-                                        {file.type?.startsWith("image/") && (
+                                        {file.type?.startsWith("image/") ? (
                                           <img
                                             src={
                                               file.originFileObj
@@ -5445,10 +5469,21 @@ const AdsetComponent = ({
                                               marginLeft: 8,
                                             }}
                                           />
+                                        ) : (
+                                          <video
+                                            src={file.originFileObj
+                                              ? URL.createObjectURL(file.originFileObj)
+                                              : file.url}
+                                            width={50}
+                                            height={40}
+                                            muted
+                                            preload="metadata"
+                                            style={{ borderRadius: 4, flexShrink: 0 }}
+                                          />
                                         )}
                                         <span
                                           style={{
-                                            maxWidth: 160,
+                                            // maxWidth: 160,
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
                                             whiteSpace: "nowrap",
@@ -5457,6 +5492,18 @@ const AdsetComponent = ({
                                               theme === "dark" ? "#fff" : "#000",
                                           }}
                                         >
+                                          {/* <Tooltip
+                                            overlayInnerStyle={{
+                                              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                              color: theme === "dark" ? "#ffffff" : "#000000",
+                                              borderRadius: 6,
+                                              padding: "6px 10px",
+                                              fontSize: "14px",
+                                            }}
+                                            title={file.name}
+                                          >
+                                            {file.name}
+                                          </Tooltip> */}
                                           {file.name}
                                         </span>
                                         {/* </Tooltip> */}
@@ -11017,15 +11064,15 @@ const CreateCampaignDrawer = ({
       form.getFieldValue(["adsets", creativeIndex, "MediaContent"]) || [];
     const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
 
-    form.setFieldsValue({
-      adsets: {
-        [creativeIndex]: {
-          MediaContent: updatedMediaContent,
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [creativeIndex]: {
+    //       MediaContent: updatedMediaContent,
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
+    // form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
   };
 
   console.log("Selected Files:", selectedFiles);
@@ -11709,7 +11756,7 @@ const CreateCampaignDrawer = ({
           </div>
 
           <div>
-            <Tooltip title="Turn on to launch campaigns in multiple Pixels"
+            <Tooltip title={pixel === "Pixels" ? "Turn off to launch campaign in single Pixel" : "Turn on to launch campaigns in multiple Pixels"}
               overlayInnerStyle={{
                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                 color: theme === "dark" ? "#ffffff" : "#000000",
@@ -11733,7 +11780,7 @@ const CreateCampaignDrawer = ({
           </div>
 
           <div>
-            <Tooltip title="Turn on to launch campaigns in multiple Pages"
+            <Tooltip title={page === "Pages" ? "Turn off to launch campaign in single Page" :"Turn on to launch campaigns in multiple Pages"}
               overlayInnerStyle={{
                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                 color: theme === "dark" ? "#ffffff" : "#000000",

@@ -1567,15 +1567,30 @@ const AddComponent = ({
                           {selectedFilesFromCreatives.map((file, index) => (
                             <div
                               key={index}
+                              // style={{
+                              //   display: "flex",
+                              //   alignItems: "center",
+                              //   marginBottom: 8,
+                              // }}
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                marginBottom: 8,
+                                gap: 12,
+                                width: 365,
+                                marginTop: 10,
+                                padding: 8,                         // ✅ space inside border
+                                border: theme === "dark"
+                                  ? "1px solid #444"
+                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                borderRadius: 6,                    // ✅ rounded corners
+                                background: theme === "dark"
+                                  ? "#1f1f1f"
+                                  : "#fff",
                               }}
                             >
                               {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                               {/* <Tooltip title={file.name}> */}
-                              {file.type?.startsWith("image/") && (
+                              {file.type?.startsWith("image/") ? (
                                 <img
                                   src={
                                     file.originFileObj
@@ -1591,10 +1606,21 @@ const AddComponent = ({
                                     marginLeft: 8,
                                   }}
                                 />
+                              ) : (
+                                <video
+                                  src={file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url}
+                                  width={50}
+                                  height={40}
+                                  muted
+                                  preload="metadata"
+                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                />
                               )}
                               <span
                                 style={{
-                                  maxWidth: 160,
+                                  // maxWidth: 160,
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
@@ -4372,7 +4398,7 @@ const AdsetComponent = ({
                   }
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     options={[
                       { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
                       { value: "LINK_CLICKS", label: "Clicks" },
@@ -4401,7 +4427,7 @@ const AdsetComponent = ({
                   initialValue={adset.billing_event || "IMPRESSIONS"}
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                     disabled={true}
                     options={[
                       { value: "IMPRESSIONS", label: "Impressions" },
                       { value: "VALUE", label: "Value" },
@@ -4426,7 +4452,7 @@ const AdsetComponent = ({
                   initialValue={dayjs()}
                 >
                   <DatePicker
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     showTime
                     dropdownClassName={
                       theme === "dark" ? "dark-theme-dropdown" : ""
@@ -4454,7 +4480,7 @@ const AdsetComponent = ({
                   initialValue={adset.action_source || "website"}
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     options={[
                       { value: "website", label: "Website" },
                       { value: "email", label: "Email" },
@@ -4481,7 +4507,7 @@ const AdsetComponent = ({
                   initialValue={adset.custom_event_type || "LEAD"}
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     options={[
                       { value: "LEAD", label: "Lead" },
                       { value: "PURCHASE", label: "Purchase" },
@@ -4533,6 +4559,7 @@ const AdsetComponent = ({
                           ? "custom-input-dark"
                           : "custom-input-light"
                       }
+                      disabled={true}
                     >
                       {Object.entries(imagehash.pixelID).map(
                         ([label, value]) => (
@@ -6048,38 +6075,64 @@ const AdsetComponent = ({
                                           (file, index) => (
                                             <div
                                               key={index}
+                                              // style={{
+                                              //   display: "flex",
+                                              //   alignItems: "center",
+                                              //   marginBottom: 8,
+                                              // }}
                                               style={{
                                                 display: "flex",
                                                 alignItems: "center",
-                                                marginBottom: 8,
+                                                gap: 12,
+                                                width: 365,
+                                                marginTop: 10,
+                                                padding: 8,                         // ✅ space inside border
+                                                border: theme === "dark"
+                                                  ? "1px solid #444"
+                                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                                borderRadius: 6,                    // ✅ rounded corners
+                                                background: theme === "dark"
+                                                  ? "#1f1f1f"
+                                                  : "#fff",
                                               }}
                                             >
                                               {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                               {/* <Tooltip title={file.name}> */}
                                               {file.type?.startsWith(
                                                 "image/"
-                                              ) && (
-                                                  <img
-                                                    src={
-                                                      file.originFileObj
-                                                        ? URL.createObjectURL(
-                                                          file.originFileObj
-                                                        )
-                                                        : file.url
-                                                    }
-                                                    alt="preview"
-                                                    style={{
-                                                      width: 40,
-                                                      height: 40,
-                                                      objectFit: "cover",
-                                                      borderRadius: 4,
-                                                      marginLeft: 8,
-                                                    }}
-                                                  />
-                                                )}
+                                              ) ? (
+                                                <img
+                                                  src={
+                                                    file.originFileObj
+                                                      ? URL.createObjectURL(
+                                                        file.originFileObj
+                                                      )
+                                                      : file.url
+                                                  }
+                                                  alt="preview"
+                                                  style={{
+                                                    width: 40,
+                                                    height: 40,
+                                                    objectFit: "cover",
+                                                    borderRadius: 4,
+                                                    marginLeft: 8,
+                                                  }}
+                                                />
+                                              ) : (
+                                                <video
+                                                  src={file.originFileObj
+                                                    ? URL.createObjectURL(file.originFileObj)
+                                                    : file.url}
+                                                  width={50}
+                                                  height={40}
+                                                  muted
+                                                  preload="metadata"
+                                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                                />
+                                              )}
                                               <span
                                                 style={{
-                                                  maxWidth: 160,
+                                                  // maxWidth: 160,
                                                   overflow: "hidden",
                                                   textOverflow: "ellipsis",
                                                   whiteSpace: "nowrap",
@@ -6202,10 +6255,10 @@ const AdsetComponent = ({
                                 message: "Please select an option!",
                               },
                             ]}
-                            style={{ flex: 3, marginLeft: "1%" }}
+                            style={{ flex: 2, marginLeft: "1%" }}
                           >
                             <Input
-                              style={{ width: "23%" }}
+                              style={{ width: "60%" }}
                               className={
                                 theme === "dark"
                                   ? "custom-input-dark"
