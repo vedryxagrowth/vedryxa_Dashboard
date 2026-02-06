@@ -10320,7 +10320,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
           }
           : {}),
         bid_amount: formValuesObject.bid_amount
-          ? parseFloat(formValuesObject.bid_amount) * 100
+          ? Math.round(parseFloat(formValuesObject.bid_amount) * 100)
           : 0,
         countries: formValuesObject.countries,
         Min_Age: formValuesObject.Min_Age,
@@ -10467,7 +10467,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         custom_event_type: values.adsets[i].custom_event_type || "",
         pixel_id: values.pixel_id,
         bid_amount: values.adsets[i].bid_amount
-          ? parseFloat(values.adsets[i].bid_amount) * 100
+          ? Math.round(parseFloat(values.adsets[i].bid_amount) * 100)
           : 0,
         countries: values.adsets[i].countries || "",
         Min_Age: values.adsets[i].Min_Age || "",
@@ -10587,7 +10587,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
           custom_event_type: values.custom_event_type,
           pixel_id: values.pixel_id,
           bid_amount: values.bid_amount
-            ? parseFloat(values.bid_amount) * 100
+            ? Math.round(parseFloat(values.bid_amount) * 100)
             : 0,
           countries: values.countries,
           Min_Age: values.Min_Age,

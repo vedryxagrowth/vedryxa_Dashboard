@@ -5583,7 +5583,7 @@ const MyTablePage = () => {
                         parseFloat(changeBudget) > 0 &&// <- this is critical&&
                         changeBudgetValue !== previousBudget
                     ) {
-                        payload.budget = parseFloat(changeBudget) * 100;
+                        payload.budget = Math.round(parseFloat(changeBudget) * 100);
                         payload.activity = {
                             editType: "Budget",
                             campaignid: campaignId,       // cents
@@ -8684,7 +8684,7 @@ const MyTablePage = () => {
 
                     const payload = {
                         campaignId: campaignIdFinal,
-                        budget: Number(changeBudget) * 100,         // cents
+                        budget: Math.round(Number(changeBudget) * 100),         // cents
                         accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
                         campaignname: campaignnameFinal,
                         updatedby: params.context?.userdetails?.email,
@@ -10372,7 +10372,7 @@ const MyTablePage = () => {
                         parseFloat(changeBudget) > 0 &&
                         changeBudgetValue !== previousBudget
                     ) {
-                        payload.budget = parseFloat(changeBudget) * 100;
+                        payload.budget = Math.round(parseFloat(changeBudget) * 100);
                         payload.activity = {
                             editType: "Budget",
                             campaignid: campaignId,       // cents
@@ -14632,7 +14632,7 @@ const MyTablePage = () => {
 
                     const payload = {
                         campaignId: campaignIdFinal,
-                        budget: Number(changeBudget) * 100,         // cents
+                        budget: Math.round(Number(changeBudget) * 100),         // cents
                         accountNumber: String(rowAccountNumber),    // ✅ update *this* row’s account
                         campaignname: campaignnameFinal,
                         updatedby: params.context?.userdetails?.email,
