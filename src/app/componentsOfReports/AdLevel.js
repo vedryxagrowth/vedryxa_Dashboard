@@ -1710,7 +1710,7 @@ const onBtExport1 = async () => {
           if (newResponse.status === 200 || newResponse.status === 201) {
             setCampaignComments(prev => {
               const arr = Array.isArray(prev) ? [...prev] : [];
-              const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+              const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
               const match = arr.findIndex(
                 i =>
@@ -1789,7 +1789,7 @@ const onBtExport1 = async () => {
               // refreshThisCell();
               setCampaignComments(prev => {
                 const arr = Array.isArray(prev) ? [...prev] : [];
-                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                 const match = arr.findIndex(
                   i =>
@@ -1994,7 +1994,7 @@ const onBtExport1 = async () => {
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
                   const arr = Array.isArray(prev) ? [...prev] : [];
-                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                  const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                   const match = arr.findIndex(
                     i =>
@@ -2656,7 +2656,8 @@ const onBtExport1 = async () => {
                       Last Edited Time:
                     </span>
                     <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
-                      {editedTimeDisplay}
+                      {/* {editedTimeDisplay} */}
+                      {universalOject?.editedTime || ""}
                     </span>
                   </div>
                   <div>

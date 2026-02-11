@@ -1583,7 +1583,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             // if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
                                 const arr = Array.isArray(prev) ? [...prev] : [];
-                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                                 const match = arr.findIndex(
                                     i =>
@@ -1747,7 +1747,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
                                 const arr = Array.isArray(prev) ? [...prev] : [];
-                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                                 const match = arr.findIndex(
                                     i =>
@@ -1885,7 +1885,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
                                 const arr = Array.isArray(prev) ? [...prev] : [];
-                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                                 const match = arr.findIndex(
                                     i =>
@@ -2673,7 +2673,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                         </span>
                                         <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {/* {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""} */}
-                                            {editedPretty || ""}
+                                            {/* {editedPretty || ""} */}
+                                            {universalOject?.editedTime || ""}
                                         </span>
 
                                     </div>
