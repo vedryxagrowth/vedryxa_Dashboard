@@ -1674,7 +1674,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
                   const arr = Array.isArray(prev) ? [...prev] : [];
-                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                  const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                   const match = arr.findIndex(
                     i =>
@@ -1889,7 +1889,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             if (newResponse.status === 200 || newResponse.status === 201) {
               setCampaignComments(prev => {
                 const arr = Array.isArray(prev) ? [...prev] : [];
-                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                 const match = arr.findIndex(
                   i =>
@@ -2051,7 +2051,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             if (newResponse.status === 200 || newResponse.status === 201) {
               setCampaignComments(prev => {
                 const arr = Array.isArray(prev) ? [...prev] : [];
-                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                 const match = arr.findIndex(
                   i =>
@@ -2730,7 +2730,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       Last Edited Time:
                     </span>
                     <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
-                      {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
+                      {/* {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""} */}
+                      {universalOject?.editedTime || ""}
                     </span>
                   </div>
                   <div>
