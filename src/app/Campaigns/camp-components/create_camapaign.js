@@ -57,6 +57,7 @@ import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
 import AffinityUrlBuilder from "./urlbuilder/affinity";
+import CompadoUrlBuilder from  "./urlbuilder/compado";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
@@ -710,6 +711,7 @@ const AccountForm = ({
   const getUrlBuilder = () => {
     // useMemo(() => {
     // return (extraString) => {
+      console.log(network)
     switch (network) {
       case "FB_Mnet":
         //defaultValues
@@ -726,6 +728,12 @@ const AccountForm = ({
         return (
           <AffinityUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
+      case "FB_Compado":
+        //defaultValues
+        return (
+          <CompadoUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
+      
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
