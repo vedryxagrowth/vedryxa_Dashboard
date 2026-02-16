@@ -2250,10 +2250,15 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             ) || null;
 
         const hasCreative = !!matchedAd;
-        const CreativeMedia = ({ url, small = false, circle = false }) => {
+        const CreativeMedia = ({
+          url,
+          filetype,
+          small = false,
+          circle = false
+        }) => {
           if (!url) return null;
 
-          const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+          const isVideo = filetype === "video";
 
           const baseStyle = small
             ? {
@@ -2266,9 +2271,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             }
             : {
               width: "100%",
-              maxHeight: "280px",   
+              maxHeight: "280px",
               display: "block",
-              objectFit: "contain"
+              objectFit: "contain",
             };
 
           if (circle) {
@@ -2288,13 +2293,21 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                     autoPlay
                     loop
                     playsInline
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 ) : (
                   <img
                     src={url}
                     alt="page"
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 )}
               </div>
@@ -2319,6 +2332,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             />
           );
         };
+
 
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
@@ -2362,7 +2376,11 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 setCreativeModalOpen(true);
               }}
             >
-              <CreativeMedia url={matchedAd.image} small />
+              <CreativeMedia
+                url={matchedAd.image}
+                filetype={matchedAd.filetype}
+                small
+              />
             </div>
           );
         };
@@ -2534,7 +2552,12 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                           objectFit: "cover",
                         }}
                       /> */}
-                      <CreativeMedia url={selectedCreative.image} circle />
+                      <CreativeMedia
+                        url={selectedCreative.image}
+                        filetype={selectedCreative.filetype}
+                        circle
+                      />
+
                       <div style={{ flex: 1, marginLeft: 6 }}>
                         <div
                           style={{
@@ -2579,7 +2602,10 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       display: "block",
                     }}
                   /> */}
-                  <CreativeMedia url={selectedCreative.image} />
+                  <CreativeMedia
+                    url={selectedCreative.image}
+                    filetype={selectedCreative.filetype}
+                  />
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (
                       <div

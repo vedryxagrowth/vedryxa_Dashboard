@@ -1208,10 +1208,10 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 const creatives =
                     campaignCreative?.adsets?.flatMap(adset => adset.ads) || [];
 
-                const CreativeMedia = ({ url, small = false }) => {
+                const CreativeMedia = ({ url, filetype, small = false }) => {
                     if (!url) return null;
 
-                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+                    const isVideo = filetype === "video";
 
                     const commonStyle = small
                         ? {
@@ -1226,7 +1226,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             width: "100%",
                             maxHeight: "250px",
                             display: "block",
-                            objectFit: "contain"
+                            objectFit: "contain",
                         };
 
                     return isVideo ? (
@@ -1245,15 +1245,15 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             alt="creative"
                             style={{
                                 ...commonStyle,
-                                objectFit: "cover",
+                                objectFit: small ? "cover" : "cover",
                             }}
                         />
                     );
                 };
-                const CreativeAvatar = ({ url }) => {
+                const CreativeAvatar = ({ url, filetype }) => {
                     if (!url) return null;
 
-                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+                    const isVideo = filetype === "video";
 
                     const style = {
                         width: 35,
@@ -1327,7 +1327,12 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                         setCreativeModalOpen(true);
                                     }}
                                 >
-                                    <CreativeMedia url={ad.image} small />
+                                    <CreativeMedia
+                                        url={ad.image}
+                                        filetype={ad.filetype}
+                                        small
+                                    />
+
                                 </div>
                             ))}
                         </div>
@@ -1511,7 +1516,10 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                     objectFit: "cover",
                                                 }}
                                             /> */}
-                                            <CreativeAvatar url={selectedCreative.image} />
+                                            <CreativeAvatar
+                                                url={selectedCreative.image}
+                                                filetype={selectedCreative.filetype}
+                                            />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
                                                 <div
                                                     style={{
@@ -1556,7 +1564,10 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             display: "block",
                                         }}
                                     /> */}
-                                    <CreativeMedia url={selectedCreative.image} />
+                                    <CreativeMedia
+                                        url={selectedCreative.image}
+                                        filetype={selectedCreative.filetype}
+                                    />
                                     <div style={{ padding: "8px 10px" }}>
                                         {selectedCreative.headline && (
                                             <div
