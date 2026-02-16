@@ -2347,10 +2347,10 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 );
 
                 const creatives = adsetCreative?.ads || [];
-                const CreativeMedia = ({ url, small = false }) => {
+                const CreativeMedia = ({ url, filetype, small = false }) => {
                     if (!url) return null;
 
-                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+                    const isVideo = filetype === "video";
 
                     const commonStyle = small
                         ? {
@@ -2365,7 +2365,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             width: "100%",
                             maxHeight: "250px",
                             display: "block",
-                            objectFit: "contain"
+                            objectFit: "contain",
                         };
 
                     return isVideo ? (
@@ -2384,15 +2384,15 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             alt="creative"
                             style={{
                                 ...commonStyle,
-                                objectFit: "cover",
+                                objectFit: small ? "cover" : "cover",
                             }}
                         />
                     );
                 };
-                const CreativeAvatar = ({ url }) => {
+                const CreativeAvatar = ({ url, filetype }) => {
                     if (!url) return null;
 
-                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+                    const isVideo = filetype === "video";
 
                     const style = {
                         width: 35,
@@ -2466,7 +2466,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                         setCreativeModalOpen(true);
                                     }}
                                 >
-                                    <CreativeMedia url={ad.image} small />
+                                    <CreativeMedia
+                                        url={ad.image}
+                                        filetype={ad.filetype}
+                                        small
+                                    />
+
                                 </div>
                             ))}
                         </div>
@@ -2692,7 +2697,10 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                     objectFit: "cover",
                                                 }}
                                             /> */}
-                                            <CreativeAvatar url={selectedCreative.image} />
+                                           <CreativeAvatar
+                                                url={selectedCreative.image}
+                                                filetype={selectedCreative.filetype}
+                                            />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
                                                 <div
                                                     style={{
@@ -2737,7 +2745,10 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                             display: "block",
                                         }}
                                     /> */}
-                                    <CreativeMedia url={selectedCreative.image} />
+                                     <CreativeMedia
+                                        url={selectedCreative.image}
+                                        filetype={selectedCreative.filetype}
+                                    />
                                     <div style={{ padding: "8px 10px" }}>
                                         {selectedCreative.headline && (
                                             <div

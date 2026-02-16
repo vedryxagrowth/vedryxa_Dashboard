@@ -2341,10 +2341,15 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             ) || null;
 
         const hasCreative = !!matchedAd;
-        const CreativeMedia = ({ url, small = false, circle = false }) => {
+        const CreativeMedia = ({
+          url,
+          filetype,
+          small = false,
+          circle = false
+        }) => {
           if (!url) return null;
 
-          const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+          const isVideo = filetype === "video";
 
           const baseStyle = small
             ? {
@@ -2359,7 +2364,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               width: "100%",
               maxHeight: "280px",
               display: "block",
-              objectFit: "contain"
+              objectFit: "contain",
             };
 
           if (circle) {
@@ -2379,13 +2384,21 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                     autoPlay
                     loop
                     playsInline
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 ) : (
                   <img
                     src={url}
                     alt="page"
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 )}
               </div>
@@ -2410,6 +2423,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             />
           );
         };
+
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
             return (
@@ -2452,7 +2466,11 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 setCreativeModalOpen(true);
               }}
             >
-              <CreativeMedia url={matchedAd.image} small />
+              <CreativeMedia
+                url={matchedAd.image}
+                filetype={matchedAd.filetype}
+                small
+              />
             </div>
           );
         };
@@ -2608,7 +2626,12 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                           objectFit: "cover",
                         }}
                       /> */}
-                      <CreativeMedia url={selectedCreative.image} circle />
+                      <CreativeMedia
+                        url={selectedCreative.image}
+                        filetype={selectedCreative.filetype}
+                        circle
+                      />
+
                       <div style={{ flex: 1, marginLeft: 6 }}>
                         <div
                           style={{
@@ -2653,7 +2676,11 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       display: "block",
                     }}
                   /> */}
-                   <CreativeMedia url={selectedCreative.image} />
+                  <CreativeMedia
+                    url={selectedCreative.image}
+                    filetype={selectedCreative.filetype}
+                  />
+
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (
                       <div

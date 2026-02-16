@@ -2218,10 +2218,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     a => String(a.adsetId) === String(currentAdsetId)
                 );
 
-                const CreativeMedia = ({ url, small = false }) => {
+                const CreativeMedia = ({ url, filetype, small = false }) => {
                     if (!url) return null;
 
-                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+                    const isVideo = filetype === "video";
 
                     const commonStyle = small
                         ? {
@@ -2236,7 +2236,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             width: "100%",
                             maxHeight: "250px",
                             display: "block",
-                            objectFit: "contain"
+                            objectFit: "contain",
                         };
 
                     return isVideo ? (
@@ -2255,15 +2255,15 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             alt="creative"
                             style={{
                                 ...commonStyle,
-                                objectFit: "cover",
+                                objectFit: small ? "cover" : "cover",
                             }}
                         />
                     );
                 };
-                const CreativeAvatar = ({ url }) => {
+                const CreativeAvatar = ({ url, filetype }) => {
                     if (!url) return null;
 
-                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+                    const isVideo = filetype === "video";
 
                     const style = {
                         width: 35,
@@ -2339,7 +2339,12 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                         setCreativeModalOpen(true);
                                     }}
                                 >
-                                    <CreativeMedia url={ad.image} small />
+                                    <CreativeMedia
+                                        url={ad.image}
+                                        filetype={ad.filetype}
+                                        small
+                                    />
+
                                 </div>
                             ))}
                         </div>
@@ -2521,7 +2526,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                     objectFit: "cover",
                                                 }}
                                             /> */}
-                                            <CreativeAvatar url={selectedCreative.image} />
+                                            <CreativeAvatar
+                                                url={selectedCreative.image}
+                                                filetype={selectedCreative.filetype}
+                                            />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
                                                 <div
                                                     style={{
@@ -2567,7 +2575,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                         }}
                                     />
                                      */}
-                                    <CreativeMedia url={selectedCreative.image} />
+                                    <CreativeMedia
+                                        url={selectedCreative.image}
+                                        filetype={selectedCreative.filetype}
+                                    />
                                     <div style={{ padding: "8px 10px" }}>
                                         {selectedCreative.headline && (
                                             <div
