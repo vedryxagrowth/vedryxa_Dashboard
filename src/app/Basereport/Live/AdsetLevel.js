@@ -257,62 +257,62 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
     //     updateDetails();
 
     // };
-       const onBtExport1 = async () => {
-    console.log(gridRef.current.api, "in");
+    const onBtExport1 = async () => {
+        console.log(gridRef.current.api, "in");
 
-    const Details = {
-        network: newRevenuePratner,
-        account: newaccount,
-        dateRange: `From ${startDate} to ${endDate}`,
-        type: "Live",
-        email: userdetails?.email,
-        time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+        const Details = {
+            network: newRevenuePratner,
+            account: newaccount,
+            dateRange: `From ${startDate} to ${endDate}`,
+            type: "Live",
+            email: userdetails?.email,
+            time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+        };
+        const campaignIdNameMap = {};
+        const adsetIdNameMap = {};
+
+        gridRef.current.api.forEachLeafNode(node => {
+            const d = node.data;
+            if (d?.campaignid && d?.campaignname) {
+                campaignIdNameMap[String(d.campaignid)] = d.campaignname;
+            }
+            if (d?.adsetid && d?.adsetname) {
+                adsetIdNameMap[String(d.adsetid)] = d.adsetname;
+            }
+        });
+        gridRef.current.api.exportDataAsCsv({
+            processRowGroupCallback: (params) => {
+                const key = String(params.node.key);
+
+                if (adsetIdNameMap[key]) {
+                    return adsetIdNameMap[key];
+                }
+                if (campaignIdNameMap[key]) {
+                    return campaignIdNameMap[key];
+                }
+
+                return params.node.key; // fallback
+            },
+            processCellCallback: (params) => {
+                const colId = params.column.getColId();
+
+                if (colId === 'campaignid') {
+                    return params.data?.campaignname || params.value;
+                }
+
+                if (colId === 'adsetid') {
+                    return params.data?.adsetname || params.value;
+                }
+
+                return params.value;
+            }
+        });
+        try {
+            await apiClient.post('/UserExportActivities/', { Details });
+        } catch (e) {
+            console.error("Export activity log failed", e);
+        }
     };
-    const campaignIdNameMap = {};
-    const adsetIdNameMap = {};
-
-    gridRef.current.api.forEachLeafNode(node => {
-        const d = node.data;
-        if (d?.campaignid && d?.campaignname) {
-            campaignIdNameMap[String(d.campaignid)] = d.campaignname;
-        }
-        if (d?.adsetid && d?.adsetname) {
-            adsetIdNameMap[String(d.adsetid)] = d.adsetname;
-        }
-    });
-    gridRef.current.api.exportDataAsCsv({
-        processRowGroupCallback: (params) => {
-            const key = String(params.node.key);
-
-            if (adsetIdNameMap[key]) {
-                return adsetIdNameMap[key];
-            }
-            if (campaignIdNameMap[key]) {
-                return campaignIdNameMap[key];
-            }
-
-            return params.node.key; // fallback
-        },
-        processCellCallback: (params) => {
-            const colId = params.column.getColId();
-
-            if (colId === 'campaignid') {
-                return params.data?.campaignname || params.value;
-            }
-
-            if (colId === 'adsetid') {
-                return params.data?.adsetname || params.value;
-            }
-
-            return params.value;
-        }
-    });
-    try {
-        await apiClient.post('/UserExportActivities/', { Details });
-    } catch (e) {
-        console.error("Export activity log failed", e);
-    }
-};
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
         const selectedData = selectedNodes.map(node => node.data);
@@ -1911,7 +1911,77 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 const adsetCreative = campaignCreative?.adsets?.find(
                     a => String(a.adsetId) === String(currentAdsetId)
                 );
+                const CreativeMedia = ({ url, small = false }) => {
+                    if (!url) return null;
 
+                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+
+                    const commonStyle = small
+                        ? {
+                            width: 50,
+                            height: 50,
+                            objectFit: "cover",
+                            borderRadius: 2,
+                            border: "1px solid #ccc",
+                            cursor: "pointer",
+                        }
+                        : {
+                            width: "100%",
+                            maxHeight: "250px",
+                            display: "block",
+                            objectFit: "contain"
+                        };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            style={commonStyle}
+                            controls={!small}
+                            muted={small}
+                            autoPlay={small}
+                            loop={small}
+                            playsInline
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="creative"
+                            style={{
+                                ...commonStyle,
+                                objectFit: "cover",
+                            }}
+                        />
+                    );
+                };
+                const CreativeAvatar = ({ url }) => {
+                    if (!url) return null;
+
+                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+
+                    const style = {
+                        width: 35,
+                        height: 35,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                    };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            muted
+                            autoPlay
+                            loop
+                            playsInline
+                            style={style}
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="page"
+                            style={style}
+                        />
+                    );
+                };
                 const creatives = adsetCreative?.ads || [];
                 const CreativeTooltip = () => {
                     if (!adLevelCreatives.length) {
@@ -1931,7 +2001,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                 maxWidth: 280
                             }}
                         >
-                            {creatives.map((ad, i) => (
+                            {/* {creatives.map((ad, i) => (
                                 <img
                                     key={i}
                                     src={ad.image}
@@ -1951,6 +2021,18 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                     }}
                                 />
 
+                            ))} */}
+                            {creatives.map((ad, i) => (
+                                <div
+                                    key={i}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCampaignCreatives(creatives);
+                                        setCreativeModalOpen(true);
+                                    }}
+                                >
+                                    <CreativeMedia url={ad.image} small />
+                                </div>
                             ))}
                         </div>
                     );
@@ -2121,7 +2203,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                                     <div style={{ padding: "8px 10px" }}>
                                         <div style={{ display: "flex", alignItems: "center" }}>
-                                            <img
+                                            {/* <img
                                                 src={selectedCreative.image}
                                                 alt="page"
                                                 style={{
@@ -2130,8 +2212,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                     borderRadius: "50%",
                                                     objectFit: "cover",
                                                 }}
-                                            />
-
+                                            /> */}
+                                            <CreativeAvatar url={selectedCreative.image} />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
                                                 <div
                                                     style={{
@@ -2166,7 +2248,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             </div>
                                         )}
                                     </div>
-                                    <img
+                                    {/* <img
                                         src={selectedCreative.image}
                                         alt="creative"
                                         style={{
@@ -2175,7 +2257,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             objectFit: "cover",
                                             display: "block",
                                         }}
-                                    />
+                                    /> */}
+                                    <CreativeMedia url={selectedCreative.image} />
                                     <div style={{ padding: "8px 10px" }}>
                                         {selectedCreative.headline && (
                                             <div

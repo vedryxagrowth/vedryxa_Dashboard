@@ -2341,7 +2341,75 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             ) || null;
 
         const hasCreative = !!matchedAd;
+        const CreativeMedia = ({ url, small = false, circle = false }) => {
+          if (!url) return null;
 
+          const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+
+          const baseStyle = small
+            ? {
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              cursor: "pointer",
+            }
+            : {
+              width: "100%",
+              maxHeight: "280px",
+              display: "block",
+              objectFit: "contain"
+            };
+
+          if (circle) {
+            return (
+              <div
+                style={{
+                  width: 35,
+                  height: 35,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                }}
+              >
+                {isVideo ? (
+                  <video
+                    src={url}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <img
+                    src={url}
+                    alt="page"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                )}
+              </div>
+            );
+          }
+
+          return isVideo ? (
+            <video
+              src={url}
+              style={baseStyle}
+              controls={!small}
+              muted={small}
+              autoPlay={small}
+              loop={small}
+              playsInline
+            />
+          ) : (
+            <img
+              src={url}
+              alt="creative"
+              style={baseStyle}
+            />
+          );
+        };
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
             return (
@@ -2360,23 +2428,32 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           }
 
           return (
-            <img
-              src={matchedAd.image}
-              alt={matchedAd.headline || "Creative"}
+            // <img
+            //   src={matchedAd.image}
+            //   alt={matchedAd.headline || "Creative"}
+            //   onClick={(e) => {
+            //     e.stopPropagation();
+            //     setSelectedCampaignCreatives([matchedAd])
+            //     setCreativeModalOpen(true);
+            //   }}
+            //   style={{
+            //     width: 60,
+            //     height: 60,
+            //     objectFit: "cover",
+            //     borderRadius: 4,
+            //     border: "1px solid #ccc",
+            //     cursor: "pointer",
+            //   }}
+            // />
+            <div
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedCampaignCreatives([matchedAd])
+                setSelectedCampaignCreatives([matchedAd]);
                 setCreativeModalOpen(true);
               }}
-              style={{
-                width: 60,
-                height: 60,
-                objectFit: "cover",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                cursor: "pointer",
-              }}
-            />
+            >
+              <CreativeMedia url={matchedAd.image} small />
+            </div>
           );
         };
 
@@ -2521,7 +2598,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
                   <div style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <img
+                      {/* <img
                         src={selectedCreative.image}
                         alt="page"
                         style={{
@@ -2530,8 +2607,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
-                      />
-
+                      /> */}
+                      <CreativeMedia url={selectedCreative.image} circle />
                       <div style={{ flex: 1, marginLeft: 6 }}>
                         <div
                           style={{
@@ -2566,7 +2643,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       </div>
                     )}
                   </div>
-                  <img
+                  {/* <img
                     src={selectedCreative.image}
                     alt="creative"
                     style={{
@@ -2575,7 +2652,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       objectFit: "cover",
                       display: "block",
                     }}
-                  />
+                  /> */}
+                   <CreativeMedia url={selectedCreative.image} />
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (
                       <div

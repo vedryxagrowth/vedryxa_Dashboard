@@ -238,64 +238,64 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
   //   updateDetails();
 
   // };
-const onBtExport1 = async () => {
-  console.log(gridRef.current.api, "in");
+  const onBtExport1 = async () => {
+    console.log(gridRef.current.api, "in");
 
-  const Details = {
-    network: newRevenuePratner,
-    account: newaccount,
-    dateRange: `From ${startDate} to ${endDate}`,
-    type: "Live",
-    email: userdetails?.email,
-    time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+    const Details = {
+      network: newRevenuePratner,
+      account: newaccount,
+      dateRange: `From ${startDate} to ${endDate}`,
+      type: "Live",
+      email: userdetails?.email,
+      time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+    };
+    const campaignMap = {};
+    const adsetMap = {};
+    const adMap = {};
+
+    gridRef.current.api.forEachLeafNode(node => {
+      const d = node.data;
+      if (!d) return;
+
+      if (d.campaignid && d.campaignname) {
+        campaignMap[String(d.campaignid)] = d.campaignname;
+      }
+      if (d.adsetid && d.adsetname) {
+        adsetMap[String(d.adsetid)] = d.adsetname;
+      }
+      if (d.adid && d.adname) {
+        adMap[String(d.adid)] = d.adname;
+      }
+    });
+    gridRef.current.api.exportDataAsCsv({
+      processRowGroupCallback: (params) => {
+        const key = String(params.node.key);
+
+        if (adMap[key]) return adMap[key];
+        if (adsetMap[key]) return adsetMap[key];
+        if (campaignMap[key]) return campaignMap[key];
+
+        return params.node.key;
+      },
+      processCellCallback: (params) => {
+        const colId = params.column.getColId();
+        const d = params.data;
+
+        if (!d) return params.value;
+
+        if (colId === "campaignid") return d.campaignname || params.value;
+        if (colId === "adsetid") return d.adsetname || params.value;
+        if (colId === "adid") return d.adname || params.value;
+
+        return params.value;
+      }
+    });
+    try {
+      await apiClient.post("/UserExportActivities/", { Details });
+    } catch (e) {
+      console.error("Export activity failed", e);
+    }
   };
-  const campaignMap = {};
-  const adsetMap = {};
-  const adMap = {};
-
-  gridRef.current.api.forEachLeafNode(node => {
-    const d = node.data;
-    if (!d) return;
-
-    if (d.campaignid && d.campaignname) {
-      campaignMap[String(d.campaignid)] = d.campaignname;
-    }
-    if (d.adsetid && d.adsetname) {
-      adsetMap[String(d.adsetid)] = d.adsetname;
-    }
-    if (d.adid && d.adname) {
-      adMap[String(d.adid)] = d.adname;
-    }
-  });
-  gridRef.current.api.exportDataAsCsv({
-    processRowGroupCallback: (params) => {
-      const key = String(params.node.key);
-
-      if (adMap[key]) return adMap[key];
-      if (adsetMap[key]) return adsetMap[key];
-      if (campaignMap[key]) return campaignMap[key];
-
-      return params.node.key; 
-    },
-    processCellCallback: (params) => {
-      const colId = params.column.getColId();
-      const d = params.data;
-
-      if (!d) return params.value;
-
-      if (colId === "campaignid") return d.campaignname || params.value;
-      if (colId === "adsetid") return d.adsetname || params.value;
-      if (colId === "adid") return d.adname || params.value;
-
-      return params.value;
-    }
-  });
-  try {
-    await apiClient.post("/UserExportActivities/", { Details });
-  } catch (e) {
-    console.error("Export activity failed", e);
-  }
-};
   const uniqueByAdId = (arr) => {
     const map = new Map();
     arr.forEach(obj => {
@@ -2033,6 +2033,75 @@ const onBtExport1 = async () => {
             ) || null;
 
         const hasCreative = !!matchedAd;
+        const CreativeMedia = ({ url, small = false, circle = false }) => {
+          if (!url) return null;
+
+          const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+
+          const baseStyle = small
+            ? {
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              cursor: "pointer",
+            }
+            : {
+              width: "100%",
+              maxHeight: "280px",
+              display: "block",
+              objectFit: "contain"
+            };
+
+          if (circle) {
+            return (
+              <div
+                style={{
+                  width: 35,
+                  height: 35,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                }}
+              >
+                {isVideo ? (
+                  <video
+                    src={url}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <img
+                    src={url}
+                    alt="page"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                )}
+              </div>
+            );
+          }
+
+          return isVideo ? (
+            <video
+              src={url}
+              style={baseStyle}
+              controls={!small}
+              muted={small}
+              autoPlay={small}
+              loop={small}
+              playsInline
+            />
+          ) : (
+            <img
+              src={url}
+              alt="creative"
+              style={baseStyle}
+            />
+          );
+        };
 
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
@@ -2052,23 +2121,32 @@ const onBtExport1 = async () => {
           }
 
           return (
-            <img
-              src={matchedAd.image}
-              alt={matchedAd.headline || "Creative"}
+            // <img
+            //   src={matchedAd.image}
+            //   alt={matchedAd.headline || "Creative"}
+            //   onClick={(e) => {
+            //     e.stopPropagation();
+            //     setSelectedCampaignCreatives([matchedAd])
+            //     setCreativeModalOpen(true);
+            //   }}
+            //   style={{
+            //     width: 60,
+            //     height: 60,
+            //     objectFit: "cover",
+            //     borderRadius: 4,
+            //     border: "1px solid #ccc",
+            //     cursor: "pointer",
+            //   }}
+            // />
+            <div
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedCampaignCreatives([matchedAd])
+                setSelectedCampaignCreatives([matchedAd]);
                 setCreativeModalOpen(true);
               }}
-              style={{
-                width: 60,
-                height: 60,
-                objectFit: "cover",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                cursor: "pointer",
-              }}
-            />
+            >
+              <CreativeMedia url={matchedAd.image} small />
+            </div>
           );
         };
         // formatted edited time for comment hover (guard against undefined)
@@ -2228,7 +2306,7 @@ const onBtExport1 = async () => {
 
                   <div style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <img
+                      {/* <img
                         src={selectedCreative.image}
                         alt="page"
                         style={{
@@ -2237,8 +2315,8 @@ const onBtExport1 = async () => {
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
-                      />
-
+                      /> */}
+                      <CreativeMedia url={selectedCreative.image} circle />
                       <div style={{ flex: 1, marginLeft: 6 }}>
                         <div
                           style={{
@@ -2273,7 +2351,7 @@ const onBtExport1 = async () => {
                       </div>
                     )}
                   </div>
-                  <img
+                  {/* <img
                     src={selectedCreative.image}
                     alt="creative"
                     style={{
@@ -2282,7 +2360,8 @@ const onBtExport1 = async () => {
                       objectFit: "cover",
                       display: "block",
                     }}
-                  />
+                  /> */}
+                   <CreativeMedia url={selectedCreative.image} />
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (
                       <div
