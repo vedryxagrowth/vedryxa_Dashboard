@@ -2029,8 +2029,77 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                 const creatives =
                     campaignCreative?.adsets?.flatMap(adset => adset.ads) || [];
+                const CreativeMedia = ({ url, small = false }) => {
+                    if (!url) return null;
 
+                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
 
+                    const commonStyle = small
+                        ? {
+                            width: 50,
+                            height: 50,
+                            objectFit: "cover",
+                            borderRadius: 2,
+                            border: "1px solid #ccc",
+                            cursor: "pointer",
+                        }
+                        : {
+                            width: "100%",
+                            maxHeight: "250px",
+                            display: "block",
+                            objectFit: "contain"
+                        };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            style={commonStyle}
+                            controls={!small}
+                            muted={small}
+                            autoPlay={small}
+                            loop={small}
+                            playsInline
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="creative"
+                            style={{
+                                ...commonStyle,
+                                objectFit: "cover",
+                            }}
+                        />
+                    );
+                };
+                const CreativeAvatar = ({ url }) => {
+                    if (!url) return null;
+
+                    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+
+                    const style = {
+                        width: 35,
+                        height: 35,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                    };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            muted
+                            autoPlay
+                            loop
+                            playsInline
+                            style={style}
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="page"
+                            style={style}
+                        />
+                    );
+                };
                 const CreativeTooltip = () => {
                     if (!adLevelCreatives.length) {
                         return <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>Loading creatives…</div>;
@@ -2049,7 +2118,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                 maxWidth: 280
                             }}
                         >
-                            {creatives.map((ad, i) => (
+                            {/* {creatives.map((ad, i) => (
                                 <img
                                     key={i}
                                     src={ad.image}
@@ -2069,7 +2138,20 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                     }}
                                 />
 
+                            ))} */}
+                            {creatives.map((ad, i) => (
+                                <div
+                                    key={i}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCampaignCreatives(creatives);
+                                        setCreativeModalOpen(true);
+                                    }}
+                                >
+                                    <CreativeMedia url={ad.image} small />
+                                </div>
                             ))}
+
                         </div>
                     );
                 };
@@ -2299,7 +2381,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                                     <div style={{ padding: "8px 10px" }}>
                                         <div style={{ display: "flex", alignItems: "center" }}>
-                                            <img
+                                            {/* <img
                                                 src={selectedCreative.image}
                                                 alt="page"
                                                 style={{
@@ -2308,8 +2390,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                     borderRadius: "50%",
                                                     objectFit: "cover",
                                                 }}
-                                            />
-
+                                            /> */}
+                                            <CreativeAvatar url={selectedCreative.image} />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
                                                 <div
                                                     style={{
@@ -2344,7 +2426,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             </div>
                                         )}
                                     </div>
-                                    <img
+                                    {/* <img
                                         src={selectedCreative.image}
                                         alt="creative"
                                         style={{
@@ -2353,7 +2435,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             objectFit: "cover",
                                             display: "block",
                                         }}
-                                    />
+                                    /> */}
+                                    <CreativeMedia url={selectedCreative.image} />
                                     <div style={{ padding: "8px 10px" }}>
                                         {selectedCreative.headline && (
                                             <div
