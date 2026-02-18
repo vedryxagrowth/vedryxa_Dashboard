@@ -111,6 +111,7 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAcco
                     if (Array.isArray(item?.ActivityHistory)) {
                         const updatedHistory = item.ActivityHistory.map(historyItem => ({
                             ...historyItem,
+                            newupdateAt: historyItem.updateAt,
                             updateAt: convertToTimezoneAndFormat(historyItem.updateAt, "Asia/Kolkata"),
                             account: convertToTimezoneAndFormat(historyItem.updateAt, accountTimezone),
                             level: item.level
@@ -328,8 +329,8 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAcco
                         : "light-mode-pagination"
                         }`}
                     dataSource={data.sort((a, b) =>
-                        moment(b.updateAt, "DD-MM-YYYY hh:mm A", true).valueOf() -
-                        moment(a.updateAt, "DD-MM-YYYY hh:mm A", true).valueOf()
+                        moment(b.newupdateAt, "DD-MM-YYYY hh:mm A", true).valueOf() -
+                        moment(a.newupdateAt, "DD-MM-YYYY hh:mm A", true).valueOf()
                     )}
                     loading={loading}
                     rowKey={(r, i) => i}

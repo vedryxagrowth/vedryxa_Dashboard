@@ -316,7 +316,18 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             campaignid: item.campaignid,
             campaignname: item.campaignname,
             level: item.level,
-            userPin: userdetails?.email
+            userPin: userdetails?.email,
+            activity: {
+                editType: "Pin",
+                campaignid: item.campaignid,
+                Account: item.accountNumber,    // ✅ update *this* row’s account
+                campaignname: item.campaignname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Campaign pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From "${action === "pin" ? "unpin" : "pin"}" to "${action === "pin" ? "pin" : "unpin"}"`,
+            }
         }));
 
         message.loading(`${action === "pin" ? "Pinning" : "Unpinning"} selected campaigns...`, 0);
@@ -324,9 +335,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         let apiUrl = "";
 
         if (action === "pin") {
-            apiUrl = "/SmartPinBulk";
+            apiUrl = "/SmartPinBulkWithHitory";
         } else if (action === "unpin") {
-            apiUrl = "/SmartUnpinBulk";
+            apiUrl = "/SmartUnpinBulkWithHistory";
         }
 
         const res = await apiClient.post(apiUrl, {
@@ -375,6 +386,87 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     };
 
+    const handleBulkDeleteComments = async () => {
+        try {
+            message.loading({
+                content: 'Deleting comments for selected campaigns...',
+                key: 'bulkDelete'
+            });
+
+
+            const items = leafCampaigns.map(item => ({
+                campaignid: item.campaignid,
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Campaign comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
+            }));
+
+            const body = {
+                accountNumber: leafCampaigns?.[0]?.accountNumber,
+                level: 'campaign',
+                items,
+
+            };
+
+            const resp = await apiClient.post(
+                '/Comments/bulkdeleteWithHistory',
+                body
+            );
+
+            if (resp.status === 200 || resp.status === 201) {
+                const timeStamp = moment()
+                    .tz('Asia/Kolkata')
+                    .format('YYYY-MM-DD hh:mm:ss A');
+
+                setCampaignComments(prev => {
+                    const arr = [...prev];
+
+                    leafCampaigns.forEach(item => {
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(item.campaignid) &&
+                                String(i.Account) === String(item.accountNumber) &&
+                                i.level === 'campaign'
+                        );
+
+                        if (idx >= 0) {
+                            arr[idx] = {
+                                ...arr[idx],
+                                comment: "",
+                                usercommit: userdetails?.email,
+                                editedTime: timeStamp
+                            };
+                        }
+                    });
+
+                    return arr;
+                });
+
+                message.success({
+                    content: `${leafCampaigns.length} comment(s) deleted successfully`,
+                    key: 'bulkDelete',
+                    duration: 3
+                });
+
+                setIsBulkCommentModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Bulk delete error:', error);
+            message.error({
+                content: 'Error while deleting comments for selected campaigns.',
+                key: 'bulkDelete'
+            });
+        }
+    };
+
     const handleSmartCommentSubmit = async () => {
         try {
             message.loading({
@@ -389,10 +481,21 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 comment,
                 usercommit: userdetails?.email,
                 level: item.level,
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Campaign pin updated",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNew',
+                '/Comments/upsertBulkNewWithHistory',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -489,6 +592,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     accountNumber: String(item.accountNumber),
                     name: item.campaignname,
                     email: userdetails?.email,
+                    activity: {
+                        editType: "Status",
+                        campaignid: item.campaignid,
+                        Account: String(item.accountNumber),    // ✅ update *this* row’s account
+                        campaignname: item.campaignname,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign status updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
+                    }
                 }));
 
 
@@ -501,7 +615,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
             const resp = await apiClient.post(
-                "/BulkCampaignStatusChangeMany",
+                "/BulkCampaignStatusChangeManyWithHistory",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -598,6 +712,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 campaignid: item.campaignid,
                 level: "campaign",
                 campaignname: item.campaignname,
+                activity: {
+                    editType: "Category",
+                    campaignid: item.campaignid,       // cents
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Category comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
         if (items.length === 0) {
@@ -610,7 +735,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "/BulkUpdateCategoryNewWithHistory",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -920,6 +1045,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     setConfirmLoading(true);
                     try {
                         const token = localStorage.getItem("token");
+                        const payloadForActivity = {
+                            editType: "Status",
+                            campaignid: campaignid,       // cents
+                            Account: String(pendingAccount),    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Campain status updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+                        }
                         const payload = {
                             status: desired ? "ACTIVE" : "PAUSED",
                             id: params.data?.identifier,
@@ -928,10 +1064,11 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                             adset_id: adsetid,
                             name: campaignName,
                             email: userdetails?.email,
+                            activity: payloadForActivity,
                         };
 
                         const response = await apiClient.post(
-                            `/BulkCampaignStatusChange`,
+                            `/BulkCampaignStatusChangeWithHistory`,
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -1035,6 +1172,17 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
                 const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
                     const updatedPinStatus = !currentPinStatus;
+                    const payloadForActivity = {
+                        editType: "Pin",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign pin updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: `From "${updatedPinStatus ? "unpin" : "pin"}" to "${updatedPinStatus ? "pin" : "unpin"}"`,
+                    }
 
                     const body = {
                         accountNumber: rowAccount,
@@ -1042,12 +1190,13 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         campaignid,
                         userPin: userdetails?.email,
                         comment: comment || '',
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('/NewPinBulk', body)
-                        : await apiClient.post('/NewUnpinBulk', body);
+                        ? await apiClient.post('/NewPinBulkWithHistory', body)
+                        : await apiClient.post('/NewUnpinBulkWithHistory', body);
 
                     if (resp.status === 200 || resp.status === 201) {
                         // if (newResponse.status === 200 || newResponse.status === 201) {
@@ -1089,15 +1238,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 };
 
                 const handleOks = async () => {
+                    const payloadForActivity = {
+                        editType: "Comment",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign pin updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         comment,
                         usercommit: userdetails?.email,
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/Comments/upsert', body);
+                    const newResponse = await apiClient.post('/Comments/upsert/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1136,15 +1297,27 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 };
 
                 const handleDelete = async () => {
+                    const payloadForActivity = {
+                        editType: "Comment",
+                        campaignid: campaignid,       // cents
+                        Account: rowAccount,    // ✅ update *this* row’s account
+                        campaignname: campaignName,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Campaign comment cleared",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                    }
                     const body = {
                         accountNumber: rowAccount,
                         campaignname: campaignName,
                         campaignid,
                         // comment,
                         usercommit: userdetails?.email,
-                        level: "campaign"
+                        level: "campaign",
+                        activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/New/Comments/delete', body);
+                    const newResponse = await apiClient.post('/New/Comments/delete/History', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -2138,7 +2311,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                 fbLClicks > 0
                                     ? Math.round((spendValue / fbLClicks) * 100) / 100
                                     : 0;
-
+                            const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
+                            const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
                             return {
                                 accountNumber: eachData.accountNumber,
                                 campaignname: eachData.campaign_name,
@@ -2165,6 +2339,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                 adid: "",
                                 adname: "",
                                 actions: "...",
+                                from: campaign_date?.start ? campaign_date?.start : "",
+                                to: campaign_date?.end ? campaign_date?.end : "",
+                                category: category?.category || "",
                             };
                         })
                     : [];
@@ -2342,15 +2519,77 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         setIsModalOpen(true);
     };
 
+    // Universal numeric filter value resolver for AG Grid
+    // const numericGroupFilterValueGetter = (params) => {
+    //     const { node, colDef, data } = params;
+    //     const field = colDef.field;
+
+    //     // 🔹 GROUP ROW → return aggregated numeric value
+    //     if (node.group) {
+    //         const value = node.aggData?.[field];
+    //         return value == null ? null : Number(value);
+    //     }
+
+    //     // 🔹 LEAF ROW → use grid-evaluated value (handles valueGetter/expression)
+    //     // if (field) {
+    //     //     const value = params.getValue(field);
+    //     //     return value == null ? null : Number(value);
+    //     // }
+
+    //     return null;
+    // };
+    const numericGroupFilterValueGetter = (params) => {
+        const { node, colDef } = params;
+        const field = colDef.field;
+
+        // ✅ GROUP → aggregated value
+        if (node.group) {
+            const value = node.aggData?.[field];
+            return value == null ? null : Number(value);
+        }
+
+        // ❗ Leaf rows must return SAME group value
+        // so filtering decision depends only on group total
+        const parentAgg = node.parent?.aggData?.[field];
+        return parentAgg == null ? null : Number(parentAgg);
+    };
+
+
+
     const gridOptions = useMemo(() => ({
         onColumnMoved: (params) => {
             // if (toggleStatus) {
             debouncedHandleColumnMove(params, 'grid1');
             // }
         },
+        // groupAggFiltering: true,
         defaultColDef: {
             suppressMenu: true,
-            headerClass: "custom-header" // Apply to all columns by default
+            headerClass: "custom-header", // Apply to all columns by default
+            // filterValueGetter: (params) => {
+            //     // ✅ If group row → return aggregated value
+            //     if (params.node.group) {
+            //         const field = params.colDef.field;
+            //         return params.node.aggData?.[field];
+            //     }
+
+            //     // ✅ Otherwise fallback to existing logic
+            //     if (params.colDef.valueGetter) {
+            //         return params.colDef.valueGetter(params);
+            //     }
+
+            //     return params.data?.[params.colDef.field];
+            // }
+            // filterValueGetter: (params) => {
+            //     const filterType = params.colDef.filter;
+
+            //     if (filterType === 'agNumberColumnFilter') {
+            //         return numericGroupFilterValueGetter(params);
+            //     }
+
+            //     // fallback → default grid behaviour
+            //     return params.getValue(params.colDef.field);
+            // }
         },
         ensureDomOrder: false
     }), []);
