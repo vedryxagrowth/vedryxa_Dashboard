@@ -210,8 +210,37 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     ])
   }, [memorizedRowData]);
 
-  const onBtExport1 = () => {
-    console.log(gridRef.current.api, "in")
+  // const onBtExport1 = () => {
+  //   console.log(gridRef.current.api, "in")
+  //   const Details = {
+  //     network: newRevenuePratner,
+  //     account: newaccount,
+  //     dateRange: `From ${startDate} to ${endDate}`,
+  //     type: "Live",
+  //     email: userdetails?.email,
+  //     time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+  //   }
+  //   gridRef.current.api.exportDataAsCsv({
+  //     processCellCallback: (params) => {
+  //       const node = params.node;
+  //       if (node.group) {
+  //         return null;
+  //       }
+  //       return params.value;
+  //     },
+  //     shouldRowBeSkipped: (params) => {
+  //       return params.node.group;
+  //     },
+  //   });
+  //   const updateDetails = async () => {
+  //     await apiClient.post('/UserExportActivities/', { Details });
+  //   }
+  //   updateDetails();
+
+  // };
+  const onBtExport1 = async () => {
+    console.log(gridRef.current.api, "in");
+
     const Details = {
       network: newRevenuePratner,
       account: newaccount,
@@ -219,24 +248,53 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       type: "Live",
       email: userdetails?.email,
       time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-    }
-    gridRef.current.api.exportDataAsCsv({
-      processCellCallback: (params) => {
-        const node = params.node;
-        if (node.group) {
-          return null;
-        }
-        return params.value;
-      },
-      shouldRowBeSkipped: (params) => {
-        return params.node.group;
-      },
-    });
-    const updateDetails = async () => {
-      await apiClient.post('/UserExportActivities/', { Details });
-    }
-    updateDetails();
+    };
+    const campaignMap = {};
+    const adsetMap = {};
+    const adMap = {};
 
+    gridRef.current.api.forEachLeafNode(node => {
+      const d = node.data;
+      if (!d) return;
+
+      if (d.campaignid && d.campaignname) {
+        campaignMap[String(d.campaignid)] = d.campaignname;
+      }
+      if (d.adsetid && d.adsetname) {
+        adsetMap[String(d.adsetid)] = d.adsetname;
+      }
+      if (d.adid && d.adname) {
+        adMap[String(d.adid)] = d.adname;
+      }
+    });
+    gridRef.current.api.exportDataAsCsv({
+      processRowGroupCallback: (params) => {
+        const key = String(params.node.key);
+
+        if (adMap[key]) return adMap[key];
+        if (adsetMap[key]) return adsetMap[key];
+        if (campaignMap[key]) return campaignMap[key];
+
+        return params.node.key;
+      },
+      processCellCallback: (params) => {
+        const colId = params.column.getColId();
+        const d = params.data;
+
+        if (!d) return params.value;
+
+        if (colId === "campaignid") return d.campaignname || params.value;
+        if (colId === "adsetid") return d.adsetname || params.value;
+        if (colId === "adid") return d.adname || params.value;
+
+        return params.value;
+      }
+    });
+    try {
+      await apiClient.post("/UserExportActivities/", { Details });
+    } catch (e) {
+      console.error("Export activity failed", e);
+    }
   };
 
   const uniqueByAdId = (arr) => {
@@ -1652,7 +1710,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           if (newResponse.status === 200 || newResponse.status === 201) {
             setCampaignComments(prev => {
               const arr = Array.isArray(prev) ? [...prev] : [];
-              const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+              const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
               const match = arr.findIndex(
                 i =>
@@ -1731,7 +1789,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               // refreshThisCell();
               setCampaignComments(prev => {
                 const arr = Array.isArray(prev) ? [...prev] : [];
-                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                 const match = arr.findIndex(
                   i =>
@@ -1936,7 +1994,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
                   const arr = Array.isArray(prev) ? [...prev] : [];
-                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                  const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                   const match = arr.findIndex(
                     i =>
@@ -2192,6 +2250,89 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             ) || null;
 
         const hasCreative = !!matchedAd;
+        const CreativeMedia = ({
+          url,
+          filetype,
+          small = false,
+          circle = false
+        }) => {
+          if (!url) return null;
+
+          const isVideo = filetype === "video";
+
+          const baseStyle = small
+            ? {
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              cursor: "pointer",
+            }
+            : {
+              width: "100%",
+              maxHeight: "280px",
+              display: "block",
+              objectFit: "contain",
+            };
+
+          if (circle) {
+            return (
+              <div
+                style={{
+                  width: 35,
+                  height: 35,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                }}
+              >
+                {isVideo ? (
+                  <video
+                    src={url}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={url}
+                    alt="page"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+              </div>
+            );
+          }
+
+          return isVideo ? (
+            <video
+              src={url}
+              style={baseStyle}
+              controls={!small}
+              muted={small}
+              autoPlay={small}
+              loop={small}
+              playsInline
+            />
+          ) : (
+            <img
+              src={url}
+              alt="creative"
+              style={baseStyle}
+            />
+          );
+        };
+
 
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
@@ -2211,23 +2352,36 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           }
 
           return (
-            <img
-              src={matchedAd.image}
-              alt={matchedAd.headline || "Creative"}
+            // <img
+            //   src={matchedAd.image}
+            //   alt={matchedAd.headline || "Creative"}
+            //   onClick={(e) => {
+            //     e.stopPropagation();
+            //     setSelectedCampaignCreatives([matchedAd])
+            //     setCreativeModalOpen(true);
+            //   }}
+            //   style={{
+            //     width: 60,
+            //     height: 60,
+            //     objectFit: "cover",
+            //     borderRadius: 4,
+            //     border: "1px solid #ccc",
+            //     cursor: "pointer",
+            //   }}
+            // />
+            <div
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedCampaignCreatives([matchedAd])
+                setSelectedCampaignCreatives([matchedAd]);
                 setCreativeModalOpen(true);
               }}
-              style={{
-                width: 60,
-                height: 60,
-                objectFit: "cover",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                cursor: "pointer",
-              }}
-            />
+            >
+              <CreativeMedia
+                url={matchedAd.image}
+                filetype={matchedAd.filetype}
+                small
+              />
+            </div>
           );
         };
 
@@ -2388,7 +2542,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
                   <div style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <img
+                      {/* <img
                         src={selectedCreative.image}
                         alt="page"
                         style={{
@@ -2397,6 +2551,11 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
+                      /> */}
+                      <CreativeMedia
+                        url={selectedCreative.image}
+                        filetype={selectedCreative.filetype}
+                        circle
                       />
 
                       <div style={{ flex: 1, marginLeft: 6 }}>
@@ -2433,7 +2592,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       </div>
                     )}
                   </div>
-                  <img
+                  {/* <img
                     src={selectedCreative.image}
                     alt="creative"
                     style={{
@@ -2442,6 +2601,10 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       objectFit: "cover",
                       display: "block",
                     }}
+                  /> */}
+                  <CreativeMedia
+                    url={selectedCreative.image}
+                    filetype={selectedCreative.filetype}
                   />
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (
@@ -2598,7 +2761,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       Last Edited Time:
                     </span>
                     <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
-                      {editedTimeDisplay}
+                      {/* {editedTimeDisplay} */}
+                      {universalOject?.editedTime || ""}
                     </span>
                   </div>
                   <div>
@@ -2640,7 +2804,35 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     }
   };
 
+  function getFBHour(data, startDate, endDate) {
+    const start = new Date(startDate).toISOString().slice(0, 10);
+    const end = new Date(endDate).toISOString().slice(0, 10);
 
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000)
+      .toISOString()
+      .slice(0, 10);
+
+    const fbData = data.filter(
+      item => item.fbCron && item.fbCron !== "Failed" && item.hour
+    );
+    if (!fbData.length) return "00";
+    if (start === end && start === today) {
+      const currentHour = new Date().getHours();
+
+      const todayHours = fbData
+        .map(i => Number(i.hour))
+        .filter(h => h <= currentHour);
+
+      return todayHours.length
+        ? String(Math.max(...todayHours)).padStart(2, "0")
+        : "00";
+    }
+    if (start === end && start === yesterday) {
+      return findMaxHour(fbData);
+    }
+    return findMaxHour(fbData);
+  }
 
   function findMaxHour(data) {
     // Use reduce to find the maximum value of the 'hour' key
@@ -2851,7 +3043,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
         revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
 
-        maxHour.current = findMaxHour(mainData);
+        // maxHour.current = findMaxHour(mainData);
+        maxHour.current = getFBHour(mainData, startDate, endDate);
         maxNetworkHour.current = getMaxHour(mainData);
       }
 

@@ -229,8 +229,37 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         ])
     }, [memorizedRowData]);
 
-    const onBtExport1 = () => {
-        console.log(gridRef.current.api, "in")
+    // const onBtExport1 = () => {
+    //     console.log(gridRef.current.api, "in")
+    //     const Details = {
+    //         network: newRevenuePratner,
+    //         account: newaccount,
+    //         dateRange: `From ${startDate} to ${endDate}`,
+    //         type: "Live",
+    //         email: userdetails?.email,
+    //         time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+    //     }
+    //     gridRef.current.api.exportDataAsCsv({
+    //         processCellCallback: (params) => {
+    //             const node = params.node;
+    //             if (node.group) {
+    //                 return null;
+    //             }
+    //             return params.value;
+    //         },
+    //         shouldRowBeSkipped: (params) => {
+    //             return params.node.group;
+    //         },
+    //     });
+    //     const updateDetails = async () => {
+    //         await apiClient.post('/UserExportActivities/', { Details });
+    //     }
+    //     updateDetails();
+
+    // };
+    const onBtExport1 = async () => {
+        console.log(gridRef.current.api, "in");
+
         const Details = {
             network: newRevenuePratner,
             account: newaccount,
@@ -238,25 +267,53 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             type: "Live",
             email: userdetails?.email,
             time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-        }
-        gridRef.current.api.exportDataAsCsv({
-            processCellCallback: (params) => {
-                const node = params.node;
-                if (node.group) {
-                    return null;
-                }
-                return params.value;
-            },
-            shouldRowBeSkipped: (params) => {
-                return params.node.group;
-            },
-        });
-        const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
-        }
-        updateDetails();
+        };
+        const campaignIdNameMap = {};
+        const adsetIdNameMap = {};
 
+        gridRef.current.api.forEachLeafNode(node => {
+            const d = node.data;
+            if (d?.campaignid && d?.campaignname) {
+                campaignIdNameMap[String(d.campaignid)] = d.campaignname;
+            }
+            if (d?.adsetid && d?.adsetname) {
+                adsetIdNameMap[String(d.adsetid)] = d.adsetname;
+            }
+        });
+        gridRef.current.api.exportDataAsCsv({
+            processRowGroupCallback: (params) => {
+                const key = String(params.node.key);
+
+                if (adsetIdNameMap[key]) {
+                    return adsetIdNameMap[key];
+                }
+                if (campaignIdNameMap[key]) {
+                    return campaignIdNameMap[key];
+                }
+
+                return params.node.key; // fallback
+            },
+            processCellCallback: (params) => {
+                const colId = params.column.getColId();
+
+                if (colId === 'campaignid') {
+                    return params.data?.campaignname || params.value;
+                }
+
+                if (colId === 'adsetid') {
+                    return params.data?.adsetname || params.value;
+                }
+
+                return params.value;
+            }
+        });
+        try {
+            await apiClient.post('/UserExportActivities/', { Details });
+        } catch (e) {
+            console.error("Export activity log failed", e);
+        }
     };
+
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
         const selectedData = selectedNodes.map(node => node.data);
@@ -1526,7 +1583,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             // if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
                                 const arr = Array.isArray(prev) ? [...prev] : [];
-                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                                 const match = arr.findIndex(
                                     i =>
@@ -1690,7 +1747,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
                                 const arr = Array.isArray(prev) ? [...prev] : [];
-                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                                 const match = arr.findIndex(
                                     i =>
@@ -1828,7 +1885,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
                                 const arr = Array.isArray(prev) ? [...prev] : [];
-                                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                                 const match = arr.findIndex(
                                     i =>
@@ -2161,6 +2218,78 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     a => String(a.adsetId) === String(currentAdsetId)
                 );
 
+                const CreativeMedia = ({ url, filetype, small = false }) => {
+                    if (!url) return null;
+
+                    const isVideo = filetype === "video";
+
+                    const commonStyle = small
+                        ? {
+                            width: 50,
+                            height: 50,
+                            objectFit: "cover",
+                            borderRadius: 2,
+                            border: "1px solid #ccc",
+                            cursor: "pointer",
+                        }
+                        : {
+                            width: "100%",
+                            maxHeight: "250px",
+                            display: "block",
+                            objectFit: "contain",
+                        };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            style={commonStyle}
+                            controls={!small}
+                            muted={small}
+                            autoPlay={small}
+                            loop={small}
+                            playsInline
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="creative"
+                            style={{
+                                ...commonStyle,
+                                objectFit: small ? "cover" : "cover",
+                            }}
+                        />
+                    );
+                };
+                const CreativeAvatar = ({ url, filetype }) => {
+                    if (!url) return null;
+
+                    const isVideo = filetype === "video";
+
+                    const style = {
+                        width: 35,
+                        height: 35,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                    };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            muted
+                            autoPlay
+                            loop
+                            playsInline
+                            style={style}
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="page"
+                            style={style}
+                        />
+                    );
+                };
+
                 const creatives = adsetCreative?.ads || [];
                 const CreativeTooltip = () => {
                     if (!adLevelCreatives.length) {
@@ -2180,7 +2309,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                 maxWidth: 280
                             }}
                         >
-                            {creatives.map((ad, i) => (
+                            {/* {creatives.map((ad, i) => (
                                 <img
                                     key={i}
                                     src={ad.image}
@@ -2200,6 +2329,23 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                     }}
                                 />
 
+                            ))} */}
+                            {creatives.map((ad, i) => (
+                                <div
+                                    key={i}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCampaignCreatives(creatives);
+                                        setCreativeModalOpen(true);
+                                    }}
+                                >
+                                    <CreativeMedia
+                                        url={ad.image}
+                                        filetype={ad.filetype}
+                                        small
+                                    />
+
+                                </div>
                             ))}
                         </div>
                     );
@@ -2370,7 +2516,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                                     <div style={{ padding: "8px 10px" }}>
                                         <div style={{ display: "flex", alignItems: "center" }}>
-                                            <img
+                                            {/* <img
                                                 src={selectedCreative.image}
                                                 alt="page"
                                                 style={{
@@ -2379,8 +2525,11 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                     borderRadius: "50%",
                                                     objectFit: "cover",
                                                 }}
+                                            /> */}
+                                            <CreativeAvatar
+                                                url={selectedCreative.image}
+                                                filetype={selectedCreative.filetype}
                                             />
-
                                             <div style={{ flex: 1, marginLeft: 6 }}>
                                                 <div
                                                     style={{
@@ -2415,7 +2564,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             </div>
                                         )}
                                     </div>
-                                    <img
+                                    {/* <img
                                         src={selectedCreative.image}
                                         alt="creative"
                                         style={{
@@ -2424,6 +2573,11 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             objectFit: "cover",
                                             display: "block",
                                         }}
+                                    />
+                                     */}
+                                    <CreativeMedia
+                                        url={selectedCreative.image}
+                                        filetype={selectedCreative.filetype}
                                     />
                                     <div style={{ padding: "8px 10px" }}>
                                         {selectedCreative.headline && (
@@ -2616,7 +2770,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                         </span>
                                         <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {/* {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""} */}
-                                            {editedPretty || ""}
+                                            {/* {editedPretty || ""} */}
+                                            {universalOject?.editedTime || ""}
                                         </span>
 
                                     </div>
@@ -2668,6 +2823,36 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         }
     };
 
+    function getFBHour(data, startDate, endDate) {
+        const start = new Date(startDate).toISOString().slice(0, 10);
+        const end = new Date(endDate).toISOString().slice(0, 10);
+
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000)
+            .toISOString()
+            .slice(0, 10);
+
+        const fbData = data.filter(
+            item => item.fbCron && item.fbCron !== "Failed" && item.hour
+        );
+        if (!fbData.length) return "00";
+        if (start === end && start === today) {
+            const currentHour = new Date().getHours();
+
+            const todayHours = fbData
+                .map(i => Number(i.hour))
+                .filter(h => h <= currentHour);
+
+            return todayHours.length
+                ? String(Math.max(...todayHours)).padStart(2, "0")
+                : "00";
+        }
+        if (start === end && start === yesterday) {
+            return findMaxHour(fbData);
+        }
+        return findMaxHour(fbData);
+    }
+
     function findMaxHour(data) {
         // Use reduce to find the maximum value of the 'hour' key
         const maxHour = data.reduce((max, obj) => {
@@ -2685,7 +2870,6 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             .map(item => parseInt(item.updatedHour.split(":")[0], 10));
         return hours.length > 0 ? Math.max(...hours) : null;
     }
-
     const adsetStatusMap = useMemo(() => {
         const map = new Map();
 
@@ -2942,8 +3126,25 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     (newFilterData.reduce((a, c) => a + parseFloat(c.impressions || 0), 0) || 1) * 100
                 ).toFixed(2))
             }]);
-
             newRowData.current = filteredData;
+            //added for fb hour
+            const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
+            const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
+            if (mainData.length > 1) {
+                const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
+                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                timezone.current = findRevenueObject.accountTimezone;
+                accountStatus.current = findRevenueObject.accountStatus;
+                cronStatus.current = mainData[0].cronStatus;
+
+                fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
+                revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
+
+                // maxHour.current = findMaxHour(mainData);
+                maxHour.current = getFBHour(mainData, startDate, endDate);
+                maxNetworkHour.current = getMaxHour(mainData);
+            }
+            //ended
             setApiStatus(false);
             setLoading(false);
         } catch (error) {

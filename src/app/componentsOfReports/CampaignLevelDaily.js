@@ -297,36 +297,36 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
     );
   }, [memorizedDailyData]);
 
-  const onBtExport = (gridRef, text) => {
-    const Details = {
-      network: newRevenuePratner,
-      account: newaccount,
-      dateRange: `From ${startDate} to ${endDate}`,
-      type: text,
-      email: userdetails?.email,
-      time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-    }
-    if (gridRef.current) {
-      gridRef.current.api.exportDataAsCsv({
-        processCellCallback: (params) => {
-          const node = params.node;
-          if (node.group) {
-            return null;
-          }
-          return params.value;
-        },
-        shouldRowBeSkipped: (params) => {
-          return params.node.group;
-        },
-      });
-    } else {
-      console.error("Grid reference is null");
-    }
-    const updateDetails = async () => {
-      await apiClient.post('/UserExportActivities/', { Details });
-    }
-    updateDetails();
-  };
+  // const onBtExport = (gridRef, text) => {
+  //   const Details = {
+  //     network: newRevenuePratner,
+  //     account: newaccount,
+  //     dateRange: `From ${startDate} to ${endDate}`,
+  //     type: text,
+  //     email: userdetails?.email,
+  //     time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+  //   }
+  //   if (gridRef.current) {
+  //     gridRef.current.api.exportDataAsCsv({
+  //       processCellCallback: (params) => {
+  //         const node = params.node;
+  //         if (node.group) {
+  //           return null;
+  //         }
+  //         return params.value;
+  //       },
+  //       shouldRowBeSkipped: (params) => {
+  //         return params.node.group;
+  //       },
+  //     });
+  //   } else {
+  //     console.error("Grid reference is null");
+  //   }
+  //   const updateDetails = async () => {
+  //     await apiClient.post('/UserExportActivities/', { Details });
+  //   }
+  //   updateDetails();
+  // };
 
   //     const autoGroupColumnDef = {
   //         headerName: 'Campaign name',
@@ -1084,6 +1084,51 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
   //             }
   //         }
   //     };
+  const onBtExport = (gridRef, text) => {
+    const Details = {
+      network: newRevenuePratner,
+      account: newaccount,
+      dateRange: `From ${startDate} to ${endDate}`,
+      type: text,
+      email: userdetails?.email,
+      time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+    };
+
+    if (!gridRef.current) {
+      console.error("Grid reference is null");
+      return;
+    }
+
+    const campaignIdNameMap = {};
+
+    gridRef.current.api.forEachLeafNode(node => {
+      const d = node.data;
+      if (d?.campaignid && d?.campaignname) {
+        campaignIdNameMap[String(d.campaignid)] = d.campaignname;
+      }
+    });
+
+    gridRef.current.api.exportDataAsCsv({
+      processRowGroupCallback: (params) => {
+        const key = String(params.node.key); // campaignid
+        return campaignIdNameMap[key] || key;
+      },
+      processCellCallback: (params) => {
+        const colId = params.column.getColId();
+        const d = params.data;
+
+        if (!d) return params.value;
+
+        if (colId === "campaignid") {
+          return d.campaignname || params.value;
+        }
+
+        return params.value;
+      }
+    });
+    apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+  };
+
   const handleBulkSmartPin = async (action) => {
 
     if (!leafCampaigns || leafCampaigns.length === 0) {
@@ -2100,7 +2145,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           if (newResponse.status === 200 || newResponse.status === 201) {
             setCampaignComments(prev => {
               const arr = Array.isArray(prev) ? [...prev] : [];
-              const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+              const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
               const match = arr.findIndex(
                 i =>
@@ -2161,7 +2206,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
             if (newResponse.status === 200 || newResponse.status === 201) {
               setCampaignComments(prev => {
                 const arr = Array.isArray(prev) ? [...prev] : [];
-                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                 const match = arr.findIndex(
                   i =>
@@ -2317,7 +2362,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                 // if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
                   const arr = Array.isArray(prev) ? [...prev] : [];
-                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                  const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                   const match = arr.findIndex(
                     i =>
@@ -2581,8 +2626,77 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
         const creatives =
           campaignCreative?.adsets?.flatMap(adset => adset.ads) || [];
+        const CreativeMedia = ({ url, filetype, small = false }) => {
+          if (!url) return null;
 
+          const isVideo = filetype === "video";
 
+          const commonStyle = small
+            ? {
+              width: 50,
+              height: 50,
+              objectFit: "cover",
+              borderRadius: 2,
+              border: "1px solid #ccc",
+              cursor: "pointer",
+            }
+            : {
+              width: "100%",
+              maxHeight: "250px",
+              display: "block",
+              objectFit: "contain",
+            };
+
+          return isVideo ? (
+            <video
+              src={url}
+              style={commonStyle}
+              controls={!small}
+              muted={small}
+              autoPlay={small}
+              loop={small}
+              playsInline
+            />
+          ) : (
+            <img
+              src={url}
+              alt="creative"
+              style={{
+                ...commonStyle,
+                objectFit: small ? "cover" : "cover",
+              }}
+            />
+          );
+        };
+        const CreativeAvatar = ({ url, filetype }) => {
+          if (!url) return null;
+
+          const isVideo = filetype === "video";
+
+          const style = {
+            width: 35,
+            height: 35,
+            borderRadius: "50%",
+            objectFit: "cover",
+          };
+
+          return isVideo ? (
+            <video
+              src={url}
+              muted
+              autoPlay
+              loop
+              playsInline
+              style={style}
+            />
+          ) : (
+            <img
+              src={url}
+              alt="page"
+              style={style}
+            />
+          );
+        };
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
             return <div style={{ color: theme === "dark" ? "#e4e6eb" : "#050505" }}>Loading creatives…</div>;
@@ -2601,7 +2715,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                 maxWidth: 280
               }}
             >
-              {creatives.map((ad, i) => (
+              {/* {creatives.map((ad, i) => (
                 <img
                   key={i}
                   src={ad.image}
@@ -2621,6 +2735,23 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                   }}
                 />
 
+              ))} */}
+              {creatives.map((ad, i) => (
+                <div
+                  key={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCampaignCreatives(creatives);
+                    setCreativeModalOpen(true);
+                  }}
+                >
+                  <CreativeMedia
+                    url={ad.image}
+                    filetype={ad.filetype}
+                    small
+                  />
+
+                </div>
               ))}
             </div>
           );
@@ -2774,7 +2905,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
                   <div style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <img
+                      {/* <img
                         src={selectedCreative.image}
                         alt="page"
                         style={{
@@ -2783,8 +2914,11 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
+                      /> */}
+                      <CreativeAvatar
+                        url={selectedCreative.image}
+                        filetype={selectedCreative.filetype}
                       />
-
                       <div style={{ flex: 1, marginLeft: 6 }}>
                         <div
                           style={{
@@ -2819,7 +2953,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                       </div>
                     )}
                   </div>
-                  <img
+                  {/* <img
                     src={selectedCreative.image}
                     alt="creative"
                     style={{
@@ -2828,6 +2962,10 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                       objectFit: "cover",
                       display: "block",
                     }}
+                  /> */}
+                  <CreativeMedia
+                    url={selectedCreative.image}
+                    filetype={selectedCreative.filetype}
                   />
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (

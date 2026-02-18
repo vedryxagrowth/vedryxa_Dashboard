@@ -56,6 +56,8 @@ import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
+import AffinityUrlBuilder from "./urlbuilder/affinity";
+import CompadoUrlBuilder from "./urlbuilder/compado";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
@@ -592,12 +594,16 @@ const AccountForm = ({
         }
       };
     } else {
-      setCaption(text.split("/")[0]);
+      // console.log(text);
+      // console.log(new URL(text).hostname);
+      // console.log(new URL(text).origin);
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin);
       updatedAdsets[index] = {
         ...updatedAdsets[index],
         [account]: {
           Website_URL: text,
-          Caption: text.split("/")[0],
+          Caption: new URL(text).origin,
         }
       };
     }
@@ -705,6 +711,7 @@ const AccountForm = ({
   const getUrlBuilder = () => {
     // useMemo(() => {
     // return (extraString) => {
+    console.log(network)
     switch (network) {
       case "FB_Mnet":
         //defaultValues
@@ -716,6 +723,17 @@ const AccountForm = ({
         return (
           <MnetBingUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
+      case "FB_Affinity":
+        //defaultValues
+        return (
+          <AffinityUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Compado":
+        //defaultValues
+        return (
+          <CompadoUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
+
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
@@ -887,7 +905,7 @@ const AccountForm = ({
         // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
         styles={{
           body: {
-            height: "50vh",
+            height: network === "FB_Affinity" ? "60vh" : "50vh",
             overflowY: "auto",
           },
         }}
@@ -1214,7 +1232,11 @@ const AdsetComponent = ({
   adSchedulingToShow,
   selectedByAdset,
   setAdSchedulingToShow,
+  setScheduleErrorByAdset,
+  setShowScheduleSubmitError,
+  scheduleErrorByAdset,
   setSelectedByAdset,
+  adSchedulingToShowCampaign,
   page,
   pixel,
   geo,
@@ -1366,18 +1388,35 @@ const AdsetComponent = ({
     });
   };
 
-  const handleEveryDayToggle = (hour) => {
+  // const handleEveryDayToggle = (hour) => {
+  //   setSelectedByAdset(prev => {
+  //     const current = prev[adset.id] || {};
+
+  //     const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+  //       d => current[`${d}-${hour}`]
+  //     );
+
+  //     const updated = { ...current };
+
+  //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+  //       updated[`${d}-${hour}`] = !allSelected;
+  //     });
+
+  //     return {
+  //       ...prev,
+  //       [adset.id]: updated
+  //     };
+  //   });
+  // };
+  const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
-      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
-        d => current[`${d}-${hour}`]
-      );
 
       const updated = { ...current };
 
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-        updated[`${d}-${hour}`] = !allSelected;
+        const key = `${d}-${hour}`;
+        updated[key] = !current[key];
       });
 
       return {
@@ -1386,6 +1425,16 @@ const AdsetComponent = ({
       };
     });
   };
+
+  const isValidAdSchedule = (schedule = []) =>
+    Array.isArray(schedule) &&
+    schedule.length > 0 &&
+    schedule.every(
+      s =>
+        s.end_minute > s.start_minute &&
+        Array.isArray(s.days) &&
+        s.days.length > 0
+    );
 
   useEffect(() => {
     if (!adset?.id || !timezoneType) return;
@@ -1399,15 +1448,16 @@ const AdsetComponent = ({
       ...prev,
       [adset.id]: schedule
     }));
+    if (isValidAdSchedule(schedule)) {
+      setScheduleErrorByAdset(prev =>
+        prev[adset.id]
+          ? { ...prev, [adset.id]: false }
+          : prev
+      );
+      setShowScheduleSubmitError(false);
+    }
 
   }, [selectedByAdset, adset.id, timezoneType]);
-
-
-
-
-
-
-
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
 
@@ -1425,8 +1475,15 @@ const AdsetComponent = ({
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
   const showScheduling =
-    budgetType === "lifetime" && !CampaignBudgetActive && !!adSchedulingToShow[adset.id];
+    budgetType === "lifetime" && (adSchedulingToShow[adset.id] || adSchedulingToShowCampaign);
 
+  useEffect(() => {
+    if (adSchedulingToShowCampaign || CampaignBudgetActive) {
+      setAdSchedulingToShow({});
+      setScheduleErrorByAdset({});
+      setShowScheduleSubmitError(false);
+    }
+  }, [adSchedulingToShowCampaign || CampaignBudgetActive]);
   const Bid_strategy_values = [
     {
       value: "LOWEST_COST_WITHOUT_CAP",
@@ -1476,6 +1533,7 @@ const AdsetComponent = ({
     { value: "ES", label: "Spain" },
     { value: "SG", label: "Singapore" },
     { value: "NZ", label: "New Zealand" },
+    { value: "NO", label: "Norway", },
     { value: "MX", label: "Mexico" },
     { value: "AT", label: "Austria" },
     { value: "BE", label: "Belgium" },
@@ -2168,18 +2226,18 @@ const AdsetComponent = ({
       [adsetId]: [...(prev[adsetId] || []), ...mapped],
     }));
 
-    form.setFieldsValue({
-      adsets: {
-        [index]: {
-          MediaContent: [
-            ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
-            ...mapped,
-          ],
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [index]: {
+    //       MediaContent: [
+    //         ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
+    //         ...mapped,
+    //       ],
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", index, "MediaContent"]]);
+    // form.validateFields([["adsets", index, "MediaContent"]]);
     setOpenCreativesDrawer(false);
   };
 
@@ -3306,6 +3364,7 @@ const AdsetComponent = ({
                 >
                   <Switch
                     size="small"
+                    disabled={adSchedulingToShowCampaign || budgetType === "daily" || CampaignBudgetActive}
                     checked={!!adSchedulingToShow[adset.id]}
                     style={{
                       backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
@@ -3571,64 +3630,88 @@ const AdsetComponent = ({
               </Form.Item>
 
               {/* Schedule Grid */}
-              <div
-                className="schedule-grid"
-                onMouseUp={handleMouseUp}
-              >
-                <div className="row header">
-                  <div className="day-cell" />
-                  {Array.from({ length: 24 }).map((_, h) => (
-                    <div key={h} className="hour-label">
-                      {h % 3 === 0
-                        ? h === 0
-                          ? "12 am"
-                          : h < 12
-                            ? `${h} am`
-                            : h === 12
-                              ? "12 pm"
-                              : `${h - 12} pm`
-                        : ""}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  className="schedule-grid"
+                  onMouseUp={handleMouseUp}
+                >
+                  <div className="row header">
+                    <div className="day-cell" />
+                    {Array.from({ length: 24 }).map((_, h) => (
+                      <div key={h} className="hour-label">
+                        {h % 3 === 0
+                          ? h === 0
+                            ? "12 am"
+                            : h < 12
+                              ? `${h} am`
+                              : h === 12
+                                ? "12 pm"
+                                : `${h - 12} pm`
+                          : ""}
+                      </div>
+                    ))}
+                  </div>
+
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
+                    <div key={day} className="row">
+                      <div className="day-cell">{day}</div>
+
+                      {Array.from({ length: 24 }).map((_, h) => {
+                        const key = `${d}-${h}`;
+                        return (
+                          <div
+                            key={h}
+                            className={`hour-cell ${selected[key] ? "active" : ""
+                              } ${h % 3 === 0 ? "group-start" : ""}`}
+                            onMouseDown={() => handleMouseDown(d, h)}
+                            onMouseEnter={() => handleMouseEnter(d, h)}
+                          />
+                        );
+                      })}
                     </div>
                   ))}
-                </div>
-
-                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
-                  <div key={day} className="row">
-                    <div className="day-cell">{day}</div>
+                  {/* Every Day Row */}
+                  <div className="row every-day">
+                    <div className="day-cell">Every Day</div>
 
                     {Array.from({ length: 24 }).map((_, h) => {
-                      const key = `${d}-${h}`;
+                      const isActive = [0, 1, 2, 3, 4, 5, 6].every(
+                        d => selected[`${d}-${h}`]
+                      );
+
                       return (
                         <div
                           key={h}
-                          className={`hour-cell ${selected[key] ? "active" : ""
-                            } ${h % 3 === 0 ? "group-start" : ""}`}
-                          onMouseDown={() => handleMouseDown(d, h)}
-                          onMouseEnter={() => handleMouseEnter(d, h)}
+                          className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
+                            }`}
+                          // onMouseDown={() => handleEveryDayToggle(h)}
+                          onMouseDown={() => {
+                            setDragging(true);
+                            handleEveryDayDrag(h);
+                          }}
+                          onMouseEnter={() => {
+                            if (dragging) handleEveryDayDrag(h);
+                          }}
+
                         />
                       );
                     })}
                   </div>
-                ))}
-                {/* Every Day Row */}
-                <div className="row every-day">
-                  <div className="day-cell">Every Day</div>
-
-                  {Array.from({ length: 24 }).map((_, h) => {
-                    const isActive = [0, 1, 2, 3, 4, 5, 6].every(
-                      d => selected[`${d}-${h}`]
-                    );
-
-                    return (
-                      <div
-                        key={h}
-                        className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
-                          }`}
-                        onMouseDown={() => handleEveryDayToggle(h)}
-                      />
-                    );
-                  })}
                 </div>
+                {/* {budgetType === "lifetime" &&
+                  scheduleErrorByAdset[adset.id] &&
+                  adSchedulingToShow[adset.id] && (
+                    <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                      Please select at least one valid time slot and day
+                    </div>
+                  )} */}
+                {budgetType === "lifetime" &&
+                  scheduleErrorByAdset[adset.id] &&
+                  (adSchedulingToShowCampaign || adSchedulingToShow[adset.id]) && (
+                    <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                      Please select at least one valid time slot and day
+                    </div>
+                  )}
 
               </div>
             </>
@@ -3877,6 +3960,7 @@ const AdsetComponent = ({
                 placeholder={
                   campaignCountries.length ? "Select from campaign countries" : "Select any country"
                 }
+                optionFilterProp="label"
                 disabled={(geo === "Geos" && index !== 0)}
                 options={optionsForIndexOfCountries}
                 getPopupContainer={(trigger) => trigger.parentNode}
@@ -5053,16 +5137,42 @@ const AdsetComponent = ({
                             //   });
                             // }}
                             onChange={(info) => {
-                              const newFiles = info.fileList.map((file) => ({
-                                ...file,
-                                uid: file.uid || `-${Date.now()}`,
-                                source: "media",
-                                thumbUrl:
-                                  file.thumbUrl ||
-                                  (file.originFileObj
-                                    ? URL.createObjectURL(file.originFileObj)
-                                    : undefined),
-                              }));
+                              // const newFiles = info.fileList.map((file) => ({
+                              //   ...file,
+                              //   uid: file.uid || `-${Date.now()}`,
+                              //   status: "done", // ✅ REQUIRED
+                              //   source: "media",
+                              //   thumbUrl:
+                              //     file.thumbUrl ||
+                              //     (file.originFileObj
+                              //       ? URL.createObjectURL(file.originFileObj)
+                              //       : undefined),
+                              // }));
+                              const newFiles = info.fileList.map((file) => {
+                                const isVideo = file.type?.startsWith("video");
+
+                                return {
+                                  ...file,
+                                  uid: file.uid || `-${Date.now()}`,
+                                  status: "done", // ✅ REQUIRED for images & videos
+                                  source: "media",
+                                  // thumbUrl:
+                                  //   file.thumbUrl ||
+                                  //   (file.originFileObj
+                                  //     ? URL.createObjectURL(file.originFileObj)
+                                  //     : undefined),
+                                  // isVideo, // ✅ helps AntD distinguish
+                                  ...(isVideo
+                                    ? {} // ❌ no thumbUrl for video
+                                    : {
+                                      thumbUrl:
+                                        file.thumbUrl ||
+                                        (file.originFileObj
+                                          ? URL.createObjectURL(file.originFileObj)
+                                          : undefined),
+                                    }),
+                                };
+                              });
 
                               setSelectedFiles((prev) => {
                                 const existingUids = new Set(
@@ -5213,6 +5323,111 @@ const AdsetComponent = ({
                             fileList={selectedFilesFromMedia[adset.id] || []}
                             listType="picture"
                             accept="image/*, video/*"
+                            // itemRender={(originNode, file) => {
+                            //   if (file.type?.startsWith("video")) {
+                            //     return (
+                            //       <div
+                            //         style={{
+                            //           display: "flex",
+                            //           alignItems: "center",
+                            //           gap: 12,
+                            //           width: "100%",
+                            //         }}
+                            //       >
+                            //         <video
+                            //           src={file.originFileObj
+                            //             ? URL.createObjectURL(file.originFileObj)
+                            //             : file.url}
+                            //           width={80}
+                            //           height={50}
+                            //           muted
+                            //           preload="metadata"
+                            //           style={{ borderRadius: 4, flexShrink: 0 }}
+                            //         />
+                            //         <span
+                            //           style={{
+                            //             color: theme === "dark" ?"#fff" : "#000" ,
+                            //             width: 160,
+                            //           }}
+                            //         >{file.name}</span>
+                            //       </div>
+                            //     );
+                            //   }
+
+                            //   return originNode; // images stay exactly the same
+                            // }}
+                            itemRender={(originNode, file, fileList, actions) => {
+                              const isVideo = file.type?.startsWith("video");
+                              const isImage = file.type?.startsWith("image");
+
+                              if (isVideo || isImage) {
+                                return (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 12,
+                                      width: "100%",
+                                      marginTop: 10,
+                                      padding: 8,                         // ✅ space inside border
+                                      border: theme === "dark"
+                                        ? "1px solid #444"
+                                        : "1px solid #d9d9d9",            // ✅ light theme border
+                                      borderRadius: 6,                    // ✅ rounded corners
+                                      background: theme === "dark"
+                                        ? "#1f1f1f"
+                                        : "#fff",
+                                    }}
+                                  >
+                                    {isVideo ? (
+                                      <video
+                                        src={file.originFileObj
+                                          ? URL.createObjectURL(file.originFileObj)
+                                          : file.url}
+                                        width={50}
+                                        height={50}
+                                        muted
+                                        preload="metadata"
+                                        style={{ borderRadius: 4, flexShrink: 0 }}
+                                      />
+                                    ) : (
+                                      <img
+                                        src={file.thumbUrl || file.url}
+                                        width={50}
+                                        height={50}
+                                        alt={file.name}
+                                        style={{ borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                                      />
+                                    )}
+
+                                    <span
+                                      style={{
+                                        color: theme === "dark" ? "#fff" : "#000",
+                                        flex: 1,                    // ✅ auto width
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                      }}
+                                    >
+                                      {file.name}
+                                    </span>
+                                    {/* ✅ DEFAULT REMOVE FLOW */}
+                                    <DeleteOutlined
+                                      onClick={actions.remove}
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "#ff4d4f",
+                                        fontSize: 16,
+                                      }}
+                                    />
+                                  </div>
+                                );
+                              }
+
+                              return originNode; // fallback for other file types
+                            }}
+
+
                           >
                             <Button
                               icon={<UploadOutlined />}
@@ -5249,15 +5464,30 @@ const AdsetComponent = ({
                                     (file, index) => (
                                       <div
                                         key={index}
+                                        // style={{
+                                        //   display: "flex",
+                                        //   alignItems: "center",
+                                        //   marginBottom: 8,
+                                        // }}
                                         style={{
                                           display: "flex",
                                           alignItems: "center",
-                                          marginBottom: 8,
+                                          gap: 12,
+                                          width: 365,
+                                          marginTop: 10,
+                                          padding: 8,                         // ✅ space inside border
+                                          border: theme === "dark"
+                                            ? "1px solid #444"
+                                            : "1px solid #d9d9d9",            // ✅ light theme border
+                                          borderRadius: 6,                    // ✅ rounded corners
+                                          background: theme === "dark"
+                                            ? "#1f1f1f"
+                                            : "#fff",
                                         }}
                                       >
                                         {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                         {/* <Tooltip title={file.name}> */}
-                                        {file.type?.startsWith("image/") && (
+                                        {file.type?.startsWith("image/") ? (
                                           <img
                                             src={
                                               file.originFileObj
@@ -5275,10 +5505,21 @@ const AdsetComponent = ({
                                               marginLeft: 8,
                                             }}
                                           />
+                                        ) : (
+                                          <video
+                                            src={file.originFileObj
+                                              ? URL.createObjectURL(file.originFileObj)
+                                              : file.url}
+                                            width={50}
+                                            height={40}
+                                            muted
+                                            preload="metadata"
+                                            style={{ borderRadius: 4, flexShrink: 0 }}
+                                          />
                                         )}
                                         <span
                                           style={{
-                                            maxWidth: 160,
+                                            // maxWidth: 160,
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
                                             whiteSpace: "nowrap",
@@ -5287,6 +5528,18 @@ const AdsetComponent = ({
                                               theme === "dark" ? "#fff" : "#000",
                                           }}
                                         >
+                                          {/* <Tooltip
+                                            overlayInnerStyle={{
+                                              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                              color: theme === "dark" ? "#ffffff" : "#000000",
+                                              borderRadius: 6,
+                                              padding: "6px 10px",
+                                              fontSize: "14px",
+                                            }}
+                                            title={file.name}
+                                          >
+                                            {file.name}
+                                          </Tooltip> */}
                                           {file.name}
                                         </span>
                                         {/* </Tooltip> */}
@@ -6701,6 +6954,10 @@ const CreateCampaignDrawer = ({
   const [adsetSchedule, setAdsetSchedule] = useState({});
   const [selectedByAdset, setSelectedByAdset] = useState({});
   const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
+  const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
+  const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
+  const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
+
 
   // Derived condition name changed to watchedHasAdsetBudget
   const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
@@ -6759,6 +7016,7 @@ const CreateCampaignDrawer = ({
       `${a.accountNumber} ${a.accountName || ""}`.toLowerCase().includes(q)
     );
   }, [accountsAccess, searchText]);
+
   useEffect(() => {
     if (userdetails?.adAccounts) {
       const adAccountOptions = Object.keys(userdetails?.adAccounts).map(
@@ -6877,7 +7135,7 @@ const CreateCampaignDrawer = ({
       // Category: selectedDraftForShare.Category,
       camapaignlevel: selectedDraftForShare.camapaignlevel,
       adsetlevel_1: selectedDraftForShare.adsetlevel_1,
-      createdby: session?.user?.name,
+      createdby: userdetails?.userName,
     };
 
     const payload = {
@@ -9199,24 +9457,24 @@ const CreateCampaignDrawer = ({
             let response, fbResponse;
 
             if (file.type.startsWith("image/")) {
-              response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
-                formData,
-                {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                    "Content-Type": "multipart/form-data",
-                  },
-                }
-              );
+              // response = await axios.post(
+              //   "https://www.testapi.adsgoat.in/upload",
+              //   formData,
+              //   {
+              //     headers: {
+              //       Authorization: localStorage.getItem("token"),
+              //       "Content-Type": "multipart/form-data",
+              //     },
+              //   }
+              // );
 
-              if (!response.data.imageUrl) {
-                onError("Error: Image URL not returned from custom API");
-                console.error(
-                  "Image upload to custom API failed, imageUrl missing"
-                );
-                continue;
-              }
+              // if (!response.data.imageUrl) {
+              //   onError("Error: Image URL not returned from custom API");
+              //   console.error(
+              //     "Image upload to custom API failed, imageUrl missing"
+              //   );
+              //   continue;
+              // }
 
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/adimages`,
@@ -9224,7 +9482,7 @@ const CreateCampaignDrawer = ({
                 { headers: { "Content-Type": "multipart/form-data" } }
               );
 
-              if (response.status === 200 && fbResponse.status === 200) {
+              if (s3FileUrl && fbResponse.status === 200) {
                 onSuccess("ok", response);
                 mediaHashArray.push({
                   filename: s3FileUrl,
@@ -9235,22 +9493,22 @@ const CreateCampaignDrawer = ({
                 console.error("Image upload failed");
               }
             } else if (file.type.startsWith("video/")) {
-              response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
-                formData,
-                {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                    "Content-Type": "multipart/form-data",
-                  },
-                }
-              );
+              // response = await axios.post(
+              //   "https://www.testapi.adsgoat.in/upload",
+              //   formData,
+              //   {
+              //     headers: {
+              //       Authorization: localStorage.getItem("token"),
+              //       "Content-Type": "multipart/form-data",
+              //     },
+              //   }
+              // );
 
-              if (response.status !== 200) {
-                onError("error", response);
-                console.error("Video upload to custom API failed");
-                continue;
-              }
+              // if (response.status !== 200) {
+              //   onError("error", response);
+              //   console.error("Video upload to custom API failed");
+              //   continue;
+              // }
 
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/advideos`,
@@ -9406,13 +9664,13 @@ const CreateCampaignDrawer = ({
       // message.error("Category is required");
       return;
     }
-
     console.log("Form values", formValues);
 
     const campaignData = await MultipleAdsestsFetching(formValues);
     console.log("Campaign Data before adding category:", campaignData);
     // campaignData.Category = selectedCategory;
     //abcd  
+
 
     try {
       if (campaignData) {
@@ -9421,7 +9679,7 @@ const CreateCampaignDrawer = ({
 
         for (const campaign of campaignData) {
           await fetch(
-            "https://www.testapi.adsgoat.in/api/newsubmitFormData",
+            "https://www.testapi.adsgoat.in/api/newsubmitFormDatanew",
             {
               method: "POST",
               headers: {
@@ -9468,6 +9726,7 @@ const CreateCampaignDrawer = ({
         setAdSchedulingToShow({});
         setSelectedByAdset({});
         setAdsetSchedule({});
+        setAdSchedulingToShowCampaign(false);
       }
     } catch (error) {
       console.error("Error during campaign creation:", error);
@@ -9579,7 +9838,7 @@ const CreateCampaignDrawer = ({
                 fbstatus: "No-Live",
                 Category: selectedCategory,
                 camapaignlevel: {
-                  createdby: session?.user?.name,
+                  createdby: userdetails?.userName,
                   Name: values.Name,
                   Objectives: values.Objectives,
                   Special_categories: values.Special_categories,
@@ -9588,6 +9847,10 @@ const CreateCampaignDrawer = ({
                     : {}),
                   Bid_strategy: values.Bid_strategy,
                   Budget_type: budgetType,
+                  ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+                    is_day_parting_enabled_campign: true,
+                    pacing_type: ["day_parting"]
+                  }),
                   Daily_amount: parseFloat(values.Daily_amount) * 100,
                   Status: values.Status,
                   access_token: newImageHash.token,
@@ -9617,18 +9880,30 @@ const CreateCampaignDrawer = ({
                 const getTheImages = imagesHashArray
                   .map(media => media.imag_hash)
                   .filter(Boolean);
-                const getTheVidoes = imagesHashArray
-                  .map(media => media.videoid)
-                  .filter(Boolean);
+                // const getTheVidoes = imagesHashArray
+                //   .map(media => media.videoid)
+                //   .filter(Boolean);
+                const getTheVideos = imagesHashArray
+                  .filter(media => media.vidoeid && media.thambnailurl)
+                  .map(media => ({
+                    video_id: media.vidoeid,
+                    thumbnail_url: media.thambnailurl
+                  }));
                 // console.log(imageHashArray, "imageHashArray")
                 // console.log(values.adsets[i].isDynamicCreative, "Dynamic creative");
                 const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
                   id: uuidv4(),
                   AddName: `${values.adsets[i].AddName}`,
-                  filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                  // filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                  filename: imagesHashArray.map(m =>
+                    m.imag_hash
+                      ? { filename: m.filename, imag_hash: m.imag_hash }
+                      : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
+                  ),
                   imag_hash: imagesHashArray.map(media => media.imag_hash),
                   images: getTheImages,
-                  videos: getTheVidoes,
+                  // videos: getTheVidoes,
+                  videos: getTheVideos.length ? getTheVideos : [],
                   page_id: page_id,
                   message: values?.adsets[i]?.messages,
                   headline: values.adsets[i].headlines,
@@ -9638,7 +9913,7 @@ const CreateCampaignDrawer = ({
                   call_to_action_types: ["LEARN_MORE"],
                   ad_formats: [
                     ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
-                    ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
+                    ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
                   ]
                 }] : imagesHashArray.map((media, index) => {
                   if (media.imag_hash) {
@@ -9695,6 +9970,11 @@ const CreateCampaignDrawer = ({
                         .format("YYYY-MM-DDTHH:mm:ssZ"),
                     }
                     : {}),
+                  ...(values.adsets[i].isDynamicCreative
+                    ? {
+                      is_dynamic_creative: true
+                    }
+                    : {}),
                   action_source: values.adsets[i].action_source,
                   custom_event_type: values.adsets[i].custom_event_type,
                   pixel_id: pixel_id,
@@ -9714,11 +9994,25 @@ const CreateCampaignDrawer = ({
                   Max_Age: values.adsets[i].Max_Age,
                   Gender: parseInt(values.adsets[i].Gender),
                   locales: values.adsets[i].Language,
-                  ...(adSchedulingToShow?.[adsets[i].id] && {
-                    is_day_parting_enabled: true,
-                    pacing_type: ["day_parting"],
-                    adschedule: adsetSchedule?.[adsets[i].id] || []
-                  }),
+                  // ...(adSchedulingToShow?.[adsets[i].id] && {
+                  //   is_day_parting_enabled: true,
+                  //   pacing_type: ["day_parting"],
+                  //   adschedule: adsetSchedule?.[adsets[i].id] || []
+                  // }),
+                  ...(
+                    adSchedulingToShowCampaign
+                      ? {
+                        adschedule: adsetSchedule?.[adsets[i].id] || [],
+                      }
+                      :
+                      adSchedulingToShow?.[adsets[i].id]
+                        ? {
+                          is_day_parting_enabled: true,
+                          pacing_type: ["day_parting"],
+                          adschedule: adsetSchedule?.[adsets[i].id] || [],
+                        }
+                        : {}
+                  ),
                   placements: values.adsets[i].placements,
                   ...(values.adsets[i].placements !== "Advance" && {
                     publisher_platforms: values.adsets[i].platforms,
@@ -9768,7 +10062,7 @@ const CreateCampaignDrawer = ({
               fbstatus: "No-Live",
               Category: selectedCategory,
               camapaignlevel: {
-                createdby: session?.user?.name,
+                createdby: userdetails?.userName,
                 Name: values.Name,
                 Objectives: values.Objectives,
                 Special_categories: values.Special_categories,
@@ -9777,6 +10071,10 @@ const CreateCampaignDrawer = ({
                   : {}),
                 Bid_strategy: values.Bid_strategy,
                 Budget_type: budgetType,
+                ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+                  is_day_parting_enabled_campign: true,
+                  pacing_type: ["day_parting"],
+                }),
                 Daily_amount: parseFloat(values.Daily_amount) * 100,
                 Status: values.Status,
                 access_token: newImageHash.token,
@@ -9806,18 +10104,29 @@ const CreateCampaignDrawer = ({
               const getTheImages = imagesHashArray
                 .map(media => media.imag_hash)
                 .filter(Boolean);
-              const getTheVidoes = imagesHashArray
-                .map(media => media.vidoeid)
-                .filter(Boolean);
+              // const getTheVidoes = imagesHashArray
+              //   .map(media => media.vidoeid)
+              //   .filter(Boolean);
+              const getTheVideos = imagesHashArray
+                .filter(media => media.vidoeid && media.thambnailurl)
+                .map(media => ({
+                  video_id: media.vidoeid,
+                  thumbnail_url: media.thambnailurl
+                }));
               const addLevelData = values?.adsets[i]?.isDynamicCreative ? [{
                 id: uuidv4(),
                 AddName: `${values.adsets[i].AddName}`,
-                filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                // filename: imagesHashArray.map(media => ({ filename: media.filename })),
+                filename: imagesHashArray.map(m =>
+                  m.imag_hash
+                    ? { filename: m.filename, imag_hash: m.imag_hash }
+                    : { filename: m.filename, video_id: m.videoid, thumbnailurl: m.thambnailurl }
+                ),
                 // imag_hash: imagesHashArray.map(media => media.imag_hash),
                 imag_hash: imagesHashArray.map(media => media.imag_hash),
-
                 images: getTheImages?.map(item => ({ hash: item })) || [],
-                videos: getTheVidoes?.map(item => ({ video_id: item })) || [],
+                // videos: getTheVidoes?.map(item => ({ video_id: item })) || [],
+                videos: getTheVideos.length ? getTheVideos : [],
                 page_id: page_id,
                 message: values.adsets[i].messages,
                 headline: values.adsets[i].headlines,
@@ -9827,7 +10136,7 @@ const CreateCampaignDrawer = ({
                 call_to_action_types: ["LEARN_MORE"],
                 ad_formats: [
                   ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
-                  ...(getTheVidoes.length > 0 ? ["SINGLE_VIDEO"] : []),
+                  ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
                 ]
               }] : imagesHashArray.map((media, index) => {
                 if (media.imag_hash) {
@@ -9902,12 +10211,25 @@ const CreateCampaignDrawer = ({
                 Max_Age: values.adsets[i].Max_Age,
                 Gender: parseInt(values.adsets[i].Gender),
                 locales: values.adsets[i].Language,
-                ...(adSchedulingToShow?.[adsets[i].id] && {
-                  is_day_parting_enabled: true,
-                  pacing_type: ["day_parting"],
-                  adschedule: adsetSchedule?.[adsets[i].id] || []
-                }),
-
+                // ...(adSchedulingToShow?.[adsets[i].id] && {
+                //   is_day_parting_enabled: true,
+                //   pacing_type: ["day_parting"],
+                //   adschedule: adsetSchedule?.[adsets[i].id] || []
+                // }),
+                ...(
+                  adSchedulingToShowCampaign
+                    ? {
+                      adschedule: adsetSchedule?.[adsets[i].id] || [],
+                    }
+                    :
+                    adSchedulingToShow?.[adsets[i].id]
+                      ? {
+                        is_day_parting_enabled: true,
+                        pacing_type: ["day_parting"],
+                        adschedule: adsetSchedule?.[adsets[i].id] || [],
+                      }
+                      : {}
+                ),
                 placements: values.adsets[i].placements,
                 ...(values.adsets[i].placements !== "Advance" && {
                   publisher_platforms: values.adsets[i].platforms,
@@ -10134,7 +10456,7 @@ const CreateCampaignDrawer = ({
         geo: geo,
         pixel: pixel,
         page: page,
-        createdby: session?.user?.name,
+        createdby: userdetails?.userName,
         createdDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         editedDate: moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
         camapaignlevel: {
@@ -10147,6 +10469,10 @@ const CreateCampaignDrawer = ({
             : {}),
           Bid_strategy: values.Bid_strategy,
           Budget_type: budgetType,
+          ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+            is_day_parting_enabled_campign: true,
+            pacing_type: ["day_parting"]
+          }),
           Daily_amount: parseFloat(values.Daily_amount) * 100 || 0,
           Status: values.Status,
           // access_token: imagehash.token,
@@ -10227,6 +10553,20 @@ const CreateCampaignDrawer = ({
           Max_Age: values.adsets[i].Max_Age || "",
           Gender: parseInt(values.adsets[i].Gender) || 0,
           locales: values.adsets[i].Language || [6],
+          ...(
+            adSchedulingToShowCampaign
+              ? {
+                adschedule: adsetSchedule?.[adsets[i].id] || [],
+              }
+              :
+              adSchedulingToShow?.[adsets[i].id]
+                ? {
+                  is_day_parting_enabled: true,
+                  pacing_type: ["day_parting"],
+                  adschedule: adsetSchedule?.[adsets[i].id] || [],
+                }
+                : {}
+          ),
           placements: values.adsets[i].placements || "Advance",
           ...(values.adsets[i].placements !== "Advance" && {
             publisher_platforms: values.adsets[i].platforms,
@@ -10325,7 +10665,7 @@ const CreateCampaignDrawer = ({
           ? selectedRef.current
           : {}),
         camapaignlevel: {
-          createdby: session?.user?.name,
+          createdby: userdetails?.userName,
           Name: values.Name,
           Objectives: values.Objectives,
           Special_categories: values.Special_categories,
@@ -10615,6 +10955,7 @@ const CreateCampaignDrawer = ({
     setAdSchedulingToShow({});
     setSelectedByAdset({});
     setAdsetSchedule({});
+    setAdSchedulingToShowCampaign(false);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -10759,15 +11100,15 @@ const CreateCampaignDrawer = ({
       form.getFieldValue(["adsets", creativeIndex, "MediaContent"]) || [];
     const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
 
-    form.setFieldsValue({
-      adsets: {
-        [creativeIndex]: {
-          MediaContent: updatedMediaContent,
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [creativeIndex]: {
+    //       MediaContent: updatedMediaContent,
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
+    // form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
   };
 
   console.log("Selected Files:", selectedFiles);
@@ -11007,6 +11348,7 @@ const CreateCampaignDrawer = ({
 
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => {
+      const isAccountInclueded = accountis.includes(draft.Account_Number)
       const updatedAdset = {};
       accountis.forEach((account) => {
         updatedAdset[account] = {
@@ -11027,8 +11369,10 @@ const CreateCampaignDrawer = ({
         countries: adsetObj.countries,
         Min_Age: adsetObj.Min_Age,
         Max_Age: adsetObj.Max_Age,
-        Gender: adsetObj.Gender,
+        // Gender: adsetObj.Gender,
+        Gender: String(adsetObj.Gender),
         showPayer: !!adsetObj.payer,
+        timezone_type: adsetObj.adschedule?.[0]?.timezone_type,
         Beneficiary: adsetObj.beneficiary,
         Payer: adsetObj.payer,
         platforms: adsetObj.publisher_platforms || [],
@@ -11168,12 +11512,114 @@ const CreateCampaignDrawer = ({
 
     checkFormCompletion();
   };
+  const adscheduleToGrid = (adschedule = []) => {
+    const restored = {};
+
+    adschedule.forEach(s => {
+      if (
+        typeof s.start_minute !== "number" ||
+        typeof s.end_minute !== "number" ||
+        !Array.isArray(s.days)
+      ) return;
+
+      s.days.forEach(fbDay => {
+        const uiDay = (fbDay + 6) % 7;
+
+        for (let m = s.start_minute; m < s.end_minute; m += 60) {
+          const hour = m / 60;
+          restored[`${uiDay}-${hour}`] = true;
+        }
+      });
+    });
+
+    return restored;
+  };
+
   const onChangeDraft = (value) => {
     const draft = draftsData.find(d => d.draftId === value);
     if (!draft) return;
 
     console.log("Selected Draft:", draft);
     setFormValuesFromDraft(draft);
+    setTimeout(() => {
+      const pixelsFromDraft = Object.keys(draft)
+        .filter(key => key.startsWith("adsetlevel_"))
+        .map(key => {
+          const adset = draft[key];
+          return adset?.pixel_id
+            ? `${draft.Account_Number} - ${adset.pixel_id}`
+            : null;
+        })
+        .filter(Boolean);
+      // setPixelIdList(pixelsFromDraft);
+      setPixelIdList(prev => {
+        const otherAccounts = (prev || []).filter(p => {
+          const account = p.split(" - ")[0];
+          return account !== draft.Account_Number;
+        });
+
+        return [...otherAccounts, ...pixelsFromDraft];
+      });
+
+    }, 0);
+    setTimeout(() => {
+      const pagesFromDraft = Object.keys(draft)
+        .filter(key => key.startsWith("adsetlevel_"))
+        .map(key => {
+          const adset = draft[key];
+          return adset?.addlevel?.page_id
+            ? `${draft.Account_Number} - ${adset.addlevel.page_id}`
+            : null;
+        })
+        .filter(Boolean);
+
+      if (pagesFromDraft.length > 0) {
+        form.setFieldsValue({
+          page_id: pagesFromDraft,
+        });
+
+        setPageIdList(prev => {
+          const otherAccounts = (prev || []).filter(p => {
+            const account = p.split(" - ")[0];
+            return account !== draft.Account_Number;
+          });
+
+          return [...otherAccounts, ...pagesFromDraft];
+        });
+
+      }
+    }, 0);
+
+
+    setAdSchedulingToShowCampaign(
+      !!draft?.camapaignlevel?.is_day_parting_enabled_campign || false
+    );
+    setSelectedByAdset(prev => {
+      const updated = { ...prev };
+
+      Object.keys(draft)
+        .filter(key => key.startsWith("adsetlevel_"))
+        .forEach(key => {
+          const adset = draft[key];
+
+          if (adset?.id && Array.isArray(adset.adschedule)) {
+            updated[adset.id] = adscheduleToGrid(adset.adschedule);
+          }
+        });
+
+      return updated;
+    });
+    const adsetSwitchMap = {};
+
+    Object.keys(draft || {}).forEach(key => {
+      if (!key.startsWith("adsetlevel_")) return;
+
+      const adset = draft[key];
+      if (!adset?.id) return;
+
+      adsetSwitchMap[adset.id] = !!adset.is_day_parting_enabled || false;
+    });
+    setAdSchedulingToShow(adsetSwitchMap);
     selectedRef.current = {
       Draft_Name: draft.Draft_Name,
       Draft_Id: draft.draftId,
@@ -11398,7 +11844,7 @@ const CreateCampaignDrawer = ({
           </div>
 
           <div>
-            <Tooltip title="Turn on to launch campaigns in multiple Pixels"
+            <Tooltip title={pixel === "Pixels" ? "Turn off to launch campaign in single Pixel" : "Turn on to launch campaigns in multiple Pixels"}
               overlayInnerStyle={{
                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                 color: theme === "dark" ? "#ffffff" : "#000000",
@@ -11422,7 +11868,7 @@ const CreateCampaignDrawer = ({
           </div>
 
           <div>
-            <Tooltip title="Turn on to launch campaigns in multiple Pages"
+            <Tooltip title={page === "Pages" ? "Turn off to launch campaign in single Page" : "Turn on to launch campaigns in multiple Pages"}
               overlayInnerStyle={{
                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                 color: theme === "dark" ? "#ffffff" : "#000000",
@@ -12096,6 +12542,7 @@ const CreateCampaignDrawer = ({
                           //   { value: "MX", label: "Mexico" },
                           // ]}
                           showSearch
+                          optionFilterProp="label"
                           options={[
                             { value: "US", label: "United States", title: "" },
                             { value: "GB", label: "United Kingdom", title: "" },
@@ -12114,6 +12561,7 @@ const CreateCampaignDrawer = ({
                             { value: "ES", label: "Spain", title: "" },
                             { value: "SG", label: "Singapore", title: "" },
                             { value: "NZ", label: "New Zealand", title: "" },
+                            { value: "NO", label: "Norway", title: "" },
                             { value: "MX", label: "Mexico", title: "" },
                             { value: "AT", label: "Austria", title: "" },
                             { value: "BE", label: "Belgium", title: "" },
@@ -12387,8 +12835,26 @@ const CreateCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label={<span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>}
-
+                    label={<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
+                      <Tooltip title="Enable Ad Scheduling"
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                          color: theme === "dark" ? "#fff" : "#333",
+                        }}
+                      >
+                        <Switch
+                          size="small"
+                          disabled={budgetType === "daily"}
+                          checked={adSchedulingToShowCampaign}
+                          onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
+                          style={{
+                            backgroundColor: adSchedulingToShowCampaign ? "#91C25F" : undefined,
+                          }}
+                        />
+                      </Tooltip>
+                    </div>
+                    }
                     required={!watchedHasAdsetBudget}
                     rules={[
                       {
@@ -12513,6 +12979,10 @@ const CreateCampaignDrawer = ({
                   selectedByAdset={selectedByAdset}
                   setAdSchedulingToShow={setAdSchedulingToShow}
                   setSelectedByAdset={setSelectedByAdset}
+                  scheduleErrorByAdset={scheduleErrorByAdset}
+                  setScheduleErrorByAdset={setScheduleErrorByAdset}
+                  setShowScheduleSubmitError={setShowScheduleSubmitError}
+                  adSchedulingToShowCampaign={adSchedulingToShowCampaign}
                   page={page}
                   pixel={pixel}
                   geo={geo}
@@ -12693,12 +13163,11 @@ const CreateCampaignDrawer = ({
                             Draft_Name: popupInputs.input2,
                           };
 
-                          await fetch("https://www.testapi.adsgoat.in/api/NewupdateDraftSmart", {
+                          await fetch("https://www.testapi.adsgoat.in/api/NewupdateDraftSmartnew", {
                             method: "PATCH",
                             headers: { "Content-Type": "application/json", Authorization: token },
                             body: JSON.stringify({
-                              accountNumber,
-                              // draftId: selectedRef.current.draftId,
+                              accountNumber: accountNumber,
                               groupId: selectedRef.current.groupId,
                               payload: filteredPayload,
                             }),
@@ -12798,6 +13267,90 @@ const CreateCampaignDrawer = ({
                           return;
                         }
 
+                        // if (budgetType === "lifetime") {
+                        //   let hasError = false;
+                        //   const newErrors = {};
+                        //   Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                        //     if (!adSchedulingToShow[adsetId]) return;
+                        //     const schedule = adsetSchedule?.[adsetId] || [];
+                        //     const isValid =
+                        //       Array.isArray(schedule) &&
+                        //       schedule.length > 0 &&
+                        //       schedule.every(
+                        //         s =>
+                        //           s.end_minute > s.start_minute &&
+                        //           Array.isArray(s.days) &&
+                        //           s.days.length > 0
+                        //       );
+                        //     if (!isValid) {
+                        //       newErrors[adsetId] = true;
+                        //       hasError = true;
+                        //     }
+                        //   });
+                        //   if (hasError) {
+                        //     setScheduleErrorByAdset(newErrors);
+                        //     setShowScheduleSubmitError(true);
+                        //     return;
+                        //   }
+                        // }
+                        if (budgetType === "lifetime") {
+                          let hasError = false;
+                          const newErrors = {};
+                          const isAnySchedulingEnabled =
+                            adSchedulingToShowCampaign ||
+                            Object.values(adSchedulingToShow || {}).some(Boolean);
+                          if (isAnySchedulingEnabled) {
+                            if (adSchedulingToShowCampaign) {
+                              Object.keys(adsetSchedule || {}).forEach(adsetId => {
+                                const schedule = adsetSchedule?.[adsetId] || [];
+                                const isValid =
+                                  Array.isArray(schedule) &&
+                                  schedule.length > 0 &&
+                                  schedule.every(
+                                    s =>
+                                      s.end_minute > s.start_minute &&
+                                      Array.isArray(s.days) &&
+                                      s.days.length > 0
+                                  );
+
+                                if (!isValid) {
+                                  newErrors[adsetId] = true;
+                                  hasError = true;
+                                }
+                              });
+                            } else {
+                              Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                                if (!adSchedulingToShow[adsetId]) return;
+
+                                const schedule = adsetSchedule?.[adsetId] || [];
+
+                                const isValid =
+                                  Array.isArray(schedule) &&
+                                  schedule.length > 0 &&
+                                  schedule.every(
+                                    s =>
+                                      s.end_minute > s.start_minute &&
+                                      Array.isArray(s.days) &&
+                                      s.days.length > 0
+                                  );
+                                if (!isValid) {
+                                  newErrors[adsetId] = true;
+                                  hasError = true;
+                                }
+                              });
+                            }
+
+                            if (hasError) {
+                              setScheduleErrorByAdset(newErrors);
+                              setShowScheduleSubmitError(true);
+                              return;
+                            }
+                          }
+                          setScheduleErrorByAdset({});
+                          setShowScheduleSubmitError(false);
+                        }
+
+
                         try {
                           const values = await form.validateFields();
 
@@ -12858,6 +13411,18 @@ const CreateCampaignDrawer = ({
                     {errors.reportCat && (
                       <div style={{ color: "red", marginTop: "5px" }}>
                         {errors.reportCat}
+                      </div>
+                    )}
+                    {budgetType === "lifetime" && showScheduleSubmitError && (
+                      <div
+                        style={{
+                          color: "red",
+                          marginTop: 6,
+                          fontSize: 12,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Please select at least one valid time slot and day
                       </div>
                     )}
                   </div>
@@ -13274,5 +13839,6 @@ const CreateCampaignDrawer = ({
     </Modal >
   );
 };
-
 export default CreateCampaignDrawer;
+
+

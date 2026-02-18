@@ -52,6 +52,7 @@ import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
+import AffinityUrlBuilder from "./urlbuilder/affinity";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
@@ -59,6 +60,7 @@ import { useTokenContext } from "../../components/parent";
 import { useContext } from "react";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { Campaign } from "@mui/icons-material";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -642,8 +644,9 @@ const AddComponent = ({
         Caption: text.split("//")[1].split("/")[0],
       });
     } else {
-      setCaption(text.split("/")[0]);
-      form.setFieldsValue({ Website_URL: text, Caption: text.split("/")[0] });
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin)
+      form.setFieldsValue({ Website_URL: text, Caption: new URL(text).origin });
       // updatedAdsets[index] = {
       //     ...updatedAdsets[index],
       //     Website_URL: text,
@@ -807,6 +810,14 @@ const AddComponent = ({
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -1815,6 +1826,76 @@ const AddComponent = ({
                       fileList={selectedFilesFromMedia || []}
                       listType="picture"
                       accept="image/*, video/*"
+                      itemRender={(originNode, file, fileList, actions) => {
+                        const isVideo = file.type?.startsWith("video");
+                        const isImage = file.type?.startsWith("image");
+
+                        if (isVideo || isImage) {
+                          return (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 12,
+                                width: 365,
+                                marginTop: 10,
+                                padding: 8,                         // ✅ space inside border
+                                border: theme === "dark"
+                                  ? "1px solid #444"
+                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                borderRadius: 6,                    // ✅ rounded corners
+                                background: theme === "dark"
+                                  ? "#1f1f1f"
+                                  : "#fff",
+                              }}
+                            >
+                              {isVideo ? (
+                                <video
+                                  src={file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url}
+                                  width={50}
+                                  height={50}
+                                  muted
+                                  preload="metadata"
+                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                />
+                              ) : (
+                                <img
+                                  src={file.thumbUrl || file.url}
+                                  width={50}
+                                  height={50}
+                                  alt={file.name}
+                                  style={{ borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                                />
+                              )}
+
+                              <span
+                                style={{
+                                  color: theme === "dark" ? "#fff" : "#000",
+                                  flex: 1,                    // ✅ auto width
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {file.name}
+                              </span>
+                              {/* ✅ DEFAULT REMOVE FLOW */}
+                              <DeleteOutlined
+                                onClick={actions.remove}
+                                style={{
+                                  cursor: "pointer",
+                                  color: "#ff4d4f",
+                                  fontSize: 16,
+                                }}
+                              />
+                            </div>
+                          );
+                        }
+
+                        return originNode; // fallback for other file types
+                      }}
                     >
                       <Button
                         disabled={selectedFiles.length > 0}
@@ -1851,15 +1932,30 @@ const AddComponent = ({
                           {selectedFilesFromCreatives.map((file, index) => (
                             <div
                               key={index}
+                              // style={{
+                              //   display: "flex",
+                              //   alignItems: "center",
+                              //   marginBottom: 8,
+                              // }}
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                marginBottom: 8,
+                                gap: 12,
+                                width: 365,
+                                marginTop: 10,
+                                padding: 8,                         // ✅ space inside border
+                                border: theme === "dark"
+                                  ? "1px solid #444"
+                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                borderRadius: 6,                    // ✅ rounded corners
+                                background: theme === "dark"
+                                  ? "#1f1f1f"
+                                  : "#fff",
                               }}
                             >
                               {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                               {/* <Tooltip title={file.name}> */}
-                              {file.type?.startsWith("image/") && (
+                              {file.type?.startsWith("image/") ? (
                                 <img
                                   src={
                                     file.originFileObj
@@ -1875,10 +1971,21 @@ const AddComponent = ({
                                     marginLeft: 8,
                                   }}
                                 />
+                              ) : (
+                                <video
+                                  src={file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url}
+                                  width={50}
+                                  height={40}
+                                  muted
+                                  preload="metadata"
+                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                />
                               )}
                               <span
                                 style={{
-                                  maxWidth: 160,
+                                  // maxWidth: 160,
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
@@ -1960,7 +2067,7 @@ const AddComponent = ({
               style={{ flex: "140px" }}
             >
               <Input
-                style={{ width: "23%" }}
+                style={{ width: "60%" }}
                 disabled={true}
                 className={
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
@@ -1987,6 +2094,7 @@ const AddComponent = ({
               }
             />
           </Form.Item>
+
           <Form.Item
             label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
             name="message"
@@ -2612,6 +2720,7 @@ const AdsetComponent = ({
   handleFieldChange,
   network,
   accountis,
+  setAdsets,
   handleAdsetChange,
   setSelectedPositions,
   selectedPositions,
@@ -2628,9 +2737,13 @@ const AdsetComponent = ({
   setAdsetSchedule,
   adSchedulingToShow,
   selectedByAdset,
+  budgetType,
   setAdSchedulingToShow,
+  setScheduleErrorByAdset,
+  setShowScheduleSubmitError,
+  scheduleErrorByAdset,
   setSelectedByAdset,
-  budgetType
+  adSchedulingToShowCampaign,
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2648,6 +2761,7 @@ const AdsetComponent = ({
   const [viewSingleAd, setViewSingleAd] = useState({});
   const [dragging, setDragging] = useState(false);
   const selected = selectedByAdset[adset.id] || {};
+  const isDynamicCreative = Form.useWatch(["adsets", index, "isDynamicCreative"], form);
 
   console.log(pixelIDLIst, "pixelIDLIst in adset component");
   console.log(pageIDList, "pageIDList in adset component");
@@ -2754,18 +2868,35 @@ const AdsetComponent = ({
     });
   };
 
-  const handleEveryDayToggle = (hour) => {
+  // const handleEveryDayToggle = (hour) => {
+  //   setSelectedByAdset(prev => {
+  //     const current = prev[adset.id] || {};
+
+  //     const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+  //       d => current[`${d}-${hour}`]
+  //     );
+
+  //     const updated = { ...current };
+
+  //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+  //       updated[`${d}-${hour}`] = !allSelected;
+  //     });
+
+  //     return {
+  //       ...prev,
+  //       [adset.id]: updated
+  //     };
+  //   });
+  // };
+  const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
-      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
-        d => current[`${d}-${hour}`]
-      );
 
       const updated = { ...current };
 
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-        updated[`${d}-${hour}`] = !allSelected;
+        const key = `${d}-${hour}`;
+        updated[key] = !current[key];
       });
 
       return {
@@ -2774,6 +2905,16 @@ const AdsetComponent = ({
       };
     });
   };
+
+  const isValidAdSchedule = (schedule = []) =>
+    Array.isArray(schedule) &&
+    schedule.length > 0 &&
+    schedule.every(
+      s =>
+        s.end_minute > s.start_minute &&
+        Array.isArray(s.days) &&
+        s.days.length > 0
+    );
 
   useEffect(() => {
     if (!adset?.id || !timezoneType) return;
@@ -2787,8 +2928,52 @@ const AdsetComponent = ({
       ...prev,
       [adset.id]: schedule
     }));
+    if (isValidAdSchedule(schedule)) {
+      setScheduleErrorByAdset(prev =>
+        prev[adset.id]
+          ? { ...prev, [adset.id]: false }
+          : prev
+      );
+      setShowScheduleSubmitError(false);
+    }
 
   }, [selectedByAdset, adset.id, timezoneType]);
+
+  useEffect(() => {
+    const adsetsFromForm = form.getFieldValue("adsets") || [];
+    const currentAdsetFromForm = adsetsFromForm.find(item => item.id === adset.id) || {};
+    if (adset?.is_dynamic_creative) {
+      const firstAddLevel = Array.isArray(adset?.addlevel)
+        ? adset.addlevel[0]
+        : null;
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            isDynamicCreative: adset?.is_dynamic_creative ?? false,
+            descriptions: currentAdsetFromForm.descriptions,
+            headlines: currentAdsetFromForm.headlines,
+            messages: currentAdsetFromForm.messages,
+          },
+        }
+      })
+    } else {
+      const firstAddLevel = Array.isArray(adset?.addlevel)
+        ? adset.addlevel[0]
+        : null;
+      console.log(firstAddLevel, "firstAddLevel when not dynamic creative");
+      form.setFieldsValue({
+        adsets: {
+          [index]: {
+            isDynamicCreative: false,
+            descriptions: currentAdsetFromForm.descriptions,
+            headlines: currentAdsetFromForm.headlines,
+            messages: currentAdsetFromForm.messages,
+          },
+        }
+      })
+    }
+
+  }, [adset, index])
 
   const currentDate = dayjs();
   const after30Days = currentDate.add(30, "day");
@@ -2844,6 +3029,7 @@ const AdsetComponent = ({
     { value: "LU", label: "Luxembourg" },
     { value: "MT", label: "Malta" },
     { value: "NL", label: "Netherlands" },
+    { value: "NO", label: "Norway" },
     { value: "PL", label: "Poland" },
     { value: "PT", label: "Portugal" },
     { value: "RO", label: "Romania" },
@@ -2914,8 +3100,17 @@ const AdsetComponent = ({
 
   const adsetsValues = form.getFieldValue("adsets") || [];
   const currentValue = adsetsValues[index]?.optimization_goal ?? "";
+  // const showScheduling =
+  //   budgetType === "lifetime" && !isCampaignBudgetActive && !!adSchedulingToShow[adset.id];
   const showScheduling =
-    budgetType === "lifetime" && !isCampaignBudgetActive && !!adSchedulingToShow[adset.id];
+    budgetType === "lifetime" && (adSchedulingToShow[adset.id] || adSchedulingToShowCampaign);
+  useEffect(() => {
+    if (adSchedulingToShowCampaign || isCampaignBudgetActive) {
+      setAdSchedulingToShow({});
+      setScheduleErrorByAdset({});
+      setShowScheduleSubmitError(false);
+    }
+  }, [adSchedulingToShowCampaign || isCampaignBudgetActive]);
   const optionsForIndex =
     index === 0
       ? optionsForOptimz_goal
@@ -2989,11 +3184,12 @@ const AdsetComponent = ({
         return { ...prev, [key]: next };
       });
     } else {
-      setCaption(text.split("/")[0]);
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin);
       updatedAdsets[index] = {
         ...updatedAdsets[index],
         Website_URL: text,
-        Caption: text.split("/")[0],
+        Caption: new URL(text).origin,
       };
       setNewAddLevelData((prev) => {
         const key = adset.id;
@@ -3041,6 +3237,14 @@ const AdsetComponent = ({
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -3299,7 +3503,7 @@ const AdsetComponent = ({
   //     form.validateFields([['adsets', index, 'MediaContent']]);
   //   };
 
-  const selectedFilesData = (data, index, adsetId = creativeIndex) => {
+  const selectedFilesData = (data, adsetId = creativeIndex) => {
     const mapped = data.map((file, i) => ({
       id: uuidv4(),
       uid: file.uid || `-${Date.now()}-${i}`,
@@ -3340,8 +3544,7 @@ const AdsetComponent = ({
         const max = numbers.length > 0 ? Math.max(...numbers) : 0;
         return max + 1;
       };
-      const previousPageId =
-        list.length > 0 ? list[0].page_id : form.getFieldValue("page_id");
+      const pageId = form.getFieldValue(["adsets", index, "page_id"]);
       const nextAddNumber = list?.length + 1 || getNextAddNumber(list);
       const newAds = mapped.map((item, i) => ({
         id: item.id,
@@ -3349,7 +3552,7 @@ const AdsetComponent = ({
         filename: item,
         uid: item.uid,
         // page_id: form.getFieldValue("page_id"),
-        page_id: previousPageId,
+        page_id: pageId,
         message: primaryText,
         headline: headline,
         Description: description,
@@ -3359,18 +3562,18 @@ const AdsetComponent = ({
       const next = [...list, ...newAds];
       return { ...prev, [key]: next };
     });
-    form.setFieldsValue({
-      adsets: {
-        [index]: {
-          MediaContent: [
-            ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
-            ...mapped,
-          ],
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [index]: {
+    //       MediaContent: [
+    //         ...(form.getFieldValue(["adsets", index, "MediaContent"]) || []),
+    //         ...mapped,
+    //       ],
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", index, "MediaContent"]]);
+    // form.validateFields([["adsets", index, "MediaContent"]]);
     setOpenCreativesDrawer(false);
   };
 
@@ -3552,6 +3755,7 @@ const AdsetComponent = ({
       ]);
     }
   }, [adset?.DailyAdd_amount]);
+
   useEffect(() => {
     if (adset?.is_day_parting_enabled === true) {
       setAdSchedulingToShow(prev => ({
@@ -3560,6 +3764,7 @@ const AdsetComponent = ({
       }));
     }
   }, [adset?.is_day_parting_enabled, adset.id]);
+
   useEffect(() => {
     if (!adset?.id || !Array.isArray(adset.adschedule)) return;
 
@@ -3658,7 +3863,99 @@ const AdsetComponent = ({
               {adset.AdsetPanelName}
             </span>
 
-            {!view && (
+            <div style={{ display: "flex" }} >
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
+                <Form.Item
+                  name={["adsets", index, "isDynamicCreative"]}
+                  valuePropName="checked"
+                  style={{ marginBottom: 0 }}
+
+                >
+                  {/* <Switch
+                                                size="small"
+                                                onClick={(checked, e) => {
+                                                  e.stopPropagation(); // ⛔ prevent panel collapse
+                                                }}
+                                              /> */}
+                  <Switch
+                    size="small"
+                    disabled={view || adset.Adsetid}
+                    style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
+                    onClick={(checked, e) => e.stopPropagation()}
+                    onChange={(checked) => {
+                      console.log("Dynamic Creative:", checked);
+                      if (checked) {
+                        setViewSingleAd({});
+                      }
+                      // if (!checked) {
+                      // Example: clear dynamic creative assets
+                      setAdsets(prevAdsets =>
+                        prevAdsets.map(a => a.id === adset.id ? { ...a, is_dynamic_creative: checked } : a)
+                      );
+                      form.setFieldsValue({
+                        adsets: {
+                          [index]: {
+                            isDynamicCreative: checked,
+                          },
+                        },
+                      });
+                      // }
+                    }}
+                  />
+                </Form.Item>
+              </div>
+              {!view && (
+                <div>
+                  {index !== 0 && !adset.Adsetid && (
+                    <Popconfirm
+                      title="Are you sure to delete this Adset?"
+                      onConfirm={(e) => {
+                        e.stopPropagation(); // Prevent panel collapse
+                        removeAdset(index, adset.id);
+                      }}
+                      okText="Yes"
+                      cancelText="No"
+                      style={{ float: "right", marginLeft: "10px" }}
+                    >
+                      <Button
+                        type="text"
+                        onClick={(e) => e.stopPropagation()} // Prevent panel collapse
+                        icon={<FaTrashCan color="#EC7117" />}
+                      />
+                    </Popconfirm>
+                  )}
+                  <Button
+                    type="text"
+                    icon={
+                      <PlusOutlined
+                        style={{ color: theme === "dark" ? "#fff" : "#000" }}
+                      />
+                    }
+                    // onClick={() => {
+                    //     const updatedAdsets = adsets.filter((_, i) => i !== index);
+                    //     setAdsets(updatedAdsets);
+                    //     setActiveKey(['1']); // Reset to the first panel
+                    // }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent panel
+                      addAdset();
+                    }}
+                    style={{ float: "right", marginLeft: "10px" }}
+                  />
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent panel collapse
+                      cloneAdset(adset.id);
+                    }}
+                    style={{ float: "right", marginLeft: "10px" }}
+                  />
+                </div>
+              )}
+            </div>
+            {/* {!view && (
               <div>
                 {index !== 0 && !adset.Adsetid && (
                   <Popconfirm
@@ -3706,43 +4003,23 @@ const AdsetComponent = ({
                   style={{ float: "right", marginLeft: "10px" }}
                 />
               </div>
-            )}
-            {(view && adset.is_dynamic_creative) && (<div style={{ display: "flex", alignItems: "center" }}>
+            )} */}
+            {/* {(view && adset.is_dynamic_creative) && (<div style={{ display: "flex", alignItems: "center" }}>
               <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
               <Form.Item
                 name={["adsets", index, "isDynamicCreative"]}
                 valuePropName="checked"
                 style={{ marginBottom: 0 }}
               >
-                {/* <Switch
-                  size="small"
-                  onClick={(checked, e) => {
-                    e.stopPropagation(); // ⛔ prevent panel collapse
-                  }}
-                /> */}
                 <Switch
                   size="small"
                   disabled
                   checked={adset?.is_dynamic_creative}
                   style={{ backgroundColor: adset.is_dynamic_creative ? "#91C25F" : undefined }}
-                // onClick={(checked, e) => e.stopPropagation()}
-                // onChange={(checked) => {
-                //   console.log("Dynamic Creative:", checked);
-
-                //   // if (!checked) {
-                //   // Example: clear dynamic creative assets
-                //   form.setFieldsValue({
-                //     adsets: {
-                //       [index]: {
-                //         isDynamicCreative: checked,
-                //       },
-                //     },
-                //   });
-                //   // }
-                // }}
+                
                 />
               </Form.Item>
-            </div>)}
+            </div>)} */}
           </div>
         }
         className="adset-collapse-panel"
@@ -4187,7 +4464,7 @@ const AdsetComponent = ({
                 >
                   <Switch
                     size="small"
-                    disabled={adset?.Adsetid || view}
+                    disabled={adSchedulingToShowCampaign || budgetType === "daily" || isCampaignBudgetActive || view || adset?.Adsetid}
                     checked={!!adSchedulingToShow[adset.id]}
                     style={{
                       backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
@@ -4332,7 +4609,7 @@ const AdsetComponent = ({
                 name={["adsets", index, "timezone_type"]}
                 label={<span style={{ color: "#B4B4B4" }}>Time Zone</span>}
                 rules={[{ required: true, message: "Please select a time zone" }]}
-                initialValue={adset.adschedule?.[0]?.timezone_type}
+                initialValue={adset.adschedule?.[0]?.timezone_type || "ADVERTISER"}
               >
                 <Select
                   disabled={adset?.Adsetid || view}
@@ -4344,68 +4621,92 @@ const AdsetComponent = ({
               </Form.Item>
 
               {/* Schedule Grid */}
-              <div
-                className="schedule-grid"
-                onMouseUp={handleMouseUp}
-                style={{
-                  pointerEvents: adset?.Adsetid || view ? "none" : "auto",
-                  cursor: adset?.Adsetid || view ? "not-allowed" : "pointer",
-                }}
-              >
-                <div className="row header">
-                  <div className="day-cell" />
-                  {Array.from({ length: 24 }).map((_, h) => (
-                    <div key={h} className="hour-label">
-                      {h % 3 === 0
-                        ? h === 0
-                          ? "12 am"
-                          : h < 12
-                            ? `${h} am`
-                            : h === 12
-                              ? "12 pm"
-                              : `${h - 12} pm`
-                        : ""}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  className="schedule-grid"
+                  onMouseUp={handleMouseUp}
+                  style={{
+                    pointerEvents: adset?.Adsetid || view ? "none" : "auto",
+                    cursor: adset?.Adsetid || view ? "not-allowed" : "pointer",
+                  }}
+                >
+
+                  <div className="row header">
+                    <div className="day-cell" />
+                    {Array.from({ length: 24 }).map((_, h) => (
+                      <div key={h} className="hour-label">
+                        {h % 3 === 0
+                          ? h === 0
+                            ? "12 am"
+                            : h < 12
+                              ? `${h} am`
+                              : h === 12
+                                ? "12 pm"
+                                : `${h - 12} pm`
+                          : ""}
+                      </div>
+                    ))}
+                  </div>
+
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
+                    <div key={day} className="row">
+                      <div className="day-cell">{day}</div>
+
+                      {Array.from({ length: 24 }).map((_, h) => {
+                        const key = `${d}-${h}`;
+                        return (
+                          <div
+                            key={h}
+                            className={`hour-cell ${selected[key] ? "active" : ""
+                              } ${h % 3 === 0 ? "group-start" : ""}`}
+                            onMouseDown={() => handleMouseDown(d, h)}
+                            onMouseEnter={() => handleMouseEnter(d, h)}
+                          />
+                        );
+                      })}
                     </div>
                   ))}
-                </div>
-
-                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day, d) => (
-                  <div key={day} className="row">
-                    <div className="day-cell">{day}</div>
+                  {/* Every Day Row */}
+                  <div className="row every-day">
+                    <div className="day-cell">Every Day</div>
 
                     {Array.from({ length: 24 }).map((_, h) => {
-                      const key = `${d}-${h}`;
+                      const isActive = [0, 1, 2, 3, 4, 5, 6].every(
+                        d => selected[`${d}-${h}`]
+                      );
+
                       return (
                         <div
                           key={h}
-                          className={`hour-cell ${selected[key] ? "active" : ""
-                            } ${h % 3 === 0 ? "group-start" : ""}`}
-                          onMouseDown={() => handleMouseDown(d, h)}
-                          onMouseEnter={() => handleMouseEnter(d, h)}
+                          className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
+                            }`}
+                          // onMouseDown={() => handleEveryDayToggle(h)}
+                          onMouseDown={() => {
+                            setDragging(true);
+                            handleEveryDayDrag(h);
+                          }}
+                          onMouseEnter={() => {
+                            if (dragging) handleEveryDayDrag(h);
+                          }}
                         />
                       );
                     })}
                   </div>
-                ))}
-                {/* Every Day Row */}
-                <div className="row every-day">
-                  <div className="day-cell">Every Day</div>
-
-                  {Array.from({ length: 24 }).map((_, h) => {
-                    const isActive = [0, 1, 2, 3, 4, 5, 6].every(
-                      d => selected[`${d}-${h}`]
-                    );
-
-                    return (
-                      <div
-                        key={h}
-                        className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
-                          }`}
-                        onMouseDown={() => handleEveryDayToggle(h)}
-                      />
-                    );
-                  })}
                 </div>
+                {/* {budgetType === "lifetime" &&
+                           scheduleErrorByAdset[adset.id] &&
+                           adSchedulingToShow[adset.id] && (
+                             <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                               Please select at least one valid time slot and day
+                             </div>
+                           )} */}
+                {budgetType === "lifetime" &&
+                  scheduleErrorByAdset[adset.id] &&
+                  (adSchedulingToShowCampaign || adSchedulingToShow[adset.id]) && (
+                    <div style={{ color: "red", marginTop: 8, fontSize: 12 }}>
+                      Please select at least one valid time slot and day
+                    </div>
+                  )}
 
               </div>
             </>
@@ -4528,6 +4829,7 @@ const AdsetComponent = ({
                 mode="multiple"
                 allowClear
                 showSearch
+                optionFilterProp="label"
                 placeholder={
                   campaignCountries.length ? "Select from campaign countries" : "Select any country"
                 }
@@ -5065,7 +5367,7 @@ const AdsetComponent = ({
                   AD LEVEL
                 </span>
                 {((newAddLevelData[adset.id] || []).length > 0) &&
-                  !(view && adset.is_dynamic_creative) &&
+                  !(view || isDynamicCreative) &&
                   (
                     <div onClick={(e) => e.stopPropagation()}>
                       <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
@@ -5241,34 +5543,34 @@ const AdsetComponent = ({
                             <Upload
                               //   beforeUpload={() => false}
                               disabled={view}
-                              itemRender={(
-                                originNode,
-                                file,
-                                fileList,
-                                actions
-                              ) => {
-                                console.log(file);
-                                // Show delete icon only if `canDelete: true`
-                                return (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    {originNode}
-                                    {file.canDelete !== false && (
-                                      <Button
-                                        size="small"
-                                        type="text"
-                                        icon={<DeleteOutlined />}
-                                        onClick={() => actions.remove()}
-                                        style={{ marginLeft: 8 }}
-                                      />
-                                    )}
-                                  </div>
-                                );
-                              }}
+                              // itemRender={(
+                              //   originNode,
+                              //   file,
+                              //   fileList,
+                              //   actions
+                              // ) => {
+                              //   console.log(file);
+                              //   // Show delete icon only if `canDelete: true`
+                              //   return (
+                              //     <div
+                              //       style={{
+                              //         display: "flex",
+                              //         alignItems: "center",
+                              //       }}
+                              //     >
+                              //       {originNode}
+                              //       {file.canDelete !== false && (
+                              //         <Button
+                              //           size="small"
+                              //           type="text"
+                              //           icon={<DeleteOutlined />}
+                              //           onClick={() => actions.remove()}
+                              //           style={{ marginLeft: 8 }}
+                              //         />
+                              //       )}
+                              //     </div>
+                              //   );
+                              // }}
                               // onChange={(info) => {
                               //   const newFiles = info.fileList.map((file) => ({
                               //     ...file,
@@ -5805,6 +6107,76 @@ const AdsetComponent = ({
                               showUploadList={{ showRemoveIcon: false }}
                               listType="picture"
                               accept="image/*, video/*"
+                              itemRender={(originNode, file, fileList, actions) => {
+                                const isVideo = file.type?.startsWith("video");
+                                const isImage = file.type?.startsWith("image");
+
+                                if (isVideo || isImage) {
+                                  return (
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 12,
+                                        width: 365,
+                                        marginTop: 10,
+                                        padding: 8,                         // ✅ space inside border
+                                        border: theme === "dark"
+                                          ? "1px solid #444"
+                                          : "1px solid #d9d9d9",            // ✅ light theme border
+                                        borderRadius: 6,                    // ✅ rounded corners
+                                        background: theme === "dark"
+                                          ? "#1f1f1f"
+                                          : "#fff",
+                                      }}
+                                    >
+                                      {isVideo ? (
+                                        <video
+                                          src={file.originFileObj
+                                            ? URL.createObjectURL(file.originFileObj)
+                                            : file.url}
+                                          width={50}
+                                          height={50}
+                                          muted
+                                          preload="metadata"
+                                          style={{ borderRadius: 4, flexShrink: 0 }}
+                                        />
+                                      ) : (
+                                        <img
+                                          src={file.thumbUrl || file.url}
+                                          width={50}
+                                          height={50}
+                                          alt={file.name}
+                                          style={{ borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                                        />
+                                      )}
+
+                                      <span
+                                        style={{
+                                          color: theme === "dark" ? "#fff" : "#000",
+                                          flex: 1,                    // ✅ auto width
+                                          whiteSpace: "nowrap",
+                                          overflow: "hidden",
+                                          textOverflow: "ellipsis",
+                                        }}
+                                      >
+                                        {file.name}
+                                      </span>
+                                      {/* ✅ DEFAULT REMOVE FLOW */}
+                                      <DeleteOutlined
+                                        onClick={actions.remove}
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "#ff4d4f",
+                                          fontSize: 16,
+                                        }}
+                                      />
+                                    </div>
+                                  );
+                                }
+
+                                return originNode; // fallback for other file types
+                              }}
                             >
                               <Button
                                 icon={<UploadOutlined />}
@@ -5841,15 +6213,30 @@ const AdsetComponent = ({
                                       (file, index) => (
                                         <div
                                           key={index}
+                                          // style={{
+                                          //   display: "flex",
+                                          //   alignItems: "center",
+                                          //   marginBottom: 8,
+                                          // }}
                                           style={{
                                             display: "flex",
                                             alignItems: "center",
-                                            marginBottom: 8,
+                                            gap: 12,
+                                            width: 365,
+                                            marginTop: 10,
+                                            padding: 8,                         // ✅ space inside border
+                                            border: theme === "dark"
+                                              ? "1px solid #444"
+                                              : "1px solid #d9d9d9",            // ✅ light theme border
+                                            borderRadius: 6,                    // ✅ rounded corners
+                                            background: theme === "dark"
+                                              ? "#1f1f1f"
+                                              : "#fff",
                                           }}
                                         >
                                           {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                           {/* <Tooltip title={file.name}> */}
-                                          {file.type?.startsWith("image/") && (
+                                          {file.type?.startsWith("image/") ? (
                                             <img
                                               src={
                                                 file.originFileObj
@@ -5867,10 +6254,21 @@ const AdsetComponent = ({
                                                 marginLeft: 8,
                                               }}
                                             />
+                                          ) : (
+                                            <video
+                                              src={file.originFileObj
+                                                ? URL.createObjectURL(file.originFileObj)
+                                                : file.url}
+                                              width={50}
+                                              height={40}
+                                              muted
+                                              preload="metadata"
+                                              style={{ borderRadius: 4, flexShrink: 0 }}
+                                            />
                                           )}
                                           <span
                                             style={{
-                                              maxWidth: 160,
+                                              // maxWidth: 160,
                                               overflow: "hidden",
                                               textOverflow: "ellipsis",
                                               whiteSpace: "nowrap",
@@ -6094,7 +6492,79 @@ const AdsetComponent = ({
                       }
                     />
                   </Form.Item>
-                  <Form.Item
+
+                  {isDynamicCreative ? (<Form.List name={["adsets", index, "messages"]}>
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map((field, i) => (
+                          <Form.Item
+                            key={field.key}
+                            label={
+                              i === 0 ? (
+                                <span style={{ color: "#B4B4B4" }}>
+                                  Primary Text
+                                </span>
+                              ) : null
+                            }
+                            required
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                              }}
+                            >
+                              {/* TextArea */}
+                              <Form.Item
+                                {...field}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please enter a primary text!",
+                                  },
+                                ]}
+                                noStyle
+                              >
+                                <TextArea
+                                  placeholder={`Primary text ${i + 1}`}
+                                  autoSize={{ minRows: 2, maxRows: 10 }}
+                                  className={
+                                    theme === "dark"
+                                      ? "custom-input-dark"
+                                      : "custom-input-light"
+                                  }
+                                />
+                              </Form.Item>
+
+                              {/* ➕ Add */}
+                              {i === fields.length - 1 && fields.length < 5 && (!view) && (
+                                <PlusOutlined
+                                  onClick={() => add("")}
+                                  style={{
+                                    color: "#52c41a",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+
+                              {/* 🗑 Delete */}
+                              {fields.length > 1 && (!view) && (
+                                <DeleteOutlined
+                                  onClick={() => remove(field.name)}
+                                  style={{
+                                    color: "#ff4d4f",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </Form.Item>
+                        ))}
+                      </>
+                    )}
+                  </Form.List>
+                  ) : (<Form.Item
                     label={
                       <span style={{ color: "#B4B4B4" }}>Primary text</span>
                     }
@@ -6133,7 +6603,7 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
                   {/* <Form.Item
                                     label="Caption"
                                     name="Caption"
@@ -6152,7 +6622,72 @@ const AdsetComponent = ({
 
                                     />
                                 </Form.Item> */}
-                  <Form.Item
+                  {isDynamicCreative ? (
+                    <Form.List name={["adsets", index, "headlines"]}>
+                      {(fields, { add, remove }) => (
+                        <>
+                          {fields.map((field, i) => (
+                            <Form.Item
+                              key={field.key}
+                              label={
+                                i === 0 ? (
+                                  <span style={{ color: "#B4B4B4" }}>
+                                    Headline
+                                  </span>
+                                ) : null
+                              }
+                              required
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 8,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Form.Item
+                                  {...field}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please enter a Headline!",
+                                    },
+                                  ]}
+                                  noStyle
+                                >
+                                  <TextArea
+                                    placeholder={`Headline ${i + 1}`}
+                                    autoSize={{ minRows: 2, maxRows: 10 }}
+                                    className={
+                                      theme === "dark"
+                                        ? "custom-input-dark"
+                                        : "custom-input-light"
+                                    }
+                                  />
+                                </Form.Item>
+
+                                {/* ➕ Add */}
+                                {i === fields.length - 1 && fields.length < 5 && (!view) && (
+                                  <PlusOutlined
+                                    onClick={() => add("")}
+                                    style={{ color: "#52c41a", cursor: "pointer" }}
+                                  />
+                                )}
+
+                                {/* 🗑 Delete */}
+                                {fields.length > 1 && (!view) && (
+                                  <DeleteOutlined
+                                    onClick={() => remove(field.name)}
+                                    style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                  />
+                                )}
+                              </div>
+                            </Form.Item>
+                          ))}
+                        </>
+                      )}
+                    </Form.List>
+                  ) : (<Form.Item
                     label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                     name={["adsets", index, "headline"]}
                     rules={[
@@ -6189,9 +6724,74 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
 
-                  <Form.Item
+                  {isDynamicCreative ? (
+                    <Form.List name={["adsets", index, "descriptions"]}>
+                      {(fields, { add, remove }) => (
+                        <>
+                          {fields.map((field, i) => (
+                            <Form.Item
+                              key={field.key}
+                              label={
+                                i === 0 ? (
+                                  <span style={{ color: "#B4B4B4" }}>
+                                    Description
+                                  </span>
+                                ) : null
+                              }
+                              required
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 8,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Form.Item
+                                  {...field}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please enter a Description!",
+                                    },
+                                  ]}
+                                  noStyle
+                                >
+                                  <TextArea
+                                    placeholder={`Description ${i + 1}`}
+                                    autoSize={{ minRows: 2, maxRows: 10 }}
+                                    className={
+                                      theme === "dark"
+                                        ? "custom-input-dark"
+                                        : "custom-input-light"
+                                    }
+                                  />
+                                </Form.Item>
+
+                                {/* ➕ Add */}
+                                {i === fields.length - 1 && fields.length < 5 && (!view) && (
+                                  <PlusOutlined
+                                    onClick={() => add("")}
+                                    style={{ color: "#52c41a", cursor: "pointer" }}
+                                  />
+                                )}
+
+                                {/* 🗑 Delete */}
+                                {fields.length > 1 && (!view) && (
+                                  <DeleteOutlined
+                                    onClick={() => remove(field.name)}
+                                    style={{ color: "#ff4d4f", cursor: "pointer" }}
+                                  />
+                                )}
+                              </div>
+                            </Form.Item>
+                          ))}
+                        </>
+                      )}
+                    </Form.List>
+                  ) : (<Form.Item
                     label={
                       <span style={{ color: "#B4B4B4" }}>Description</span>
                     }
@@ -6231,7 +6831,7 @@ const AdsetComponent = ({
                           : "custom-input-light"
                       }
                     />
-                  </Form.Item>
+                  </Form.Item>)}
                   <Form.Item
                     label={
                       <div
@@ -7149,6 +7749,11 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [adsetSchedule, setAdsetSchedule] = useState({});
   const [selectedByAdset, setSelectedByAdset] = useState({});
   const [adSchedulingToShow, setAdSchedulingToShow] = useState({});
+  const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
+  const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
+  const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
+  const [objectivevalue, setObjectiveValue] = useState();
+  const isFirstRender = useRef(true);
 
   console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
   console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
@@ -7364,6 +7969,9 @@ const EditMultipleAdsetCampaignDrawer = ({
         console.log("hello viewdata", ...response.data);
         setFullCampaignData(response?.data[0]);
         setBudgetType(response?.data[0]?.camapaignlevel?.Budget_type || "daily")
+        setAdSchedulingToShowCampaign(
+          response?.data[0]?.camapaignlevel?.is_day_parting_enabled_campign
+        );
         setPopupInputs(prev => ({
           ...prev,
           reportCat: response?.data[0]?.Category  // <-- value coming from API
@@ -7430,12 +8038,11 @@ const EditMultipleAdsetCampaignDrawer = ({
     // Run only when objectiveValue changes
     if (objectiveValue) {
       const adsets = form.getFieldValue("adsets") || [];
-
       const updatedAdsets = adsets.map((adset) => ({
         ...adset,
         optimization_goal: "OFFSITE_CONVERSIONS",
-        custom_event_type:
-          objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
+        // custom_event_type:
+        //   objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
         action_source: "website",
         billing_event: "IMPRESSIONS",
       }));
@@ -7963,6 +8570,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
     // ✅ Assign the new unique id to the cloned form entry
     clonedFormData.id = newId;
+    delete clonedFormData.Adsetid;
 
     // ✅ Add `_Copy` suffixes if present
     if (clonedFormData.AdsetName) {
@@ -8121,11 +8729,12 @@ const EditMultipleAdsetCampaignDrawer = ({
         Caption: text.split("//")[1].split("/")[0],
       };
     } else {
-      setCaption(text.split("/")[0]);
+      // setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin);
       updatedAdsets[urlBuilderIndex] = {
         ...updatedAdsets[urlBuilderIndex],
         Website_URL: text,
-        Caption: text.split("/")[0],
+        Caption: new URL(text).origin,
       };
     }
 
@@ -8169,6 +8778,11 @@ const EditMultipleAdsetCampaignDrawer = ({
         return (
           <MnetBingUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
+      case "FB_Affinity":
+        return (
+          <AffinityUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
@@ -9115,7 +9729,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
     // abcd
     const campaignData = await MultipleAdsestsFetching(formValues);
-
+    const username = userdetails?.userName;
     console.log(fullCampaignData, "fullCampaignData");
 
     console.log("Campaign Data:", campaignData);
@@ -9125,7 +9739,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         // console.log("Campaign Data:", campaignData);
         //https://www.testapi.adsgoat.in
         const response = await fetch(
-          "https://www.testapi.adsgoat.in/api/newEditFormData",
+          "https://www.testapi.adsgoat.in/api/newEditFormDatanew",
           {
             method: "POST",
             headers: {
@@ -9148,6 +9762,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           setAdSchedulingToShow({});
           setSelectedByAdset({});
           setAdsetSchedule({});
+          setAdSchedulingToShowCampaign(false);
           setAdsets([
             { id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" },
           ]);
@@ -9210,6 +9825,9 @@ const EditMultipleAdsetCampaignDrawer = ({
         return item.key;
       });
   }
+  function isSameArray(a = [], b = []) {
+    return JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+  }
 
   const MultipleAdsestsFetching = async (values) => {
     // let AllAdsetsData = {
@@ -9244,9 +9862,11 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["Category"] = fullCampaignData.Category;
     if (fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
     if (fullCampaignData.Approveddate) AllAdsetsData["Approveddate"] = fullCampaignData.Approveddate;
+    if (fullCampaignData.processingNote) AllAdsetsData["processingNote"] = fullCampaignData.processingNote;
+    if (fullCampaignData.startedAt) AllAdsetsData["startedAt"] = fullCampaignData.startedAt;
     if (fullCampaignData.camapaignlevel.campaignid) {
       AllAdsetsData["camapaignlevel"] = {};
-      AllAdsetsData["camapaignlevel"]["Editedby"] = session?.user?.name;
+      AllAdsetsData["camapaignlevel"]["Editedby"] = userdetails?.userName;
       AllAdsetsData["camapaignlevel"]["EditedDate"] = moment().tz(imagehash.timeZone).format("YYYY-MM-DD");
       AllAdsetsData["camapaignlevel"]["Budget_type"] = budgetType;
       AllAdsetsData["camapaignlevel"]["campaignid"] =
@@ -9261,6 +9881,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         fullCampaignData.camapaignlevel.Status;
       AllAdsetsData["camapaignlevel"]["Objectives"] =
         fullCampaignData.camapaignlevel.Objectives;
+
       if (fullCampaignData.camapaignlevel.Name === values.Name) {
         AllAdsetsData["camapaignlevel"]["Name"] =
           fullCampaignData.camapaignlevel.Name;
@@ -9332,12 +9953,19 @@ const EditMultipleAdsetCampaignDrawer = ({
           ] = true;
           send_re_launch_status = true;
         }
+
+      }
+      if (budgetType === "lifetime") {
+        if (adSchedulingToShowCampaign) {
+          AllAdsetsData.camapaignlevel.is_day_parting_enabled_campign = true;
+          AllAdsetsData.camapaignlevel.pacing_type = ["day_parting"];
+        }
       }
     }
     else {
       AllAdsetsData["camapaignlevel"] = {
         createdby: fullCampaignData.camapaignlevel.createdby,
-        Editedby: session?.user?.name,
+        Editedby: userdetails?.userName,
         Name: values.Name,
         Objectives: values.Objectives,
         Special_categories: values.Special_categories,
@@ -9346,6 +9974,10 @@ const EditMultipleAdsetCampaignDrawer = ({
           : {}),
         Bid_strategy: values.Bid_strategy,
         Budget_type: budgetType,
+        ...(adSchedulingToShowCampaign && budgetType === "lifetime" && {
+          is_day_parting_enabled_campign: true,
+          pacing_type: ["day_parting"]
+        }),
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
         access_token: imagehash.token,
@@ -9369,7 +10001,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
     for (let newAdset of values.adsets) {
       console.log(newAdset, "newAdset");
-      let AdsetsData = { buying_type: "AUCTION" };
+      let AdsetsData = { buying_type: "AUCTION", Budget_type: budgetType };
       const adsetKeys = Object.keys(fullCampaignData).filter((key) =>
         key.startsWith("adsetlevel_")
       );
@@ -9407,6 +10039,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         let s3FileUrl = null;
         const folderPath = `${network}/${fullCampaignData.Account_Number}/${fullCampaignData.campaign_name}`;
         const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
+          // if (!(fileBlob instanceof Blob)) {
+          //   const response = await fetch(fileBlob);
+          //   fileBlob = await response.blob();
+          // }
           const fullPath = `${folderPath}/${fileName}`;
           const formData = new FormData();
           formData.append("file", fileBlob, fileName);
@@ -9449,6 +10085,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           );
 
           fileBlob = await response.blob();
+          console.log("blob file test for s3 files");
           s3FileUrl = await uploadFileToS3(fileBlob, file.name, folderPath);
 
           const formData = new FormData();
@@ -9522,6 +10159,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           const uniqueId = uuidv4();
           const safeName = `blob_${uniqueId}_${file.name}`;
           const editedImage = editedImages[file.name];
+          console.log("blob file test for local files");
           fileBlob = editedImage
             ? await fetch(editedImage).then((res) => res.blob())
             : file.originFileObj;
@@ -9534,16 +10172,16 @@ const EditMultipleAdsetCampaignDrawer = ({
           let response, fbResponse;
 
           if (file.type.startsWith("image/")) {
-            response = await axios.post(
-              "https://www.testapi.adsgoat.in/upload",
-              formData,
-              {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            );
+            // response = await axios.post(
+            //   "https://www.testapi.adsgoat.in/upload",
+            //   formData,
+            //   {
+            //     headers: {
+            //       Authorization: localStorage.getItem("token"),
+            //       "Content-Type": "multipart/form-data",
+            //     },
+            //   }
+            // );
 
             //   if (!response.data.imageUrl) {
             //     onError("Error: Image URL not returned from custom API");
@@ -9559,7 +10197,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               { headers: { "Content-Type": "multipart/form-data" } }
             );
 
-            if (response.status === 200 && fbResponse.status === 200) {
+            if (s3FileUrl && fbResponse.status === 200) {
               onSuccess("ok", response);
               mediaHashArray = {
                 filename: s3FileUrl,
@@ -9570,16 +10208,16 @@ const EditMultipleAdsetCampaignDrawer = ({
               console.error("Image upload failed");
             }
           } else if (file.type.startsWith("video/")) {
-            response = await axios.post(
-              "https://www.testapi.adsgoat.in/upload",
-              formData,
-              {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            );
+            // response = await axios.post(
+            //   "https://www.testapi.adsgoat.in/upload",
+            //   formData,
+            //   {
+            //     headers: {
+            //       Authorization: localStorage.getItem("token"),
+            //       "Content-Type": "multipart/form-data",
+            //     },
+            //   }
+            // );
 
             //   if (response.status !== 200) {
             //     onError("error", response);
@@ -9629,149 +10267,689 @@ const EditMultipleAdsetCampaignDrawer = ({
         return mediaHashArray;
       };
 
-      const newAddLevel = await Promise.all(
-        newAddLevelData[newAdset.id].map(async (item) => {
-          console.log(item, "item in newAddLevel");
-          const getItem =
-            addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
-          if (Object.keys(getItem).length > 0) {
-            const newUpdatedAd = { id: item.id, page_id: item.page_id };
-            if (Object.keys(getItem).length > 0 && item.Addid) {
-              newUpdatedAd["Addid"] = item.Addid;
-            }
-            if (Object.keys(getItem).length > 0 && item.Ad_Status) {
-              newUpdatedAd["Ad_Status"] = item.Ad_Status;
-            }
-            if (Object.keys(getItem).length > 0 && item.status) {
-              newUpdatedAd["status"] = item.status;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.message === getItem.message
-            ) {
-              newUpdatedAd["message"] = item.message;
-            } else {
-              newUpdatedAd["message"] = item.message;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.headline === getItem.headline
-            ) {
-              newUpdatedAd["headline"] = item.headline;
-            } else {
-              newUpdatedAd["headline"] = item.headline;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Description === getItem.Description
-            ) {
-              newUpdatedAd["Description"] = item.Description;
-            } else {
-              newUpdatedAd["Description"] = item.Description;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Caption === getItem.Caption
-            ) {
-              newUpdatedAd["Caption"] = item.Caption;
-            } else {
-              newUpdatedAd["Caption"] = item.Caption;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.Website_URL === getItem.Website_URL
-            ) {
-              newUpdatedAd["Website_URL"] = item.Website_URL;
-            } else {
-              newUpdatedAd["Website_URL"] = item.Website_URL;
-              newUpdatedAd["re_lunch"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.AddName === getItem.AddName
-            ) {
-              newUpdatedAd["AddName"] = item.AddName;
-            } else {
-              newUpdatedAd["AddName"] = item.AddName;
-              newUpdatedAd["re_lunch_addname"] = true;
-              send_re_launch_status = true;
-              re_lunch = true;
-            }
-            if (
-              Object.keys(getItem).length > 0 &&
-              item.filename === getItem.filename
-            ) {
-              newUpdatedAd["filename"] = item.filename;
-              if (item.imag_hash) {
-                newUpdatedAd["imag_hash"] = item.imag_hash;
-              } else {
-                newUpdatedAd["videoid"] = getItem.videoid;
-                newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+      console.log(addlevelData, "addlevelData");
+      console.log(newAddLevelData, "newAddLevelData");
+
+      const buildNewDynamicAdPayload = async ({
+        items,
+        oldItems = []
+      }) => {
+        const imagesHashArray = [];
+        const getTheImages = [];
+        const getTheVideos = [];
+
+        for (const item of items) {
+          // 🔍 find old file by filename
+          const oldFile = oldItems.find(o => o.filename === item.filename);
+
+          let fileData;
+
+          // ✅ SAME filename → reuse
+          if (oldFile) {
+            fileData = oldFile;
+          }
+          // ❌ DIFFERENT filename → fetch new
+          else {
+            fileData = await getFilenameDeatials(item.filename);
+          }
+
+          if (!fileData || !Object.keys(fileData).length) continue;
+
+          imagesHashArray.push(fileData);
+
+          if (fileData.imag_hash) {
+            getTheImages.push(fileData.imag_hash);
+          }
+
+          if (fileData.videoid) {
+            getTheVideos.push({
+              video_id: fileData.videoid,
+              thumbnail_url: fileData.thambnailurl,
+            });
+          }
+        }
+        const mainItem = items[0];
+        const oldMainItem = oldItems[0];
+        return [
+          {
+            id: uuidv4(),
+            AddName: newAdset.AdsetName,
+
+            filename: imagesHashArray.map(m =>
+              m.imag_hash
+                ? { filename: m.filename, imag_hash: m.imag_hash }
+                : {
+                  filename: m.filename,
+                  video_id: m.videoid,
+                  thumbnailurl: m.thambnailurl,
+                }
+            ),
+
+            imag_hash: imagesHashArray
+              .filter(m => m.imag_hash)
+              .map(m => m.imag_hash),
+
+            images: getTheImages?.map(item => ({ hash: item })) || [],
+
+            videos: getTheVideos.length ? getTheVideos : [],
+
+            page_id: mainItem.page_id,
+
+            message: newAdset?.messages,
+            headline: newAdset.headlines,
+            Description: newAdset.descriptions,
+            Caption: mainItem?.Caption,
+            Website_URL: mainItem?.Website_URL,
+
+            call_to_action_types: ["LEARN_MORE"],
+
+            ad_formats: [
+              ...(getTheImages.length > 0 ? ["SINGLE_IMAGE"] : []),
+              ...(getTheVideos.length > 0 ? ["SINGLE_VIDEO"] : []),
+            ],
+            ...(oldMainItem.status ? { status: oldMainItem.status } : {}),
+          },
+        ];
+      };
+
+      // const buildDynamicAdPayloadForExistingAdset = async ({
+      //   items,
+      //   oldItems = [],
+      // }) => {
+      //   let re_lunch = false;
+      //   let send_re_launch_status = false;
+
+      //   const updatedAds = await Promise.all(
+      //     items.map(async (item) => {
+      //       const oldItem = oldItems.find(o => o.id === item.id) || {};
+      //       const hasOld = Object.keys(oldItem).length > 0;
+
+      //       const updatedAd = {
+      //         id: item.id,
+      //         page_id: item.page_id,
+      //       };
+
+      //       if (item.Addid) updatedAd.Addid = item.Addid;
+      //       if (item.Ad_Status) updatedAd.Ad_Status = item.Ad_Status;
+      //       if (item.status) updatedAd.status = item.status;
+
+      //       let addNameChanged = false;
+      //       let otherChanged = false;
+
+      //       const fields = [
+      //         "message",
+      //         "headline",
+      //         "Description",
+      //         "Caption",
+      //         "Website_URL",
+      //         "AddName",
+      //       ];
+
+      //       fields.forEach((field) => {
+      //         updatedAd[field] = item[field];
+
+      //         if (!hasOld) return;
+
+      //         if (item[field] !== oldItem[field]) {
+      //           if (field === "AddName") {
+      //             addNameChanged = true;
+      //           } else {
+      //             otherChanged = true;
+      //           }
+      //         }
+      //       });
+
+      //       // 🔑 Apply flags AFTER comparison
+      //       if (addNameChanged) {
+      //         updatedAd.re_lunch_addname = true;
+      //         send_re_launch_status = true;
+      //       }
+
+      //       if (otherChanged) {
+      //         updatedAd.re_lunch = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+
+      //       // 🖼️ / 🎥 FILE HANDLING
+      //       if (hasOld && item.filename === oldItem.filename) {
+      //         updatedAd.filename = item.filename;
+
+      //         if (oldItem.imag_hash) {
+      //           updatedAd.imag_hash = oldItem.imag_hash;
+      //         } else {
+      //           updatedAd.videoid = oldItem.videoid;
+      //           updatedAd.thambnailurl = oldItem.thambnailurl;
+      //         }
+      //       } else {
+      //         const fileData = await getFilenameDeatials(item.filename);
+
+      //         if (Object.keys(fileData).length > 0) {
+      //           updatedAd.filename = fileData.filename;
+      //           updatedAd.re_lunch = true;
+      //           send_re_launch_status = true;
+      //           re_lunch = true;
+
+      //           if (fileData.imag_hash) {
+      //             updatedAd.imag_hash = fileData.imag_hash;
+      //           } else if (fileData.videoid) {
+      //             updatedAd.videoid = fileData.videoid;
+      //             updatedAd.thambnailurl = fileData.thambnailurl;
+      //           }
+      //         }
+      //       }
+
+      //       return updatedAd;
+      //     })
+      //   );
+
+      //   return {
+      //     updatedAds,
+      //     re_lunch,
+      //     send_re_launch_status,
+      //   };
+      // };
+
+      const isSameArray = (a = [], b = []) =>
+        JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+
+      const buildDynamicAdPayloadForExistingAdset = async ({
+        items,
+        oldItems = [],
+        page_id,
+        AddName,
+      }) => {
+        let addNameChanged = false;
+        let otherChanged = false;
+
+        const imagesHashArray = [];
+        const getTheImages = [];
+        const getTheVideos = [];
+
+        // 🔁 Compare TEXT FIELDS (Dynamic ads → shared text)
+
+        // const findMatchingAdset = oldItems[0] || {};
+        // const formValuesObject = items[0] || {};
+
+        // console.log("findMatchingAdset", findMatchingAdset);
+        // console.log("formValuesObject", formValuesObject);
+
+        const mainItem = { message: formValuesObject.messages, headline: formValuesObject.headlines, Description: formValuesObject.descriptions, Caption: formValuesObject.Caption, Website_URL: formValuesObject.Website_URL, };
+        const oldMainItem = { message: findMatchingAdset?.addlevel[0]?.message || "", headline: findMatchingAdset?.addlevel[0]?.headline || "", Description: findMatchingAdset?.addlevel[0]?.Description, Caption: findMatchingAdset?.addlevel[0]?.Caption, Website_URL: findMatchingAdset?.addlevel[0]?.Website_URL, status: findMatchingAdset?.addlevel[0]?.status, Addid: findMatchingAdset?.addlevel[0]?.Addid, Ad_Status: findMatchingAdset?.addlevel[0]?.Ad_Status };
+        const oldAddName = findMatchingAdset?.addlevel[0]?.AddName || "";
+
+        console.log("mainItem", mainItem);
+        console.log("oldMainItem", oldMainItem);
+
+        // 🔹 Ad Name check
+        if (AddName !== oldAddName) {
+          console.log("Ad Name changed:", { oldAddName, AddName });
+          addNameChanged = true;
+        }
+
+        const normalizeString = (v) => (v ?? "").trim();
+
+        const normalizeArray = (arr = []) =>
+          arr.map((v) => normalizeString(v)).filter(Boolean);
+
+        const isSameArray = (a = [], b = []) => {
+          const na = normalizeArray(a);
+          const nb = normalizeArray(b);
+
+          return na.length === nb.length && na.every((v, i) => v === nb[i]);
+        };
+
+        // 🔹 Array-based fields
+        const arrayFields = ["message", "headline", "Description"];
+        arrayFields.forEach((field) => {
+          const newVal = mainItem[field] || [];
+          const oldVal = oldMainItem[field] || [];
+          if (!isSameArray(newVal, oldVal)) {
+            console.log("Array field changed:", { field, newVal, oldVal });
+            otherChanged = true;
+          }
+        });
+
+        // 🔹 String-based fields
+        const stringFields = ["Caption", "Website_URL"];
+        stringFields.forEach((field) => {
+          if (mainItem[field] !== oldMainItem[field]) {
+            console.log("String field changed:", { field, newVal: mainItem[field], oldVal: oldMainItem[field] });
+            otherChanged = true;
+          }
+        });
+
+        // // 🔹 Array-based fields
+        // const arrayFields = ["message", "headline", "Description"];
+
+        // arrayFields.forEach((field) => {
+        //   if (!isSameArray(mainItem[field], oldMainItem[field])) {
+        //     otherChanged = true;
+        //   }
+        // });
+
+        // // 🔹 String-based fields
+        // const stringFields = ["Caption", "Website_URL"];
+
+        // stringFields.forEach((field) => {
+        //   const newVal = normalizeString(mainItem[field]);
+        //   const oldVal = normalizeString(oldMainItem[field]);
+
+        //   if (newVal !== oldVal) {
+        //     otherChanged = true;
+        //   }
+        // });
+
+        // 🖼️ / 🎥 FILE HANDLING
+        for (const item of items) {
+          const oldFile = oldItems.find(o => o.filename === item.filename);
+          let fileData;
+
+          if (oldFile) {
+            fileData = oldFile;
+          } else {
+            fileData = await getFilenameDeatials(item.filename);
+            otherChanged = true;
+          }
+
+          if (!fileData || !Object.keys(fileData).length) continue;
+
+          imagesHashArray.push(fileData);
+
+          if (fileData.imag_hash) {
+            getTheImages.push(fileData.imag_hash);
+          }
+
+          if (fileData.videoid) {
+            getTheVideos.push({
+              video_id: fileData.videoid,
+              thumbnail_url: fileData.thambnailurl,
+            });
+          }
+        }
+
+        // ✅ RETURN ONLY SINGLE OBJECT ARRAY
+        return [
+          {
+            id: uuidv4(),
+            AddName,
+            status: oldMainItem.status,
+            Addid: oldMainItem.Addid,
+            Ad_Status: oldMainItem.Ad_Status,
+
+            filename: imagesHashArray.map(m =>
+              m.imag_hash
+                ? { filename: m.filename, imag_hash: m.imag_hash }
+                : {
+                  filename: m.filename,
+                  video_id: m.videoid,
+                  thumbnailurl: m.thambnailurl,
+                }
+            ),
+
+            imag_hash: imagesHashArray
+              .filter(m => m.imag_hash)
+              .map(m => m.imag_hash),
+
+            images: getTheImages.map(hash => ({ hash })),
+
+            videos: getTheVideos.length ? getTheVideos : [],
+
+            page_id,
+
+            message: mainItem.message,
+            headline: mainItem.headline,
+            Description: mainItem.Description,
+            Caption: mainItem.Caption,
+            Website_URL: mainItem.Website_URL,
+
+            call_to_action_types: ["LEARN_MORE"],
+
+            ad_formats: [
+              ...(getTheImages.length ? ["SINGLE_IMAGE"] : []),
+              ...(getTheVideos.length ? ["SINGLE_VIDEO"] : []),
+            ],
+
+            ...(addNameChanged && { re_lunch_addname: true }),
+            ...(otherChanged && { re_lunch: true }),
+          },
+        ];
+      };
+
+
+
+      let newAddLevel = [];
+
+      if (newAdset.isDynamicCreative) {
+        if (!newAdset.Adsetid) {
+          newAddLevel = await buildNewDynamicAdPayload({
+            items: newAddLevelData[newAdset.id],
+            oldItems: addlevelData[newAdset.id] || [],
+          });
+        }
+        else {
+          newAddLevel = await buildDynamicAdPayloadForExistingAdset({
+            items: newAddLevelData[newAdset.id],
+            oldItems: addlevelData[newAdset.id] || [],
+            page_id: addlevelData[newAdset.id][0]?.page_id,
+            AddName: formValuesObject?.AddName || ""
+          });
+        }
+
+      }
+      else {
+        newAddLevel = await Promise.all(
+          newAddLevelData[newAdset.id].map(async (item) => {
+            console.log(item, "item in newAddLevel");
+            const toCommaString = (value) =>
+              Array.isArray(value) ? value.join(", ") : value;
+            const getItem =
+              addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
+            if (Object.keys(getItem).length > 0) {
+              const newUpdatedAd = { id: item.id, page_id: item.page_id };
+              if (Object.keys(getItem).length > 0 && item.Addid) {
+                newUpdatedAd["Addid"] = item.Addid;
               }
-            } else {
-              re_lunch = true;
-              newUpdatedAd["filename"] = item.filename;
-              const updatedFilesDeatils = await getFilenameDeatials(
-                item.filename
-              );
-              if (Object.keys(updatedFilesDeatils).length > 0) {
-                if (updatedFilesDeatils.imag_hash) {
-                  newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
-                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                  newUpdatedAd["re_lunch"] = true;
-                  send_re_launch_status = true;
-                } else if (updatedFilesDeatils.videoid) {
-                  newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
-                  newUpdatedAd["thambnailurl"] =
-                    updatedFilesDeatils.thambnailurl;
-                  newUpdatedAd["filename"] = updatedFilesDeatils.filename;
-                  newUpdatedAd["re_lunch"] = true;
-                  send_re_launch_status = true;
+              if (Object.keys(getItem).length > 0 && item.Ad_Status) {
+                newUpdatedAd["Ad_Status"] = item.Ad_Status;
+              }
+              if (Object.keys(getItem).length > 0 && item.status) {
+                newUpdatedAd["status"] = item.status;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.message === getItem.message
+              ) {
+                newUpdatedAd["message"] = toCommaString(item.message);
+              } else {
+                newUpdatedAd["message"] = toCommaString(item.message);
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.headline === getItem.headline
+              ) {
+                newUpdatedAd["headline"] = toCommaString(item.headline);
+              } else {
+                newUpdatedAd["headline"] = toCommaString(item.headline);
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.Description === getItem.Description
+              ) {
+                newUpdatedAd["Description"] = toCommaString(item.Description);
+              } else {
+                newUpdatedAd["Description"] = toCommaString(item.Description);
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.Caption === getItem.Caption
+              ) {
+                newUpdatedAd["Caption"] = item.Caption;
+              } else {
+                newUpdatedAd["Caption"] = item.Caption;
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.Website_URL === getItem.Website_URL
+              ) {
+                newUpdatedAd["Website_URL"] = item.Website_URL;
+              } else {
+                newUpdatedAd["Website_URL"] = item.Website_URL;
+                if (item.Addid) newUpdatedAd["re_lunch"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.AddName === getItem.AddName
+              ) {
+                newUpdatedAd["AddName"] = item.AddName;
+              } else {
+                newUpdatedAd["AddName"] = item.AddName;
+                if (item.Addid) newUpdatedAd["re_lunch_addname"] = true;
+                send_re_launch_status = true;
+                re_lunch = true;
+              }
+              if (
+                Object.keys(getItem).length > 0 &&
+                item.filename === getItem.filename
+              ) {
+                newUpdatedAd["filename"] = item.filename;
+                if (item.imag_hash) {
+                  newUpdatedAd["imag_hash"] = item.imag_hash;
+                } else {
+                  newUpdatedAd["videoid"] = getItem.videoid;
+                  newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+                }
+              } else {
+                re_lunch = true;
+                newUpdatedAd["filename"] = item.filename;
+                console.log(Object.keys(getItem).length > 0 &&
+                  item.filename === getItem.filename);
+                console.log(item.filename !== getItem.filename);
+                console.log(Object.keys(getItem).length > 0);
+                console.log(item.filename === getItem.filename);
+                console.log("existing filename is changed");
+                console.log(item.filename, "item.filename");
+                console.log(getItem.filename, "getItem.filename");
+                const updatedFilesDeatils = await getFilenameDeatials(
+                  item.filename
+                );
+                if (Object.keys(updatedFilesDeatils).length > 0) {
+                  if (updatedFilesDeatils.imag_hash) {
+                    newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
+                    newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+                    if (item.Addid) newUpdatedAd["re_lunch"] = true;
+                    send_re_launch_status = true;
+                  } else if (updatedFilesDeatils.videoid) {
+                    newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
+                    newUpdatedAd["thambnailurl"] =
+                      updatedFilesDeatils.thambnailurl;
+                    newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+                    if (item.Addid) newUpdatedAd["re_lunch"] = true;
+                    send_re_launch_status = true;
+                  }
                 }
               }
+              return newUpdatedAd;
+            } else {
+              console.log("new ad created in adlevel");
+              const fileData = await getFilenameDeatials(item.filename);
+              re_lunch = true;
+              send_re_launch_status = true;
+
+              const newAd = {
+                id: item.id,
+                page_id: item.page_id,
+                message: toCommaString(item.message),
+                headline: toCommaString(item.headline),
+                Description: toCommaString(item.Description),
+                Caption: item.Caption,
+                Website_URL: item.Website_URL,
+                AddName: item.AddName,
+              };
+              if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
+                newAd["imag_hash"] = fileData.imag_hash;
+                newAd["filename"] = fileData.filename;
+              }
+              if (Object.keys(fileData).length > 0 && fileData.videoid) {
+                newAd["videoid"] = fileData.videoid;
+                newAd["filename"] = fileData.filename;
+                newAd["thambnailurl"] = fileData.thambnailurl;
+              }
+              return newAd;
             }
-            return newUpdatedAd;
-          } else {
-            const fileData = await getFilenameDeatials(item.filename);
-            re_lunch = true;
-            send_re_launch_status = true;
-            const newAd = {
-              id: item.id,
-              page_id: item.page_id,
-              message: item.message,
-              headline: item.headline,
-              Description: item.Description,
-              Caption: item.Caption,
-              Website_URL: item.Website_URL,
-              AddName: item.AddName,
-            };
-            if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
-              newAd["imag_hash"] = fileData.imag_hash;
-              newAd["filename"] = fileData.filename;
-            }
-            if (Object.keys(fileData).length > 0 && fileData.videoid) {
-              newAd["videoid"] = fileData.videoid;
-              newAd["filename"] = fileData.filename;
-              newAd["thambnailurl"] = fileData.thambnailurl;
-            }
-            return newAd;
-          }
-        })
-      );
+          })
+        );
+      }
+
+
+
+
+      // const newAddLevel = await Promise.all(
+      //   newAddLevelData[newAdset.id].map(async (item) => {
+      //     console.log(item, "item in newAddLevel");
+      //     const getItem =
+      //       addlevelData[newAdset.id].find((i) => i.id === item.id) || {};
+      //     if (Object.keys(getItem).length > 0) {
+      //       const newUpdatedAd = { id: item.id, page_id: item.page_id };
+      //       if (Object.keys(getItem).length > 0 && item.Addid) {
+      //         newUpdatedAd["Addid"] = item.Addid;
+      //       }
+      //       if (Object.keys(getItem).length > 0 && item.Ad_Status) {
+      //         newUpdatedAd["Ad_Status"] = item.Ad_Status;
+      //       }
+      //       if (Object.keys(getItem).length > 0 && item.status) {
+      //         newUpdatedAd["status"] = item.status;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.message === getItem.message
+      //       ) {
+      //         newUpdatedAd["message"] = item.message;
+      //       } else {
+      //         newUpdatedAd["message"] = item.message;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.headline === getItem.headline
+      //       ) {
+      //         newUpdatedAd["headline"] = item.headline;
+      //       } else {
+      //         newUpdatedAd["headline"] = item.headline;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Description === getItem.Description
+      //       ) {
+      //         newUpdatedAd["Description"] = item.Description;
+      //       } else {
+      //         newUpdatedAd["Description"] = item.Description;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Caption === getItem.Caption
+      //       ) {
+      //         newUpdatedAd["Caption"] = item.Caption;
+      //       } else {
+      //         newUpdatedAd["Caption"] = item.Caption;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.Website_URL === getItem.Website_URL
+      //       ) {
+      //         newUpdatedAd["Website_URL"] = item.Website_URL;
+      //       } else {
+      //         newUpdatedAd["Website_URL"] = item.Website_URL;
+      //         newUpdatedAd["re_lunch"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.AddName === getItem.AddName
+      //       ) {
+      //         newUpdatedAd["AddName"] = item.AddName;
+      //       } else {
+      //         newUpdatedAd["AddName"] = item.AddName;
+      //         newUpdatedAd["re_lunch_addname"] = true;
+      //         send_re_launch_status = true;
+      //         re_lunch = true;
+      //       }
+      //       if (
+      //         Object.keys(getItem).length > 0 &&
+      //         item.filename === getItem.filename
+      //       ) {
+      //         newUpdatedAd["filename"] = item.filename;
+      //         if (item.imag_hash) {
+      //           newUpdatedAd["imag_hash"] = item.imag_hash;
+      //         } else {
+      //           newUpdatedAd["videoid"] = getItem.videoid;
+      //           newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
+      //         }
+      //       } else {
+      //         re_lunch = true;
+      //         newUpdatedAd["filename"] = item.filename;
+      //         console.log(Object.keys(getItem).length > 0 &&
+      //           item.filename === getItem.filename);
+      //         console.log(item.filename !== getItem.filename);
+      //         console.log(Object.keys(getItem).length > 0);
+      //         console.log(item.filename === getItem.filename);
+      //         console.log("existing filename is changed");
+      //         console.log(item.filename, "item.filename");
+      //         console.log(getItem.filename, "getItem.filename");
+      //         const updatedFilesDeatils = await getFilenameDeatials(
+      //           item.filename
+      //         );
+      //         if (Object.keys(updatedFilesDeatils).length > 0) {
+      //           if (updatedFilesDeatils.imag_hash) {
+      //             newUpdatedAd["imag_hash"] = updatedFilesDeatils.imag_hash;
+      //             newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+      //             newUpdatedAd["re_lunch"] = true;
+      //             send_re_launch_status = true;
+      //           } else if (updatedFilesDeatils.videoid) {
+      //             newUpdatedAd["videoid"] = updatedFilesDeatils.videoid;
+      //             newUpdatedAd["thambnailurl"] =
+      //               updatedFilesDeatils.thambnailurl;
+      //             newUpdatedAd["filename"] = updatedFilesDeatils.filename;
+      //             newUpdatedAd["re_lunch"] = true;
+      //             send_re_launch_status = true;
+      //           }
+      //         }
+      //       }
+      //       return newUpdatedAd;
+      //     } else {
+      //       console.log("new ad created in adlevel");
+      //       const fileData = await getFilenameDeatials(item.filename);
+      //       re_lunch = true;
+      //       send_re_launch_status = true;
+      //       const newAd = {
+      //         id: item.id,
+      //         page_id: item.page_id,
+      //         message: item.message,
+      //         headline: item.headline,
+      //         Description: item.Description,
+      //         Caption: item.Caption,
+      //         Website_URL: item.Website_URL,
+      //         AddName: item.AddName,
+      //       };
+      //       if (Object.keys(fileData).length > 0 && fileData.imag_hash) {
+      //         newAd["imag_hash"] = fileData.imag_hash;
+      //         newAd["filename"] = fileData.filename;
+      //       }
+      //       if (Object.keys(fileData).length > 0 && fileData.videoid) {
+      //         newAd["videoid"] = fileData.videoid;
+      //         newAd["filename"] = fileData.filename;
+      //         newAd["thambnailurl"] = fileData.thambnailurl;
+      //       }
+      //       return newAd;
+      //     }
+      //   })
+      // );
 
       console.log(newAddLevel, "newAddLevel");
 
@@ -9823,23 +11001,38 @@ const EditMultipleAdsetCampaignDrawer = ({
           AdsetsData["Adsetid"] = findMatchingAdset.Adsetid;
           AdsetsData["id"] = findMatchingAdset.id;
           AdsetsData["Budget_type"] = budgetType;
+          console.log(formValuesObject.isDynamicCreative, "isDynamicCreative");
+          console.log(formValuesObject.is_dynamic_creative, "is_dynamic_creative");
+          console.log(findMatchingAdset.isDynamicCreative, "isDynamicCreative");
+          console.log(findMatchingAdset.is_dynamic_creative, "is_dynamic_creative");
+          if (formValuesObject.isDynamicCreative) AdsetsData["is_dynamic_creative"] = true;
         } else {
           AdsetsData["id"] = formValuesObject.id;
           AdsetsData["Budget_type"] = budgetType;
+          console.log(formValuesObject.isDynamicCreative, "isDynamicCreative");
+          console.log(formValuesObject.is_dynamic_creative, "is_dynamic_creative");
+          console.log(findMatchingAdset.isDynamicCreative, "isDynamicCreative");
+          console.log(findMatchingAdset.is_dynamic_creative, "is_dynamic_creative");
+          if (formValuesObject.isDynamicCreative) AdsetsData["is_dynamic_creative"] = formValuesObject.isDynamicCreative;
         }
         if (formValuesObject.AdsetName === findMatchingAdset.AdsetName) {
           AdsetsData["AdsetName"] = findMatchingAdset.AdsetName;
-        } else {
-          AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
-          AdsetsData["re_lunch_adset_name"] = true;
-          send_re_launch_status = true;
         }
+        // else {
+        //   // if (findMatchingAdset.Adsetid) {
+        //   AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
+        //   // AdsetsData["re_lunch_adset_name"] = true;
+        //   // send_re_launch_status = true;
+        //   // }else{
+        //   //   AdsetsData["AdsetName"] = formValuesObject.AdsetName || "";
+        //   // }
+        // }
         if (findMatchingAdset.Status) {
           AdsetsData["Status"] = findMatchingAdset.Status;
         }
-        if (findMatchingAdset["re_lunch_adsetname"]) {
-          AdsetsData["re_lunch_adsetname"] =
-            findMatchingAdset["re_lunch_adsetname"];
+        if (findMatchingAdset["re_lunch_adset_name"]) {
+          AdsetsData["re_lunch_adset_name"] =
+            findMatchingAdset["re_lunch_adset_name"];
         }
         if (findMatchingAdset["re_lunch_bid_amount"]) {
           AdsetsData["re_lunch_bid_amount"] =
@@ -9866,7 +11059,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           findMatchingAdset.AdsetName !== formValuesObject.AdsetName
         ) {
           AdsetsData["AdsetName"] = formValuesObject.AdsetName;
-          AdsetsData["re_lunch_adsetname"] = true;
+          AdsetsData["re_lunch_adset_name"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
@@ -9878,14 +11071,14 @@ const EditMultipleAdsetCampaignDrawer = ({
           findMatchingAdset.bid_amount / 100 !== formValuesObject.bid_amount
         ) {
           AdsetsData["bid_amount"] = formValuesObject.bid_amount
-            ? parseFloat(formValuesObject.bid_amount) * 100
+            ? Math.round(parseFloat(formValuesObject.bid_amount) * 100)
             : 0;
           AdsetsData["re_lunch_bid_amount"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["bid_amount"] = formValuesObject.bid_amount
-            ? parseFloat(formValuesObject.bid_amount) * 100
+            ? Math.round(parseFloat(formValuesObject.bid_amount) * 100)
             : 0;
         }
         if (
@@ -9922,7 +11115,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             .format("YYYY-MM-DDTHH:mm:ssZ");
           AdsetsData["action_source"] = formValuesObject.action_source;
           AdsetsData["custom_event_type"] = formValuesObject.custom_event_type;
-          AdsetsData["pixel_id"] = findMatchingAdset.pixel_id;
+          AdsetsData["pixel_id"] = formValuesObject.pixel_id;
         }
         if (budgetType === "lifetime") {
           const newEnd = dayjs(formValuesObject.DatePickerEnd)
@@ -9936,10 +11129,12 @@ const EditMultipleAdsetCampaignDrawer = ({
             re_lunch = true;
           }
         }
+        // notice
         if (
           findMatchingAdset.Adsetid &&
           findMatchingAdset.countries &&
-          findMatchingAdset.countries !== formValuesObject.countries
+          // findMatchingAdset.countries !== formValuesObject.countries
+          !isSameArray(findMatchingAdset.countries, formValuesObject.countries)
         ) {
           AdsetsData["countries"] = formValuesObject.countries;
           // if (formValuesObject.Beneficiary) {
@@ -9969,7 +11164,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           const newCountries = formValuesObject.countries;
           if (findMatchingAdset.countries && findMatchingAdset.countries !== newCountries) {
             AdsetsData["countries"] = newCountries;
-            AdsetsData.re_lunch_targeting = true;
+            // AdsetsData.re_lunch_targeting = true;
             send_re_launch_status = true;
             re_lunch = true;
           } else {
@@ -10043,41 +11238,41 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (
           findMatchingAdset.Adsetid &&
           findMatchingAdset.locales &&
-          JSON.stringify(findMatchingAdset.locales) !==
-          JSON.stringify(formValuesObject.Language)
+          // JSON.stringify(findMatchingAdset.locales) !==
+          // JSON.stringify(formValuesObject.Language)
+          !isSameArray(findMatchingAdset.locales, formValuesObject.Language)
         ) {
+
           AdsetsData["locales"] = formValuesObject.Language;
           // Day parting (Ad Scheduling)
-          if (adSchedulingToShow?.[formValuesObject.id]) {
-            // SWITCH ON
+          // if (adSchedulingToShow?.[formValuesObject.id]) {
+          //   // SWITCH ON
+          //   AdsetsData.is_day_parting_enabled = true;
+          //   AdsetsData.pacing_type = ["day_parting"];
+          //   AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
+          // }
+          // Day Parting (Ad Scheduling)
+          if (adSchedulingToShowCampaign) {
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+          else if (adSchedulingToShow?.[formValuesObject.id]) {
             AdsetsData.is_day_parting_enabled = true;
             AdsetsData.pacing_type = ["day_parting"];
-            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
           }
-          //  else {
-          //   // SWITCH OFF
-          //   AdsetsData.is_day_parting_enabled = false;
-          //   AdsetsData.pacing_type = [];
-          //   AdsetsData.adschedule = [];
-          // }
           AdsetsData["re_lunch_targeting"] = true;
           send_re_launch_status = true;
           re_lunch = true;
         } else {
           AdsetsData["locales"] = formValuesObject.Language;
-          // Day parting (Ad Scheduling)
-          if (adSchedulingToShow?.[formValuesObject.id]) {
-            // SWITCH ON
+          if (adSchedulingToShowCampaign) {
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+          else if (adSchedulingToShow?.[formValuesObject.id]) {
             AdsetsData.is_day_parting_enabled = true;
             AdsetsData.pacing_type = ["day_parting"];
-            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id] || [];
-          } 
-          // else {
-          //   // SWITCH OFF
-          //   AdsetsData.is_day_parting_enabled = false;
-          //   AdsetsData.pacing_type = [];
-          //   AdsetsData.adschedule = [];
-          // }
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
         }
         if (
           findMatchingAdset.Adsetid &&
@@ -10155,8 +11350,9 @@ const EditMultipleAdsetCampaignDrawer = ({
             console.log(findMatchingAdset.placements);
             AdsetsData["placements"] = formValuesObject.placements;
             if (
-              JSON.stringify(findMatchingAdset.publisher_platforms) !==
-              JSON.stringify(formValuesObject.platforms)
+              // JSON.stringify(findMatchingAdset.publisher_platforms) !==
+              // JSON.stringify(formValuesObject.platforms)
+              !isSameArray(findMatchingAdset.publisher_platforms, formValuesObject.platforms)
             ) {
               AdsetsData["publisher_platforms"] = formValuesObject.platforms;
               AdsetsData["re_lunch_targeting"] = true;
@@ -10166,8 +11362,15 @@ const EditMultipleAdsetCampaignDrawer = ({
               AdsetsData["publisher_platforms"] = formValuesObject.platforms;
             }
             if (
-              JSON.stringify(findMatchingAdset.Facebook_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.Facebook_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Facebook"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.Facebook_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Facebook"
@@ -10190,8 +11393,15 @@ const EditMultipleAdsetCampaignDrawer = ({
                 ) || [];
             }
             if (
-              JSON.stringify(findMatchingAdset.instagram_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.instagram_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Instagram"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.instagram_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Instagram"
@@ -10213,8 +11423,15 @@ const EditMultipleAdsetCampaignDrawer = ({
                 ) || [];
             }
             if (
-              JSON.stringify(findMatchingAdset.audience_network_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.audience_network_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Audience"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.audience_network_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Audience"
@@ -10237,8 +11454,15 @@ const EditMultipleAdsetCampaignDrawer = ({
                 ) || [];
             }
             if (
-              JSON.stringify(findMatchingAdset.messenger_positions) !==
-              JSON.stringify(
+              // JSON.stringify(findMatchingAdset.messenger_positions) !==
+              // JSON.stringify(
+              //   extractValuesByPartialLabel(
+              //     selectedPositions[formValuesObject?.id],
+              //     "Messenger"
+              //   )
+              // )
+              !isSameArray(
+                findMatchingAdset.messenger_positions,
                 extractValuesByPartialLabel(
                   selectedPositions[formValuesObject?.id],
                   "Messenger"
@@ -10269,8 +11493,12 @@ const EditMultipleAdsetCampaignDrawer = ({
               return item;
             });
             if (
-              JSON.stringify(findMatchingAdset.device_platforms) !==
-              JSON.stringify(formValuesObject.device_platforms)
+              // JSON.stringify(findMatchingAdset.device_platforms) !==
+              // JSON.stringify(formValuesObject.device_platforms)
+              !isSameArray(
+                findMatchingAdset.device_platforms,
+                formValuesObject.device_platforms
+              )
             ) {
               AdsetsData["device_platforms"] =
                 formValuesObject.device_platforms;
@@ -10327,7 +11555,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           ? parseFloat(formValuesObject.DailyAdd_amount) * 100
           : "";
         AdsetsData["bid_amount"] = formValuesObject.bid_amount
-          ? parseFloat(formValuesObject.bid_amount) * 100
+          ? Math.round(parseFloat(formValuesObject.bid_amount) * 100)
           : 0;
         AdsetsData["optimization_goal"] = formValuesObject.optimization_goal;
         AdsetsData["billing_event"] = formValuesObject.billing_event;
@@ -10343,6 +11571,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         AdsetsData["Gender"] = parseInt(formValuesObject.Gender);
         AdsetsData["locales"] = formValuesObject.Language;
         AdsetsData["placements"] = formValuesObject.placements;
+        if (formValuesObject.isDynamicCreative) AdsetsData["is_dynamic_creative"] = true;
         if (formValuesObject.placements !== "Advance") {
           AdsetsData["publisher_platforms"] = formValuesObject.platforms;
           AdsetsData["Facebook_positions"] =
@@ -10388,6 +11617,16 @@ const EditMultipleAdsetCampaignDrawer = ({
         }
 
         AdsetsData["buying_type"] = "AUCTION";
+        if (budgetType === "lifetime") {
+          if (adSchedulingToShowCampaign) {
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+          else if (adSchedulingToShow?.[formValuesObject.id]) {
+            AdsetsData.is_day_parting_enabled = true;
+            AdsetsData.pacing_type = ["day_parting"];
+            AdsetsData.adschedule = adsetSchedule?.[formValuesObject.id];
+          }
+        }
         AdsetsData["addlevel"] = newAddLevel;
       }
 
@@ -10531,7 +11770,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         custom_event_type: values.adsets[i].custom_event_type || "",
         pixel_id: values.pixel_id,
         bid_amount: values.adsets[i].bid_amount
-          ? parseFloat(values.adsets[i].bid_amount) * 100
+          ? Math.round(parseFloat(values.adsets[i].bid_amount) * 100)
           : 0,
         countries: values.adsets[i].countries || "",
         Min_Age: values.adsets[i].Min_Age || "",
@@ -10651,7 +11890,7 @@ const EditMultipleAdsetCampaignDrawer = ({
           custom_event_type: values.custom_event_type,
           pixel_id: values.pixel_id,
           bid_amount: values.bid_amount
-            ? parseFloat(values.bid_amount) * 100
+            ? Math.round(parseFloat(values.bid_amount) * 100)
             : 0,
           countries: values.countries,
           Min_Age: values.Min_Age,
@@ -10901,6 +12140,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     setAdSchedulingToShow({});
     setSelectedByAdset({});
     setAdsetSchedule({});
+    setAdSchedulingToShowCampaign(false);
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -11044,15 +12284,15 @@ const EditMultipleAdsetCampaignDrawer = ({
       form.getFieldValue(["adsets", creativeIndex, "MediaContent"]) || [];
     const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
 
-    form.setFieldsValue({
-      adsets: {
-        [creativeIndex]: {
-          MediaContent: updatedMediaContent,
-        },
-      },
-    });
+    // form.setFieldsValue({
+    //   adsets: {
+    //     [creativeIndex]: {
+    //       MediaContent: updatedMediaContent,
+    //     },
+    //   },
+    // });
 
-    form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
+    // form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
   };
 
   console.log("Selected Files:", selectedFiles);
@@ -11276,25 +12516,137 @@ const EditMultipleAdsetCampaignDrawer = ({
           ? adsetObj.Daily_amount / 100
           : 0,
         Adsetid: adsetObj.Adsetid || "",
+        is_dynamic_creative: adsetObj.is_dynamic_creative || false,
         ...adsetObj, // Spread the adsetObj properties
       }))
     );
 
-    setAddLevelData((prev) => {
-      const adsetAddLevelData = {};
-      adsetObjects.forEach((adsetObj, index) => {
-        adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
-      });
-      return { ...prev, ...adsetAddLevelData };
-    });
+    // setAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+    //   adsetObjects.forEach((adsetObj, index) => {
+    //     adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+    //   });
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
 
-    setNewAddLevelData((prev) => {
+    // setNewAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+    //   adsetObjects.forEach((adsetObj, index) => {
+    //     adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+    //   });
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
+
+    // const extractFilenames = (filename) => {
+    //   if (Array.isArray(filename)) {
+    //     return filename.map(f => f.filename);
+    //   }
+    //   return filename ? [filename] : [];
+    // };
+
+    const extractFilenames = (filename, id) => {
+      if (Array.isArray(filename)) {
+        return filename.map(f => ({
+          filename: f.filename,
+          ...(f.imag_hash
+            ? { imag_hash: f.imag_hash }
+            : {
+              video_id: f.video_id,
+              thambnailurl: f.thambnailurl,
+            }),
+          id: uuidv4(),
+        }));
+      }
+      return filename ? [{ filename: filename, id: id }] : [];
+    };
+
+    const buildAdsetAddLevelData = () => {
       const adsetAddLevelData = {};
-      adsetObjects.forEach((adsetObj, index) => {
-        adsetAddLevelData[adsetObj.id] = adsetObj.addlevel;
+
+      adsetObjects.forEach((adsetObj) => {
+        const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+          const filenames = extractFilenames(item.filename, item.id);
+
+          return filenames.map((name, i) => ({
+            ...item,
+            id: name.id,
+            filename: name.filename,
+            ...(name.imag_hash
+              ? { imag_hash: name.imag_hash }
+              : name.video_id ? {
+                video_id: name.video_id,
+                thambnailurl: name.thambnailurl,
+              } : {}),
+            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}_${i + 1}`,
+            ...(
+              adsetObj?.Adsetid &&
+                adsetObj?.is_dynamic_creative === true
+                ? { Addid: null }
+                : {}
+            ),
+
+          }));
+        });
+
+        adsetAddLevelData[adsetObj.id] = newArray;
       });
-      return { ...prev, ...adsetAddLevelData };
-    });
+
+      return adsetAddLevelData;
+    };
+    const adsetAddLevelData = buildAdsetAddLevelData();
+
+    console.log(adsetAddLevelData, "test");
+
+    setAddLevelData((prev) => ({
+      ...prev,
+      ...adsetAddLevelData,
+    }));
+
+    setNewAddLevelData((prev) => ({
+      ...prev,
+      ...adsetAddLevelData,
+    }));
+
+    // setAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+
+    //   adsetObjects.forEach((adsetObj) => {
+    //     const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+    //       const filenames = extractFilenames(item.filename);
+
+    //       return filenames.map((name, i) => ({
+    //         ...item,
+    //         filename: name,          // normalized single filename
+    //         AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+    //       }));
+    //     });
+
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
+
+
+    // setNewAddLevelData((prev) => {
+    //   const adsetAddLevelData = {};
+
+    //   adsetObjects.forEach((adsetObj) => {
+    //     const newArray = adsetObj.addlevel.flatMap((item, itemIndex) => {
+    //       const filenames = extractFilenames(item.filename);
+
+    //       return filenames.map((name, i) => ({
+    //         ...item,
+    //         filename: name,
+    //         AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}-${i + 1}`,
+    //       }));
+    //     });
+
+    //     adsetAddLevelData[adsetObj.id] = newArray;
+    //   });
+
+    //   return { ...prev, ...adsetAddLevelData };
+    // });
 
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
@@ -11318,7 +12670,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       Language: adsetObj.locales,
       placements: adsetObj.placements,
       position: adsetObj.position || [],
-      AddName: adsetObj.addlevel[0]?.AddName.split("_").slice(0, -1).join("_"),
+      AddName: adsetObj.is_dynamic_creative ? adsetObj.addlevel[0]?.AddName : adsetObj.addlevel[0]?.AddName.split("_").slice(0, -1).join("_"),
       filename: adsetObj.addlevel[0]?.filename,
       message: adsetObj.addlevel[0]?.message,
       headline: adsetObj.addlevel[0]?.headline,
@@ -11326,6 +12678,16 @@ const EditMultipleAdsetCampaignDrawer = ({
       Caption: adsetObj.addlevel[0]?.Caption,
       Website_URL: adsetObj.addlevel[0]?.Website_URL,
       MediaContent: adsetObj.addlevel[0] || [],
+      isDynamicCreative: adsetObj.is_dynamic_creative || false,
+      descriptions: Array.isArray(adsetObj.addlevel[0]?.Description) ? adsetObj.addlevel[0]?.Description : [
+        adsetObj.addlevel[0]?.Description ?? ""
+      ],
+      headlines: Array.isArray(adsetObj.addlevel[0]?.headline) ? adsetObj.addlevel[0]?.headline : [
+        adsetObj.addlevel[0]?.headline ?? ""
+      ],
+      messages: Array.isArray(adsetObj.addlevel[0]?.message) ? adsetObj.addlevel[0]?.message : [
+        adsetObj.addlevel[0]?.message ?? ""
+      ],
     }));
 
     // 4. Update the form fields
@@ -11358,40 +12720,82 @@ const EditMultipleAdsetCampaignDrawer = ({
     //     url: file?.url,}
     //     return "";
     // });
+    // const mapped = (data) =>
+    //   data.map((file, i) => ({
+    //     id: file?.id,
+    //     uid: `-${Date.now()}-${i}`,
+    //     name: file?.filename,
+    //     status: "done",
+    //     type: file?.filename?.endsWith(".jpg")
+    //       ? "image/jpg"
+    //       : file?.filename?.endsWith(".jpeg")
+    //         ? "image/jpeg"
+    //         : file?.filename?.endsWith(".png")
+    //           ? "image/png"
+    //           : "video/",
+    //     url: file?.filename,
+    //     Addid: file?.Addid || null,
+    //   }));
+
+    const getFileType = (name = "") => {
+      if (name.endsWith(".jpg")) return "image/jpg";
+      if (name.endsWith(".jpeg")) return "image/jpeg";
+      if (name.endsWith(".png")) return "image/png";
+      return "video/";
+    };
+
     const mapped = (data) =>
-      data.map((file, i) => ({
-        id: file?.id,
-        uid: `-${Date.now()}-${i}`,
-        name: file?.filename,
-        status: "done",
-        type: file?.filename?.endsWith(".jpg")
-          ? "image/jpg"
-          : file?.filename?.endsWith(".jpeg")
-            ? "image/jpeg"
-            : file?.filename?.endsWith(".png")
-              ? "image/png"
-              : "video/",
-        url: file?.filename,
-        Addid: file?.Addid || null,
-      }));
+      data.flatMap((file, fileIndex) => {
+        const filenames = Array.isArray(file.filename)
+          ? file.filename.map(f => f.filename)
+          : [file.filename];
+
+        return filenames.map((filename, i) => ({
+          id: file.id,
+          uid: `-${Date.now()}-${fileIndex}-${i}`,
+          name: filename,
+          status: "done",
+          type: getFileType(filename),
+          url: filename,
+          Addid: file.Addid || null,
+        }));
+      });
 
     adsetObjects.forEach((adsetObj) => {
       const uuid = adsetObj.id ?? uuidv4();
 
-      updatedSelectedFiles[uuid] = adsetObj.addlevel
-        ? mapped(adsetObj.addlevel)
-        : [];
-      updatedSelectedCreatives[uuid] = adsetObj.addlevel
-        ? mapped(adsetObj.addlevel)
-        : [];
+      console.log(adsetObj, "adsetObj");
+      console.log(mapped(adsetObj.addlevel), "mappedadsetObj");
+
+      // updatedSelectedFiles[uuid] = adsetObj.addlevel
+      //   ? mapped(adsetObj.addlevel)
+      //   : [];
+      // updatedSelectedCreatives[uuid] = adsetObj.addlevel
+      //   ? mapped(adsetObj.addlevel)
+      //   : [];
       updatedSelectedPositions[uuid] = getPositionsByKeys(
         adsetObj.position || []
       );
       updatedSelectedPublishers[uuid] = adsetObj.publisher_platforms || [];
     });
 
+    // adsetAddLevelData.forEach((adsetObj)=> {
+    //   updatedSelectedFiles[adsetObj.id] = mapped(adsetObj.id);
+    //   updatedSelectedCreatives[adsetObj.id] = mapped(adsetObj.id);
+    // });
+
+    Object.entries(adsetAddLevelData).forEach(([key, adsetObj]) => {
+      console.log(key, adsetObj, "keyvalue");
+      console.log(mapped(adsetObj), "mappedvalue");
+      updatedSelectedFiles[key] = mapped(adsetObj) || [];
+      updatedSelectedCreatives[key] = mapped(adsetObj) || [];
+    });
+
+
     setSelectedFiles(updatedSelectedFiles);
     setSelectedFilesFromCreatives(updatedSelectedCreatives);
+    // setSelectedFiles(adsetAddLevelData);
+    // setSelectedFilesFromCreatives(adsetAddLevelData);
     setSelectedPositions(updatedSelectedPositions);
     setSelectedPublishers(updatedSelectedPublishers);
 
@@ -11451,7 +12855,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     try {
       //https://www.testapi.adsgoat.in
       const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/newupdateApproval/${id}`,
+        `https://www.testapi.adsgoat.in/api/newupdateApprovalnew/${id}`,
         {
           method: "PUT",
           headers: {
@@ -11913,6 +13317,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                             //   { value: "MX", label: "Mexico" },
                             // ]}
                             showSearch
+                            optionFilterProp="label"
                             options={[
                               { value: "US", label: "United States", title: "" },
                               { value: "GB", label: "United Kingdom", title: "" },
@@ -11949,6 +13354,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                               { value: "LU", label: "Luxembourg", title: "" },
                               { value: "MT", label: "Malta", title: "" },
                               { value: "NL", label: "Netherlands", title: "" },
+                              { value: "NO", label: "Norway", title: "" },
                               { value: "PL", label: "Poland", title: "" },
                               { value: "PT", label: "Portugal", title: "" },
                               { value: "RO", label: "Romania", title: "" },
@@ -12009,6 +13415,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                             //   { value: "MX", label: "Mexico" },
                             // ]}
                             showSearch
+                            optionFilterProp="label"
                             options={[
                               { value: "US", label: "United States", title: "" },
                               { value: "GB", label: "United Kingdom", title: "" },
@@ -12045,6 +13452,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                               { value: "LU", label: "Luxembourg", title: "" },
                               { value: "MT", label: "Malta", title: "" },
                               { value: "NL", label: "Netherlands", title: "" },
+                              { value: "NO", label: "Norway", title: "" },
                               { value: "PL", label: "Poland", title: "" },
                               { value: "PT", label: "Portugal", title: "" },
                               { value: "RO", label: "Romania", title: "" },
@@ -12258,8 +13666,28 @@ const EditMultipleAdsetCampaignDrawer = ({
                 >
                   <Form.Item
                     name="Daily_amount"
-                    label={
+                    // label={
+                    //   <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
+                    // }
+                    label={<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ color: "#B4B4B4" }}>{`${budgetType.charAt(0).toUpperCase()}${budgetType.slice(1).toLowerCase()} budget`}</span>
+                      <Tooltip title="Enable Ad Scheduling"
+                        overlayInnerStyle={{
+                          backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                          color: theme === "dark" ? "#fff" : "#333",
+                        }}
+                      >
+                        <Switch
+                          size="small"
+                          disabled={budgetType === "daily" || view || fullCampaignData?.camapaignlevel?.campaignid}
+                          checked={adSchedulingToShowCampaign}
+                          onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
+                          style={{
+                            backgroundColor: adSchedulingToShowCampaign ? "#91C25F" : undefined,
+                          }}
+                        />
+                      </Tooltip>
+                    </div>
                     }
                     rules={[
                       {
@@ -12355,6 +13783,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             {adsets.map((adset, index) => {
               return (
                 <AdsetComponent
+                  key={adset.id}
                   view={view}
                   theme={theme}
                   setSelectedPublishers={setSelectedPublishers}
@@ -12380,6 +13809,8 @@ const EditMultipleAdsetCampaignDrawer = ({
                   handleFieldChange={handleFieldChange}
                   network={network}
                   accountis={accountis}
+                  adsets={adsets}
+                  setAdsets={setAdsets}
                   addlevelData={addlevelData}
                   newAddLevelData={newAddLevelData}
                   setAdsetSchedule={setAdsetSchedule}
@@ -12387,6 +13818,10 @@ const EditMultipleAdsetCampaignDrawer = ({
                   selectedByAdset={selectedByAdset}
                   setAdSchedulingToShow={setAdSchedulingToShow}
                   setSelectedByAdset={setSelectedByAdset}
+                  scheduleErrorByAdset={scheduleErrorByAdset}
+                  setScheduleErrorByAdset={setScheduleErrorByAdset}
+                  setShowScheduleSubmitError={setShowScheduleSubmitError}
+                  adSchedulingToShowCampaign={adSchedulingToShowCampaign}
                   setAddLevelData={setAddLevelData}
                   setNewAddLevelData={setNewAddLevelData}
                   setIsAnyAdsetBudgetSet={setIsAnyAdsetBudgetSet}
@@ -12518,75 +13953,138 @@ const EditMultipleAdsetCampaignDrawer = ({
                     className={theme === "dark" ? "custom-input-dark" : "custom-input-light"}
                   />
                 </Modal>
-                {!view && (
-                  <Button
-                    type="primary"
-                    style={{
-                      background: "#91c25f",
-                      minWidth: "200px",
-                      borderWidth: "0px",
-                    }}
-                    onClick={async () => {
-                      try {
-                        const values = await form.validateFields(); // Validates all form fields
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {!view && (
+                    <Button
+                      type="primary"
+                      style={{
+                        background: "#91c25f",
+                        minWidth: "200px",
+                        borderWidth: "0px",
+                      }}
 
-                        // Check if campaign-level and adset-level budgets are both zero
-                        const campaignLevelDailyBudget = values.Daily_amount;
-                        const isCampaignBudgetActive =
-                          parseFloat(campaignLevelDailyBudget) > 0;
+                      onClick={async () => {
+                        if (budgetType === "lifetime") {
+                          let hasError = false;
+                          const newErrors = {};
+                          if (adSchedulingToShowCampaign) {
+                            adsets.forEach(adset => {
+                              const schedule = adsetSchedule?.[adset.id] || [];
+                              const isValid =
+                                schedule.length > 0 &&
+                                schedule.every(
+                                  s =>
+                                    s.end_minute > s.start_minute &&
+                                    Array.isArray(s.days) &&
+                                    s.days.length > 0
+                                );
 
-                        // Check if any adset has a budget
-                        const isAnyAdsetBudgetSet = values.adsets.some(
-                          (adset) => parseFloat(adset.DailyAdd_amount) > 0
-                        );
+                              if (!isValid) {
+                                newErrors[adset.id] = true;
+                                hasError = true;
+                              }
+                            });
+                          } else {
+                            Object.keys(adSchedulingToShow || {}).forEach(adsetId => {
+                              if (!adSchedulingToShow[adsetId]) return;
 
-                        // If Campaign Budget is not set, check Adsets
-                        if (!isCampaignBudgetActive) {
-                          const isAllAdsetsFilled = values.adsets.every(
+                              const schedule = adsetSchedule?.[adsetId] || [];
+                              const isValid =
+                                schedule.length > 0 &&
+                                schedule.every(
+                                  s =>
+                                    s.end_minute > s.start_minute &&
+                                    Array.isArray(s.days) &&
+                                    s.days.length > 0
+                                );
+
+                              if (!isValid) {
+                                newErrors[adsetId] = true;
+                                hasError = true;
+                              }
+                            });
+                          }
+
+                          if (hasError) {
+                            setScheduleErrorByAdset(newErrors);
+                            setShowScheduleSubmitError(true);
+                            return;
+                          }
+                          setScheduleErrorByAdset({});
+                          setShowScheduleSubmitError(false);
+                        }
+                        try {
+                          const values = await form.validateFields(); // Validates all form fields
+
+                          // Check if campaign-level and adset-level budgets are both zero
+                          const campaignLevelDailyBudget = values.Daily_amount;
+                          const isCampaignBudgetActive =
+                            parseFloat(campaignLevelDailyBudget) > 0;
+
+                          // Check if any adset has a budget
+                          const isAnyAdsetBudgetSet = values.adsets.some(
                             (adset) => parseFloat(adset.DailyAdd_amount) > 0
                           );
 
-                          if (!isAllAdsetsFilled) {
-                            throw {
-                              errorFields: [
-                                {
-                                  name: ["Daily_amount"], // The field where error occurs
-                                  errors: [
-                                    "Daily budget cannot be zero on both Adset and Campaign levels",
-                                  ], // The error message
-                                },
-                              ],
-                            };
+                          // If Campaign Budget is not set, check Adsets
+                          if (!isCampaignBudgetActive) {
+                            const isAllAdsetsFilled = values.adsets.every(
+                              (adset) => parseFloat(adset.DailyAdd_amount) > 0
+                            );
+
+                            if (!isAllAdsetsFilled) {
+                              throw {
+                                errorFields: [
+                                  {
+                                    name: ["Daily_amount"], // The field where error occurs
+                                    errors: [
+                                      "Daily budget cannot be zero on both Adset and Campaign levels",
+                                    ], // The error message
+                                  },
+                                ],
+                              };
+                            }
                           }
+
+                          // Clear any previous errors
+                          setSubmitErrors([]);
+                          console.log("Form values:", values); // Log form values to verify
+
+                          // Call the onFinish logic, passing in the values
+                          onFinish(values); // Trigger the existing logic for form submission
+
+                          // Optionally trigger confirmation modal (as per your logic)
+                          setIsModalVisible(true);
+
+                          // Save values if needed
+                          setFormValues(values);
+                          setIsCreateCampaignorDraft("createcampaign");
+                        } catch (err) {
+                          // Catch any validation errors thrown by form.validateFields
+                          const allErrors = err?.errorFields?.map((field) => ({
+                            name: field.name?.[0], // field name
+                            message: field.errors?.[0], // validation message
+                          }));
+                          setSubmitErrors(allErrors); // Capture and show validation errors
                         }
-
-                        // Clear any previous errors
-                        setSubmitErrors([]);
-                        console.log("Form values:", values); // Log form values to verify
-
-                        // Call the onFinish logic, passing in the values
-                        onFinish(values); // Trigger the existing logic for form submission
-
-                        // Optionally trigger confirmation modal (as per your logic)
-                        setIsModalVisible(true);
-
-                        // Save values if needed
-                        setFormValues(values);
-                        setIsCreateCampaignorDraft("createcampaign");
-                      } catch (err) {
-                        // Catch any validation errors thrown by form.validateFields
-                        const allErrors = err?.errorFields?.map((field) => ({
-                          name: field.name?.[0], // field name
-                          message: field.errors?.[0], // validation message
-                        }));
-                        setSubmitErrors(allErrors); // Capture and show validation errors
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>
-                )}
-
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  )}
+                  {budgetType === "lifetime" && showScheduleSubmitError && (
+                    <div
+                      style={{
+                        color: "red",
+                        marginTop: 6,
+                        fontSize: 12,
+                        fontWeight: 500,
+                      }}
+                    >
+                      Please select at least one valid time slot and day
+                    </div>
+                  )}
+                </div>
                 {/* <Popconfirm
                                     title="Enter required fields"
                                     description={

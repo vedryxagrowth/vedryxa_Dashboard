@@ -210,8 +210,37 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     ])
   }, [memorizedRowData]);
 
-  const onBtExport1 = () => {
-    console.log(gridRef.current.api, "in")
+  // const onBtExport1 = () => {
+  //   console.log(gridRef.current.api, "in")
+  //   const Details = {
+  //     network: newRevenuePratner,
+  //     account: newaccount,
+  //     dateRange: `From ${startDate} to ${endDate}`,
+  //     type: "Live",
+  //     email: userdetails?.email,
+  //     time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+  //   }
+  //   gridRef.current.api.exportDataAsCsv({
+  //     processCellCallback: (params) => {
+  //       const node = params.node;
+  //       if (node.group) {
+  //         return null;
+  //       }
+  //       return params.value;
+  //     },
+  //     shouldRowBeSkipped: (params) => {
+  //       return params.node.group;
+  //     },
+  //   });
+  //   const updateDetails = async () => {
+  //     await apiClient.post('/UserExportActivities/', { Details });
+  //   }
+  //   updateDetails();
+
+  // };
+  const onBtExport1 = async () => {
+    console.log(gridRef.current.api, "in");
+
     const Details = {
       network: newRevenuePratner,
       account: newaccount,
@@ -219,26 +248,54 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       type: "Live",
       email: userdetails?.email,
       time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-    }
-    gridRef.current.api.exportDataAsCsv({
-      processCellCallback: (params) => {
-        const node = params.node;
-        if (node.group) {
-          return null;
-        }
-        return params.value;
-      },
-      shouldRowBeSkipped: (params) => {
-        return params.node.group;
-      },
+    };
+    const campaignMap = {};
+    const adsetMap = {};
+    const adMap = {};
+
+    gridRef.current.api.forEachLeafNode(node => {
+      const d = node.data;
+      if (!d) return;
+
+      if (d.campaignid && d.campaignname) {
+        campaignMap[String(d.campaignid)] = d.campaignname;
+      }
+      if (d.adsetid && d.adsetname) {
+        adsetMap[String(d.adsetid)] = d.adsetname;
+      }
+      if (d.adid && d.adname) {
+        adMap[String(d.adid)] = d.adname;
+      }
     });
-    const updateDetails = async () => {
-      await apiClient.post('/UserExportActivities/', { Details });
+    gridRef.current.api.exportDataAsCsv({
+      processRowGroupCallback: (params) => {
+        const key = String(params.node.key);
+
+        if (adMap[key]) return adMap[key];
+        if (adsetMap[key]) return adsetMap[key];
+        if (campaignMap[key]) return campaignMap[key];
+
+        return params.node.key;
+      },
+      processCellCallback: (params) => {
+        const colId = params.column.getColId();
+        const d = params.data;
+
+        if (!d) return params.value;
+
+        if (colId === "campaignid") return d.campaignname || params.value;
+        if (colId === "adsetid") return d.adsetname || params.value;
+        if (colId === "adid") return d.adname || params.value;
+
+        return params.value;
+      }
+    });
+    try {
+      await apiClient.post("/UserExportActivities/", { Details });
+    } catch (e) {
+      console.error("Export activity failed", e);
     }
-    updateDetails();
-
   };
-
   const uniqueByAdId = (arr) => {
     const map = new Map();
     arr.forEach(obj => {
@@ -291,7 +348,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       adsetid: item.adsetid,
       ad_id: item.adid,
       level: "ad",
-      userPin: userdetails?.email
+      userPin: userdetails?.email,
+      activity: {
+        editType: "Pin",
+        campaignid: item.campaignid,       // cents
+        adsetid: item.adsetid,
+        ad_id: item.adid,
+        Account: item.accountNumber,    // ✅ update *this* row’s account
+        campaignname: item.campaignname,
+        adsetname: item.adsetname,
+        adname: item.adName || item.adname,
+        updatedBy: userdetails?.userName,
+        updatedUserEmail: userdetails?.email,
+        updateType: "Ad pin updated",
+        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+        updateDetail: `From "${action === "pin" ? "unpin" : "pin"}" to "${action === "pin" ? "pin" : "unpin"}"`,
+      }
     }));
 
     message.loading(
@@ -301,8 +373,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
     const apiUrl =
       action === "pin"
-        ? "/SmartPinBulk"
-        : "/SmartUnpinBulk";
+        ? "/SmartPinBulkWithHitory"
+        : "/SmartUnpinBulkWithHistory";
 
     const res = await apiClient.post(apiUrl, { items: data });
 
@@ -417,6 +489,94 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
   //   }
   // };
 
+  const handleBulkDeleteComments = async () => {
+    try {
+      message.loading({
+        content: 'Deleting comments for selected campaigns...',
+        key: 'bulkDelete'
+      });
+
+
+      const items = leafCampaigns.map(item => ({
+        campaignid: item.campaignid,
+        adsetid: item.adsetid,
+        ad_id: item.adid,
+        activity: {
+          editType: "Comment",
+          campaignid: item.campaignid,       // cents
+          adsetid: item.adsetid,
+          ad_id: item.adid,
+          Account: item.accountNumber,    // ✅ update *this* row’s account
+          campaignname: item.campaignname,
+          adsetname: item.adsetname,
+          adname: item.adName,
+          updatedBy: userdetails?.userName,
+          updatedUserEmail: userdetails?.email,
+          updateType: "Ad comment cleared",
+          updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+          // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+        }
+      }));
+
+      const body = {
+        accountNumber: leafCampaigns?.[0]?.accountNumber,
+        level: 'ad',
+        items
+      };
+
+      const resp = await apiClient.post(
+        '/Comments/bulkdeleteWithHistory',
+        body
+      );
+
+      if (resp.status === 200 || resp.status === 201) {
+        const timeStamp = moment()
+          .tz('Asia/Kolkata')
+          .format('YYYY-MM-DD hh:mm:ss A');
+
+        setCampaignComments(prev => {
+          const arr = [...prev];
+
+          leafCampaigns.forEach(item => {
+            const idx = arr.findIndex(
+              i =>
+                String(i.campaignid) === String(item.campaignid) &&
+                String(i.adsetid) === String(item.adsetid) &&
+                String(i.ad_id) === String(item.adid) &&
+                String(i.Account) === String(item.accountNumber) &&
+                i.level === 'ad'
+            );
+
+            if (idx >= 0) {
+              arr[idx] = {
+                ...arr[idx],
+                comment: "",
+                usercommit: userdetails?.email,
+                editedTime: timeStamp
+              };
+            }
+          });
+
+          return arr;
+        });
+
+        message.success({
+          content: `${leafCampaigns.length} comment(s) deleted successfully`,
+          key: 'bulkDelete',
+          duration: 3
+        });
+
+        setIsBulkCommentModalVisible(false);
+      }
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      message.error({
+        content: 'Error while deleting comments for selected campaigns.',
+        key: 'bulkDelete'
+      });
+    }
+  };
+
   const handleBulkCommentSubmitAd = async () => {
     try {
       message.loading({
@@ -432,11 +592,26 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         comment,
         campaignname: item.adName,
         usercommit: userdetails?.email,
-        level: "ad"
+        level: "ad",
+        activity: {
+          editType: "Comment",
+          campaignid: item.campaignid,       // cents
+          adsetid: item.adsetid,
+          ad_id: item.adid,
+          Account: item.accountNumber,    // ✅ update *this* row’s account
+          campaignname: item.campaignname,
+          adsetname: item.adsetname,
+          adname: item.adName,
+          updatedBy: userdetails?.userName,
+          updatedUserEmail: userdetails?.email,
+          updateType: "Ad comment updated",
+          updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+          // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+        }
       }));
 
       const resp = await apiClient.post(
-        '/Comments/upsertBulkNew',
+        '/Comments/upsertBulkNewWithHistory',
         { items, usercommit: userdetails?.email, }
       );
 
@@ -639,7 +814,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           ad_id: item.adid,
           accountNumber: String(item.accountNumber),
           name: item.adName,
-          email: userdetails?.email
+          email: userdetails?.email,
+          activity: {
+            editType: "Status",
+            campaignid: item.campaignid,
+            adsetid: item.adsetid,
+            Account: String(item.accountNumber),
+            campaignname: item.campaignname,
+            ad_id: item.adid,
+            adname: item.adName,
+            adsetname: item.adsetname,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Ad status updated",
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
+          }
         }));
 
       if (filteredItems.length === 0) {
@@ -650,7 +840,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }
 
       const resp = await apiClient.post(
-        "/BulkAdStatusChangeMany",
+        "/BulkAdStatusChangeManyWithHistory",
         { items: filteredItems },
         { headers: { Authorization: token } }
       );
@@ -837,6 +1027,16 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         campaignid: item.campaignid,
         level: "campaign",
         campaignname: item.campaignname,
+        activity: {
+          editType: "Category",
+          campaignid: item.campaignid,
+          Account: item.accountNumber,
+          campaignname: item.campaignname,
+          updatedBy: userdetails?.userName,
+          updatedUserEmail: userdetails?.email,
+          updateType: "Campaign category updated",
+          updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+        }
       }));
 
     if (items.length === 0) {
@@ -849,7 +1049,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "/BulkUpdateCategory",
+        "/BulkUpdateCategoryNewWithHistory",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
@@ -1040,7 +1240,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         // group key rendered in the cell
         const firstColumnValue = params.node.allLeafChildren?.[0]?.data?.adname || "";
         const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+        const adsetName = params.node.allLeafChildren?.[0]?.data?.adsetname || "";
         const adName = params.node.allLeafChildren?.[0]?.data?.adname || "";
+
 
         let campaignid, adsetid, adid, rowAccount;
 
@@ -1223,8 +1425,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           // refreshThisCell();
 
           try {
+            const payloadForActivity = {
+              editType: "Status",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              ad_id: adid,
+              adname: adName,
+              adsetname: adsetName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad status updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+              updateDetail: `From ${nextChecked ? "Inactive" : "Active"} to ${nextChecked ? "Active" : "Inactive"}`,
+            }
             const response = await apiClient.post(
-              `/NewAdStatusChange`,
+              `/NewAdStatusChangeWithHistory`,
               {
                 status: nextChecked ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1233,7 +1450,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 campaign_id: campaignid,
                 adset_id: adsetid,
                 email: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity,
               },
               authHeaders
             );
@@ -1468,8 +1686,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         };
 
         const upsertCommentBulk = async ({ text }) => {
+          const payloadForActivity = {
+            editType: "Comment",
+            campaignid: campaignid,       // cents
+            adsetid: adsetid,
+            ad_id: adid,
+            Account: rowAccount,    // ✅ update *this* row’s account
+            campaignname: campaignName,
+            adsetname: adsetName,
+            adname: adName,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Ad comment updated",
+            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+          }
           const newResponse = await apiClient.post(
-            '/Comments/upsert',
+            '/Comments/upsert/History',
             {
               accountNumber: rowAccount,
               campaignname: adName,
@@ -1478,7 +1711,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               ad_id: adid,
               comment: text,
               usercommit: userdetails?.email,
-              level: "ad"
+              level: "ad",
+              activity: payloadForActivity
             },
             authHeaders
           );
@@ -1518,8 +1752,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
         const handleDelete = async () => {
           try {
+            const payloadForActivity = {
+              editType: "Comment",
+              campaignid: campaignid,       // cents
+              adsetid: adsetid,
+              ad_id: adid,
+              Account: rowAccount,    // ✅ update *this* row’s account
+              campaignname: campaignName,
+              adsetname: adsetName,
+              adname: adName,
+              updatedBy: userdetails?.userName,
+              updatedUserEmail: userdetails?.email,
+              updateType: "Ad comment updated",
+              updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+              // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             const response = await apiClient.post(
-              '/New/Comments/delete',
+              '/New/Comments/delete/History',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1528,7 +1777,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 ad_id: adid,
                 // comment: text,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
               },
               authHeaders
             );
@@ -1720,8 +1970,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
           try {
             if (updatedPinStatus) {
+              const payloadForActivity = {
+                editType: "Pin",
+                campaignid: campaignid,       // cents
+                adsetid: adsetid,
+                ad_id: adid,
+                Account: rowAccount,    // ✅ update *this* row’s account
+                campaignname: campaignName,
+                adsetname: adsetName,
+                adname: adName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From "${updatedPinStatus ? "unpin" : "pin"}" to "${updatedPinStatus ? "pin" : "unpin"}"`,
+              }
               const newResponse = await apiClient.post(
-                '/NewPinBulk',
+                '/NewPinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -1730,7 +1995,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                   ad_id: adid,
                   userPin: userdetails?.email,
                   comment: comment || '',
-                  level: "ad"
+                  level: "ad",
+                  activity: payloadForActivity
                 },
                 authHeaders
               );
@@ -1768,8 +2034,23 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               }
               message.success("pinned!");
             } else {
+              const payloadForActivity = {
+                editType: "Pin",
+                campaignid: campaignid,       // cents
+                adsetid: adsetid,
+                ad_id: adid,
+                Account: rowAccount,    // ✅ update *this* row’s account
+                campaignname: campaignName,
+                adsetname: adsetName,
+                adname: adName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+              }
               const newResponse = await apiClient.post(
-                '/NewUnpinBulk',
+                '/NewUnpinBulkWithHistory',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -1778,7 +2059,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                   ad_id: adid,
                   userPin: userdetails?.email,
                   comment: comment || '',
-                  level: "ad"
+                  level: "ad",
+                  activity: payloadForActivity
                 },
                 authHeaders
               );
@@ -1976,6 +2258,89 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             ) || null;
 
         const hasCreative = !!matchedAd;
+        const CreativeMedia = ({
+          url,
+          filetype,
+          small = false,
+          circle = false
+        }) => {
+          if (!url) return null;
+
+          const isVideo = filetype === "video";
+
+          const baseStyle = small
+            ? {
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              cursor: "pointer",
+            }
+            : {
+              width: "100%",
+              maxHeight: "280px",
+              display: "block",
+              objectFit: "contain",
+            };
+
+          if (circle) {
+            return (
+              <div
+                style={{
+                  width: 35,
+                  height: 35,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                }}
+              >
+                {isVideo ? (
+                  <video
+                    src={url}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={url}
+                    alt="page"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+              </div>
+            );
+          }
+
+          return isVideo ? (
+            <video
+              src={url}
+              style={baseStyle}
+              controls={!small}
+              muted={small}
+              autoPlay={small}
+              loop={small}
+              playsInline
+            />
+          ) : (
+            <img
+              src={url}
+              alt="creative"
+              style={baseStyle}
+            />
+          );
+        };
+
 
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
@@ -1995,23 +2360,36 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           }
 
           return (
-            <img
-              src={matchedAd.image}
-              alt={matchedAd.headline || "Creative"}
+            // <img
+            //   src={matchedAd.image}
+            //   alt={matchedAd.headline || "Creative"}
+            //   onClick={(e) => {
+            //     e.stopPropagation();
+            //     setSelectedCampaignCreatives([matchedAd])
+            //     setCreativeModalOpen(true);
+            //   }}
+            //   style={{
+            //     width: 60,
+            //     height: 60,
+            //     objectFit: "cover",
+            //     borderRadius: 4,
+            //     border: "1px solid #ccc",
+            //     cursor: "pointer",
+            //   }}
+            // />
+            <div
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedCampaignCreatives([matchedAd])
+                setSelectedCampaignCreatives([matchedAd]);
                 setCreativeModalOpen(true);
               }}
-              style={{
-                width: 60,
-                height: 60,
-                objectFit: "cover",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                cursor: "pointer",
-              }}
-            />
+            >
+              <CreativeMedia
+                url={matchedAd.image}
+                filetype={matchedAd.filetype}
+                small
+              />
+            </div>
           );
         };
         // formatted edited time for comment hover (guard against undefined)
@@ -2171,7 +2549,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
                   <div style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <img
+                      {/* <img
                         src={selectedCreative.image}
                         alt="page"
                         style={{
@@ -2180,6 +2558,11 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
+                      /> */}
+                      <CreativeMedia
+                        url={selectedCreative.image}
+                        filetype={selectedCreative.filetype}
+                        circle
                       />
 
                       <div style={{ flex: 1, marginLeft: 6 }}>
@@ -2216,7 +2599,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       </div>
                     )}
                   </div>
-                  <img
+                  {/* <img
                     src={selectedCreative.image}
                     alt="creative"
                     style={{
@@ -2225,7 +2608,12 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       objectFit: "cover",
                       display: "block",
                     }}
+                  /> */}
+                  <CreativeMedia
+                    url={selectedCreative.image}
+                    filetype={selectedCreative.filetype}
                   />
+
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (
                       <div
@@ -2423,7 +2811,35 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     }
   };
 
+  function getFBHour(data, startDate, endDate) {
+    const start = new Date(startDate).toISOString().slice(0, 10);
+    const end = new Date(endDate).toISOString().slice(0, 10);
 
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000)
+      .toISOString()
+      .slice(0, 10);
+
+    const fbData = data.filter(
+      item => item.fbCron && item.fbCron !== "Failed" && item.hour
+    );
+    if (!fbData.length) return "00";
+    if (start === end && start === today) {
+      const currentHour = new Date().getHours();
+
+      const todayHours = fbData
+        .map(i => Number(i.hour))
+        .filter(h => h <= currentHour);
+
+      return todayHours.length
+        ? String(Math.max(...todayHours)).padStart(2, "0")
+        : "00";
+    }
+    if (start === end && start === yesterday) {
+      return findMaxHour(fbData);
+    }
+    return findMaxHour(fbData);
+  }
 
   function findMaxHour(data) {
     // Use reduce to find the maximum value of the 'hour' key
@@ -2877,7 +3293,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
         revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
 
-        maxHour.current = findMaxHour(mainData);
+        // maxHour.current = findMaxHour(mainData);
+        maxHour.current = getFBHour(mainData, startDate, endDate);
         maxNetworkHour.current = getMaxHour(mainData);
       }
 
@@ -3888,6 +4305,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                         onCancel={() => setIsBulkCommentModalVisible(false)}
                         footer={[
+                          <Button key="Delete" onClick={handleBulkDeleteComments}>
+                            Delete
+                          </Button>,
                           <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                             Cancel
                           </Button>,

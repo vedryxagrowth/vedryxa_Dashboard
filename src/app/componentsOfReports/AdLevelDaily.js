@@ -226,6 +226,36 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     );
   }, [memorizedDailyData]);
 
+  // const onBtExport = (gridRef, text) => {
+  //   const Details = {
+  //     network: newRevenuePratner,
+  //     account: newaccount,
+  //     dateRange: `From ${startDate} to ${endDate}`,
+  //     type: text,
+  //     email: userdetails?.email,
+  //     time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+  //   }
+  //   if (gridRef.current) {
+  //     gridRef.current.api.exportDataAsCsv({
+  //       processCellCallback: (params) => {
+  //         const node = params.node;
+  //         if (node.group) {
+  //           return null;
+  //         }
+  //         return params.value;
+  //       },
+  //       shouldRowBeSkipped: (params) => {
+  //         return params.node.group;
+  //       },
+  //     });
+  //   } else {
+  //     console.error("Grid reference is null");
+  //   }
+  //   const updateDetails = async () => {
+  //     await apiClient.post('/UserExportActivities/', { Details });
+  //   }
+  //   updateDetails();
+  // };
   const onBtExport = (gridRef, text) => {
     const Details = {
       network: newRevenuePratner,
@@ -233,29 +263,43 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
       dateRange: `From ${startDate} to ${endDate}`,
       type: text,
       email: userdetails?.email,
-      time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-    }
-    if (gridRef.current) {
-      gridRef.current.api.exportDataAsCsv({
-        processCellCallback: (params) => {
-          const node = params.node;
-          if (node.group) {
-            return null;
-          }
-          return params.value;
-        },
-        shouldRowBeSkipped: (params) => {
-          return params.node.group;
-        },
-      });
-    } else {
+      time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A"),
+    };
+
+    if (!gridRef.current) {
       console.error("Grid reference is null");
+      return;
     }
-    const updateDetails = async () => {
-      await apiClient.post('/UserExportActivities/', { Details });
-    }
-    updateDetails();
+    const adIdNameMap = {};
+
+    gridRef.current.api.forEachLeafNode(node => {
+      const d = node.data;
+      if (d?.adid && d?.adname) {
+        adIdNameMap[String(d.adid)] = d.adname;
+      }
+    });
+
+    gridRef.current.api.exportDataAsCsv({
+      processRowGroupCallback: (params) => {
+        const key = String(params.node.key); // adid
+        return adIdNameMap[key] || key;
+      },
+      processCellCallback: (params) => {
+        const d = params.data;
+        const colId = params.column.getColId();
+
+        if (!d) return params.value;
+        if (colId === "adid") {
+          return d.adname || params.value;
+        }
+
+        return params.value;
+      }
+    });
+
+    apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
   };
+
   useEffect(() => {
     if (removeSelectedAds === "Remove") {
       // if (gridRef.current) {
@@ -1630,7 +1674,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
               if (newResponse.status === 200 || newResponse.status === 201) {
                 setCampaignComments(prev => {
                   const arr = Array.isArray(prev) ? [...prev] : [];
-                  const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                  const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                   const match = arr.findIndex(
                     i =>
@@ -1845,7 +1889,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             if (newResponse.status === 200 || newResponse.status === 201) {
               setCampaignComments(prev => {
                 const arr = Array.isArray(prev) ? [...prev] : [];
-                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                 const match = arr.findIndex(
                   i =>
@@ -2007,7 +2051,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             if (newResponse.status === 200 || newResponse.status === 201) {
               setCampaignComments(prev => {
                 const arr = Array.isArray(prev) ? [...prev] : [];
-                const timeStamp = moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A');
+                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
                 const match = arr.findIndex(
                   i =>
@@ -2297,6 +2341,88 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             ) || null;
 
         const hasCreative = !!matchedAd;
+        const CreativeMedia = ({
+          url,
+          filetype,
+          small = false,
+          circle = false
+        }) => {
+          if (!url) return null;
+
+          const isVideo = filetype === "video";
+
+          const baseStyle = small
+            ? {
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+              border: "1px solid #ccc",
+              cursor: "pointer",
+            }
+            : {
+              width: "100%",
+              maxHeight: "280px",
+              display: "block",
+              objectFit: "contain",
+            };
+
+          if (circle) {
+            return (
+              <div
+                style={{
+                  width: 35,
+                  height: 35,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                }}
+              >
+                {isVideo ? (
+                  <video
+                    src={url}
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={url}
+                    alt="page"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+              </div>
+            );
+          }
+
+          return isVideo ? (
+            <video
+              src={url}
+              style={baseStyle}
+              controls={!small}
+              muted={small}
+              autoPlay={small}
+              loop={small}
+              playsInline
+            />
+          ) : (
+            <img
+              src={url}
+              alt="creative"
+              style={baseStyle}
+            />
+          );
+        };
 
         const CreativeTooltip = () => {
           if (!adLevelCreatives.length) {
@@ -2316,23 +2442,36 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           }
 
           return (
-            <img
-              src={matchedAd.image}
-              alt={matchedAd.headline || "Creative"}
+            // <img
+            //   src={matchedAd.image}
+            //   alt={matchedAd.headline || "Creative"}
+            //   onClick={(e) => {
+            //     e.stopPropagation();
+            //     setSelectedCampaignCreatives([matchedAd])
+            //     setCreativeModalOpen(true);
+            //   }}
+            //   style={{
+            //     width: 60,
+            //     height: 60,
+            //     objectFit: "cover",
+            //     borderRadius: 4,
+            //     border: "1px solid #ccc",
+            //     cursor: "pointer",
+            //   }}
+            // />
+            <div
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedCampaignCreatives([matchedAd])
+                setSelectedCampaignCreatives([matchedAd]);
                 setCreativeModalOpen(true);
               }}
-              style={{
-                width: 60,
-                height: 60,
-                objectFit: "cover",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                cursor: "pointer",
-              }}
-            />
+            >
+              <CreativeMedia
+                url={matchedAd.image}
+                filetype={matchedAd.filetype}
+                small
+              />
+            </div>
           );
         };
 
@@ -2477,7 +2616,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
                   <div style={{ padding: "8px 10px" }}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <img
+                      {/* <img
                         src={selectedCreative.image}
                         alt="page"
                         style={{
@@ -2486,6 +2625,11 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
+                      /> */}
+                      <CreativeMedia
+                        url={selectedCreative.image}
+                        filetype={selectedCreative.filetype}
+                        circle
                       />
 
                       <div style={{ flex: 1, marginLeft: 6 }}>
@@ -2522,7 +2666,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       </div>
                     )}
                   </div>
-                  <img
+                  {/* <img
                     src={selectedCreative.image}
                     alt="creative"
                     style={{
@@ -2531,7 +2675,12 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       objectFit: "cover",
                       display: "block",
                     }}
+                  /> */}
+                  <CreativeMedia
+                    url={selectedCreative.image}
+                    filetype={selectedCreative.filetype}
                   />
+
                   <div style={{ padding: "8px 10px" }}>
                     {selectedCreative.headline && (
                       <div
@@ -2686,7 +2835,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                       Last Edited Time:
                     </span>
                     <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
-                      {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
+                      {/* {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""} */}
+                      {universalOject?.editedTime || ""}
                     </span>
                   </div>
                   <div>

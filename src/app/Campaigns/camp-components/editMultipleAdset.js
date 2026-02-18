@@ -19,6 +19,7 @@ import {
   InputNumber,
   Breadcrumb,
   Popconfirm,
+  Switch
 } from "antd";
 import {
   PlusOutlined,
@@ -543,23 +544,46 @@ function getPositionsByKeys(keys) {
   const keySet = new Set(keys); // Faster lookup
   return allPositions.filter((pos) => keySet.has(pos.key));
 }
+const getFileType = (name = "") => {
+  if (name.endsWith(".jpg")) return "image/jpg";
+  if (name.endsWith(".jpeg")) return "image/jpeg";
+  if (name.endsWith(".png")) return "image/png";
+  return "video/";
+};
 
 const mapped = (data) =>
-  data.map((file, i) => ({
-    id: file?.id,
-    uid: `-${Date.now()}-${i}`,
-    name: file?.filename,
-    status: "done",
-    type: file?.filename?.endsWith(".jpg")
-      ? "image/jpg"
-      : file?.filename?.endsWith(".jpeg")
-        ? "image/jpeg"
-        : file?.filename.endsWith(".png")
-          ? "image/png"
-          : "video/",
-    url: file?.filename,
-    Addid: file?.Addid || null,
-  }));
+  data.flatMap((file, fileIndex) => {
+    const filenames = Array.isArray(file.filename)
+      ? file.filename.map(f => f.filename)
+      : [file.filename];
+
+    return filenames.map((filename, i) => ({
+      id: file.id,
+      uid: `-${Date.now()}-${fileIndex}-${i}`,
+      name: filename,
+      status: "done",
+      type: getFileType(filename),
+      url: filename,
+      Addid: file.Addid || null,
+    }));
+  });
+
+// const mapped = (data) =>
+//   data.map((file, i) => ({
+//     id: file?.id,
+//     uid: `-${Date.now()}-${i}`,
+//     name: file?.filename,
+//     status: "done",
+//     type: file?.filename?.endsWith(".jpg")
+//       ? "image/jpg"
+//       : file?.filename?.endsWith(".jpeg")
+//         ? "image/jpeg"
+//         : file?.filename.endsWith(".png")
+//           ? "image/png"
+//           : "video/",
+//     url: file?.filename,
+//     Addid: file?.Addid || null,
+//   }));
 
 const AddComponent = ({
   imagehash,
@@ -1543,15 +1567,30 @@ const AddComponent = ({
                           {selectedFilesFromCreatives.map((file, index) => (
                             <div
                               key={index}
+                              // style={{
+                              //   display: "flex",
+                              //   alignItems: "center",
+                              //   marginBottom: 8,
+                              // }}
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                marginBottom: 8,
+                                gap: 12,
+                                width: 365,
+                                marginTop: 10,
+                                padding: 8,                         // ✅ space inside border
+                                border: theme === "dark"
+                                  ? "1px solid #444"
+                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                borderRadius: 6,                    // ✅ rounded corners
+                                background: theme === "dark"
+                                  ? "#1f1f1f"
+                                  : "#fff",
                               }}
                             >
                               {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                               {/* <Tooltip title={file.name}> */}
-                              {file.type?.startsWith("image/") && (
+                              {file.type?.startsWith("image/") ? (
                                 <img
                                   src={
                                     file.originFileObj
@@ -1567,10 +1606,21 @@ const AddComponent = ({
                                     marginLeft: 8,
                                   }}
                                 />
+                              ) : (
+                                <video
+                                  src={file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url}
+                                  width={50}
+                                  height={40}
+                                  muted
+                                  preload="metadata"
+                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                />
                               )}
                               <span
                                 style={{
-                                  maxWidth: 160,
+                                  // maxWidth: 160,
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
@@ -2288,19 +2338,30 @@ const AdsetComponent = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
     useState(false);
+  // const [primaryText, setPrimaryText] = useState(
+  //   adset.addlevel[0]?.message || ""
+  // );
   const [primaryText, setPrimaryText] = useState(
-    adset.addlevel[0]?.message || ""
+    Array.isArray(adset?.addlevel?.[0]?.message)
+      ? adset.addlevel[0].message
+      : [adset?.addlevel?.[0]?.message || ""]
   );
-  const [headline, setHeadline] = useState(adset.addlevel[0]?.headline || "");
+  const [headline, setHeadline] = useState(
+    Array.isArray(adset?.addlevel?.[0]?.headline)
+      ? adset.addlevel[0].headline
+      : [adset?.addlevel?.[0]?.headline || ""]
+  );
   const [caption, setCaption] = useState(adset.addlevel[0]?.Caption || "");
   const [description, setDescription] = useState(
-    adset.addlevel[0]?.Description || ""
+    Array.isArray(adset?.addlevel?.[0]?.Description)
+      ? adset.addlevel[0].Description
+      : [adset?.addlevel?.[0]?.Description || ""]
   );
   const [websiteURL, setWebsiteURL] = useState(
     adset.addlevel[0]?.Website_URL || ""
   );
   const [addName, setAddName] = useState(
-    adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || ""
+    adset?.is_dynamic_creative ? adset.addlevel[0].AddName : adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || ""
   );
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
   const [creativeIndex, setCreativeIndex] = useState(null);
@@ -4178,7 +4239,7 @@ const AdsetComponent = ({
             message: adset.addlevel[0].message || "",
             page_id: adset.addlevel[0].page_id || "",
             AddName:
-              adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || "",
+              adset?.is_dynamic_creative ? adset.addlevel[0].AddName : adset.addlevel[0].AddName.split("_").slice(0, -1).join("_") || ""
           }}
           layout="vertical"
           disabled={isViewAdset}
@@ -4209,6 +4270,44 @@ const AdsetComponent = ({
                   >
                     {adset.AdsetName}
                   </span>
+
+                  {adset?.is_dynamic_creative && (<div style={{ display: "flex", alignItems: "center" }}>
+                    <span style={{ marginRight: "8px" }}>Dynamic Creative</span>
+                    <Form.Item
+                      name={["adsets", index, "isDynamicCreative"]}
+                      valuePropName="checked"
+                      style={{ marginBottom: 0 }}
+                    >
+                      {/* <Switch
+                                    size="small"
+                                    onClick={(checked, e) => {
+                                      e.stopPropagation(); // ⛔ prevent panel collapse
+                                    }}
+                                  /> */}
+                      <Switch
+                        size="small"
+                        disabled
+                        checked={adset?.is_dynamic_creative}
+                        style={{ backgroundColor: adset.is_dynamic_creative ? "#91C25F" : undefined }}
+                      // onClick={(checked, e) => e.stopPropagation()}
+                      // onChange={(checked) => {
+                      //   console.log("Dynamic Creative:", checked);
+
+                      //   // if (!checked) {
+                      //   // Example: clear dynamic creative assets
+                      //   form.setFieldsValue({
+                      //     adsets: {
+                      //       [index]: {
+                      //         isDynamicCreative: checked,
+                      //       },
+                      //     },
+                      //   });
+                      //   // }
+                      // }}
+                      />
+                    </Form.Item>
+                  </div>)}
+
 
                   {/* <div>
                                 {index !== 0 && (
@@ -4299,7 +4398,7 @@ const AdsetComponent = ({
                   }
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     options={[
                       { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
                       { value: "LINK_CLICKS", label: "Clicks" },
@@ -4328,7 +4427,7 @@ const AdsetComponent = ({
                   initialValue={adset.billing_event || "IMPRESSIONS"}
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                     disabled={true}
                     options={[
                       { value: "IMPRESSIONS", label: "Impressions" },
                       { value: "VALUE", label: "Value" },
@@ -4353,7 +4452,7 @@ const AdsetComponent = ({
                   initialValue={dayjs()}
                 >
                   <DatePicker
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     showTime
                     dropdownClassName={
                       theme === "dark" ? "dark-theme-dropdown" : ""
@@ -4381,7 +4480,7 @@ const AdsetComponent = ({
                   initialValue={adset.action_source || "website"}
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     options={[
                       { value: "website", label: "Website" },
                       { value: "email", label: "Email" },
@@ -4408,7 +4507,7 @@ const AdsetComponent = ({
                   initialValue={adset.custom_event_type || "LEAD"}
                 >
                   <Select
-                    disabled={adset.Adsetid ? true : false}
+                    disabled={true}
                     options={[
                       { value: "LEAD", label: "Lead" },
                       { value: "PURCHASE", label: "Purchase" },
@@ -4460,6 +4559,7 @@ const AdsetComponent = ({
                           ? "custom-input-dark"
                           : "custom-input-light"
                       }
+                      disabled={true}
                     >
                       {Object.entries(imagehash.pixelID).map(
                         ([label, value]) => (
@@ -4766,6 +4866,7 @@ const AdsetComponent = ({
 
                     // defaultValue={adset.countries || "US"}
                     showSearch
+                    optionFilterProp="label"
                     options={[
                       { value: "US", label: "United States", title: "" },
                       { value: "GB", label: "United Kingdom", title: "" },
@@ -4802,6 +4903,7 @@ const AdsetComponent = ({
                       { value: "LU", label: "Luxembourg", title: "" },
                       { value: "MT", label: "Malta", title: "" },
                       { value: "NL", label: "Netherlands", title: "" },
+                       { value: "NO", label: "Norway",title:""},
                       { value: "PL", label: "Poland", title: "" },
                       { value: "PT", label: "Portugal", title: "" },
                       { value: "RO", label: "Romania", title: "" },
@@ -5175,7 +5277,7 @@ const AdsetComponent = ({
                       >
                         AD LEVEL
                       </span>
-                      {(selectedFiles || []).length > 0 && (
+                      {(selectedFiles || []).length > 0 && (!(adset?.is_dynamic_creative)) && (
                         <div onClick={(e) => e.stopPropagation()}>
                           <Breadcrumb separator={<span style={{ color: theme === "dark" ? "#fff" : "#333" }}>/</span>}>
                             <div style={{ display: 'flex' }}>
@@ -5975,38 +6077,64 @@ const AdsetComponent = ({
                                           (file, index) => (
                                             <div
                                               key={index}
+                                              // style={{
+                                              //   display: "flex",
+                                              //   alignItems: "center",
+                                              //   marginBottom: 8,
+                                              // }}
                                               style={{
                                                 display: "flex",
                                                 alignItems: "center",
-                                                marginBottom: 8,
+                                                gap: 12,
+                                                width: 365,
+                                                marginTop: 10,
+                                                padding: 8,                         // ✅ space inside border
+                                                border: theme === "dark"
+                                                  ? "1px solid #444"
+                                                  : "1px solid #d9d9d9",            // ✅ light theme border
+                                                borderRadius: 6,                    // ✅ rounded corners
+                                                background: theme === "dark"
+                                                  ? "#1f1f1f"
+                                                  : "#fff",
                                               }}
                                             >
                                               {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                               {/* <Tooltip title={file.name}> */}
                                               {file.type?.startsWith(
                                                 "image/"
-                                              ) && (
-                                                  <img
-                                                    src={
-                                                      file.originFileObj
-                                                        ? URL.createObjectURL(
-                                                          file.originFileObj
-                                                        )
-                                                        : file.url
-                                                    }
-                                                    alt="preview"
-                                                    style={{
-                                                      width: 40,
-                                                      height: 40,
-                                                      objectFit: "cover",
-                                                      borderRadius: 4,
-                                                      marginLeft: 8,
-                                                    }}
-                                                  />
-                                                )}
+                                              ) ? (
+                                                <img
+                                                  src={
+                                                    file.originFileObj
+                                                      ? URL.createObjectURL(
+                                                        file.originFileObj
+                                                      )
+                                                      : file.url
+                                                  }
+                                                  alt="preview"
+                                                  style={{
+                                                    width: 40,
+                                                    height: 40,
+                                                    objectFit: "cover",
+                                                    borderRadius: 4,
+                                                    marginLeft: 8,
+                                                  }}
+                                                />
+                                              ) : (
+                                                <video
+                                                  src={file.originFileObj
+                                                    ? URL.createObjectURL(file.originFileObj)
+                                                    : file.url}
+                                                  width={50}
+                                                  height={40}
+                                                  muted
+                                                  preload="metadata"
+                                                  style={{ borderRadius: 4, flexShrink: 0 }}
+                                                />
+                                              )}
                                               <span
                                                 style={{
-                                                  maxWidth: 160,
+                                                  // maxWidth: 160,
                                                   overflow: "hidden",
                                                   textOverflow: "ellipsis",
                                                   whiteSpace: "nowrap",
@@ -6129,10 +6257,10 @@ const AdsetComponent = ({
                                 message: "Please select an option!",
                               },
                             ]}
-                            style={{ flex: 3, marginLeft: "1%" }}
+                            style={{ flex: 2, marginLeft: "1%" }}
                           >
                             <Input
-                              style={{ width: "23%" }}
+                              style={{ width: "60%" }}
                               className={
                                 theme === "dark"
                                   ? "custom-input-dark"
@@ -6188,43 +6316,30 @@ const AdsetComponent = ({
                           required
                         // tooltip="This is a required field"
                         >
-                          <TextArea
-                            placeholder="Primary text"
-                            autoSize={{ minRows: 2, maxRows: 10 }}
-                            onChange={(e) => {
-                              setPrimaryText(e.target.value);
-                              setNewAddLevelData((prev) => {
-                                return prev.map((item, idx) => ({
-                                  ...item,
-                                  message: `${e.target.value}`,
-                                }));
-                              });
-                            }}
-                            className={
-                              theme === "dark"
-                                ? "custom-input-dark"
-                                : "custom-input-light"
-                            }
-                          />
+                          {primaryText.map((text, index) => (
+                            <TextArea
+                              key={index}
+                              value={text}
+                              placeholder="Primary text"
+                              autoSize={{ minRows: 2, maxRows: 10 }}
+                              style={{ marginBottom: "8px" }}
+                              onChange={(e) => {
+                                setPrimaryText(e.target.value);
+                                setNewAddLevelData((prev) => {
+                                  return prev.map((item, idx) => ({
+                                    ...item,
+                                    message: `${e.target.value}`,
+                                  }));
+                                });
+                              }}
+                              className={
+                                theme === "dark"
+                                  ? "custom-input-dark"
+                                  : "custom-input-light"
+                              }
+                            />
+                          ))}
                         </Form.Item>
-                        {/* <Form.Item
-                                            label="Caption"
-                                            name="Caption"
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please enter a Caption!",
-                                                },
-                                            ]}
-                                            required
-                                            tooltip="This is a required field">
-                                            <TextArea
-                                                placeholder="Caption"
-                                                autoSize={{ minRows: 2, maxRows: 10 }}
-                                                onChange={(e) => setCaption(e.target.value)}
-
-                                            />
-                                        </Form.Item> */}
                         <Form.Item
                           label={
                             <span style={{ color: "#B4B4B4" }}>Headline</span>
@@ -6239,24 +6354,29 @@ const AdsetComponent = ({
                           required
                         // tooltip="This is a required field"
                         >
-                          <TextArea
-                            placeholder="Headline"
-                            autoSize={{ minRows: 2, maxRows: 10 }}
-                            onChange={(e) => {
-                              setHeadline(e.target.value);
-                              setNewAddLevelData((prev) => {
-                                return prev.map((item, idx) => ({
-                                  ...item,
-                                  headline: `${e.target.value}`,
-                                }));
-                              });
-                            }}
-                            className={
-                              theme === "dark"
-                                ? "custom-input-dark"
-                                : "custom-input-light"
-                            }
-                          />
+                          {headline.map((text, index) => (
+                            <TextArea
+                              key={index}
+                              value={text}
+                              placeholder="Headline"
+                              style={{ marginBottom: "8px" }}
+                              autoSize={{ minRows: 2, maxRows: 10 }}
+                              onChange={(e) => {
+                                setHeadline(e.target.value);
+                                setNewAddLevelData((prev) => {
+                                  return prev.map((item, idx) => ({
+                                    ...item,
+                                    headline: `${e.target.value}`,
+                                  }));
+                                });
+                              }}
+                              className={
+                                theme === "dark"
+                                  ? "custom-input-dark"
+                                  : "custom-input-light"
+                              }
+                            />
+                          ))}
                         </Form.Item>
 
                         <Form.Item
@@ -6276,24 +6396,29 @@ const AdsetComponent = ({
                           initialValue={"Find More"}
                         // tooltip="This is a required field"
                         >
-                          <TextArea
-                            placeholder="Description"
-                            autoSize={{ minRows: 2, maxRows: 10 }}
-                            onChange={(e) => {
-                              setDescription(e.target.value);
-                              setNewAddLevelData((prev) => {
-                                return prev.map((item, idx) => ({
-                                  ...item,
-                                  Description: `${e.target.value}`,
-                                }));
-                              });
-                            }}
-                            className={
-                              theme === "dark"
-                                ? "custom-input-dark"
-                                : "custom-input-light"
-                            }
-                          />
+                          {description.map((text, index) => (
+                            <TextArea
+                              key={index}
+                              value={text}
+                              placeholder="Description"
+                              style={{ marginBottom: "8px" }}
+                              autoSize={{ minRows: 2, maxRows: 10 }}
+                              onChange={(e) => {
+                                setDescription(e.target.value);
+                                setNewAddLevelData((prev) => {
+                                  return prev.map((item, idx) => ({
+                                    ...item,
+                                    Description: `${e.target.value}`,
+                                  }));
+                                });
+                              }}
+                              className={
+                                theme === "dark"
+                                  ? "custom-input-dark"
+                                  : "custom-input-light"
+                              }
+                            />
+                          ))}
                         </Form.Item>
                         <Form.Item
                           label={

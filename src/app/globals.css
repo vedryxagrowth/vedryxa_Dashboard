@@ -4228,3 +4228,35 @@ body.dark-mode .black-icon-creatives1.anticon svg {
   background: #7ecfe5;
   border-color: #3aa7c9;
 }
+
+/*  */
+.single-creative .slick-arrow {
+  opacity: 0.25 !important;
+  pointer-events: none;
+}
+
+.single-creative .slick-dots li,
+.single-creative .slick-dots li button,
+.single-creative .slick-dots li button::before {
+  opacity: 0.25 !important;
+}
+
+/* MULTI CREATIVE (HIGHLIGHT ALL) */
+.multi-creative .slick-arrow {
+  opacity: 1 !important;
+  color: #91c25f !important;
+}
+
+.multi-creative .slick-dots li,
+.multi-creative .slick-dots li button,
+.multi-creative .slick-dots li button::before {
+  opacity: 1 !important;
+  color: #91c25f !important;
+}
+
+.multi-creative .slick-dots li.slick-active button::before {
+  color: #91c25f !important;
+}
+ /* ended */
+ /*  */
+ 

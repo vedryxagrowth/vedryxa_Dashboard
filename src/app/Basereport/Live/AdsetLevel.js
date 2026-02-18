@@ -229,8 +229,37 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         ])
     }, [memorizedRowData]);
 
-    const onBtExport1 = () => {
-        console.log(gridRef.current.api, "in")
+    // const onBtExport1 = () => {
+    //     console.log(gridRef.current.api, "in")
+    //     const Details = {
+    //         network: newRevenuePratner,
+    //         account: newaccount,
+    //         dateRange: `From ${startDate} to ${endDate}`,
+    //         type: "Live",
+    //         email: userdetails?.email,
+    //         time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+    //     }
+    //     gridRef.current.api.exportDataAsCsv({
+    //         processCellCallback: (params) => {
+    //             const node = params.node;
+    //             if (node.group) {
+    //                 return null;
+    //             }
+    //             return params.value;
+    //         },
+    //         shouldRowBeSkipped: (params) => {
+    //             return params.node.group;
+    //         },
+    //     });
+    //     const updateDetails = async () => {
+    //         await apiClient.post('/UserExportActivities/', { Details });
+    //     }
+    //     updateDetails();
+
+    // };
+    const onBtExport1 = async () => {
+        console.log(gridRef.current.api, "in");
+
         const Details = {
             network: newRevenuePratner,
             account: newaccount,
@@ -238,24 +267,51 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             type: "Live",
             email: userdetails?.email,
             time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
-        }
-        gridRef.current.api.exportDataAsCsv({
-            processCellCallback: (params) => {
-                const node = params.node;
-                if (node.group) {
-                    return null;
-                }
-                return params.value;
-            },
-            shouldRowBeSkipped: (params) => {
-                return params.node.group;
-            },
-        });
-        const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
-        }
-        updateDetails();
+        };
+        const campaignIdNameMap = {};
+        const adsetIdNameMap = {};
 
+        gridRef.current.api.forEachLeafNode(node => {
+            const d = node.data;
+            if (d?.campaignid && d?.campaignname) {
+                campaignIdNameMap[String(d.campaignid)] = d.campaignname;
+            }
+            if (d?.adsetid && d?.adsetname) {
+                adsetIdNameMap[String(d.adsetid)] = d.adsetname;
+            }
+        });
+        gridRef.current.api.exportDataAsCsv({
+            processRowGroupCallback: (params) => {
+                const key = String(params.node.key);
+
+                if (adsetIdNameMap[key]) {
+                    return adsetIdNameMap[key];
+                }
+                if (campaignIdNameMap[key]) {
+                    return campaignIdNameMap[key];
+                }
+
+                return params.node.key; // fallback
+            },
+            processCellCallback: (params) => {
+                const colId = params.column.getColId();
+
+                if (colId === 'campaignid') {
+                    return params.data?.campaignname || params.value;
+                }
+
+                if (colId === 'adsetid') {
+                    return params.data?.adsetname || params.value;
+                }
+
+                return params.value;
+            }
+        });
+        try {
+            await apiClient.post('/UserExportActivities/', { Details });
+        } catch (e) {
+            console.error("Export activity log failed", e);
+        }
     };
     const onSelectionChanged = (event) => {
         const selectedNodes = event.api.getSelectedNodes();
@@ -295,7 +351,20 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             campaignid: item.campaignid,
             adsetid: item.adsetid,
             level: "adset",
-            userPin: userdetails?.email
+            userPin: userdetails?.email,
+            activity: {
+                editType: "Pin",
+                campaignid: item.campaignid,       // cents
+                adsetid: item.adsetid,
+                Account: item.accountNumber,    // ✅ update *this* row’s account
+                campaignname: item.campaignname,
+                adsetname: item.adsetname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Adset pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From "${action === "pin" ? "unpin" : "pin"}" to "${action === "pin" ? "pin" : "unpin"}"`,
+            }
         }));
 
         message.loading(
@@ -305,8 +374,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
         const apiUrl =
             action === "pin"
-                ? "/SmartPinBulk"
-                : "/SmartUnpinBulk";
+                ? "/SmartPinBulkWithHitory"
+                : "/SmartUnpinBulkWithHistory";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -353,6 +422,89 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             return arr;
         });
     };
+    const handleBulkDeleteComments = async () => {
+        try {
+            message.loading({
+                content: 'Deleting comments for selected campaigns...',
+                key: 'bulkDelete'
+            });
+
+
+            const items = leafCampaigns.map(item => ({
+                campaignid: item.campaignid,
+                adsetid: item.adsetid,
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    adsetid: item.adsetid,
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    adsetname: item.adsetname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Adset comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
+            }));
+
+            const body = {
+                accountNumber: leafCampaigns?.[0]?.accountNumber,
+                level: 'adset',
+                items
+            };
+
+            const resp = await apiClient.post(
+                '/Comments/bulkdeleteWithHistory',
+                body
+            );
+
+            if (resp.status === 200 || resp.status === 201) {
+                const timeStamp = moment()
+                    .tz('Asia/Kolkata')
+                    .format('YYYY-MM-DD hh:mm:ss A');
+
+                setCampaignComments(prev => {
+                    const arr = [...prev];
+
+                    leafCampaigns.forEach(item => {
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(item.campaignid) &&
+                                String(i.adsetid) === String(item.adsetid) &&
+                                String(i.Account) === String(item.accountNumber) &&
+                                i.level === 'adset'
+                        );
+
+                        if (idx >= 0) {
+                            arr[idx] = {
+                                ...arr[idx],
+                                comment: "",
+                                usercommit: userdetails?.email,
+                                editedTime: timeStamp
+                            };
+                        }
+                    });
+
+                    return arr;
+                });
+
+                message.success({
+                    content: `${leafCampaigns.length} comment(s) deleted successfully`,
+                    key: 'bulkDelete',
+                    duration: 3
+                });
+
+                setIsBulkCommentModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Bulk delete error:', error);
+            message.error({
+                content: 'Error while deleting comments for selected campaigns.',
+                key: 'bulkDelete'
+            });
+        }
+    };
     const handleSmartCommentSubmitAdset = async () => {
         try {
             message.loading({
@@ -367,11 +519,24 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 adsetid: item.adsetid,
                 comment,
                 usercommit: userdetails?.email,
-                level: "adset"
+                level: "adset",
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    adsetid: item.adsetid,
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    adsetname: item.adsetname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Adset pin updated",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNew',
+                '/Comments/upsertBulkNewWithHistory',
                 { items, usercommit: userdetails?.email, }
             );
 
@@ -477,7 +642,20 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     adset_id: item.adsetid,
                     accountNumber: String(item.accountNumber),
                     name: item.adsetname,
-                    email: userdetails?.email
+                    email: userdetails?.email,
+                    activity: {
+                        editType: "Status",
+                        campaignid: item.campaignid,       // cents
+                        adsetid: item.adsetid,
+                        Account: String(item.accountNumber),    // ✅ update *this* row’s account
+                        campaignname: item.campaignname,
+                        adsetname: item.adsetname,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Adset status updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
+                    }
                 }));
 
 
@@ -489,7 +667,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }
 
             const resp = await apiClient.post(
-                "/BulkAdsetStatusChangeMany",
+                "/BulkAdsetStatusChangeManyWithHistory",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -595,6 +773,17 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 campaignid: item.campaignid,
                 level: "campaign",
                 campaignname: item.campaignname,
+                activity: {
+                    editType: "Category",
+                    campaignid: item.campaignid,       // cents
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Category comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
         if (items.length === 0) {
@@ -607,7 +796,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "/BulkUpdateCategoryNewWithHistory",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1022,6 +1211,19 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     setIsAdsetModalVisibles(true);
                     setConfirmLoading(true);
                     try {
+                        const payloadForActivity = {
+                            editType: "Status",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset status updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+                        }
                         const token = localStorage.getItem("token");
                         const payload = {
                             status: desired ? "ACTIVE" : "PAUSED",
@@ -1030,8 +1232,9 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             campaign_id: campaignid,
                             adset_id: adsetid,
                             email: userdetails?.email,
+                            activity: payloadForActivity
                         };
-                        const response = await apiClient.post(`/NewBulkAdsetStatusChange`, payload,
+                        const response = await apiClient.post(`/NewBulkAdsetStatusChangeWithHistory`, payload,
                             { headers: { Authorization: token } }
                         );
 
@@ -1233,6 +1436,19 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         //     userPin: userdetails?.email,
                         //     comment: comment || ''
                         // };
+                        const payloadForActivity = {
+                            editType: "Pin",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset pin updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `From "${next ? "unpin" : "pin"}" to "${next ? "pin" : "unpin"}"`,
+                        }
                         const body = {
                             accountNumber: rowAccount,
                             campaignname: campaignName,
@@ -1240,11 +1456,12 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             adsetid,
                             userPin: userdetails?.email,
                             comment: comment || '',
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('/NewPinBulk', body)
-                            : await apiClient.post('/NewUnpinBulk', body);
+                            ? await apiClient.post('/NewPinBulkWithHistory', body)
+                            : await apiClient.post('/NewUnpinBulkWithHistory', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1389,14 +1606,28 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                 const handleOks = async () => {
                     try {
-                        const newResponse = await apiClient.post('/Comments/upsert', {
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset comment updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        }
+                        const newResponse = await apiClient.post('/Comments/upsert/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
                             adsetid,
                             comment,
                             usercommit: userdetails?.email,
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         });
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
@@ -1513,14 +1744,28 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 };
                 const handleDelete = async () => {
                     try {
-                        const newResponse = await apiClient.post('/New/Comments/delete', {
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset comment updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        }
+                        const newResponse = await apiClient.post('/New/Comments/delete/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
                             adsetid,
                             // comment,
                             usercommit: userdetails?.email,
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         });
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
@@ -1855,7 +2100,77 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 const adsetCreative = campaignCreative?.adsets?.find(
                     a => String(a.adsetId) === String(currentAdsetId)
                 );
+                const CreativeMedia = ({ url, filetype, small = false }) => {
+                    if (!url) return null;
 
+                    const isVideo = filetype === "video";
+
+                    const commonStyle = small
+                        ? {
+                            width: 50,
+                            height: 50,
+                            objectFit: "cover",
+                            borderRadius: 2,
+                            border: "1px solid #ccc",
+                            cursor: "pointer",
+                        }
+                        : {
+                            width: "100%",
+                            maxHeight: "250px",
+                            display: "block",
+                            objectFit: "contain",
+                        };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            style={commonStyle}
+                            controls={!small}
+                            muted={small}
+                            autoPlay={small}
+                            loop={small}
+                            playsInline
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="creative"
+                            style={{
+                                ...commonStyle,
+                                objectFit: small ? "cover" : "cover",
+                            }}
+                        />
+                    );
+                };
+                const CreativeAvatar = ({ url, filetype }) => {
+                    if (!url) return null;
+
+                    const isVideo = filetype === "video";
+
+                    const style = {
+                        width: 35,
+                        height: 35,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                    };
+
+                    return isVideo ? (
+                        <video
+                            src={url}
+                            muted
+                            autoPlay
+                            loop
+                            playsInline
+                            style={style}
+                        />
+                    ) : (
+                        <img
+                            src={url}
+                            alt="page"
+                            style={style}
+                        />
+                    );
+                };
                 const creatives = adsetCreative?.ads || [];
                 const CreativeTooltip = () => {
                     if (!adLevelCreatives.length) {
@@ -1875,7 +2190,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                 maxWidth: 280
                             }}
                         >
-                            {creatives.map((ad, i) => (
+                            {/* {creatives.map((ad, i) => (
                                 <img
                                     key={i}
                                     src={ad.image}
@@ -1895,6 +2210,23 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                     }}
                                 />
 
+                            ))} */}
+                            {creatives.map((ad, i) => (
+                                <div
+                                    key={i}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCampaignCreatives(creatives);
+                                        setCreativeModalOpen(true);
+                                    }}
+                                >
+                                    <CreativeMedia
+                                        url={ad.image}
+                                        filetype={ad.filetype}
+                                        small
+                                    />
+
+                                </div>
                             ))}
                         </div>
                     );
@@ -2065,7 +2397,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                                     <div style={{ padding: "8px 10px" }}>
                                         <div style={{ display: "flex", alignItems: "center" }}>
-                                            <img
+                                            {/* <img
                                                 src={selectedCreative.image}
                                                 alt="page"
                                                 style={{
@@ -2074,8 +2406,11 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                     borderRadius: "50%",
                                                     objectFit: "cover",
                                                 }}
+                                            /> */}
+                                            <CreativeAvatar
+                                                url={selectedCreative.image}
+                                                filetype={selectedCreative.filetype}
                                             />
-
                                             <div style={{ flex: 1, marginLeft: 6 }}>
                                                 <div
                                                     style={{
@@ -2110,7 +2445,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             </div>
                                         )}
                                     </div>
-                                    <img
+                                    {/* <img
                                         src={selectedCreative.image}
                                         alt="creative"
                                         style={{
@@ -2119,6 +2454,10 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                             objectFit: "cover",
                                             display: "block",
                                         }}
+                                    /> */}
+                                    <CreativeMedia
+                                        url={selectedCreative.image}
+                                        filetype={selectedCreative.filetype}
                                     />
                                     <div style={{ padding: "8px 10px" }}>
                                         {selectedCreative.headline && (
@@ -2362,6 +2701,36 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             return params.value; // Normal copy behavior for regular cells
         }
     };
+
+    function getFBHour(data, startDate, endDate) {
+        const start = new Date(startDate).toISOString().slice(0, 10);
+        const end = new Date(endDate).toISOString().slice(0, 10);
+
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000)
+            .toISOString()
+            .slice(0, 10);
+
+        const fbData = data.filter(
+            item => item.fbCron && item.fbCron !== "Failed" && item.hour
+        );
+        if (!fbData.length) return "00";
+        if (start === end && start === today) {
+            const currentHour = new Date().getHours();
+
+            const todayHours = fbData
+                .map(i => Number(i.hour))
+                .filter(h => h <= currentHour);
+
+            return todayHours.length
+                ? String(Math.max(...todayHours)).padStart(2, "0")
+                : "00";
+        }
+        if (start === end && start === yesterday) {
+            return findMaxHour(fbData);
+        }
+        return findMaxHour(fbData);
+    }
 
     function findMaxHour(data) {
         // Use reduce to find the maximum value of the 'hour' key
@@ -2875,8 +3244,25 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     (newFilterData.reduce((a, c) => a + parseFloat(c.impressions || 0), 0) || 1) * 100
                 ).toFixed(2))
             }]);
-
             newRowData.current = filteredData;
+
+            const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
+            const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
+
+            if (mainData.length > 1) {
+                const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
+                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                timezone.current = findRevenueObject.accountTimezone;
+                accountStatus.current = findRevenueObject.accountStatus;
+                cronStatus.current = mainData[0].cronStatus;
+
+                fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
+                revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
+
+                // maxHour.current = findMaxHour(mainData);
+                maxHour.current = getFBHour(mainData, startDate, endDate);
+                maxNetworkHour.current = getMaxHour(mainData);
+            }
             setApiStatus(false);
             setLoading(false);
         } catch (error) {
@@ -3609,6 +3995,9 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                                                 footer={[
+                                                    <Button key="Delete" onClick={handleBulkDeleteComments}>
+                                                        Delete
+                                                    </Button>,
                                                     <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                                                         Cancel
                                                     </Button>,
