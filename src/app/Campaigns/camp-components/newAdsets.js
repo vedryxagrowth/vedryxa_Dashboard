@@ -4552,6 +4552,7 @@ const NewAdsetComponent = ({
                     //   { value: "MX", label: "Mexico", title: "" },
                     // ]}
                     showSearch
+                    optionFilterProp="label"
                     options={[
                       { value: "US", label: "United States", title: "" },
                       { value: "GB", label: "United Kingdom", title: "" },
@@ -4588,6 +4589,7 @@ const NewAdsetComponent = ({
                       { value: "LU", label: "Luxembourg", title: "" },
                       { value: "MT", label: "Malta", title: "" },
                       { value: "NL", label: "Netherlands", title: "" },
+                       { value: "NO", label: "Norway",title:""},
                       { value: "PL", label: "Poland", title: "" },
                       { value: "PT", label: "Portugal", title: "" },
                       { value: "RO", label: "Romania", title: "" },
