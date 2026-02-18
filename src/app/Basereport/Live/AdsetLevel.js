@@ -351,7 +351,20 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             campaignid: item.campaignid,
             adsetid: item.adsetid,
             level: "adset",
-            userPin: userdetails?.email
+            userPin: userdetails?.email,
+            activity: {
+                editType: "Pin",
+                campaignid: item.campaignid,       // cents
+                adsetid: item.adsetid,
+                Account: item.accountNumber,    // ✅ update *this* row’s account
+                campaignname: item.campaignname,
+                adsetname: item.adsetname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Adset pin updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From "${action === "pin" ? "unpin" : "pin"}" to "${action === "pin" ? "pin" : "unpin"}"`,
+            }
         }));
 
         message.loading(
@@ -361,8 +374,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
         const apiUrl =
             action === "pin"
-                ? "/SmartPinBulk"
-                : "/SmartUnpinBulk";
+                ? "/SmartPinBulkWithHitory"
+                : "/SmartUnpinBulkWithHistory";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -409,6 +422,89 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             return arr;
         });
     };
+    const handleBulkDeleteComments = async () => {
+        try {
+            message.loading({
+                content: 'Deleting comments for selected campaigns...',
+                key: 'bulkDelete'
+            });
+
+
+            const items = leafCampaigns.map(item => ({
+                campaignid: item.campaignid,
+                adsetid: item.adsetid,
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    adsetid: item.adsetid,
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    adsetname: item.adsetname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Adset comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
+            }));
+
+            const body = {
+                accountNumber: leafCampaigns?.[0]?.accountNumber,
+                level: 'adset',
+                items
+            };
+
+            const resp = await apiClient.post(
+                '/Comments/bulkdeleteWithHistory',
+                body
+            );
+
+            if (resp.status === 200 || resp.status === 201) {
+                const timeStamp = moment()
+                    .tz('Asia/Kolkata')
+                    .format('YYYY-MM-DD hh:mm:ss A');
+
+                setCampaignComments(prev => {
+                    const arr = [...prev];
+
+                    leafCampaigns.forEach(item => {
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(item.campaignid) &&
+                                String(i.adsetid) === String(item.adsetid) &&
+                                String(i.Account) === String(item.accountNumber) &&
+                                i.level === 'adset'
+                        );
+
+                        if (idx >= 0) {
+                            arr[idx] = {
+                                ...arr[idx],
+                                comment: "",
+                                usercommit: userdetails?.email,
+                                editedTime: timeStamp
+                            };
+                        }
+                    });
+
+                    return arr;
+                });
+
+                message.success({
+                    content: `${leafCampaigns.length} comment(s) deleted successfully`,
+                    key: 'bulkDelete',
+                    duration: 3
+                });
+
+                setIsBulkCommentModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Bulk delete error:', error);
+            message.error({
+                content: 'Error while deleting comments for selected campaigns.',
+                key: 'bulkDelete'
+            });
+        }
+    };
     const handleSmartCommentSubmitAdset = async () => {
         try {
             message.loading({
@@ -423,11 +519,24 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 adsetid: item.adsetid,
                 comment,
                 usercommit: userdetails?.email,
-                level: "adset"
+                level: "adset",
+                activity: {
+                    editType: "Comment",
+                    campaignid: item.campaignid,       // cents
+                    adsetid: item.adsetid,
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    adsetname: item.adsetname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Adset pin updated",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNew',
+                '/Comments/upsertBulkNewWithHistory',
                 { items, usercommit: userdetails?.email, }
             );
 
@@ -533,7 +642,20 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     adset_id: item.adsetid,
                     accountNumber: String(item.accountNumber),
                     name: item.adsetname,
-                    email: userdetails?.email
+                    email: userdetails?.email,
+                    activity: {
+                        editType: "Status",
+                        campaignid: item.campaignid,       // cents
+                        adsetid: item.adsetid,
+                        Account: String(item.accountNumber),    // ✅ update *this* row’s account
+                        campaignname: item.campaignname,
+                        adsetname: item.adsetname,
+                        updatedBy: userdetails?.userName,
+                        updatedUserEmail: userdetails?.email,
+                        updateType: "Adset status updated",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
+                    }
                 }));
 
 
@@ -545,7 +667,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }
 
             const resp = await apiClient.post(
-                "/BulkAdsetStatusChangeMany",
+                "/BulkAdsetStatusChangeManyWithHistory",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -651,6 +773,17 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 campaignid: item.campaignid,
                 level: "campaign",
                 campaignname: item.campaignname,
+                activity: {
+                    editType: "Category",
+                    campaignid: item.campaignid,       // cents
+                    Account: item.accountNumber,    // ✅ update *this* row’s account
+                    campaignname: item.campaignname,
+                    updatedBy: userdetails?.userName,
+                    updatedUserEmail: userdetails?.email,
+                    updateType: "Category comment cleared",
+                    updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                    // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                }
             }));
 
         if (items.length === 0) {
@@ -663,7 +796,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategory",
+                "/BulkUpdateCategoryNewWithHistory",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1078,6 +1211,19 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     setIsAdsetModalVisibles(true);
                     setConfirmLoading(true);
                     try {
+                        const payloadForActivity = {
+                            editType: "Status",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset status updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+                        }
                         const token = localStorage.getItem("token");
                         const payload = {
                             status: desired ? "ACTIVE" : "PAUSED",
@@ -1086,8 +1232,9 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             campaign_id: campaignid,
                             adset_id: adsetid,
                             email: userdetails?.email,
+                            activity: payloadForActivity
                         };
-                        const response = await apiClient.post(`/NewBulkAdsetStatusChange`, payload,
+                        const response = await apiClient.post(`/NewBulkAdsetStatusChangeWithHistory`, payload,
                             { headers: { Authorization: token } }
                         );
 
@@ -1289,6 +1436,19 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         //     userPin: userdetails?.email,
                         //     comment: comment || ''
                         // };
+                        const payloadForActivity = {
+                            editType: "Pin",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset pin updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `From "${next ? "unpin" : "pin"}" to "${next ? "pin" : "unpin"}"`,
+                        }
                         const body = {
                             accountNumber: rowAccount,
                             campaignname: campaignName,
@@ -1296,11 +1456,12 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             adsetid,
                             userPin: userdetails?.email,
                             comment: comment || '',
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('/NewPinBulk', body)
-                            : await apiClient.post('/NewUnpinBulk', body);
+                            ? await apiClient.post('/NewPinBulkWithHistory', body)
+                            : await apiClient.post('/NewUnpinBulkWithHistory', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1445,14 +1606,28 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
                 const handleOks = async () => {
                     try {
-                        const newResponse = await apiClient.post('/Comments/upsert', {
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset comment updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        }
+                        const newResponse = await apiClient.post('/Comments/upsert/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
                             adsetid,
                             comment,
                             usercommit: userdetails?.email,
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         });
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
@@ -1569,14 +1744,28 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 };
                 const handleDelete = async () => {
                     try {
-                        const newResponse = await apiClient.post('/New/Comments/delete', {
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            adsetid: adsetid,
+                            Account: rowAccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            adsetname: adsetName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Adset comment updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        }
+                        const newResponse = await apiClient.post('/New/Comments/delete/History', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
                             adsetid,
                             // comment,
                             usercommit: userdetails?.email,
-                            level: "adset"
+                            level: "adset",
+                            activity: payloadForActivity
                         });
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setCampaignComments(prev => {
@@ -3806,6 +3995,9 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                                                 footer={[
+                                                    <Button key="Delete" onClick={handleBulkDeleteComments}>
+                                                        Delete
+                                                    </Button>,
                                                     <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                                                         Cancel
                                                     </Button>,

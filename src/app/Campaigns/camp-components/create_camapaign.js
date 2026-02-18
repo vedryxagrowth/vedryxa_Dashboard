@@ -11320,6 +11320,7 @@ const CreateCampaignDrawer = ({
 
     // 3. Map adset form values
     const updatedFormAdsets = adsetObjects.map((adsetObj, index) => {
+      const isAccountInclueded = accountis.includes(draft.Account_Number)
       const updatedAdset = {};
       accountis.forEach((account) => {
         updatedAdset[account] = {
