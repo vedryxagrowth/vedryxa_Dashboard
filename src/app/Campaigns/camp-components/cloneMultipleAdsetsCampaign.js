@@ -2855,18 +2855,35 @@ const AdsetComponent = ({
     });
   };
 
-  const handleEveryDayToggle = (hour) => {
+  // const handleEveryDayToggle = (hour) => {
+  //   setSelectedByAdset(prev => {
+  //     const current = prev[adset.id] || {};
+
+  //     const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+  //       d => current[`${d}-${hour}`]
+  //     );
+
+  //     const updated = { ...current };
+
+  //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+  //       updated[`${d}-${hour}`] = !allSelected;
+  //     });
+
+  //     return {
+  //       ...prev,
+  //       [adset.id]: updated
+  //     };
+  //   });
+  // };
+  const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
-      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
-        d => current[`${d}-${hour}`]
-      );
 
       const updated = { ...current };
 
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-        updated[`${d}-${hour}`] = !allSelected;
+        const key = `${d}-${hour}`;
+        updated[key] = !current[key];
       });
 
       return {
@@ -2875,6 +2892,7 @@ const AdsetComponent = ({
       };
     });
   };
+
   const isValidAdSchedule = (schedule = []) =>
     Array.isArray(schedule) &&
     schedule.length > 0 &&
@@ -3038,6 +3056,7 @@ const AdsetComponent = ({
     { value: "LU", label: "Luxembourg" },
     { value: "MT", label: "Malta" },
     { value: "NL", label: "Netherlands" },
+    { value: "NO", label: "Norway", },
     { value: "PL", label: "Poland" },
     { value: "PT", label: "Portugal" },
     { value: "RO", label: "Romania" },
@@ -4547,7 +4566,14 @@ const AdsetComponent = ({
                           key={h}
                           className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
                             }`}
-                          onMouseDown={() => handleEveryDayToggle(h)}
+                          // onMouseDown={() => handleEveryDayToggle(h)}
+                          onMouseDown={() => {
+                            setDragging(true);
+                            handleEveryDayDrag(h);
+                          }}
+                          onMouseEnter={() => {
+                            if (dragging) handleEveryDayDrag(h);
+                          }}
                         />
                       );
                     })}
@@ -4598,6 +4624,7 @@ const AdsetComponent = ({
               mode="multiple"
               allowClear
               showSearch
+              optionFilterProp="label"
               placeholder={
                 campaignCountries.length ? "Select from campaign countries" : "Select any country"
               }
@@ -12096,6 +12123,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                           //   { value: "MX", label: "Mexico" },
                           // ]}
                           showSearch
+                          optionFilterProp="label"
                           options={[
                             { value: "US", label: "United States", title: "" },
                             { value: "GB", label: "United Kingdom", title: "" },
@@ -12114,6 +12142,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                             { value: "ES", label: "Spain", title: "" },
                             { value: "SG", label: "Singapore", title: "" },
                             { value: "NZ", label: "New Zealand", title: "" },
+                            { value: "NO", label: "Norway", title: "" },
                             { value: "MX", label: "Mexico", title: "" },
                             { value: "AT", label: "Austria", title: "" },
                             { value: "BE", label: "Belgium", title: "" },

@@ -866,6 +866,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                 //   { value: "MX", label: "Mexico" }
                 // ]}
                 showSearch
+                optionFilterProp="label"
                 options={[
                   { value: "US", label: "United States", title: "" },
                   { value: "GB", label: "United Kingdom", title: "" },
@@ -902,6 +903,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "LU", label: "Luxembourg", title: "" },
                   { value: "MT", label: "Malta", title: "" },
                   { value: "NL", label: "Netherlands", title: "" },
+                  { value: "NO", label: "Norway",title:""},
                   { value: "PL", label: "Poland", title: "" },
                   { value: "PT", label: "Portugal", title: "" },
                   { value: "RO", label: "Romania", title: "" },
