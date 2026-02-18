@@ -252,6 +252,7 @@ const Createadsets = () => {
                 //   { value: "MX", label: "Mexico" }
                 // ]}
                 showSearch
+                optionFilterProp="label"
                 options={[
                   { value: "US", label: "United States", title: "" },
                   { value: "GB", label: "United Kingdom", title: "" },
@@ -270,6 +271,7 @@ const Createadsets = () => {
                   { value: "ES", label: "Spain", title: "" },
                   { value: "SG", label: "Singapore", title: "" },
                   { value: "NZ", label: "New Zealand", title: "" },
+                   { value: "NO", label: "Norway",title:""},
                   { value: "MX", label: "Mexico", title: "" },
                   { value: "AT", label: "Austria", title: "" },
                   { value: "BE", label: "Belgium", title: "" },

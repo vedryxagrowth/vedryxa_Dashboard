@@ -57,7 +57,7 @@ import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
 import AffinityUrlBuilder from "./urlbuilder/affinity";
-import CompadoUrlBuilder from  "./urlbuilder/compado";
+import CompadoUrlBuilder from "./urlbuilder/compado";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
 import { NodeNextRequest } from "next/dist/server/base-http/node";
@@ -711,7 +711,7 @@ const AccountForm = ({
   const getUrlBuilder = () => {
     // useMemo(() => {
     // return (extraString) => {
-      console.log(network)
+    console.log(network)
     switch (network) {
       case "FB_Mnet":
         //defaultValues
@@ -733,7 +733,7 @@ const AccountForm = ({
         return (
           <CompadoUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
-      
+
       case "FB_Tonic1":
         return (
           <TonicUrlBuilder
@@ -1388,18 +1388,35 @@ const AdsetComponent = ({
     });
   };
 
-  const handleEveryDayToggle = (hour) => {
+  // const handleEveryDayToggle = (hour) => {
+  //   setSelectedByAdset(prev => {
+  //     const current = prev[adset.id] || {};
+
+  //     const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+  //       d => current[`${d}-${hour}`]
+  //     );
+
+  //     const updated = { ...current };
+
+  //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+  //       updated[`${d}-${hour}`] = !allSelected;
+  //     });
+
+  //     return {
+  //       ...prev,
+  //       [adset.id]: updated
+  //     };
+  //   });
+  // };
+  const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
-      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
-        d => current[`${d}-${hour}`]
-      );
 
       const updated = { ...current };
 
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-        updated[`${d}-${hour}`] = !allSelected;
+        const key = `${d}-${hour}`;
+        updated[key] = !current[key];
       });
 
       return {
@@ -1408,6 +1425,7 @@ const AdsetComponent = ({
       };
     });
   };
+
   const isValidAdSchedule = (schedule = []) =>
     Array.isArray(schedule) &&
     schedule.length > 0 &&
@@ -1515,6 +1533,7 @@ const AdsetComponent = ({
     { value: "ES", label: "Spain" },
     { value: "SG", label: "Singapore" },
     { value: "NZ", label: "New Zealand" },
+    { value: "NO", label: "Norway", },
     { value: "MX", label: "Mexico" },
     { value: "AT", label: "Austria" },
     { value: "BE", label: "Belgium" },
@@ -3665,7 +3684,15 @@ const AdsetComponent = ({
                           key={h}
                           className={`hour-cell ${isActive ? "active" : ""} ${h % 3 === 0 ? "group-start" : ""
                             }`}
-                          onMouseDown={() => handleEveryDayToggle(h)}
+                          // onMouseDown={() => handleEveryDayToggle(h)}
+                          onMouseDown={() => {
+                            setDragging(true);
+                            handleEveryDayDrag(h);
+                          }}
+                          onMouseEnter={() => {
+                            if (dragging) handleEveryDayDrag(h);
+                          }}
+
                         />
                       );
                     })}
@@ -3933,6 +3960,7 @@ const AdsetComponent = ({
                 placeholder={
                   campaignCountries.length ? "Select from campaign countries" : "Select any country"
                 }
+                optionFilterProp="label"
                 disabled={(geo === "Geos" && index !== 0)}
                 options={optionsForIndexOfCountries}
                 getPopupContainer={(trigger) => trigger.parentNode}
@@ -11341,7 +11369,8 @@ const CreateCampaignDrawer = ({
         countries: adsetObj.countries,
         Min_Age: adsetObj.Min_Age,
         Max_Age: adsetObj.Max_Age,
-        Gender: adsetObj.Gender,
+        // Gender: adsetObj.Gender,
+        Gender: String(adsetObj.Gender),
         showPayer: !!adsetObj.payer,
         timezone_type: adsetObj.adschedule?.[0]?.timezone_type,
         Beneficiary: adsetObj.beneficiary,
@@ -11512,6 +11541,56 @@ const CreateCampaignDrawer = ({
 
     console.log("Selected Draft:", draft);
     setFormValuesFromDraft(draft);
+    setTimeout(() => {
+      const pixelsFromDraft = Object.keys(draft)
+        .filter(key => key.startsWith("adsetlevel_"))
+        .map(key => {
+          const adset = draft[key];
+          return adset?.pixel_id
+            ? `${draft.Account_Number} - ${adset.pixel_id}`
+            : null;
+        })
+        .filter(Boolean);
+      // setPixelIdList(pixelsFromDraft);
+      setPixelIdList(prev => {
+        const otherAccounts = (prev || []).filter(p => {
+          const account = p.split(" - ")[0];
+          return account !== draft.Account_Number;
+        });
+
+        return [...otherAccounts, ...pixelsFromDraft];
+      });
+
+    }, 0);
+    setTimeout(() => {
+      const pagesFromDraft = Object.keys(draft)
+        .filter(key => key.startsWith("adsetlevel_"))
+        .map(key => {
+          const adset = draft[key];
+          return adset?.addlevel?.page_id
+            ? `${draft.Account_Number} - ${adset.addlevel.page_id}`
+            : null;
+        })
+        .filter(Boolean);
+
+      if (pagesFromDraft.length > 0) {
+        form.setFieldsValue({
+          page_id: pagesFromDraft,
+        });
+
+        setPageIdList(prev => {
+          const otherAccounts = (prev || []).filter(p => {
+            const account = p.split(" - ")[0];
+            return account !== draft.Account_Number;
+          });
+
+          return [...otherAccounts, ...pagesFromDraft];
+        });
+
+      }
+    }, 0);
+
+
     setAdSchedulingToShowCampaign(
       !!draft?.camapaignlevel?.is_day_parting_enabled_campign || false
     );
@@ -11789,7 +11868,7 @@ const CreateCampaignDrawer = ({
           </div>
 
           <div>
-            <Tooltip title={page === "Pages" ? "Turn off to launch campaign in single Page" :"Turn on to launch campaigns in multiple Pages"}
+            <Tooltip title={page === "Pages" ? "Turn off to launch campaign in single Page" : "Turn on to launch campaigns in multiple Pages"}
               overlayInnerStyle={{
                 backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                 color: theme === "dark" ? "#ffffff" : "#000000",
@@ -12463,6 +12542,7 @@ const CreateCampaignDrawer = ({
                           //   { value: "MX", label: "Mexico" },
                           // ]}
                           showSearch
+                          optionFilterProp="label"
                           options={[
                             { value: "US", label: "United States", title: "" },
                             { value: "GB", label: "United Kingdom", title: "" },
@@ -12481,6 +12561,7 @@ const CreateCampaignDrawer = ({
                             { value: "ES", label: "Spain", title: "" },
                             { value: "SG", label: "Singapore", title: "" },
                             { value: "NZ", label: "New Zealand", title: "" },
+                            { value: "NO", label: "Norway", title: "" },
                             { value: "MX", label: "Mexico", title: "" },
                             { value: "AT", label: "Austria", title: "" },
                             { value: "BE", label: "Belgium", title: "" },

@@ -1321,15 +1321,21 @@ const App = () => {
 
             // Step 2: If campaignId is available, update the budget on Facebook
             if (record.campaignid) {
+              const budgetParams = {
+                access_token: record.access_token,
+                ...(BudgetType === "daily" && { daily_budget: budgets }),
+                ...(BudgetType === "lifetime" && { lifetime_budget: budgets }),
+              };
               try {
                 const fbResponse = await axios.post(
                   `https://graph.facebook.com/v22.0/${record.campaignid}`,
                   null,
                   {
-                    params: {
-                      daily_budget: budgets,
-                      access_token: record.access_token,
-                    },
+                    // params: {
+                    //   daily_budget: budgets,
+                    //   access_token: record.access_token,
+                    // },
+                    params: budgetParams,
                     headers: {
                       "Content-Type": "application/json",
                     },
@@ -1340,7 +1346,7 @@ const App = () => {
                   console.log("Daily budget updated successfully on Facebook");
                   message.open({
                     type: 'success',
-                    content: "Daily amount updated successfully on both backend and Facebook",
+                    content: `${BudgetType} amount updated successfully on both backend and Facebook`,
                     className: theme === 'dark' ? 'dark-message' : '',
                   });
 
@@ -1413,7 +1419,7 @@ const App = () => {
             >
               <DollarOutlined className="custom-dollar-icon" />
               <span style={{ color: "#1890ff" }}>{value}</span>
-              <span style={{ marginLeft: "5px" }}>Daily</span>
+              <span style={{ marginLeft: "5px" }}>{record.budgetType}</span>
               {/* <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} /> */}
             </div>
           )
@@ -1553,7 +1559,7 @@ const App = () => {
             >
               <DollarOutlined className="custom-dollar-icon" />
               <span style={{ color: "#1890ff" }}>{value}</span>
-              <span style={{ marginLeft: "5px" }}>Daily</span>
+              <span style={{ marginLeft: "5px" }}>{record.budgetType}</span>
               {/* <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} /> */}
             </div>
           )
@@ -4051,7 +4057,7 @@ const App = () => {
             />
 
             {/* 🔹 Date Picker */}
-            <ConfigProvider
+            {/* <ConfigProvider
               theme={{
                 token: { colorPrimary: "#91C25F", colorTextLightSolid: "#000" },
               }}
@@ -4070,8 +4076,65 @@ const App = () => {
                 dropdownClassName={`${theme === "dark" ? "dark-theme-dropdown" : ""
                   }`}
               />
-            </ConfigProvider>
+            </ConfigProvider> */}
 
+            <Col flex="none" className='Dashboard-Details-1'>
+              <ConfigProvider
+                // locale={locale}
+                theme={{
+                  token: {
+                    colorPrimary: '#91C25F',
+                    colorTextLightSolid: '#000',
+                  },
+                }}
+              >
+                <RangePicker
+                  presets={rangePresets}
+                  onChange={handleChange}
+                  disabledDate={disabledDate}
+                  // defaultValue={defaultDates}
+                  defaultValue={[dayjs(), dayjs()]}
+                  format="YYYY-MM-DD"
+                  style={{
+                    width: '220px',
+                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                    color: theme === 'dark' ? 'white' : undefined,
+                    border: '1px solid #4CAF50',
+                    borderRadius: '6px'
+                  }}
+                  dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                />
+              </ConfigProvider>
+            </Col>
+            <Col flex="none" className='Dashboard-Details-2'>
+              <ConfigProvider
+                // locale={locale}
+                theme={{
+                  token: {
+                    colorPrimary: '#91C25F',
+                    colorTextLightSolid: '#000',
+                  },
+                }}
+              >
+                <RangePicker
+                  presets={rangePresets}
+                  onChange={handleChange}
+                  disabledDate={disabledDate}
+                  // defaultValue={defaultDates}
+                  defaultValue={[dayjs(), dayjs()]}
+                  format="YYYY-MM-DD"
+                  style={{
+                    width: '240px',
+                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                    color: theme === 'dark' ? 'white' : undefined,
+                    border: '1px solid #4CAF50',
+                    borderRadius: '6px'
+                  }}
+                  // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+                  dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                />
+              </ConfigProvider>
+            </Col>
             {/* 🔹 Apply Button */}
             <Button
               type="primary"
@@ -4239,7 +4302,7 @@ const App = () => {
                   border: "1px solid #4CAF50",
                   color: theme === "dark" ? "#95de64" : "#389e0d",
                   fontWeight: 500,
-                  width: 100,
+                  width: 80,
                 }}
               >
                 <Space size={2}>
