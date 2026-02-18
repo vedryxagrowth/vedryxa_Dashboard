@@ -5519,6 +5519,7 @@ const MyTablePage = () => {
                                 adset.budget.lifetime_budget = null;
                             }
                         }
+
                         if (adset) {
                             const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
                             onChangeBudget(budget);
