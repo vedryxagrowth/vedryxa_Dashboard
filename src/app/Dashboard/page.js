@@ -1090,6 +1090,7 @@ const Dashboard = () => {
     const cpl1 = useRef(0);
     const ctr1 = useRef(0);
     const rpc1 = useRef(0);
+    const roi1 = useRef(0);
 
     // State for the first Select element (categories)
     const [firstSelectValues, setFirstSelectValues] = useState([defaultCategory]);
@@ -1454,6 +1455,10 @@ const Dashboard = () => {
         return Math.round((getTotalEstimatedSpend(fullData) / getTotalLeads(fullData)) * 100) / 100;
     }
 
+    function getTotalROI(fullData){
+        return getTotalEstimatedSpend(fullData) > 0 ? Math.round((((getTotalEstimatedRevenue(fullData) - getTotalEstimatedSpend(fullData)) / getTotalEstimatedSpend(fullData)) * 100) * 100) / 100 : 0;
+    }
+
     function getTotalCtr(fullData) {
         return Math.round(((getTotalFbClicks(fullData) / getTotalImpressions(fullData)) * 100) * 100) / 100;
     }
@@ -1545,7 +1550,7 @@ const Dashboard = () => {
             cpl1.current = getTotalCpl(responseData);
             rpc1.current = getTotalRpc(responseData, collectionName);
             ctr1.current = getTotalCtr(responseData);
-
+            roi1.current = getTotalROI(responseData);
             setData(responseData);
         }
         functionForDetailsUpdate();
@@ -5520,6 +5525,7 @@ const Dashboard = () => {
         { key: "ctr", label: "CTR", color: "#2196F3", value: data.length > 0 ? ctr1.current : 0 },
         { key: "cpc", label: "CPC", color: "#F44336", value: data.length > 0 ? cpc1.current : 0 },
         { key: "rpc", label: "RPC", color: "#00ACC1", value: data.length > 0 ? rpc1.current : 0 },
+        { key: "roi", label: "ROI", color: "#00C853", value: data.length > 0 ? roi1.current : 0 },
     ];
 
     const onCellClicked = (params) => {
@@ -5992,6 +5998,7 @@ const Dashboard = () => {
                                             { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE' },
                                             { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
                                             { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                            { title: 'ROI', value: roi1.current, color: '#00C853', dot: '#00C853' },
                                         ].map((item, idx) => (
                                             <div
                                                 key={idx}
@@ -6006,7 +6013,9 @@ const Dashboard = () => {
                                                     width: '100%',
                                                     position: 'relative',
                                                     zIndex: 2,
-                                                    borderBottom: idx < 8 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                                          gridColumn: idx === metrics.length - 1 ? 'span 2' : 'auto',
+
+                                                    borderBottom: idx < 10 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
                                                     borderLeft:
                                                         (idx % 2 === 1 && idx < 8 || idx === 9) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
                                                     // borderLeft: idx === 9 ? (theme === 'dark' ? '1px solid #fff' : '1px solid #0B3D63') : 'none',

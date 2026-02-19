@@ -4066,7 +4066,7 @@ select:focus,
 /* Default: all 10 cards in ONE row */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(11, 1fr);
   gap: 12px;
 }
 
@@ -4124,7 +4124,7 @@ select:focus,
 -------------------------------- */
 @container (max-width: 1150px) {
   .metrics-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     /* always 5 per row */
   }
 }

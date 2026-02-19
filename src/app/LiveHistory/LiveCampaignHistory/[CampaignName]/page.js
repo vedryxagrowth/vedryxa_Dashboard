@@ -107,6 +107,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const timeZone = paramsData[2];
     // timeZoneToDisplay.current = timeZone;
     let network = paramsData[3];
+    let reportType = paramsData[4];
     console.log(network, "network");
     console.log(decodedString, "decode");
 
@@ -1207,7 +1208,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         "Last Month",
     ];
 
-    const [selectedValue, setSelectedValue] = useState("All");
+    const [selectedValue, setSelectedValue] = useState(reportType === "BaseReport" ? "Today" : "All");
     const [filteredData, setFilteredData] = useState(rowData);
 
     const [domainFixedFooter, setDomainFixedFooter] = useState([]);
@@ -1397,61 +1398,64 @@ const MnetLiveCampaignHistory = ({ params }) => {
         setCampaignId(mainData[0].campaign_id);
         setAdsetID(mainData[0].adset_id);
 
-        const filteredData = mainData && mainData.length > 0 ?
-            mainData.map((eachData) => {
-                const revenueData = parseFloat(eachData.estimated_revenue) || '0.00';
-                const profit = (revenueData - eachData.spend).toFixed(2);
-                const margin = revenueData !== '0.00' ? `${((revenueData - eachData.spend) / revenueData * 100).toFixed(2)}%` : "0%";
+        const filteredData = mainData && mainData.length > 0 ? 
+        (reportType === "BaseReport"
+            ? mainData.filter(eachData => eachData.updatedHour)
+            : mainData
+        ).map((eachData) => {
+            const revenueData = parseFloat(eachData.estimated_revenue) || '0.00';
+            const profit = (revenueData - eachData.spend).toFixed(2);
+            const margin = revenueData !== '0.00' ? `${((revenueData - eachData.spend) / revenueData * 100).toFixed(2)}%` : "0%";
 
-                const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
+            const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
 
-                let cpl;
-                if (eachData.fbLeads == 0) {
-                    cpl = 0;
-                } else {
-                    cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
-                }
-                const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-                console.log(eachData[`${timeZone}Date`], `${timeZone}Date`);
+            let cpl;
+            if (eachData.fbLeads == 0) {
+                cpl = 0;
+            } else {
+                cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+            }
+            const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+            console.log(eachData[`${timeZone}Date`], `${timeZone}Date`);
 
-                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-                const spend = parseFloat(eachData.spend);
-                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
-                return {
-                    date: eachData[`${timeZone}Date`],
-                    date_n: eachData[`${timeZone}Date`],
-                    date_f: eachData[`${timeZone}Date`],
-                    campaignname: eachData.campaign_name,
-                    adsetname: eachData.adsetName,
-                    spend: eachData.spend,
-                    revenue: revenueData,
-                    profit: profit,
-                    margin: margin,
-                    fbleads: eachData.fbLeads,
-                    conversions: eachData.conversions !== null ? eachData.conversions : 0,
-                    cpc: eachData.cpc,
-                    cpclinkclicks: cpcLinkClicks,
-                    fbclicks: eachData.fbClicks,
-                    fblinkclicks: eachData.fbLinkClicks,
-                    impressions: eachData.impressions,
-                    rpc: rpc,
-                    cpl: cpl,
-                    ncpl: ncpl,
-                    adsetId: eachData.adset_id,
-                    campaignId: eachData.campaign_id,
-                    timezone: eachData[timeZone],
-                    hour_f: eachData.hour,
-                    hour_n: eachData.updatedHour,
-                    filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads) - parseInt(eachData.conversions)) / parseInt(eachData.fbLeads)) * 100) * 100) / 100 : 0,
-                    adname: "",
-                    M_tq: "",
-                    D_tq: "",
-                };
-            })
+            const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+            const spend = parseFloat(eachData.spend);
+            const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
+            return {
+                date: eachData[`${timeZone}Date`],
+                date_n: eachData[`${timeZone}Date`],
+                date_f: eachData[`${timeZone}Date`],
+                campaignname: eachData.campaign_name,
+                adsetname: eachData.adsetName,
+                spend: eachData.spend,
+                revenue: revenueData,
+                profit: profit,
+                margin: margin,
+                fbleads: eachData.fbLeads,
+                conversions: eachData.conversions !== null ? eachData.conversions : 0,
+                cpc: eachData.cpc,
+                cpclinkclicks: cpcLinkClicks,
+                fbclicks: eachData.fbClicks,
+                fblinkclicks: eachData.fbLinkClicks,
+                impressions: eachData.impressions,
+                rpc: rpc,
+                cpl: cpl,
+                ncpl: ncpl,
+                adsetId: eachData.adset_id,
+                campaignId: eachData.campaign_id,
+                timezone: eachData[timeZone],
+                hour_f: eachData.hour,
+                hour_n: eachData.updatedHour,
+                filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads) - parseInt(eachData.conversions)) / parseInt(eachData.fbLeads)) * 100) * 100) / 100 : 0,
+                adname: "",
+                M_tq: "",
+                D_tq: "",
+            };
+        })
             : null;
 
         setRowData(filteredData);
-        setFilteredData(filteredData);
+        setFilteredData(reportType === "BaseReport" ? filteredData.filter((item) => item.date === moment().format("YYYY-MM-DD")) : filteredData);
         setValue(mainData);
         setLoading(false);
 

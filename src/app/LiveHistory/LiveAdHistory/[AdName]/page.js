@@ -129,6 +129,7 @@ const MnetLiveAdHistory = ({ params }) => {
     timeZoneToDisplay.current = timeZone;
     // console.log(paramsData[3], "network");
     let network = paramsData[3];
+    const reportType = paramsData[4];
 
     const handleCopy = () => {
         navigator.clipboard.writeText(decodedString).then(() => {
@@ -1117,7 +1118,7 @@ const MnetLiveAdHistory = ({ params }) => {
         "Last Month",
     ];
 
-    const [selectedValue, setSelectedValue] = useState("All");
+    const [selectedValue, setSelectedValue] = useState(reportType === "BaseReport" ? "Today" : "All");
     const [filteredData, setFilteredData] = useState(rowData);
 
     const [domainFixedFooter, setDomainFixedFooter] = useState([]);
@@ -1230,7 +1231,11 @@ const MnetLiveAdHistory = ({ params }) => {
             obj => obj.ad_id && obj.campaign_id && obj.adset_id
         ))
         const filteredData = mainData && mainData.length > 0 ?
-            mainData.map((eachData) => {
+            (reportType === "BaseReport"
+        ? mainData.filter(eachData => eachData.updatedHour)
+        : mainData
+      )
+            .map((eachData) => {
                 console.log("obj:", eachData);
                 let revenueData;
                 if (eachData.estimated_revenue === 0) {
@@ -1300,7 +1305,7 @@ const MnetLiveAdHistory = ({ params }) => {
             })
             : null;
         setRowData(filteredData);
-        setFilteredData(filteredData);
+        setFilteredData(reportType === "BaseReport" ? filteredData.filter((item) => item.date === moment().format("YYYY-MM-DD")) : filteredData);
         setValue(mainData);
         setLoading(false);
         setTrue(false);
