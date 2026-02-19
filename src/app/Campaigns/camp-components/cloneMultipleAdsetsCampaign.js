@@ -3360,6 +3360,18 @@ const AdsetComponent = ({
   //     // setSelectedPositions([]); // Clear positions when publisher selection changes
   // };
 
+  // const handlePublisherChange = (value) => {
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [adset.id]: value,
+  //   }));
+
+  //   // Optionally reset selected positions for this adset
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [adset.id]: [], // clear when publishers change
+  //   }));
+  // };
   const handlePublisherChange = (value) => {
     setSelectedPublishers((prev) => ({
       ...prev,
@@ -3367,9 +3379,19 @@ const AdsetComponent = ({
     }));
 
     // Optionally reset selected positions for this adset
+    // setSelectedPositions((prev) => ({
+    //   ...prev,
+    //   [adset.id]: [], // clear when publishers change
+    // }));
+    const autoPositions = value
+      .flatMap((pub) => positionOptions[pub] || [])
+      .map((pos) => pos.key);
+
+    const uniquePositions = [...new Set(autoPositions)];
+
     setSelectedPositions((prev) => ({
       ...prev,
-      [adset.id]: [], // clear when publishers change
+      [adset.id]: getPositionsByKeys(uniquePositions),
     }));
   };
 

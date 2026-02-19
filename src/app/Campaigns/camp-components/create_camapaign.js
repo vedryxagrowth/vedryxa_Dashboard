@@ -1978,53 +1978,95 @@ const AdsetComponent = ({
   //   }));
   // };
 
-  const handlePublisherChange = (value) => {
-    // 🧠 Start with the new selection
-    let updated = [...value];
+  // const handlePublisherChange = (value) => {
+  //   // 🧠 Start with the new selection
+  //   let updated = [...value];
 
-    // ⚙️ Meta-style dependencies
-    // Messenger and Audience Network require Facebook
-    // if (updated.includes("messenger") && !updated.includes("facebook")) {
-    //   updated.push("facebook");
-    // }
+  //   // ⚙️ Meta-style dependencies
+  //   // Messenger and Audience Network require Facebook
+  //   // if (updated.includes("messenger") && !updated.includes("facebook")) {
+  //   //   updated.push("facebook");
+  //   // }
+  //   if (updated.includes("audience_network") && !updated.includes("facebook")) {
+  //     updated.push("facebook");
+  //   }
+
+  //   // 🧹 If Facebook is removed but required by others, re-add it
+  //   if (
+  //     !updated.includes("facebook") &&
+  //     (
+  //       // updated.includes("messenger") || 
+  //       updated.includes("audience_network"))
+  //   ) {
+  //     updated.push("facebook");
+  //   }
+
+  //   // ✅ Update state for publishers
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [adset.id]: updated,
+  //   }));
+
+  //   // // ✅ Reset selected positions when publishers change
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [adset.id]: [],
+  //   }));
+
+
+
+  //   // ✅ Preserve only valid positions
+  //   //   setSelectedPublishers((prev) => ({
+  //   //   ...prev,
+  //   //   // current: updated,       // 👈 keeps UI happy
+  //   //   [adset.id]: updated,    // 👈 keeps adset mapping
+  //   // }));
+
+  //   // ✅ Also update form value if you’re syncing with AntD Form
+  //   form?.setFieldValue(["adsets", index, "platforms"], updated);
+  // };
+
+  const handlePublisherChange = (value) => {
+    let updated = [...value];
     if (updated.includes("audience_network") && !updated.includes("facebook")) {
       updated.push("facebook");
     }
-
-    // 🧹 If Facebook is removed but required by others, re-add it
     if (
       !updated.includes("facebook") &&
-      (
-        // updated.includes("messenger") || 
-        updated.includes("audience_network"))
+      updated.includes("audience_network")
     ) {
       updated.push("facebook");
     }
-
-    // ✅ Update state for publishers
     setSelectedPublishers((prev) => ({
       ...prev,
       [adset.id]: updated,
     }));
 
-    // // ✅ Reset selected positions when publishers change
+    const autoPositions = updated
+      .flatMap((pub) => positionOptions[pub] || [])
+      .map((pos) => pos.key);
+
+    const uniquePositions = [...new Set(autoPositions)];
     setSelectedPositions((prev) => ({
       ...prev,
-      [adset.id]: [],
+      [adset.id]: getPositionsByKeys(uniquePositions),
     }));
-
-
-
-    // ✅ Preserve only valid positions
-    //   setSelectedPublishers((prev) => ({
-    //   ...prev,
-    //   // current: updated,       // 👈 keeps UI happy
-    //   [adset.id]: updated,    // 👈 keeps adset mapping
-    // }));
-
-    // ✅ Also update form value if you’re syncing with AntD Form
-    form?.setFieldValue(["adsets", index, "platforms"], updated);
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = currentAdsets.map((ad, idx) =>
+      idx === index
+        ? {
+          ...ad,
+          platforms: updated,
+          positions: uniquePositions,
+        }
+        : ad
+    );
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
   };
+
+
 
   const handleCancelForURLBuilder = () => {
     setIsModalVisibleForURLBuilder(false);
