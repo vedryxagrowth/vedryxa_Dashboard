@@ -2412,6 +2412,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                 filetype={selectedCreative.filetype}
                                             />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
+                                                <div style={{display:"flex"}}>
                                                 <div
                                                     style={{
                                                         fontWeight: 600,
@@ -2421,7 +2422,20 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                 >
                                                     {selectedCreative.adName || "-"}
                                                 </div>
+                                                <div>
+                                                    {idx === 0 && adLevelCreatives.length > 0 && (
+                                                        <EditOutlined
+                                                            style={{ cursor: "pointer", marginLeft: 8 }}
+                                                            onClick={() => {
+                                                                const campaign = adLevelCreatives[0];
 
+                                                                const href = `/Campaigns?campaignId=${currentCampaignId}&account=${currentAccount}&network=${newRevenuePratner}`;
+                                                                window.open(href, "_blank", "noopener,noreferrer");
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+                                                </div>
                                                 <div
                                                     style={{
                                                         fontSize: 10,

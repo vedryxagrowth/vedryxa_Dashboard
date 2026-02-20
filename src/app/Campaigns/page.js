@@ -72,6 +72,7 @@ import StickyBox from "react-sticky-box";
 import { FaClone, FaEye, FaPenToSquare, FaTrashCan, FaRegCommentDots } from "react-icons/fa6";
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
 import { IoMdCreate } from "react-icons/io";
+import { useSearchParams } from "next/navigation";
 const CampaignHistoryModal = React.lazy(() => import('../Campaigns/camp-components/campaignHistory'));
 
 import { Token } from "aws-sdk";
@@ -187,7 +188,7 @@ const App = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
   const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
-
+  const searchParams = useSearchParams();
   console.log(checkedRowRecords);
 
   // const [isOpen, setIsOpen] = useState(false);
@@ -195,7 +196,27 @@ const App = () => {
     setCampaignStatusFilter(key);
   };
 
+  useEffect(() => {
+    const networkFromUrl = searchParams.get("network");
 
+    if (networkFromUrl) {
+      setSelectedKey(networkFromUrl);
+    }
+  }, [searchParams]);
+  useEffect(() => {
+    const accountFromUrl = searchParams.get("account");
+
+    if (accountFromUrl) {
+      setSelectedValue([accountFromUrl]);
+    }
+  }, [searchParams]);
+  useEffect(() => {
+    const campaignIdFromUrl = searchParams.get("campaignId");
+
+    if (campaignIdFromUrl) {
+      setSearchInput(campaignIdFromUrl);
+    }
+  }, [searchParams]);
   useEffect(() => {
     const fetchNetworksData = async () => {
       try {
@@ -765,12 +786,24 @@ const App = () => {
     // fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
     allowFetchOnSelectRef.current = false;
   }, [selectedValue]);
+  // useEffect(() => {
+  //   if (!selectedValue || !startDate || !endDate) return;
+  //   fetchLauncherComments(selectedValue);
+  //   fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+  // }, [refrst]);
   useEffect(() => {
-    if (!selectedValue || !startDate || !endDate) return;
-    fetchLauncherComments(selectedValue);
-    fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
-  }, [refrst]);
+    if (!selectedKey || !selectedValue || !startDate || !endDate) return;
 
+    fetchLauncherComments(selectedValue);
+
+    fetchMultipleAdsetCampaigns(
+      selectedValue,
+      startDate,
+      endDate,
+      searchInput || ""
+    );
+
+  }, [selectedKey, selectedValue, startDate, endDate,refrst]);
   // Handle value change
   // const handleValueChange = (value) => {
   //   setSelectedValue(value);
