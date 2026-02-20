@@ -3140,6 +3140,7 @@ const AdsetComponent = ({
     return Array.isArray(countries) && countries.some(c => EU_AND_ASSOCIATED.includes(String(c)));
   }
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
+  const isChecked = Form.useWatch(["adsets", index, "showPayer"], form)
   console.log(BeneficiaryAndPayer);
   useEffect(() => {
     const adsetsFromForm = form.getFieldValue("adsets") || [];
@@ -4697,7 +4698,9 @@ const AdsetComponent = ({
                       name={["adsets", index, "showPayer"]}
                       valuePropName="checked"
                     >
-                      <Switch size="small" />
+                      <Switch size="small" style={{
+                        backgroundColor: isChecked ? "#91C25F" : undefined,
+                      }} />
                     </Form.Item>
                   </div>
                 }
@@ -4711,7 +4714,9 @@ const AdsetComponent = ({
                 style={{ flex: "1 1 150px" }}
                 initialValue={adset?.beneficiary}
               >
-                <Input />
+                <Input className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                } />
               </Form.Item>
 
               {/* ✅ Conditionally render Payer field when switch is ON */}
@@ -4756,7 +4761,9 @@ const AdsetComponent = ({
                       style={{ flex: "1 1 150px" }}
                       initialValue={adset?.payer}
                     >
-                      <Input />
+                      <Input className={
+                        theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                      } />
                     </Form.Item>
                   ) : null
                 }

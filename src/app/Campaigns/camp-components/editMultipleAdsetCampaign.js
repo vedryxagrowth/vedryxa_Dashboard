@@ -3158,6 +3158,7 @@ const AdsetComponent = ({
   }
 
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
+  const isChecked = Form.useWatch(["adsets", index, "showPayer"], form)
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -4903,7 +4904,9 @@ const AdsetComponent = ({
                       name={["adsets", index, "showPayer"]}
                       valuePropName="checked"
                     >
-                      <Switch size="small" />
+                      <Switch size="small" style={{
+                        backgroundColor: isChecked ? "#91C25F" : undefined,
+                      }} />
                     </Form.Item>
                   </div>
                 }
@@ -4916,7 +4919,9 @@ const AdsetComponent = ({
                 ]}
                 style={{ flex: "1 1 150px" }}
               >
-                <Input />
+                <Input className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                } />
               </Form.Item>
               <Form.Item
                 noStyle
@@ -4957,7 +4962,9 @@ const AdsetComponent = ({
                       ]}
                       style={{ flex: "1 1 150px" }}
                     >
-                      <Input />
+                      <Input className={
+                        theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                      } />
                     </Form.Item>
                   ) : null
                 }
