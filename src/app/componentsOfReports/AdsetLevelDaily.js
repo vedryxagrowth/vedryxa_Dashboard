@@ -2697,11 +2697,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                     objectFit: "cover",
                                                 }}
                                             /> */}
-                                           <CreativeAvatar
+                                            <CreativeAvatar
                                                 url={selectedCreative.image}
                                                 filetype={selectedCreative.filetype}
                                             />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
+                                                <div style={{display:"flex"}}>
                                                 <div
                                                     style={{
                                                         fontWeight: 600,
@@ -2711,7 +2712,20 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 >
                                                     {selectedCreative.adName || "-"}
                                                 </div>
+                                                <div>
+                                                    {idx === 0 && adLevelCreatives.length > 0 && (
+                                                        <EditOutlined
+                                                            style={{ cursor: "pointer", marginLeft: 8 }}
+                                                            onClick={() => {
+                                                                const campaign = adLevelCreatives[0];
 
+                                                                const href = `/Campaigns?campaignId=${currentCampaignId}&account=${currentAccount}&network=${newRevenuePratner}`;
+                                                                window.open(href, "_blank", "noopener,noreferrer");
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+                                                </div>
                                                 <div
                                                     style={{
                                                         fontSize: 10,
@@ -2745,7 +2759,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                             display: "block",
                                         }}
                                     /> */}
-                                     <CreativeMedia
+                                    <CreativeMedia
                                         url={selectedCreative.image}
                                         filetype={selectedCreative.filetype}
                                     />

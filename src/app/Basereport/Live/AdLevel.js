@@ -2566,16 +2566,30 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       />
 
                       <div style={{ flex: 1, marginLeft: 6 }}>
-                        <div
-                          style={{
-                            fontWeight: 600,
-                            fontSize: 10,
-                            color: theme === "dark" ? "#e4e6eb" : "#050505",
-                          }}
-                        >
-                          {selectedCreative.adName || "-"}
-                        </div>
+                        <div style={{ display: "flex" }}>
+                          <div
+                            style={{
+                              fontWeight: 600,
+                              fontSize: 10,
+                              color: theme === "dark" ? "#e4e6eb" : "#050505",
+                            }}
+                          >
+                            {selectedCreative.adName || "-"}
+                          </div>
+                          <div>
+                            {idx === 0 && adLevelCreatives.length > 0 && (
+                              <EditOutlined
+                                style={{ cursor: "pointer", marginLeft: 8 }}
+                                onClick={() => {
+                                  const campaign = adLevelCreatives[0];
 
+                                  const href = `/Campaigns?campaignId=${rowCampaignId}&account=${rowAccountNumber}&network=${newRevenuePratner}`;
+                                  window.open(href, "_blank", "noopener,noreferrer");
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
                         <div
                           style={{
                             fontSize: 8,
