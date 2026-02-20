@@ -28,6 +28,7 @@
     "bootstrap": "^5.3.3",
     "canvas": "^2.11.2",
     "chart.js": "^4.4.4",
+    "chartjs-plugin-zoom": "^2.2.0",
     "countries-and-timezones": "^3.8.0",
     "dayjs": "^1.11.19",
     "emailjs-com": "^3.2.0",
