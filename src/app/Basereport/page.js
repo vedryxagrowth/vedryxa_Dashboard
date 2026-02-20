@@ -18520,7 +18520,7 @@ const MyTablePage = () => {
     const items = [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
-        { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
+        // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
@@ -19812,7 +19812,7 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            <Tabs.TabPane key="3">
+                            {/* <Tabs.TabPane key="3">
                                 <CampaignReports
                                     startDate={newStartDate}
                                     endDate={newendDate}
@@ -19841,7 +19841,7 @@ const MyTablePage = () => {
                                     onClickRefresh={onClickRefresh}
                                     accountsAccess={accountsAccess}
                                 />
-                            </Tabs.TabPane>
+                            </Tabs.TabPane> */}
 
                             <Tabs.TabPane key="4">
                                 <AgencyAndBMNameReports

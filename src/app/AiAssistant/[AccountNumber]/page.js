@@ -360,6 +360,8 @@ const networkCollections = {
     FB_TonicRsoc: 'Facebook_TonicRsoc',
     FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
+    FB_Predicto:'Facebook_Predicto_Daily',
+    FB_Affinity:'Facebook_Affinity_Daily'
 };
 
 

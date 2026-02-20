@@ -19,6 +19,7 @@ import {
   InputNumber,
   Breadcrumb,
   Popconfirm,
+  Popover,
   Checkbox,
   Switch
 } from "antd";
@@ -1978,53 +1979,95 @@ const AdsetComponent = ({
   //   }));
   // };
 
-  const handlePublisherChange = (value) => {
-    // 🧠 Start with the new selection
-    let updated = [...value];
+  // const handlePublisherChange = (value) => {
+  //   // 🧠 Start with the new selection
+  //   let updated = [...value];
 
-    // ⚙️ Meta-style dependencies
-    // Messenger and Audience Network require Facebook
-    // if (updated.includes("messenger") && !updated.includes("facebook")) {
-    //   updated.push("facebook");
-    // }
+  //   // ⚙️ Meta-style dependencies
+  //   // Messenger and Audience Network require Facebook
+  //   // if (updated.includes("messenger") && !updated.includes("facebook")) {
+  //   //   updated.push("facebook");
+  //   // }
+  //   if (updated.includes("audience_network") && !updated.includes("facebook")) {
+  //     updated.push("facebook");
+  //   }
+
+  //   // 🧹 If Facebook is removed but required by others, re-add it
+  //   if (
+  //     !updated.includes("facebook") &&
+  //     (
+  //       // updated.includes("messenger") || 
+  //       updated.includes("audience_network"))
+  //   ) {
+  //     updated.push("facebook");
+  //   }
+
+  //   // ✅ Update state for publishers
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [adset.id]: updated,
+  //   }));
+
+  //   // // ✅ Reset selected positions when publishers change
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [adset.id]: [],
+  //   }));
+
+
+
+  //   // ✅ Preserve only valid positions
+  //   //   setSelectedPublishers((prev) => ({
+  //   //   ...prev,
+  //   //   // current: updated,       // 👈 keeps UI happy
+  //   //   [adset.id]: updated,    // 👈 keeps adset mapping
+  //   // }));
+
+  //   // ✅ Also update form value if you’re syncing with AntD Form
+  //   form?.setFieldValue(["adsets", index, "platforms"], updated);
+  // };
+
+  const handlePublisherChange = (value) => {
+    let updated = [...value];
     if (updated.includes("audience_network") && !updated.includes("facebook")) {
       updated.push("facebook");
     }
-
-    // 🧹 If Facebook is removed but required by others, re-add it
     if (
       !updated.includes("facebook") &&
-      (
-        // updated.includes("messenger") || 
-        updated.includes("audience_network"))
+      updated.includes("audience_network")
     ) {
       updated.push("facebook");
     }
-
-    // ✅ Update state for publishers
     setSelectedPublishers((prev) => ({
       ...prev,
       [adset.id]: updated,
     }));
 
-    // // ✅ Reset selected positions when publishers change
+    const autoPositions = updated
+      .flatMap((pub) => positionOptions[pub] || [])
+      .map((pos) => pos.key);
+
+    const uniquePositions = [...new Set(autoPositions)];
     setSelectedPositions((prev) => ({
       ...prev,
-      [adset.id]: [],
+      [adset.id]: getPositionsByKeys(uniquePositions),
     }));
-
-
-
-    // ✅ Preserve only valid positions
-    //   setSelectedPublishers((prev) => ({
-    //   ...prev,
-    //   // current: updated,       // 👈 keeps UI happy
-    //   [adset.id]: updated,    // 👈 keeps adset mapping
-    // }));
-
-    // ✅ Also update form value if you’re syncing with AntD Form
-    form?.setFieldValue(["adsets", index, "platforms"], updated);
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = currentAdsets.map((ad, idx) =>
+      idx === index
+        ? {
+          ...ad,
+          platforms: updated,
+          positions: uniquePositions,
+        }
+        : ad
+    );
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
   };
+
+
 
   const handleCancelForURLBuilder = () => {
     setIsModalVisibleForURLBuilder(false);
@@ -2286,6 +2329,8 @@ const AdsetComponent = ({
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
   console.log(BeneficiaryAndPayer);
 
+  const isChecked = Form.useWatch(["adsets", index, "showPayer"], form)
+
   // useEffect(() => {
   //   setNewSelectedPageId(pageidList || []);
   //   setNewSelectedPixelId(pixelIdList || []);
@@ -2370,6 +2415,13 @@ const AdsetComponent = ({
 
   useEffect(() => {
     setBudget(adset?.DailyAdd_amount || 0);
+    form.setFieldsValue({
+      adsets: {
+        [index]: {
+          selectedAccount: accountis[0],
+        },
+      },
+    });
   }, [adset]);
 
   useEffect(() => {
@@ -2723,6 +2775,28 @@ const AdsetComponent = ({
       }))
       : // otherwise full options (fully editable)
       baseOptions;
+
+  const onClickShareBeneficiaryAndPayerForAllAccount = () => {
+    const account = (form.getFieldValue(["adsets", index, "selectedAccount"]))
+    console.log(account)
+    const valueOfAccount = (form.getFieldValue(["adsets", index, "Beneficiary", account]));
+    const valueofPayerAccount = form.getFieldValue(["adsets", index, "Payer", account])
+    watchedAccountList.map(account => {
+      form.setFieldValue(["adsets", index, "Beneficiary", account], valueOfAccount)
+      form.setFieldValue(["adsets", index, "Payer", account], valueofPayerAccount)
+    })
+  }
+
+  const onClickClearAllAccounts = () => {
+    // const account = (form.getFieldValue(["adsets", index, "selectedAccount"]))
+    // console.log(account)
+    // const valueOfAccount = (form.getFieldValue(["adsets", index, "Beneficiary", account]));
+    // const valueofPayerAccount = form.getFieldValue(["adsets", index, "Payer", account])
+    watchedAccountList.map(account => {
+      form.setFieldValue(["adsets", index, "Beneficiary", account], "")
+      form.setFieldValue(["adsets", index, "Payer", account], "")
+    })
+  }
 
 
   return (
@@ -4000,97 +4074,345 @@ const AdsetComponent = ({
           } */}
 
           {BeneficiaryAndPayer && (
+            // <>
+            //   {/* 🌿 Beneficiary field with Switch in label */}
+            //   <Form.Item
+            //     label={
+            //       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            //         <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+            //         <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+            //           overlayInnerStyle={{
+            //             backgroundColor: theme === 'dark' ? '#111' : '#fff',
+            //             color: theme === 'dark' ? '#fff' : '#000',
+            //             border: '1px solid #ccc',
+            //             borderRadius: 6,
+            //             // fontWeight: 500,
+            //           }}
+            //         >
+            //           <InfoCircleOutlined
+            //             style={{
+            //               color: theme === "dark" ? "#bbb" : "#888",
+            //               cursor: "pointer",
+            //             }}
+            //           />
+            //         </Tooltip>
+
+            //         {/* ✅ Switch controls visibility of Payer field */}
+            //         <Form.Item
+            //           noStyle
+            //           name={["adsets", index, "showPayer"]}
+            //           valuePropName="checked"
+            //         >
+            //           <Switch size="small" />
+            //         </Form.Item>
+            //       </div>
+            //     }
+            //     name={["adsets", index, "Beneficiary"]}
+            //     rules={[
+            //       {
+            //         required: true,
+            //         message: "Please fill the input!",
+            //       },
+            //     ]}
+            //     style={{ flex: "1 1 150px" }}
+            //   >
+            //     <Input />
+            //   </Form.Item>
+
+            //   {/* ✅ Conditionally render Payer field when switch is ON */}
+            //   <Form.Item
+            //     noStyle
+            //     shouldUpdate={(prev, curr) =>
+            //       prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
+            //     }
+            //   >
+            //     {({ getFieldValue }) =>
+            //       getFieldValue(["adsets", index, "showPayer"]) ? (
+            //         <Form.Item
+            //           name={["adsets", index, "Payer"]}
+            //           label={
+            //             // <span style={{ color: "#B4B4B4" }}>Payer</span>
+            //             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            //               <span style={{ color: "#B4B4B4" }}>Payer</span>
+            //               <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+            //                 overlayInnerStyle={{
+            //                   backgroundColor: theme === 'dark' ? '#111' : '#fff',
+            //                   color: theme === 'dark' ? '#fff' : '#000',
+            //                   border: '1px solid #ccc',
+            //                   borderRadius: 6,
+            //                   // fontWeight: 500,
+            //                 }}
+            //               >
+            //                 <InfoCircleOutlined
+            //                   style={{
+            //                     color: theme === "dark" ? "#bbb" : "#888",
+            //                     cursor: "pointer",
+            //                   }}
+            //                 />
+            //               </Tooltip>
+            //             </div>
+            //           }
+            //           rules={[
+            //             {
+            //               required: true,
+            //               message: "Please fill the input!",
+            //             },
+            //           ]}
+            //           style={{ flex: "1 1 150px" }}
+            //         >
+            //           <Input />
+            //         </Form.Item>
+            //       ) : null
+            //     }
+            //   </Form.Item>
+            // </>
             <>
-              {/* 🌿 Beneficiary field with Switch in label */}
-              <Form.Item
-                label={
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
-                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+              {/* Main vertical wrapper */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {/* ---------------- Row 1 ---------------- */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 6,
+                  }}
+                >
+                  {/* Label */}
+                  <span style={{ color: "red", fontSize: "18px" }}>*</span>
+                  <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+
+                  {/* Info tooltip */}
+                  <Tooltip
+                    placement="top"
+                    title="Value must be Page ID or BM ID"
+                    overlayInnerStyle={{
+                      backgroundColor: theme === "dark" ? "#111" : "#fff",
+                      color: theme === "dark" ? "#fff" : "#000",
+                      border: "1px solid #ccc",
+                      borderRadius: 6,
+                    }}
+                  >
+                    <InfoCircleOutlined
+                      style={{ color: theme === "dark" ? "#bbb" : "#888" }}
+                    />
+                  </Tooltip>
+
+                  {/* Account dropdown */}
+                  <Form.Item
+                    name={["adsets", index, "selectedAccount"]}
+                    rules={[{ required: true, message: "Select account" }]}
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Select
+                      placeholder="Select Account"
+                      size="small"
+                      style={{ width: 170 }}
+                      options={watchedAccountList.map((acc) => ({
+                        label: acc,
+                        value: acc,
+                      }))}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                        } green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* <Button> */}
+                  {watchedAccountList.length > 1 &&
+                    <Popover
+                      trigger="click"
                       overlayInnerStyle={{
-                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                        color: theme === 'dark' ? '#fff' : '#000',
-                        border: '1px solid #ccc',
-                        borderRadius: 6,
-                        // fontWeight: 500,
+                        backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                        color: theme === "dark" ? "#fff" : "#333",
+                        padding: 0,
                       }}
-                    >
-                      <InfoCircleOutlined
-                        style={{
-                          color: theme === "dark" ? "#bbb" : "#888",
-                          cursor: "pointer",
-                        }}
-                      />
-                    </Tooltip>
-
-                    {/* ✅ Switch controls visibility of Payer field */}
-                    <Form.Item
-                      noStyle
-                      name={["adsets", index, "showPayer"]}
-                      valuePropName="checked"
-                    >
-                      <Switch size="small" />
-                    </Form.Item>
-                  </div>
-                }
-                name={["adsets", index, "Beneficiary"]}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill the input!",
-                  },
-                ]}
-                style={{ flex: "1 1 150px" }}
-              >
-                <Input />
-              </Form.Item>
-
-              {/* ✅ Conditionally render Payer field when switch is ON */}
-              <Form.Item
-                noStyle
-                shouldUpdate={(prev, curr) =>
-                  prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
-                }
-              >
-                {({ getFieldValue }) =>
-                  getFieldValue(["adsets", index, "showPayer"]) ? (
-                    <Form.Item
-                      name={["adsets", index, "Payer"]}
-                      label={
-                        // <span style={{ color: "#B4B4B4" }}>Payer</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ color: "#B4B4B4" }}>Payer</span>
-                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
-                            overlayInnerStyle={{
-                              backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                              color: theme === 'dark' ? '#fff' : '#000',
-                              border: '1px solid #ccc',
-                              borderRadius: 6,
-                              // fontWeight: 500,
+                      content={
+                        <div style={{ display: "flex" }}>
+                          <Button
+                            type="text"
+                            // style={{ textAlign: "left" }}
+                            style={{
+                              border: "1px solid #91C25F", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                              backgroundColor: "transparent"
+                            }}
+                            onClick={() => {
+                              onClickShareBeneficiaryAndPayerForAllAccount();
                             }}
                           >
-                            <InfoCircleOutlined
-                              style={{
-                                color: theme === "dark" ? "#bbb" : "#888",
-                                cursor: "pointer",
-                              }}
-                            />
-                          </Tooltip>
+                            Set to All Accounts
+                          </Button>
+
+                          <Button
+                            type="text"
+                            // style={{ textAlign: "right" }}
+                            style={{
+                              border: "1px solid #f7370cff", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                              backgroundColor: "transparent", marginLeft: "10px"
+                            }}
+                            onClick={() => {
+                              onClickClearAllAccounts();
+                            }}
+                          >
+                            Clear All Accounts
+                          </Button>
                         </div>
                       }
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please fill the input!",
-                        },
-                      ]}
-                      style={{ flex: "1 1 150px" }}
                     >
-                      <Input />
-                    </Form.Item>
-                  ) : null
-                }
-              </Form.Item>
+                      <ShareAltOutlined style={{ cursor: "pointer" }} />
+                    </Popover>}
+                  {/* </Button> */}
+
+                  {/* Payer switch */}
+                  <Form.Item
+                    name={["adsets", index, "showPayer"]}
+                    valuePropName="checked"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Switch size="small" style={{
+                      backgroundColor: isChecked ? "#91C25F" : undefined,
+                    }} />
+                  </Form.Item>
+                </div>
+
+                {/* -------- Render ALL accounts but hide inactive -------- */}
+                <Form.Item
+                  noStyle
+                  shouldUpdate={(prev, curr) =>
+                    prev?.adsets?.[index]?.selectedAccount !==
+                    curr?.adsets?.[index]?.selectedAccount ||
+                    prev?.adsets?.[index]?.showPayer !==
+                    curr?.adsets?.[index]?.showPayer
+                  }
+                >
+                  {({ getFieldValue }) => {
+                    const selectedAccount = getFieldValue([
+                      "adsets",
+                      index,
+                      "selectedAccount",
+                    ]);
+                    const showPayer = getFieldValue(["adsets", index, "showPayer"]);
+
+                    return (
+                      <>
+                        {watchedAccountList.map((account) => {
+                          const isActive = account === selectedAccount;
+
+                          return (
+                            <div
+                              key={account}
+                              style={{
+                                display: isActive ? "block" : "none", // 👈 keep mounted for validation
+                              }}
+                            >
+                              {/* ---------------- Row 2 : Beneficiary ---------------- */}
+                              <Form.Item
+                                name={["adsets", index, "Beneficiary", account]}
+                                // rules={[
+                                //   {
+                                //     required: true,
+                                //     message: `Enter beneficiary for ${account}`,
+                                //   },
+                                // ]}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: `Enter beneficiary for ${account}`,
+                                  },
+                                  {
+                                    pattern: /^\d+$/,
+                                    message: "Only integer numbers are allowed",
+                                  },
+                                ]}
+                                style={{ marginBottom: 8 }}
+                              >
+                                {/* <Input placeholder="Enter Page ID or BM ID" /> */}
+                                <Input
+                                  className={
+                                    theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                                  }
+                                  placeholder="Enter beneficiary ID"
+                                  inputMode="numeric"
+                                  onKeyPress={(e) => {
+                                    if (!/[0-9]/.test(e.key)) {
+                                      e.preventDefault();
+                                    }
+                                  }}
+                                />
+                              </Form.Item>
+
+                              {/* ---------------- Row 3 : Payer ---------------- */}
+                              {showPayer && (
+                                <Form.Item
+                                  name={["adsets", index, "Payer", account]}
+                                  // rules={[
+                                  //   ({ getFieldValue }) => ({
+                                  //     validator(_, value) {
+                                  //       const show = getFieldValue([
+                                  //         "adsets",
+                                  //         index,
+                                  //         "showPayer",
+                                  //       ]);
+
+                                  //       if (!show) return Promise.resolve();
+                                  //       if (!value)
+                                  //         return Promise.reject(
+                                  //           new Error(`Enter payer for ${account}`)
+                                  //         );
+
+                                  //       return Promise.resolve();
+                                  //     },
+                                  //   }),
+                                  // ]}
+                                  rules={[
+                                    ({ getFieldValue }) => ({
+                                      validator(_, value) {
+                                        const show = getFieldValue([
+                                          "adsets",
+                                          index,
+                                          "showPayer",
+                                        ]);
+
+                                        if (!show) return Promise.resolve();
+
+                                        if (!value)
+                                          return Promise.reject(
+                                            new Error(`Enter payer for ${account}`)
+                                          );
+
+                                        if (!/^\d+$/.test(value))
+                                          return Promise.reject(
+                                            new Error("Only integer numbers are allowed")
+                                          );
+
+                                        return Promise.resolve();
+                                      },
+                                    }),
+                                  ]}
+                                >
+                                  {/* <Input placeholder="Enter Page ID or BM ID" /> */}
+                                  <Input
+                                    className={
+                                      theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                                    }
+                                    placeholder="Enter payer ID"
+                                    inputMode="numeric"
+                                    onKeyPress={(e) => {
+                                      if (!/[0-9]/.test(e.key)) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                  />
+                                </Form.Item>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </>
+                    );
+                  }}
+                </Form.Item>
+              </div>
             </>
           )}
 
@@ -9728,7 +10050,8 @@ const CreateCampaignDrawer = ({
         setAdsetSchedule({});
         setAdSchedulingToShowCampaign(false);
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error during campaign creation:", error);
       message.error("An error occurred while creating the campaign.");
     } finally {
@@ -9876,7 +10199,6 @@ const CreateCampaignDrawer = ({
                   onError,
                   adsets[i].id
                 );
-
                 const getTheImages = imagesHashArray
                   .map(media => media.imag_hash)
                   .filter(Boolean);
@@ -10040,10 +10362,10 @@ const CreateCampaignDrawer = ({
                     device_platforms: values.adsets[i].device_platforms,
                   }),
                   ...(values.adsets[i].Beneficiary
-                    ? { beneficiary: values.adsets[i].Beneficiary }
+                    ? { beneficiary: values.adsets[i].Beneficiary[account].trim() }
                     : {}),
                   ...(values.adsets[i].Beneficiary
-                    ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+                    ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer[account].trim() } : { payer: values.adsets[i].Beneficiary[account].trim() }
                     : {}),
                   buying_type: "AUCTION",
                   addlevel: addLevelData,
@@ -10257,10 +10579,10 @@ const CreateCampaignDrawer = ({
                   device_platforms: values.adsets[i].device_platforms,
                 }),
                 ...(values.adsets[i].Beneficiary
-                  ? { beneficiary: values.adsets[i].Beneficiary }
+                  ? { beneficiary: values.adsets[i].Beneficiary[account].trim() }
                   : {}),
                 ...(values.adsets[i].Beneficiary
-                  ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+                  ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer[account].trim() } : { payer: values.adsets[i].Beneficiary[account].trim() }
                   : {}),
                 buying_type: "AUCTION",
                 addlevel: addLevelData,
