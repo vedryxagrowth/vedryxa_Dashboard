@@ -5,6 +5,8 @@ import {
   CheckCircleFilled,
   CloseCircleFilled,
   HistoryOutlined,
+  WalletOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import {
   Table,
@@ -832,7 +834,6 @@ const App = () => {
       // fetchData(selectedValue, startDate, endDate);
       fetchLauncherComments(selectedValue)
       fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
-      fetchAccountDetails(selectedValue);
       setAccountChanged(false);
 
       allowFetchOnSelectRef.current = true;
@@ -840,6 +841,14 @@ const App = () => {
       message.warning("Please select project, account and date range");
     }
   };
+  const handleAccountBalance = ()=>{
+    if (selectedValue) {
+       fetchAccountDetails(selectedValue);
+    }
+    else {
+      message.warning("Please select project, account and date range");
+    }
+  }
 
   // useEffect(() => {
   //   if (!selectedValue || !startDate || !endDate) return;
@@ -2826,7 +2835,7 @@ const App = () => {
                     height: "20px",
                     cursor: "pointer",
                     textAlign: "center",
-                    marginLeft:"5px"
+                    marginLeft: "5px"
                   }}
                   onMouseEnter={() => {
                     if (!adDetails[record.identifier]) {
@@ -4069,6 +4078,13 @@ const App = () => {
         size="small"
         extra={
           <div style={{ display: 'flex', gap: "10px" }}>
+            <Tooltip title="Click the icon to view the latest spent and remaining amount" overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+            }}>
+              <SyncOutlined style={{fontSize:"18px",cursor:"pointer"}} onClick={handleAccountBalance}/>
+              </Tooltip>
+          
             <span
               style={{
                 backgroundColor: "transparent",
