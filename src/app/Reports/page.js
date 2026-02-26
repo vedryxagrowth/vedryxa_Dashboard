@@ -15956,46 +15956,57 @@ const MyTablePage = () => {
         const handleCopy = () => {
             const textToCopy = shouldAllowKeywordCopy ? keyword : adId;
 
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                setTooltipText("Copied!");
-                setTimeout(() => setTooltipText("Copy to clipboard"), 2000);
-            }).catch(() => {
-                alert('Failed to copy!');
-            });
+            // navigator.clipboard.writeText(textToCopy).then(() => {
+            //     setTooltipText("Copied!");
+            //     setTimeout(() => setTooltipText("Copy to clipboard"), 2000);
+            // }).catch(() => {
+            //     alert('Failed to copy!');
+            // });
+            navigator.clipboard
+                .writeText(textToCopy)
+                .then(() => {
+                    message.success("Copied to clipboard");
+                })
+                .catch(() => {
+                    message.error("Failed to copy");
+                });
         };
 
 
-        const popoverContent = (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>{adId}</span>
-                <Tooltip title={tooltipText}
-                >
-                    <div className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
-                        <CopyOutlined
-                            className="copy-icon"
-                            onClick={handleCopy}
-                            style={{
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                            }}
-                        />
-                    </div>
-                </Tooltip>
-            </div>
-        );
+        // const popoverContent = (
+        //     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        //         <span>{adId}</span>
+        //         <Tooltip title={tooltipText}
+        //         >
+        //             <div className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
+        //                 <CopyOutlined
+        //                     className="copy-icon"
+        //                     onClick={handleCopy}
+        //                     style={{
+        //                         cursor: 'pointer',
+        //                         fontSize: '16px',
+        //                     }}
+        //                 />
+        //             </div>
+        //         </Tooltip>
+        //     </div>
+        // );
 
 
         return (
-            <Popover
-                content={popoverContent}
-                trigger="hover"
-                placement="topLeft"
+            // <Popover
+            // content={popoverContent}
+            // trigger="hover"
+            // placement="topLeft"
             // title="Ad ID"
-            >
-                <span style={{ cursor: 'pointer' }} >
-                    {keyword}
-                </span>
-            </Popover>
+            // >
+            //     <span style={{ cursor: 'pointer' }} onClick={handleCopy} >
+            //         {keyword}
+            //     </span>
+            // </Popover>
+            <span style={{ cursor: 'pointer' }} onClick={handleCopy} >
+                {keyword}
+            </span>
         );
     };
 
