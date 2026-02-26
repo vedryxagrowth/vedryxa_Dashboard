@@ -1407,18 +1407,16 @@ const AdsetComponent = ({
     });
   };
 
-  // const handleEveryDayToggle = (hour) => {
+  
+  // const handleEveryDayDrag = (hour) => {
   //   setSelectedByAdset(prev => {
   //     const current = prev[adset.id] || {};
-
-  //     const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
-  //       d => current[`${d}-${hour}`]
-  //     );
 
   //     const updated = { ...current };
 
   //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-  //       updated[`${d}-${hour}`] = !allSelected;
+  //       const key = `${d}-${hour}`;
+  //       updated[key] = !current[key];
   //     });
 
   //     return {
@@ -1428,22 +1426,22 @@ const AdsetComponent = ({
   //   });
   // };
   const handleEveryDayDrag = (hour) => {
-    setSelectedByAdset(prev => {
-      const current = prev[adset.id] || {};
-
-      const updated = { ...current };
-
-      [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-        const key = `${d}-${hour}`;
-        updated[key] = !current[key];
-      });
-
-      return {
-        ...prev,
-        [adset.id]: updated
-      };
+  setSelectedByAdset(prev => {
+    const current = prev[adset.id] || {};
+    const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+      d => current[`${d}-${hour}`]
+    );
+    const updated = { ...current };
+    [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+      const key = `${d}-${hour}`;
+      updated[key] = !allSelected; 
     });
-  };
+    return {
+      ...prev,
+      [adset.id]: updated
+    };
+  });
+};
 
   const isValidAdSchedule = (schedule = []) =>
     Array.isArray(schedule) &&

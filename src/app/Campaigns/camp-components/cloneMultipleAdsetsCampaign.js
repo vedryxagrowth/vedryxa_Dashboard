@@ -2875,24 +2875,40 @@ const AdsetComponent = ({
   //     };
   //   });
   // };
+  // const handleEveryDayDrag = (hour) => {
+  //   setSelectedByAdset(prev => {
+  //     const current = prev[adset.id] || {};
+
+  //     const updated = { ...current };
+
+  //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+  //       const key = `${d}-${hour}`;
+  //       updated[key] = !current[key];
+  //     });
+
+  //     return {
+  //       ...prev,
+  //       [adset.id]: updated
+  //     };
+  //   });
+  // };
   const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
       const updated = { ...current };
-
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
         const key = `${d}-${hour}`;
-        updated[key] = !current[key];
+        updated[key] = !allSelected;
       });
-
       return {
         ...prev,
         [adset.id]: updated
       };
     });
   };
-
   const isValidAdSchedule = (schedule = []) =>
     Array.isArray(schedule) &&
     schedule.length > 0 &&
