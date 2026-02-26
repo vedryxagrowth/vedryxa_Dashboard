@@ -829,39 +829,39 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
         setCampaignComments(updatedCampaignComments);
 
         // 3️⃣ Update rowData using the SAME computed data
-        if (campaignStatusFilter !== "All") {
-          const adStatusMap = new Map(
-            updatedCampaignComments
-              .filter(item => item.level === "ad" && item.ad_id)
-              .map(item => [
-                String(item.ad_id),
-                item.fbStatus
-                  ? String(item.fbStatus).toUpperCase()
-                  : "ACTIVE"
-              ])
-          );
-          const newRowData = newRowDataForFilter.current;
+        // if (campaignStatusFilter !== "All") {
+        //   const adStatusMap = new Map(
+        //     updatedCampaignComments
+        //       .filter(item => item.level === "ad" && item.ad_id)
+        //       .map(item => [
+        //         String(item.ad_id),
+        //         item.fbStatus
+        //           ? String(item.fbStatus).toUpperCase()
+        //           : "ACTIVE"
+        //       ])
+        //   );
+        //   const newRowData = newRowDataForFilter.current;
 
-          // Attach fbStatus to each row using adStatusMap
-          const newRowDataWithFbStatus = newRowData.map(each => {
-            const adKey = String(each.adid);
+        //   // Attach fbStatus to each row using adStatusMap
+        //   const newRowDataWithFbStatus = newRowData.map(each => {
+        //     const adKey = String(each.adid);
 
-            return {
-              ...each,
-              fbStatus: adStatusMap.get(adKey) || "ACTIVE"
-            };
-          });
+        //     return {
+        //       ...each,
+        //       fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+        //     };
+        //   });
 
-          // Final filter by selected status
-          const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
-            item =>
-              item.fbStatus.toUpperCase() ===
-              campaignStatusFilter?.toUpperCase()
-          );
+        //   // Final filter by selected status
+        //   const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+        //     item =>
+        //       item.fbStatus.toUpperCase() ===
+        //       campaignStatusFilter?.toUpperCase()
+        //   );
 
-          setdailyData(filteredRowDataWithStatus);
+        //   setdailyData(filteredRowDataWithStatus);
 
-        }
+        // }
 
         // 🔥 UPDATE UI — SAME AS SINGLE UPDATE
         // setCampaignComments(prev => {
@@ -1462,39 +1462,39 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 return arr;
               })();
               setCampaignComments(updatedCampaignComments);
-              if (campaignStatusFilter !== "All") {
-                const adStatusMap = new Map(
-                  updatedCampaignComments
-                    .filter(item => item.level === "ad" && item.ad_id)
-                    .map(item => [
-                      String(item.ad_id),
-                      item.fbStatus
-                        ? String(item.fbStatus).toUpperCase()
-                        : "ACTIVE"
-                    ])
-                );
-                const newRowData = newRowDataForFilter.current;
+              // if (campaignStatusFilter !== "All") {
+              //   const adStatusMap = new Map(
+              //     updatedCampaignComments
+              //       .filter(item => item.level === "ad" && item.ad_id)
+              //       .map(item => [
+              //         String(item.ad_id),
+              //         item.fbStatus
+              //           ? String(item.fbStatus).toUpperCase()
+              //           : "ACTIVE"
+              //       ])
+              //   );
+              //   const newRowData = newRowDataForFilter.current;
 
-                // Attach fbStatus to each row using adStatusMap
-                const newRowDataWithFbStatus = newRowData.map(each => {
-                  const adKey = String(each.adid);
+              //   // Attach fbStatus to each row using adStatusMap
+              //   const newRowDataWithFbStatus = newRowData.map(each => {
+              //     const adKey = String(each.adid);
 
-                  return {
-                    ...each,
-                    fbStatus: adStatusMap.get(adKey) || "ACTIVE"
-                  };
-                });
+              //     return {
+              //       ...each,
+              //       fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+              //     };
+              //   });
 
-                // Final filter by selected status
-                const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
-                  item =>
-                    item.fbStatus.toUpperCase() ===
-                    campaignStatusFilter?.toUpperCase()
-                );
+              //   // Final filter by selected status
+              //   const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+              //     item =>
+              //       item.fbStatus.toUpperCase() ===
+              //       campaignStatusFilter?.toUpperCase()
+              //   );
 
-                setdailyData(filteredRowDataWithStatus);
+              //   setdailyData(filteredRowDataWithStatus);
 
-              }
+              // }
               // setCampaignComments(prev => {
               //   const arr = Array.isArray(prev) ? [...prev] : [];
 
@@ -3203,7 +3203,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
           const spend = parseFloat(eachData.spend);
           const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
-          const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
+          const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
           const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
           const getFbStatusKey = campaignComments.find(ad => ad.campaignid === eachData.campaign_id && ad.Account === eachData.accountNumber && ad.adsetid === eachData.adset_id && ad.ad_id === eachData.ad_id && ad.level === 'ad');
           // console.log(eachData.campaign_name, "campaign_name");

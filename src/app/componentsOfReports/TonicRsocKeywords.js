@@ -615,6 +615,7 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
                     const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
                     const conversions = eachData.conversions !== undefined ? eachData.conversions : '0';
                     const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
+                    const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
                     rpc = !isNaN(rpc) ? rpc : 0;
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
@@ -650,6 +651,7 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
                             keyword: eachData.keyword,
                             from: campaign_date?.start ? campaign_date?.start : "",
                             to: campaign_date?.end ? campaign_date?.end : "",
+                            category: category?.category ? category.category : "",
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",

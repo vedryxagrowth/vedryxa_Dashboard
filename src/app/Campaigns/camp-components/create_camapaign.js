@@ -21,7 +21,9 @@ import {
   Popconfirm,
   Popover,
   Checkbox,
-  Switch
+  Switch,
+  Tree,
+  TreeSelect
 } from "antd";
 import {
   PlusOutlined,
@@ -68,10 +70,18 @@ import { FaPenToSquare, FaShareFromSquare, FaTrashCan } from "react-icons/fa6";
 import { Category } from "@mui/icons-material";
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
+const { SHOW_PARENT } = TreeSelect;
 
 const { Panel } = Collapse;
 const { Option } = Select;
 const { Step } = Steps;
+
+const europeanUnionCountryCodes = [
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+  "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+  "PL", "PT", "RO", "SK", "SI", "ES", "SE"
+];
+
 const publisherOptions = [
   { label: "Facebook", value: "facebook" },
   { label: "Instagram", value: "instagram" },
@@ -1241,7 +1251,8 @@ const AdsetComponent = ({
   page,
   pixel,
   geo,
-  newImageHashArray
+  newImageHashArray,
+  geoTreeData
 }) => {
   console.log(page_id_list, "page_id_list in adset component");
   console.log(pageidList, "pageidList in adset component");
@@ -1274,6 +1285,13 @@ const AdsetComponent = ({
 
 
   const [dragging, setDragging] = useState(false);
+  const [value, setValue] = useState([]);
+
+  const onChange = (newValue, label, extra) => {
+    console.log("Selected values:", newValue);
+    console.log("Extra info:", extra);
+    setValue(newValue);
+  };
   const selected = selectedByAdset[adset.id] || {};
   const handleMouseDown = (day, hour) => {
     setDragging(true);
@@ -1557,6 +1575,7 @@ const AdsetComponent = ({
     { value: "SK", label: "Slovakia" },
     { value: "SI", label: "Slovenia" },
     { value: "SE", label: "Sweden" },
+    { value: "NG", label: "Nigeria" }
   ];
 
 
@@ -1571,6 +1590,118 @@ const AdsetComponent = ({
   }) : []
 
   console.log(newCampaignCountries);
+
+  const filterTreeByCampaign = (tree, allowed) => {
+
+    if (!allowed.length) return tree;
+
+    return tree.map(root => ({
+
+      ...root,
+
+      children: root.children
+        .map(continent => {
+
+          // continent selected → include all countries
+          if (allowed.includes(continent.value)) {
+            return continent;
+          }
+
+          // filter countries
+          const matchingCountries =
+            continent.children.filter(country =>
+              allowed.includes(country.value)
+            );
+
+          if (matchingCountries.length) {
+            return {
+              ...continent,
+              children: matchingCountries,
+            };
+          }
+
+          return null;
+
+        })
+        .filter(Boolean),
+
+    }));
+
+  };
+
+
+  /**
+   * DISABLE TREE for locked adsets
+   */
+  const disableTreeNodes = (
+    tree,
+    allowedValues = []
+  ) =>
+
+    tree.map(root => ({
+
+      ...root,
+
+      children: root.children?.map(continent => ({
+
+        ...continent,
+
+        children: continent.children?.map(country => ({
+
+          ...country,
+
+          disabled:
+            !allowedValues.includes(
+              country.value
+            ),
+
+        })),
+
+      })),
+
+    }));
+
+
+  const baseTreeOptions =
+    campaignCountries.length === 0
+      ? geoTreeData   // ⭐ FULL ACCESS
+      : filterTreeByCampaign(
+        geoTreeData,
+        campaignCountries
+      );
+
+
+  const treeOptionsForIndexOfCountries =
+    geo === "Geos" &&
+      index > 0 &&
+      campaignCountries.length > 0   // ⭐ IMPORTANT
+      ? disableTreeNodes(
+        baseTreeOptions,
+        currentCountries || []
+      )
+      : baseTreeOptions;
+
+  // Flatten tree to get all available country codes
+  const flattenCountries = (tree) => {
+    let result = [];
+
+    tree.forEach(node => {
+      if (node.children) {
+        result = result.concat(flattenCountries(node.children));
+      } else {
+        result.push(node.value);
+      }
+    });
+
+    return result;
+  };
+
+  const availableCountryCodes = flattenCountries(treeOptionsForIndexOfCountries);
+
+  // Check if ALL EU countries exist in current tree
+  const isFullEUAvailable = europeanUnionCountryCodes.every(code =>
+    availableCountryCodes.includes(code)
+  );
 
   //   const options = useMemo(() => {
   //   const newpageidList = form.getFieldValue(["adsets", index, "page_id"]) || []
@@ -2629,60 +2760,130 @@ const AdsetComponent = ({
   //   }
   // }, [campaignCountries, form, index, allCountries]);
 
-  useEffect(() => {
-    // always treat current as an array
-    const current = form.getFieldValue(["adsets", index, "countries"]) || [];
+  // useEffect(() => {
+  //   // always treat current as an array
+  //   const current = form.getFieldValue(["adsets", index, "countries"]) || [];
 
-    // helper to set an array value safely
+  //   // helper to set an array value safely
+  //   const setArrayValue = (valArray) => {
+  //     form.setFields([
+  //       { name: ["adsets", index, "countries"], value: valArray },
+  //     ]);
+  //     form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //   };
+
+  //   if (campaignCountries.length > 0) {
+  //     // Allowed values are campaignCountries
+  //     const filtered = Array.isArray(current)
+  //       ? current.filter((c) => campaignCountries.includes(c))
+  //       : (campaignCountries.includes(current) ? [current] : []);
+
+  //     if (filtered.length === 0) {
+  //       // fallback to first campaign country (as an array)
+  //       setArrayValue([campaignCountries[0]]);
+  //       // form.setFieldsValue({
+  //       //   adsets: {
+  //       //     [index]: { countries: [campaignCountries[0]] }
+  //       //   }
+  //       // });
+  //       // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //     } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+  //       // remove invalid entries, keep the valid ones
+  //       setArrayValue(filtered);
+  //     }
+  //   } else {
+  //     // No campaign-level countries -> allowed values are allCountries' values
+  //     const validSet = new Set(allCountries.map((c) => c.value));
+  //     const filtered = Array.isArray(current)
+  //       ? current.filter((c) => validSet.has(c))
+  //       : (validSet.has(current) ? [current] : []);
+
+  //     if (filtered.length === 0) {
+  //       // fallback to first available country (as an array)
+  //       setArrayValue([allCountries[0].value]);
+  //       // form.setFieldsValue({
+  //       //   adsets: {
+  //       //     [index]: { countries: [allCountries[0].value] }
+  //       //   }
+  //       // });
+  //       // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //     }
+  //     else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+  //       setArrayValue(filtered);
+  //     }
+  //   }
+  //   // include only necessary deps (allCountries is an array constant — ok to include)
+  // }, [campaignCountries, form, index, allCountries]);
+  useEffect(() => {
+
+    const fieldPath = [
+      "adsets",
+      index,
+      "countries",
+    ];
+
+    const current =
+      form.getFieldValue(fieldPath) || [];
+
     const setArrayValue = (valArray) => {
       form.setFields([
-        { name: ["adsets", index, "countries"], value: valArray },
+        {
+          name: fieldPath,
+          value: valArray,
+        },
       ]);
-      form.validateFields([`adsets.${index}.countries`]).catch(() => { });
     };
 
+
+    // ✅ CASE 1 — Campaign restriction exists
     if (campaignCountries.length > 0) {
-      // Allowed values are campaignCountries
-      const filtered = Array.isArray(current)
-        ? current.filter((c) => campaignCountries.includes(c))
-        : (campaignCountries.includes(current) ? [current] : []);
+
+      const filtered =
+        current.filter(c =>
+          campaignCountries.includes(c)
+        );
 
       if (filtered.length === 0) {
-        // fallback to first campaign country (as an array)
-        setArrayValue([campaignCountries[0]]);
-        // form.setFieldsValue({
-        //   adsets: {
-        //     [index]: { countries: [campaignCountries[0]] }
-        //   }
-        // });
-        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
-      } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
-        // remove invalid entries, keep the valid ones
-        setArrayValue(filtered);
-      }
-    } else {
-      // No campaign-level countries -> allowed values are allCountries' values
-      const validSet = new Set(allCountries.map((c) => c.value));
-      const filtered = Array.isArray(current)
-        ? current.filter((c) => validSet.has(c))
-        : (validSet.has(current) ? [current] : []);
 
-      if (filtered.length === 0) {
-        // fallback to first available country (as an array)
-        setArrayValue([allCountries[0].value]);
-        // form.setFieldsValue({
-        //   adsets: {
-        //     [index]: { countries: [allCountries[0].value] }
-        //   }
-        // });
-        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
-      }
-      else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        // fallback only when restricted
+        setArrayValue([
+          campaignCountries[0],
+        ]);
+
+      } else if (
+        filtered.length !== current.length
+      ) {
+
         setArrayValue(filtered);
+
       }
+
     }
-    // include only necessary deps (allCountries is an array constant — ok to include)
-  }, [campaignCountries, form, index, allCountries]);
+
+    // ✅ CASE 2 — No campaign restriction
+    else {
+
+      // Only set default if empty
+      if (current.length === 0) {
+
+        // pick first country from your continents list
+        const firstCountry =
+          // continents?.[0]?.children?.[0]?.value;
+          "US";
+
+        if (firstCountry) {
+          setArrayValue([firstCountry]);
+        }
+
+      }
+
+    }
+
+  }, [
+    campaignCountries,
+    form,
+    index,
+  ]);
 
   const handleFirstCountriesChange = (newCountriesArray) => {
     const adsets = form.getFieldValue("adsets") || [];
@@ -4013,18 +4214,14 @@ const AdsetComponent = ({
             </Form.Item>
           </Form.Item> */}
 
-          <Form.Item noStyle key={index}>
+          {/* <Form.Item noStyle key={index}>
             <Form.Item
               name={["adsets", index, "countries"]}
               label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
               required={true}
               style={{ flex: "0 0 140px" }}
             >
-              {/*
-          - index === 0 and geo === "Geos": onChange will propagate to all adsets
-          - index > 0 and geo === "Geos": Select opens but only current items selectable (others disabled)
-          - geo !== "Geos": every index is independent
-        */}
+             
               <Select
                 mode="multiple"
                 allowClear
@@ -4046,6 +4243,128 @@ const AdsetComponent = ({
                     // For independent mode, let Ant Form handle the change automatically.
                     // If you need side effects when geo !== "Geos", handle them here.
                   }
+                }}
+              />
+            </Form.Item>
+          </Form.Item> */}
+
+          <Form.Item noStyle key={index}>
+            <Form.Item
+              name={[
+                "adsets",
+                index,
+                "countries",
+              ]}
+              label={
+                <span style={{ color: "#B4B4B4" }}>
+                  Countries
+                </span>
+              }
+              required
+              style={{ flex: "0 0 200px" }}
+            >
+              <TreeSelect
+                treeData={
+                  treeOptionsForIndexOfCountries
+                }
+                fieldNames={{
+                  label: "label",
+                  value: "value",
+                  children: "children",
+                }}
+                treeCheckable
+                treeDefaultExpandedKeys={["all_countries"]}
+                showCheckedStrategy={
+                  TreeSelect.SHOW_CHILD
+                }
+                allowClear
+                showSearch
+                treeNodeFilterProp="label"
+                maxTagCount={2}
+                placeholder={
+                  campaignCountries.length
+                    ? "Select from campaign countries"
+                    : "Select any country"
+                }
+                disabled={
+                  geo === "Geos" &&
+                  index !== 0
+                }
+                getPopupContainer={(
+                  trigger
+                ) =>
+                  trigger.parentNode
+                }
+                popupClassName={
+                  theme === "dark"
+                    ? "custom-dropdown"
+                    : "custom-dropdown-light"
+                }
+                className={`${theme === "dark"
+                  ? "dark-theme"
+                  : "light-theme"
+                  } green-border-select`}
+                onChange={(val) => {
+                  if (geo === "Geos" && index === 0) {
+                    handleFirstCountriesChange(val);
+                  }
+                }}
+                treeTitleRender={(node) => {
+
+                  if (node.value === "europe" && isFullEUAvailable) {
+
+                    return (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "100%",
+                        }}
+                      >
+                        <span>{node.label}</span>
+
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 500,
+                            padding: "2px 8px",
+                            borderRadius: 12,
+                            background: "#91c25f",
+                            color: "white",
+                            cursor: "pointer",
+                            border: "1px solid #91caff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            const current =
+                              form.getFieldValue(["adsets", index, "countries"]) || [];
+
+                            const newValues = [
+                              ...new Set([
+                                ...current.filter(v => v !== "europe"),
+                                ...europeanUnionCountryCodes
+                              ])
+                            ];
+
+                            if (geo === "Geos" && index === 0) {
+                              handleFirstCountriesChange(newValues);
+                            } else {
+                              form.setFieldValue(
+                                ["adsets", index, "countries"],
+                                newValues
+                              );
+                            }
+                          }}
+                        >
+                          EU
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  return node.label;
                 }}
               />
             </Form.Item>
@@ -7254,6 +7573,7 @@ const CreateCampaignDrawer = ({
   const [pixel, setPixels] = useState("Pixel");
   const [page, setPages] = useState("Page");
   const userPickedRef = useRef(false);
+  const [continents, setContinents] = useState([])
   // const [budgetType, ]
 
   // const adsets = Form.useWatch("adsets", form) || [];
@@ -7329,6 +7649,14 @@ const CreateCampaignDrawer = ({
     onChangeSelect(values);
     setAccountChanged(true);
   };
+  const geoTreeData = [
+    {
+      label: "Countries",
+      value: "all_countries",
+      key: "all_countries",
+      children: continents,
+    },
+  ];
   const filteredAccounts = useMemo(() => {
     const q = searchText.trim().toLowerCase();
     if (!q) return accountsAccess;
@@ -8918,7 +9246,10 @@ const CreateCampaignDrawer = ({
     setPixelIdList(pixelIdListFiltered);
     setPageIdList(pageIdListFiltered);
   }, [imageHashArray, form]);
-
+  const formatContinent = (str) =>
+    str
+      .replace(/([A-Z])/g, " $1")     // add space before capital letters
+      .replace(/^./, (c) => c.toUpperCase()); // capitalize first letter
   const Accountchange = (e) => {
     console.log(e);
     const newAccounts = newImageHashArray.filter(item =>
@@ -8933,25 +9264,39 @@ const CreateCampaignDrawer = ({
   const fetchAccountDetails = async () => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/newhashimageidentity/${accountNumber}`,
+        `https://www.testapi.adsgoat.in/api/newhashimageidentityWithGeos/${accountNumber}`,
         {
           headers: {
             Authorization: token,
           },
         }
       );
-      console.log("account data", ...response?.data);
+      // console.log("account data", ...response?.data);
 
       // response?.data?.map((item) => {
       //   console.log(item.Network === network, "item.Network === network");
       // });
 
-      console.log(response?.data?.filter((item) => item.Network === network));
+      console.log(response?.data?.data?.filter((item) => item.Network === network));
 
-      setImageHashArray(response?.data?.filter((item) => item.Network === network) || []);
-      setNewImageHashArray(response?.data?.filter((item) => item.Network === network) || []);
+      setImageHashArray(response?.data?.data?.filter((item) => item.Network === network) || []);
+      setNewImageHashArray(response?.data?.data?.filter((item) => item.Network === network) || []);
+      const newCountriesFormat = Object.entries(response?.data?.geos || {}).map(
+        ([continent, countries]) => ({
+          label: formatContinent(continent),
+          value: continent,
+          key: continent,
+          selectable: false, // optional (prevents selecting continent itself)
+          children: countries.map((country) => ({
+            label: country.label,     // or country.label (based on your API)
+            value: country.value,     // or country.value
+            key: country.key,
+          })),
+        })
+      );
+      setContinents(newCountriesFormat);
 
-      setimagehash(...response?.data);
+      setimagehash(...response?.data?.data);
     } catch (error) {
       console.error("Error fetching campaign data:", error);
       // Handle error
@@ -11979,7 +12324,7 @@ const CreateCampaignDrawer = ({
       onCancel={handleDrawerClose}
       footer={null}
       centered
-      width="85%"
+      width="88%"
       // bodyStyle={{
       //   height: '80vh',
       //   overflowY: 'auto',
@@ -12819,7 +13164,7 @@ const CreateCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
-                <Form.Item shouldUpdate noStyle>
+                {/* <Form.Item shouldUpdate noStyle>
                   {({ getFieldValue }) => {
                     const categories = getFieldValue("Special_categories") || [];
                     // if "NONE" is selected, hide the countries field
@@ -12912,6 +13257,112 @@ const CreateCampaignDrawer = ({
                         />
                       </Form.Item>
                     ) : null;
+                  }}
+                </Form.Item> */}
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue }) => {
+
+                    const categories =
+                      getFieldValue("Special_categories") || [];
+
+                    const showCountries =
+                      categories.length > 0 &&
+                      !categories.includes("NONE");
+
+                    return showCountries ? (
+                      <Form.Item
+                        name="countries"
+                        label="Countries"
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              "Please select at least one country",
+                          },
+                        ]}
+                        initialValue={["US"]}
+                        style={{ width: 250, }}
+                      >
+                        <TreeSelect
+                          treeData={geoTreeData}
+                          fieldNames={{
+                            label: "label",
+                            value: "value",
+                            children: "children",
+                          }}
+                          treeCheckable
+                          showCheckedStrategy={
+                            TreeSelect.SHOW_CHILD
+                          }
+                          showSearch
+                          allowClear
+                          treeNodeFilterProp="label"
+                          treeDefaultExpandedKeys={["all_countries"]}
+                          placeholder="Select continents or countries"
+                          maxTagCount={2}
+                          popupClassName={
+                            theme === "dark"
+                              ? "custom-dropdown"
+                              : "custom-dropdown-light"
+                          }
+                          className={`${theme === "dark"
+                            ? "dark-theme"
+                            : "light-theme"
+                            } green-border-select`}
+                          treeTitleRender={(node) => {
+
+                            if (node.value === "europe") {
+
+                              return (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    width: "100%",
+                                  }}
+                                >
+                                  <span>{node.label}</span>
+
+                                  <span
+                                    style={{
+                                      fontSize: 11,
+                                      fontWeight: 500,
+                                      padding: "2px 8px",
+                                      borderRadius: 12,
+                                      background: "#91c25f",
+                                      color: "white",
+                                      cursor: "pointer",
+                                      border: "1px solid #91caff",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // prevent checkbox toggle
+
+                                      const current =
+                                        form.getFieldValue("countries") || [];
+
+                                      const newValues = [
+                                        ...new Set([
+                                          ...current.filter(v => v !== "europe"),
+                                          ...europeanUnionCountryCodes
+                                        ])
+                                      ];
+
+                                      form.setFieldValue("countries", newValues);
+                                    }}
+                                  >
+                                    EU
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            return node.label;
+                          }}
+                        />
+                      </Form.Item>
+                    ) : null;
+
                   }}
                 </Form.Item>
                 <Form.Item
@@ -13307,6 +13758,7 @@ const CreateCampaignDrawer = ({
                   pixel={pixel}
                   geo={geo}
                   newImageHashArray={newImageHashArray}
+                  geoTreeData={geoTreeData}
                 />
               );
               // <ffff/>
