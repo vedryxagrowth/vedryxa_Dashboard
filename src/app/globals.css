@@ -3593,6 +3593,90 @@ select:focus,
   fill: #1d39c4 !important;
 }
 
+/* Tree select stylings start */
+/* Dark dropdown background */
+.custom-dropdown.ant-select-dropdown {
+  background-color: #1f1f1f !important;
+}
+
+/* Tree container */
+.custom-dropdown .ant-select-tree {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+/* Tree node text */
+.custom-dropdown .ant-select-tree-node-content-wrapper {
+  color: #fff !important;
+}
+
+/* Hover state */
+.custom-dropdown .ant-select-tree-node-content-wrapper:hover {
+  background-color: #303030 !important;
+}
+
+/* Checkbox border */
+.custom-dropdown .ant-select-tree-checkbox-inner {
+  background-color: #333;
+  border-color: #555;
+}
+
+/* Search input */
+.custom-dropdown .ant-select-tree-list-holder-inner {
+  background-color: #333;
+}
+/* Checked checkbox background */
+.custom-dropdown .ant-select-tree-checkbox-checked .ant-select-tree-checkbox-inner {
+  background-color: #91c25f !important;   /* your color */
+  border-color: #91c25f !important;
+}
+
+/* Checkmark color */
+.custom-dropdown .ant-select-tree-checkbox-checked .ant-select-tree-checkbox-inner::after {
+  border-color: #ffffff !important;
+}
+
+/* Checked */
+/* .custom-dropdown 
+.ant-select-tree-checkbox-checked 
+.ant-select-tree-checkbox-inner {
+  background-color: #22c55e !important;
+  border-color: #22c55e !important;
+} */
+
+/* Indeterminate */
+.custom-dropdown 
+.ant-select-tree-checkbox-indeterminate 
+.ant-select-tree-checkbox-inner {
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
+}
+
+/* Indeterminate bar */
+.custom-dropdown 
+.ant-select-tree-checkbox-indeterminate 
+.ant-select-tree-checkbox-inner::after {
+  background-color: #ffffff !important;
+}
+.custom-dropdown-light .ant-select-tree-checkbox-checked .ant-select-tree-checkbox-inner {
+  background-color: #91c25f !important;   /* your color */
+  border-color: #91c25f !important;
+}
+.custom-dropdown-light 
+.ant-select-tree-checkbox-indeterminate 
+.ant-select-tree-checkbox-inner {
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
+}
+
+/* Indeterminate bar */
+.custom-dropdown-light 
+.ant-select-tree-checkbox-indeterminate 
+.ant-select-tree-checkbox-inner::after {
+  background-color: #ffffff !important;
+}
+/* Tree select stylings end */
+
 /* Center header text while preserving icons */
 .ag-center-header .ag-header-cell-label {
   justify-content: center !important;

@@ -875,39 +875,39 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         setCampaignComments(updatedCampaignComments);
 
         // 3️⃣ Update rowData using the SAME computed data
-        if (campaignStatusFilter !== "All") {
-          const adStatusMap = new Map(
-            updatedCampaignComments
-              .filter(item => item.level === "ad" && item.ad_id)
-              .map(item => [
-                String(item.ad_id),
-                item.fbStatus
-                  ? String(item.fbStatus).toUpperCase()
-                  : "ACTIVE"
-              ])
-          );
-          const newRowData = newRowDataForFilter.current;
+        // if (campaignStatusFilter !== "All") {
+        //   const adStatusMap = new Map(
+        //     updatedCampaignComments
+        //       .filter(item => item.level === "ad" && item.ad_id)
+        //       .map(item => [
+        //         String(item.ad_id),
+        //         item.fbStatus
+        //           ? String(item.fbStatus).toUpperCase()
+        //           : "ACTIVE"
+        //       ])
+        //   );
+        //   const newRowData = newRowDataForFilter.current;
 
-          // Attach fbStatus to each row using adStatusMap
-          const newRowDataWithFbStatus = newRowData.map(each => {
-            const adKey = String(each.adid);
+        //   // Attach fbStatus to each row using adStatusMap
+        //   const newRowDataWithFbStatus = newRowData.map(each => {
+        //     const adKey = String(each.adid);
 
-            return {
-              ...each,
-              fbStatus: adStatusMap.get(adKey) || "ACTIVE"
-            };
-          });
+        //     return {
+        //       ...each,
+        //       fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+        //     };
+        //   });
 
-          // Final filter by selected status
-          const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
-            item =>
-              item.fbStatus.toUpperCase() ===
-              campaignStatusFilter?.toUpperCase()
-          );
+        //   // Final filter by selected status
+        //   const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+        //     item =>
+        //       item.fbStatus.toUpperCase() ===
+        //       campaignStatusFilter?.toUpperCase()
+        //   );
 
-          setRowData(filteredRowDataWithStatus);
+        //   setRowData(filteredRowDataWithStatus);
 
-        }
+        // }
 
         message.success(`${filteredItems.length} ad(s) updated.`);
       }
@@ -1485,39 +1485,39 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 return arr;
               })();
               setCampaignComments(updatedCampaignComments);
-              if (campaignStatusFilter !== "All") {
-                const adStatusMap = new Map(
-                  updatedCampaignComments
-                    .filter(item => item.level === "ad" && item.ad_id)
-                    .map(item => [
-                      String(item.ad_id),
-                      item.fbStatus
-                        ? String(item.fbStatus).toUpperCase()
-                        : "ACTIVE"
-                    ])
-                );
-                const newRowData = newRowDataForFilter.current;
+              // if (campaignStatusFilter !== "All") {
+              //   const adStatusMap = new Map(
+              //     updatedCampaignComments
+              //       .filter(item => item.level === "ad" && item.ad_id)
+              //       .map(item => [
+              //         String(item.ad_id),
+              //         item.fbStatus
+              //           ? String(item.fbStatus).toUpperCase()
+              //           : "ACTIVE"
+              //       ])
+              //   );
+              //   const newRowData = newRowDataForFilter.current;
 
-                // Attach fbStatus to each row using adStatusMap
-                const newRowDataWithFbStatus = newRowData.map(each => {
-                  const adKey = String(each.adid);
+              //   // Attach fbStatus to each row using adStatusMap
+              //   const newRowDataWithFbStatus = newRowData.map(each => {
+              //     const adKey = String(each.adid);
 
-                  return {
-                    ...each,
-                    fbStatus: adStatusMap.get(adKey) || "ACTIVE"
-                  };
-                });
+              //     return {
+              //       ...each,
+              //       fbStatus: adStatusMap.get(adKey) || "ACTIVE"
+              //     };
+              //   });
 
-                // Final filter by selected status
-                const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
-                  item =>
-                    item.fbStatus.toUpperCase() ===
-                    campaignStatusFilter?.toUpperCase()
-                );
+              //   // Final filter by selected status
+              //   const filteredRowDataWithStatus = newRowDataWithFbStatus.filter(
+              //     item =>
+              //       item.fbStatus.toUpperCase() ===
+              //       campaignStatusFilter?.toUpperCase()
+              //   );
 
-                setRowData(filteredRowDataWithStatus);
+              //   setRowData(filteredRowDataWithStatus);
 
-              }
+              // }
               // setCampaignComments(prev => {
               //   const arr = Array.isArray(prev) ? [...prev] : [];
 
@@ -2994,7 +2994,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
           // console.log(revenueData, "revenueData");
           const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
-          const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
+          const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
           const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
           const spend = parseFloat(eachData.spend);
           const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
