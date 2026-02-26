@@ -70,6 +70,7 @@ const AdsetCard = ({
   const [adsetDrawerOpen, setAdsetDrawerOpen] = useState(false);
   const [adsetToEdit, setAdsetToEdit] = useState(null);
   const [isViewAdset, setIsViewAdset] = useState(false);
+  
 
   const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
 
@@ -131,7 +132,6 @@ const AdsetCard = ({
       );
     }
   };
-
   const makeHandleChangeAd = (currentItem, adsetKey) => async (checked) => {
     const newStatus = checked ? "ACTIVE" : "PAUSED";
     const campaignIdentifier = viewCampaignData?.identifier;
@@ -634,7 +634,7 @@ const AdsetCard = ({
 
                           {/* Title */}
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 12, fontWeight: "bold",  }}>
+                            <div style={{ fontSize: 12, fontWeight: "bold", }}>
                               {item?.AddName || "Consumer finds"}
                             </div>
                             <div style={{ fontSize: 12, color: "#888" }}>
@@ -1088,7 +1088,7 @@ const AdsetCard = ({
 
 
                           <div style={{ flex: "1" }}>
-                            <div style={{ fontWeight: "bold", fontSize: "12px", maxWidth: "140px",wordBreak: "break-word",overflowWrap: "anywhere", }}>
+                            <div style={{ fontWeight: "bold", fontSize: "12px", maxWidth: "140px", wordBreak: "break-word", overflowWrap: "anywhere", }}>
                               {item?.AddName || "Consumer finds"}
                             </div>
                             <div
@@ -1135,8 +1135,6 @@ const AdsetCard = ({
                               transform: 'scale(0.8)',
                             }}
                           />
-
-
                           {/* <Tooltip title="View Ad History">
                             <HistoryOutlined
                               style={{
