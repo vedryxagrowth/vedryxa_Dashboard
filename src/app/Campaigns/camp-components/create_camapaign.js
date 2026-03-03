@@ -895,7 +895,8 @@ const AccountForm = ({
         rules={[{ required: true, message: `Please input Website URL! for ${account}` }]}
         preserve={true}
       >
-        <TextArea placeholder="Website URL" autoSize={{ minRows: 5, maxRows: 15 }} />
+        <TextArea onChange={(e) => {setWebsiteURL(e.target.value)}}
+          placeholder="Website URL" autoSize={{ minRows: 5, maxRows: 15 }} />
       </Form.Item>
 
       <Form.Item
@@ -904,7 +905,7 @@ const AccountForm = ({
         rules={[{ required: true, message: `Please input Display Link! for ${account}` }]}
         preserve={true}
       >
-        <TextArea placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
+        <TextArea onChange={(e) => {setCaption(e.target.value)}} placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
       </Form.Item>
 
       <Modal
@@ -1407,7 +1408,7 @@ const AdsetComponent = ({
     });
   };
 
-  
+
   // const handleEveryDayDrag = (hour) => {
   //   setSelectedByAdset(prev => {
   //     const current = prev[adset.id] || {};
@@ -1426,22 +1427,22 @@ const AdsetComponent = ({
   //   });
   // };
   const handleEveryDayDrag = (hour) => {
-  setSelectedByAdset(prev => {
-    const current = prev[adset.id] || {};
-    const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
-      d => current[`${d}-${hour}`]
-    );
-    const updated = { ...current };
-    [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-      const key = `${d}-${hour}`;
-      updated[key] = !allSelected; 
+    setSelectedByAdset(prev => {
+      const current = prev[adset.id] || {};
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
+      const updated = { ...current };
+      [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+        const key = `${d}-${hour}`;
+        updated[key] = !allSelected;
+      });
+      return {
+        ...prev,
+        [adset.id]: updated
+      };
     });
-    return {
-      ...prev,
-      [adset.id]: updated
-    };
-  });
-};
+  };
 
   const isValidAdSchedule = (schedule = []) =>
     Array.isArray(schedule) &&

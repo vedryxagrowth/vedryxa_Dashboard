@@ -109,11 +109,15 @@ const App = () => {
   if (userdetails?.role === "Revenue_Partner") {
     redirect("/Dashboard");
   }
+  const searchParams = useSearchParams();
+  const networkFromUrl = searchParams.get("network");
+  const accountFromUrl = searchParams.get("account");
+  const campaignIdFromUrl = searchParams.get("campaignId");
   const { adAccounts } = userdetails || {};
   const [hovered, setHovered] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationSize, setPaginationSize] = useState(10);
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(campaignIdFromUrl ? campaignIdFromUrl : "");
   const [filteredData, setFilteredData] = useState([]);
   const [sendInputToApi, setSendInputToApi] = useState("");
   const [cdrawerVisible, setDrawerVisible] = useState(false);
@@ -145,8 +149,8 @@ const App = () => {
   const [refrst, setRefrst] = useState(false);
   const [options, setOptions] = useState([]);
   const [createcamselectedacc, setcreatecamselectedacc] = useState("");
-  const [selectedKey, setSelectedKey] = useState(null);
-  const [selectedValue, setSelectedValue] = useState([]);
+  const [selectedKey, setSelectedKey] = useState(networkFromUrl ? networkFromUrl : null);
+  const [selectedValue, setSelectedValue] = useState(accountFromUrl ? [accountFromUrl] : []);
   const [valueOptions, setValueOptions] = useState([]);
   const [error, setError] = useState(false);
   const { theme } = useTokenContext();
@@ -196,35 +200,29 @@ const App = () => {
   const [adDetails, setAdDetails] = useState({});
   const [adsCount, setAdsCount] = useState({});
   const [loadingAd, setLoadingAd] = useState(null);
-  const searchParams = useSearchParams();
   console.log(checkedRowRecords);
-  const hasInitializedFromUrl = useRef(false);
   // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
     setCampaignStatusFilter(key);
   };
-  useEffect(() => {
-    if (hasInitializedFromUrl.current) return;
+  // useEffect(() => {
+  //   const networkFromUrl = searchParams.get("network");
+  //   const accountFromUrl = searchParams.get("account");
+  //   const campaignIdFromUrl = searchParams.get("campaignId");
 
-    const networkFromUrl = searchParams.get("network");
-    const accountFromUrl = searchParams.get("account");
-    const campaignIdFromUrl = searchParams.get("campaignId");
+  //   if (networkFromUrl) {
+  //     setSelectedKey(networkFromUrl);
+  //   }
 
-    if (networkFromUrl) {
-      setSelectedKey(networkFromUrl);
-    }
+  //   if (accountFromUrl) {
+  //     setSelectedValue([accountFromUrl]);
+  //   }
 
-    if (accountFromUrl) {
-      setSelectedValue([accountFromUrl]);
-    }
-
-    if (campaignIdFromUrl) {
-      setSearchInput(campaignIdFromUrl);
-    }
-
-    hasInitializedFromUrl.current = true;
-
-  }, []);
+  //   if (campaignIdFromUrl) {
+  //     setSearchInput(campaignIdFromUrl);
+  //   }
+  //    setIsReady(true);
+  // }, []);
   useEffect(() => {
     const fetchNetworksData = async () => {
       try {
@@ -830,9 +828,9 @@ const App = () => {
 
   const handleApply = () => {
     if (selectedValue && startDate && endDate) {
-
       // fetchData(selectedValue, startDate, endDate);
-      fetchLauncherComments(selectedValue)
+      campaignIdFromUrl === searchInput && setSearchInput(""); 
+      fetchLauncherComments(selectedValue);
       fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
       setAccountChanged(false);
 
@@ -841,9 +839,9 @@ const App = () => {
       message.warning("Please select project, account and date range");
     }
   };
-  const handleAccountBalance = ()=>{
+  const handleAccountBalance = () => {
     if (selectedValue) {
-       fetchAccountDetails(selectedValue);
+      fetchAccountDetails(selectedValue);
     }
     else {
       message.warning("Please select project, account and date range");
@@ -874,38 +872,21 @@ const App = () => {
   //   fetchLauncherComments(selectedValue);
   //   fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
   // }, [refrst]);
-  // useEffect(() => {
-  //   if (!selectedKey || !selectedValue || !startDate || !endDate) return;
 
-  //   fetchLauncherComments(selectedValue);
-
-  //   fetchMultipleAdsetCampaigns(
-  //     selectedValue,
-  //     startDate,
-  //     endDate,
-  //     searchInput || ""
-  //   );
-
-  // }, [selectedKey, selectedValue, startDate, endDate, refrst]);
   useEffect(() => {
-    if (
-      hasInitializedFromUrl.current &&
-      selectedKey &&
-      selectedValue?.length > 0 &&
-      startDate &&
-      endDate
-    ) {
-      fetchLauncherComments(selectedValue);
-      fetchMultipleAdsetCampaigns(
-        selectedValue,
-        startDate,
-        endDate,
-        searchInput || ""
-      );
+    if (!selectedKey || !selectedValue || !startDate || !endDate) return;
 
-      hasInitializedFromUrl.current = false;
-    }
-  }, [selectedKey, selectedValue, startDate, endDate, refrst]);
+    fetchLauncherComments(selectedValue);
+
+    fetchMultipleAdsetCampaigns(
+      selectedValue,
+      startDate,
+      endDate,
+      searchInput || ""
+    );
+
+  }, [refrst]);
+
   // Handle value change
   // const handleValueChange = (value) => {
   //   setSelectedValue(value);
@@ -2764,7 +2745,7 @@ const App = () => {
                 {record.adsetCount}
               </div>
             </Tooltip>
-            {record.fbstatus !== "No-Live" && (
+            {/* {record.fbstatus !== "No-Live" && (
               <Tooltip
                 title={
                   loadingAd === record.identifier ? (
@@ -2846,7 +2827,7 @@ const App = () => {
                   {adsCount[record.identifier]}
                 </div>
               </Tooltip>
-            )}
+            )} */}
           </div>
         );
       },
@@ -4082,9 +4063,9 @@ const App = () => {
               backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
               color: theme === "dark" ? "#ffffff" : "#000000",
             }}>
-              <SyncOutlined style={{fontSize:"18px",cursor:"pointer"}} onClick={handleAccountBalance}/>
-              </Tooltip>
-          
+              <SyncOutlined style={{ fontSize: "18px", cursor: "pointer" }} onClick={handleAccountBalance} />
+            </Tooltip>
+
             <span
               style={{
                 backgroundColor: "transparent",
