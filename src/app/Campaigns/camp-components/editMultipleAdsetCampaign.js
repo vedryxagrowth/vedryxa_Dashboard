@@ -8043,7 +8043,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
   const [websiteURL, setWebsiteURL] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentFile, setCurrentFile] = useState(null); // File to be edited
   const [isImgEditorShown, setIsImgEditorShown] = useState(false);
   const [editedImages, setEditedImages] = useState({});
@@ -8362,6 +8362,9 @@ const EditMultipleAdsetCampaignDrawer = ({
     } catch (error) {
       console.error("Error fetching campaign list:", error);
     }
+    finally{
+      setLoading(false);
+    }
   };
 
   const fetchCategories = async (selectedRow) => {
@@ -8580,7 +8583,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: "0",
@@ -8612,7 +8615,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: "0",

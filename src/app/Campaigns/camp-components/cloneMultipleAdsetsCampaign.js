@@ -7763,7 +7763,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
   const [websiteURL, setWebsiteURL] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentFile, setCurrentFile] = useState(null); // File to be edited
   const [isImgEditorShown, setIsImgEditorShown] = useState(false);
   const [editedImages, setEditedImages] = useState({});
@@ -8102,6 +8102,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         });
         setAdSchedulingToShow(adsetSwitchMap);
         setFormValuesFromDraft(response?.data[0]);
+        
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
         //     const selectedOption = item.selectedOption || "creative";
 
@@ -8131,6 +8132,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
       }
     } catch (error) {
       console.error("Error fetching campaign list:", error);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -8299,7 +8303,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: "0",
@@ -8330,7 +8334,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: 0,
