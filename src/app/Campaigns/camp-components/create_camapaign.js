@@ -895,7 +895,7 @@ const AccountForm = ({
         rules={[{ required: true, message: `Please input Website URL! for ${account}` }]}
         preserve={true}
       >
-        <TextArea onChange={(e) => {setWebsiteURL(e.target.value)}}
+        <TextArea onChange={(e) => { setWebsiteURL(e.target.value) }}
           placeholder="Website URL" autoSize={{ minRows: 5, maxRows: 15 }} />
       </Form.Item>
 
@@ -905,7 +905,7 @@ const AccountForm = ({
         rules={[{ required: true, message: `Please input Display Link! for ${account}` }]}
         preserve={true}
       >
-        <TextArea onChange={(e) => {setCaption(e.target.value)}} placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
+        <TextArea onChange={(e) => { setCaption(e.target.value) }} placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
       </Form.Item>
 
       <Modal
@@ -7598,6 +7598,7 @@ const CreateCampaignDrawer = ({
   const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
   const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
   const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
+  const [imageHashStatus, setImageHashStatus] = useState([])
 
 
   // Derived condition name changed to watchedHasAdsetBudget
@@ -9939,7 +9940,17 @@ const CreateCampaignDrawer = ({
   //         return [];
   //     }
   // };
-
+  const updateStatus = (name, status) => {
+    setImageHashStatus(prev => {
+      const existing = prev.find(item => item.name === name);
+      if (existing) {
+        return prev.map(item =>
+          item.name === name ? { ...item, status } : item
+        );
+      }
+      return [...prev, { name, status }];
+    });
+  };
   const customRequest = async (singleaccount, data, index, onSuccess, onError, id) => {
     if (!imagehash || imagehash.length === 0) {
       onError("Image hash data not loaded");
@@ -10004,11 +10015,12 @@ const CreateCampaignDrawer = ({
         return null;
       }
     };
-
+    let adIndex = 1;
     const uploadFilesSequentially = async (selectedFiles) => {
       const mediaHashArray = [];
 
       for (const file of selectedFiles) {
+        const adName = `${account}_${data?.AddName}_${adIndex}`;
         try {
           const fileType = file.type;
           if (
@@ -10051,7 +10063,7 @@ const CreateCampaignDrawer = ({
               file.url.endsWith(".jpeg")
             ) {
               const fileName = file.name.split("/").pop();
-
+              updateStatus(adName, "Generating image hash...");
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/adimages`,
                 formData,
@@ -10059,6 +10071,7 @@ const CreateCampaignDrawer = ({
               );
 
               if (fbResponse.status === 200) {
+                updateStatus(adName, "Image uploaded");
                 onSuccess("ok", fbResponse);
                 mediaHashArray.push({
                   filename: s3FileUrl,
@@ -10069,6 +10082,7 @@ const CreateCampaignDrawer = ({
                 console.error("Image upload failed");
               }
             } else if (file.url.endsWith(".mp4")) {
+              updateStatus(adName, "Generating video id...");
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/advideos`,
                 formData,
@@ -10077,6 +10091,7 @@ const CreateCampaignDrawer = ({
 
               if (fbResponse.status === 200) {
                 const videoid = fbResponse?.data?.id;
+                updateStatus(adName, "video uploaded");
                 await new Promise((resolve) => setTimeout(resolve, 10000));
 
                 const thumbnailResponse = await axios.get(
@@ -10219,6 +10234,7 @@ const CreateCampaignDrawer = ({
           console.error("Error uploading file:", error);
           onError("error", error);
         }
+        adIndex++ ;
       }
 
       return mediaHashArray;
@@ -12991,8 +13007,15 @@ const CreateCampaignDrawer = ({
 
        
       </Select> */}
-
-      <Spin spinning={loading}>
+      <Spin spinning={loading} tip={
+        <div>
+          {imageHashStatus.map((item, index) => (
+            <div key={index}>
+              <b>{item.name}</b> : {item.status}
+            </div>
+          ))}
+        </div>
+      }>
         <Form
           layout="vertical"
           form={form}
