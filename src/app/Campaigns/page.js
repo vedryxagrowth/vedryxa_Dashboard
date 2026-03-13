@@ -31,7 +31,11 @@ import {
   Skeleton,
   Tabs,
   Popconfirm,
-  Checkbox
+  Checkbox,
+  Popover,
+  Steps,
+  Tree,
+  Timeline
 } from "antd";
 import {
   EditOutlined,
@@ -829,7 +833,7 @@ const App = () => {
   const handleApply = () => {
     if (selectedValue && startDate && endDate) {
       // fetchData(selectedValue, startDate, endDate);
-      campaignIdFromUrl === searchInput && setSearchInput(""); 
+      campaignIdFromUrl === searchInput && setSearchInput("");
       fetchLauncherComments(selectedValue);
       fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
       setAccountChanged(false);
@@ -2357,9 +2361,140 @@ const App = () => {
         <div
           style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         >
-          <span
+          {/* <span
           // onClick={() => handleCampaignNameClick(record)}
-          >{text}</span>
+          >{text}</span> */}
+          <Popover
+            trigger="hover"
+            placement="right"
+            content={
+              <div style={{ width: 320, maxHeight: 420, overflowY: "auto", }}>
+                <Steps
+                  direction="vertical"
+                  size="small"
+                  items={[
+                    record?.createdDate && {
+                      title: <b>Campaign Created</b>,
+                      description: record.createdDate,
+                      status: "finish",
+                    },
+
+
+                    record?.campaignid && {
+                      title: <b>Campaign Launched in Facebook</b>,
+                      description: record.campaignid,
+                      status: "finish",
+                    },
+
+
+                    ...(record?.adsetsWithAds || [])
+                      .map((adset) => {
+                        const adsetError = record?.adsetErrors?.find(
+                          (err) => err.name === adset.adsetName
+                        );
+
+
+                        if (!adset.adsetId && !adsetError) return null;
+
+
+                        return {
+                          title: (
+                            <div
+                              title={adset.adsetName}
+                              style={{
+                                maxWidth: 260,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                fontWeight: "bold"
+                              }}
+                            >
+                              {adsetError
+                                ? `Adset launching failed: ${adset.adsetName}`
+                                : `Adset launched: ${adset.adsetName}`}
+                            </div>
+                          ),
+                          description: (
+                            <div>
+                              {adset.adsetId && (
+                                <div style={{ marginBottom: 6, color: "#888" }}>
+                                  {adset.adsetId}
+                                </div>
+                              )}
+
+
+                              {!adset.adsetId && adsetError && (
+                                <div style={{ color: "red", fontSize: 12 }}>
+                                  Error: {adsetError.error}
+                                </div>
+                              )}
+                              <Steps
+                                direction="vertical"
+                                size="small"
+                                style={{ marginLeft: 10 }}
+                                items={(adset?.ads || []).map((ad, i) => {
+
+
+                                  const adError = record?.adErrorsByAdset?.find(
+                                    (err) =>
+                                      err.adsetKey === adset.key &&
+                                      err.adIndex === i
+                                  );
+                                  if (!ad.adId && !adError) return null;
+                                  return {
+                                    title: (
+                                      <div
+                                        title={ad.adName}
+                                        style={{
+                                          maxWidth: 200,
+                                          whiteSpace: "nowrap",
+                                          overflow: "hidden",
+                                          textOverflow: "ellipsis",
+                                          fontWeight: "bold"
+                                        }}
+                                      >
+                                        {adError
+                                          ? `Ad launching failed: ${ad.adName}`
+                                          : `Ad launched: ${ad.adName}`}
+                                      </div>
+                                    ),
+
+
+                                    description: (
+                                      <>
+                                        {ad.adId && (
+                                          <div style={{ fontSize: 12, color: "#888" }}>
+                                            {ad.adId}
+                                          </div>
+                                        )}
+
+
+                                        {adError && (
+                                          <div style={{ color: "red", fontSize: 12 }}>
+                                            Error: {adError.error}
+                                          </div>
+                                        )}
+                                      </>
+                                    ),
+
+
+                                    status: adError ? "error" : "finish",
+                                  };
+                                })}
+                              />
+                            </div>
+                          ),
+                          status: adset.adsetId ? "finish" : "error",
+                        };
+                      })
+                      .filter(Boolean),
+                  ].filter(Boolean)}
+                />
+              </div>
+            }
+          >
+            <span>{text}</span>
+          </Popover>
           {record.reports && (
             <span
               style={{

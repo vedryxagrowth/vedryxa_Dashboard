@@ -10234,6 +10234,7 @@ const CreateCampaignDrawer = ({
           console.error("Error uploading file:", error);
           onError("error", error);
         }
+        adIndex++ ;
       }
 
       return mediaHashArray;
