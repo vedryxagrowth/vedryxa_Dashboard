@@ -9,7 +9,9 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTokenContext } from '../../../components/parent';
-const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, showSubmitButton, accountis }) => {
+const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, showSubmitButton, accountis, primaryText,
+    headline,
+    description, campaign_name }) => {
     // Initial data array
     const [domain, setDomain] = useState(null);
     const [source, setSource] = useState("fb");
@@ -31,7 +33,10 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
     const { theme } = useTokenContext();
     const [domainExtension, setDomainExtension] = useState('');
     const [copyMessage, setCopyMessage] = useState('Click to copy');
-
+    const combinedRac =
+        [primaryText, headline, description]
+            .filter(Boolean)
+            .join(",");
     const DataToSend = "domain_extension_replace?src=src_replace&pxi=835172915206585&channel=channel_replace&terms=terms_replace&rac=rac_replace&utm_campaign=utm_campaign_replace&sltId=sltId_replace&tmp=tmp_replace";
     const getUrlBuilderData = async () => {
         const response = await apiClient.get(`/get/urlbuilderdata?network=Affinity`);
@@ -60,9 +65,13 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
                 const termsValue = new URL(indexValueForAccount).searchParams.get("terms");
                 const pixelValue = new URL(indexValueForAccount).searchParams.get("pxi");
                 setTerms(termsValue ? termsValue.replace(/%20/g, " ") : "");
-                setKeyWords(utm_campaignValue ? utm_campaignValue.trim().replace(/\+/g, " ") : "");
+                setKeyWords(utm_campaignValue ? utm_campaignValue.trim().replace(/%20/g, " ") : "");
                 setDomainExtension(domainValue);
-                setRac(racValue || '');
+                setRac(
+                    racValue
+                        ? decodeURIComponent(racValue).replace(/\+/g, " ")
+                        : ""
+                );
                 setTmp(tmpValue || '9');
                 setChannel(sltIdValue || "1675913170");
                 setChannel_id(channelValue || '');
@@ -115,9 +124,13 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
                     const termsValue = new URL(defaultValues).searchParams.get("terms");
                     const pixelValue = new URL(defaultValues).searchParams.get("pxi");
                     setTerms(termsValue ? termsValue.replace(/%20/g, " ") : "");
-                    setKeyWords(utm_campaignValue ? utm_campaignValue.trim().replace(/\+/g, " ") : "");
+                    setKeyWords(utm_campaignValue ? utm_campaignValue.trim().replace(/%20/g, " ") : "");
                     setDomainExtension(domainValue);
-                    setRac(racValue || '');
+                    setRac(
+                        racValue
+                            ? decodeURIComponent(racValue).replace(/\+/g, " ")
+                            : ""
+                    );
                     setTmp(tmpValue || '9');
                     setChannel(sltIdValue || "1675913170");
                     setChannel_id(channelValue || '');
@@ -140,8 +153,24 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
     }, [accountis]);
 
     useEffect(() => {
+        if (!combinedRac) return;
+        setRac(combinedRac);
+    }, [combinedRac]);
+    useEffect(() => {
+        if (!campaign_name) return;
+        setKeyWords(campaign_name);
+    }, [campaign_name]);
+
+    useEffect(() => {
         getUrlBuilderData();
     }, []);
+    useEffect(() => {
+        if (channel === "1675913170") {
+            setTmp("10");
+        } else {
+            setTmp("9");
+        }
+    }, [channel]);
 
     const onChangePixelId = (value) => {
         setPixelId(value);
@@ -174,7 +203,7 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
 
         if (keywords && channel && domainExtension && source && pixelId && channel_id && rac) {
             // const formattedKeywords = keywords.replace(/\s+/g, '+'); praveen 
-            const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+'); //s
+            const formattedKeywords = encodeURIComponent(keywords.trim()); //s
 
             const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
             const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
@@ -206,7 +235,13 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             //         .replace("campaign_id_replace", adset_id)
             //         .replace("adset_id_replace", ad_id);
             // }
-            const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
+            // const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
+            const racValue = rac
+                ? rac
+                    .split(",")
+                    .map(item => encodeURIComponent(item.trim()))
+                    .join(",")
+                : "";
 
             if (pixelId === 'PixelId') {
                 url = DataToSend;
@@ -263,12 +298,18 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
     const onClickGet = () => {
 
         if (keywords && channel && domainExtension && source && pixelId && channel_id && rac) {
-            const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+');
+            const formattedKeywords = encodeURIComponent(keywords.trim());
             const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
             const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
             const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
             let url;
-            const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
+            // const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
+            const racValue = rac
+                ? rac
+                    .split(",")
+                    .map(item => encodeURIComponent(item.trim()))
+                    .join(",")
+                : "";
 
             if (pixelId === 'PixelId') {
                 url = DataToSend;
