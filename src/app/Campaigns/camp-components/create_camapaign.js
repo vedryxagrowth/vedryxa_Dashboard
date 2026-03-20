@@ -586,6 +586,10 @@ const AccountForm = ({
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
   const [indexValueForAccount, setIndexValueForAccount] = useState("");
   console.log("defaultUrlData in account form", defaultUrlData);
+  const primaryText = Form.useWatch(["adsets", index, "message"], form);
+  const headline = Form.useWatch(["adsets", index, "headline"], form);
+  const description = Form.useWatch(["adsets", index, "Description"], form);
+  const campaign_name = Form.useWatch(["Name"],form);
 
 
   const onReturnUrl = (text) => {
@@ -737,7 +741,9 @@ const AccountForm = ({
       case "FB_Affinity":
         //defaultValues
         return (
-          <AffinityUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+          <AffinityUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} primaryText={primaryText}
+            headline={headline}
+            description={description} campaign_name={campaign_name} />
         );
       case "FB_Compado":
         //defaultValues
@@ -10234,7 +10240,7 @@ const CreateCampaignDrawer = ({
           console.error("Error uploading file:", error);
           onError("error", error);
         }
-        adIndex++ ;
+        adIndex++;
       }
 
       return mediaHashArray;
