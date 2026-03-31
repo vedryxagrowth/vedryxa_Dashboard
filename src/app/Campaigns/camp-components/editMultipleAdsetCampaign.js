@@ -8362,7 +8362,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     } catch (error) {
       console.error("Error fetching campaign list:", error);
     }
-    finally{
+    finally {
       setLoading(false);
     }
   };
@@ -10232,7 +10232,12 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["identifier"] = fullCampaignData.identifier;
     AllAdsetsData["campaign_name"] = values?.Name;
     AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
-    AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    // AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    if (fullCampaignData.Approval === "Rejected") {
+      AllAdsetsData["Approval"] = "PENDING_APPROVAL";
+    } else {
+      AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    }
     AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus === "Processing" ? "No-Live" : fullCampaignData.fbstatus;
     AllAdsetsData["Category"] = fullCampaignData.Category;
     if (fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
@@ -11029,7 +11034,14 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["Ad_Status"] = item.Ad_Status;
               }
               if (Object.keys(getItem).length > 0 && item.status) {
-                newUpdatedAd["status"] = item.status;
+                // newUpdatedAd["status"] = item.status;
+                if (fullCampaignData.Approval === "Rejected") {
+
+                } else {
+                  if (item.status) {
+                    newUpdatedAd["status"] = item.status;
+                  }
+                }
               }
               if (
                 Object.keys(getItem).length > 0 &&
