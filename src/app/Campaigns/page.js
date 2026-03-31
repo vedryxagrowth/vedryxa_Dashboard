@@ -989,7 +989,11 @@ const App = () => {
   const [useaproval, setuseraproval] = useState(null);
   const [isModalVisibleForAdsets, setIsModalVisibleForAdsets] = useState(false);
   const [useaprovalForAdsets, setuseraprovalForAdsets] = useState(null);
+  const [userdisaprovalForAdsets, setuserdisaprovalForAdsets] = useState(null);
+  const [isModalVisibleForAdsetsdisapprove, setIsModalVisibleForAdsetsdisapprove] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [rejectedReason, setRejectionReason] = useState("");
+  const [reasonError, setReasonError] = useState("");
 
   const handleUpdateApproval = async (id, newApprovalValue) => {
     try {
@@ -1094,7 +1098,57 @@ const App = () => {
       // Handle error
     }
   };
+  const handleUpdateDisapprovalForAdsets = async (id) => {
+    try {
+      const response = await fetch(
+        `https://www.testapi.adsgoat.in/api/newupdateDisapproval/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("token"),
+          },
+          body: JSON.stringify({
+            reason: rejectedReason,
+            RejectedBy: userdetails?.userName,
+            datetime: moment()
+              .tz("Asia/Kolkata")
+              .format("YYYY-MM-DD HH:mm [IST]"),
+          }),
+        }
+      );
 
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setCampaignData((prevData) =>
+          prevData.map((record) =>
+            record.identifier === id
+              ? {
+                ...record,
+                Approval: "Rejected",
+                // RejectedBy: userdetails?.userName,
+                // RejectedDate: moment().format("YYYY-MM-DD HH:mm"),
+              }
+              : record
+          )
+        );
+        message.open({
+          type: "success",
+          content: "Disapproval confirmed",
+          className: theme === "dark" ? "dark-message" : "",
+        });
+
+        setIsModalVisibleForAdsetsdisapprove(false);
+        changeRRefrst();
+
+      } else {
+        console.error("Failed to update disapproval");
+      }
+    } catch (error) {
+      console.error("Error updating disapproval:", error);
+    }
+  };
   const handleApproval = (record) => {
     console.log(record, "record");
     setuseraproval(record);
@@ -1105,6 +1159,11 @@ const App = () => {
     console.log(record, "record");
     setuseraprovalForAdsets(record);
     setIsModalVisibleForAdsets(true);
+  };
+  const handledisApprovalforAdsets = (record) => {
+    console.log(record, "record");
+    setuserdisaprovalForAdsets(record);
+    setIsModalVisibleForAdsetsdisapprove(true);
   };
 
   const handleOk = async () => {
@@ -1141,7 +1200,24 @@ const App = () => {
       // Handle error
     }
   };
+  const handleOkForAdsetsdisapprove = async () => {
+    try {
+      if (!userdisaprovalForAdsets) return;
+      if (!rejectedReason?.trim()) {
+        setReasonError("Rejection reason is required");
+        return;
+      }
 
+      await handleUpdateDisapprovalForAdsets(
+        userdisaprovalForAdsets.identifier
+      );
+      setIsModalVisibleForAdsetsdisapprove(false);
+      setuserdisaprovalForAdsets(null);
+      setRejectionReason("");
+    } catch (error) {
+      console.error("Error updating disapproval:", error);
+    }
+  };
   const handleOkDeleteDraft = async () => {
     try {
       const response = await axios.delete(
@@ -3063,14 +3139,22 @@ const App = () => {
           displayText = "Pending";
         } else if (text === "Approved") {
           color = "#4caf50";
+        } else if (text === "Rejected") {
+          color = "red"
         }
+        console.log(record, "recordada")
         const approvedBy = record?.Approvedby || "N/A";
         const approvedDate = record?.Approveddate
           ? moment(record.Approveddate, "YYYY-MM-DD HH:mm z")
             .tz("Asia/Kolkata")
             .format("DD-MM-YYYY HH:mm")
           : "N/A";
-
+        const RejectedBy = record?.RejectedBy || "N/A";
+        const RejectedDate = record?.RejectedDate
+         ? moment(record.RejectedDate, "YYYY-MM-DD HH:mm z")
+          .tz("Asia/Kolkata")
+          .format("DD-MM-YYYY HH:mm")
+          : "N/A";
         return (
           <div>
             <span style={{ color }}>{displayText}</span>
@@ -3089,6 +3173,16 @@ const App = () => {
                 </span>
                 <span style={{ color: "gray", fontSize: "9px", display: "block", marginTop: 2, display: approvedDate !== "N/A" ? "block" : "none" }}>
                   {approvedDate}
+                </span>
+              </div>
+            )}
+            {text === "Rejected" && (
+              <div style={{ lineHeight: "12px" }}>
+                <span style={{ color: "gray", fontSize: "11px", display: "block" }}>
+                  {RejectedBy}
+                </span>
+                <span style={{ color: "gray", fontSize: "9px", display: "block", marginTop: 2, display: RejectedDate !== "N/A" ? "block" : "none" }}>
+                  {RejectedDate}
                 </span>
               </div>
             )}
@@ -3214,7 +3308,7 @@ const App = () => {
           setSelectedAccountForHistory(accountNumber);
           setHistoryOpen(true);
         };
-        if (record.Approval === "Approved") {
+        if (record.Approval === "Approved" || record.Approval === "Rejected") {
           return (
             <Tooltip title="View Campaign History" overlayInnerStyle={{
               backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
@@ -3241,17 +3335,32 @@ const App = () => {
         if (approval === "pending_approval") {
           return (
             <>
-              <Button
-                style={{
-                  backgroundColor: "#91C25F",
-                  color: "#000",
-                  border: "none",
-                }}
-                onClick={() => handleApprovalforAdsets(record)}
-              >
-                Approve
-              </Button>
-
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "5px",
+              }}>
+                <Button
+                  style={{
+                    backgroundColor: "#91C25F",
+                    color: "#000",
+                    border: "none",
+                  }}
+                  onClick={() => handleApprovalforAdsets(record)}
+                >
+                  Approve
+                </Button>
+                <Button
+                  style={{
+                    backgroundColor: "#fb4437ff",
+                    color: "#000",
+                    border: "none",
+                  }}
+                  onClick={() => handledisApprovalforAdsets(record)}
+                >
+                  Disapprove
+                </Button>
+              </div>
               {useaprovalForAdsets?.identifier === record.identifier && (
                 <Modal
                   title="Confirm approval"
@@ -3264,10 +3373,12 @@ const App = () => {
                   <p>Are you sure you want to approve?</p>
                 </Modal>
               )}
+
+
             </>
+
           );
         }
-
         return null;
       },
     }
@@ -5226,7 +5337,36 @@ const App = () => {
         adAccounts={adAccounts}
         accountNumber={selectedAccountForHistory}
       />
+
+      <Modal
+        title="Confirm disapproval"
+        open={isModalVisibleForAdsetsdisapprove}
+        onOk={handleOkForAdsetsdisapprove}
+        onCancel={() => setIsModalVisibleForAdsetsdisapprove(false)}
+        confirmLoading={loading}
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+      >
+        <p>Are you sure you want to disapprove?</p>
+
+        <Input.TextArea
+          placeholder="Enter rejection reason"
+          value={rejectedReason}
+          onChange={(e) => {
+            setRejectionReason(e.target.value);
+            if (reasonError) setReasonError("");
+          }}
+          rows={4}
+          status={reasonError ? "error" : ""}
+        />
+
+        {reasonError && (
+          <div style={{ color: "#ff4d4f", marginTop: 5 }}>
+            {reasonError}
+          </div>
+        )}
+      </Modal>
     </div>
+
   );
 };
 export default App;

@@ -32,6 +32,7 @@
     "countries-and-timezones": "^3.8.0",
     "dayjs": "^1.11.19",
     "emailjs-com": "^3.2.0",
+    "jodit-react": "^5.3.21",
     "jsonwebtoken": "^9.0.2",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "lodash.debounce": "^4.0.8",

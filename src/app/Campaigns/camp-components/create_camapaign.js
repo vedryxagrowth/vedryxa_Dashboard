@@ -44,7 +44,8 @@ import {
   ExclamationCircleOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  FileAddOutlined
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -60,6 +61,7 @@ import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
 import AffinityUrlBuilder from "./urlbuilder/affinity";
+import AffinityArticleBuilder from "./urlbuilder/affinity-article"
 import CompadoUrlBuilder from "./urlbuilder/compado";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
@@ -581,6 +583,8 @@ const AccountForm = ({
 
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
     useState(false);
+  const [isModalVisibleForArticleURLBuilder, setIsModalVisibleForArticleURLBuilder] =
+    useState(false);
   const [websiteURL, setWebsiteURL] = useState("");
   const [caption, setCaption] = useState("");
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
@@ -589,7 +593,7 @@ const AccountForm = ({
   const primaryText = Form.useWatch(["adsets", index, "message"], form);
   const headline = Form.useWatch(["adsets", index, "headline"], form);
   const description = Form.useWatch(["adsets", index, "Description"], form);
-  const campaign_name = Form.useWatch(["Name"],form);
+  const campaign_name = Form.useWatch(["Name"], form);
 
 
   const onReturnUrl = (text) => {
@@ -631,7 +635,9 @@ const AccountForm = ({
   const handleCancelForURLBuilder = () => {
     setIsModalVisibleForURLBuilder(false);
   }
-
+  const handleCancelForArticleURLBuilder = () => {
+    setIsModalVisibleForArticleURLBuilder(false);
+  }
   const onClickEdit = (index) => {
     setIsModalVisibleForURLBuilder(true);
     const val = form.getFieldValue(["adsets", index, account, "Website_URL"])
@@ -778,6 +784,20 @@ const AccountForm = ({
         );
     }
   }
+  const getArticleUrlBuilder = () => {
+    // useMemo(() => {
+    // return (extraString) => {
+    console.log(network)
+    switch (network) {
+      case "FB_Affinity":
+        //defaultValues
+        return (
+          <AffinityArticleBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} primaryText={primaryText}
+            headline={headline}
+            description={description} campaign_name={campaign_name} />
+        );
+    }
+  }
   // }
   // }, [network, account, defaultURLBuilder, indexValueForAccount, onReturnUrl]);
 
@@ -834,6 +854,7 @@ const AccountForm = ({
               style={{ cursor: "pointer" }}
               onClick={() => onClickEdit(index)}
             />
+            {network === "FB_Affinity" && <FileAddOutlined style={{ cursor: "pointer", marginLeft: "20px" }} onClick={() => { setIsModalVisibleForArticleURLBuilder(true) }} />}
             <LinkOutlined
               style={{ cursor: "pointer", marginLeft: "20px" }}
               onClick={() => onClickLinkView(index)}
@@ -930,6 +951,27 @@ const AccountForm = ({
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
         {getUrlBuilder()}
+      </Modal>
+      <Modal
+        title=""
+        visible={isModalVisibleForArticleURLBuilder}
+        onCancel={handleCancelForArticleURLBuilder}
+        footer={null}
+        width="60%"
+        // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        // styles={{
+        //   body: {
+        //     // height: "90vh",
+        //     // overflowY: "auto",
+        //   },
+        // }}
+        // className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        centered={false}
+        style={{ top: 20 }}
+        getContainer={document.body}
+      >
+        {getArticleUrlBuilder()}
       </Modal>
       {/* </Form> */}
     </div>

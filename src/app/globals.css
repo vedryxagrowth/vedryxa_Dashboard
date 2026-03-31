@@ -4344,3 +4344,22 @@ body.dark-mode .black-icon-creatives1.anticon svg {
  /* ended */
  /*  */
  
+ /* Selected (checked) */
+.ant-radio-button-wrapper-checked {
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
+  color: #fff !important;
+}
+
+/* ✅ Hover on selected → keep white text */
+.ant-radio-button-wrapper-checked:hover {
+  background-color: #91c25f !important;
+  border-color: #91c25f !important;
+  color: #fff !important;
+}
+
+/* Unselected hover */
+.ant-radio-button-wrapper:not(.ant-radio-button-wrapper-checked):hover {
+  color: #91c25f !important;
+  border-color: #91c25f !important;
+}
