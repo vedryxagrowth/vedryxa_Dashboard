@@ -22,6 +22,7 @@ import {
   Alert,
   Switch,
   Descriptions,
+  TreeSelect
 } from "antd";
 import {
   PlusOutlined,
@@ -69,6 +70,11 @@ const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 const { Panel } = Collapse;
 const { Option } = Select;
 const { Step } = Steps;
+const europeanUnionCountryCodes = [
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+  "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+  "PL", "PT", "RO", "SK", "SI", "ES", "SE"
+];
 const publisherOptions = [
   { label: "Facebook", value: "facebook" },
   { label: "Instagram", value: "instagram" },
@@ -2738,6 +2744,7 @@ const AdsetComponent = ({
   scheduleErrorByAdset,
   setSelectedByAdset,
   adSchedulingToShowCampaign,
+  geoTreeData
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState(-1);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2875,24 +2882,40 @@ const AdsetComponent = ({
   //     };
   //   });
   // };
+  // const handleEveryDayDrag = (hour) => {
+  //   setSelectedByAdset(prev => {
+  //     const current = prev[adset.id] || {};
+
+  //     const updated = { ...current };
+
+  //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+  //       const key = `${d}-${hour}`;
+  //       updated[key] = !current[key];
+  //     });
+
+  //     return {
+  //       ...prev,
+  //       [adset.id]: updated
+  //     };
+  //   });
+  // };
   const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
       const updated = { ...current };
-
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
         const key = `${d}-${hour}`;
-        updated[key] = !current[key];
+        updated[key] = !allSelected;
       });
-
       return {
         ...prev,
         [adset.id]: updated
       };
     });
   };
-
   const isValidAdSchedule = (schedule = []) =>
     Array.isArray(schedule) &&
     schedule.length > 0 &&
@@ -2934,7 +2957,7 @@ const AdsetComponent = ({
   // }, [adset.id]);
 
 
-
+  const campaignCountries = Form.useWatch("countries", form) || [];
   const currentDate = dayjs();
   const after30Days = currentDate.add(30, "day");
   console.log(addlevelData, "addlevelData in adset component");
@@ -2955,6 +2978,86 @@ const AdsetComponent = ({
       setShowScheduleSubmitError(false);
     }
   }, [adSchedulingToShowCampaign || CampaignBudgetActive]);
+
+  useEffect(() => {
+
+    const fieldPath = [
+      "adsets",
+      index,
+      "countries",
+    ];
+
+    const current =
+      form.getFieldValue(fieldPath) || [];
+
+    const setArrayValue = (valArray) => {
+      form.setFields([
+        {
+          name: fieldPath,
+          value: valArray,
+        },
+      ]);
+    };
+
+
+    // ✅ CASE 1 — Campaign restriction exists
+    if (campaignCountries.length > 0) {
+
+      const filtered =
+        current.filter(c =>
+          campaignCountries.includes(c)
+        );
+
+      if (filtered.length === 0) {
+
+        // fallback only when restricted
+        setArrayValue([
+          campaignCountries[0],
+        ]);
+
+      } else if (
+        filtered.length !== current.length
+      ) {
+
+        setArrayValue(filtered);
+
+      }
+
+    }
+
+    // ✅ CASE 2 — No campaign restriction
+    else {
+
+      // Only set default if empty
+      if (current.length === 0) {
+
+        // pick first country from your continents list
+        const firstCountry =
+          // continents?.[0]?.children?.[0]?.value;
+          "US";
+
+        if (firstCountry) {
+          setArrayValue([firstCountry]);
+        }
+
+      }
+
+    }
+
+  }, [
+    campaignCountries,
+    form,
+    index,
+  ]);
+
+  const handleFirstCountriesChange = (newCountriesArray) => {
+    const adsets = form.getFieldValue("adsets") || [];
+    const newAdsets = adsets.map((a, i) => ({
+      ...a,
+      countries: Array.isArray(newCountriesArray) ? newCountriesArray : [],
+    }));
+    form.setFieldsValue({ adsets: newAdsets });
+  };
 
   const Billing_Event_options = {
     OFFSITE_CONVERSIONS: [{ value: "IMPRESSIONS", label: "Impressions" }],
@@ -3020,6 +3123,7 @@ const AdsetComponent = ({
 
   console.log(adsetLocationCountry);
 
+
   const allCountries = [
     { value: "US", label: "United States" },
     { value: "GB", label: "United Kingdom" },
@@ -3065,11 +3169,116 @@ const AdsetComponent = ({
     { value: "SE", label: "Sweden" },
   ];
 
-  const campaignCountries = Form.useWatch("countries", form) || [];
+  
 
   const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
 
   console.log(campaignCountries);
+
+  const filterTreeByCampaign = (tree, allowed) => {
+
+    if (!allowed.length) return tree;
+
+    return tree.map(root => ({
+
+      ...root,
+
+      children: root.children
+        .map(continent => {
+
+          // continent selected → include all countries
+          if (allowed.includes(continent.value)) {
+            return continent;
+          }
+
+          // filter countries
+          const matchingCountries =
+            continent.children.filter(country =>
+              allowed.includes(country.value)
+            );
+
+          if (matchingCountries.length) {
+            return {
+              ...continent,
+              children: matchingCountries,
+            };
+          }
+
+          return null;
+
+        })
+        .filter(Boolean),
+
+    }));
+
+  };
+
+
+  /**
+   * DISABLE TREE for locked adsets
+   */
+  const disableTreeNodes = (
+    tree,
+    allowedValues = []
+  ) =>
+
+    tree.map(root => ({
+
+      ...root,
+
+      children: root.children?.map(continent => ({
+
+        ...continent,
+
+        children: continent.children?.map(country => ({
+
+          ...country,
+
+          disabled:
+            !allowedValues.includes(
+              country.value
+            ),
+
+        })),
+
+      })),
+
+    }));
+
+
+  const baseTreeOptions =
+    campaignCountries.length === 0
+      ? geoTreeData   // ⭐ FULL ACCESS
+      : filterTreeByCampaign(
+        geoTreeData,
+        campaignCountries
+      );
+
+
+  const treeOptionsForIndexOfCountries =
+    baseTreeOptions;
+
+  // Flatten tree to get all available country codes
+  const flattenCountries = (tree) => {
+    let result = [];
+
+    tree.forEach(node => {
+      if (node.children) {
+        result = result.concat(flattenCountries(node.children));
+      } else {
+        result.push(node.value);
+      }
+    });
+
+    return result;
+  };
+
+  const availableCountryCodes = flattenCountries(treeOptionsForIndexOfCountries);
+
+  // Check if ALL EU countries exist in current tree
+  const isFullEUAvailable = europeanUnionCountryCodes.every(code =>
+    availableCountryCodes.includes(code)
+  );
 
   const newCampaignCountries = campaignCountries && campaignCountries.length > 0 ? campaignCountries.map(item => {
     return allCountries.find(item1 => item1.value === item)
@@ -3140,6 +3349,7 @@ const AdsetComponent = ({
     return Array.isArray(countries) && countries.some(c => EU_AND_ASSOCIATED.includes(String(c)));
   }
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
+  const isChecked = Form.useWatch(["adsets", index, "showPayer"], form)
   console.log(BeneficiaryAndPayer);
   useEffect(() => {
     const adsetsFromForm = form.getFieldValue("adsets") || [];
@@ -3360,6 +3570,18 @@ const AdsetComponent = ({
   //     // setSelectedPositions([]); // Clear positions when publisher selection changes
   // };
 
+  // const handlePublisherChange = (value) => {
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [adset.id]: value,
+  //   }));
+
+  //   // Optionally reset selected positions for this adset
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [adset.id]: [], // clear when publishers change
+  //   }));
+  // };
   const handlePublisherChange = (value) => {
     setSelectedPublishers((prev) => ({
       ...prev,
@@ -3367,9 +3589,19 @@ const AdsetComponent = ({
     }));
 
     // Optionally reset selected positions for this adset
+    // setSelectedPositions((prev) => ({
+    //   ...prev,
+    //   [adset.id]: [], // clear when publishers change
+    // }));
+    const autoPositions = value
+      .flatMap((pub) => positionOptions[pub] || [])
+      .map((pos) => pos.key);
+
+    const uniquePositions = [...new Set(autoPositions)];
+
     setSelectedPositions((prev) => ({
       ...prev,
-      [adset.id]: [], // clear when publishers change
+      [adset.id]: getPositionsByKeys(uniquePositions),
     }));
   };
 
@@ -4608,7 +4840,7 @@ const AdsetComponent = ({
           Targeting
         </span>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-          <Form.Item
+          {/* <Form.Item
             name={["adsets", index, "countries"]}
             label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
             rules={[
@@ -4643,6 +4875,127 @@ const AdsetComponent = ({
                 }
               }}
             />
+          </Form.Item> */}
+          <Form.Item noStyle key={index}>
+            <Form.Item
+              name={[
+                "adsets",
+                index,
+                "countries",
+              ]}
+              label={
+                <span style={{ color: "#B4B4B4" }}>
+                  Countries
+                </span>
+              }
+              required
+              style={{ flex: "0 0 200px" }}
+            >
+              <TreeSelect
+                treeData={
+                  treeOptionsForIndexOfCountries
+                }
+                fieldNames={{
+                  label: "label",
+                  value: "value",
+                  children: "children",
+                }}
+                treeCheckable
+                treeDefaultExpandedKeys={["all_countries"]}
+                showCheckedStrategy={
+                  TreeSelect.SHOW_CHILD
+                }
+                allowClear
+                showSearch
+                treeNodeFilterProp="label"
+                maxTagCount={2}
+                placeholder={
+                  campaignCountries.length
+                    ? "Select from campaign countries"
+                    : "Select any country"
+                }
+                disabled={
+                  geo === "Geos" &&
+                  index !== 0
+                }
+                getPopupContainer={(
+                  trigger
+                ) =>
+                  trigger.parentNode
+                }
+                popupClassName={
+                  theme === "dark"
+                    ? "custom-dropdown"
+                    : "custom-dropdown-light"
+                }
+                className={`${theme === "dark"
+                  ? "dark-theme"
+                  : "light-theme"
+                  } green-border-select`}
+                onChange={(val) => {
+                  if (geo === "Geos" && index === 0) {
+                    handleFirstCountriesChange(val);
+                  }
+                }}
+                treeTitleRender={(node) => {
+
+                  if (node.value === "europe" && isFullEUAvailable) {
+
+                    return (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "100%",
+                        }}
+                      >
+                        <span>{node.label}</span>
+
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 500,
+                            padding: "2px 8px",
+                            borderRadius: 12,
+                            background: "#91c25f",
+                            color: "white",
+                            cursor: "pointer",
+                            border: "1px solid #91caff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            const current =
+                              form.getFieldValue(["adsets", index, "countries"]) || [];
+
+                            const newValues = [
+                              ...new Set([
+                                ...current.filter(v => v !== "europe"),
+                                ...europeanUnionCountryCodes
+                              ])
+                            ];
+
+                            if (geo === "Geos" && index === 0) {
+                              handleFirstCountriesChange(newValues);
+                            } else {
+                              form.setFieldValue(
+                                ["adsets", index, "countries"],
+                                newValues
+                              );
+                            }
+                          }}
+                        >
+                          EU
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  return node.label;
+                }}
+              />
+            </Form.Item>
           </Form.Item>
 
           {BeneficiaryAndPayer && (
@@ -4675,7 +5028,9 @@ const AdsetComponent = ({
                       name={["adsets", index, "showPayer"]}
                       valuePropName="checked"
                     >
-                      <Switch size="small" />
+                      <Switch size="small" style={{
+                        backgroundColor: isChecked ? "#91C25F" : undefined,
+                      }} />
                     </Form.Item>
                   </div>
                 }
@@ -4689,7 +5044,9 @@ const AdsetComponent = ({
                 style={{ flex: "1 1 150px" }}
                 initialValue={adset?.beneficiary}
               >
-                <Input />
+                <Input className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                } />
               </Form.Item>
 
               {/* ✅ Conditionally render Payer field when switch is ON */}
@@ -4734,7 +5091,9 @@ const AdsetComponent = ({
                       style={{ flex: "1 1 150px" }}
                       initialValue={adset?.payer}
                     >
-                      <Input />
+                      <Input className={
+                        theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                      } />
                     </Form.Item>
                   ) : null
                 }
@@ -7404,7 +7763,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
   const [websiteURL, setWebsiteURL] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentFile, setCurrentFile] = useState(null); // File to be edited
   const [isImgEditorShown, setIsImgEditorShown] = useState(false);
   const [editedImages, setEditedImages] = useState({});
@@ -7458,12 +7817,21 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
   const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
   const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
+  const [continents, setContinents] = useState([])
 
   // Derived condition name changed to watchedHasAdsetBudget
   const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
     ? watchedAdsets.some(ad => Number(ad?.DailyAdd_amount) > 0)
     : false;
   const watchedCampaignBudget = Form.useWatch("Daily_amount", form);
+  const geoTreeData = [
+    {
+      label: "Countries",
+      value: "all_countries",
+      key: "all_countries",
+      children: continents,
+    },
+  ];
   useEffect(() => {
     if (!accountNumber || accountNumber.length === 0) return;
 
@@ -7734,6 +8102,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         });
         setAdSchedulingToShow(adsetSwitchMap);
         setFormValuesFromDraft(response?.data[0]);
+        
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
         //     const selectedOption = item.selectedOption || "creative";
 
@@ -7763,6 +8132,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
       }
     } catch (error) {
       console.error("Error fetching campaign list:", error);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -7931,7 +8303,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: "0",
@@ -7962,7 +8334,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: 0,
@@ -8716,20 +9088,39 @@ const CloneMultipleAdsetCampaignDrawer = ({
   // const handlepositionChange = async (values) => {
   //     console.log(values, "handlepositionChange")
   // }
+  const formatContinent = (str) =>
+    str
+      .replace(/([A-Z])/g, " $1")     // add space before capital letters
+      .replace(/^./, (c) => c.toUpperCase()); // capitalize first letter
 
   const fetchAccountDetails = async () => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/hashimageidentity/${accountNumber}`,
+        `https://www.testapi.adsgoat.in/api/hashimageidentityWithGeos/${accountNumber}`,
         {
           headers: {
             Authorization: token,
           },
         }
       );
-      console.log("account data", ...response?.data);
+      // console.log("account data", ...response?.data);
+      const newCountriesFormat = Object.entries(response?.data?.geos || {}).map(
+        ([continent, countries]) => ({
+          label: formatContinent(continent),
+          value: continent,
+          key: continent,
+          selectable: false, // optional (prevents selecting continent itself)
+          children: countries.map((country) => ({
+            label: country.label,     // or country.label (based on your API)
+            value: country.value,     // or country.value
+            key: country.key,
+          })),
+        })
+      );
+      setContinents(newCountriesFormat);
 
-      setimagehash(...response?.data);
+      setimagehash(...response?.data?.data);
+
     } catch (error) {
       console.error("Error fetching campaign data:", error);
       // Handle error
@@ -12080,7 +12471,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
-                <Form.Item shouldUpdate noStyle>
+                {/* <Form.Item shouldUpdate noStyle>
                   {({ getFieldValue }) => {
                     const categories = getFieldValue("Special_categories") || [];
                     // if "NONE" is selected, hide the countries field
@@ -12173,6 +12564,112 @@ const CloneMultipleAdsetCampaignDrawer = ({
                         />
                       </Form.Item>
                     ) : null;
+                  }}
+                </Form.Item> */}
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue }) => {
+
+                    const categories =
+                      getFieldValue("Special_categories") || [];
+
+                    const showCountries =
+                      categories.length > 0 &&
+                      !categories.includes("NONE");
+
+                    return showCountries ? (
+                      <Form.Item
+                        name="countries"
+                        label="Countries"
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              "Please select at least one country",
+                          },
+                        ]}
+                        initialValue={["US"]}
+                        style={{ width: 250, }}
+                      >
+                        <TreeSelect
+                          treeData={geoTreeData}
+                          fieldNames={{
+                            label: "label",
+                            value: "value",
+                            children: "children",
+                          }}
+                          treeCheckable
+                          showCheckedStrategy={
+                            TreeSelect.SHOW_CHILD
+                          }
+                          showSearch
+                          allowClear
+                          treeNodeFilterProp="label"
+                          treeDefaultExpandedKeys={["all_countries"]}
+                          placeholder="Select continents or countries"
+                          maxTagCount={2}
+                          popupClassName={
+                            theme === "dark"
+                              ? "custom-dropdown"
+                              : "custom-dropdown-light"
+                          }
+                          className={`${theme === "dark"
+                            ? "dark-theme"
+                            : "light-theme"
+                            } green-border-select`}
+                          treeTitleRender={(node) => {
+
+                            if (node.value === "europe") {
+
+                              return (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    width: "100%",
+                                  }}
+                                >
+                                  <span>{node.label}</span>
+
+                                  <span
+                                    style={{
+                                      fontSize: 11,
+                                      fontWeight: 500,
+                                      padding: "2px 8px",
+                                      borderRadius: 12,
+                                      background: "#91c25f",
+                                      color: "white",
+                                      cursor: "pointer",
+                                      border: "1px solid #91caff",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // prevent checkbox toggle
+
+                                      const current =
+                                        form.getFieldValue("countries") || [];
+
+                                      const newValues = [
+                                        ...new Set([
+                                          ...current.filter(v => v !== "europe"),
+                                          ...europeanUnionCountryCodes
+                                        ])
+                                      ];
+
+                                      form.setFieldValue("countries", newValues);
+                                    }}
+                                  >
+                                    EU
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            return node.label;
+                          }}
+                        />
+                      </Form.Item>
+                    ) : null;
+
                   }}
                 </Form.Item>
                 <Form.Item
@@ -12581,6 +13078,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                   setScheduleErrorByAdset={setScheduleErrorByAdset}
                   setShowScheduleSubmitError={setShowScheduleSubmitError}
                   adSchedulingToShowCampaign={adSchedulingToShowCampaign}
+                  geoTreeData={geoTreeData}
                 />
               );
               // <ffff/>

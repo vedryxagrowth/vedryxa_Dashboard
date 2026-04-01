@@ -19,8 +19,11 @@ import {
   InputNumber,
   Breadcrumb,
   Popconfirm,
+  Popover,
   Checkbox,
-  Switch
+  Switch,
+  Tree,
+  TreeSelect
 } from "antd";
 import {
   PlusOutlined,
@@ -41,7 +44,8 @@ import {
   ExclamationCircleOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  FileAddOutlined
 } from "@ant-design/icons";
 import moment from "moment-timezone";
 import { useState, useRef } from "react";
@@ -57,6 +61,7 @@ import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
 import AffinityUrlBuilder from "./urlbuilder/affinity";
+import AffinityArticleBuilder from "./urlbuilder/affinity-article"
 import CompadoUrlBuilder from "./urlbuilder/compado";
 import CreativesDrawer from "./creativesDrawer";
 import ImageUploadPage from "../../Creatives/page";
@@ -67,10 +72,18 @@ import { FaPenToSquare, FaShareFromSquare, FaTrashCan } from "react-icons/fa6";
 import { Category } from "@mui/icons-material";
 
 const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
+const { SHOW_PARENT } = TreeSelect;
 
 const { Panel } = Collapse;
 const { Option } = Select;
 const { Step } = Steps;
+
+const europeanUnionCountryCodes = [
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+  "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+  "PL", "PT", "RO", "SK", "SI", "ES", "SE"
+];
+
 const publisherOptions = [
   { label: "Facebook", value: "facebook" },
   { label: "Instagram", value: "instagram" },
@@ -570,11 +583,17 @@ const AccountForm = ({
 
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
     useState(false);
+  const [isModalVisibleForArticleURLBuilder, setIsModalVisibleForArticleURLBuilder] =
+    useState(false);
   const [websiteURL, setWebsiteURL] = useState("");
   const [caption, setCaption] = useState("");
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
   const [indexValueForAccount, setIndexValueForAccount] = useState("");
   console.log("defaultUrlData in account form", defaultUrlData);
+  const primaryText = Form.useWatch(["adsets", index, "message"], form);
+  const headline = Form.useWatch(["adsets", index, "headline"], form);
+  const description = Form.useWatch(["adsets", index, "Description"], form);
+  const campaign_name = Form.useWatch(["Name"], form);
 
 
   const onReturnUrl = (text) => {
@@ -616,7 +635,9 @@ const AccountForm = ({
   const handleCancelForURLBuilder = () => {
     setIsModalVisibleForURLBuilder(false);
   }
-
+  const handleCancelForArticleURLBuilder = () => {
+    setIsModalVisibleForArticleURLBuilder(false);
+  }
   const onClickEdit = (index) => {
     setIsModalVisibleForURLBuilder(true);
     const val = form.getFieldValue(["adsets", index, account, "Website_URL"])
@@ -726,7 +747,9 @@ const AccountForm = ({
       case "FB_Affinity":
         //defaultValues
         return (
-          <AffinityUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+          <AffinityUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} primaryText={primaryText}
+            headline={headline}
+            description={description} campaign_name={campaign_name} />
         );
       case "FB_Compado":
         //defaultValues
@@ -758,6 +781,20 @@ const AccountForm = ({
             accountis={account}
             onReturnMessage={onReturnUrl}
           />
+        );
+    }
+  }
+  const getArticleUrlBuilder = () => {
+    // useMemo(() => {
+    // return (extraString) => {
+    console.log(network)
+    switch (network) {
+      case "FB_Affinity":
+        //defaultValues
+        return (
+          <AffinityArticleBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} primaryText={primaryText}
+            headline={headline}
+            description={description} campaign_name={campaign_name} />
         );
     }
   }
@@ -817,6 +854,7 @@ const AccountForm = ({
               style={{ cursor: "pointer" }}
               onClick={() => onClickEdit(index)}
             />
+            {network === "FB_Affinity" && <FileAddOutlined style={{ cursor: "pointer", marginLeft: "20px" }} onClick={() => { setIsModalVisibleForArticleURLBuilder(true) }} />}
             <LinkOutlined
               style={{ cursor: "pointer", marginLeft: "20px" }}
               onClick={() => onClickLinkView(index)}
@@ -884,7 +922,8 @@ const AccountForm = ({
         rules={[{ required: true, message: `Please input Website URL! for ${account}` }]}
         preserve={true}
       >
-        <TextArea placeholder="Website URL" autoSize={{ minRows: 5, maxRows: 15 }} />
+        <TextArea onChange={(e) => { setWebsiteURL(e.target.value) }}
+          placeholder="Website URL" autoSize={{ minRows: 5, maxRows: 15 }} />
       </Form.Item>
 
       <Form.Item
@@ -893,7 +932,7 @@ const AccountForm = ({
         rules={[{ required: true, message: `Please input Display Link! for ${account}` }]}
         preserve={true}
       >
-        <TextArea placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
+        <TextArea onChange={(e) => { setCaption(e.target.value) }} placeholder="Display Link" autoSize={{ minRows: 2, maxRows: 10 }} />
       </Form.Item>
 
       <Modal
@@ -912,6 +951,27 @@ const AccountForm = ({
         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
         {getUrlBuilder()}
+      </Modal>
+      <Modal
+        title=""
+        visible={isModalVisibleForArticleURLBuilder}
+        onCancel={handleCancelForArticleURLBuilder}
+        footer={null}
+        width="60%"
+        // bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        // styles={{
+        //   body: {
+        //     // height: "90vh",
+        //     // overflowY: "auto",
+        //   },
+        // }}
+        // className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+        centered={false}
+        style={{ top: 20 }}
+        getContainer={document.body}
+      >
+        {getArticleUrlBuilder()}
       </Modal>
       {/* </Form> */}
     </div>
@@ -1240,7 +1300,8 @@ const AdsetComponent = ({
   page,
   pixel,
   geo,
-  newImageHashArray
+  newImageHashArray,
+  geoTreeData
 }) => {
   console.log(page_id_list, "page_id_list in adset component");
   console.log(pageidList, "pageidList in adset component");
@@ -1273,6 +1334,13 @@ const AdsetComponent = ({
 
 
   const [dragging, setDragging] = useState(false);
+  const [value, setValue] = useState([]);
+
+  const onChange = (newValue, label, extra) => {
+    console.log("Selected values:", newValue);
+    console.log("Extra info:", extra);
+    setValue(newValue);
+  };
   const selected = selectedByAdset[adset.id] || {};
   const handleMouseDown = (day, hour) => {
     setDragging(true);
@@ -1388,18 +1456,16 @@ const AdsetComponent = ({
     });
   };
 
-  // const handleEveryDayToggle = (hour) => {
+
+  // const handleEveryDayDrag = (hour) => {
   //   setSelectedByAdset(prev => {
   //     const current = prev[adset.id] || {};
-
-  //     const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
-  //       d => current[`${d}-${hour}`]
-  //     );
 
   //     const updated = { ...current };
 
   //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
-  //       updated[`${d}-${hour}`] = !allSelected;
+  //       const key = `${d}-${hour}`;
+  //       updated[key] = !current[key];
   //     });
 
   //     return {
@@ -1411,14 +1477,14 @@ const AdsetComponent = ({
   const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
       const updated = { ...current };
-
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
         const key = `${d}-${hour}`;
-        updated[key] = !current[key];
+        updated[key] = !allSelected;
       });
-
       return {
         ...prev,
         [adset.id]: updated
@@ -1558,6 +1624,7 @@ const AdsetComponent = ({
     { value: "SK", label: "Slovakia" },
     { value: "SI", label: "Slovenia" },
     { value: "SE", label: "Sweden" },
+    { value: "NG", label: "Nigeria" }
   ];
 
 
@@ -1572,6 +1639,118 @@ const AdsetComponent = ({
   }) : []
 
   console.log(newCampaignCountries);
+
+  const filterTreeByCampaign = (tree, allowed) => {
+
+    if (!allowed.length) return tree;
+
+    return tree.map(root => ({
+
+      ...root,
+
+      children: root.children
+        .map(continent => {
+
+          // continent selected → include all countries
+          if (allowed.includes(continent.value)) {
+            return continent;
+          }
+
+          // filter countries
+          const matchingCountries =
+            continent.children.filter(country =>
+              allowed.includes(country.value)
+            );
+
+          if (matchingCountries.length) {
+            return {
+              ...continent,
+              children: matchingCountries,
+            };
+          }
+
+          return null;
+
+        })
+        .filter(Boolean),
+
+    }));
+
+  };
+
+
+  /**
+   * DISABLE TREE for locked adsets
+   */
+  const disableTreeNodes = (
+    tree,
+    allowedValues = []
+  ) =>
+
+    tree.map(root => ({
+
+      ...root,
+
+      children: root.children?.map(continent => ({
+
+        ...continent,
+
+        children: continent.children?.map(country => ({
+
+          ...country,
+
+          disabled:
+            !allowedValues.includes(
+              country.value
+            ),
+
+        })),
+
+      })),
+
+    }));
+
+
+  const baseTreeOptions =
+    campaignCountries.length === 0
+      ? geoTreeData   // ⭐ FULL ACCESS
+      : filterTreeByCampaign(
+        geoTreeData,
+        campaignCountries
+      );
+
+
+  const treeOptionsForIndexOfCountries =
+    geo === "Geos" &&
+      index > 0 &&
+      campaignCountries.length > 0   // ⭐ IMPORTANT
+      ? disableTreeNodes(
+        baseTreeOptions,
+        currentCountries || []
+      )
+      : baseTreeOptions;
+
+  // Flatten tree to get all available country codes
+  const flattenCountries = (tree) => {
+    let result = [];
+
+    tree.forEach(node => {
+      if (node.children) {
+        result = result.concat(flattenCountries(node.children));
+      } else {
+        result.push(node.value);
+      }
+    });
+
+    return result;
+  };
+
+  const availableCountryCodes = flattenCountries(treeOptionsForIndexOfCountries);
+
+  // Check if ALL EU countries exist in current tree
+  const isFullEUAvailable = europeanUnionCountryCodes.every(code =>
+    availableCountryCodes.includes(code)
+  );
 
   //   const options = useMemo(() => {
   //   const newpageidList = form.getFieldValue(["adsets", index, "page_id"]) || []
@@ -1978,53 +2157,95 @@ const AdsetComponent = ({
   //   }));
   // };
 
-  const handlePublisherChange = (value) => {
-    // 🧠 Start with the new selection
-    let updated = [...value];
+  // const handlePublisherChange = (value) => {
+  //   // 🧠 Start with the new selection
+  //   let updated = [...value];
 
-    // ⚙️ Meta-style dependencies
-    // Messenger and Audience Network require Facebook
-    // if (updated.includes("messenger") && !updated.includes("facebook")) {
-    //   updated.push("facebook");
-    // }
+  //   // ⚙️ Meta-style dependencies
+  //   // Messenger and Audience Network require Facebook
+  //   // if (updated.includes("messenger") && !updated.includes("facebook")) {
+  //   //   updated.push("facebook");
+  //   // }
+  //   if (updated.includes("audience_network") && !updated.includes("facebook")) {
+  //     updated.push("facebook");
+  //   }
+
+  //   // 🧹 If Facebook is removed but required by others, re-add it
+  //   if (
+  //     !updated.includes("facebook") &&
+  //     (
+  //       // updated.includes("messenger") || 
+  //       updated.includes("audience_network"))
+  //   ) {
+  //     updated.push("facebook");
+  //   }
+
+  //   // ✅ Update state for publishers
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [adset.id]: updated,
+  //   }));
+
+  //   // // ✅ Reset selected positions when publishers change
+  //   setSelectedPositions((prev) => ({
+  //     ...prev,
+  //     [adset.id]: [],
+  //   }));
+
+
+
+  //   // ✅ Preserve only valid positions
+  //   //   setSelectedPublishers((prev) => ({
+  //   //   ...prev,
+  //   //   // current: updated,       // 👈 keeps UI happy
+  //   //   [adset.id]: updated,    // 👈 keeps adset mapping
+  //   // }));
+
+  //   // ✅ Also update form value if you’re syncing with AntD Form
+  //   form?.setFieldValue(["adsets", index, "platforms"], updated);
+  // };
+
+  const handlePublisherChange = (value) => {
+    let updated = [...value];
     if (updated.includes("audience_network") && !updated.includes("facebook")) {
       updated.push("facebook");
     }
-
-    // 🧹 If Facebook is removed but required by others, re-add it
     if (
       !updated.includes("facebook") &&
-      (
-        // updated.includes("messenger") || 
-        updated.includes("audience_network"))
+      updated.includes("audience_network")
     ) {
       updated.push("facebook");
     }
-
-    // ✅ Update state for publishers
     setSelectedPublishers((prev) => ({
       ...prev,
       [adset.id]: updated,
     }));
 
-    // // ✅ Reset selected positions when publishers change
+    const autoPositions = updated
+      .flatMap((pub) => positionOptions[pub] || [])
+      .map((pos) => pos.key);
+
+    const uniquePositions = [...new Set(autoPositions)];
     setSelectedPositions((prev) => ({
       ...prev,
-      [adset.id]: [],
+      [adset.id]: getPositionsByKeys(uniquePositions),
     }));
-
-
-
-    // ✅ Preserve only valid positions
-    //   setSelectedPublishers((prev) => ({
-    //   ...prev,
-    //   // current: updated,       // 👈 keeps UI happy
-    //   [adset.id]: updated,    // 👈 keeps adset mapping
-    // }));
-
-    // ✅ Also update form value if you’re syncing with AntD Form
-    form?.setFieldValue(["adsets", index, "platforms"], updated);
+    const currentAdsets = form.getFieldValue("adsets") || [];
+    const updatedAdsets = currentAdsets.map((ad, idx) =>
+      idx === index
+        ? {
+          ...ad,
+          platforms: updated,
+          positions: uniquePositions,
+        }
+        : ad
+    );
+    form.setFieldsValue({
+      adsets: updatedAdsets,
+    });
   };
+
+
 
   const handleCancelForURLBuilder = () => {
     setIsModalVisibleForURLBuilder(false);
@@ -2286,6 +2507,8 @@ const AdsetComponent = ({
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
   console.log(BeneficiaryAndPayer);
 
+  const isChecked = Form.useWatch(["adsets", index, "showPayer"], form)
+
   // useEffect(() => {
   //   setNewSelectedPageId(pageidList || []);
   //   setNewSelectedPixelId(pixelIdList || []);
@@ -2370,6 +2593,13 @@ const AdsetComponent = ({
 
   useEffect(() => {
     setBudget(adset?.DailyAdd_amount || 0);
+    form.setFieldsValue({
+      adsets: {
+        [index]: {
+          selectedAccount: accountis[0],
+        },
+      },
+    });
   }, [adset]);
 
   useEffect(() => {
@@ -2579,60 +2809,130 @@ const AdsetComponent = ({
   //   }
   // }, [campaignCountries, form, index, allCountries]);
 
-  useEffect(() => {
-    // always treat current as an array
-    const current = form.getFieldValue(["adsets", index, "countries"]) || [];
+  // useEffect(() => {
+  //   // always treat current as an array
+  //   const current = form.getFieldValue(["adsets", index, "countries"]) || [];
 
-    // helper to set an array value safely
+  //   // helper to set an array value safely
+  //   const setArrayValue = (valArray) => {
+  //     form.setFields([
+  //       { name: ["adsets", index, "countries"], value: valArray },
+  //     ]);
+  //     form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //   };
+
+  //   if (campaignCountries.length > 0) {
+  //     // Allowed values are campaignCountries
+  //     const filtered = Array.isArray(current)
+  //       ? current.filter((c) => campaignCountries.includes(c))
+  //       : (campaignCountries.includes(current) ? [current] : []);
+
+  //     if (filtered.length === 0) {
+  //       // fallback to first campaign country (as an array)
+  //       setArrayValue([campaignCountries[0]]);
+  //       // form.setFieldsValue({
+  //       //   adsets: {
+  //       //     [index]: { countries: [campaignCountries[0]] }
+  //       //   }
+  //       // });
+  //       // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //     } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+  //       // remove invalid entries, keep the valid ones
+  //       setArrayValue(filtered);
+  //     }
+  //   } else {
+  //     // No campaign-level countries -> allowed values are allCountries' values
+  //     const validSet = new Set(allCountries.map((c) => c.value));
+  //     const filtered = Array.isArray(current)
+  //       ? current.filter((c) => validSet.has(c))
+  //       : (validSet.has(current) ? [current] : []);
+
+  //     if (filtered.length === 0) {
+  //       // fallback to first available country (as an array)
+  //       setArrayValue([allCountries[0].value]);
+  //       // form.setFieldsValue({
+  //       //   adsets: {
+  //       //     [index]: { countries: [allCountries[0].value] }
+  //       //   }
+  //       // });
+  //       // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //     }
+  //     else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+  //       setArrayValue(filtered);
+  //     }
+  //   }
+  //   // include only necessary deps (allCountries is an array constant — ok to include)
+  // }, [campaignCountries, form, index, allCountries]);
+  useEffect(() => {
+
+    const fieldPath = [
+      "adsets",
+      index,
+      "countries",
+    ];
+
+    const current =
+      form.getFieldValue(fieldPath) || [];
+
     const setArrayValue = (valArray) => {
       form.setFields([
-        { name: ["adsets", index, "countries"], value: valArray },
+        {
+          name: fieldPath,
+          value: valArray,
+        },
       ]);
-      form.validateFields([`adsets.${index}.countries`]).catch(() => { });
     };
 
+
+    // ✅ CASE 1 — Campaign restriction exists
     if (campaignCountries.length > 0) {
-      // Allowed values are campaignCountries
-      const filtered = Array.isArray(current)
-        ? current.filter((c) => campaignCountries.includes(c))
-        : (campaignCountries.includes(current) ? [current] : []);
+
+      const filtered =
+        current.filter(c =>
+          campaignCountries.includes(c)
+        );
 
       if (filtered.length === 0) {
-        // fallback to first campaign country (as an array)
-        setArrayValue([campaignCountries[0]]);
-        // form.setFieldsValue({
-        //   adsets: {
-        //     [index]: { countries: [campaignCountries[0]] }
-        //   }
-        // });
-        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
-      } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
-        // remove invalid entries, keep the valid ones
-        setArrayValue(filtered);
-      }
-    } else {
-      // No campaign-level countries -> allowed values are allCountries' values
-      const validSet = new Set(allCountries.map((c) => c.value));
-      const filtered = Array.isArray(current)
-        ? current.filter((c) => validSet.has(c))
-        : (validSet.has(current) ? [current] : []);
 
-      if (filtered.length === 0) {
-        // fallback to first available country (as an array)
-        setArrayValue([allCountries[0].value]);
-        // form.setFieldsValue({
-        //   adsets: {
-        //     [index]: { countries: [allCountries[0].value] }
-        //   }
-        // });
-        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
-      }
-      else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        // fallback only when restricted
+        setArrayValue([
+          campaignCountries[0],
+        ]);
+
+      } else if (
+        filtered.length !== current.length
+      ) {
+
         setArrayValue(filtered);
+
       }
+
     }
-    // include only necessary deps (allCountries is an array constant — ok to include)
-  }, [campaignCountries, form, index, allCountries]);
+
+    // ✅ CASE 2 — No campaign restriction
+    else {
+
+      // Only set default if empty
+      if (current.length === 0) {
+
+        // pick first country from your continents list
+        const firstCountry =
+          // continents?.[0]?.children?.[0]?.value;
+          "US";
+
+        if (firstCountry) {
+          setArrayValue([firstCountry]);
+        }
+
+      }
+
+    }
+
+  }, [
+    campaignCountries,
+    form,
+    index,
+  ]);
 
   const handleFirstCountriesChange = (newCountriesArray) => {
     const adsets = form.getFieldValue("adsets") || [];
@@ -2723,6 +3023,28 @@ const AdsetComponent = ({
       }))
       : // otherwise full options (fully editable)
       baseOptions;
+
+  const onClickShareBeneficiaryAndPayerForAllAccount = () => {
+    const account = (form.getFieldValue(["adsets", index, "selectedAccount"]))
+    console.log(account)
+    const valueOfAccount = (form.getFieldValue(["adsets", index, "Beneficiary", account]));
+    const valueofPayerAccount = form.getFieldValue(["adsets", index, "Payer", account])
+    watchedAccountList.map(account => {
+      form.setFieldValue(["adsets", index, "Beneficiary", account], valueOfAccount)
+      form.setFieldValue(["adsets", index, "Payer", account], valueofPayerAccount)
+    })
+  }
+
+  const onClickClearAllAccounts = () => {
+    // const account = (form.getFieldValue(["adsets", index, "selectedAccount"]))
+    // console.log(account)
+    // const valueOfAccount = (form.getFieldValue(["adsets", index, "Beneficiary", account]));
+    // const valueofPayerAccount = form.getFieldValue(["adsets", index, "Payer", account])
+    watchedAccountList.map(account => {
+      form.setFieldValue(["adsets", index, "Beneficiary", account], "")
+      form.setFieldValue(["adsets", index, "Payer", account], "")
+    })
+  }
 
 
   return (
@@ -3941,18 +4263,14 @@ const AdsetComponent = ({
             </Form.Item>
           </Form.Item> */}
 
-          <Form.Item noStyle key={index}>
+          {/* <Form.Item noStyle key={index}>
             <Form.Item
               name={["adsets", index, "countries"]}
               label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
               required={true}
               style={{ flex: "0 0 140px" }}
             >
-              {/*
-          - index === 0 and geo === "Geos": onChange will propagate to all adsets
-          - index > 0 and geo === "Geos": Select opens but only current items selectable (others disabled)
-          - geo !== "Geos": every index is independent
-        */}
+             
               <Select
                 mode="multiple"
                 allowClear
@@ -3974,6 +4292,128 @@ const AdsetComponent = ({
                     // For independent mode, let Ant Form handle the change automatically.
                     // If you need side effects when geo !== "Geos", handle them here.
                   }
+                }}
+              />
+            </Form.Item>
+          </Form.Item> */}
+
+          <Form.Item noStyle key={index}>
+            <Form.Item
+              name={[
+                "adsets",
+                index,
+                "countries",
+              ]}
+              label={
+                <span style={{ color: "#B4B4B4" }}>
+                  Countries
+                </span>
+              }
+              required
+              style={{ flex: "0 0 200px" }}
+            >
+              <TreeSelect
+                treeData={
+                  treeOptionsForIndexOfCountries
+                }
+                fieldNames={{
+                  label: "label",
+                  value: "value",
+                  children: "children",
+                }}
+                treeCheckable
+                treeDefaultExpandedKeys={["all_countries"]}
+                showCheckedStrategy={
+                  TreeSelect.SHOW_CHILD
+                }
+                allowClear
+                showSearch
+                treeNodeFilterProp="label"
+                maxTagCount={2}
+                placeholder={
+                  campaignCountries.length
+                    ? "Select from campaign countries"
+                    : "Select any country"
+                }
+                disabled={
+                  geo === "Geos" &&
+                  index !== 0
+                }
+                getPopupContainer={(
+                  trigger
+                ) =>
+                  trigger.parentNode
+                }
+                popupClassName={
+                  theme === "dark"
+                    ? "custom-dropdown"
+                    : "custom-dropdown-light"
+                }
+                className={`${theme === "dark"
+                  ? "dark-theme"
+                  : "light-theme"
+                  } green-border-select`}
+                onChange={(val) => {
+                  if (geo === "Geos" && index === 0) {
+                    handleFirstCountriesChange(val);
+                  }
+                }}
+                treeTitleRender={(node) => {
+
+                  if (node.value === "europe" && isFullEUAvailable) {
+
+                    return (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "100%",
+                        }}
+                      >
+                        <span>{node.label}</span>
+
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 500,
+                            padding: "2px 8px",
+                            borderRadius: 12,
+                            background: "#91c25f",
+                            color: "white",
+                            cursor: "pointer",
+                            border: "1px solid #91caff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            const current =
+                              form.getFieldValue(["adsets", index, "countries"]) || [];
+
+                            const newValues = [
+                              ...new Set([
+                                ...current.filter(v => v !== "europe"),
+                                ...europeanUnionCountryCodes
+                              ])
+                            ];
+
+                            if (geo === "Geos" && index === 0) {
+                              handleFirstCountriesChange(newValues);
+                            } else {
+                              form.setFieldValue(
+                                ["adsets", index, "countries"],
+                                newValues
+                              );
+                            }
+                          }}
+                        >
+                          EU
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  return node.label;
                 }}
               />
             </Form.Item>
@@ -4000,97 +4440,345 @@ const AdsetComponent = ({
           } */}
 
           {BeneficiaryAndPayer && (
+            // <>
+            //   {/* 🌿 Beneficiary field with Switch in label */}
+            //   <Form.Item
+            //     label={
+            //       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            //         <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+            //         <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+            //           overlayInnerStyle={{
+            //             backgroundColor: theme === 'dark' ? '#111' : '#fff',
+            //             color: theme === 'dark' ? '#fff' : '#000',
+            //             border: '1px solid #ccc',
+            //             borderRadius: 6,
+            //             // fontWeight: 500,
+            //           }}
+            //         >
+            //           <InfoCircleOutlined
+            //             style={{
+            //               color: theme === "dark" ? "#bbb" : "#888",
+            //               cursor: "pointer",
+            //             }}
+            //           />
+            //         </Tooltip>
+
+            //         {/* ✅ Switch controls visibility of Payer field */}
+            //         <Form.Item
+            //           noStyle
+            //           name={["adsets", index, "showPayer"]}
+            //           valuePropName="checked"
+            //         >
+            //           <Switch size="small" />
+            //         </Form.Item>
+            //       </div>
+            //     }
+            //     name={["adsets", index, "Beneficiary"]}
+            //     rules={[
+            //       {
+            //         required: true,
+            //         message: "Please fill the input!",
+            //       },
+            //     ]}
+            //     style={{ flex: "1 1 150px" }}
+            //   >
+            //     <Input />
+            //   </Form.Item>
+
+            //   {/* ✅ Conditionally render Payer field when switch is ON */}
+            //   <Form.Item
+            //     noStyle
+            //     shouldUpdate={(prev, curr) =>
+            //       prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
+            //     }
+            //   >
+            //     {({ getFieldValue }) =>
+            //       getFieldValue(["adsets", index, "showPayer"]) ? (
+            //         <Form.Item
+            //           name={["adsets", index, "Payer"]}
+            //           label={
+            //             // <span style={{ color: "#B4B4B4" }}>Payer</span>
+            //             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            //               <span style={{ color: "#B4B4B4" }}>Payer</span>
+            //               <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+            //                 overlayInnerStyle={{
+            //                   backgroundColor: theme === 'dark' ? '#111' : '#fff',
+            //                   color: theme === 'dark' ? '#fff' : '#000',
+            //                   border: '1px solid #ccc',
+            //                   borderRadius: 6,
+            //                   // fontWeight: 500,
+            //                 }}
+            //               >
+            //                 <InfoCircleOutlined
+            //                   style={{
+            //                     color: theme === "dark" ? "#bbb" : "#888",
+            //                     cursor: "pointer",
+            //                   }}
+            //                 />
+            //               </Tooltip>
+            //             </div>
+            //           }
+            //           rules={[
+            //             {
+            //               required: true,
+            //               message: "Please fill the input!",
+            //             },
+            //           ]}
+            //           style={{ flex: "1 1 150px" }}
+            //         >
+            //           <Input />
+            //         </Form.Item>
+            //       ) : null
+            //     }
+            //   </Form.Item>
+            // </>
             <>
-              {/* 🌿 Beneficiary field with Switch in label */}
-              <Form.Item
-                label={
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
-                    <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
+              {/* Main vertical wrapper */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {/* ---------------- Row 1 ---------------- */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 6,
+                  }}
+                >
+                  {/* Label */}
+                  <span style={{ color: "red", fontSize: "18px" }}>*</span>
+                  <span style={{ color: "#B4B4B4" }}>Beneficiary</span>
+
+                  {/* Info tooltip */}
+                  <Tooltip
+                    placement="top"
+                    title="Value must be Page ID or BM ID"
+                    overlayInnerStyle={{
+                      backgroundColor: theme === "dark" ? "#111" : "#fff",
+                      color: theme === "dark" ? "#fff" : "#000",
+                      border: "1px solid #ccc",
+                      borderRadius: 6,
+                    }}
+                  >
+                    <InfoCircleOutlined
+                      style={{ color: theme === "dark" ? "#bbb" : "#888" }}
+                    />
+                  </Tooltip>
+
+                  {/* Account dropdown */}
+                  <Form.Item
+                    name={["adsets", index, "selectedAccount"]}
+                    rules={[{ required: true, message: "Select account" }]}
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Select
+                      placeholder="Select Account"
+                      size="small"
+                      style={{ width: 170 }}
+                      options={watchedAccountList.map((acc) => ({
+                        label: acc,
+                        value: acc,
+                      }))}
+                      dropdownClassName={theme === "dark" && "custom-dropdown"}
+                      className={`${theme === "dark" ? "dark-theme" : "light-theme"
+                        } green-border-select`}
+                    />
+                  </Form.Item>
+
+                  {/* <Button> */}
+                  {watchedAccountList.length > 1 &&
+                    <Popover
+                      trigger="click"
                       overlayInnerStyle={{
-                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                        color: theme === 'dark' ? '#fff' : '#000',
-                        border: '1px solid #ccc',
-                        borderRadius: 6,
-                        // fontWeight: 500,
+                        backgroundColor: theme === "dark" ? "#000000" : "#ffffff",
+                        color: theme === "dark" ? "#fff" : "#333",
+                        padding: 0,
                       }}
-                    >
-                      <InfoCircleOutlined
-                        style={{
-                          color: theme === "dark" ? "#bbb" : "#888",
-                          cursor: "pointer",
-                        }}
-                      />
-                    </Tooltip>
-
-                    {/* ✅ Switch controls visibility of Payer field */}
-                    <Form.Item
-                      noStyle
-                      name={["adsets", index, "showPayer"]}
-                      valuePropName="checked"
-                    >
-                      <Switch size="small" />
-                    </Form.Item>
-                  </div>
-                }
-                name={["adsets", index, "Beneficiary"]}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill the input!",
-                  },
-                ]}
-                style={{ flex: "1 1 150px" }}
-              >
-                <Input />
-              </Form.Item>
-
-              {/* ✅ Conditionally render Payer field when switch is ON */}
-              <Form.Item
-                noStyle
-                shouldUpdate={(prev, curr) =>
-                  prev?.adsets?.[index]?.showPayer !== curr?.adsets?.[index]?.showPayer
-                }
-              >
-                {({ getFieldValue }) =>
-                  getFieldValue(["adsets", index, "showPayer"]) ? (
-                    <Form.Item
-                      name={["adsets", index, "Payer"]}
-                      label={
-                        // <span style={{ color: "#B4B4B4" }}>Payer</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ color: "#B4B4B4" }}>Payer</span>
-                          <Tooltip placement="top" title={"Value must be Page ID or BM ID"}
-                            overlayInnerStyle={{
-                              backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                              color: theme === 'dark' ? '#fff' : '#000',
-                              border: '1px solid #ccc',
-                              borderRadius: 6,
-                              // fontWeight: 500,
+                      content={
+                        <div style={{ display: "flex" }}>
+                          <Button
+                            type="text"
+                            // style={{ textAlign: "left" }}
+                            style={{
+                              border: "1px solid #91C25F", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                              backgroundColor: "transparent"
+                            }}
+                            onClick={() => {
+                              onClickShareBeneficiaryAndPayerForAllAccount();
                             }}
                           >
-                            <InfoCircleOutlined
-                              style={{
-                                color: theme === "dark" ? "#bbb" : "#888",
-                                cursor: "pointer",
-                              }}
-                            />
-                          </Tooltip>
+                            Set to All Accounts
+                          </Button>
+
+                          <Button
+                            type="text"
+                            // style={{ textAlign: "right" }}
+                            style={{
+                              border: "1px solid #f7370cff", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                              backgroundColor: "transparent", marginLeft: "10px"
+                            }}
+                            onClick={() => {
+                              onClickClearAllAccounts();
+                            }}
+                          >
+                            Clear All Accounts
+                          </Button>
                         </div>
                       }
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please fill the input!",
-                        },
-                      ]}
-                      style={{ flex: "1 1 150px" }}
                     >
-                      <Input />
-                    </Form.Item>
-                  ) : null
-                }
-              </Form.Item>
+                      <ShareAltOutlined style={{ cursor: "pointer" }} />
+                    </Popover>}
+                  {/* </Button> */}
+
+                  {/* Payer switch */}
+                  <Form.Item
+                    name={["adsets", index, "showPayer"]}
+                    valuePropName="checked"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Switch size="small" style={{
+                      backgroundColor: isChecked ? "#91C25F" : undefined,
+                    }} />
+                  </Form.Item>
+                </div>
+
+                {/* -------- Render ALL accounts but hide inactive -------- */}
+                <Form.Item
+                  noStyle
+                  shouldUpdate={(prev, curr) =>
+                    prev?.adsets?.[index]?.selectedAccount !==
+                    curr?.adsets?.[index]?.selectedAccount ||
+                    prev?.adsets?.[index]?.showPayer !==
+                    curr?.adsets?.[index]?.showPayer
+                  }
+                >
+                  {({ getFieldValue }) => {
+                    const selectedAccount = getFieldValue([
+                      "adsets",
+                      index,
+                      "selectedAccount",
+                    ]);
+                    const showPayer = getFieldValue(["adsets", index, "showPayer"]);
+
+                    return (
+                      <>
+                        {watchedAccountList.map((account) => {
+                          const isActive = account === selectedAccount;
+
+                          return (
+                            <div
+                              key={account}
+                              style={{
+                                display: isActive ? "block" : "none", // 👈 keep mounted for validation
+                              }}
+                            >
+                              {/* ---------------- Row 2 : Beneficiary ---------------- */}
+                              <Form.Item
+                                name={["adsets", index, "Beneficiary", account]}
+                                // rules={[
+                                //   {
+                                //     required: true,
+                                //     message: `Enter beneficiary for ${account}`,
+                                //   },
+                                // ]}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: `Enter beneficiary for ${account}`,
+                                  },
+                                  {
+                                    pattern: /^\d+$/,
+                                    message: "Only integer numbers are allowed",
+                                  },
+                                ]}
+                                style={{ marginBottom: 8 }}
+                              >
+                                {/* <Input placeholder="Enter Page ID or BM ID" /> */}
+                                <Input
+                                  className={
+                                    theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                                  }
+                                  placeholder="Enter beneficiary ID"
+                                  inputMode="numeric"
+                                  onKeyPress={(e) => {
+                                    if (!/[0-9]/.test(e.key)) {
+                                      e.preventDefault();
+                                    }
+                                  }}
+                                />
+                              </Form.Item>
+
+                              {/* ---------------- Row 3 : Payer ---------------- */}
+                              {showPayer && (
+                                <Form.Item
+                                  name={["adsets", index, "Payer", account]}
+                                  // rules={[
+                                  //   ({ getFieldValue }) => ({
+                                  //     validator(_, value) {
+                                  //       const show = getFieldValue([
+                                  //         "adsets",
+                                  //         index,
+                                  //         "showPayer",
+                                  //       ]);
+
+                                  //       if (!show) return Promise.resolve();
+                                  //       if (!value)
+                                  //         return Promise.reject(
+                                  //           new Error(`Enter payer for ${account}`)
+                                  //         );
+
+                                  //       return Promise.resolve();
+                                  //     },
+                                  //   }),
+                                  // ]}
+                                  rules={[
+                                    ({ getFieldValue }) => ({
+                                      validator(_, value) {
+                                        const show = getFieldValue([
+                                          "adsets",
+                                          index,
+                                          "showPayer",
+                                        ]);
+
+                                        if (!show) return Promise.resolve();
+
+                                        if (!value)
+                                          return Promise.reject(
+                                            new Error(`Enter payer for ${account}`)
+                                          );
+
+                                        if (!/^\d+$/.test(value))
+                                          return Promise.reject(
+                                            new Error("Only integer numbers are allowed")
+                                          );
+
+                                        return Promise.resolve();
+                                      },
+                                    }),
+                                  ]}
+                                >
+                                  {/* <Input placeholder="Enter Page ID or BM ID" /> */}
+                                  <Input
+                                    className={
+                                      theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                                    }
+                                    placeholder="Enter payer ID"
+                                    inputMode="numeric"
+                                    onKeyPress={(e) => {
+                                      if (!/[0-9]/.test(e.key)) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                  />
+                                </Form.Item>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </>
+                    );
+                  }}
+                </Form.Item>
+              </div>
             </>
           )}
 
@@ -6934,6 +7622,7 @@ const CreateCampaignDrawer = ({
   const [pixel, setPixels] = useState("Pixel");
   const [page, setPages] = useState("Page");
   const userPickedRef = useRef(false);
+  const [continents, setContinents] = useState([])
   // const [budgetType, ]
 
   // const adsets = Form.useWatch("adsets", form) || [];
@@ -6957,6 +7646,7 @@ const CreateCampaignDrawer = ({
   const [scheduleErrorByAdset, setScheduleErrorByAdset] = useState({});
   const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
   const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
+  const [imageHashStatus, setImageHashStatus] = useState([])
 
 
   // Derived condition name changed to watchedHasAdsetBudget
@@ -7009,6 +7699,14 @@ const CreateCampaignDrawer = ({
     onChangeSelect(values);
     setAccountChanged(true);
   };
+  const geoTreeData = [
+    {
+      label: "Countries",
+      value: "all_countries",
+      key: "all_countries",
+      children: continents,
+    },
+  ];
   const filteredAccounts = useMemo(() => {
     const q = searchText.trim().toLowerCase();
     if (!q) return accountsAccess;
@@ -8598,7 +9296,10 @@ const CreateCampaignDrawer = ({
     setPixelIdList(pixelIdListFiltered);
     setPageIdList(pageIdListFiltered);
   }, [imageHashArray, form]);
-
+  const formatContinent = (str) =>
+    str
+      .replace(/([A-Z])/g, " $1")     // add space before capital letters
+      .replace(/^./, (c) => c.toUpperCase()); // capitalize first letter
   const Accountchange = (e) => {
     console.log(e);
     const newAccounts = newImageHashArray.filter(item =>
@@ -8613,25 +9314,39 @@ const CreateCampaignDrawer = ({
   const fetchAccountDetails = async () => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/newhashimageidentity/${accountNumber}`,
+        `https://www.testapi.adsgoat.in/api/newhashimageidentityWithGeos/${accountNumber}`,
         {
           headers: {
             Authorization: token,
           },
         }
       );
-      console.log("account data", ...response?.data);
+      // console.log("account data", ...response?.data);
 
       // response?.data?.map((item) => {
       //   console.log(item.Network === network, "item.Network === network");
       // });
 
-      console.log(response?.data?.filter((item) => item.Network === network));
+      console.log(response?.data?.data?.filter((item) => item.Network === network));
 
-      setImageHashArray(response?.data?.filter((item) => item.Network === network) || []);
-      setNewImageHashArray(response?.data?.filter((item) => item.Network === network) || []);
+      setImageHashArray(response?.data?.data?.filter((item) => item.Network === network) || []);
+      setNewImageHashArray(response?.data?.data?.filter((item) => item.Network === network) || []);
+      const newCountriesFormat = Object.entries(response?.data?.geos || {}).map(
+        ([continent, countries]) => ({
+          label: formatContinent(continent),
+          value: continent,
+          key: continent,
+          selectable: false, // optional (prevents selecting continent itself)
+          children: countries.map((country) => ({
+            label: country.label,     // or country.label (based on your API)
+            value: country.value,     // or country.value
+            key: country.key,
+          })),
+        })
+      );
+      setContinents(newCountriesFormat);
 
-      setimagehash(...response?.data);
+      setimagehash(...response?.data?.data);
     } catch (error) {
       console.error("Error fetching campaign data:", error);
       // Handle error
@@ -9273,7 +9988,17 @@ const CreateCampaignDrawer = ({
   //         return [];
   //     }
   // };
-
+  const updateStatus = (name, status) => {
+    setImageHashStatus(prev => {
+      const existing = prev.find(item => item.name === name);
+      if (existing) {
+        return prev.map(item =>
+          item.name === name ? { ...item, status } : item
+        );
+      }
+      return [...prev, { name, status }];
+    });
+  };
   const customRequest = async (singleaccount, data, index, onSuccess, onError, id) => {
     if (!imagehash || imagehash.length === 0) {
       onError("Image hash data not loaded");
@@ -9338,11 +10063,12 @@ const CreateCampaignDrawer = ({
         return null;
       }
     };
-
+    let adIndex = 1;
     const uploadFilesSequentially = async (selectedFiles) => {
       const mediaHashArray = [];
 
       for (const file of selectedFiles) {
+        const adName = `${account}_${data?.AddName}_${adIndex}`;
         try {
           const fileType = file.type;
           if (
@@ -9385,7 +10111,7 @@ const CreateCampaignDrawer = ({
               file.url.endsWith(".jpeg")
             ) {
               const fileName = file.name.split("/").pop();
-
+              updateStatus(adName, "Generating image hash...");
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/adimages`,
                 formData,
@@ -9393,6 +10119,7 @@ const CreateCampaignDrawer = ({
               );
 
               if (fbResponse.status === 200) {
+                updateStatus(adName, "Image uploaded");
                 onSuccess("ok", fbResponse);
                 mediaHashArray.push({
                   filename: s3FileUrl,
@@ -9403,6 +10130,7 @@ const CreateCampaignDrawer = ({
                 console.error("Image upload failed");
               }
             } else if (file.url.endsWith(".mp4")) {
+              updateStatus(adName, "Generating video id...");
               fbResponse = await axios.post(
                 `https://graph.facebook.com/v23.0/act_${account}/advideos`,
                 formData,
@@ -9411,6 +10139,7 @@ const CreateCampaignDrawer = ({
 
               if (fbResponse.status === 200) {
                 const videoid = fbResponse?.data?.id;
+                updateStatus(adName, "video uploaded");
                 await new Promise((resolve) => setTimeout(resolve, 10000));
 
                 const thumbnailResponse = await axios.get(
@@ -9553,6 +10282,7 @@ const CreateCampaignDrawer = ({
           console.error("Error uploading file:", error);
           onError("error", error);
         }
+        adIndex++;
       }
 
       return mediaHashArray;
@@ -9728,7 +10458,8 @@ const CreateCampaignDrawer = ({
         setAdsetSchedule({});
         setAdSchedulingToShowCampaign(false);
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error during campaign creation:", error);
       message.error("An error occurred while creating the campaign.");
     } finally {
@@ -9876,7 +10607,6 @@ const CreateCampaignDrawer = ({
                   onError,
                   adsets[i].id
                 );
-
                 const getTheImages = imagesHashArray
                   .map(media => media.imag_hash)
                   .filter(Boolean);
@@ -10040,10 +10770,10 @@ const CreateCampaignDrawer = ({
                     device_platforms: values.adsets[i].device_platforms,
                   }),
                   ...(values.adsets[i].Beneficiary
-                    ? { beneficiary: values.adsets[i].Beneficiary }
+                    ? { beneficiary: values.adsets[i].Beneficiary[account].trim() }
                     : {}),
                   ...(values.adsets[i].Beneficiary
-                    ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+                    ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer[account].trim() } : { payer: values.adsets[i].Beneficiary[account].trim() }
                     : {}),
                   buying_type: "AUCTION",
                   addlevel: addLevelData,
@@ -10257,10 +10987,10 @@ const CreateCampaignDrawer = ({
                   device_platforms: values.adsets[i].device_platforms,
                 }),
                 ...(values.adsets[i].Beneficiary
-                  ? { beneficiary: values.adsets[i].Beneficiary }
+                  ? { beneficiary: values.adsets[i].Beneficiary[account].trim() }
                   : {}),
                 ...(values.adsets[i].Beneficiary
-                  ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer } : { payer: values.adsets[i].Beneficiary }
+                  ? values.adsets[i].Payer ? { payer: values.adsets[i].Payer[account].trim() } : { payer: values.adsets[i].Beneficiary[account].trim() }
                   : {}),
                 buying_type: "AUCTION",
                 addlevel: addLevelData,
@@ -11659,7 +12389,7 @@ const CreateCampaignDrawer = ({
       onCancel={handleDrawerClose}
       footer={null}
       centered
-      width="85%"
+      width="88%"
       // bodyStyle={{
       //   height: '80vh',
       //   overflowY: 'auto',
@@ -12325,8 +13055,15 @@ const CreateCampaignDrawer = ({
 
        
       </Select> */}
-
-      <Spin spinning={loading}>
+      <Spin spinning={loading} tip={
+        <div>
+          {imageHashStatus.map((item, index) => (
+            <div key={index}>
+              <b>{item.name}</b> : {item.status}
+            </div>
+          ))}
+        </div>
+      }>
         <Form
           layout="vertical"
           form={form}
@@ -12499,7 +13236,7 @@ const CreateCampaignDrawer = ({
                       } green-border-select`}
                   />
                 </Form.Item>
-                <Form.Item shouldUpdate noStyle>
+                {/* <Form.Item shouldUpdate noStyle>
                   {({ getFieldValue }) => {
                     const categories = getFieldValue("Special_categories") || [];
                     // if "NONE" is selected, hide the countries field
@@ -12592,6 +13329,112 @@ const CreateCampaignDrawer = ({
                         />
                       </Form.Item>
                     ) : null;
+                  }}
+                </Form.Item> */}
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue }) => {
+
+                    const categories =
+                      getFieldValue("Special_categories") || [];
+
+                    const showCountries =
+                      categories.length > 0 &&
+                      !categories.includes("NONE");
+
+                    return showCountries ? (
+                      <Form.Item
+                        name="countries"
+                        label="Countries"
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              "Please select at least one country",
+                          },
+                        ]}
+                        initialValue={["US"]}
+                        style={{ width: 250, }}
+                      >
+                        <TreeSelect
+                          treeData={geoTreeData}
+                          fieldNames={{
+                            label: "label",
+                            value: "value",
+                            children: "children",
+                          }}
+                          treeCheckable
+                          showCheckedStrategy={
+                            TreeSelect.SHOW_CHILD
+                          }
+                          showSearch
+                          allowClear
+                          treeNodeFilterProp="label"
+                          treeDefaultExpandedKeys={["all_countries"]}
+                          placeholder="Select continents or countries"
+                          maxTagCount={2}
+                          popupClassName={
+                            theme === "dark"
+                              ? "custom-dropdown"
+                              : "custom-dropdown-light"
+                          }
+                          className={`${theme === "dark"
+                            ? "dark-theme"
+                            : "light-theme"
+                            } green-border-select`}
+                          treeTitleRender={(node) => {
+
+                            if (node.value === "europe") {
+
+                              return (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    width: "100%",
+                                  }}
+                                >
+                                  <span>{node.label}</span>
+
+                                  <span
+                                    style={{
+                                      fontSize: 11,
+                                      fontWeight: 500,
+                                      padding: "2px 8px",
+                                      borderRadius: 12,
+                                      background: "#91c25f",
+                                      color: "white",
+                                      cursor: "pointer",
+                                      border: "1px solid #91caff",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // prevent checkbox toggle
+
+                                      const current =
+                                        form.getFieldValue("countries") || [];
+
+                                      const newValues = [
+                                        ...new Set([
+                                          ...current.filter(v => v !== "europe"),
+                                          ...europeanUnionCountryCodes
+                                        ])
+                                      ];
+
+                                      form.setFieldValue("countries", newValues);
+                                    }}
+                                  >
+                                    EU
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            return node.label;
+                          }}
+                        />
+                      </Form.Item>
+                    ) : null;
+
                   }}
                 </Form.Item>
                 <Form.Item
@@ -12987,6 +13830,7 @@ const CreateCampaignDrawer = ({
                   pixel={pixel}
                   geo={geo}
                   newImageHashArray={newImageHashArray}
+                  geoTreeData={geoTreeData}
                 />
               );
               // <ffff/>

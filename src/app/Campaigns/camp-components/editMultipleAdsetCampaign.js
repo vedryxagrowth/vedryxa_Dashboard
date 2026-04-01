@@ -20,7 +20,8 @@ import {
   Breadcrumb,
   Popconfirm,
   Alert,
-  Switch
+  Switch,
+  TreeSelect
 } from "antd";
 import {
   PlusOutlined,
@@ -70,6 +71,11 @@ const FabricCanvas = dynamic(() => import("./Fabricanvas"), { ssr: false });
 const { Panel } = Collapse;
 const { Option } = Select;
 const { Step } = Steps;
+const europeanUnionCountryCodes = [
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+  "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+  "PL", "PT", "RO", "SK", "SI", "ES", "SE"
+];
 const publisherOptions = [
   { label: "Facebook", value: "facebook" },
   { label: "Instagram", value: "instagram" },
@@ -2744,6 +2750,7 @@ const AdsetComponent = ({
   scheduleErrorByAdset,
   setSelectedByAdset,
   adSchedulingToShowCampaign,
+  geoTreeData
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2888,24 +2895,40 @@ const AdsetComponent = ({
   //     };
   //   });
   // };
+  // const handleEveryDayDrag = (hour) => {
+  //   setSelectedByAdset(prev => {
+  //     const current = prev[adset.id] || {};
+
+  //     const updated = { ...current };
+
+  //     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+  //       const key = `${d}-${hour}`;
+  //       updated[key] = !current[key];
+  //     });
+
+  //     return {
+  //       ...prev,
+  //       [adset.id]: updated
+  //     };
+  //   });
+  // };
   const handleEveryDayDrag = (hour) => {
     setSelectedByAdset(prev => {
       const current = prev[adset.id] || {};
-
+      const allSelected = [0, 1, 2, 3, 4, 5, 6].every(
+        d => current[`${d}-${hour}`]
+      );
       const updated = { ...current };
-
       [0, 1, 2, 3, 4, 5, 6].forEach(d => {
         const key = `${d}-${hour}`;
-        updated[key] = !current[key];
+        updated[key] = !allSelected;
       });
-
       return {
         ...prev,
         [adset.id]: updated
       };
     });
   };
-
   const isValidAdSchedule = (schedule = []) =>
     Array.isArray(schedule) &&
     schedule.length > 0 &&
@@ -3053,6 +3076,110 @@ const AdsetComponent = ({
   }) : allCountries;
 
   console.log(newCampaignCountries);
+  const filterTreeByCampaign = (tree, allowed) => {
+
+    if (!allowed.length) return tree;
+
+    return tree.map(root => ({
+
+      ...root,
+
+      children: root.children
+        .map(continent => {
+
+          // continent selected → include all countries
+          if (allowed.includes(continent.value)) {
+            return continent;
+          }
+
+          // filter countries
+          const matchingCountries =
+            continent.children.filter(country =>
+              allowed.includes(country.value)
+            );
+
+          if (matchingCountries.length) {
+            return {
+              ...continent,
+              children: matchingCountries,
+            };
+          }
+
+          return null;
+
+        })
+        .filter(Boolean),
+
+    }));
+
+  };
+
+
+  /**
+   * DISABLE TREE for locked adsets
+   */
+  const disableTreeNodes = (
+    tree,
+    allowedValues = []
+  ) =>
+
+    tree.map(root => ({
+
+      ...root,
+
+      children: root.children?.map(continent => ({
+
+        ...continent,
+
+        children: continent.children?.map(country => ({
+
+          ...country,
+
+          disabled:
+            !allowedValues.includes(
+              country.value
+            ),
+
+        })),
+
+      })),
+
+    }));
+
+
+  const baseTreeOptions =
+    campaignCountries.length === 0
+      ? geoTreeData   // ⭐ FULL ACCESS
+      : filterTreeByCampaign(
+        geoTreeData,
+        campaignCountries
+      );
+
+
+  const treeOptionsForIndexOfCountries =
+    baseTreeOptions;
+
+  // Flatten tree to get all available country codes
+  const flattenCountries = (tree) => {
+    let result = [];
+
+    tree.forEach(node => {
+      if (node.children) {
+        result = result.concat(flattenCountries(node.children));
+      } else {
+        result.push(node.value);
+      }
+    });
+
+    return result;
+  };
+
+  const availableCountryCodes = flattenCountries(treeOptionsForIndexOfCountries);
+
+  // Check if ALL EU countries exist in current tree
+  const isFullEUAvailable = europeanUnionCountryCodes.every(code =>
+    availableCountryCodes.includes(code)
+  );
 
   const Optimization_goal_values = {
     OUTCOME_LEADS: [
@@ -3158,6 +3285,7 @@ const AdsetComponent = ({
   }
 
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
+  const isChecked = Form.useWatch(["adsets", index, "showPayer"], form)
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -3315,6 +3443,19 @@ const AdsetComponent = ({
   //     // setSelectedPositions([]); // Clear positions when publisher selection changes
   // };
 
+  // const handlePublisherChange = (value) => {
+  //   setSelectedPublishers((prev) => ({
+  //     ...prev,
+  //     [adset.id]: value,
+  //   }));
+
+  //   // Optionally reset selected positions for this adset
+  //   // setSelectedPositions((prev) => ({
+  //   //   ...prev,
+  //   //   [adset.id]: [], // clear when publishers change
+  //   // }));
+  // };
+
   const handlePublisherChange = (value) => {
     setSelectedPublishers((prev) => ({
       ...prev,
@@ -3326,7 +3467,19 @@ const AdsetComponent = ({
     //   ...prev,
     //   [adset.id]: [], // clear when publishers change
     // }));
+
+    const autoPositions = value
+      .flatMap((pub) => positionOptions[pub] || [])
+      .map((pos) => pos.key);
+
+    const uniquePositions = [...new Set(autoPositions)];
+
+    setSelectedPositions((prev) => ({
+      ...prev,
+      [adset.id]: getPositionsByKeys(uniquePositions),
+    }));
   };
+
 
   const handleCancelForURLBuilder = () => {
     setIsModalVisibleForURLBuilder(false);
@@ -3577,61 +3730,131 @@ const AdsetComponent = ({
     setOpenCreativesDrawer(false);
   };
 
-  useEffect(() => {
-    // always treat current as an array
-    const current = form.getFieldValue(["adsets", index, "countries"]) || [];
+  // useEffect(() => {
+  //   // always treat current as an array
+  //   const current = form.getFieldValue(["adsets", index, "countries"]) || [];
 
-    // helper to set an array value safely
+  //   // helper to set an array value safely
+  //   const setArrayValue = (valArray) => {
+  //     form.setFields([
+  //       { name: ["adsets", index, "countries"], value: valArray },
+  //     ]);
+  //     form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //   };
+
+  //   if (campaignCountries.length > 0) {
+  //     // Allowed values are campaignCountries
+  //     const filtered = Array.isArray(current)
+  //       ? current.filter((c) => campaignCountries.includes(c))
+  //       : (campaignCountries.includes(current) ? [current] : []);
+
+  //     if (filtered.length === 0) {
+  //       // fallback to first campaign country (as an array)
+  //       setArrayValue([campaignCountries[0]]);
+  //       // form.setFieldsValue({
+  //       //   adsets: {
+  //       //     [index]: { countries: [campaignCountries[0]] }
+  //       //   }
+  //       // });
+  //       // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //     } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+  //       // remove invalid entries, keep the valid ones
+  //       setArrayValue(filtered);
+  //     }
+  //   } else {
+  //     // No campaign-level countries -> allowed values are allCountries' values
+  //     const validSet = new Set(allCountries.map((c) => c.value));
+  //     const filtered = Array.isArray(current)
+  //       ? current.filter((c) => validSet.has(c))
+  //       : (validSet.has(current) ? [current] : []);
+
+  //     if (filtered.length === 0) {
+  //       // fallback to first available country (as an array)
+  //       setArrayValue([allCountries[0].value]);
+  //       // form.setFieldsValue({
+  //       //   adsets: {
+  //       //     [index]: { countries: [allCountries[0].value] }
+  //       //   }
+  //       // });
+  //       // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
+  //     }
+  //     else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+  //       setArrayValue(filtered);
+  //     }
+  //   }
+  //   // include only necessary deps (allCountries is an array constant — ok to include)
+  // }, [campaignCountries, form, index, allCountries]);
+
+  useEffect(() => {
+
+    const fieldPath = [
+      "adsets",
+      index,
+      "countries",
+    ];
+
+    const current =
+      form.getFieldValue(fieldPath) || [];
+
     const setArrayValue = (valArray) => {
       form.setFields([
-        { name: ["adsets", index, "countries"], value: valArray },
+        {
+          name: fieldPath,
+          value: valArray,
+        },
       ]);
-      form.validateFields([`adsets.${index}.countries`]).catch(() => { });
     };
 
+
+    // ✅ CASE 1 — Campaign restriction exists
     if (campaignCountries.length > 0) {
-      // Allowed values are campaignCountries
-      const filtered = Array.isArray(current)
-        ? current.filter((c) => campaignCountries.includes(c))
-        : (campaignCountries.includes(current) ? [current] : []);
+
+      const filtered =
+        current.filter(c =>
+          campaignCountries.includes(c)
+        );
 
       if (filtered.length === 0) {
-        // fallback to first campaign country (as an array)
-        setArrayValue([campaignCountries[0]]);
-        // form.setFieldsValue({
-        //   adsets: {
-        //     [index]: { countries: [campaignCountries[0]] }
-        //   }
-        // });
-        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
-      } else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
-        // remove invalid entries, keep the valid ones
-        setArrayValue(filtered);
-      }
-    } else {
-      // No campaign-level countries -> allowed values are allCountries' values
-      const validSet = new Set(allCountries.map((c) => c.value));
-      const filtered = Array.isArray(current)
-        ? current.filter((c) => validSet.has(c))
-        : (validSet.has(current) ? [current] : []);
 
-      if (filtered.length === 0) {
-        // fallback to first available country (as an array)
-        setArrayValue([allCountries[0].value]);
-        // form.setFieldsValue({
-        //   adsets: {
-        //     [index]: { countries: [allCountries[0].value] }
-        //   }
-        // });
-        // form.validateFields([`adsets.${index}.countries`]).catch(() => { });
-      }
-      else if (filtered.length !== (Array.isArray(current) ? current.length : 0)) {
+        // fallback only when restricted
+        setArrayValue([
+          campaignCountries[0],
+        ]);
+
+      } else if (
+        filtered.length !== current.length
+      ) {
+
         setArrayValue(filtered);
+
       }
+
     }
-    // include only necessary deps (allCountries is an array constant — ok to include)
-  }, [campaignCountries, form, index, allCountries]);
 
+    // ✅ CASE 2 — No campaign restriction
+    else {
+
+      // Only set default if empty
+      if (current.length === 0) {
+
+        // pick first country from your continents list
+        const firstCountry =
+          // continents?.[0]?.children?.[0]?.value;
+          "US";
+
+        if (firstCountry) {
+          setArrayValue([firstCountry]);
+        }
+
+      }
+
+    }
+
+  }, [
+    campaignCountries,
+    form,
+    index,
+  ]);
   useEffect(() => {
     if (hasCountries) {
       form.setFieldsValue({
@@ -4805,7 +5028,7 @@ const AdsetComponent = ({
                 } green-border-select`}
             />
           </Form.Item> */}
-          <Form.Item noStyle key={index}>
+          {/* <Form.Item noStyle key={index}>
             <Form.Item
               name={["adsets", index, "countries"]}
               label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
@@ -4820,11 +5043,6 @@ const AdsetComponent = ({
             //   },
             // ]}
             >
-              {/*
-                    - index === 0 and geo === "Geos": onChange will propagate to all adsets
-                    - index > 0 and geo === "Geos": Select opens but only current items selectable (others disabled)
-                    - geo !== "Geos": every index is independent
-                  */}
               <Select
                 mode="multiple"
                 allowClear
@@ -4847,6 +5065,127 @@ const AdsetComponent = ({
               //     // If you need side effects when geo !== "Geos", handle them here.
               //   }
               // }}
+              />
+            </Form.Item>
+          </Form.Item> */}
+          <Form.Item noStyle key={index}>
+            <Form.Item
+              name={[
+                "adsets",
+                index,
+                "countries",
+              ]}
+              label={
+                <span style={{ color: "#B4B4B4" }}>
+                  Countries
+                </span>
+              }
+              required
+              style={{ flex: "0 0 200px" }}
+            >
+              <TreeSelect
+                treeData={
+                  treeOptionsForIndexOfCountries
+                }
+                fieldNames={{
+                  label: "label",
+                  value: "value",
+                  children: "children",
+                }}
+                treeCheckable
+                treeDefaultExpandedKeys={["all_countries"]}
+                showCheckedStrategy={
+                  TreeSelect.SHOW_CHILD
+                }
+                allowClear
+                showSearch
+                treeNodeFilterProp="label"
+                maxTagCount={2}
+                placeholder={
+                  campaignCountries.length
+                    ? "Select from campaign countries"
+                    : "Select any country"
+                }
+                // disabled={
+                //   geo === "Geos" &&
+                //   index !== 0
+                // }
+                getPopupContainer={(
+                  trigger
+                ) =>
+                  trigger.parentNode
+                }
+                popupClassName={
+                  theme === "dark"
+                    ? "custom-dropdown"
+                    : "custom-dropdown-light"
+                }
+                className={`${theme === "dark"
+                  ? "dark-theme"
+                  : "light-theme"
+                  } green-border-select`}
+                // onChange={(val) => {
+                //   if (geo === "Geos" && index === 0) {
+                //     handleFirstCountriesChange(val);
+                //   }
+                // }}
+                treeTitleRender={(node) => {
+
+                  if (node.value === "europe" && isFullEUAvailable) {
+
+                    return (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "100%",
+                        }}
+                      >
+                        <span>{node.label}</span>
+
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 500,
+                            padding: "2px 8px",
+                            borderRadius: 12,
+                            background: "#91c25f",
+                            color: "white",
+                            cursor: "pointer",
+                            border: "1px solid #91caff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            const current =
+                              form.getFieldValue(["adsets", index, "countries"]) || [];
+
+                            const newValues = [
+                              ...new Set([
+                                ...current.filter(v => v !== "europe"),
+                                ...europeanUnionCountryCodes
+                              ])
+                            ];
+
+                            // if (geo === "Geos" && index === 0) {
+                            //   handleFirstCountriesChange(newValues);
+                            // } else {
+                            form.setFieldValue(
+                              ["adsets", index, "countries"],
+                              newValues
+                            );
+                            // }
+                          }}
+                        >
+                          EU
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  return node.label;
+                }}
               />
             </Form.Item>
           </Form.Item>
@@ -4878,7 +5217,9 @@ const AdsetComponent = ({
                       name={["adsets", index, "showPayer"]}
                       valuePropName="checked"
                     >
-                      <Switch size="small" />
+                      <Switch size="small" style={{
+                        backgroundColor: isChecked ? "#91C25F" : undefined,
+                      }} />
                     </Form.Item>
                   </div>
                 }
@@ -4891,7 +5232,9 @@ const AdsetComponent = ({
                 ]}
                 style={{ flex: "1 1 150px" }}
               >
-                <Input />
+                <Input className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                } />
               </Form.Item>
               <Form.Item
                 noStyle
@@ -4932,7 +5275,9 @@ const AdsetComponent = ({
                       ]}
                       style={{ flex: "1 1 150px" }}
                     >
-                      <Input />
+                      <Input className={
+                        theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                      } />
                     </Form.Item>
                   ) : null
                 }
@@ -7698,7 +8043,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
   const [websiteURL, setWebsiteURL] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentFile, setCurrentFile] = useState(null); // File to be edited
   const [isImgEditorShown, setIsImgEditorShown] = useState(false);
   const [editedImages, setEditedImages] = useState({});
@@ -7754,6 +8099,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
   const [objectivevalue, setObjectiveValue] = useState();
   const isFirstRender = useRef(true);
+  const [continents, setContinents] = useState([])
 
   console.log(pixelIDLIst, "pixelIDLIst in EditMultipleAdsetCampaignDrawer");
   console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
@@ -7788,6 +8134,14 @@ const EditMultipleAdsetCampaignDrawer = ({
   //     }, 1000);
   //   });
   // };
+  const geoTreeData = [
+    {
+      label: "Countries",
+      value: "all_countries",
+      key: "all_countries",
+      children: continents,
+    },
+  ];
 
   const handleConfirm = async () => {
     const newErrors = {
@@ -8008,6 +8362,9 @@ const EditMultipleAdsetCampaignDrawer = ({
     } catch (error) {
       console.error("Error fetching campaign list:", error);
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   const fetchCategories = async (selectedRow) => {
@@ -8226,7 +8583,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: "0",
@@ -8258,7 +8615,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       billing_event: "IMPRESSIONS",
       action_source: "website",
       custom_event_type: "LEAD",
-      countries: "US",
+      countries: ["US"],
       Min_Age: "18",
       Max_Age: "65",
       Gender: "0",
@@ -9002,20 +9359,38 @@ const EditMultipleAdsetCampaignDrawer = ({
   // const handlepositionChange = async (values) => {
   //     console.log(values, "handlepositionChange")
   // }
+  const formatContinent = (str) =>
+    str
+      .replace(/([A-Z])/g, " $1")     // add space before capital letters
+      .replace(/^./, (c) => c.toUpperCase()); // capitalize first letter
 
   const fetchAccountDetails = async () => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/hashimageidentity/${accountNumber}`,
+        `https://www.testapi.adsgoat.in/api/hashimageidentityWithGeos/${accountNumber}`,
         {
           headers: {
             Authorization: token,
           },
         }
       );
-      console.log("account data", ...response?.data);
+      // console.log("account data", ...response?.data);
+      const newCountriesFormat = Object.entries(response?.data?.geos || {}).map(
+        ([continent, countries]) => ({
+          label: formatContinent(continent),
+          value: continent,
+          key: continent,
+          selectable: false, // optional (prevents selecting continent itself)
+          children: countries.map((country) => ({
+            label: country.label,     // or country.label (based on your API)
+            value: country.value,     // or country.value
+            key: country.key,
+          })),
+        })
+      );
+      setContinents(newCountriesFormat);
 
-      setimagehash(...response?.data);
+      setimagehash(...response?.data?.data);
     } catch (error) {
       console.error("Error fetching campaign data:", error);
       // Handle error
@@ -9857,7 +10232,12 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["identifier"] = fullCampaignData.identifier;
     AllAdsetsData["campaign_name"] = values?.Name;
     AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
-    AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    // AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    if (fullCampaignData.Approval === "Rejected") {
+      AllAdsetsData["Approval"] = "PENDING_APPROVAL";
+    } else {
+      AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    }
     AllAdsetsData["fbstatus"] = fullCampaignData.fbstatus === "Processing" ? "No-Live" : fullCampaignData.fbstatus;
     AllAdsetsData["Category"] = fullCampaignData.Category;
     if (fullCampaignData.Approvedby) AllAdsetsData["Approvedby"] = fullCampaignData.Approvedby;
@@ -10654,7 +11034,14 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newUpdatedAd["Ad_Status"] = item.Ad_Status;
               }
               if (Object.keys(getItem).length > 0 && item.status) {
-                newUpdatedAd["status"] = item.status;
+                // newUpdatedAd["status"] = item.status;
+                if (fullCampaignData.Approval === "Rejected") {
+
+                } else {
+                  if (item.status) {
+                    newUpdatedAd["status"] = item.status;
+                  }
+                }
               }
               if (
                 Object.keys(getItem).length > 0 &&
@@ -13273,198 +13660,412 @@ const EditMultipleAdsetCampaignDrawer = ({
                   />
                 </Form.Item>
                 {((fullCampaignData?.camapaignlevel?.campaignid) && (fullCampaignData?.camapaignlevel?.Special_categories_countries)) && (
+                  // <Form.Item shouldUpdate noStyle>
+                  //   {({ getFieldValue }) => {
+                  //     const categories = getFieldValue("Special_categories") || [];
+                  //     // if "NONE" is selected, hide the countries field
+                  //     const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                  //     return showCountries ? (
+                  //       <Form.Item
+                  //         name="countries"
+                  //         label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                  //         rules={[
+                  //           {
+                  //             required: true,
+                  //             message: "Please select at least one country!",
+                  //           },
+                  //         ]}
+                  //         style={{ width: "140px", marginLeft: "1%" }}
+                  //         initialValue={["US"]} // default
+                  //       >
+                  //         <Select
+                  //           mode="multiple"
+                  //           allowClear
+                  //           disabled={fullCampaignData?.camapaignlevel?.campaignid}
+                  //           // options={[
+                  //           //   { value: "US", label: "United States" },
+                  //           //   { value: "GB", label: "United Kingdom" },
+                  //           //   { value: "AU", label: "Australia" },
+                  //           //   { value: "IN", label: "India" },
+                  //           //   { value: "AE", label: "United Arab Emirates" },
+                  //           //   { value: "CA", label: "Canada" },
+                  //           //   { value: "DE", label: "Germany" },
+                  //           //   { value: "FR", label: "France" },
+                  //           //   { value: "JP", label: "Japan" },
+                  //           //   { value: "CN", label: "China" },
+                  //           //   { value: "BR", label: "Brazil" },
+                  //           //   { value: "ZA", label: "South Africa" },
+                  //           //   { value: "RU", label: "Russia" },
+                  //           //   { value: "IT", label: "Italy" },
+                  //           //   { value: "ES", label: "Spain" },
+                  //           //   { value: "SG", label: "Singapore" },
+                  //           //   { value: "NZ", label: "New Zealand" },
+                  //           //   { value: "MX", label: "Mexico" },
+                  //           // ]}
+                  //           showSearch
+                  //           optionFilterProp="label"
+                  //           options={[
+                  //             { value: "US", label: "United States", title: "" },
+                  //             { value: "GB", label: "United Kingdom", title: "" },
+                  //             { value: "AU", label: "Australia", title: "" },
+                  //             { value: "IN", label: "India", title: "" },
+                  //             { value: "AE", label: "United Arab Emirates", title: "" },
+                  //             { value: "CA", label: "Canada", title: "" },
+                  //             { value: "DE", label: "Germany", title: "" },
+                  //             { value: "FR", label: "France", title: "" },
+                  //             { value: "JP", label: "Japan", title: "" },
+                  //             { value: "CN", label: "China", title: "" },
+                  //             { value: "BR", label: "Brazil", title: "" },
+                  //             { value: "ZA", label: "South Africa", title: "" },
+                  //             { value: "RU", label: "Russia", title: "" },
+                  //             { value: "IT", label: "Italy", title: "" },
+                  //             { value: "ES", label: "Spain", title: "" },
+                  //             { value: "SG", label: "Singapore", title: "" },
+                  //             { value: "NZ", label: "New Zealand", title: "" },
+                  //             { value: "MX", label: "Mexico", title: "" },
+                  //             { value: "AT", label: "Austria", title: "" },
+                  //             { value: "BE", label: "Belgium", title: "" },
+                  //             { value: "BG", label: "Bulgaria", title: "" },
+                  //             { value: "HR", label: "Croatia", title: "" },
+                  //             { value: "CY", label: "Cyprus", title: "" },
+                  //             { value: "CZ", label: "Czech Republic", title: "" },
+                  //             { value: "DK", label: "Denmark", title: "" },
+                  //             { value: "EE", label: "Estonia", title: "" },
+                  //             { value: "FI", label: "Finland", title: "" },
+                  //             { value: "GR", label: "Greece", title: "" },
+                  //             { value: "HU", label: "Hungary", title: "" },
+                  //             { value: "IE", label: "Ireland", title: "" },
+                  //             { value: "LV", label: "Latvia", title: "" },
+                  //             { value: "LT", label: "Lithuania", title: "" },
+                  //             { value: "LU", label: "Luxembourg", title: "" },
+                  //             { value: "MT", label: "Malta", title: "" },
+                  //             { value: "NL", label: "Netherlands", title: "" },
+                  //             { value: "NO", label: "Norway", title: "" },
+                  //             { value: "PL", label: "Poland", title: "" },
+                  //             { value: "PT", label: "Portugal", title: "" },
+                  //             { value: "RO", label: "Romania", title: "" },
+                  //             { value: "SK", label: "Slovakia", title: "" },
+                  //             { value: "SI", label: "Slovenia", title: "" },
+                  //             { value: "SE", label: "Sweden", title: "" },
+                  //           ]}
+                  //           dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                  //           className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                  //         />
+                  //       </Form.Item>
+                  //     ) : null;
+                  //   }}
+                  // </Form.Item>
                   <Form.Item shouldUpdate noStyle>
                     {({ getFieldValue }) => {
-                      const categories = getFieldValue("Special_categories") || [];
-                      // if "NONE" is selected, hide the countries field
-                      const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                      const categories =
+                        getFieldValue("Special_categories") || [];
+
+                      const showCountries =
+                        categories.length > 0 &&
+                        !categories.includes("NONE");
 
                       return showCountries ? (
                         <Form.Item
                           name="countries"
-                          label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                          label="Countries"
                           rules={[
                             {
                               required: true,
-                              message: "Please select at least one country!",
+                              message:
+                                "Please select at least one country",
                             },
                           ]}
-                          style={{ width: "140px", marginLeft: "1%" }}
-                          initialValue={["US"]} // default
+                          initialValue={["US"]}
+                          style={{ width: 250, }}
                         >
-                          <Select
-                            mode="multiple"
-                            allowClear
+                          <TreeSelect
+                            treeData={geoTreeData}
                             disabled={fullCampaignData?.camapaignlevel?.campaignid}
-                            // options={[
-                            //   { value: "US", label: "United States" },
-                            //   { value: "GB", label: "United Kingdom" },
-                            //   { value: "AU", label: "Australia" },
-                            //   { value: "IN", label: "India" },
-                            //   { value: "AE", label: "United Arab Emirates" },
-                            //   { value: "CA", label: "Canada" },
-                            //   { value: "DE", label: "Germany" },
-                            //   { value: "FR", label: "France" },
-                            //   { value: "JP", label: "Japan" },
-                            //   { value: "CN", label: "China" },
-                            //   { value: "BR", label: "Brazil" },
-                            //   { value: "ZA", label: "South Africa" },
-                            //   { value: "RU", label: "Russia" },
-                            //   { value: "IT", label: "Italy" },
-                            //   { value: "ES", label: "Spain" },
-                            //   { value: "SG", label: "Singapore" },
-                            //   { value: "NZ", label: "New Zealand" },
-                            //   { value: "MX", label: "Mexico" },
-                            // ]}
+                            fieldNames={{
+                              label: "label",
+                              value: "value",
+                              children: "children",
+                            }}
+                            treeCheckable
+                            showCheckedStrategy={
+                              TreeSelect.SHOW_CHILD
+                            }
                             showSearch
-                            optionFilterProp="label"
-                            options={[
-                              { value: "US", label: "United States", title: "" },
-                              { value: "GB", label: "United Kingdom", title: "" },
-                              { value: "AU", label: "Australia", title: "" },
-                              { value: "IN", label: "India", title: "" },
-                              { value: "AE", label: "United Arab Emirates", title: "" },
-                              { value: "CA", label: "Canada", title: "" },
-                              { value: "DE", label: "Germany", title: "" },
-                              { value: "FR", label: "France", title: "" },
-                              { value: "JP", label: "Japan", title: "" },
-                              { value: "CN", label: "China", title: "" },
-                              { value: "BR", label: "Brazil", title: "" },
-                              { value: "ZA", label: "South Africa", title: "" },
-                              { value: "RU", label: "Russia", title: "" },
-                              { value: "IT", label: "Italy", title: "" },
-                              { value: "ES", label: "Spain", title: "" },
-                              { value: "SG", label: "Singapore", title: "" },
-                              { value: "NZ", label: "New Zealand", title: "" },
-                              { value: "MX", label: "Mexico", title: "" },
-                              { value: "AT", label: "Austria", title: "" },
-                              { value: "BE", label: "Belgium", title: "" },
-                              { value: "BG", label: "Bulgaria", title: "" },
-                              { value: "HR", label: "Croatia", title: "" },
-                              { value: "CY", label: "Cyprus", title: "" },
-                              { value: "CZ", label: "Czech Republic", title: "" },
-                              { value: "DK", label: "Denmark", title: "" },
-                              { value: "EE", label: "Estonia", title: "" },
-                              { value: "FI", label: "Finland", title: "" },
-                              { value: "GR", label: "Greece", title: "" },
-                              { value: "HU", label: "Hungary", title: "" },
-                              { value: "IE", label: "Ireland", title: "" },
-                              { value: "LV", label: "Latvia", title: "" },
-                              { value: "LT", label: "Lithuania", title: "" },
-                              { value: "LU", label: "Luxembourg", title: "" },
-                              { value: "MT", label: "Malta", title: "" },
-                              { value: "NL", label: "Netherlands", title: "" },
-                              { value: "NO", label: "Norway", title: "" },
-                              { value: "PL", label: "Poland", title: "" },
-                              { value: "PT", label: "Portugal", title: "" },
-                              { value: "RO", label: "Romania", title: "" },
-                              { value: "SK", label: "Slovakia", title: "" },
-                              { value: "SI", label: "Slovenia", title: "" },
-                              { value: "SE", label: "Sweden", title: "" },
-                            ]}
-                            dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
-                            className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                            allowClear
+                            treeNodeFilterProp="label"
+                            treeDefaultExpandedKeys={["all_countries"]}
+                            placeholder="Select continents or countries"
+                            maxTagCount={2}
+                            popupClassName={
+                              theme === "dark"
+                                ? "custom-dropdown"
+                                : "custom-dropdown-light"
+                            }
+                            className={`${theme === "dark"
+                              ? "dark-theme"
+                              : "light-theme"
+                              } green-border-select`}
+                            treeTitleRender={(node) => {
+
+                              if (node.value === "europe") {
+
+                                return (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <span>{node.label}</span>
+
+                                    <span
+                                      style={{
+                                        fontSize: 11,
+                                        fontWeight: 500,
+                                        padding: "2px 8px",
+                                        borderRadius: 12,
+                                        background: "#91c25f",
+                                        color: "white",
+                                        cursor: "pointer",
+                                        border: "1px solid #91caff",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation(); // prevent checkbox toggle
+
+                                        const current =
+                                          form.getFieldValue("countries") || [];
+
+                                        const newValues = [
+                                          ...new Set([
+                                            ...current.filter(v => v !== "europe"),
+                                            ...europeanUnionCountryCodes
+                                          ])
+                                        ];
+
+                                        form.setFieldValue("countries", newValues);
+                                      }}
+                                    >
+                                      EU
+                                    </span>
+                                  </div>
+                                );
+                              }
+
+                              return node.label;
+                            }}
                           />
                         </Form.Item>
                       ) : null;
+
                     }}
                   </Form.Item>
                 )}
                 {!(fullCampaignData?.camapaignlevel?.campaignid) && (
+                  // <Form.Item shouldUpdate noStyle>
+                  //   {({ getFieldValue }) => {
+                  //     const categories = getFieldValue("Special_categories") || [];
+                  //     // if "NONE" is selected, hide the countries field
+                  //     const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                  //     return showCountries ? (
+                  //       <Form.Item
+                  //         name="countries"
+                  //         label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                  //         rules={[
+                  //           {
+                  //             required: true,
+                  //             message: "Please select at least one country!",
+                  //           },
+                  //         ]}
+                  //         style={{ width: "140px", marginLeft: "1%" }}
+                  //         initialValue={["US"]} // default
+                  //       >
+                  //         <Select
+                  //           mode="multiple"
+                  //           allowClear
+                  //           disabled={fullCampaignData?.camapaignlevel?.campaignid}
+                  //           // options={[
+                  //           //   { value: "US", label: "United States" },
+                  //           //   { value: "GB", label: "United Kingdom" },
+                  //           //   { value: "AU", label: "Australia" },
+                  //           //   { value: "IN", label: "India" },
+                  //           //   { value: "AE", label: "United Arab Emirates" },
+                  //           //   { value: "CA", label: "Canada" },
+                  //           //   { value: "DE", label: "Germany" },
+                  //           //   { value: "FR", label: "France" },
+                  //           //   { value: "JP", label: "Japan" },
+                  //           //   { value: "CN", label: "China" },
+                  //           //   { value: "BR", label: "Brazil" },
+                  //           //   { value: "ZA", label: "South Africa" },
+                  //           //   { value: "RU", label: "Russia" },
+                  //           //   { value: "IT", label: "Italy" },
+                  //           //   { value: "ES", label: "Spain" },
+                  //           //   { value: "SG", label: "Singapore" },
+                  //           //   { value: "NZ", label: "New Zealand" },
+                  //           //   { value: "MX", label: "Mexico" },
+                  //           // ]}
+                  //           showSearch
+                  //           optionFilterProp="label"
+                  //           options={[
+                  //             { value: "US", label: "United States", title: "" },
+                  //             { value: "GB", label: "United Kingdom", title: "" },
+                  //             { value: "AU", label: "Australia", title: "" },
+                  //             { value: "IN", label: "India", title: "" },
+                  //             { value: "AE", label: "United Arab Emirates", title: "" },
+                  //             { value: "CA", label: "Canada", title: "" },
+                  //             { value: "DE", label: "Germany", title: "" },
+                  //             { value: "FR", label: "France", title: "" },
+                  //             { value: "JP", label: "Japan", title: "" },
+                  //             { value: "CN", label: "China", title: "" },
+                  //             { value: "BR", label: "Brazil", title: "" },
+                  //             { value: "ZA", label: "South Africa", title: "" },
+                  //             { value: "RU", label: "Russia", title: "" },
+                  //             { value: "IT", label: "Italy", title: "" },
+                  //             { value: "ES", label: "Spain", title: "" },
+                  //             { value: "SG", label: "Singapore", title: "" },
+                  //             { value: "NZ", label: "New Zealand", title: "" },
+                  //             { value: "MX", label: "Mexico", title: "" },
+                  //             { value: "AT", label: "Austria", title: "" },
+                  //             { value: "BE", label: "Belgium", title: "" },
+                  //             { value: "BG", label: "Bulgaria", title: "" },
+                  //             { value: "HR", label: "Croatia", title: "" },
+                  //             { value: "CY", label: "Cyprus", title: "" },
+                  //             { value: "CZ", label: "Czech Republic", title: "" },
+                  //             { value: "DK", label: "Denmark", title: "" },
+                  //             { value: "EE", label: "Estonia", title: "" },
+                  //             { value: "FI", label: "Finland", title: "" },
+                  //             { value: "GR", label: "Greece", title: "" },
+                  //             { value: "HU", label: "Hungary", title: "" },
+                  //             { value: "IE", label: "Ireland", title: "" },
+                  //             { value: "LV", label: "Latvia", title: "" },
+                  //             { value: "LT", label: "Lithuania", title: "" },
+                  //             { value: "LU", label: "Luxembourg", title: "" },
+                  //             { value: "MT", label: "Malta", title: "" },
+                  //             { value: "NL", label: "Netherlands", title: "" },
+                  //             { value: "NO", label: "Norway", title: "" },
+                  //             { value: "PL", label: "Poland", title: "" },
+                  //             { value: "PT", label: "Portugal", title: "" },
+                  //             { value: "RO", label: "Romania", title: "" },
+                  //             { value: "SK", label: "Slovakia", title: "" },
+                  //             { value: "SI", label: "Slovenia", title: "" },
+                  //             { value: "SE", label: "Sweden", title: "" },
+                  //           ]}
+                  //           dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                  //           className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                  //         />
+                  //       </Form.Item>
+                  //     ) : null;
+                  //   }}
+                  // </Form.Item>
                   <Form.Item shouldUpdate noStyle>
                     {({ getFieldValue }) => {
-                      const categories = getFieldValue("Special_categories") || [];
-                      // if "NONE" is selected, hide the countries field
-                      const showCountries = categories.length > 0 && !categories.includes("NONE");
+
+                      const categories =
+                        getFieldValue("Special_categories") || [];
+
+                      const showCountries =
+                        categories.length > 0 &&
+                        !categories.includes("NONE");
 
                       return showCountries ? (
                         <Form.Item
                           name="countries"
-                          label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                          label="Countries"
                           rules={[
                             {
                               required: true,
-                              message: "Please select at least one country!",
+                              message:
+                                "Please select at least one country",
                             },
                           ]}
-                          style={{ width: "140px", marginLeft: "1%" }}
-                          initialValue={["US"]} // default
+                          initialValue={["US"]}
+                          style={{ width: 250, }}
                         >
-                          <Select
-                            mode="multiple"
-                            allowClear
+                          <TreeSelect
+                            treeData={geoTreeData}
                             disabled={fullCampaignData?.camapaignlevel?.campaignid}
-                            // options={[
-                            //   { value: "US", label: "United States" },
-                            //   { value: "GB", label: "United Kingdom" },
-                            //   { value: "AU", label: "Australia" },
-                            //   { value: "IN", label: "India" },
-                            //   { value: "AE", label: "United Arab Emirates" },
-                            //   { value: "CA", label: "Canada" },
-                            //   { value: "DE", label: "Germany" },
-                            //   { value: "FR", label: "France" },
-                            //   { value: "JP", label: "Japan" },
-                            //   { value: "CN", label: "China" },
-                            //   { value: "BR", label: "Brazil" },
-                            //   { value: "ZA", label: "South Africa" },
-                            //   { value: "RU", label: "Russia" },
-                            //   { value: "IT", label: "Italy" },
-                            //   { value: "ES", label: "Spain" },
-                            //   { value: "SG", label: "Singapore" },
-                            //   { value: "NZ", label: "New Zealand" },
-                            //   { value: "MX", label: "Mexico" },
-                            // ]}
+                            fieldNames={{
+                              label: "label",
+                              value: "value",
+                              children: "children",
+                            }}
+                            treeCheckable
+                            showCheckedStrategy={
+                              TreeSelect.SHOW_CHILD
+                            }
                             showSearch
-                            optionFilterProp="label"
-                            options={[
-                              { value: "US", label: "United States", title: "" },
-                              { value: "GB", label: "United Kingdom", title: "" },
-                              { value: "AU", label: "Australia", title: "" },
-                              { value: "IN", label: "India", title: "" },
-                              { value: "AE", label: "United Arab Emirates", title: "" },
-                              { value: "CA", label: "Canada", title: "" },
-                              { value: "DE", label: "Germany", title: "" },
-                              { value: "FR", label: "France", title: "" },
-                              { value: "JP", label: "Japan", title: "" },
-                              { value: "CN", label: "China", title: "" },
-                              { value: "BR", label: "Brazil", title: "" },
-                              { value: "ZA", label: "South Africa", title: "" },
-                              { value: "RU", label: "Russia", title: "" },
-                              { value: "IT", label: "Italy", title: "" },
-                              { value: "ES", label: "Spain", title: "" },
-                              { value: "SG", label: "Singapore", title: "" },
-                              { value: "NZ", label: "New Zealand", title: "" },
-                              { value: "MX", label: "Mexico", title: "" },
-                              { value: "AT", label: "Austria", title: "" },
-                              { value: "BE", label: "Belgium", title: "" },
-                              { value: "BG", label: "Bulgaria", title: "" },
-                              { value: "HR", label: "Croatia", title: "" },
-                              { value: "CY", label: "Cyprus", title: "" },
-                              { value: "CZ", label: "Czech Republic", title: "" },
-                              { value: "DK", label: "Denmark", title: "" },
-                              { value: "EE", label: "Estonia", title: "" },
-                              { value: "FI", label: "Finland", title: "" },
-                              { value: "GR", label: "Greece", title: "" },
-                              { value: "HU", label: "Hungary", title: "" },
-                              { value: "IE", label: "Ireland", title: "" },
-                              { value: "LV", label: "Latvia", title: "" },
-                              { value: "LT", label: "Lithuania", title: "" },
-                              { value: "LU", label: "Luxembourg", title: "" },
-                              { value: "MT", label: "Malta", title: "" },
-                              { value: "NL", label: "Netherlands", title: "" },
-                              { value: "NO", label: "Norway", title: "" },
-                              { value: "PL", label: "Poland", title: "" },
-                              { value: "PT", label: "Portugal", title: "" },
-                              { value: "RO", label: "Romania", title: "" },
-                              { value: "SK", label: "Slovakia", title: "" },
-                              { value: "SI", label: "Slovenia", title: "" },
-                              { value: "SE", label: "Sweden", title: "" },
-                            ]}
-                            dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
-                            className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
+                            allowClear
+                            treeNodeFilterProp="label"
+                            treeDefaultExpandedKeys={["all_countries"]}
+                            placeholder="Select continents or countries"
+                            maxTagCount={2}
+                            popupClassName={
+                              theme === "dark"
+                                ? "custom-dropdown"
+                                : "custom-dropdown-light"
+                            }
+                            className={`${theme === "dark"
+                              ? "dark-theme"
+                              : "light-theme"
+                              } green-border-select`}
+                            treeTitleRender={(node) => {
+
+                              if (node.value === "europe") {
+
+                                return (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <span>{node.label}</span>
+
+                                    <span
+                                      style={{
+                                        fontSize: 11,
+                                        fontWeight: 500,
+                                        padding: "2px 8px",
+                                        borderRadius: 12,
+                                        background: "#91c25f",
+                                        color: "white",
+                                        cursor: "pointer",
+                                        border: "1px solid #91caff",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation(); // prevent checkbox toggle
+
+                                        const current =
+                                          form.getFieldValue("countries") || [];
+
+                                        const newValues = [
+                                          ...new Set([
+                                            ...current.filter(v => v !== "europe"),
+                                            ...europeanUnionCountryCodes
+                                          ])
+                                        ];
+
+                                        form.setFieldValue("countries", newValues);
+                                      }}
+                                    >
+                                      EU
+                                    </span>
+                                  </div>
+                                );
+                              }
+
+                              return node.label;
+                            }}
                           />
                         </Form.Item>
                       ) : null;
+
                     }}
                   </Form.Item>
                 )}
@@ -13829,6 +14430,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                   pixelIDLIst={pixelIDLIst}
                   pageIDList={pageIDList}
                   budgetType={budgetType}
+                  geoTreeData={geoTreeData}
                 />
               );
               // <ffff/>

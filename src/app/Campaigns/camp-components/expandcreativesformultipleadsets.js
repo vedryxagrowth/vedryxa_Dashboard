@@ -70,6 +70,11 @@ const AdsetCard = ({
   const [adsetDrawerOpen, setAdsetDrawerOpen] = useState(false);
   const [adsetToEdit, setAdsetToEdit] = useState(null);
   const [isViewAdset, setIsViewAdset] = useState(false);
+  const [error, setError] = useState("");
+  const [isIconModalOpen, setIsIconModalOpen] = useState(false);
+  const [iconInputValue, setIconInputValue] = useState("");
+
+
 
   const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
 
@@ -131,7 +136,6 @@ const AdsetCard = ({
       );
     }
   };
-
   const makeHandleChangeAd = (currentItem, adsetKey) => async (checked) => {
     const newStatus = checked ? "ACTIVE" : "PAUSED";
     const campaignIdentifier = viewCampaignData?.identifier;
@@ -254,10 +258,16 @@ const AdsetCard = ({
   };
 
   const handleConfirmReject = async () => {
-    setLoading(true);
     const username = userdetails?.userName;
+    if (!rejectionReason || !rejectionReason.trim()) {
+      setError("Rejection reason is required");
+      return;
+    }
+    setError("");
+    setLoading(true);
     try {
       //https://www.testapi.adsgoat.in
+
       const response = await axios.post(
         "https://www.testapi.adsgoat.in/api/newrejectAdsnew",
         {
@@ -281,8 +291,8 @@ const AdsetCard = ({
       console.error("Error rejecting ad:", error);
     } finally {
       setLoading(false);
-      setIsRejectModalVisible(false); // Close the modal
-      setRejectionReason(""); // Reset the rejection reason input
+      // setIsRejectModalVisible(false); // Close the modal
+      // setRejectionReason(""); // Reset the rejection reason input
     }
   };
 
@@ -301,7 +311,48 @@ const AdsetCard = ({
   const onCloseDrawer = () => {
     setnewadsDrawerVisible(false);
   };
+  const handleUpdateReason = async () => {
+    const trimmedReason = iconInputValue.trim();
 
+    if (!trimmedReason) {
+      message.error("Rejection reason is required");
+      return;
+    }
+
+    if (trimmedReason === (selectedItem?.rejectionReason || "").trim()) {
+      message.info("No changes detected");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await axios.put(
+        `https://www.testapi.adsgoat.in/api/updateRejectReason/${viewCampaignData.identifier}`,
+        {
+          adsetKey: adsetKey,
+          adId: selectedItem?.Addid || selectedItem?.id,
+          reason: trimmedReason,
+          username: userdetails?.userName
+        },
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+      message.success("Rejection reason updated");
+      setIsIconModalOpen(false);
+      setIconInputValue("");
+      setSelectedItem(null);
+      changeRRefrst();
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to update reason");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Card
       bordered={false}
@@ -634,7 +685,7 @@ const AdsetCard = ({
 
                           {/* Title */}
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 12, fontWeight: "bold",  }}>
+                            <div style={{ fontSize: 12, fontWeight: "bold", }}>
                               {item?.AddName || "Consumer finds"}
                             </div>
                             <div style={{ fontSize: 12, color: "#888" }}>
@@ -1001,7 +1052,11 @@ const AdsetCard = ({
                               fontWeight: "bold",
                             }}
                           >
-                            <Tooltip title={item.rejectionReason}>
+                            <Tooltip title={item.rejectionReason} overlayInnerStyle={{
+                              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                              color: theme === "dark" ? "#ffffff" : "#000000",
+
+                            }}>
                               <MessageOutlined style={{ marginRight: "5px" }} />
                             </Tooltip>
                             <p style={{ margin: 0 }}>
@@ -1088,7 +1143,7 @@ const AdsetCard = ({
 
 
                           <div style={{ flex: "1" }}>
-                            <div style={{ fontWeight: "bold", fontSize: "12px", maxWidth: "140px",wordBreak: "break-word",overflowWrap: "anywhere", }}>
+                            <div style={{ fontWeight: "bold", fontSize: "12px", maxWidth: "140px", wordBreak: "break-word", overflowWrap: "anywhere", }}>
                               {item?.AddName || "Consumer finds"}
                             </div>
                             <div
@@ -1135,8 +1190,6 @@ const AdsetCard = ({
                               transform: 'scale(0.8)',
                             }}
                           />
-
-
                           {/* <Tooltip title="View Ad History">
                             <HistoryOutlined
                               style={{
@@ -1184,7 +1237,7 @@ const AdsetCard = ({
                             style={{
                               width: "100%",
                               height: "100%",
-                              objectFit: "cover",
+                              objectFit: "contain",
                             }}
                           >
                             <source src={item?.filename} type="video/mp4" />
@@ -1197,7 +1250,7 @@ const AdsetCard = ({
                             style={{
                               width: "100%",
                               height: "100%",
-                              objectFit: "cover",
+                              objectFit: "contain",
                             }}
                           />
                         ) : (
@@ -1429,8 +1482,16 @@ const AdsetCard = ({
                                 fontWeight: "bold",
                               }}
                             >
-                              <Tooltip title={item.rejectionReason}>
-                                <MessageOutlined style={{ marginRight: "5px" }} />
+                              <Tooltip title={item.rejectionReason} overlayInnerStyle={{
+                                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                color: theme === "dark" ? "#ffffff" : "#000000",
+
+                              }}>
+                                <MessageOutlined style={{ marginRight: "5px" }} onClick={() => {
+                                  setSelectedItem(item);
+                                  setIconInputValue(item.rejectionReason || "");
+                                  setIsIconModalOpen(true);
+                                }} />
                               </Tooltip>
                               <p style={{ margin: 0 }}>
                                 <CloseCircleOutlined style={{ marginLeft: "5px" }} />
@@ -1438,13 +1499,33 @@ const AdsetCard = ({
                               </p>
                             </div>
                           )}
+
                         </div>
                       </div>
                     </Card>
+
                   </Col>
                 )
                 // </div>
               })}
+              <Modal
+                title="Update Rejection Reason"
+                open={isIconModalOpen}
+                onOk={handleUpdateReason}
+                onCancel={() => {
+                  setIsIconModalOpen(false);
+                  setIconInputValue("");
+                  setSelectedItem(null);
+                }}
+
+              >
+                <Input.TextArea
+                  placeholder="Enter rejection reason"
+                  value={iconInputValue}
+                  onChange={(e) => setIconInputValue(e.target.value)}
+                  rows={4}
+                />
+              </Modal>
               {!restrictedEmails.includes(userdetails.email) && (
                 <Col span={12} style={{ flex: "0 0 auto" }}>
                   <Card
@@ -1499,7 +1580,13 @@ const AdsetCard = ({
           value={rejectionReason}
           onChange={(e) => setRejectionReason(e.target.value)}
           rows={4}
+          rules={[{ required: true, message: "Please enter rejection reason" }]}
         />
+        {error && (
+          <div style={{ color: "red", marginTop: 5 }}>
+            {error}
+          </div>
+        )}
       </Modal>
       {adsetToEdit && (
         <AdsetComponent
@@ -1548,18 +1635,25 @@ const AdsetCard = ({
           network={network}
         />
       </Modal>
-      <Drawer
+      <Modal
         title="Edit ad"
-        width={"100%"}
-        onClose={() => {
+        onCancel={() => {
           setIsDrawerVisible(false); // Close the drawer
           setSelectedItem(null); // Reset the selected item to avoid showing old data
         }}
+        footer={null}
+        centered
+        width="80%"
         visible={isDrawerVisible}
         bodyStyle={{ paddingBottom: 80 }}
-        style={{
-          backgroundColor: theme === "dark" ? "#333" : "#fff",
-          color: theme === "dark" ? "#fff" : "#000",
+        styles={{
+          body: {
+            height: '80vh',
+            overflowY: 'auto',
+            padding: 10,
+            backgroundColor: theme === 'dark' ? '#333' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#000',
+          },
         }}
       >
         {selectedItem && (
@@ -1575,7 +1669,7 @@ const AdsetCard = ({
           />
         )}{" "}
         {/* Pass selected item data to the Editads component */}
-      </Drawer>
+      </Modal>
     </Card>
   );
 };
@@ -1593,6 +1687,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
   const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
   const [imagehash, setimagehash] = useState("");
   const [newAdsetDrawerVisible, setNewAdsetDrawerVisible] = useState(false);
+  const [error, setError] = useState("");
 
   console.log(userdetails, "userdetails");
   console.log(record, "record in expanded adsets content");
@@ -1894,6 +1989,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
           value={rejectionReason}
           onChange={(e) => setRejectionReason(e.target.value)}
           rows={4}
+          rules={[{ required: true, message: "Please enter rejection reason" }]}
         />
       </Modal>
     </>

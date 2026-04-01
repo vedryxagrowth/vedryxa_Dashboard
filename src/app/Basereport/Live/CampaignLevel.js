@@ -1694,16 +1694,30 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 filetype={selectedCreative.filetype}
                                             />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
-                                                <div
-                                                    style={{
-                                                        fontWeight: 600,
-                                                        fontSize: 10,
-                                                        color: theme === "dark" ? "#e4e6eb" : "#050505",
-                                                    }}
-                                                >
-                                                    {selectedCreative.adName || "-"}
-                                                </div>
+                                                <div style={{ display: "flex" }}>
+                                                    <div
+                                                        style={{
+                                                            fontWeight: 600,
+                                                            fontSize: 10,
+                                                            color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                        }}
+                                                    >
+                                                        {selectedCreative.adName || "-"}
+                                                    </div>
+                                                    <div>
+                                                        {idx === 0 && adLevelCreatives.length > 0 && (
+                                                            <EditOutlined
+                                                                style={{ cursor: "pointer", marginLeft: 8 }}
+                                                                onClick={() => {
+                                                                    const campaign = adLevelCreatives[0];
 
+                                                                    const href = `/Campaigns?campaignId=${currentCampaignId}&account=${currentAccount}&network=${newRevenuePratner}`;
+                                                                    window.open(href, "_blank", "noopener,noreferrer");
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
                                                 <div
                                                     style={{
                                                         fontSize: 10,
@@ -1874,7 +1888,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         </Modal>
                         <LinkOutlined
                             onClick={() => {
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}-BaseReport`;
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                             style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}

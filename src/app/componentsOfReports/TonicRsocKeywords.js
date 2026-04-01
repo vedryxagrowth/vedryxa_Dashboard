@@ -4,8 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import {  Input, Button, Result, Modal, message } from 'antd';
-import {   SmileOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Input, Button, Result, Modal, message } from 'antd';
+import { SmileOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import 'antd/dist/reset.css';
 import '../globals.css';
@@ -36,7 +36,7 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
-    "FB_TonicRsoc":"Facebook_TonicRsoc"
+    "FB_TonicRsoc": "Facebook_TonicRsoc"
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -55,9 +55,9 @@ const selectTimezone = {
 };
 
 
-const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus,changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
-    const {theme} = useTokenContext();
-    const {apiClient} = useTokenContext();
+const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems }) => {
+    const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
     const [tonicKeywordData, setTonicKeywordData] = useState([]);
@@ -65,7 +65,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [fixedTonic, setFixedTonic] = useState([]);
-    
+
 
     const [apiStatus, setApiStatus] = useState(false);
 
@@ -82,8 +82,8 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
 
     const oneTimeFetch = useRef(true);
 
-    const memorizedColumnDef4 = useMemo(()=> columnDefs.current, [columnDefs.current]);
-    const memorizedTonicKeywordsData = useMemo(()=>tonicKeywordData.filter((each) => {
+    const memorizedColumnDef4 = useMemo(() => columnDefs.current, [columnDefs.current]);
+    const memorizedTonicKeywordsData = useMemo(() => tonicKeywordData.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
         return (
@@ -92,7 +92,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ),[tonicKeywordData, inputValue]);
+    ), [tonicKeywordData, inputValue]);
 
     const onBtExport = (gridRef, text) => {
         // const Details = {
@@ -132,6 +132,19 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
         sortable: true, // Enable sorting
         unSortIcon: true,
         headerClass: 'ag-center-header',
+        field: 'campaignname',          // 👈 THIS is the real built-in fix
+        filter: 'agTextColumnFilter',
+           // filter: "agGroupColumnFilter",
+        // filter: 'agTextColumnFilter',
+        // filterValueGetter: (params) => {
+        //     if (params.node.group) {
+        //         return (params.node.key || '').toString().toLowerCase();
+        //     }
+        //     return (params.data?.campaignname || '').toString().toLowerCase();
+        // },
+        // filterParams: {
+        //     filter: 'agTextColumnFilter'
+        // },
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -158,8 +171,8 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total';
+                if (params.node.footer || params.node.rowPinned === 'bottom') {
+                    return '';
                 }
 
                 const firstColumnValue = params.node.key;  // campaign name
@@ -282,23 +295,23 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                             adsetid: adsetid,
                             campaignid: campaignid,
                         };
-                
+
                         // Call the backend API to delete the comment
                         const response = await apiClient.post('/Comments/delete', payload);
-                
+
                         if (response.status === 200 || response.status === 201) {
                             // Remove the comment from the local state
                             // const updatedComments = campaignComments.filter(
                             //     (comment) => comment.campaignname !== firstColumnValue
                             // );
-                
+
                             // // Update the state with the updated comments
                             // setCampaignComments(updatedComments);
                             refreshComments(newaccount);
-                
+
                             // Refresh the table or any other UI component
                             // changeRRefrst();
-                
+
                             message.success('Comment deleted successfully!');
                             setIsModalVisibles(false); // Close the popup
                         } else {
@@ -331,7 +344,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                             message.success("New comment added successfully!");
                         }
 
-                        
+
                         setIsModalVisibles(false);
                     } catch (error) {
                         console.error('Error while submitting comment:', error);
@@ -365,7 +378,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                 comment: comment || ''
                             });
                             // changeRRefrst();
-                            if(response.status ===200 || response.status === 201){
+                            if (response.status === 200 || response.status === 201) {
                                 refreshComments(newaccount);
                             }
 
@@ -378,7 +391,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                 adsetid: adsetid
                             });
                             // changeRRefrst();
-                            if(response.status ===200 || response.status === 201){
+                            if (response.status === 200 || response.status === 201) {
                                 refreshComments(newaccount);
                             }
 
@@ -460,7 +473,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                     if (status === 'PAUSED') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}  className='black-icon-pause' />
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} className='black-icon-pause' />
                                             </Tooltip>
                                         );
                                     } else if (status === 'ACTIVE') {
@@ -494,7 +507,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: '#4CAF50' }} />
+                                <MessageOutlined className={theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: '#4CAF50' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
@@ -522,30 +535,30 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                                    <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                    <div style={{ display: 'flex', flexDirection: "column" }}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight: "bold" }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight: "bold" }}>
                                             {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
                                         </span>
 
                                     </div>
                                     <div>
-                                    <Button
-                                        key="delete"
-                                        type="danger"
-                                        onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
-                                    >
-                                        Delete
-                                    </Button>
-                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
-                                        Cancel
-                                    </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
-                                        Ok
-                                    </Button>
+                                        <Button
+                                            key="delete"
+                                            type="danger"
+                                            onClick={handleDelete}
+                                            style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        >
+                                            Delete
+                                        </Button>
+                                        <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
+                                            Cancel
+                                        </Button>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                            Ok
+                                        </Button>
                                     </div>
                                 </div>
                             ]}
@@ -580,7 +593,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
         return hours.length > 0 ? Math.max(...hours) : null;
     }
     const functionCall6 = async () => {
-        try { 
+        try {
             setTonicKeywordLoading(true);
             const fetchData = await apiClient.get(`/TonicKeywords?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}&collectionName=Facebook_TonicRsoc_Keywords`);
             const mainData = fetchData.data;
@@ -601,6 +614,8 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                     const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
                     const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
                     const conversions = eachData.conversions !== undefined ? eachData.conversions : '0';
+                    const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
+                    const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
                     rpc = !isNaN(rpc) ? rpc : 0;
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
@@ -634,7 +649,9 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                             adid: "",
                             adname: "",
                             keyword: eachData.keyword,
-                            from:'',
+                            from: campaign_date?.start ? campaign_date?.start : "",
+                            to: campaign_date?.end ? campaign_date?.end : "",
+                            category: category?.category ? category.category : "",
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
@@ -654,6 +671,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
             setTonicFixedFooter([
                 {
                     campaignName: 'Total',
+                    campaignname: "",
                     spend: fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
                     revenue: fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
                     profit: fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
@@ -692,10 +710,10 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                 }
             ]);
             fetchData.status === 200 && setApiStatus(false);
-            
+
         } catch (error) {
             setTonicKeywordData([]);
-            setTonicKeywordLoading(false); 
+            setTonicKeywordLoading(false);
             setApiStatus(true);
             // console.log(error);
             // setLoading4(false); // Hide loading spinner in case of error
@@ -718,11 +736,11 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
         suppressHeaderContextMenu: false,
     };
     const onCellClicked = (event) => {
-        
+
         if (event.colDef.field === 'adsetname') {
             const accountNumber =
-            event.data?.accountNumber ??
-            (event.node?.group ? event.node.allLeafChildren?.[0]?.data?.accountNumber : undefined);
+                event.data?.accountNumber ??
+                (event.node?.group ? event.node.allLeafChildren?.[0]?.data?.accountNumber : undefined);
 
             const value = event.value;
             if (value !== undefined) {
@@ -741,13 +759,13 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
         // }
 
     };
-    
+
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
         params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
-    
+
     // const onGridReady = (params, gridId, gridRef) => {
     //     gridRef.current = params;
     //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
@@ -823,20 +841,20 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
     const onCellKeyDown = (params) => {
         if (params.event.ctrlKey && params.event.key === "c") {
             params.event.preventDefault(); // Prevent default copy behavior
-    
+
             // ✅ Ensure `selectedCells` is not empty
             if (!selectedCells.length) return;
-    
+
             // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
             const copiedText = selectedCells
                 .map(({ rowIndex, columns }) => {
                     if (!columns || !Array.isArray(columns)) {
                         // ✅ Handle case where only one cell is selected
-                        const singleColId = selectedCells[0]?.colId; 
+                        const singleColId = selectedCells[0]?.colId;
                         const row = params.api.getDisplayedRowAtIndex(rowIndex);
                         return row && singleColId ? params.api.getValue(singleColId, row) : "";
                     }
-                    
+
                     // ✅ Multi-cell copying logic
                     return columns
                         .map((colId) => {
@@ -846,14 +864,14 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                         .join("\t");
                 })
                 .join("\n"); // Each row on a new line
-    
+
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
                 console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
-    
+
             // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
             params.api.copySelectedRangeToClipboard();
         }
@@ -868,15 +886,15 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
             handleReFetchData();
         }
     }
-    , [refreshpage]);
+        , [refreshpage]);
 
     useEffect(() => {
-        if(oneTimeFetch.current){
+        if (oneTimeFetch.current) {
             functionCall6();
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
-    return(
+    return (
         <div>
             <div style={contentStyle}>
                 {tonicKeywordLoading === true ? (
@@ -917,7 +935,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                 window.__top5 = params.api;
                                 // call your existing handler passing the grid id and ref
                                 onGridReady(params, 'grid10', gridRef5);
-                              }}
+                            }}
                             // onGridReady={(params) => onGridReady(params, 'grid5', gridRef5)}
                             gridOptions={{
                                 ...gridOptions3,
@@ -945,26 +963,26 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                 const isSelected = selectedCells.some(
                                     (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
                                 );
-                        
+
                                 // ✅ Ensure first cell inside a group is highlighted
                                 const isFirstSelected = firstSelectedCell &&
                                     firstSelectedCell.rowIndex === params.node.rowIndex &&
                                     firstSelectedCell.colId === params.column.getId();
-                        
+
                                 return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
                             }}
                             onFilterChanged={(params) => {
                                 try {
                                     const api = params?.api;
                                     const filteredData = [];
-                            
+
                                     // Collect filtered data
                                     api.forEachNodeAfterFilterAndSort((node) => {
                                         if (!node.rowPinned) {
                                             filteredData.push(node.data);
                                         }
                                     });
-                            
+
                                     const fieldValueFilter = (field, value) => {
                                         if (!filteredData || !Array.isArray(filteredData)) {
                                             console.error("Filtered data is invalid or not an array:", filteredData);
@@ -975,6 +993,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                     const updatedFooter = [
                                         {
                                             adsetName: 'Total',
+                                            campaignname: "",
                                             spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2),
                                             revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2),
                                             profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2),
@@ -1017,10 +1036,11 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                                             ).toFixed(2)}%`,
                                         },
                                     ];
-                            
+
                                     // Set updated footer data
-                                    setFixedTonic(updatedFooter);
-                            
+                                    // setFixedTonic(updatedFooter);
+                                    setTonicFixedFooter(updatedFooter);
+
                                     // Example field-based filtering logic with error handling
                                     try {
                                         const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
@@ -1035,13 +1055,13 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
                         />
                     </div>
                 ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                        {apiStatus === true ? 
-                            <Result
-                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                // icon={<SmileOutlined />}
-                                title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                                extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                        /> : 
+                    {apiStatus === true ?
+                        <Result
+                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                            // icon={<SmileOutlined />}
+                            title={`API failed to fetch the data. Please click retry button to fetch the data`}
+                            extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+                        /> :
                         (startDate !== endDate ? <Result
                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                             icon={<SmileOutlined />}

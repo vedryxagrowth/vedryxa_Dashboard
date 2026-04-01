@@ -728,23 +728,23 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     return arr;
                 })();
                 setCamapignlevelstatus(updatedCampaignLevelStatus);
-                if (campaignStatusFilter !== "All") {
-                    const adsetStatusMap = new Map(
-                        updatedCampaignLevelStatus.flatMap(campaign =>
-                            (campaign.adsets || []).map(adset => [
-                                String(adset.adset_id),
-                                adset.status?.toUpperCase()
-                            ])
-                        )
-                    );
+                // if (campaignStatusFilter !== "All") {
+                //     const adsetStatusMap = new Map(
+                //         updatedCampaignLevelStatus.flatMap(campaign =>
+                //             (campaign.adsets || []).map(adset => [
+                //                 String(adset.adset_id),
+                //                 adset.status?.toUpperCase()
+                //             ])
+                //         )
+                //     );
 
-                    const filteredRowObjects = newRowDataForFilter.current.filter(row =>
-                        adsetStatusMap.get(String(row.adsetid)) ===
-                        campaignStatusFilter?.toUpperCase()
-                    );
+                //     const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                //         adsetStatusMap.get(String(row.adsetid)) ===
+                //         campaignStatusFilter?.toUpperCase()
+                //     );
 
-                    setdailyData(filteredRowObjects);
-                }
+                //     setdailyData(filteredRowObjects);
+                // }
                 // setCamapignlevelstatus(prev => {
                 //     let arr = [...prev];
 
@@ -1441,23 +1441,23 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                     : item
                             );
                             setCamapignlevelstatus(updatedCampaignLevelStatus);
-                            if (campaignStatusFilter !== "All") {
-                                const adsetStatusMap = new Map(
-                                    updatedCampaignLevelStatus.flatMap(campaign =>
-                                        (campaign.adsets || []).map(adset => [
-                                            String(adset.adset_id),
-                                            adset.status?.toUpperCase()
-                                        ])
-                                    )
-                                );
+                            // if (campaignStatusFilter !== "All") {
+                            //     const adsetStatusMap = new Map(
+                            //         updatedCampaignLevelStatus.flatMap(campaign =>
+                            //             (campaign.adsets || []).map(adset => [
+                            //                 String(adset.adset_id),
+                            //                 adset.status?.toUpperCase()
+                            //             ])
+                            //         )
+                            //     );
 
-                                const filteredRowObjects = newRowDataForFilter.current.filter(row =>
-                                    adsetStatusMap.get(String(row.adsetid)) ===
-                                    campaignStatusFilter?.toUpperCase()
-                                );
+                            //     const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                            //         adsetStatusMap.get(String(row.adsetid)) ===
+                            //         campaignStatusFilter?.toUpperCase()
+                            //     );
 
-                                setdailyData(filteredRowObjects);
-                            }
+                            //     setdailyData(filteredRowObjects);
+                            // }
 
                             // setCamapignlevelstatus(prevStatus =>
                             //     prevStatus.map(item =>
@@ -2697,11 +2697,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                     objectFit: "cover",
                                                 }}
                                             /> */}
-                                           <CreativeAvatar
+                                            <CreativeAvatar
                                                 url={selectedCreative.image}
                                                 filetype={selectedCreative.filetype}
                                             />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
+                                                <div style={{display:"flex"}}>
                                                 <div
                                                     style={{
                                                         fontWeight: 600,
@@ -2711,7 +2712,20 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 >
                                                     {selectedCreative.adName || "-"}
                                                 </div>
+                                                <div>
+                                                    {idx === 0 && adLevelCreatives.length > 0 && (
+                                                        <EditOutlined
+                                                            style={{ cursor: "pointer", marginLeft: 8 }}
+                                                            onClick={() => {
+                                                                const campaign = adLevelCreatives[0];
 
+                                                                const href = `/Campaigns?campaignId=${currentCampaignId}&account=${currentAccount}&network=${newRevenuePratner}`;
+                                                                window.open(href, "_blank", "noopener,noreferrer");
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+                                                </div>
                                                 <div
                                                     style={{
                                                         fontSize: 10,
@@ -2745,7 +2759,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                             display: "block",
                                         }}
                                     /> */}
-                                     <CreativeMedia
+                                    <CreativeMedia
                                         url={selectedCreative.image}
                                         filetype={selectedCreative.filetype}
                                     />
@@ -3120,7 +3134,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                     const spend = parseFloat(eachData.spend);
                     const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
-                    const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
+                    const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
                     const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
                     const adsetObjectStatus = Camapignlevelstatus
                         .find(item =>

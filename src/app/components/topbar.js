@@ -182,7 +182,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   // ];
 
   const onClickNotificationView = async (item, key, email) => {
-    const notificationData = await apiClient.put('https://prodapis.adsgoat.in/Notifications/Viewed', { email, key, item }, {
+    const notificationData = await apiClient.put('/Notifications/Deleted', { email, key, item }, {
       headers: {
         Authorization: localStorage.getItem('token'),
         accept: 'application/json',
@@ -208,7 +208,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     e.stopPropagation();
 
     try {
-      await apiClient.put('https://prodapis.adsgoat.in/Notifications/ViewedAll', {
+      await apiClient.put('/Notifications/DeleteAll', {
         email: userdetails?.email
       }, {
         headers: {

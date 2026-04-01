@@ -701,23 +701,23 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     return arr;
                 })();
                 setCamapignlevelstatus(updatedCampaignLevelStatus);
-                if (campaignStatusFilter !== "All") {
-                    const adsetStatusMap = new Map(
-                        updatedCampaignLevelStatus.flatMap(campaign =>
-                            (campaign.adsets || []).map(adset => [
-                                String(adset.adset_id),
-                                adset.status?.toUpperCase()
-                            ])
-                        )
-                    );
+                // if (campaignStatusFilter !== "All") {
+                //     const adsetStatusMap = new Map(
+                //         updatedCampaignLevelStatus.flatMap(campaign =>
+                //             (campaign.adsets || []).map(adset => [
+                //                 String(adset.adset_id),
+                //                 adset.status?.toUpperCase()
+                //             ])
+                //         )
+                //     );
 
-                    const filteredRowObjects = newRowDataForFilter.current.filter(row =>
-                        adsetStatusMap.get(String(row.adsetid)) ===
-                        campaignStatusFilter?.toUpperCase()
-                    );
+                //     const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                //         adsetStatusMap.get(String(row.adsetid)) ===
+                //         campaignStatusFilter?.toUpperCase()
+                //     );
 
-                    setRowData(filteredRowObjects);
-                }
+                //     setRowData(filteredRowObjects);
+                // }
 
 
                 // setCamapignlevelstatus(prev => {
@@ -1342,23 +1342,23 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                     : item
                             );
                             setCamapignlevelstatus(updatedCampaignLevelStatus);
-                            if (campaignStatusFilter !== "All") {
-                                const adsetStatusMap = new Map(
-                                    updatedCampaignLevelStatus.flatMap(campaign =>
-                                        (campaign.adsets || []).map(adset => [
-                                            String(adset.adset_id),
-                                            adset.status?.toUpperCase()
-                                        ])
-                                    )
-                                );
+                            // if (campaignStatusFilter !== "All") {
+                            //     const adsetStatusMap = new Map(
+                            //         updatedCampaignLevelStatus.flatMap(campaign =>
+                            //             (campaign.adsets || []).map(adset => [
+                            //                 String(adset.adset_id),
+                            //                 adset.status?.toUpperCase()
+                            //             ])
+                            //         )
+                            //     );
 
-                                const filteredRowObjects = newRowDataForFilter.current.filter(row =>
-                                    adsetStatusMap.get(String(row.adsetid)) ===
-                                    campaignStatusFilter?.toUpperCase()
-                                );
+                            //     const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                            //         adsetStatusMap.get(String(row.adsetid)) ===
+                            //         campaignStatusFilter?.toUpperCase()
+                            //     );
 
-                                setRowData(filteredRowObjects);
-                            }
+                            //     setRowData(filteredRowObjects);
+                            // }
 
                             // setCamapignlevelstatus(prevStatus =>
                             //     prevStatus.map(item =>
@@ -2531,16 +2531,30 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                 filetype={selectedCreative.filetype}
                                             />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
-                                                <div
-                                                    style={{
-                                                        fontWeight: 600,
-                                                        fontSize: 10,
-                                                        color: theme === "dark" ? "#e4e6eb" : "#050505",
-                                                    }}
-                                                >
-                                                    {selectedCreative.adName || "-"}
-                                                </div>
+                                                <div style={{ display: "flex" }}>
+                                                    <div
+                                                        style={{
+                                                            fontWeight: 600,
+                                                            fontSize: 10,
+                                                            color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                        }}
+                                                    >
+                                                        {selectedCreative.adName || "-"}
+                                                    </div>
+                                                    <div>
+                                                        {idx === 0 && adLevelCreatives.length > 0 && (
+                                                            <EditOutlined
+                                                                style={{ cursor: "pointer", marginLeft: 8 }}
+                                                                onClick={() => {
+                                                                    const campaign = adLevelCreatives[0];
 
+                                                                    const href = `/Campaigns?campaignId=${currentCampaignId}&account=${currentAccount}&network=${newRevenuePratner}`;
+                                                                    window.open(href, "_blank", "noopener,noreferrer");
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
                                                 <div
                                                     style={{
                                                         fontSize: 10,
@@ -2982,7 +2996,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         c => c.campaignname === eachData.campaign_name
                             && String(c.Account) === String(eachData.accountNumber) // ✅ per-account
                     );
-                    const category = campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber);
+                    const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
                     const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
                     const adsetObjectStatus = Camapignlevelstatus
                         .find(item =>

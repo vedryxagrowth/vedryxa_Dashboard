@@ -5,6 +5,8 @@ import {
   CheckCircleFilled,
   CloseCircleFilled,
   HistoryOutlined,
+  WalletOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import {
   Table,
@@ -29,7 +31,11 @@ import {
   Skeleton,
   Tabs,
   Popconfirm,
-  Checkbox
+  Checkbox,
+  Popover,
+  Steps,
+  Tree,
+  Timeline
 } from "antd";
 import {
   EditOutlined,
@@ -72,9 +78,11 @@ import StickyBox from "react-sticky-box";
 import { FaClone, FaEye, FaPenToSquare, FaTrashCan, FaRegCommentDots } from "react-icons/fa6";
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
 import { IoMdCreate } from "react-icons/io";
+import { useSearchParams } from "next/navigation";
 const CampaignHistoryModal = React.lazy(() => import('../Campaigns/camp-components/campaignHistory'));
 
 import { Token } from "aws-sdk";
+import { AccountBalance } from "@mui/icons-material";
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
 
@@ -105,11 +113,15 @@ const App = () => {
   if (userdetails?.role === "Revenue_Partner") {
     redirect("/Dashboard");
   }
+  const searchParams = useSearchParams();
+  const networkFromUrl = searchParams.get("network");
+  const accountFromUrl = searchParams.get("account");
+  const campaignIdFromUrl = searchParams.get("campaignId");
   const { adAccounts } = userdetails || {};
   const [hovered, setHovered] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationSize, setPaginationSize] = useState(10);
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(campaignIdFromUrl ? campaignIdFromUrl : "");
   const [filteredData, setFilteredData] = useState([]);
   const [sendInputToApi, setSendInputToApi] = useState("");
   const [cdrawerVisible, setDrawerVisible] = useState(false);
@@ -141,8 +153,8 @@ const App = () => {
   const [refrst, setRefrst] = useState(false);
   const [options, setOptions] = useState([]);
   const [createcamselectedacc, setcreatecamselectedacc] = useState("");
-  const [selectedKey, setSelectedKey] = useState(null);
-  const [selectedValue, setSelectedValue] = useState([]);
+  const [selectedKey, setSelectedKey] = useState(networkFromUrl ? networkFromUrl : null);
+  const [selectedValue, setSelectedValue] = useState(accountFromUrl ? [accountFromUrl] : []);
   const [valueOptions, setValueOptions] = useState([]);
   const [error, setError] = useState(false);
   const { theme } = useTokenContext();
@@ -187,15 +199,34 @@ const App = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
   const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
-
+  const [accountBalance, setAccountBalance] = useState("");
+  const [accountRemaining, setAccountRemaining] = useState("");
+  const [adDetails, setAdDetails] = useState({});
+  const [adsCount, setAdsCount] = useState({});
+  const [loadingAd, setLoadingAd] = useState(null);
   console.log(checkedRowRecords);
-
   // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
     setCampaignStatusFilter(key);
   };
+  // useEffect(() => {
+  //   const networkFromUrl = searchParams.get("network");
+  //   const accountFromUrl = searchParams.get("account");
+  //   const campaignIdFromUrl = searchParams.get("campaignId");
 
+  //   if (networkFromUrl) {
+  //     setSelectedKey(networkFromUrl);
+  //   }
 
+  //   if (accountFromUrl) {
+  //     setSelectedValue([accountFromUrl]);
+  //   }
+
+  //   if (campaignIdFromUrl) {
+  //     setSearchInput(campaignIdFromUrl);
+  //   }
+  //    setIsReady(true);
+  // }, []);
   useEffect(() => {
     const fetchNetworksData = async () => {
       try {
@@ -254,6 +285,39 @@ const App = () => {
     "shravan.k@winkleads.com",
     "abhynay.k@winkleads.com",
   ];
+  const handleIconClick = async (identifier) => {
+    if (!identifier) return;
+    if (adDetails[identifier]) return;
+    setLoadingAd(identifier);
+    try {
+      const response = await fetch("https://www.testapi.adsgoat.in/api/getAdDetails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ identifier }),
+      });
+
+      const data = await response.json();
+
+      if (data?.data) {
+        setAdDetails((prev) => ({
+          ...prev,
+          [identifier]: data.data,
+        }));
+
+        setAdsCount((prev) => ({
+          ...prev,
+          [identifier]: data.totalAds,
+        }));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingAd(null);
+    }
+  };
 
   const rangePresets = [
     {
@@ -696,7 +760,41 @@ const App = () => {
       setError("Failed to fetch draft data.");
     }
   };
+  const fetchAccountDetails = async (accounts) => {
+    try {
+      const token = localStorage.getItem("token");
+      const formattedAccounts = Array.isArray(accounts)
+        ? accounts
+        : [accounts];
 
+      const response = await fetch("https://www.testapi.adsgoat.in/api/getAccountDetails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify({
+          accounts: formattedAccounts,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) return;
+      const totalBalance = data.data
+        .filter(item => item.success)
+        .reduce((sum, item) => sum + Number(item.data.balance), 0);
+
+      const totalRemaining = data.data
+        .filter(item => item.success)
+        .reduce((sum, item) => sum + Number(item.data.remaining_amount), 0);
+
+      setAccountBalance(totalBalance);
+      setAccountRemaining(totalRemaining)
+
+    } catch (error) {
+      console.error("Error fetching account details:", error);
+    }
+  };
   // Handle date range change
   const handleChange = (dates) => {
     if (dates && dates.length === 2) {
@@ -734,9 +832,9 @@ const App = () => {
 
   const handleApply = () => {
     if (selectedValue && startDate && endDate) {
-
       // fetchData(selectedValue, startDate, endDate);
-      fetchLauncherComments(selectedValue)
+      campaignIdFromUrl === searchInput && setSearchInput("");
+      fetchLauncherComments(selectedValue);
       fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
       setAccountChanged(false);
 
@@ -745,6 +843,14 @@ const App = () => {
       message.warning("Please select project, account and date range");
     }
   };
+  const handleAccountBalance = () => {
+    if (selectedValue) {
+      fetchAccountDetails(selectedValue);
+    }
+    else {
+      message.warning("Please select project, account and date range");
+    }
+  }
 
   // useEffect(() => {
   //   if (!selectedValue || !startDate || !endDate) return;
@@ -765,10 +871,24 @@ const App = () => {
     // fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
     allowFetchOnSelectRef.current = false;
   }, [selectedValue]);
+  // useEffect(() => {
+  //   if (!selectedValue || !startDate || !endDate) return;
+  //   fetchLauncherComments(selectedValue);
+  //   fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+  // }, [refrst]);
+
   useEffect(() => {
-    if (!selectedValue || !startDate || !endDate) return;
+    if (!selectedKey || !selectedValue || !startDate || !endDate) return;
+
     fetchLauncherComments(selectedValue);
-    fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate);
+
+    fetchMultipleAdsetCampaigns(
+      selectedValue,
+      startDate,
+      endDate,
+      searchInput || ""
+    );
+
   }, [refrst]);
 
   // Handle value change
@@ -869,7 +989,11 @@ const App = () => {
   const [useaproval, setuseraproval] = useState(null);
   const [isModalVisibleForAdsets, setIsModalVisibleForAdsets] = useState(false);
   const [useaprovalForAdsets, setuseraprovalForAdsets] = useState(null);
+  const [userdisaprovalForAdsets, setuserdisaprovalForAdsets] = useState(null);
+  const [isModalVisibleForAdsetsdisapprove, setIsModalVisibleForAdsetsdisapprove] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [rejectedReason, setRejectionReason] = useState("");
+  const [reasonError, setReasonError] = useState("");
 
   const handleUpdateApproval = async (id, newApprovalValue) => {
     try {
@@ -974,7 +1098,57 @@ const App = () => {
       // Handle error
     }
   };
+  const handleUpdateDisapprovalForAdsets = async (id) => {
+    try {
+      const response = await fetch(
+        `https://www.testapi.adsgoat.in/api/newupdateDisapproval/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: localStorage.getItem("token"),
+          },
+          body: JSON.stringify({
+            reason: rejectedReason,
+            RejectedBy: userdetails?.userName,
+            datetime: moment()
+              .tz("Asia/Kolkata")
+              .format("YYYY-MM-DD HH:mm [IST]"),
+          }),
+        }
+      );
 
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setCampaignData((prevData) =>
+          prevData.map((record) =>
+            record.identifier === id
+              ? {
+                ...record,
+                Approval: "Rejected",
+                // RejectedBy: userdetails?.userName,
+                // RejectedDate: moment().format("YYYY-MM-DD HH:mm"),
+              }
+              : record
+          )
+        );
+        message.open({
+          type: "success",
+          content: "Disapproval confirmed",
+          className: theme === "dark" ? "dark-message" : "",
+        });
+
+        setIsModalVisibleForAdsetsdisapprove(false);
+        changeRRefrst();
+
+      } else {
+        console.error("Failed to update disapproval");
+      }
+    } catch (error) {
+      console.error("Error updating disapproval:", error);
+    }
+  };
   const handleApproval = (record) => {
     console.log(record, "record");
     setuseraproval(record);
@@ -985,6 +1159,11 @@ const App = () => {
     console.log(record, "record");
     setuseraprovalForAdsets(record);
     setIsModalVisibleForAdsets(true);
+  };
+  const handledisApprovalforAdsets = (record) => {
+    console.log(record, "record");
+    setuserdisaprovalForAdsets(record);
+    setIsModalVisibleForAdsetsdisapprove(true);
   };
 
   const handleOk = async () => {
@@ -1021,7 +1200,24 @@ const App = () => {
       // Handle error
     }
   };
+  const handleOkForAdsetsdisapprove = async () => {
+    try {
+      if (!userdisaprovalForAdsets) return;
+      if (!rejectedReason?.trim()) {
+        setReasonError("Rejection reason is required");
+        return;
+      }
 
+      await handleUpdateDisapprovalForAdsets(
+        userdisaprovalForAdsets.identifier
+      );
+      setIsModalVisibleForAdsetsdisapprove(false);
+      setuserdisaprovalForAdsets(null);
+      setRejectionReason("");
+    } catch (error) {
+      console.error("Error updating disapproval:", error);
+    }
+  };
   const handleOkDeleteDraft = async () => {
     try {
       const response = await axios.delete(
@@ -2241,9 +2437,140 @@ const App = () => {
         <div
           style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         >
-          <span
+          {/* <span
           // onClick={() => handleCampaignNameClick(record)}
-          >{text}</span>
+          >{text}</span> */}
+          <Popover
+            trigger="hover"
+            placement="right"
+            content={
+              <div style={{ width: 320, maxHeight: 420, overflowY: "auto", }}>
+                <Steps
+                  direction="vertical"
+                  size="small"
+                  items={[
+                    record?.createdDate && {
+                      title: <b>Campaign Created</b>,
+                      description: record.createdDate,
+                      status: "finish",
+                    },
+
+
+                    record?.campaignid && {
+                      title: <b>Campaign Launched in Facebook</b>,
+                      description: record.campaignid,
+                      status: "finish",
+                    },
+
+
+                    ...(record?.adsetsWithAds || [])
+                      .map((adset) => {
+                        const adsetError = record?.adsetErrors?.find(
+                          (err) => err.name === adset.adsetName
+                        );
+
+
+                        if (!adset.adsetId && !adsetError) return null;
+
+
+                        return {
+                          title: (
+                            <div
+                              title={adset.adsetName}
+                              style={{
+                                maxWidth: 260,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                fontWeight: "bold"
+                              }}
+                            >
+                              {adsetError
+                                ? `Adset launching failed: ${adset.adsetName}`
+                                : `Adset launched: ${adset.adsetName}`}
+                            </div>
+                          ),
+                          description: (
+                            <div>
+                              {adset.adsetId && (
+                                <div style={{ marginBottom: 6, color: "#888" }}>
+                                  {adset.adsetId}
+                                </div>
+                              )}
+
+
+                              {!adset.adsetId && adsetError && (
+                                <div style={{ color: "red", fontSize: 12 }}>
+                                  Error: {adsetError.error}
+                                </div>
+                              )}
+                              <Steps
+                                direction="vertical"
+                                size="small"
+                                style={{ marginLeft: 10 }}
+                                items={(adset?.ads || []).map((ad, i) => {
+
+
+                                  const adError = record?.adErrorsByAdset?.find(
+                                    (err) =>
+                                      err.adsetKey === adset.key &&
+                                      err.adIndex === i
+                                  );
+                                  if (!ad.adId && !adError) return null;
+                                  return {
+                                    title: (
+                                      <div
+                                        title={ad.adName}
+                                        style={{
+                                          maxWidth: 200,
+                                          whiteSpace: "nowrap",
+                                          overflow: "hidden",
+                                          textOverflow: "ellipsis",
+                                          fontWeight: "bold"
+                                        }}
+                                      >
+                                        {adError
+                                          ? `Ad launching failed: ${ad.adName}`
+                                          : `Ad launched: ${ad.adName}`}
+                                      </div>
+                                    ),
+
+
+                                    description: (
+                                      <>
+                                        {ad.adId && (
+                                          <div style={{ fontSize: 12, color: "#888" }}>
+                                            {ad.adId}
+                                          </div>
+                                        )}
+
+
+                                        {adError && (
+                                          <div style={{ color: "red", fontSize: 12 }}>
+                                            Error: {adError.error}
+                                          </div>
+                                        )}
+                                      </>
+                                    ),
+
+
+                                    status: adError ? "error" : "finish",
+                                  };
+                                })}
+                              />
+                            </div>
+                          ),
+                          status: adset.adsetId ? "finish" : "error",
+                        };
+                      })
+                      .filter(Boolean),
+                  ].filter(Boolean)}
+                />
+              </div>
+            }
+          >
+            <span>{text}</span>
+          </Popover>
           {record.reports && (
             <span
               style={{
@@ -2629,6 +2956,89 @@ const App = () => {
                 {record.adsetCount}
               </div>
             </Tooltip>
+            {/* {record.fbstatus !== "No-Live" && (
+              <Tooltip
+                title={
+                  loadingAd === record.identifier ? (
+                    "Loading..."
+                  ) : adDetails[record.identifier] ? (
+                    <div style={{ minWidth: 260, maxHeight: 300, overflowY: "auto" }}>
+                      {Object.values(adDetails[record.identifier]).map(
+                        (adset, index) => (
+                          <div key={index} style={{ marginBottom: 12 }}>
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                marginBottom: 6,
+                                maxWidth: 220,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                              title={adset.AdsetName}
+                            >
+                              {adset.AdsetName}
+                            </div>
+                            {adset.ads?.map((ad, i) => (
+                              <div
+                                key={i}
+                                style={{
+                                  fontSize: 12,
+                                  marginBottom: 6,
+                                  paddingLeft: 6,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    maxWidth: 220,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={ad.name}
+                                >
+                                  <b>Add Name:</b> {ad.name}
+                                </div>
+
+                                <div>
+                                  <b>Status:</b> {ad.effective_status}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    " "
+                  )
+                }
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: "#EC7117",
+                    color: "#000",
+                    borderRadius: "60%",
+                    width: "20px",
+                    height: "20px",
+                    cursor: "pointer",
+                    textAlign: "center",
+                    marginLeft: "5px"
+                  }}
+                  onMouseEnter={() => {
+                    if (!adDetails[record.identifier]) {
+                      handleIconClick(record.identifier);
+                    }
+                  }}
+                >
+                  {adsCount[record.identifier]}
+                </div>
+              </Tooltip>
+            )} */}
           </div>
         );
       },
@@ -2729,14 +3139,22 @@ const App = () => {
           displayText = "Pending";
         } else if (text === "Approved") {
           color = "#4caf50";
+        } else if (text === "Rejected") {
+          color = "red"
         }
+        console.log(record, "recordada")
         const approvedBy = record?.Approvedby || "N/A";
         const approvedDate = record?.Approveddate
           ? moment(record.Approveddate, "YYYY-MM-DD HH:mm z")
             .tz("Asia/Kolkata")
             .format("DD-MM-YYYY HH:mm")
           : "N/A";
-
+        const RejectedBy = record?.RejectedBy || "N/A";
+        const RejectedDate = record?.RejectedDate
+         ? moment(record.RejectedDate, "YYYY-MM-DD HH:mm z")
+          .tz("Asia/Kolkata")
+          .format("DD-MM-YYYY HH:mm")
+          : "N/A";
         return (
           <div>
             <span style={{ color }}>{displayText}</span>
@@ -2755,6 +3173,16 @@ const App = () => {
                 </span>
                 <span style={{ color: "gray", fontSize: "9px", display: "block", marginTop: 2, display: approvedDate !== "N/A" ? "block" : "none" }}>
                   {approvedDate}
+                </span>
+              </div>
+            )}
+            {text === "Rejected" && (
+              <div style={{ lineHeight: "12px" }}>
+                <span style={{ color: "gray", fontSize: "11px", display: "block" }}>
+                  {RejectedBy}
+                </span>
+                <span style={{ color: "gray", fontSize: "9px", display: "block", marginTop: 2, display: RejectedDate !== "N/A" ? "block" : "none" }}>
+                  {RejectedDate}
                 </span>
               </div>
             )}
@@ -2880,7 +3308,7 @@ const App = () => {
           setSelectedAccountForHistory(accountNumber);
           setHistoryOpen(true);
         };
-        if (record.Approval === "Approved") {
+        if (record.Approval === "Approved" || record.Approval === "Rejected") {
           return (
             <Tooltip title="View Campaign History" overlayInnerStyle={{
               backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
@@ -2907,17 +3335,32 @@ const App = () => {
         if (approval === "pending_approval") {
           return (
             <>
-              <Button
-                style={{
-                  backgroundColor: "#91C25F",
-                  color: "#000",
-                  border: "none",
-                }}
-                onClick={() => handleApprovalforAdsets(record)}
-              >
-                Approve
-              </Button>
-
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "5px",
+              }}>
+                <Button
+                  style={{
+                    backgroundColor: "#91C25F",
+                    color: "#000",
+                    border: "none",
+                  }}
+                  onClick={() => handleApprovalforAdsets(record)}
+                >
+                  Approve
+                </Button>
+                <Button
+                  style={{
+                    backgroundColor: "#fb4437ff",
+                    color: "#000",
+                    border: "none",
+                  }}
+                  onClick={() => handledisApprovalforAdsets(record)}
+                >
+                  Disapprove
+                </Button>
+              </div>
               {useaprovalForAdsets?.identifier === record.identifier && (
                 <Modal
                   title="Confirm approval"
@@ -2930,10 +3373,12 @@ const App = () => {
                   <p>Are you sure you want to approve?</p>
                 </Modal>
               )}
+
+
             </>
+
           );
         }
-
         return null;
       },
     }
@@ -3859,23 +4304,58 @@ const App = () => {
         }
         size="small"
         extra={
-          userdetails?.role !== "Network_Partner" && (
-            <Button
-              onClick={showDrawer}
-              icon={<PlusOutlined className="black-icon" />}
+          <div style={{ display: 'flex', gap: "10px" }}>
+            <Tooltip title="Click the icon to view the latest spent and remaining amount" overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+            }}>
+              <SyncOutlined style={{ fontSize: "18px", cursor: "pointer" }} onClick={handleAccountBalance} />
+            </Tooltip>
+
+            <span
               style={{
-                backgroundColor: "#91C25F",
-                color: "#000",
-                border: "none",
-                border: "#4caf50",
+                backgroundColor: "transparent",
+                padding: "5px 8px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: theme === "dark" ? "#fff" : "#000",
+                border: "1px solid #4caf50",
               }}
             >
-              New Campaign
-            </Button>
-          )
+              Spent: ${accountBalance}
+            </span>
+            <span
+              style={{
+                backgroundColor: "transparent",
+                padding: "5px 8px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: theme === "dark" ? "#fff" : "#000",
+                border: '1px solid #91d5ff',
+              }}
+            >
+              Remaining amount: ${accountRemaining}
+            </span>
+            {userdetails?.role !== "Network_Partner" && (
+              <Button
+                onClick={showDrawer}
+                icon={<PlusOutlined className="black-icon" />}
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  border: "none",
+                  border: "#4caf50",
+                }}
+              >
+                New Campaign
+              </Button>
+
+            )}
+          </div>
         }
 
       >
+
         {/* Entire filter section in one single aligned row */}
         <Row
           align="middle"
@@ -4341,8 +4821,6 @@ const App = () => {
                 Budget: ${totalDailySpend}
               </span>
             )}
-
-
             {/* 🔹 Refresh Button */}
             <Button
               type="primary"
@@ -4859,7 +5337,36 @@ const App = () => {
         adAccounts={adAccounts}
         accountNumber={selectedAccountForHistory}
       />
+
+      <Modal
+        title="Confirm disapproval"
+        open={isModalVisibleForAdsetsdisapprove}
+        onOk={handleOkForAdsetsdisapprove}
+        onCancel={() => setIsModalVisibleForAdsetsdisapprove(false)}
+        confirmLoading={loading}
+        className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+      >
+        <p>Are you sure you want to disapprove?</p>
+
+        <Input.TextArea
+          placeholder="Enter rejection reason"
+          value={rejectedReason}
+          onChange={(e) => {
+            setRejectionReason(e.target.value);
+            if (reasonError) setReasonError("");
+          }}
+          rows={4}
+          status={reasonError ? "error" : ""}
+        />
+
+        {reasonError && (
+          <div style={{ color: "#ff4d4f", marginTop: 5 }}>
+            {reasonError}
+          </div>
+        )}
+      </Modal>
     </div>
+
   );
 };
 export default App;
