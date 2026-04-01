@@ -236,10 +236,18 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             //         .replace("adset_id_replace", ad_id);
             // }
             // const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
+            // const racValue = rac
+            //     ? rac
+            //         .split(",")
+            //         .map(item => encodeURIComponent(item.trim()))
+            //         .join(",").replace(/\s+/g, '+')
+            //     : "";
             const racValue = rac
                 ? rac
                     .split(",")
-                    .map(item => encodeURIComponent(item.trim()))
+                    .map(item =>
+                        encodeURIComponent(item.trim()).replace(/%20/g, '+')
+                    )
                     .join(",")
                 : "";
 
@@ -304,10 +312,18 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
             const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
             let url;
             // const racValue = rac ? rac.trim().replace(/\s+/g, '+') : '';
+            // const racValue = rac
+            //     ? rac
+            //         .split(",")
+            //         .map(item => encodeURIComponent(item.trim()))
+            //         .join(",")
+            //     : "";
             const racValue = rac
                 ? rac
                     .split(",")
-                    .map(item => encodeURIComponent(item.trim()))
+                    .map(item =>
+                        encodeURIComponent(item.trim()).replace(/%20/g, '+')
+                    )
                     .join(",")
                 : "";
 
