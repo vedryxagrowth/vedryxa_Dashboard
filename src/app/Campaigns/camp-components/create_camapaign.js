@@ -4685,10 +4685,10 @@ const AdsetComponent = ({
                                     required: true,
                                     message: `Enter beneficiary for ${account}`,
                                   },
-                                  {
-                                    pattern: /^\d+$/,
-                                    message: "Only integer numbers are allowed",
-                                  },
+                                  // {
+                                  //   pattern: /^\d+$/,
+                                  //   message: "Only integer numbers are allowed",
+                                  // },
                                 ]}
                                 style={{ marginBottom: 8 }}
                               >
@@ -4698,12 +4698,12 @@ const AdsetComponent = ({
                                     theme === "dark" ? "custom-input-dark" : "custom-input-light"
                                   }
                                   placeholder="Enter beneficiary ID"
-                                  inputMode="numeric"
-                                  onKeyPress={(e) => {
-                                    if (!/[0-9]/.test(e.key)) {
-                                      e.preventDefault();
-                                    }
-                                  }}
+                                  // inputMode="numeric"
+                                  // onKeyPress={(e) => {
+                                  //   if (!/[0-9]/.test(e.key)) {
+                                  //     e.preventDefault();
+                                  //   }
+                                  // }}
                                 />
                               </Form.Item>
 
@@ -4746,10 +4746,10 @@ const AdsetComponent = ({
                                             new Error(`Enter payer for ${account}`)
                                           );
 
-                                        if (!/^\d+$/.test(value))
-                                          return Promise.reject(
-                                            new Error("Only integer numbers are allowed")
-                                          );
+                                        // if (!/^\d+$/.test(value))
+                                        //   return Promise.reject(
+                                        //     new Error("Only integer numbers are allowed")
+                                        //   );
 
                                         return Promise.resolve();
                                       },
@@ -4762,12 +4762,12 @@ const AdsetComponent = ({
                                       theme === "dark" ? "custom-input-dark" : "custom-input-light"
                                     }
                                     placeholder="Enter payer ID"
-                                    inputMode="numeric"
-                                    onKeyPress={(e) => {
-                                      if (!/[0-9]/.test(e.key)) {
-                                        e.preventDefault();
-                                      }
-                                    }}
+                                    // inputMode="numeric"
+                                    // onKeyPress={(e) => {
+                                    //   if (!/[0-9]/.test(e.key)) {
+                                    //     e.preventDefault();
+                                    //   }
+                                    // }}
                                   />
                                 </Form.Item>
                               )}
