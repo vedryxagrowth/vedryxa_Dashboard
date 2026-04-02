@@ -675,7 +675,7 @@ const AddComponent = ({
 
         const next = list.map((ad) =>
           ad?.id === viewSingleAd?.id
-            ? { ...ad, Website_URL: text, Caption: text.split("/")[0] }
+            ? { ...ad, Website_URL: text, Caption: new URL(text).origin }
             : ad
         );
 
@@ -3326,7 +3326,7 @@ const AdsetComponent = ({
         const next = list.map((ad) => ({
           ...ad,
           Website_URL: text,
-          Caption: text.split("/")[0],
+          Caption: new URL(text).origin,
         }));
 
         return { ...prev, [key]: next };
