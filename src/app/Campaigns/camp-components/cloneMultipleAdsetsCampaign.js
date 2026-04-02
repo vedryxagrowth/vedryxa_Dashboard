@@ -648,8 +648,8 @@ const AddComponent = ({
         Caption: text.split("//")[1].split("/")[0],
       });
     } else {
-      setCaption(text.split("/")[0]);
-      form.setFieldsValue({ Website_URL: text, Caption: text.split("/")[0] });
+      setCaption(new URL(text).origin);
+      form.setFieldsValue({ Website_URL: text, Caption: new URL(text).origin });
       // updatedAdsets[index] = {
       //     ...updatedAdsets[index],
       //     Website_URL: text,
@@ -672,7 +672,7 @@ const AddComponent = ({
 
         const next = list.map((ad) =>
           ad?.id === viewSingleAd?.id
-            ? { ...ad, Website_URL: text, Caption: text.split("/")[0] }
+            ? { ...ad, Website_URL: text, Caption: new URL(text).origin }
             : ad
         );
 
@@ -3440,11 +3440,11 @@ const AdsetComponent = ({
         return { ...prev, [key]: next };
       });
     } else {
-      setCaption(text.split("/")[0]);
+      setCaption(new URL(text).origin);
       updatedAdsets[index] = {
         ...updatedAdsets[index],
         Website_URL: text,
-        Caption: text.split("/")[0],
+        Caption: new URL(text).origin,
       };
       setNewAddLevelData((prev) => {
         const key = adset.id;
@@ -3453,7 +3453,7 @@ const AdsetComponent = ({
         const next = list.map((ad) => ({
           ...ad,
           Website_URL: text,
-          Caption: text.split("/")[0],
+          Caption: new URL(text).origin,
         }));
 
         return { ...prev, [key]: next };
