@@ -1482,17 +1482,18 @@ const AdsetCard = ({
                                 fontWeight: "bold",
                               }}
                             >
-                              <Tooltip title={item.rejectionReason} overlayInnerStyle={{
-                                backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
-                                color: theme === "dark" ? "#ffffff" : "#000000",
-
-                              }}>
+                              {item.rejectionReason && (
+                                <Tooltip title={item.rejectionReason} overlayInnerStyle={{
+                                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                  color: theme === "dark" ? "#ffffff" : "#000000",
+                                }}>
                                 <MessageOutlined style={{ marginRight: "5px" }} onClick={() => {
                                   setSelectedItem(item);
                                   setIconInputValue(item.rejectionReason || "");
                                   setIsIconModalOpen(true);
                                 }} />
                               </Tooltip>
+                              )}
                               <p style={{ margin: 0 }}>
                                 <CloseCircleOutlined style={{ marginLeft: "5px" }} />
                                 {item.status}
