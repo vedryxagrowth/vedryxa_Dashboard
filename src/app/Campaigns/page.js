@@ -5263,6 +5263,12 @@ const App = () => {
               <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
                 {universalOject?.editedTime || ""}
               </span>
+              <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                Last Edited By:
+              </span>
+              <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
+                {universalOject?.createdBy || ""}
+              </span>
             </div>
             <div>
               <Button
