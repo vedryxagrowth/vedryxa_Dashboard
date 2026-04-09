@@ -1665,7 +1665,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2648,7 +2647,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -4537,7 +4535,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6982,7 +6979,6 @@ const MyTablePage = () => {
             filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -8714,7 +8710,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -13564,7 +13559,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -16566,7 +16560,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
