@@ -3169,7 +3169,7 @@ const AdsetComponent = ({
     { value: "SE", label: "Sweden" },
   ];
 
-  
+
 
   const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
 
@@ -3478,6 +3478,29 @@ const AdsetComponent = ({
     // setIsFormComplete(true);
     // console.log(text, "text");
   };
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    if (!objectiveValue) return;
+
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
+
+    const defaultEvent =
+      Conversion_Event_options[objectiveValue]?.[0]?.value;
+
+    const adsets = form.getFieldValue("adsets") || [];
+
+    const updatedAdsets = adsets.map((adset) => ({
+      ...adset,
+      custom_event_type: defaultEvent,
+    }));
+
+    form.setFieldsValue({ adsets: updatedAdsets });
+
+  }, [objectiveValue])
 
   const getUrlBuilder = useMemo(() => {
     switch (network) {
@@ -8102,7 +8125,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         });
         setAdSchedulingToShow(adsetSwitchMap);
         setFormValuesFromDraft(response?.data[0]);
-        
+
         // const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
         //     const selectedOption = item.selectedOption || "creative";
 
@@ -8133,7 +8156,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     } catch (error) {
       console.error("Error fetching campaign list:", error);
     }
-    finally{
+    finally {
       setLoading(false);
     }
   };

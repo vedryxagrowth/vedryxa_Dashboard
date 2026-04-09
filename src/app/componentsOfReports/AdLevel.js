@@ -2931,7 +2931,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           dateEnd: endDate,
           accountNumbers: accountsParam,
           timezone: newtime,
-          status: tabStatus,                  // "Daily" | "Live"
+          status: tabStatus,
+          revenuePartner: newRevenuePratner,  // "Daily" | "Live"
           network: "Facebook_Mnet_AD",        // keep your original value
           adsetids: adsets,
           campaignids: campaigns

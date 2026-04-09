@@ -2783,7 +2783,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                       Last Edited Time:
                     </span>
                     <span style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black" }}>
-                      {editedTimeDisplay}
+                      {/* {editedTimeDisplay} */}
+                      {universalOject?.editedTime || ""}
                     </span>
                   </div>
                   <div>

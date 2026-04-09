@@ -35,7 +35,7 @@ const revenuePartnerNames = {
     "Inuvo_Prism": "FB_InuvoPrism",
     "Code_Fuel": "FB_CodeFuel",
     "Predicto": "FB_Predicto",
-    "Affinity":"FB_Affinity"
+    "Affinity": "FB_Affinity"
 };
 
 
@@ -56,7 +56,7 @@ const newtworkCollections = {
     "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
-    "FB_Affinity":"Facebook_Affinity_Daily"
+    "FB_Affinity": "Facebook_Affinity_Daily"
 }
 
 const NetworkDefaultTimezones = {
@@ -1091,6 +1091,7 @@ const Dashboard = () => {
     const ctr1 = useRef(0);
     const rpc1 = useRef(0);
     const roi1 = useRef(0);
+    const filteration1 = useRef(0);
 
     // State for the first Select element (categories)
     const [firstSelectValues, setFirstSelectValues] = useState([defaultCategory]);
@@ -1455,8 +1456,11 @@ const Dashboard = () => {
         return Math.round((getTotalEstimatedSpend(fullData) / getTotalLeads(fullData)) * 100) / 100;
     }
 
-    function getTotalROI(fullData){
+    function getTotalROI(fullData) {
         return getTotalEstimatedSpend(fullData) > 0 ? Math.round((((getTotalEstimatedRevenue(fullData) - getTotalEstimatedSpend(fullData)) / getTotalEstimatedSpend(fullData)) * 100) * 100) / 100 : 0;
+    }
+    function getAverageFilteration(fullData,collectionName) {
+        return Math.round((((getTotalLeads(fullData) - (getTotalConversions(fullData, collectionName))) / (getTotalLeads(fullData))) * 100)*100) / 100
     }
 
     function getTotalCtr(fullData) {
@@ -1551,6 +1555,7 @@ const Dashboard = () => {
             rpc1.current = getTotalRpc(responseData, collectionName);
             ctr1.current = getTotalCtr(responseData);
             roi1.current = getTotalROI(responseData);
+            filteration1.current = getAverageFilteration(responseData);
             setData(responseData);
         }
         functionForDetailsUpdate();
@@ -2266,9 +2271,9 @@ const Dashboard = () => {
         // else {
         //     setTime('UTC'); // Default to UTC otherwise
         // }
-        if(newCategories.length === 1){
+        if (newCategories.length === 1) {
             setTime(NetworkDefaultTimezones[newCategories[0]] || "UTC")
-        }else {
+        } else {
             setTime('UTC'); // Default to UTC otherwise
         }
     };
@@ -2737,7 +2742,32 @@ const Dashboard = () => {
 
         return 0;
     };
+    const avgFilteration = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { fbLeads, conversions } = params.data;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads) - parseInt(conversions)) / parseInt(fbLeads)) * 100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
 
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { fbLeads, conversions } = params.node.aggData;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads) - parseInt(conversions)) / parseInt(fbLeads)) * 100;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
 
     const avgCpc = (params) => {
         // For non-grouped rows (individual row data)
@@ -3456,6 +3486,17 @@ const Dashboard = () => {
             filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
+         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
         {
             field: 'ctr',
             headerName: 'CTR',
@@ -4007,6 +4048,17 @@ const Dashboard = () => {
             filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
+         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
         {
             field: 'ctr',
             headerName: 'CTR',
@@ -4387,6 +4439,17 @@ const Dashboard = () => {
             field: 'cpclinkclicks',
             headerName: 'CPCLinkClicks',
             valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4775,6 +4838,17 @@ const Dashboard = () => {
             filter: "agNumberColumnFilter",
             // valueFormatter: rpcCplFormatter,
         },
+         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
         {
             field: 'ctr',
             headerName: 'CTR',
@@ -5076,6 +5150,17 @@ const Dashboard = () => {
             field: 'cpclinkclicks',
             headerName: 'CPCLinkClicks',
             valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -5526,6 +5611,7 @@ const Dashboard = () => {
         { key: "cpc", label: "CPC", color: "#F44336", value: data.length > 0 ? cpc1.current : 0 },
         { key: "rpc", label: "RPC", color: "#00ACC1", value: data.length > 0 ? rpc1.current : 0 },
         { key: "roi", label: "ROI", color: "#00C853", value: data.length > 0 ? roi1.current : 0 },
+        {key:"filteration", label: "Filteration", color: "#AED581", value: data.length > 0 ? filteration1.current : 0 }
     ];
 
     const onCellClicked = (params) => {
@@ -5999,6 +6085,7 @@ const Dashboard = () => {
                                             { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
                                             { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE' },
                                             { title: 'ROI', value: roi1.current, color: '#00C853', dot: '#00C853' },
+                                            { title: 'Filteration', value: filteration1.current, color: '#AED581', dot: '#AED581' }
                                         ].map((item, idx) => (
                                             <div
                                                 key={idx}
@@ -6013,11 +6100,11 @@ const Dashboard = () => {
                                                     width: '100%',
                                                     position: 'relative',
                                                     zIndex: 2,
-                                                          gridColumn: idx === metrics.length - 1 ? 'span 2' : 'auto',
+                                                    gridColumn: idx === metrics.length - 0 ? 'span 2' : 'auto',
 
                                                     borderBottom: idx < 10 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
                                                     borderLeft:
-                                                        (idx % 2 === 1 && idx < 8 || idx === 9) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                                        (idx % 2 === 1 && idx < 10 || idx === 11) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
                                                     // borderLeft: idx === 9 ? (theme === 'dark' ? '1px solid #fff' : '1px solid #0B3D63') : 'none',
                                                 }}
                                             >

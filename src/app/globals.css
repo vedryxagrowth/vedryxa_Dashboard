@@ -4150,7 +4150,7 @@ select:focus,
 /* Default: all 10 cards in ONE row */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(11, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 12px;
 }
 
@@ -4363,3 +4363,6 @@ body.dark-mode .black-icon-creatives1.anticon svg {
   color: #91c25f !important;
   border-color: #91c25f !important;
 }
+/* .Error-Message svg{
+  fill: #ec7117;
+} */
