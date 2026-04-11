@@ -4363,6 +4363,22 @@ body.dark-mode .black-icon-creatives1.anticon svg {
   color: #91c25f !important;
   border-color: #91c25f !important;
 }
-/* .Error-Message svg{
+.Error-Message svg{
   fill: #ec7117;
-} */
+}
+.metric-comparater {
+  margin-top: 4px;
+  font-weight: 400;
+  white-space: nowrap;
+  font-size: var(--value-size, 12px);
+  padding-left: var(--value-size, 14px);
+}
+.anticon-1 svg{
+  color: green !important;
+  fill: green !important;
+}
+
+.anticon-2 svg {
+  color: red !important;
+  fill: red !important;
+}
