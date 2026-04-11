@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, LeftOutlined, HistoryOutlined } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, LeftOutlined, HistoryOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -1582,6 +1582,20 @@ const MyTablePage = () => {
                 end: item.end
             });
         });
+        return map;
+    }, [Camapignlevelstatus]);
+    const adsetMap = useMemo(() => {
+        const map = new Map();
+        Camapignlevelstatus.forEach((item) => {
+            item.adsets?.forEach((adset) => {
+                const key = `${adset.name}_${adset.adset_id}`;
+                map.set(key, {
+                    start: adset.start_time,
+                    end: adset.end_time
+                });
+            });
+        });
+
         return map;
     }, [Camapignlevelstatus]);
     const commentsMap = useMemo(() => {
@@ -6369,7 +6383,7 @@ const MyTablePage = () => {
         to: {
             headerName: 'End',
             field: 'to',
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             filter: "agDateColumnFilter",
 
@@ -6402,14 +6416,33 @@ const MyTablePage = () => {
                         params.node?.key ||
                         "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-                    dateStr = campaign?.end || null;
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
+
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 } else {
-                    dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 }
 
-                // 🔥 Convert YYYY-MM-DD → real Date object
+
                 if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
 
                 const [y, m, d] = dateStr.split('-').map(Number);
                 return new Date(y, m - 1, d);
@@ -6423,7 +6456,180 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -8096,7 +8302,7 @@ const MyTablePage = () => {
         to: {
             headerName: 'End',
             field: 'to',
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             filter: "agDateColumnFilter",
 
@@ -8129,14 +8335,33 @@ const MyTablePage = () => {
                         params.node?.key ||
                         "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-                    dateStr = campaign?.end || null;
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
+
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 } else {
-                    dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 }
 
-                // 🔥 Convert YYYY-MM-DD → real Date object
+
                 if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
 
                 const [y, m, d] = dateStr.split('-').map(Number);
                 return new Date(y, m - 1, d);
@@ -8150,7 +8375,180 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            // onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -11981,68 +12379,257 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         to: {
-            // headerName: 'End',
-            // field: 'to',
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-            //         return campaign && campaign.end
-            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //             : '-';
-            //     }
-            //     return params.data?.to || null;
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
             minWidth: 110,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
-                    // console.log(campaign, "campaign");
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
 
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
+
+                } else {
+                    // dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
+
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
+
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
             },
             suppressMenu: true,
             menuTabs: [],
@@ -13123,69 +13710,323 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // to: {
+        //     // headerName: 'End',
+        //     // field: 'to',
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+        //     //         return campaign && campaign.end
+        //     //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //             : '-';
+        //     //     }
+        //     //     return params.data?.to || null;
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             // console.log(campaign, "campaign");
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         to: {
-            // headerName: 'End',
-            // field: 'to',
-            // minWidth: 110,
-            // valueGetter: (params) => {
-            //     if (params.node.group) {
-            //         const campaignName =
-            //             params.node.groupData?.campaignname || params.node.key;
-            //         const campaign = campaignMap.get(campaignName);
-            //         return campaign && campaign.end
-            //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-            //             : '-';
-            //     }
-            //     return params.data?.to || null;
-            // },
-            // cellClassRules: {
-            //     'hide-leaf-cell': (params) => !params.node.group,
-            // },
-            // suppressMenu: true,
-            // menuTabs: [],
-            // headerClass: 'hide-menu',
             headerName: 'End',
             field: 'to',
-            minWidth: 110,
+            minWidth: 130,
+            sortable: true,
             filter: "agDateColumnFilter",
+
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    if (cellValue == null) return -1;
+                    if (!cellValue) return -1;
 
-                    // Convert your cell value string to a Date
-                    const cellDate = new Date(cellValue);
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
 
                     if (cellDate < filterLocalDateAtMidnight) return -1;
                     if (cellDate > filterLocalDateAtMidnight) return 1;
                     return 0;
                 },
             },
+
             valueGetter: (params) => {
+                let dateStr = null;
+
                 if (params.node.group) {
-                    // const campaignName =
-                    //     params.node.groupData?.campaignname || params.node.key;
-                    // const campaign = campaignMap.get(campaignName);
-                    // return campaign && campaign.end
-                    //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                    //     : '-';
-                    const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
-                    const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
-                    // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
-                    // console.log(campaignName, "campaignName");
-                    // console.log(campaignId, "campaignId");
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
 
-                    // console.log(campaign, "campaign");
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
 
-                    return campaign && campaign.end
-                        ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
-                        : '-';
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
+                } else {
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 }
-                return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+
+
+                if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
             },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
+
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            // onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
             },
             suppressMenu: true,
             menuTabs: [],
