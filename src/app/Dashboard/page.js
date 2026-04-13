@@ -5907,7 +5907,7 @@ const Dashboard = () => {
                                 Welcome, {userdetails?.userName} !
                             </h1>
                         </div> */}
-                                <div style={{ width: '40%', textAlign: 'start' }}>
+                                <div style={{ width: '30%', textAlign: 'start' }}>
                                     <h3 style={{
                                         margin: 0,
                                         fontSize: '20px',
@@ -5926,7 +5926,7 @@ const Dashboard = () => {
                                 </div>
 
                                 <div style={{
-                                    width: '65%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
+                                    width: '70%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
                                     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#dbd9d9ff',
                                     padding: "10px",
                                     marginBottom: '5px',
@@ -5999,7 +5999,7 @@ const Dashboard = () => {
                                             />
                                         </Col>
 
-                                        <Col span={8}>
+                                        <Col span={7}>
                                             <Select
                                                 mode="multiple"
                                                 showSearch
