@@ -5664,7 +5664,7 @@ const Dashboard = () => {
 
         { key: "roi", label: "ROI", color: "#00C853", value: data.length > 0 ? roi1.current : 0, comparater: data.length > 0 ? roi1Previous.current : 0, camparisionPercentage: Number(roi1Previous.current) === 0 ? 0 : ((Number(roi1.current || 0) - Number(roi1Previous.current || 0)) / Math.abs(Number(roi1Previous.current))) * 100 },
 
-        { key: "filteration", label: "Filteration", color: "#AED581", value: data.length > 0 ? filteration1.current : 0, comparater: data.length > 0 ? filteration1Previous.current : 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
+        { key: "filteration", label: "Filteration", color: "#AED581", value: data.length > 0 ? `${filteration1.current}%` : 0, comparater: data.length > 0 ? `${filteration1Previous.current}%` : 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
     ];
 
     const onCellClicked = (params) => {
@@ -6017,7 +6017,7 @@ const Dashboard = () => {
                                             />
                                         </Col>
 
-                                        <Col span={2}>
+                                        <Col span={3}>
                                             <Select
                                                 showSearch
                                                 onChange={onChangeTime}
@@ -6153,7 +6153,7 @@ const Dashboard = () => {
                                                 { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? cpc1Previous.current : 0, camparisionPercentage: Number(cpc1Previous.current) === 0 ? 0 : ((Number(cpc1.current || 0) - Number(cpc1Previous.current || 0)) / Math.abs(Number(cpc1Previous.current))) * 100 },
                                                 { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? rpc1Previous.current : 0, camparisionPercentage: Number(rpc1Previous.current) === 0 ? 0 : ((Number(rpc1.current || 0) - Number(rpc1Previous.current || 0)) / Math.abs(Number(rpc1Previous.current))) * 100 },
                                                 { title: 'ROI', value: roi1.current, color: '#00C853', dot: '#00C853', comparater: data.length > 0 ? roi1Previous.current : 0, camparisionPercentage: Number(roi1Previous.current) === 0 ? 0 : ((Number(roi1.current || 0) - Number(roi1Previous.current || 0)) / Math.abs(Number(roi1Previous.current))) * 100 },
-                                                { title: 'Filteration', value: filteration1.current, color: '#AED581', dot: '#AED581', comparater: data.length > 0 ? filteration1Previous.current : 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
+                                                { title: 'Filteration', value: `${filteration1.current}%`, color: '#AED581', dot: '#AED581', comparater: data.length > 0 ? `${filteration1Previous.current }%`: 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
                                             ]
                                                 .map((item, idx) => (
                                                     <div
@@ -6218,7 +6218,7 @@ const Dashboard = () => {
                                                             }}
                                                         >
                                                             {item.camparisionPercentage > 0 ? (<ArrowUpOutlined style={{ color: 'green', marginRight: 4 }} />) : (<ArrowDownOutlined style={{ color: 'red', marginRight: 4 }} />)}
-                                                            <span style={{ color: item.camparisionPercentage > 0 ? "green" : "red" }}>{data.length > 0 && item.camparisionPercentage !== undefined && item.camparisionPercentage !== Infinity ? item.camparisionPercentage.toFixed(2) : 0}%</span>
+                                                            <span style={{ color: item.camparisionPercentage > 0 ? "green" : "red" }}>{data.length > 0 && item.camparisionPercentage !== undefined && item.camparisionPercentage !== Infinity ? Math.abs(Number(item.camparisionPercentage.toFixed(2))) : 0}%</span>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -6550,7 +6550,7 @@ const Dashboard = () => {
                                                             </div>}>
                                                             <div className="metric-comparater" style={{ color: theme === "dark" ? "#fff" : "#666" }}>
                                                                 {m.camparisionPercentage > 0 ? (<ArrowUpOutlined className="anticon-1" style={{ color: 'green', marginRight: 4 }} />) : (<ArrowDownOutlined className="anticon anticon-2" style={{ color: 'red', marginRight: 4 }} />)}
-                                                                <span style={{ color: m.camparisionPercentage > 0 ? 'green' : 'red' }}>{m.camparisionPercentage.toFixed(2)}%</span>
+                                                                <span style={{ color: m.camparisionPercentage > 0 ? 'green' : 'red' }}>{Math.abs(Number(m.camparisionPercentage.toFixed(2)))}%</span>
                                                             </div>
                                                         </Tooltip>
                                                     )}
