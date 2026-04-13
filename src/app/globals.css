@@ -4181,10 +4181,10 @@ select:focus,
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
-  font-weight: 600;
-  font-size: var(--title-size, 13px);
+  font-weight: 500;
+  font-size: var(--title-size, 12px);
   white-space: nowrap;
-  padding-left: var(--title-size, 13px);
+  padding-left: var(--title-size, 10px);
 }
 
 /* DOT */
