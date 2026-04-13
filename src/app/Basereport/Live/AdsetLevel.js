@@ -2664,7 +2664,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                         </span>
                                         <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {/* {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""} */}
-                                            {editedPretty || ""}
+                                            {/* {editedPretty || ""} */}
+                                            {universalOject?.editedTime || ""}
                                         </span>
 
                                     </div>

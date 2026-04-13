@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import React from 'react';
 import axios from 'axios';
 import { Select, Tag, theme, Button, Carousel, Tabs, Tooltip, message, Switch } from 'antd';
+import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 import StickyBox from 'react-sticky-box';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
@@ -35,7 +36,7 @@ const revenuePartnerNames = {
     "Inuvo_Prism": "FB_InuvoPrism",
     "Code_Fuel": "FB_CodeFuel",
     "Predicto": "FB_Predicto",
-    "Affinity":"FB_Affinity"
+    "Affinity": "FB_Affinity"
 };
 
 
@@ -56,7 +57,7 @@ const newtworkCollections = {
     "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
-    "FB_Affinity":"Facebook_Affinity_Daily"
+    "FB_Affinity": "Facebook_Affinity_Daily"
 }
 
 const NetworkDefaultTimezones = {
@@ -1022,6 +1023,7 @@ const Dashboard = () => {
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [rendering, setRendering] = useState(false);
     const [usersDataFromFetch, setUsersDataFromFetch] = useState(null);
+    const [previousDataDates, setPreviousDataDates] = useState({});
 
     // (async () => {
     //     if (usersDataFromFetch === null) {  // Prevents multiple calls
@@ -1091,6 +1093,19 @@ const Dashboard = () => {
     const ctr1 = useRef(0);
     const rpc1 = useRef(0);
     const roi1 = useRef(0);
+    const filteration1 = useRef(0);
+    const revenue1Previous = useRef(0);
+    const spend1Previous = useRef(0);
+    const profit1Previous = useRef(0);
+    const leads1Previous = useRef(0);
+    const conversions1Previous = useRef(0);
+    const cpc1Previous = useRef(0);
+    const ncpl1Previous = useRef(0);
+    const cpl1Previous = useRef(0);
+    const ctr1Previous = useRef(0);
+    const rpc1Previous = useRef(0);
+    const roi1Previous = useRef(0);
+    const filteration1Previous = useRef(0);
 
     // State for the first Select element (categories)
     const [firstSelectValues, setFirstSelectValues] = useState([defaultCategory]);
@@ -1455,8 +1470,11 @@ const Dashboard = () => {
         return Math.round((getTotalEstimatedSpend(fullData) / getTotalLeads(fullData)) * 100) / 100;
     }
 
-    function getTotalROI(fullData){
+    function getTotalROI(fullData) {
         return getTotalEstimatedSpend(fullData) > 0 ? Math.round((((getTotalEstimatedRevenue(fullData) - getTotalEstimatedSpend(fullData)) / getTotalEstimatedSpend(fullData)) * 100) * 100) / 100 : 0;
+    }
+    function getAverageFilteration(fullData, collectionName) {
+        return Math.round((((getTotalLeads(fullData) - (getTotalConversions(fullData, collectionName))) / (getTotalLeads(fullData))) * 100) * 100) / 100
     }
 
     function getTotalCtr(fullData) {
@@ -1531,12 +1549,13 @@ const Dashboard = () => {
         // console.log(transformedObject);
         let response;
         try {
-            response = await apiClient.post(`/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+            response = await apiClient.post(`/Dashboardnew?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
 
         } catch (error) {
             message.error('API failed to fetch the data please click the reload button', 8);
         }
-        const responseData = response?.data;
+        const responseData = response?.data?.data || [];
+        const previousData = response?.data?.previousDays || [];
         console.log(responseData, "response");
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "deadend");
         const functionForDetailsUpdate = async () => {
@@ -1551,6 +1570,20 @@ const Dashboard = () => {
             rpc1.current = getTotalRpc(responseData, collectionName);
             ctr1.current = getTotalCtr(responseData);
             roi1.current = getTotalROI(responseData);
+            filteration1.current = getAverageFilteration(responseData);
+            revenue1Previous.current = getTotalEstimatedRevenue(previousData);
+            spend1Previous.current = getTotalEstimatedSpend(previousData);
+            profit1Previous.current = getTotalEstimatedProfit(previousData);
+            leads1Previous.current = getTotalLeads(previousData);
+            conversions1Previous.current = getTotalConversions(previousData, collectionName);
+            cpc1Previous.current = getAverageEstimatedCpc(previousData);
+            ncpl1Previous.current = getTotalNcpl(previousData, collectionName);
+            cpl1Previous.current = getTotalCpl(previousData);
+            rpc1Previous.current = getTotalRpc(previousData, collectionName);
+            ctr1Previous.current = getTotalCtr(previousData);
+            roi1Previous.current = getTotalROI(previousData);
+            filteration1Previous.current = getAverageFilteration(previousData);
+            setPreviousDataDates(response?.data?.previousRange || {});
             setData(responseData);
         }
         functionForDetailsUpdate();
@@ -2266,9 +2299,9 @@ const Dashboard = () => {
         // else {
         //     setTime('UTC'); // Default to UTC otherwise
         // }
-        if(newCategories.length === 1){
+        if (newCategories.length === 1) {
             setTime(NetworkDefaultTimezones[newCategories[0]] || "UTC")
-        }else {
+        } else {
             setTime('UTC'); // Default to UTC otherwise
         }
     };
@@ -2737,7 +2770,32 @@ const Dashboard = () => {
 
         return 0;
     };
+    const avgFilteration = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { fbLeads, conversions } = params.data;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads) - parseInt(conversions)) / parseInt(fbLeads)) * 100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
 
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { fbLeads, conversions } = params.node.aggData;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads) - parseInt(conversions)) / parseInt(fbLeads)) * 100;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
 
     const avgCpc = (params) => {
         // For non-grouped rows (individual row data)
@@ -3457,6 +3515,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -4008,6 +4077,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -4387,6 +4467,17 @@ const Dashboard = () => {
             field: 'cpclinkclicks',
             headerName: 'CPCLinkClicks',
             valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -4776,6 +4867,17 @@ const Dashboard = () => {
             // valueFormatter: rpcCplFormatter,
         },
         {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
             field: 'ctr',
             headerName: 'CTR',
             valueGetter: avgCTR,
@@ -5076,6 +5178,17 @@ const Dashboard = () => {
             field: 'cpclinkclicks',
             headerName: 'CPCLinkClicks',
             valueGetter: avgCPCLinkClikcs,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            minWidth: 95,
+            filter: "agNumberColumnFilter",
+            // valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'Filteration',
+            headerName: 'Filteration',
+            valueGetter: avgFilteration,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -5514,18 +5627,44 @@ const Dashboard = () => {
     const cardBg = theme === "dark" ? "#333" : "";
     const valueStyle = { color: theme === "dark" ? "#ffffff" : "#3f8600" };
 
+    // const metrics = [
+    //     { key: "revenue", label: "Revenue", color: "#00C853", prefix: "$", value: data.length > 0 ? revenue1.current : 0 },
+    //     { key: "profit", label: "Profit", color: "#26A69A", prefix: "$", value: data.length > 0 ? profit1.current : 0 },
+    //     { key: "spend", label: "Amount Spent", color: "#3F51B5", prefix: "$", value: data.length > 0 ? spend1.current : 0 },
+    //     { key: "leads", label: "Leads", color: "#FFC107", value: data.length > 0 ? leads1.current : 0 },
+    //     { key: "conversions", label: "Conversions", color: "#673AB7", value: data.length > 0 ? conversions1.current : 0 },
+    //     { key: "ncpl", label: "NCPL", color: "#AED581", value: data.length > 0 ? ncpl1.current : 0 },
+    //     { key: "cpl", label: "CPL", color: "#FF9800", value: data.length > 0 ? (cpl1.current !== Infinity ? cpl1.current : 0) : 0 },
+    //     { key: "ctr", label: "CTR", color: "#2196F3", value: data.length > 0 ? ctr1.current : 0 },
+    //     { key: "cpc", label: "CPC", color: "#F44336", value: data.length > 0 ? cpc1.current : 0 },
+    //     { key: "rpc", label: "RPC", color: "#00ACC1", value: data.length > 0 ? rpc1.current : 0 },
+    //     { key: "roi", label: "ROI", color: "#00C853", value: data.length > 0 ? roi1.current : 0 },
+    //     { key: "filteration", label: "Filteration", color: "#AED581", value: data.length > 0 ? filteration1.current : 0 }
+    // ];
     const metrics = [
-        { key: "revenue", label: "Revenue", color: "#00C853", prefix: "$", value: data.length > 0 ? revenue1.current : 0 },
-        { key: "profit", label: "Profit", color: "#26A69A", prefix: "$", value: data.length > 0 ? profit1.current : 0 },
-        { key: "spend", label: "Amount Spent", color: "#3F51B5", prefix: "$", value: data.length > 0 ? spend1.current : 0 },
-        { key: "leads", label: "Leads", color: "#FFC107", value: data.length > 0 ? leads1.current : 0 },
-        { key: "conversions", label: "Conversions", color: "#673AB7", value: data.length > 0 ? conversions1.current : 0 },
-        { key: "ncpl", label: "NCPL", color: "#AED581", value: data.length > 0 ? ncpl1.current : 0 },
-        { key: "cpl", label: "CPL", color: "#FF9800", value: data.length > 0 ? (cpl1.current !== Infinity ? cpl1.current : 0) : 0 },
-        { key: "ctr", label: "CTR", color: "#2196F3", value: data.length > 0 ? ctr1.current : 0 },
-        { key: "cpc", label: "CPC", color: "#F44336", value: data.length > 0 ? cpc1.current : 0 },
-        { key: "rpc", label: "RPC", color: "#00ACC1", value: data.length > 0 ? rpc1.current : 0 },
-        { key: "roi", label: "ROI", color: "#00C853", value: data.length > 0 ? roi1.current : 0 },
+        { key: "revenue", label: "Revenue", color: "#00C853", prefix: "$", value: data.length > 0 ? revenue1.current : 0, comparater: data.length > 0 ? revenue1Previous.current : 0, camparisionPercentage: Number(revenue1Previous.current) === 0 ? 0 : ((Number(revenue1.current || 0) - Number(revenue1Previous.current || 0)) / Math.abs(Number(revenue1Previous.current))) * 100 },
+
+        { key: "profit", label: "Profit", color: "#26A69A", prefix: "$", value: data.length > 0 ? profit1.current : 0, comparater: data.length > 0 ? profit1Previous.current : 0, camparisionPercentage: Number(profit1Previous.current) === 0 ? 0 : ((Number(profit1.current || 0) - Number(profit1Previous.current || 0)) / Math.abs(Number(profit1Previous.current))) * 100 },
+
+        { key: "spend", label: "Amount Spent", color: "#3F51B5", prefix: "$", value: data.length > 0 ? spend1.current : 0, comparater: data.length > 0 ? spend1Previous.current : 0, camparisionPercentage: Number(spend1Previous.current) === 0 ? 0 : ((Number(spend1.current || 0) - Number(spend1Previous.current || 0)) / Math.abs(Number(spend1Previous.current))) * 100 },
+
+        { key: "leads", label: "Leads", color: "#FFC107", value: data.length > 0 ? leads1.current : 0, comparater: data.length > 0 ? leads1Previous.current : 0, camparisionPercentage: Number(leads1Previous.current) === 0 ? 0 : ((Number(leads1.current || 0) - Number(leads1Previous.current || 0)) / Math.abs(Number(leads1Previous.current))) * 100 },
+
+        { key: "conversions", label: "Conversions", color: "#673AB7", value: data.length > 0 ? conversions1.current : 0, comparater: data.length > 0 ? conversions1Previous.current : 0, camparisionPercentage: Number(conversions1Previous.current) === 0 ? 0 : ((Number(conversions1.current || 0) - Number(conversions1Previous.current || 0)) / Math.abs(Number(conversions1Previous.current))) * 100 },
+
+        { key: "ncpl", label: "NCPL", color: "#AED581", value: data.length > 0 ? ncpl1.current : 0, comparater: data.length > 0 ? ncpl1Previous.current : 0, camparisionPercentage: Number(ncpl1Previous.current) === 0 ? 0 : ((Number(ncpl1.current || 0) - Number(ncpl1Previous.current || 0)) / Math.abs(Number(ncpl1Previous.current))) * 100 },
+
+        { key: "cpl", label: "CPL", color: "#FF9800", value: data.length > 0 ? (cpl1.current !== Infinity ? cpl1.current : 0) : 0, comparater: data.length > 0 ? cpl1Previous.current : 0, camparisionPercentage: Number(cpl1Previous.current) === 0 ? 0 : ((Number(cpl1.current || 0) - Number(cpl1Previous.current || 0)) / Math.abs(Number(cpl1Previous.current))) * 100 },
+
+        { key: "ctr", label: "CTR", color: "#2196F3", value: data.length > 0 ? ctr1.current : 0, comparater: data.length > 0 ? ctr1Previous.current : 0, camparisionPercentage: Number(ctr1Previous.current) === 0 ? 0 : ((Number(ctr1.current || 0) - Number(ctr1Previous.current || 0)) / Math.abs(Number(ctr1Previous.current))) * 100 },
+
+        { key: "cpc", label: "CPC", color: "#F44336", value: data.length > 0 ? cpc1.current : 0, comparater: data.length > 0 ? cpc1Previous.current : 0, camparisionPercentage: Number(cpc1Previous.current) === 0 ? 0 : ((Number(cpc1.current || 0) - Number(cpc1Previous.current || 0)) / Math.abs(Number(cpc1Previous.current))) * 100 },
+
+        { key: "rpc", label: "RPC", color: "#00ACC1", value: data.length > 0 ? rpc1.current : 0, comparater: data.length > 0 ? rpc1Previous.current : 0, camparisionPercentage: Number(rpc1Previous.current) === 0 ? 0 : ((Number(rpc1.current || 0) - Number(rpc1Previous.current || 0)) / Math.abs(Number(rpc1Previous.current))) * 100 },
+
+        { key: "roi", label: "ROI", color: "#00C853", value: data.length > 0 ? roi1.current : 0, comparater: data.length > 0 ? roi1Previous.current : 0, camparisionPercentage: Number(roi1Previous.current) === 0 ? 0 : ((Number(roi1.current || 0) - Number(roi1Previous.current || 0)) / Math.abs(Number(roi1Previous.current))) * 100 },
+
+        { key: "filteration", label: "Filteration", color: "#AED581", value: data.length > 0 ? `${filteration1.current}%` : 0, comparater: data.length > 0 ? `${filteration1Previous.current}%` : 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
     ];
 
     const onCellClicked = (params) => {
@@ -5768,7 +5907,7 @@ const Dashboard = () => {
                                 Welcome, {userdetails?.userName} !
                             </h1>
                         </div> */}
-                                <div style={{ width: '40%', textAlign: 'start' }}>
+                                <div style={{ width: '30%', textAlign: 'start' }}>
                                     <h3 style={{
                                         margin: 0,
                                         fontSize: '20px',
@@ -5787,7 +5926,7 @@ const Dashboard = () => {
                                 </div>
 
                                 <div style={{
-                                    width: '65%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
+                                    width: '70%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
                                     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#dbd9d9ff',
                                     padding: "10px",
                                     marginBottom: '5px',
@@ -5860,7 +5999,7 @@ const Dashboard = () => {
                                             />
                                         </Col>
 
-                                        <Col span={8}>
+                                        <Col span={7}>
                                             <Select
                                                 mode="multiple"
                                                 showSearch
@@ -5878,7 +6017,7 @@ const Dashboard = () => {
                                             />
                                         </Col>
 
-                                        <Col span={2}>
+                                        <Col span={3}>
                                             <Select
                                                 showSearch
                                                 onChange={onChangeTime}
@@ -5987,75 +6126,102 @@ const Dashboard = () => {
                                             position: 'relative',
                                         }}
                                     >
-                                        {[
-                                            { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#00C853', dot: '#00C853' },
-                                            { title: 'Profit', value: profit1.current, prefix: '$', color: '#26A69A', dot: '#26A69A' },
-                                            { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE' },
-                                            { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117' },
-                                            { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE' },
-                                            { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
-                                            { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117' },
-                                            { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE' },
-                                            { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
-                                            { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE' },
-                                            { title: 'ROI', value: roi1.current, color: '#00C853', dot: '#00C853' },
-                                        ].map((item, idx) => (
-                                            <div
-                                                key={idx}
-                                                className={theme === 'dark' ? "grid-cell" : "grid-cell-1"}
-                                                style={{
-                                                    backgroundColor: theme === 'dark' ? '#333' : '#e1e2e3',
-                                                    padding: '16px',
-                                                    textAlign: 'center',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    justifyContent: 'center',
-                                                    width: '100%',
-                                                    position: 'relative',
-                                                    zIndex: 2,
-                                                          gridColumn: idx === metrics.length - 1 ? 'span 2' : 'auto',
-
-                                                    borderBottom: idx < 10 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
-                                                    borderLeft:
-                                                        (idx % 2 === 1 && idx < 8 || idx === 9) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
-                                                    // borderLeft: idx === 9 ? (theme === 'dark' ? '1px solid #fff' : '1px solid #0B3D63') : 'none',
-                                                }}
-                                            >
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
-                                                    {item.dot && (
-                                                        <span
-                                                            style={{
-                                                                display: 'inline-block',
-                                                                height: '10px',
-                                                                width: '10px',
-                                                                borderRadius: '50%',
-                                                                backgroundColor: item.dot,
-                                                                marginRight: 6,
-                                                            }}
-                                                        ></span>
-                                                    )}
-                                                    <span
+                                        {
+                                            // [
+                                            //     { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#00C853', dot: '#00C853' },
+                                            //     { title: 'Profit', value: profit1.current, prefix: '$', color: '#26A69A', dot: '#26A69A' },
+                                            //     { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE' },
+                                            //     { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117' },
+                                            //     { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                            //     { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
+                                            //     { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117' },
+                                            //     { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                            //     { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
+                                            //     { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                            //     { title: 'ROI', value: roi1.current, color: '#00C853', dot: '#00C853' },
+                                            //     { title: 'Filteration', value: filteration1.current, color: '#AED581', dot: '#AED581' }
+                                            // ]
+                                            [
+                                                { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#00C853', dot: '#00C853', comparater: data.length > 0 ? revenue1Previous.current : 0, camparisionPercentage: Number(revenue1Previous.current) === 0 ? 0 : ((Number(revenue1.current || 0) - Number(revenue1Previous.current || 0)) / Math.abs(Number(revenue1Previous.current))) * 100 },
+                                                { title: 'Profit', value: profit1.current, prefix: '$', color: '#26A69A', dot: '#26A69A', comparater: data.length > 0 ? profit1Previous.current : 0, camparisionPercentage: Number(profit1Previous.current) === 0 ? 0 : ((Number(profit1.current || 0) - Number(profit1Previous.current || 0)) / Math.abs(Number(profit1Previous.current))) * 100 },
+                                                { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? spend1Previous.current : 0, camparisionPercentage: Number(spend1Previous.current) === 0 ? 0 : ((Number(spend1.current || 0) - Number(spend1Previous.current || 0)) / Math.abs(Number(spend1Previous.current))) * 100 },
+                                                { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? leads1Previous.current : 0, camparisionPercentage: Number(leads1Previous.current) === 0 ? 0 : ((Number(leads1.current || 0) - Number(leads1Previous.current || 0)) / Math.abs(Number(leads1Previous.current))) * 100 },
+                                                { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? conversions1Previous.current : 0, camparisionPercentage: Number(conversions1Previous.current) === 0 ? 0 : ((Number(conversions1.current || 0) - Number(conversions1Previous.current || 0)) / Math.abs(Number(conversions1Previous.current))) * 100 },
+                                                { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F', comparater: data.length > 0 ? ncpl1Previous.current : 0, camparisionPercentage: Number(ncpl1Previous.current) === 0 ? 0 : ((Number(ncpl1.current || 0) - Number(ncpl1Previous.current || 0)) / Math.abs(Number(ncpl1Previous.current))) * 100 },
+                                                { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? cpl1Previous.current : 0, camparisionPercentage: Number(cpl1Previous.current) === 0 ? 0 : ((Number(cpl1.current || 0) - Number(cpl1Previous.current || 0)) / Math.abs(Number(cpl1Previous.current))) * 100 },
+                                                { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? ctr1Previous.current : 0, camparisionPercentage: Number(ctr1Previous.current) === 0 ? 0 : ((Number(ctr1.current || 0) - Number(ctr1Previous.current || 0)) / Math.abs(Number(ctr1Previous.current))) * 100 },
+                                                { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? cpc1Previous.current : 0, camparisionPercentage: Number(cpc1Previous.current) === 0 ? 0 : ((Number(cpc1.current || 0) - Number(cpc1Previous.current || 0)) / Math.abs(Number(cpc1Previous.current))) * 100 },
+                                                { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? rpc1Previous.current : 0, camparisionPercentage: Number(rpc1Previous.current) === 0 ? 0 : ((Number(rpc1.current || 0) - Number(rpc1Previous.current || 0)) / Math.abs(Number(rpc1Previous.current))) * 100 },
+                                                { title: 'ROI', value: roi1.current, color: '#00C853', dot: '#00C853', comparater: data.length > 0 ? roi1Previous.current : 0, camparisionPercentage: Number(roi1Previous.current) === 0 ? 0 : ((Number(roi1.current || 0) - Number(roi1Previous.current || 0)) / Math.abs(Number(roi1Previous.current))) * 100 },
+                                                { title: 'Filteration', value: `${filteration1.current}%`, color: '#AED581', dot: '#AED581', comparater: data.length > 0 ? `${filteration1Previous.current }%`: 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
+                                            ]
+                                                .map((item, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className={theme === 'dark' ? "grid-cell" : "grid-cell-1"}
                                                         style={{
-                                                            fontSize: 15,
-                                                            fontWeight: 600,
-                                                            color: item.color || (theme === 'dark' ? '#66b2ff' : '#4a5d78'),
+                                                            backgroundColor: theme === 'dark' ? '#333' : '#e1e2e3',
+                                                            padding: '16px',
+                                                            textAlign: 'center',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            justifyContent: 'center',
+                                                            width: '100%',
+                                                            position: 'relative',
+                                                            zIndex: 2,
+                                                            gridColumn: idx === metrics.length - 0 ? 'span 2' : 'auto',
+
+                                                            borderBottom: idx < 10 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                                            borderLeft:
+                                                                (idx % 2 === 1 && idx < 10 || idx === 11) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                                            // borderLeft: idx === 9 ? (theme === 'dark' ? '1px solid #fff' : '1px solid #0B3D63') : 'none',
                                                         }}
                                                     >
-                                                        {item.title}
-                                                    </span>
-                                                </div>
-                                                <div
-                                                    style={{
-                                                        fontSize: 18,
-                                                        fontWeight: 700,
-                                                        // color: '#fff',
-                                                    }}
-                                                >
-                                                    {item.prefix || ''}
-                                                    {data.length > 0 && item.value !== undefined && item.value !== Infinity ? item.value : 0}
-                                                </div>
-                                            </div>
-                                        ))}
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+                                                            {item.dot && (
+                                                                <span
+                                                                    style={{
+                                                                        display: 'inline-block',
+                                                                        height: '10px',
+                                                                        width: '10px',
+                                                                        borderRadius: '50%',
+                                                                        backgroundColor: item.dot,
+                                                                        marginRight: 6,
+                                                                    }}
+                                                                ></span>
+                                                            )}
+                                                            <span
+                                                                style={{
+                                                                    fontSize: 15,
+                                                                    fontWeight: 600,
+                                                                    color: item.color || (theme === 'dark' ? '#66b2ff' : '#4a5d78'),
+                                                                }}
+                                                            >
+                                                                {item.title}
+                                                            </span>
+                                                        </div>
+                                                        <div
+                                                            style={{
+                                                                fontSize: 18,
+                                                                fontWeight: 700,
+                                                                // color: '#fff',
+                                                            }}
+                                                        >
+                                                            {item.prefix || ''}
+                                                            {data.length > 0 && item.value !== undefined && item.value !== Infinity ? item.value : 0}
+                                                        </div>
+                                                        <div
+                                                            style={{
+                                                                fontSize: 12,
+                                                                fontWeight: 500,
+                                                                // color: '#fff',
+                                                            }}
+                                                        >
+                                                            {item.camparisionPercentage > 0 ? (<ArrowUpOutlined style={{ color: 'green', marginRight: 4 }} />) : (<ArrowDownOutlined style={{ color: 'red', marginRight: 4 }} />)}
+                                                            <span style={{ color: item.camparisionPercentage > 0 ? "green" : "red" }}>{data.length > 0 && item.camparisionPercentage !== undefined && item.camparisionPercentage !== Infinity ? Math.abs(Number(item.camparisionPercentage.toFixed(2))) : 0}%</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                         <div className="vertical-divider" />
                                         <div className="horizontal-divider" />
                                     </div>
@@ -6363,6 +6529,31 @@ const Dashboard = () => {
                                                     >
                                                         {m.prefix ? m.prefix + " " : ""}{m.value}
                                                     </div>
+                                                    {/* {m.camparisionPercentage !== undefined && (
+                                                        <div className="metric-comparater" style={{ color: theme === "dark" ? "#fff" : "#666" }}>
+                                                            {m.camparisionPercentage > 0 ? (<ArrowUpOutlined style={{ color: 'green', marginRight: 4 }} />) : (<ArrowDownOutlined style={{ color: 'red', marginRight: 4 }} />)}
+                                                            <span style={{ color: m.camparisionPercentage > 0 ? 'green' : 'red' }}>{m.camparisionPercentage.toFixed(2)}%</span>
+                                                        </div>
+                                                    )} */}
+                                                    {m.camparisionPercentage !== undefined && (
+                                                        <Tooltip
+                                                            overlayInnerStyle={{
+                                                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                                border: '1px solid #ccc',
+                                                                borderRadius: 6,
+                                                            }}
+                                                            title={<div style={{ color: theme === 'dark' ? '#fff' : '#000', fontSize: 10 }}>
+                                                                Prev : {previousDataDates.start}-{previousDataDates.end}
+                                                                <br />
+                                                                Value : {m.comparater}
+                                                            </div>}>
+                                                            <div className="metric-comparater" style={{ color: theme === "dark" ? "#fff" : "#666" }}>
+                                                                {m.camparisionPercentage > 0 ? (<ArrowUpOutlined className="anticon-1" style={{ color: 'green', marginRight: 4 }} />) : (<ArrowDownOutlined className="anticon anticon-2" style={{ color: 'red', marginRight: 4 }} />)}
+                                                                <span style={{ color: m.camparisionPercentage > 0 ? 'green' : 'red' }}>{Math.abs(Number(m.camparisionPercentage.toFixed(2)))}%</span>
+                                                            </div>
+                                                        </Tooltip>
+                                                    )}
                                                 </Card>
                                             ))}
                                         </div>

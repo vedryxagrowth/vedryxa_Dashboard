@@ -4150,7 +4150,7 @@ select:focus,
 /* Default: all 10 cards in ONE row */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(11, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 12px;
 }
 
@@ -4181,10 +4181,10 @@ select:focus,
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
-  font-weight: 600;
-  font-size: var(--title-size, 13px);
+  font-weight: 500;
+  font-size: var(--title-size, 12px);
   white-space: nowrap;
-  padding-left: var(--title-size, 13px);
+  padding-left: var(--title-size, 10px);
 }
 
 /* DOT */
@@ -4362,4 +4362,23 @@ body.dark-mode .black-icon-creatives1.anticon svg {
 .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-checked):hover {
   color: #91c25f !important;
   border-color: #91c25f !important;
+}
+.Error-Message svg{
+  fill: #ec7117;
+}
+.metric-comparater {
+  margin-top: 4px;
+  font-weight: 400;
+  white-space: nowrap;
+  font-size: var(--value-size, 12px);
+  padding-left: var(--value-size, 14px);
+}
+.anticon-1 svg{
+  color: green !important;
+  fill: green !important;
+}
+
+.anticon-2 svg {
+  color: red !important;
+  fill: red !important;
 }

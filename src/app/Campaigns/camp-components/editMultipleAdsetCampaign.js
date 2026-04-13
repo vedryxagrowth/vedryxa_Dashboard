@@ -3352,6 +3352,30 @@ const AdsetComponent = ({
     // console.log(text, "text");
   };
 
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    if (!objectiveValue) return;
+
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
+
+    const defaultEvent =
+      Conversion_Event_options[objectiveValue]?.[0]?.value;
+
+    const adsets = form.getFieldValue("adsets") || [];
+
+    const updatedAdsets = adsets.map((adset) => ({
+      ...adset,
+      custom_event_type: defaultEvent,
+    }));
+
+    form.setFieldsValue({ adsets: updatedAdsets });
+
+  }, [objectiveValue]);
+
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
@@ -13279,6 +13303,9 @@ const EditMultipleAdsetCampaignDrawer = ({
       // Handle error
     }
   };
+
+
+
   return (
     <Modal
       title={

@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Checkbox, Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton, Dropdown, Menu } from 'antd';
-import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, RightOutlined, HistoryOutlined } from '@ant-design/icons';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, PlusOutlined, ArrowRightOutlined, RightOutlined, HistoryOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -99,6 +99,7 @@ const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDo
 const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAdLive'));
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
+const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/HourlyBreakDown'));
 
 const MyTablePage = () => {
     const router = useRouter();
@@ -454,6 +455,7 @@ const MyTablePage = () => {
     const [formula, setFormula] = useState('');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
 
     // const newCampaignNamesDActiveLive = useRef();
 
@@ -1624,6 +1626,20 @@ const MyTablePage = () => {
         });
         return map;
     }, [Camapignlevelstatus]);
+    const adsetMap = useMemo(() => {
+        const map = new Map();
+        Camapignlevelstatus.forEach((item) => {
+            item.adsets?.forEach((adset) => {
+                const key = `${adset.name}_${adset.adset_id}`;
+                map.set(key, {
+                    start: adset.start_time,
+                    end: adset.end_time
+                });
+            });
+        });
+
+        return map;
+    }, [Camapignlevelstatus]);
     const commentsMap = useMemo(() => {
         const map = new Map();
         campaignComments.forEach((item) => {
@@ -1707,7 +1723,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -3024,7 +3039,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -5247,7 +5261,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -6433,7 +6446,7 @@ const MyTablePage = () => {
         to: {
             headerName: 'End',
             field: 'to',
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             filter: "agDateColumnFilter",
 
@@ -6466,14 +6479,33 @@ const MyTablePage = () => {
                         params.node?.key ||
                         "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-                    dateStr = campaign?.end || null;
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
+
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 } else {
-                    dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 }
 
-                // 🔥 Convert YYYY-MM-DD → real Date object
+
                 if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
 
                 const [y, m, d] = dateStr.split('-').map(Number);
                 return new Date(y, m - 1, d);
@@ -6487,7 +6519,180 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -7041,7 +7246,6 @@ const MyTablePage = () => {
             filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -7823,10 +8027,72 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // to: {
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     sortable: true,
+        //     filter: "agDateColumnFilter",
+
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (!cellValue) return -1;
+
+        //             // cellValue already Date from valueGetter
+        //             const cellDate = new Date(
+        //                 cellValue.getFullYear(),
+        //                 cellValue.getMonth(),
+        //                 cellValue.getDate()
+        //             );
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+
+        //     valueGetter: (params) => {
+        //         let dateStr = null;
+
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+        //             const campaignId =
+        //                 params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+        //                 params.node?.key ||
+        //                 "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+        //             dateStr = campaign?.end || null;
+        //         } else {
+        //             dateStr = params.data?.to || null;
+        //         }
+
+        //         // 🔥 Convert YYYY-MM-DD → real Date object
+        //         if (!dateStr) return null;
+
+        //         const [y, m, d] = dateStr.split('-').map(Number);
+        //         return new Date(y, m - 1, d);
+        //     },
+
+        //     valueFormatter: (params) => {
+        //         const d = params.value;
+        //         return d ? moment(d).format("DD-MM-YYYY") : '';
+        //     },
+
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         to: {
             headerName: 'End',
             field: 'to',
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             filter: "agDateColumnFilter",
 
@@ -7859,14 +8125,33 @@ const MyTablePage = () => {
                         params.node?.key ||
                         "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-                    dateStr = campaign?.end || null;
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
+
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 } else {
-                    dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 }
 
-                // 🔥 Convert YYYY-MM-DD → real Date object
+
                 if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
 
                 const [y, m, d] = dateStr.split('-').map(Number);
                 return new Date(y, m - 1, d);
@@ -7880,7 +8165,180 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            // onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -8441,7 +8899,6 @@ const MyTablePage = () => {
             filter: "agNumberColumnFilter",
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -9951,6 +10408,600 @@ const MyTablePage = () => {
             },
         },
     };
+    const columnDefsObjectHour = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            showWhenGrouped: true,
+            minWidth: 170,
+            filter: "agTextColumnFilter",
+            // valueGetter: (params) => {
+            //     if (params.data) return params.data.accountNumber;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.accountNumber || null;
+            // },
+            // tooltipValueGetter: (params) => {
+            //     // ✅ Get value for both leaf & grouped rows
+            //     if (params.data) return params.data.accountNumber;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.accountNumber || '';
+            // },
+        },
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+        D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+        campaignname: {
+            headerName: 'CampaignID',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            // hide: true,
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.campaignid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.campaignid || null;
+            },
+            hide: true
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            minWidth: 90,
+            headerTooltip: '(Spend/Impressions)*1000',
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        filteration: {
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            sortable: true,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            filter: "agNumberColumnFilter",
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+        },
+        actions: {
+            headerName: 'Budget',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            hide: true,
+        },
+        adsetname: {
+            headerName: 'AdsetName',
+            field: 'adsetname',
+            sortable: true,
+            minWidth: 450,
+            filter: 'agTextColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            },
+            suppressMenu: true,
+            hide: true,
+
+
+        },
+        adname: {
+            headerName: 'AdName', field: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            hide: true,
+
+
+        },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            minWidth: 110,
+            sortable: true,
+            // filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
+            hide: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        from: {
+            headerName: 'Start',
+            field: 'from',
+            sortable: true,
+            minWidth: 110,
+            filter: "agDateColumnFilter",
+            hide: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        to: {
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+            hide: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        profitloss: {
+            headerName: 'P/L',
+            field: 'profitloss',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                    const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                    const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                    const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+
+                    return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+                }
+                return '';
+            },
+            minWidth: 110,
+            filter: "agNumberColumnFilter",
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        date: {
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+
+                    // cellValue is already a Date object
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        'fb-hour': {
+            headerName: 'F-H',
+            field: 'fb-hour',
+            width: 35,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            rowGroup: true,
+            enableRowGroup: true,
+
+
+        },
+        'mnet-hour': {
+            headerName: 'N-H',
+            field: 'mnet-hour',
+            minWidth: 95,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        spend: {
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter", // Keep filter active
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Total amount spent",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
+        },
+        revenue: {
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.revenue || 0),
+
+
+        },
+        profit: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            sortable: true,
+            aggFunc: liveSpender,
+            cellClassRules: {
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
+            },
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Profit = Revenue - Spend",
+            filterValueGetter: (params) => parseFloat(params.data.profit || 0),
+
+
+        },
+        margin: {
+            headerName: 'Margin',
+            field: 'margin',
+            minWidth: 100,
+            valueGetter: getMargin,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Margin = (Profit / Revenue) * 100",
+
+
+        },
+        fbleads: {
+            headerName: 'FBLeads',
+            field: 'fbleads',
+            minWidth: 105,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        conversions: {
+            headerName: 'Conv',
+            field: 'conversions',
+            minWidth: 85,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+
+
+            headerTooltip: "Conversions",
+
+
+        },
+        cpc: {
+            headerName: 'CPC',
+            field: 'cpc',
+            // valueGetter: (params) => {
+            //     if (params.node.group && params.node.aggData) {
+            //         return sanitizeNumericValue(params.node.aggData["cpc"]) || 0;
+            //     }
+            //     return sanitizeNumericValue(params.data?.cpc);
+            // },
+            aggFunc: cpcSpender,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+
+
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter: getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+
+
+        },
+        fbclicks: {
+            headerName: 'FBClicks',
+            field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks',
+            headerTooltip: 'fblinkclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        impressions: {
+            headerName: 'IMP',
+            field: 'impressions',
+            minWidth: 100,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Impressions",
+        },
+        ctr: {
+            headerName: 'CTR',
+            field: 'ctr',
+            valueGetter: getCtr,
+            minWidth: 100,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        rpc: {
+            headerName: 'RPC',
+            field: 'rpc',
+            minWidth: 80,
+            valueGetter: getRpc,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
+        },
+        cpl: {
+            headerName: 'CPL',
+            field: 'cpl',
+            minWidth: 80,
+            valueGetter: getCpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPL = Spend / FBLeads",
+
+
+        },
+        ncpl: {
+            headerName: 'NCPL',
+            field: 'ncpl',
+            minWidth: 90,
+            valueGetter: getNcpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "NCPL = Spend / Conversions",
+
+
+        },
+        fmargin: {
+            headerName: 'FMargin',
+            field: 'fmargin',
+            minWidth: 120,
+            valueGetter: getFmargin,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+
+
+        },
+        roi: {
+            headerName: 'ROI',
+            field: 'roi',
+            minWidth: 100,
+            valueGetter: getROI,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "ROI = ((Revenue - Spend) / Spend) * 100",
+
+
+        },
+        adsetid: {
+            headerName: 'AdsetId',
+            field: 'adsetid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
+        campaignid: {
+            headerName: 'CampaignId',
+            field: 'campaignid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 500,
+            hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+        },
+        timezone: {
+            headerName: 'TimeZone',
+            field: 'timezone',
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu'
+        },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            hide: true,
+        },
+    };
+
+
 
     const columnDefsObjectAdsetLevelDaily = {
         accountNumber: {
@@ -11258,14 +12309,36 @@ const MyTablePage = () => {
                         params.node?.key ||
                         "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-                    dateStr = campaign?.end || null;
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
+
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
+
                 } else {
-                    dateStr = params.data?.to || null;
+                    // dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
+
                 }
 
                 // 🔥 Convert YYYY-MM-DD → real Date object
                 if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
 
                 const [y, m, d] = dateStr.split('-').map(Number);
                 return new Date(y, m - 1, d);
@@ -11279,7 +12352,180 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -12544,10 +13790,72 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        // to: {
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     sortable: true,
+        //     filter: "agDateColumnFilter",
+
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (!cellValue) return -1;
+
+        //             // cellValue already Date from valueGetter
+        //             const cellDate = new Date(
+        //                 cellValue.getFullYear(),
+        //                 cellValue.getMonth(),
+        //                 cellValue.getDate()
+        //             );
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+
+        //     valueGetter: (params) => {
+        //         let dateStr = null;
+
+        //         if (params.node.group) {
+        //             const campaignName =
+        //                 params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+        //             const campaignId =
+        //                 params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+        //                 params.node?.key ||
+        //                 "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+        //             dateStr = campaign?.end || null;
+        //         } else {
+        //             dateStr = params.data?.to || null;
+        //         }
+
+        //         // 🔥 Convert YYYY-MM-DD → real Date object
+        //         if (!dateStr) return null;
+
+        //         const [y, m, d] = dateStr.split('-').map(Number);
+        //         return new Date(y, m - 1, d);
+        //     },
+
+        //     valueFormatter: (params) => {
+        //         const d = params.value;
+        //         return d ? moment(d).format("DD-MM-YYYY") : '';
+        //     },
+
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
         to: {
             headerName: 'End',
             field: 'to',
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             filter: "agDateColumnFilter",
 
@@ -12580,14 +13888,33 @@ const MyTablePage = () => {
                         params.node?.key ||
                         "";
 
-                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
-                    dateStr = campaign?.end || null;
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
+
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 } else {
-                    dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
                 }
 
-                // 🔥 Convert YYYY-MM-DD → real Date object
+
                 if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
 
                 const [y, m, d] = dateStr.split('-').map(Number);
                 return new Date(y, m - 1, d);
@@ -12601,7 +13928,180 @@ const MyTablePage = () => {
             cellClassRules: {
                 'hide-leaf-cell': (params) => !params.node.group,
             },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
 
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            // onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
+            },
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -13020,7 +14520,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -16082,7 +17581,6 @@ const MyTablePage = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            hide: true,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -17298,6 +18796,9 @@ const MyTablePage = () => {
     const getColumnDefs = (order) => {
         return order?.map(colKey => columnDefsObject[colKey]).filter(item => item);
     };
+    const getColumnDefsHour = (order) => {
+        return order?.map(colKey => columnDefsObjectHour[colKey]).filter(item => item);
+    };
 
     const getColumnDefs1 = (order) => {
         return order?.map(colKey => columnDefsObject1[colKey]).filter(item => item);
@@ -17347,6 +18848,8 @@ const MyTablePage = () => {
 
     const columnDefs4 = useRef();
 
+    const columnDefsHourly = useRef();
+
     const columnDefsAdsetLevel = useRef();
 
     const columnDefsAdLevel = useRef();
@@ -17371,6 +18874,7 @@ const MyTablePage = () => {
             columnDefs2.current = getColumnDefs2(mainData);
             columnDefs3.current = getColumnDefs3(mainData);
             columnDefs4.current = getColumnDefs4(mainData);
+            columnDefsHourly.current = getColumnDefsHour(mainData);
             columnDefsAdsetLevel.current = getColumnDefsAdsetLevel(mainData);
             columnDefsAdLevel.current = getColumnDefsAdLevel([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData)]);
             columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData));
@@ -17407,6 +18911,7 @@ const MyTablePage = () => {
         columnDefs2.current = (getColumnDefs2(updateDataArray));
         columnDefs3.current = (getColumnDefs3(updateDataArray));
         columnDefs4.current = (getColumnDefs4(updateDataArray));
+        columnDefsHourly.current = (getColumnDefsHour(updateDataArray));
         columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(updateDataArray));
         columnDefsAdLevel.current = (getColumnDefsAdLevel(updateDataArray));
         columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(updateDataArray));
@@ -18384,6 +19889,7 @@ const MyTablePage = () => {
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
@@ -20069,6 +21575,63 @@ const MyTablePage = () => {
                                     />
                                 </Tabs.TabPane>
 
+                            )}
+                            {newRevenuePratner === "FB_Mnet" && (
+                                <Tabs.TabPane key="6">
+                                    <HourlyCampaignLevelReports
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        columnStructure={mainData}
+                                        allCampaignData={allCampaignData}
+                                        allProfitLossArray={allProfitLossArray}
+                                        // newaccount={newaccount}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        newAccountName={newAccountName}
+                                        columnDefs={columnDefsHourly.current}
+                                        columnDefs1={columnDefsAdsetLevel.current}
+                                        columnDefs2={columnDefsAdLevel.current}
+                                        campaignComments={campaignComments}
+                                        setCampaignComments={setCampaignComments}
+                                        campaignStatusFilter={campaignStatusFilter}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        setCamapignlevelstatus={setCamapignlevelstatus}
+                                        commentsMap={commentsMap}
+                                        changeRRefrst={resetColumnStructure}
+                                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                        toggleStatus={checked}
+                                        handleChangeToggle={handleChangeToggle}
+                                        theme={theme}
+                                        functionCallForCommnets={functionCallForCommnets}
+                                        functionCallForCampaigns={functionCallForCampaigns}
+                                        context={{
+                                            allCampaignData,
+                                            setCampaignRefreshTrigger,
+                                            changeRRefrst,
+                                            newaccount,
+                                            userdetails,
+                                            theme,
+                                            setCamapignlevelstatus,
+                                            campaignStatusOverridesRef, // ✅ ADD THIS
+                                            adsetStatusOverridesRef,
+                                            adsetPinOverridesRef,
+                                            adsetCommentOverridesRef,
+                                            adStatusOverridesRef,
+                                            adPinOverridesRef,
+                                            adCommentOverridesRef,
+                                        }}
+                                        handleChangeInput={handleChangeInput}
+                                        handleBlur={handleBlur}
+                                        onClickRefresh={onClickRefresh}
+                                        accountsAccess={accountsAccess}
+                                    />
+                                </Tabs.TabPane>
                             )}
 
                             {/* {newRevenuePratner === "FB_Mnet" && (

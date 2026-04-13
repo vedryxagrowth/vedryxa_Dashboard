@@ -1945,7 +1945,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             Last Edited Time:
                                         </span>
                                         <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
-                                            {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
+                                            {/* {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""} */}
+                                            {universalOject?.editedTime || ""}
                                         </span>
 
                                     </div>
