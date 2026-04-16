@@ -41,7 +41,8 @@ const newtworkCollections = {
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
-    "FB_InuvoPrism": "Facebook_InuvoPrism"
+    "FB_InuvoPrism": "Facebook_InuvoPrism",
+    "FB_Botup" :"Facebook_Botup"
 }
 
 const networkCollectionsForAiAssistant = {
@@ -63,6 +64,7 @@ const networkCollectionsForAiAssistant = {
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
     FB_Predicto: 'Facebook_Predicto_Daily',
     FB_Affinity: 'Facebook_Affinity_Daily',
+    FB_Botup :"Facebook_Botup_Daily"
 };
 
 const NetworkDefaultTimezones = {
@@ -82,7 +84,8 @@ const NetworkDefaultTimezones = {
     "FB_InuvoPrism": "PDT",
     "FB_CodeFuel": "UTC",
     "FB_Predicto": "EDT",
-    "FB_Affinity": "PDT"
+    "FB_Affinity": "PDT",
+    "FB_Botup" :"EDT"
 }
 
 
