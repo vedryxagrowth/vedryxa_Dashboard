@@ -75,6 +75,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     const newRowDataForFilter = useRef([]);
 
     const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
+    const [typeFilter, setTypeFilter] = useState("All");
 
     const [insideInput, setInsideInput] = useState("");
 
@@ -3451,6 +3452,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     }, []);
 
     useEffect(() => {
+
         // functionCall1();
         console.log(campaignStatusFilter, "campaignStatusFilter");
         console.log(campaignStatusFilter?.toUpperCase())
@@ -3503,16 +3505,77 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             );
 
             // filteredRowObjects is the final filtered grid data
-
             setRowData(filteredRowObjects);
+
+            if (typeFilter !== "All") {
+
+                const campaignBudgetMap = new Map(
+                    Camapignlevelstatus.map(item => {
+                        const id = String(item.campaign_id);
+
+                        const hasDaily =
+                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+                        const hasLifetime =
+                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
+                    })
+                );
+
+                const filteredByType = filteredRowObjects.filter(row => {
+                    const budget = campaignBudgetMap.get(String(row.campaignid));
+
+                    if (typeFilter === "Daily") return budget?.daily;
+                    if (typeFilter === "Lifetime") return budget?.lifetime;
+
+                    return true;
+                });
+
+                setRowData(filteredByType);
+            }
             // setRowData(filteredByStatus);
             // newRowDataForFilter.current = filteredByStatus;
             // console.log(newRowDataForFilter.current)
         } else {
-            // console.log(newRowDataForFilter.current)
-            setRowData(newRowDataForFilter.current);
+
+            let data = newRowDataForFilter.current;
+
+            if (typeFilter !== "All") {
+                const campaignBudgetMap = new Map(
+                    Camapignlevelstatus.map(item => {
+                        const id = String(item.campaign_id);
+
+                        const hasDaily =
+                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+                        const hasLifetime =
+                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
+                    })
+                );
+
+                data = data.filter(row => {
+                    const budget = campaignBudgetMap.get(String(row.campaignid));
+
+                    if (typeFilter === "Daily") return budget?.daily;
+                    if (typeFilter === "Lifetime") return budget?.lifetime;
+
+                    return true;
+                });
+            }
+
+            setRowData(data);
+
+            // setRowData(newRowDataForFilter.current);
         }
-    }, [campaignStatusFilter]);
+
+    }, [campaignStatusFilter, typeFilter, Camapignlevelstatus]);
 
     // useEffect(() => {
     //     // console.log(campaignComments, "campaignComments");
@@ -4329,6 +4392,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                         }}
                                     />
                                 </Col>
+
                                 <Col>
                                     <Dropdown
                                         overlay={
@@ -4407,6 +4471,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                         }
                                         trigger={['click']}
                                     >
+
                                         <Button
                                             type="default"
                                             style={{
@@ -4425,7 +4490,38 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                             </Space>
                                         </Button>
                                     </Dropdown>
+
                                 </Col>
+                                <Col>
+                                    <Dropdown
+                                        overlay={
+                                            <Menu
+                                                onClick={({ key }) => setTypeFilter(key)}   
+                                                items={[
+                                                    { key: 'All', label: 'All' },
+                                                    { key: 'Daily', label: 'Daily' },
+                                                    { key: 'Lifetime', label: 'Lifetime' },
+                                                ]}
+                                            />
+                                        }
+                                        trigger={['click']}
+                                    >
+                                        <Button
+                                            style={{
+                                                borderRadius: 8,
+                                                background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                                                border: '1px solid #91d5ff',
+                                                color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                                                fontWeight: 500,
+                                                marginRight: '5px'
+                                            }}
+                                        >
+                                            {typeFilter} <DownOutlined />
+                                        </Button>
+                                    </Dropdown>
+
+                                </Col>
+
 
                                 {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ fontWeight: '600' }}>
