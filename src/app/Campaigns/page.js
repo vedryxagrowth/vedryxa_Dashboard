@@ -204,6 +204,7 @@ const App = () => {
   const [adDetails, setAdDetails] = useState({});
   const [adsCount, setAdsCount] = useState({});
   const [loadingAd, setLoadingAd] = useState(null);
+  const [typeFilter, setTypeFilter] = useState('All');
   console.log(checkedRowRecords);
   // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
@@ -254,6 +255,12 @@ const App = () => {
       if (campaignStatusFilter === "pending") {
         return campaign.Approval === "PENDING_APPROVAL";
       }
+      if (campaignStatusFilter === "reject") {
+        return campaign.Approval === "Rejected";
+      }
+      if (campaignStatusFilter === "error") {
+        return campaign.adsetErrors.length > 0;
+      }
       return true;
     });
   };
@@ -269,7 +276,26 @@ const App = () => {
       if (campaignStatusFilter === "pending") {
         return campaign.Approval === "PENDING_APPROVAL";
       }
+      if (campaignStatusFilter === "reject") {
+        return campaign.Approval === "Rejected";
+      }
+      if (campaignStatusFilter === "error") {
+        return campaign.adsetErrors.length > 0;
+      }
+      if (typeFilter === "Daily") {
+        if (campaign.budgetType?.toLowerCase() !== "daily") {
+          return false;
+        }
+      }
+
+      if (typeFilter === "Lifetime") {
+        if (campaign.budgetType?.toLowerCase() !== "lifetime") {
+          return false;
+        }
+      }
+
       return true;
+
     });
   };
 
@@ -3151,9 +3177,9 @@ const App = () => {
           : "N/A";
         const RejectedBy = record?.RejectedBy || "N/A";
         const RejectedDate = record?.RejectedDate
-         ? moment(record.RejectedDate, "YYYY-MM-DD HH:mm z")
-          .tz("Asia/Kolkata")
-          .format("DD-MM-YYYY HH:mm")
+          ? moment(record.RejectedDate, "YYYY-MM-DD HH:mm z")
+            .tz("Asia/Kolkata")
+            .format("DD-MM-YYYY HH:mm")
           : "N/A";
         return (
           <div>
@@ -4360,14 +4386,14 @@ const App = () => {
         <Row
           align="middle"
           justify="space-between"
-          style={{ flexWrap: "wrap", rowGap: "12px" }}
+          style={{ flexWrap: "wrap", rowGap: "5px" }}
         >
 
           <Col
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: "5px",
+              gap: "3px",
               alignItems: "center",
             }}
           >
@@ -4375,7 +4401,7 @@ const App = () => {
             <Select
               showSearch
               placeholder="Select Projects"
-              style={{ width: 140 }}
+              style={{ width: 130 }}
               onChange={handleKeyChange}
               value={selectedKey}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -4624,10 +4650,10 @@ const App = () => {
               style={{
                 backgroundColor: hovered ? "#91C25F" : "transparent",
                 border: "1px solid #4CAF50",
-                borderRadius: "6px",
+                borderRadius: "8px",
                 color: theme === "dark" ? "#ffffff" : "#000000",
                 height: "32px",
-                padding: "0 16px",
+                padding: "0 8px",
                 transition: "all 0.15s ease-in-out",
               }}
             >
@@ -4640,7 +4666,7 @@ const App = () => {
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: "5px",
+              gap: "3px",
               alignItems: "center",
             }}
           >
@@ -4649,7 +4675,7 @@ const App = () => {
                 style={{
                   textAlign: "right",
                   fontSize: "13px",
-                  paddingRight: "8px",
+                  paddingRight: "5px",
                   color: theme === "dark" ? "#e4e6eb" : "#050505",
                 }}
               >
@@ -4668,7 +4694,7 @@ const App = () => {
                 theme === "dark" ? "custom-input-dark" : "custom-input-light"
               }
               style={{
-                width: "170px",
+                width: "150px",
                 border: "1px solid #4caf50",
               }}
             />
@@ -4682,7 +4708,7 @@ const App = () => {
                       label: (
                         <span
                           style={{
-                            fontSize: "13px",
+                            fontSize: "12px",
                             display: "flex",
                             alignItems: "center",
                           }}
@@ -4769,6 +4795,52 @@ const App = () => {
                         </span>
                       ),
                     },
+                    {
+                      key: "reject",
+                      label: (
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "red",
+                              marginRight: "6px",
+                            }}
+                          ></span>
+                          Reject
+                        </span>
+                      ),
+                    },
+                    {
+                      key: "error",
+                      label: (
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: "6px",
+                              height: "6px",
+                              borderRadius: "50%",
+                              backgroundColor: "#EC7117",
+                              marginRight: "6px",
+                            }}
+                          ></span>
+                          Error
+                        </span>
+                      ),
+                    },
                   ]}
                 />
               }
@@ -4794,6 +4866,33 @@ const App = () => {
               </Button>
             </Dropdown>
 
+            <Dropdown
+              overlay={
+                <Menu
+                  onClick={({ key }) => setTypeFilter(key)}
+                  items={[
+                    { key: 'All', label: 'All' },
+                    { key: 'Daily', label: 'Daily' },
+                    { key: 'Lifetime', label: 'Lifetime' },
+                  ]}
+                />
+              }
+              trigger={['click']}
+            >
+              <Button
+                style={{
+                  borderRadius: 8,
+                  background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                  border: '1px solid #91d5ff',
+                  color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                  fontWeight: 500,
+                  
+                }}
+              >
+                {typeFilter} <DownOutlined />
+              </Button>
+            </Dropdown>
+
             {/* 🔹 Total Daily Spend */}
             {/* <span
               style={{
@@ -4811,9 +4910,9 @@ const App = () => {
               <span
                 style={{
                   backgroundColor: "transparent",
-                  padding: "5px 14px",
+                  padding: "5px 10px",
                   borderRadius: "8px",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   color: theme === "dark" ? "#fff" : "#000",
                   border: "1px solid #4caf50",
                 }}

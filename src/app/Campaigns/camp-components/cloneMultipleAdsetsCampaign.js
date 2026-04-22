@@ -2965,8 +2965,10 @@ const AdsetComponent = ({
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+  const BidStartegyValue = Form.useWatch("Bid_strategy", form) ?? "";
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
   const isDynamicCreative = Form.useWatch(["adsets", index, "isDynamicCreative"], form);
+
 
   const showScheduling =
     budgetType === "lifetime" && (adSchedulingToShow[adset.id] || adSchedulingToShowCampaign);
@@ -3107,7 +3109,43 @@ const AdsetComponent = ({
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ]
   }
-  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+
+  const Bid_strategy_values = [
+    {
+      value: "LOWEST_COST_WITHOUT_CAP",
+      label: "Highest Volume",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_BID_CAP",
+      label: "Bid Cap",
+      title: "",
+    },
+    {
+      value: "COST_CAP",
+      label: "Cost per Result Goal",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_MIN_ROAS",
+      label: "ROAS Goal",
+      title: "",
+    },
+  ];
+  const SPECIAL_RULES = {
+    OUTCOME_SALES: {
+      LOWEST_COST_WITH_MIN_ROAS: [
+        { value: "VALUE", label: "Maximize value of conversions" },
+      ],
+    },
+  };
+
+  const optionsForOptimz_goal =
+    SPECIAL_RULES?.[objectiveValue]?.[BidStartegyValue] ||
+    Optimization_goal_values[objectiveValue] ||
+    [];
+
+  // const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
 
   // value currently in form for this adset (keeps UI in sync)
   const adsetsValues = form.getFieldValue("adsets") || [];
@@ -4704,8 +4742,11 @@ const AdsetComponent = ({
           {showBidAmount && (
             <Form.Item
               name={["adsets", index, "bid_amount"]}
+              // label={
+              //   <span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>
+              // }
               label={
-                <span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>
+                <span style={{ color: "#B4B4B4" }}>{Bid_strategy_values.find(item => item.value === BidStartegyValue)?.label}</span>
               }
               rules={[
                 {
@@ -7843,6 +7884,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [continents, setContinents] = useState([])
 
   // Derived condition name changed to watchedHasAdsetBudget
+  const objectiveValue = Form.useWatch("Objectives", form) ?? "";
   const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
     ? watchedAdsets.some(ad => Number(ad?.DailyAdd_amount) > 0)
     : false;
@@ -8792,7 +8834,30 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const closeCanvasModal = () => {
     setIsImgEditorShown(false); // Close the image editor
   };
+  const bidStrategyOptions = [
+    { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
+    { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
+    { value: "COST_CAP", label: "Cost per Result Goal" },
+    { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" },
+  ];
 
+  const filteredBidStrategies =
+    objectiveValue === "OUTCOME_LEADS"
+      ? bidStrategyOptions.filter(
+        (opt) => opt.value !== "LOWEST_COST_WITH_MIN_ROAS"
+      )
+      : bidStrategyOptions;
+
+
+  useEffect(() => {
+    if (objectiveValue === "OUTCOME_LEADS") {
+      const current = form.getFieldValue("Bid_strategy");
+
+      if (current === "LOWEST_COST_WITH_MIN_ROAS") {
+        form.setFieldValue("Bid_strategy", "LOWEST_COST_WITHOUT_CAP");
+      }
+    }
+  }, [objectiveValue]);
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
     setWebsiteURL(text);
@@ -8926,7 +8991,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const handleBidStrategyChange = (value) => {
     // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
     setShowBidAmount(
-      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP"
+      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP" || value === "LOWEST_COST_WITH_MIN_ROAS"
     );
     // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
   };
@@ -12709,28 +12774,29 @@ const CloneMultipleAdsetCampaignDrawer = ({
                 >
                   <Select
                     variant="filled"
-                    options={[
-                      {
-                        value: "LOWEST_COST_WITHOUT_CAP",
-                        label: "Highest Volume",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_BID_CAP",
-                        label: "Bid Cap",
-                        title: "",
-                      },
-                      {
-                        value: "COST_CAP",
-                        label: "Cost per Result Goal",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_MIN_ROAS",
-                        label: "ROAS Goal",
-                        title: "",
-                      },
-                    ]}
+                    options={filteredBidStrategies}
+                    // options={[
+                    //   {
+                    //     value: "LOWEST_COST_WITHOUT_CAP",
+                    //     label: "Highest Volume",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_BID_CAP",
+                    //     label: "Bid Cap",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "COST_CAP",
+                    //     label: "Cost per Result Goal",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_MIN_ROAS",
+                    //     label: "ROAS Goal",
+                    //     title: "",
+                    //   },
+                    // ]}
                     onChange={handleBidStrategyChange}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"

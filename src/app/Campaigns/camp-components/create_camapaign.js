@@ -1526,6 +1526,7 @@ const AdsetComponent = ({
   }, [selectedByAdset, adset.id, timezoneType]);
 
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+  const BidStartegyValue = Form.useWatch("Bid_strategy", form) ?? "";
 
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
 
@@ -2963,7 +2964,7 @@ const AdsetComponent = ({
     OUTCOME_SALES: [
       { value: "OFFSITE_CONVERSIONS", label: "Maximize number of conversions" },
       { value: "VALUE", label: "Maximize value of conversions" },
-      { value: "LANDING_PAGE_VIEWS ", label: "Maximize number of landing page views" },
+      { value: "LANDING_PAGE_VIEWS", label: "Maximize number of landing page views" },
       { value: "LINK_CLICKS", label: "Maximize number of link clicks" },
       { value: "REACH", label: "Maximize daily unique reach" },
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
@@ -2993,8 +2994,19 @@ const AdsetComponent = ({
       { value: "website", label: "Website" },
     ]
   }
+  const SPECIAL_RULES = {
+    OUTCOME_SALES: {
+      LOWEST_COST_WITH_MIN_ROAS: [
+        { value: "VALUE", label: "Maximize value of conversions" },
+      ],
+    },
+  };
 
-  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+  const optionsForOptimz_goal =
+    SPECIAL_RULES?.[objectiveValue]?.[BidStartegyValue] ||
+    Optimization_goal_values[objectiveValue] ||
+    [];
+  // const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
 
   // value currently in form for this adset (keeps UI in sync)
   const adsetsValues = form.getFieldValue("adsets") || [];
@@ -3004,6 +3016,31 @@ const AdsetComponent = ({
     index === 0
       ? optionsForOptimz_goal
       : optionsForOptimz_goal.map((o) => ({ ...o, disabled: o.value !== currentValue }));
+
+
+  useEffect(() => {
+    if (!objectiveValue) return;
+
+    const adsets = form.getFieldValue("adsets") || [];
+
+    const options =
+      SPECIAL_RULES?.[objectiveValue]?.[BidStartegyValue] ||
+      Optimization_goal_values[objectiveValue] ||
+      [];
+
+    const defaultValue = options?.[0]?.value;
+
+    const updated = adsets.map((adset) => ({
+      ...adset,
+      optimization_goal:
+        !adset?.optimization_goal || !options.find(o => o.value === adset.optimization_goal)
+          ? defaultValue
+          : adset.optimization_goal,
+    }));
+
+    form.setFieldsValue({ adsets: updated });
+
+  }, [objectiveValue, BidStartegyValue]);
 
   const currentCountries = adsetsValues[index]?.countries ?? [];
 
@@ -4698,12 +4735,12 @@ const AdsetComponent = ({
                                     theme === "dark" ? "custom-input-dark" : "custom-input-light"
                                   }
                                   placeholder="Enter beneficiary ID"
-                                  // inputMode="numeric"
-                                  // onKeyPress={(e) => {
-                                  //   if (!/[0-9]/.test(e.key)) {
-                                  //     e.preventDefault();
-                                  //   }
-                                  // }}
+                                // inputMode="numeric"
+                                // onKeyPress={(e) => {
+                                //   if (!/[0-9]/.test(e.key)) {
+                                //     e.preventDefault();
+                                //   }
+                                // }}
                                 />
                               </Form.Item>
 
@@ -4762,12 +4799,12 @@ const AdsetComponent = ({
                                       theme === "dark" ? "custom-input-dark" : "custom-input-light"
                                     }
                                     placeholder="Enter payer ID"
-                                    // inputMode="numeric"
-                                    // onKeyPress={(e) => {
-                                    //   if (!/[0-9]/.test(e.key)) {
-                                    //     e.preventDefault();
-                                    //   }
-                                    // }}
+                                  // inputMode="numeric"
+                                  // onKeyPress={(e) => {
+                                  //   if (!/[0-9]/.test(e.key)) {
+                                  //     e.preventDefault();
+                                  //   }
+                                  // }}
                                   />
                                 </Form.Item>
                               )}
@@ -7659,6 +7696,31 @@ const CreateCampaignDrawer = ({
 
   const objectiveValue = Form.useWatch("Objectives", form);
 
+  const bidStrategyOptions = [
+    { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
+    { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
+    { value: "COST_CAP", label: "Cost per Result Goal" },
+    { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" },
+  ];
+
+  const filteredBidStrategies =
+    objectiveValue === "OUTCOME_LEADS"
+      ? bidStrategyOptions.filter(
+        (opt) => opt.value !== "LOWEST_COST_WITH_MIN_ROAS"
+      )
+      : bidStrategyOptions;
+
+
+  useEffect(() => {
+    if (objectiveValue === "OUTCOME_LEADS") {
+      const current = form.getFieldValue("Bid_strategy");
+
+      if (current === "LOWEST_COST_WITH_MIN_ROAS") {
+        form.setFieldValue("Bid_strategy", "LOWEST_COST_WITHOUT_CAP");
+      }
+    }
+  }, [objectiveValue]);
+
   const accountsForAccess = adAccounts[selectedKey];
   const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
@@ -9104,7 +9166,7 @@ const CreateCampaignDrawer = ({
   const handleBidStrategyChange = (value) => {
     // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
     setShowBidAmount(
-      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP"
+      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP" || value === "LOWEST_COST_WITH_MIN_ROAS"
     );
     // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
   };
@@ -13439,6 +13501,9 @@ const CreateCampaignDrawer = ({
                 </Form.Item>
                 <Form.Item
                   name="Bid_strategy"
+                  initialValues={{
+                    Bid_strategy: "LOWEST_COST_WITHOUT_CAP",
+                  }}
                   label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
                   rules={[
                     {
@@ -13451,28 +13516,29 @@ const CreateCampaignDrawer = ({
                 >
                   <Select
                     variant="filled"
-                    options={[
-                      {
-                        value: "LOWEST_COST_WITHOUT_CAP",
-                        label: "Highest Volume",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_BID_CAP",
-                        label: "Bid Cap",
-                        title: "",
-                      },
-                      {
-                        value: "COST_CAP",
-                        label: "Cost per Result Goal",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_MIN_ROAS",
-                        label: "ROAS Goal",
-                        title: "",
-                      },
-                    ]}
+                    options={filteredBidStrategies}
+                    // options={[
+                    //   {
+                    //     value: "LOWEST_COST_WITHOUT_CAP",
+                    //     label: "Highest Volume",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_BID_CAP",
+                    //     label: "Bid Cap",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "COST_CAP",
+                    //     label: "Cost per Result Goal",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_MIN_ROAS",
+                    //     label: "ROAS Goal",
+                    //     title: "",
+                    //   },
+                    // ]}
                     onChange={handleBidStrategyChange}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"
