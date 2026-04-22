@@ -3223,7 +3223,44 @@ const AdsetComponent = ({
     ]
   }
 
-  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+  const Bid_strategy_values = [
+    {
+      value: "LOWEST_COST_WITHOUT_CAP",
+      label: "Highest Volume",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_BID_CAP",
+      label: "Bid Cap",
+      title: "",
+    },
+    {
+      value: "COST_CAP",
+      label: "Cost per Result Goal",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_MIN_ROAS",
+      label: "ROAS Goal",
+      title: "",
+    },
+  ];
+
+  const bidStrategy = Form.useWatch("Bid_strategy", form);
+
+  const SPECIAL_RULES = {
+    OUTCOME_SALES: {
+      LOWEST_COST_WITH_MIN_ROAS: [
+        { value: "VALUE", label: "Maximize value of conversions" },
+      ],
+    },
+  };
+
+  const optionsForOptimz_goal =
+    SPECIAL_RULES?.[objectiveValue]?.[bidStrategy] ||
+    Optimization_goal_values[objectiveValue] ||
+    [];
+  // const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
 
   const adsetsValues = form.getFieldValue("adsets") || [];
   const currentValue = adsetsValues[index]?.optimization_goal ?? "";
@@ -4352,7 +4389,7 @@ const AdsetComponent = ({
               },
             ]}
             style={{ flex: "1 1 140px" }}
-            initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
+            initialValue={adset.optimization_goal}
           >
             {/* <Select
               disabled={adset.Adsetid || view ? true : false}
@@ -4804,8 +4841,11 @@ const AdsetComponent = ({
           {showBidAmount && (
             <Form.Item
               name={["adsets", index, "bid_amount"]}
+              // label={
+              //   <span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>
+              // }
               label={
-                <span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>
+                <span style={{ color: "#B4B4B4" }}>{Bid_strategy_values.find(item => item.value === bidStrategy)?.label}</span>
               }
               rules={[
                 {
@@ -8129,6 +8169,30 @@ const EditMultipleAdsetCampaignDrawer = ({
   console.log(pageIDList, "pageIDList in EditMultipleAdsetCampaignDrawer");
 
   const objectiveValue = Form.useWatch("Objectives", form);
+  const bidStrategyOptions = [
+    { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
+    { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
+    { value: "COST_CAP", label: "Cost per Result Goal" },
+    { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" },
+  ];
+
+  const filteredBidStrategies =
+    objectiveValue === "OUTCOME_LEADS"
+      ? bidStrategyOptions.filter(
+        (opt) => opt.value !== "LOWEST_COST_WITH_MIN_ROAS"
+      )
+      : bidStrategyOptions;
+
+
+  useEffect(() => {
+    if (objectiveValue === "OUTCOME_LEADS") {
+      const current = form.getFieldValue("Bid_strategy");
+
+      if (current === "LOWEST_COST_WITH_MIN_ROAS") {
+        form.setFieldValue("Bid_strategy", "LOWEST_COST_WITHOUT_CAP");
+      }
+    }
+  }, [objectiveValue]);
   // const handleConfirm = async() => {
   //   const newErrors = {
   //     input1: popupInputs.input1.trim() ? '' : 'First input is required',
@@ -8421,7 +8485,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       const adsets = form.getFieldValue("adsets") || [];
       const updatedAdsets = adsets.map((adset) => ({
         ...adset,
-        optimization_goal: "OFFSITE_CONVERSIONS",
+        // optimization_goal: "OFFSITE_CONVERSIONS",
         // custom_event_type:
         //   objectiveValue === "OUTCOME_LEADS" ? "LEAD" : "PURCHASE",
         action_source: "website",
@@ -9232,7 +9296,7 @@ const EditMultipleAdsetCampaignDrawer = ({
   const handleBidStrategyChange = (value) => {
     // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
     setShowBidAmount(
-      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP"
+      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP" || value === "LOWEST_COST_WITH_MIN_ROAS"
     );
     // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
   };
@@ -14110,28 +14174,29 @@ const EditMultipleAdsetCampaignDrawer = ({
                 >
                   <Select
                     variant="filled"
-                    options={[
-                      {
-                        value: "LOWEST_COST_WITHOUT_CAP",
-                        label: "Highest Volume",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_BID_CAP",
-                        label: "Bid Cap",
-                        title: "",
-                      },
-                      {
-                        value: "COST_CAP",
-                        label: "Cost per Result Goal",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_MIN_ROAS",
-                        label: "ROAS Goal",
-                        title: "",
-                      },
-                    ]}
+                    options={filteredBidStrategies}
+                    // options={[
+                    //   {
+                    //     value: "LOWEST_COST_WITHOUT_CAP",
+                    //     label: "Highest Volume",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_BID_CAP",
+                    //     label: "Bid Cap",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "COST_CAP",
+                    //     label: "Cost per Result Goal",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_MIN_ROAS",
+                    //     label: "ROAS Goal",
+                    //     title: "",
+                    //   },
+                    // ]}
                     onChange={handleBidStrategyChange}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"
