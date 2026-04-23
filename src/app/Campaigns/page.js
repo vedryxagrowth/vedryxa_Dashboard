@@ -259,7 +259,11 @@ const App = () => {
         return campaign.Approval === "Rejected";
       }
       if (campaignStatusFilter === "error") {
-        return campaign.adsetErrors.length > 0;
+        return (
+          (campaign.adsetErrors?.length || 0) > 0 ||
+          (campaign.adErrors?.length || 0) > 0 ||
+          (campaign.campaignlevel_error)
+        );
       }
       return true;
     });
@@ -280,7 +284,11 @@ const App = () => {
         return campaign.Approval === "Rejected";
       }
       if (campaignStatusFilter === "error") {
-        return campaign.adsetErrors.length > 0;
+        return (
+          (campaign.adsetErrors?.length || 0) > 0 ||
+          (campaign.adErrors?.length || 0) > 0 ||
+          (campaign.campaignlevel_error)
+        );
       }
       if (typeFilter === "Daily") {
         if (campaign.budgetType?.toLowerCase() !== "daily") {
@@ -4886,7 +4894,7 @@ const App = () => {
                   border: '1px solid #91d5ff',
                   color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
                   fontWeight: 500,
-                  
+
                 }}
               >
                 {typeFilter} <DownOutlined />
