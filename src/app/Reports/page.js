@@ -85,7 +85,8 @@ const NetworkDefaultTimezones = {
     "FB_CodeFuel": "UTC",
     "FB_Predicto": "EDT",
     "FB_Affinity": "PDT",
-    "FB_Botup" :"EDT"
+    "FB_Botup" :"EDT",
+    "Outbrain_TonicRsoc": "EDT"
 }
 
 

@@ -2954,6 +2954,24 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
       const accountsParam = Array.isArray(newaccount)
         ? newaccount.map(String)
         : [String(newaccount)];
+      let networkCollection;
+      switch (newRevenuePratner) {
+        case "FB_Mnet":
+          networkCollection = "Facebook_AD_Daily";
+          break;
+        case "FB_MnetBing":
+          networkCollection = "Facebook_AD_Daily";
+          break;
+        case "FB_CodeFuel":
+          networkCollection = "Facebook_AD_Daily";
+          break;
+        case "Outbrain_TonicRsoc":
+          networkCollection = "Outbrain_TonicRsoc";
+          break;
+        default:
+          networkCollection = "Facebook_Mnet_AD";
+          break;
+      }
 
       // ✅ call the new multi-account endpoint
       const fetchData = await apiClient.post(
@@ -2964,7 +2982,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
           accountNumbers: accountsParam,
           timezone: newtime,
           status: 'Daily',                  // "Daily" | "Live"
-          network: newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
+          // network: newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? "Facebook_AD_Daily" : "Facebook_Mnet_AD",        // keep your original value
+          network: networkCollection,
           adsetids: adsets,
           campaignids: campaigns
         }
