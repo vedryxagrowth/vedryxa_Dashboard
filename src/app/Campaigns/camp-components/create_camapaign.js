@@ -1301,7 +1301,9 @@ const AdsetComponent = ({
   pixel,
   geo,
   newImageHashArray,
-  geoTreeData
+  geoTreeData,
+  setMinAgeToggle,
+  minAgeToggle
 }) => {
   console.log(page_id_list, "page_id_list in adset component");
   console.log(pageidList, "pageidList in adset component");
@@ -1325,6 +1327,7 @@ const AdsetComponent = ({
   const [selectedIndex, setSelectedIndex] = useState(String(accountis[0]));
   const [budget, setBudget] = useState(adset?.DailyAdd_amount || 0)
 
+
   console.log(selectedPositions, "selectedPositions in adset component");
   console.log(adset.id, "adset id in adset component");
   console.log(selectedPublishers, "selectedPublishers in adset component");
@@ -1335,6 +1338,7 @@ const AdsetComponent = ({
 
   const [dragging, setDragging] = useState(false);
   const [value, setValue] = useState([]);
+
 
   const onChange = (newValue, label, extra) => {
     console.log("Selected values:", newValue);
@@ -1939,6 +1943,59 @@ const AdsetComponent = ({
     });
   }, [page_id_list, selectedPages, page]);
 
+  const below25Options = [
+    { value: "18", label: "18" },
+    { value: "19", label: "19", disabled: hasCountries },
+    { value: "20", label: "20", disabled: hasCountries },
+    { value: "21", label: "21", disabled: hasCountries },
+    { value: "22", label: "22", disabled: hasCountries },
+    { value: "23", label: "23", disabled: hasCountries },
+    { value: "24", label: "24", disabled: hasCountries },
+    { value: "25", label: "25", disabled: hasCountries }
+  ];
+
+  const above25Options = [
+    { value: "26", label: "26", disabled: hasCountries },
+    { value: "27", label: "27", disabled: hasCountries },
+    { value: "28", label: "28", disabled: hasCountries },
+    { value: "29", label: "29", disabled: hasCountries },
+    { value: "30", label: "30", disabled: hasCountries },
+    { value: "31", label: "31", disabled: hasCountries },
+    { value: "32", label: "32", disabled: hasCountries },
+    { value: "33", label: "33", disabled: hasCountries },
+    { value: "34", label: "34", disabled: hasCountries },
+    { value: "35", label: "35", disabled: hasCountries },
+    { value: "36", label: "36", disabled: hasCountries },
+    { value: "37", label: "37", disabled: hasCountries },
+    { value: "38", label: "38", disabled: hasCountries },
+    { value: "39", label: "39", disabled: hasCountries },
+    { value: "40", label: "40", disabled: hasCountries },
+    { value: "41", label: "41", disabled: hasCountries },
+    { value: "42", label: "42", disabled: hasCountries },
+    { value: "43", label: "43", disabled: hasCountries },
+    { value: "44", label: "44", disabled: hasCountries },
+    { value: "45", label: "45", disabled: hasCountries },
+    { value: "46", label: "46", disabled: hasCountries },
+    { value: "47", label: "47", disabled: hasCountries },
+    { value: "48", label: "48", disabled: hasCountries },
+    { value: "49", label: "49", disabled: hasCountries },
+    { value: "50", label: "50", disabled: hasCountries },
+    { value: "51", label: "51", disabled: hasCountries },
+    { value: "52", label: "52", disabled: hasCountries },
+    { value: "53", label: "53", disabled: hasCountries },
+    { value: "54", label: "54", disabled: hasCountries },
+    { value: "55", label: "55", disabled: hasCountries },
+    { value: "56", label: "56", disabled: hasCountries },
+    { value: "57", label: "57", disabled: hasCountries },
+    { value: "58", label: "58", disabled: hasCountries },
+    { value: "59", label: "59", disabled: hasCountries },
+    { value: "60", label: "60", disabled: hasCountries },
+    { value: "61", label: "61", disabled: hasCountries },
+    { value: "62", label: "62", disabled: hasCountries },
+    { value: "63", label: "63", disabled: hasCountries },
+    { value: "64", label: "64", disabled: hasCountries },
+    { value: "65", label: "65", disabled: hasCountries }
+  ];
 
   const selectedPixels = Form.useWatch("pixel_id", form) || [];
   // const pixelOptionsWithDisabled = useMemo(() => {
@@ -4909,21 +4966,60 @@ const AdsetComponent = ({
                   {/* 🔹 Min Age */}
                   <Form.Item
                     name={["adsets", index, "Min_Age"]}
-                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    // label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    label={
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ color: "#B4B4B4" }}>Min Age</span>
+
+                        <Switch
+                          // checked={minAgeToggle[index] ?? true}
+                          checked={hasCountries ? true : (minAgeToggle[index] ?? true)}
+                          disabled={hasCountries}
+                          onChange={(checked) => {
+                            setMinAgeToggle(prev => ({
+                              ...prev,
+                              [index]: checked
+                            }));
+
+                            const defaultValue = checked ? "18" : "26";
+
+                            const currentAdsets = form.getFieldValue("adsets") || [];
+
+                            const updatedAdsets = currentAdsets.map((item, i) =>
+                              i === index ? { ...item, Min_Age: defaultValue } : item
+                            );
+
+                            form.setFieldsValue({
+                              adsets: updatedAdsets,
+                            });
+                          }}
+                          style={{
+                            backgroundColor: (hasCountries ? true : (minAgeToggle[index] ?? true))
+                              ? "#91C25F"
+                              : "#d9d9d9",
+                          }}
+                          size="small"
+                        />
+                      </div>
+                    }
                     rules={[
                       { required: true, message: "Please select an option!" },
                     ]}
                     style={{ flex: "1 1 150px" }}
-                    initialValue={adset.Min_Age || "18"}
+                    // initialValue={adset.Min_Age}
+                    // initialValue={minAgeToggle ? "18" : "26"}
+                    initialValue={(minAgeToggle[index] ?? true) ? "18" : "26"}
                   >
                     <Select
                       disabled={hasCountries}
-                      options={[
-                        { value: "18", label: "18", title: "" },
-                        { value: "25", label: "25", title: "", disabled: hasCountries },
-                        { value: "35", label: "35", title: "", disabled: hasCountries },
-                        { value: "40", label: "40", disabled: true, title: "" },
-                      ]}
+                      showSearch
+                      // options={[
+                      //   { value: "18", label: "18", title: "" },
+                      //   { value: "25", label: "25", title: "", disabled: hasCountries },
+                      //   { value: "35", label: "35", title: "", disabled: hasCountries },
+                      //   { value: "40", label: "40", disabled: true, title: "" },
+                      // ]}
+                      options={(minAgeToggle[index] ?? true) ? below25Options : above25Options}
                       dropdownClassName={theme === "dark" && "custom-dropdown"}
                       className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                     />
@@ -7660,6 +7756,7 @@ const CreateCampaignDrawer = ({
   const [page, setPages] = useState("Page");
   const userPickedRef = useRef(false);
   const [continents, setContinents] = useState([])
+  const [minAgeToggle, setMinAgeToggle] = useState(true);
   // const [budgetType, ]
 
   // const adsets = Form.useWatch("adsets", form) || [];
@@ -8948,8 +9045,6 @@ const CreateCampaignDrawer = ({
       ...prev,
       [newId]: !!prev[adsetId]
     }));
-
-
 
     // ✅ Clone media/file states by UUID
     const cloneFiles = (prev, setter) => {
@@ -10519,6 +10614,7 @@ const CreateCampaignDrawer = ({
         setSelectedByAdset({});
         setAdsetSchedule({});
         setAdSchedulingToShowCampaign(false);
+        setMinAgeToggle(true)
       }
     }
     catch (error) {
@@ -10783,6 +10879,7 @@ const CreateCampaignDrawer = ({
                     : 0,
                   countries: [String(country)],
                   Min_Age: values.adsets[i].Min_Age,
+                  minAgeToggle: minAgeToggle[i] ?? true,
                   Max_Age: values.adsets[i].Max_Age,
                   Gender: parseInt(values.adsets[i].Gender),
                   locales: values.adsets[i].Language,
@@ -11001,6 +11098,7 @@ const CreateCampaignDrawer = ({
                 countries: values.adsets[i].countries,
                 Min_Age: values.adsets[i].Min_Age,
                 Max_Age: values.adsets[i].Max_Age,
+                minAgeToggle: minAgeToggle[i] ?? true,
                 Gender: parseInt(values.adsets[i].Gender),
                 locales: values.adsets[i].Language,
                 // ...(adSchedulingToShow?.[adsets[i].id] && {
@@ -11748,6 +11846,8 @@ const CreateCampaignDrawer = ({
     setSelectedByAdset({});
     setAdsetSchedule({});
     setAdSchedulingToShowCampaign(false);
+    setMinAgeToggle(true)
+
   };
 
   const [selectedOption, setSelectedOption] = useState("upload");
@@ -13896,6 +13996,8 @@ const CreateCampaignDrawer = ({
                   pixel={pixel}
                   geo={geo}
                   newImageHashArray={newImageHashArray}
+                  minAgeToggle={minAgeToggle}
+                  setMinAgeToggle={setMinAgeToggle}
                   geoTreeData={geoTreeData}
                 />
               );
