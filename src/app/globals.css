@@ -4382,3 +4382,9 @@ body.dark-mode .black-icon-creatives1.anticon svg {
   color: red !important;
   fill: red !important;
 }
+
+.ag-tooltip {
+  white-space: pre-line !important;
+  max-width: 300px;
+  line-height: 18px;
+}

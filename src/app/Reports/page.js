@@ -42,7 +42,7 @@ const newtworkCollections = {
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
-    "FB_Botup" :"Facebook_Botup"
+    "FB_Botup": "Facebook_Botup"
 }
 
 const networkCollectionsForAiAssistant = {
@@ -64,7 +64,7 @@ const networkCollectionsForAiAssistant = {
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
     FB_Predicto: 'Facebook_Predicto_Daily',
     FB_Affinity: 'Facebook_Affinity_Daily',
-    FB_Botup :"Facebook_Botup_Daily"
+    FB_Botup: "Facebook_Botup_Daily"
 };
 
 const NetworkDefaultTimezones = {
@@ -85,13 +85,14 @@ const NetworkDefaultTimezones = {
     "FB_CodeFuel": "UTC",
     "FB_Predicto": "EDT",
     "FB_Affinity": "PDT",
-    "FB_Botup" :"EDT",
+    "FB_Botup": "EDT",
     "Outbrain_TonicRsoc": "EDT"
 }
 
 
 const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
 const DailyReports = React.lazy(() => import('../componentsOfReports/Daily'));
+const OutbrainDailyReports = React.lazy(() => import("../componentsOfReports/DailyOutbrain"));
 const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampaigns'));
 const DAKeywordReports = React.lazy(() => import('../componentsOfReports/DAKeywords'));
 const System1KeywordReports = React.lazy(() => import('../componentsOfReports/System1Keywords'));
@@ -215,7 +216,7 @@ const MyTablePage = () => {
     const [newInputValue, setNewInputValue] = useState(inputValue);
 
     const [refrst, setRefrst] = useState(false);
-    const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") && localStorage.getItem("activeTab") !== "undefined" && localStorage.getItem("activeTab") !== "null" ? localStorage.getItem("activeTab") : "1");
+    const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") && localStorage.getItem("activeTab") !== "undefined" && localStorage.getItem("activeTab") !== "null" ? localStorage.getItem("activeTab") : revenuePratner === "Outbrain_TonicRsoc" ? "2" : "1");
 
     const [columnStructureStatus, setColumnStructureStatus] = useState(false);
     const [commentsStatus, setCommentsStatus] = useState(false);
@@ -12882,6 +12883,1887 @@ const MyTablePage = () => {
         },
     };
 
+    const columnDefsObjectAdsetLevelDailyForOutbrain = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            showWhenGrouped: true,
+            minWidth: 170,
+            filter: "agTextColumnFilter",
+            valueGetter: (params) => {
+                if (params.data) return params.data.accountNumber;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.accountNumber || null;
+            },
+        },
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+        D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            filter: "agTextColumnFilter",
+            tooltipField: "campaignname"
+            // hide: true,
+
+            // onClick: (event) => {
+            //     const url = `/history/${event}-${account}-${time}`;
+            //     window.open(url, '_blank', 'noopener,noreferrer');
+            // },
+            // cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            minWidth: 90,
+            headerTooltip: '(Spend/Impressions)*1000',
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        filteration: {
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+        },
+        // actions: {
+        //     headerName: 'Actions',
+        //     field: 'actions',
+        //     minWidth: 90,
+        //     sortable: false,    // Ensure sorting is disabled
+        //     filter: false,      // Ensure filtering is disabled
+        //     enableSorting: false,  // Disable sorting at the column level
+        //     enableFilter: false,
+        //     hide: false,
+        //     suppressMenu: true,
+        //     hide: !isYesterday(),
+        //     cellRenderer: (params) => {
+        //         const [isModalVisible, setIsModalVisible] = useState(false);
+        //         const [newgroupedData, setNewGroupedData] = useState([]);
+        //         const [groupedData, setGroupedData] = useState([]);
+        //         const [changeBudget, onChangeBudget] = useState();
+        //         const [campaignStatus, setCampaignStatus] = useState(true);
+        //         const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+        //         const onChangeSpendAndStatus = async () => {
+        //             // Check if it's a group footer row (for groupIncludeFooter)
+        //             if (params?.node?.footer) {
+        //                 // console.log("This is a groupIncludeFooter row. Modal will not open.");
+        //                 return; // Prevent modal from opening for group footer rows
+        //             }
+
+        //             // Ensure allLeafChildren exists and is an array before proceeding
+        //             const allLeafChildren = params.node?.allLeafChildren || [];
+        //             setNewGroupedData(groupedData);
+
+        //             // Fetch all the rows under the current group
+        //             const groupedData = allLeafChildren.map(node => node.data) || [];
+        //             const campaignId = groupedData[0]?.campaignid;
+
+        //             // Only show the modal if there is data (groupedData length is greater than 0)
+        //             if (groupedData.length > 0) {
+        //                 const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+        //                 const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+        //                 if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+        //                     setGroupedData(getCampaignResponse.data);
+        //                     setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+        //                     onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+        //                 }
+        //                 if(getCampaignActualSpend.status === 200){
+        //                     // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+        //                     setCampaignActualSpend(getCampaignActualSpend.data);
+        //                 }
+
+        //                 else {
+        //                     setGroupedData(groupedData);
+        //                     // console.log("dailyadd");
+        //                 }
+        //                 // Set the grouped data for the modal
+        //                 setIsModalVisible(true); // Show the modal for non-footer rows
+        //             }
+        //         };
+
+        //         const handleOk = async () => {
+        //             setIsModalVisible(false); // Close the modal
+        //             const object = {
+        //                 campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+        //                 adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+        //                 campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+        //                 usercommit: userdetails?.email,
+        //                 accountNumber: newaccount,
+        //                 budget: changeBudget * 100,
+        //                 status: campaignStatus
+        //             };
+        //             // console.log(object);
+        //             const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+        //             const responseData = requestResponse.data;
+        //             // console.log(responseData, "response");
+        //             message.success("Budget and Status Updated");
+        //             changeRRefrst();
+        //         };
+
+        //         const handleCancel = () => {
+        //             setIsModalVisible(false);
+        //             // console.log(changeBudget); // Close the modal
+        //         };
+
+        //         const getTotalSpend = (data) => {
+        //             if (!data || data.length === 0) return 0;
+        //             const total = data.reduce((total, item) => {
+        //                 return total + (parseFloat(item?.spend) || 0);
+        //             }, 0);
+        //             return Math.round(total * 100) / 100; // Round to 2 decimal places
+        //         };
+
+        //         const onChangeBudgetValue = event => {
+        //             onChangeBudget(event.target.value)
+        //         }
+        //         const onChangeCampaignStatus = async () => {
+        //             const apiEndpoint = campaignStatus
+        //                 ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+        //                 : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+
+        //             try {
+        //                 const response = await axios.post(apiEndpoint, 
+        //                     { campaignId: groupedData[0]?.campaignid }, 
+        //                     { headers: { Authorization: token } }
+        //                 );
+        //                 if (response.status === 200) {
+        //                     message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+        //                     setCampaignStatus((prev) => !prev); // Toggle the status
+        //                 } else {
+        //                     message.error('Failed to update campaign status.');
+        //                 }
+        //             } catch (error) {
+        //                 console.error('Error updating campaign status:', error);
+        //                 message.error('Error updating campaign status.');
+        //             }
+        //         };
+
+        //         return (
+        //             <div>
+        //                 <div onClick={onChangeSpendAndStatus}>
+        //                     <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+        //                 </div>
+        //                 {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+        //                 {isModalVisible && (
+        //                     <Modal
+        //                         title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+        //                         visible={isModalVisible}
+        //                         onOk={handleOk}
+        //                         onCancel={handleCancel}
+        //                         width={600}  // Set a custom width for the modal
+        //                         style={{ padding: '20px' }}  // Adjust body padding
+        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+        //                     >
+        //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
+        //                             </div>
+
+        //                             {/* Input Field */}
+        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
+        //                                 <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+        //                                 <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
+        //                             </div>
+
+        //                             {/* Campaign ID */}
+        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
+        //                                 <Typography.Text strong>Campaign ID:</Typography.Text>
+        //                                 <p>{campaignActualSpend?.id}</p>
+        //                             </div>
+        //                         </div>
+        //                     </Modal>
+        //                 )}
+        //             </div>
+        //         );
+        //     },
+        //     filterParams: { filterEnabled: false },
+
+        // },
+        actions: {
+            headerName: 'Budget',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            // hide: !isYesterday(),
+            // cellRenderer: (params) => {
+            //     const {
+            //         // allCampaignData,
+            //         setCampaignRefreshTrigger,
+            //         changeRRefrst,
+            //         newaccount,
+            //         userdetails,
+            //         theme
+            //     } = params.context;
+
+            //     const [isModalVisible, setIsModalVisible] = useState(false);
+            //     const [groupedData, setGroupedData] = useState([]);
+            //     const [changeBudget, onChangeBudget] = useState();
+            //     const [bidAmount, setBidAmount] = useState();
+            //     const [adsetId, setAdsetId] = useState(null);
+            //     const [adsetInfo, setAdsetInfo] = useState(null);
+            //     const [confirmLoading, setConfirmLoading] = useState(false);
+            //     //   const [, forceRerender] = useState(0);
+
+            //     const isGroupRow = !!params?.node?.groupData;
+            //     let campaignId = null;
+            //     let initialAdsetId = null;
+            //     let accountNumber = null;
+
+            //     if (isGroupRow) {
+            //         const children = params?.node?.allLeafChildren || [];
+            //         campaignId = children[0]?.data?.campaignid;
+            //         initialAdsetId = children[0]?.data?.adsetid;
+            //         accountNumber = children[0]?.data?.accountNumber;
+            //     } else {
+            //         campaignId = params?.data?.campaignid;
+            //         initialAdsetId = params?.data?.adsetid;
+            //         accountNumber = params?.data?.accountNumber;
+            //     }
+
+            //     const campaignname = isGroupRow
+            //         ? params?.node?.key
+            //         : params?.data?.campaignname;
+
+            //     console.log("campaignId ar:", campaignId);
+
+            //     useEffect(() => {
+            //         if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
+            //         // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+            //         // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+            //         // const matchedAdset = Camapignlevelstatus.find(
+            //         //     (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+            //         // );
+            //         // if (matchedAdset) {
+            //         //     setAdsetInfo(matchedAdset);
+            //         // }
+            //         const matchedAdset = Camapignlevelstatus
+            //             .find(item =>
+            //                 String(item.campaign_id) === String(campaignId) &&
+            //                 String(item.accountNumber) === String(accountNumber)
+            //             )?.adsets.find(adset =>
+            //                 String(adset.adset_id) === String(initialAdsetId)
+            //             );
+            //         if (matchedAdset?.budget) {
+            //             if (Number(matchedAdset.budget.daily_budget) === 0) {
+            //                 matchedAdset.budget.daily_budget = null;
+            //             }
+            //             if (Number(matchedAdset.budget.lifetime_budget) === 0) {
+            //                 matchedAdset.budget.lifetime_budget = null;
+            //             }
+            //         }
+            //         if (matchedAdset) {
+            //             setAdsetInfo(matchedAdset);
+            //         }
+            //     }, [campaignId, initialAdsetId, Camapignlevelstatus]);
+
+            //     const onChangeSpendAndStatus = async () => {
+            //         try {
+            //             const grouped = params?.node?.allLeafChildren?.map(node => node.data) || [];
+            //             const clickedAdsetId = grouped?.[0]?.adsetid || initialAdsetId;
+            //             //   const clickedCampaignId = grouped?.[0]?.campaignid || campaignId;
+
+            //             setGroupedData(grouped);
+            //             setAdsetId(clickedAdsetId);
+
+            //             const campaign = params.context.allCampaignData.find(c => c.campaign_id === campaignId);
+
+            //             // const adset = allCampaignData.find(
+            //             //     (adset) => adset.campaignid === campaignId && adset.adset_id === clickedAdsetId
+            //             // );
+
+            //             const adset = Camapignlevelstatus
+            //                 .find(item =>
+            //                     String(item.campaign_id) === String(campaignId) &&
+            //                     String(item.accountNumber) === String(accountNumber)
+            //                 )?.adsets.find(adset =>
+            //                     String(adset.adset_id) === String(initialAdsetId)
+            //                 );
+            //             if (adset?.budget) {
+            //                 if (Number(adset.budget.daily_budget) === 0) {
+            //                     adset.budget.daily_budget = null;
+            //                 }
+            //                 if (Number(adset.budget.lifetime_budget) === 0) {
+            //                     adset.budget.lifetime_budget = null;
+            //                 }
+            //             }
+
+            //             if (adset) {
+            //                 const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
+            //                 onChangeBudget(budget);
+            //                 setBidAmount(adset?.bid_amount / 100);
+            //                 setAdsetInfo(adset);
+            //                 setIsModalVisible(true);
+            //             } else {
+            //                 message.error("Adset not found in backend response.");
+            //             }
+
+            //             //   setIsModalVisible(true);
+            //         } catch (err) {
+            //             console.error("❌ Failed to fetch adset:", err);
+            //             message.error("Failed to fetch adset data");
+            //         }
+            //     };
+
+            //     if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) {
+            //         return null;
+            //     }
+
+            //     const handleOk = async () => {
+            //         // setIsModalVisible(false);
+            //         const campaignname = groupedData?.[0]?.campaignname;
+            //         const adsetname = groupedData?.[0]?.adsetname;
+
+            //         console.log("Submitting budget change:", groupedData);
+
+            //         const campaignActualSpend = Camapignlevelstatus
+            //             .find(item =>
+            //                 String(item.campaign_id) === String(campaignId) &&
+            //                 String(item.accountNumber) === String(accountNumber)
+            //             )?.adsets.find(adset =>
+            //                 String(adset.adset_id) === String(initialAdsetId)
+            //             );
+            //         if (campaignActualSpend?.budget) {
+            //             if (Number(campaignActualSpend.budget.daily_budget) === 0) {
+            //                 campaignActualSpend.budget.daily_budget = null;
+            //             }
+            //             if (Number(campaignActualSpend.budget.lifetime_budget) === 0) {
+            //                 campaignActualSpend.budget.lifetime_budget = null;
+            //             }
+            //         }
+            //         const bidAmountValue = Math.round(parseFloat(bidAmount) * 100);
+            //         const changeBudgetValue = Math.round(parseFloat(changeBudget) * 100);
+            //         const previousBudget = campaignActualSpend?.budget?.daily_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.daily_budget)) :
+            //             campaignActualSpend?.budget?.lifetime_budget != null ? Math.round(parseFloat(campaignActualSpend?.budget?.lifetime_budget)) : 0;
+            //         const payload = {
+            //             adsetId,
+            //             campaignId,
+            //             accountNumber: accountNumber,
+            //             campaignname,
+            //             adsetname,
+            //             updatedby: userdetails?.email,
+            //             budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+            //                 campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+            //         };
+
+            //         if (
+            //             changeBudget !== undefined &&
+            //             changeBudget !== '' &&
+            //             !isNaN(changeBudget) &&
+            //             parseFloat(changeBudget) > 0 &&
+            //             changeBudgetValue !== previousBudget
+            //         ) {
+            //             payload.budget = Math.round(parseFloat(changeBudget) * 100);
+            //             payload.activity = {
+            //                 editType: "Budget",
+            //                 campaignid: campaignId,       // cents
+            //                 adsetid: adsetId,
+            //                 Account: String(accountNumber),    // ✅ update *this* row’s account
+            //                 campaignname: campaignname,
+            //                 adsetname: adsetname,
+            //                 updatedBy: userdetails?.userName,
+            //                 updatedUserEmail: userdetails?.email,
+            //                 updateType: "Adset budget updated",
+            //                 updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            //                 updateDetail: `From $${campaignActualSpend?.budget?.daily_budget != null ? (Number(campaignActualSpend?.budget?.daily_budget) / 100) : campaignActualSpend?.budget?.lifetime_budget != null ? (Number(campaignActualSpend?.budget?.lifetime_budget) / 100) : 0} to $${(Number(changeBudget))}`,
+            //                 budgetType: campaignActualSpend?.budget?.daily_budget != null ? 'daily_budget' :
+            //                     campaignActualSpend?.budget?.lifetime_budget != null ? 'lifetime_budget' : 'unknown',
+            //             }
+            //         }
+
+            //         if (
+            //             bidAmount !== undefined &&
+            //             bidAmount !== '' &&
+            //             !isNaN(bidAmount) &&
+            //             parseFloat(bidAmount) * 100 >= 1 &&
+            //             bidAmountValue !== campaignActualSpend?.bid_amount
+            //         ) {
+            //             // payload.bidAmount = parseFloat(bidAmount) * 100;
+            //             payload.bidAmount = Math.round(parseFloat(bidAmount) * 100);
+            //             payload.bidactivity = {
+            //                 editType: "Bid",
+            //                 campaignid: campaignId,       // cents
+            //                 adsetid: adsetId,
+            //                 Account: String(accountNumber),    // ✅ update *this* row’s account
+            //                 campaignname: campaignname,
+            //                 adsetname: adsetname,
+            //                 updatedBy: userdetails?.userName,
+            //                 updatedUserEmail: userdetails?.email,
+            //                 updateType: "Adset bid strategy updated",
+            //                 updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            //                 updateDetail: `From $${(Number(campaignActualSpend?.bid_amount) / 100)} to $${Math.round(bidAmount * 100) / 100}`,
+            //             }
+            //         }
+
+            //         const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
+            //         const hasBidAmount = Object.prototype.hasOwnProperty.call(payload, 'bidAmount');
+
+            //         if (!hasBudget && !hasBidAmount) {
+            //             message.warning("Please enter Budget and/or Bid Amount before submitting.");
+            //             return;
+            //         }
+
+
+            //         try {
+            //             // await apiClient.post('/update/adset/budget', payload);
+            //             // message.success("Adset Budget and/or Bid Updated");
+            //             // setCampaignRefreshTrigger(prev => prev + 1); // ✅ Refresh campaign + adset data
+
+            //             // changeRRefrst();
+            //             setConfirmLoading(true);
+            //             const newResponse = await apiClient.post('/update/adset/budget/history', payload);
+            //             message.success("Adset Budget and/or Bid Updated");
+            //             if (newResponse.status === 200 || newResponse.status === 201) {
+            //                 setConfirmLoading(false);
+            //                 setCamapignlevelstatus(prevStatus =>
+            //                     prevStatus.map(item =>
+            //                         String(item.campaign_id) === String(payload.campaignId) &&
+            //                             String(item.accountNumber) === String(payload.accountNumber)
+            //                             ? {
+            //                                 ...item,
+            //                                 adsets: item.adsets.map(adset =>
+            //                                     String(adset.adset_id) === String(payload.adsetId)
+            //                                         ? {
+            //                                             ...adset,
+            //                                             ...(payload.budget !== undefined && {
+            //                                                 budget: {
+            //                                                     ...adset.budget,
+            //                                                     daily_budget: String(payload.budget), // ✅ update daily_budget
+            //                                                     lifetime_budget: null, // optional reset if needed
+            //                                                 },
+            //                                             }),
+            //                                             ...(payload.bidAmount !== undefined && {
+            //                                                 bid_amount: payload.bidAmount, // ✅ update bid_amount
+            //                                             }),
+            //                                             last_updated_by: payload.updatedby,
+            //                                             last_updated_at: new Date().toISOString(),
+            //                                         }
+            //                                         : adset
+            //                                 ),
+            //                             }
+            //                             : item
+            //                     )
+            //                 );
+            //                 setIsModalVisible(false);
+            //             }
+            //         } catch (err) {
+            //             setConfirmLoading(false);
+            //             console.error(err);
+            //             message.error("Failed to update adset");
+            //         }
+            //     };
+
+            //     const rawData = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data : params?.data;
+
+            //     const daily = adsetInfo?.budget?.daily_budget ?? rawData?.budget?.daily_budget;
+            //     const lifetime = adsetInfo?.budget?.lifetime_budget ?? rawData?.budget?.lifetime_budget;
+            //     const bid = adsetInfo?.bid_amount ?? rawData?.bid_amount;
+
+            //     const hasBudget = (daily !== null && daily !== undefined && daily !== '') ||
+            //         (lifetime !== null && lifetime !== undefined && lifetime !== '');
+            //     const hasBid = bid !== null && bid !== undefined && bid !== '';
+
+
+            //     let tooltipText = 'Ad Set Budget & Bid are NOT available';
+            //     let iconColor = '#FF4D4F'; // Red (default: none available)
+
+            //     if (hasBudget && hasBid) {
+            //         tooltipText = 'Ad Set Budget & Bid are available';
+            //         iconColor = '#91C25F'; // Green
+            //     } else if (hasBudget || hasBid) {
+            //         tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
+            //         iconColor = '#FFBF00'; // Yellow
+            //     }
+
+            //     return (
+            //         <div>
+            //             <Tooltip title={tooltipText}>
+            //                 <DollarOutlined
+            //                     style={{
+            //                         cursor: 'pointer',
+            //                         color: iconColor,
+            //                     }}
+            //                     onClick={onChangeSpendAndStatus}
+            //                 />
+            //             </Tooltip>
+
+            //             {isModalVisible && (
+            //                 <Modal
+            //                     title={groupedData?.[0]?.campaignname || 'Edit Adset'}
+            //                     open={isModalVisible}
+            //                     // confirmLoading={confirmLoading}
+            //                     onOk={handleOk}
+            //                     onCancel={() => setIsModalVisible(false)}
+            //                     width={600}
+            //                     okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+            //                     className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+            //                 >
+            //                     {confirmLoading && (
+            //                         <div
+            //                             style={{
+            //                                 position: "absolute",
+            //                                 top: 0,
+            //                                 left: 0,
+            //                                 right: 0,
+            //                                 bottom: 0,
+            //                                 background: "rgba(255,255,255,0.7)", // dim background
+            //                                 display: "flex",
+            //                                 justifyContent: "center",
+            //                                 alignItems: "center",
+            //                                 zIndex: 1000,
+            //                                 borderRadius: "8px",
+            //                             }}
+            //                         >
+            //                             <Spin size="large" tip="Saving..." />
+            //                         </div>
+            //                     )}
+            //                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            //                         <div style={{ display: 'flex' }}>
+            //                             <p style={{ marginBottom: '0px' }} >
+            //                                 Budget Type:
+            //                             </p>{' '}
+            //                             <span style={{ fontWeight: 'normal' }}>
+            //                                 {adsetInfo?.budget?.daily_budget ? 'Daily' :
+            //                                     adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'No budget'}
+            //                             </span>
+            //                         </div>
+
+            //                         <Input
+            //                             type="number"
+            //                             value={changeBudget}
+            //                             disabled={!hasBudget}
+            //                             onChange={(e) => onChangeBudget(e.target.value)}
+            //                             placeholder="Enter budget in USD"
+            //                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+            //                         />
+
+            //                         <p style={{ marginBottom: '0px' }}>Bid amount</p>
+
+            //                         <Input
+            //                             type="number"
+            //                             value={bidAmount}
+            //                             disabled={!hasBid}
+            //                             onChange={(e) => setBidAmount(e.target.value)}
+            //                             placeholder="Enter bid amount"
+            //                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+            //                         />
+
+            //                         <div style={{ display: 'flex' }}>
+            //                             <p>
+            //                                 Adset ID:
+            //                             </p>
+            //                             <p>{adsetId}</p>
+            //                         </div>
+            //                     </div>
+            //                 </Modal>
+            //             )}
+            //         </div>
+            //     );
+            // },
+        },
+        adsetname: {
+            // headerName: 'AdsetName', field: 'adsetname',
+            // // resizeble: true,
+            // sortable: true,
+            // minWidth: 450,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // width: 500,
+            // hide: true,
+            // rowGroup: true,
+            // pinned: 'left',
+            // enableRowGroup: true,
+            headerName: 'Section name',
+            field: 'adsetname',
+            resizable: true,
+            sortable: true,
+            pinned: 'left',
+            // hide: true,
+            minWidth: 400,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            // valueGetter: (params) => {
+            //     if (params.data) return params.data.adsetid;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.adsetid || null;
+            // },
+        },
+        adname: {
+            headerName: 'AdName', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+
+        },
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            minWidth: 110,
+            sortable: true,
+            filter: "agTextColumnFilter",
+
+            // ✅ Helper: Capitalize the first letter only
+            valueFormatter: (params) => {
+                if (!params.value) return '';
+                return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+            },
+
+            // ✅ Show category for both grouped and normal rows
+            valueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
+                    return capitalize(campaign?.category);
+                }
+
+                // ✅ For normal (leaf) rows
+                return capitalize(params.data?.category);
+            },
+
+            // ✅ Filter uses same logic as valueGetter
+            filterValueGetter: (params) => {
+                const capitalize = (val) =>
+                    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
+                if (params.node.group) {
+                    const firstChild = params.node.allLeafChildren?.[0];
+                    const account = firstChild?.data?.accountNumber;
+                    const campaignName = firstChild?.data?.campaignid;
+                    const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
+                    return capitalize(campaign?.category);
+                }
+
+                // ✅ Include leaf rows in filtering
+                return capitalize(params.data?.category);
+            },
+
+            // ✅ Dynamic filter list (from both grouped + leaf rows)
+            filterParams: {
+                values: (params) => {
+                    const uniqueCategories = new Set();
+
+                    params.api.forEachNode((node) => {
+                        const capitalize = (val) =>
+                            val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : null;
+
+                        if (node.group) {
+                            const firstChild = node.allLeafChildren?.[0];
+                            const account = firstChild?.data?.accountNumber;
+                            const campaignName = firstChild?.data?.campaignid;
+                            const campaign = commentsMap.get(`${campaignName}_${account}_campaign`);
+                            const category = capitalize(campaign?.category);
+                            if (category) uniqueCategories.add(category);
+                        } else {
+                            const category = capitalize(node.data?.category);
+                            if (category) uniqueCategories.add(category);
+                        }
+                    });
+
+                    // params.success(Array.from(uniqueCategories));
+                    params.success && params.success(Array.from(uniqueCategories));
+                },
+            },
+
+            // ✅ Safe comparator for sorting (group-aware)
+            comparator: (valueA, valueB, nodeA, nodeB) => {
+                const isGroupA = nodeA?.group;
+                const isGroupB = nodeB?.group;
+                if (isGroupA && isGroupB) {
+                    return valueA?.localeCompare?.(valueB) ?? 0;
+                }
+                // sort normally for leaf nodes
+                return valueA?.localeCompare?.(valueB) ?? 0;
+            },
+
+            // ✅ Optional — hide empty leaf cells (if any)
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group && !params.value,
+            },
+            // cellRenderer: (props) => {
+            //     if (props.node.rowPinned || props.node.footer) return "";
+            //     if (props.value) return props.value;
+
+            //     const [open, setOpen] = useState(false);
+            //     const [category, setCategory] = useState("");
+            //     const [row, setRow] = useState(null);
+
+            //     const getRow = () => {
+            //         return props.node.group
+            //             ? props.node.allLeafChildren?.[0]?.data
+            //             : props.node.data;
+            //     };
+
+            //     const onEdit = () => {
+            //         const r = getRow();
+            //         setRow(r);
+            //         setCategory(r?.category || "");
+            //         setOpen(true);
+            //     };
+
+            //     const save = async () => {
+            //         if (!row) return;
+
+            //         const payload = {
+            //             accountNumber: row.accountNumber,
+            //             campaignid: row.campaignid,
+            //             level: "campaign",
+            //             category,
+            //         };
+
+            //         try {
+            //             const token = localStorage.getItem("token");
+
+            //             await apiClient.post(
+            //                 "/UpdateCategoryNew",
+            //                 payload,
+            //                 { headers: { Authorization: token } }
+            //             );
+
+            //             setCampaignComments((prev) => {
+            //                 const arr = [...prev];
+            //                 const idx = arr.findIndex(
+            //                     (i) =>
+            //                         i.campaignid == payload.campaignid &&
+            //                         i.Account == payload.accountNumber &&
+            //                         i.level == "campaign"
+            //                 );
+            //                 if (idx >= 0) {
+            //                     arr[idx].category = payload.category;
+            //                 } else {
+            //                     arr.push({
+            //                         campaignid: payload.campaignid,
+            //                         Account: payload.accountNumber,
+            //                         level: "campaign",
+            //                         category: payload.category,
+            //                     });
+            //                 }
+            //                 return arr;
+            //             });
+
+            //             const key = `${payload.campaignid}_${payload.accountNumber}_campaign`;
+            //             commentsMap.set(key, { category: payload.category });
+            //             message.success("Category updated");
+            //         } catch (err) {
+            //             console.error(err);
+            //             message.error("Failed to update category");
+
+            //         }
+
+            //         setOpen(false);
+            //     };
+
+            //     return (
+            //         <div>
+            //             <span
+            //                 onClick={onEdit}
+            //                 style={{ cursor: "pointer", }}
+            //             >
+            //                 <PlusOutlined />
+            //             </span>
+
+            //             <Modal className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`} open={open} title="Edit Category" onOk={save} onCancel={() => setOpen(false)}>
+            //                 <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+            //             </Modal>
+            //         </div>
+            //     );
+            // },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
+
+                const [editing, setEditing] = React.useState(false);
+                const [value, setValue] = React.useState(props.value || "");
+
+                const [open, setOpen] = React.useState(false);
+                const [category, setCategory] = React.useState("");
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node.allLeafChildren?.[0]?.data
+                        : props.node.data;
+
+                const openModal = () => {
+                    const row = getRow();
+                    if (!row) return;
+                    setCategory(row.category || "");
+                    setOpen(true);
+                };
+
+                const saveFromModal = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, category);
+                    setOpen(false);
+                };
+
+
+                const saveInline = async () => {
+                    const row = getRow();
+                    if (!row) return;
+
+                    await saveApi(row, value);
+                    setEditing(false);
+                };
+
+
+                const saveApi = async (row, catValue) => {
+                    const payloadForActivity = {
+                        editType: "Categoty",
+                        campaignid: row.campaignid,       // cents
+                        Account: row.accountNumber,    // ✅ update *this* row’s account
+                        campaignname: row.campaignname,
+                        updatedBy: userdetails?.userName || "Unknown",
+                        updatedUserEmail: userdetails.email,
+                        updateType: row.category ? "Campain category updated" : "Campain category created",
+                        updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                        updateDetail: row.category ? `From ${row.category || "N/A"} to ${catValue}` : `Category added as ${catValue}`,
+                    }
+                    const payload = {
+                        accountNumber: row.accountNumber,
+                        campaignid: row.campaignid,
+                        level: "campaign",
+                        category: catValue,
+                        activity: payloadForActivity,
+                    };
+
+                    const token = localStorage.getItem("token");
+
+                    await apiClient.post(
+                        "/UpdateCategoryAndStoreHistory",
+                        payload,
+                        { headers: { Authorization: token } }
+                    );
+
+                    setCampaignComments((prev) => {
+                        const arr = [...prev];
+                        const idx = arr.findIndex(
+                            i =>
+                                String(i.campaignid) === String(payload.campaignid) &&
+                                String(i.Account) === String(payload.accountNumber) &&
+                                i.level === "campaign"
+                        );
+
+                        if (idx >= 0) arr[idx].category = catValue;
+                        else arr.push({
+                            campaignid: payload.campaignid,
+                            Account: payload.accountNumber,
+                            level: "campaign",
+                            category: catValue,
+                        });
+
+                        return arr;
+                    });
+
+                    commentsMap.set(
+                        `${payload.campaignid}_${payload.accountNumber}_campaign`,
+                        { category: catValue }
+                    );
+
+                    message.success("Category updated");
+                };
+
+
+                if (props.value && !editing) {
+                    return (
+                        // <span
+                        //     onClick={() => setEditing(true)}
+                        //     style={{ cursor: "pointer" }}
+                        // >
+                        //     {props.value}
+                        // </span>
+                        <Tooltip title={props.value}
+                            overlayInnerStyle={{
+                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                border: '1px solid #ccc',
+                                borderRadius: 6,
+                                // fontWeight: 500,
+                            }}>
+                            <span
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {props.value}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                if (props.value && editing) {
+                    return (
+                        <Input
+                            autoFocus
+                            size="small"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                            onPressEnter={saveInline}
+                            onBlur={saveInline}
+                        />
+                    );
+                }
+
+                return (
+                    <>
+                        <PlusOutlined
+                            // onClick={openModal}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openModal();
+                            }}
+                            style={{ cursor: "pointer" }}
+                        />
+
+                        <Modal
+                            open={open}
+                            title="Edit Category"
+                            onOk={saveFromModal}
+                            onCancel={() => setOpen(false)}
+                        >
+                            <Input
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            />
+                        </Modal>
+                    </>
+                );
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        // from: {
+        //     // headerName: 'Start',
+        //     // field: 'from',
+        //     // sortable: true,
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     // if (params.node.group) {
+        //     //     //     const campaignName =
+        //     //     //         params.node.groupData?.campaignname || params.node.key;
+        //     //     //     const campaign = campaignMap.get(campaignName);
+        //     //     //     return campaign && campaign.start
+        //     //     //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //     //         : '-';
+        //     //     // }
+        //     //     // return '';
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+
+        //     //         return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //     //     }
+        //     //     return params.data?.from || null;
+        //     // },
+        //     // valueFormatter: (params) => {
+        //     //     return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     sortable: true,
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         // if (params.node.group) {
+        //         //     const campaignName =
+        //         //         params.node.groupData?.campaignname || params.node.key;
+        //         //     const campaign = campaignMap.get(campaignName);
+        //         //     return campaign && campaign.start
+        //         //         ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //         //         : '-';
+        //         // }
+        //         // return '';
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || "";
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             return campaign?.start || null; // ✅ return raw date (YYYY-MM-DD)
+        //         }
+        //         return params.data?.from || null;
+        //     },
+        //     valueFormatter: (params) => {
+        //         return params.value ? moment(params.value, "YYYY-MM-DD").format("DD-MM-YYYY") : '';
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        // to: {
+        //     // headerName: 'End',
+        //     // field: 'to',
+        //     // minWidth: 110,
+        //     // valueGetter: (params) => {
+        //     //     if (params.node.group) {
+        //     //         const campaignName =
+        //     //             params.node.groupData?.campaignname || params.node.key;
+        //     //         const campaign = campaignMap.get(campaignName);
+        //     //         return campaign && campaign.end
+        //     //             ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //     //             : '-';
+        //     //     }
+        //     //     return params.data?.to || null;
+        //     // },
+        //     // cellClassRules: {
+        //     //     'hide-leaf-cell': (params) => !params.node.group,
+        //     // },
+        //     // suppressMenu: true,
+        //     // menuTabs: [],
+        //     // headerClass: 'hide-menu',
+        //     headerName: 'End',
+        //     field: 'to',
+        //     minWidth: 110,
+        //     filter: "agDateColumnFilter",
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             if (cellValue == null) return -1;
+
+        //             // Convert your cell value string to a Date
+        //             const cellDate = new Date(cellValue);
+
+        //             if (cellDate < filterLocalDateAtMidnight) return -1;
+        //             if (cellDate > filterLocalDateAtMidnight) return 1;
+        //             return 0;
+        //         },
+        //     },
+        //     valueGetter: (params) => {
+        //         if (params.node.group) {
+        //             // const campaignName =
+        //             //     params.node.groupData?.campaignname || params.node.key;
+        //             // const campaign = campaignMap.get(campaignName);
+        //             // return campaign && campaign.end
+        //             //     ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //             //     : '-';
+        //             const campaignName = params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+        //             const campaignId = params.node?.childrenAfterGroup?.[0]?.data?.campaignid || params.node?.key || "";
+        //             // console.log(params.node?.childrenAfterGroup?.[0], "childrenAfterGroup");
+        //             // console.log(campaignName, "campaignName");
+        //             // console.log(campaignId, "campaignId");
+
+        //             const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+
+        //             // console.log(campaign, "campaign");
+
+        //             return campaign && campaign.end
+        //                 ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+        //                 : '-';
+        //         }
+        //         return params.data?.to ? moment(params.data?.to, "YYYY-MM-DD").format("DD-MM-YYYY") : null;
+        //     },
+        //     cellClassRules: {
+        //         'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu',
+        // },
+        from: {
+            headerName: 'Start',
+            field: 'from',
+            sortable: true,
+            minWidth: 110,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
+            valueGetter: (params) => {
+                let dateStr = null;
+
+                if (params.node.group) {
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    dateStr = campaign?.start || null;
+                } else {
+                    dateStr = params.data?.from || null;
+                }
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        to: {
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue already Date from valueGetter
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
+            valueGetter: (params) => {
+                let dateStr = null;
+
+                if (params.node.group) {
+                    const campaignName =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignname || "";
+
+                    const campaignId =
+                        params.node?.childrenAfterGroup?.[0]?.data?.campaignid ||
+                        params.node?.key ||
+                        "";
+
+                    // const campaign = campaignMap.get(`${campaignName}_${campaignId}`);
+                    // dateStr = campaign?.end || null;
+                    const row = params.node?.childrenAfterGroup?.[0]?.data;
+
+                    const adsetName = row?.adsetname || "";
+                    const adsetId = row?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
+
+                } else {
+                    // dateStr = params.data?.to || null;
+                    const adsetName = params.data?.adsetname || "";
+                    const adsetId = params.data?.adsetid || "";
+
+                    const adset = adsetMap.get(`${adsetName}_${adsetId}`);
+
+                    dateStr = adset?.end || null;
+
+                }
+
+                // 🔥 Convert YYYY-MM-DD → real Date object
+                if (!dateStr) return null;
+
+                // const [y, m, d] = dateStr.split('-').map(Number);
+                // return new Date(y, m - 1, d);
+                if (dateStr?.includes("T")) {
+                    return new Date(dateStr); // FB format
+                }
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellRenderer: (props) => {
+                if (props.node.rowPinned || props.node.footer) return null;
+
+                const [open, setOpen] = React.useState(false);
+                const [date, setDate] = React.useState(
+                    props.value ? dayjs(props.value) : null
+                );
+                const [loading, setLoading] = React.useState(false);
+
+                const getRow = () =>
+                    props.node.group
+                        ? props.node?.childrenAfterGroup?.[0]?.data
+                        : props.node.data;
+
+                const openModal = (e) => {
+                    e.stopPropagation();
+                    if (!props.value) return;
+                    setDate(dayjs(props.value));
+                    setOpen(true);
+                };
+                const handleSave = async () => {
+                    const row = getRow();
+                    setLoading(true);
+                    const payload = {
+                        adsetId: row?.adsetid,
+                        campaignId: row?.campaignid,
+                        accountNumber: row?.accountNumber,
+                        end_time: date ? date.format("YYYY-MM-DDTHH:mm:ss") : null,
+                        level: "adset",
+                        activity: {
+                            editType: "End Date",
+                            campaignid: row?.campaignid,
+                            Account: row?.accountNumber,
+                            adsetid: row?.adsetid,
+                            adsetname: row?.adsetname,
+                            campaignname: row?.campaignname,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "End date updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `End date updated from ${props.value ? dayjs(props.value).format("YYYY-MM-DDTHH:mm:ss") : "null"} to ${date.format("YYYY-MM-DDTHH:mm:ss")}`,
+                        }
+                    };
+
+                    console.log("API Payload →", payload);
+
+                    try {
+                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        console.log("API Response →", res.data);
+                        message.success("End date updated successfully");
+                        setOpen(false);
+                    } catch (err) {
+                        console.error("API Error →", err);
+                        message.error("Failed to update end date");
+                    }
+                    setCamapignlevelstatus(prev => {
+                        return prev.map(campaign => {
+                            if (
+                                String(campaign.campaign_id) === String(payload.campaignId) &&
+                                String(campaign.accountNumber) === String(payload.accountNumber)
+                            ) {
+                                return {
+                                    ...campaign,
+                                    adsets: campaign.adsets?.map(ad => {
+                                        if (String(ad.adset_id) === String(payload.adsetId)) {
+                                            return {
+                                                ...ad,
+                                                end_time: payload.end_time
+                                            };
+                                        }
+                                        return ad;
+                                    })
+                                };
+                            }
+                            return campaign;
+                        });
+                    });
+                };
+
+                const rowData = getRow();
+
+                let budgetType = null;
+                const campaign = Camapignlevelstatus?.find(item =>
+                    String(item.campaign_id) === String(rowData?.campaignid) &&
+                    String(item.accountNumber) === String(rowData?.accountNumber)
+                );
+
+                const adset = campaign?.adsets?.find(ad =>
+                    String(ad.adset_id) === String(rowData?.adsetid)
+                );
+                let adsetDaily = adset?.budget?.daily_budget;
+                let adsetLifetime = adset?.budget?.lifetime_budget;
+
+                let campaignDaily = campaign?.campaign_budget?.daily_budget;
+                let campaignLifetime = campaign?.campaign_budget?.lifetime_budget;
+
+                if (!adsetDaily || Number(adsetDaily) === 0) adsetDaily = null;
+                if (!adsetLifetime || Number(adsetLifetime) === 0) adsetLifetime = null;
+
+                if (!campaignDaily || Number(campaignDaily) === 0) campaignDaily = null;
+                if (!campaignLifetime || Number(campaignLifetime) === 0) campaignLifetime = null;
+                if (adsetDaily != null) {
+                    budgetType = "daily";
+                } else if (adsetLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else if (campaignDaily != null) {
+                    budgetType = "daily";
+                }
+                else if (campaignLifetime != null) {
+                    budgetType = "lifetime";
+                }
+                else {
+                    budgetType = campaign?.budget_type || null;
+                }
+
+                const formattedDate = props.value
+                    ? dayjs(props.value).format("DD-MM-YYYY")
+                    : "N/A";
+                let showWarning = false;
+
+                if (budgetType === "lifetime" && props.value) {
+                    const endDate = moment(props.value).startOf("day");
+                    const today = moment().startOf("day");
+
+                    const diffDays = endDate.diff(today, "days");
+
+                    if (diffDays >= 0 && diffDays <= 2) {
+                        showWarning = true;
+                    }
+                }
+                return (
+                    <>
+                        <span
+                            onClick={openModal}
+                            style={{
+                                cursor: budgetType === "lifetime" ? "pointer" : "not-allowed",
+                                ...(budgetType === "lifetime" && {
+                                    color: "#73a6f7",
+                                })
+                            }}
+                        >
+                            {formattedDate}
+
+                            {showWarning && (
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+
+                                }}>
+                                    <span style={{ marginLeft: 3 }}>
+                                        <InfoCircleOutlined className='Error-Message' />
+                                    </span>
+                                </Tooltip>
+                            )}
+                        </span>
+
+                        <Modal
+                            open={open}
+                            title="Edit End Date"
+                            onOk={handleSave}
+                            onCancel={() => setOpen(false)}
+                            confirmLoading={loading}
+                        >
+                            <DatePicker
+                                style={{ width: "100%" }}
+                                value={date}
+                                onChange={(d) => setDate(d)}
+                                showTime
+                            />
+                        </Modal>
+                    </>
+                );
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        profitloss: {
+            headerName: 'P/L',
+            field: 'profitloss',
+            minWidth: 110,
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                    const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                    const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                    const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                    // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                    // const {  start } = campaignStatus;
+                    // console.log(params.node.groupData?.campaignname, "groupData");
+                    // console.log(params.node.key, "start");
+                    // return campaignStatus?.start || 'Unknown';
+                    return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+                }
+                return '';
+            },
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        // date: {
+        //     headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+        //     filter: "agDateColumnFilter",
+        //     // sort: "asc",
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        //     filterParams: {
+        //         comparator: (filterLocalDateAtMidnight, cellValue) => {
+        //             const dateAsString = cellValue;
+        //             if (dateAsString == null) return -1;
+        //             const dateParts = dateAsString.split("/");
+        //             const cellDate = new Date(
+        //                 Number(dateParts[2]),
+        //                 Number(dateParts[1]) - 1,
+        //                 Number(dateParts[0])
+        //             );
+
+        //             if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        //                 return 0;
+        //             }
+
+        //             if (cellDate < filterLocalDateAtMidnight) {
+        //                 return -1;
+        //             }
+
+        //             if (cellDate > filterLocalDateAtMidnight) {
+        //                 return 1;
+        //             }
+        //             return 0;
+        //         }
+        //     },
+        // },
+        date: {
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+                    // cellValue is already a Date object
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        spend: {
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter, // Format display as currency
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
+        },
+        revenue: {
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
+        },
+        profit: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            cellClassRules: {
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0, // Conditional formatting for negative profit
+            },
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: 'Profit = Revenue - Spend',
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
+        },
+        margin: {
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
+            minWidth: 100,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+
+        },
+        fbleads: { headerName: 'FBLeads', field: 'fbleads', minWidth: 105, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        conversions: { headerName: 'Conv', field: 'conversions', headerTooltip: "Conversions", minWidth: 85, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        cpc: {
+            headerName: 'CPC', field: 'cpc',
+            minWidth: 80,
+            aggFunc: (params) => {
+                const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+                return sum / params.values.length;
+            },
+            valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+            sortable: true, filter: 'agNumberColumnFilter',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter: getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+
+        },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', headerTooltip: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        impressions: { headerName: 'IMP', field: 'impressions', headerTooltip: "Impressions", minWidth: 100, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        ctr: {
+            headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
+            minWidth: 100,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            filter: 'agNumberColumnFilter',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CTR = (FBClicks / Impressions) * 100",
+        },
+        rpc: {
+            headerName: 'RPC', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            minWidth: 80,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
+        },
+        cpl: { headerName: 'CPL', field: 'cpl', minWidth: 80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
+        ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth: 90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
+        fmargin: {
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: "agNumberColumnFilter",
+            minWidth: 120,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+        },
+        roi: {
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            minWidth: 100,
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "ROI = (Revenue - Spend) / Spend",
+        },
+        campaignid: {
+            headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', minWidth: 180,
+            // spanRows: true,
+            filter: "agTextColumnFilter",
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            // valueGetter: (params) => {
+            //     if (params.data) return params.data.campaignid;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.campaignid || null;
+            // },
+        },
+        adsetid:
+        {
+            // headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', minWidth: 180,
+            // spanRows: true,
+            // filter: "agTextColumnFilter",
+            // // hide: true,
+            // // rowGroup: true,
+            // // enableRowGroup: true,
+            // // pinned: 'left',
+            // valueGetter: (params) => {
+            //     if (params.data) return params.data.adsetid;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.adsetid || null;
+            // },
+            headerName: 'SectionId',
+            field: 'adsetid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 500,
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+        },
+        
+        timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            hide: true,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [hasBudget, setHasBudget] = useState(false);
+                const [confirmLoading, setConfirmLoading] = useState(false);
+
+                const isGroupRow = !!params?.node?.groupData;
+
+                // campaign id + campaign name for this row/group
+                const campaignId = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.campaignid
+                    : params?.data?.campaignid;
+
+                const campaignname = isGroupRow
+                    ? params?.node?.key
+                    : params?.data?.campaignname;
+
+                // ✅ the *accountNumber of this row/group* (not the selected accounts list)
+                const rowAccountNumber = isGroupRow
+                    ? params?.node?.allLeafChildren?.[0]?.data?.accountNumber
+                    : params?.data?.accountNumber;
+
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+
+                return (
+                    <div>
+                        <HistoryOutlined />
+                    </div>
+                );
+            },
+        },
+    };
+
     const columnDefsObjectAdLevelDaily = {
         accountNumber: {
             headerName: 'Account',
@@ -18824,6 +20706,10 @@ const MyTablePage = () => {
         return order?.map(colKey => columnDefsObjectAdsetLevelDaily[colKey]).filter(item => item);
     };
 
+    const getColumnDefsAdsetLevelDailyForOutbrain = (order) => {
+        return order?.map(colKey => columnDefsObjectAdsetLevelDailyForOutbrain[colKey]).filter(item => item);
+    };
+
     const getColumnDefsAdLevelDaily = (order) => {
         return order?.map(colKey => columnDefsObjectAdLevelDaily[colKey]).filter(item => item);
     };
@@ -18860,6 +20746,8 @@ const MyTablePage = () => {
 
     const columnDefsAdsetLevelDaily = useRef();
 
+    const columnDefsAdsetLevelDailyForOutbrain = useRef();
+
     const columnDefsAdLevelDaily = useRef();
 
     const columnDefsOfAdID = useRef();
@@ -18882,6 +20770,7 @@ const MyTablePage = () => {
             columnDefsAdsetLevel.current = getColumnDefsAdsetLevel(mainData);
             columnDefsAdLevel.current = getColumnDefsAdLevel([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData)]);
             columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData));
+            columnDefsAdsetLevelDailyForOutbrain.current = getColumnDefsAdsetLevelDailyForOutbrain(mainData);
             columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData)]));
             // Ensure that 'adid' is included in the column structure
             let updatedColumnStructure = mainData;
@@ -18919,6 +20808,7 @@ const MyTablePage = () => {
         columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(updateDataArray));
         columnDefsAdLevel.current = (getColumnDefsAdLevel(updateDataArray));
         columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(updateDataArray));
+        columnDefsAdsetLevelDailyForOutbrain.current = getColumnDefsAdsetLevelDailyForOutbrain(updateDataArray)
         columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily(updateDataArray));
         setColDefs(getColumnDefsObjectOfAdID(updateDataArray));
         setColDailyDefs(getColumnDefsObjectOfDailyAdID(updateDataArray));
@@ -18954,6 +20844,7 @@ const MyTablePage = () => {
             columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(mainData.columnStructure));
             columnDefsAdLevel.current = (getColumnDefsAdLevel([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData.columnStructure)]));
             columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData.columnStructure));
+            columnDefsAdsetLevelDailyForOutbrain.current = getColumnDefsAdsetLevelDailyForOutbrain(mainData.columnStructure)
             columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData.columnStructure)]));
             // Ensure that 'adid' is included in the column structure
             let updatedColumnStructure = mainData.columnStructure;
@@ -19347,6 +21238,10 @@ const MyTablePage = () => {
             setPageSize(1);
         } else {
             setPageSize(pageSize);
+        }
+
+        if (revenuePratner === "Outbrain_TonicRsoc") {
+            setActiveTab("2")
         }
 
         isInitialLoad.current = false;
@@ -20984,7 +22879,7 @@ const MyTablePage = () => {
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
-                    {renderCarouselNav()}
+                    {newRevenuePratner !== "Outbrain_TonicRsoc" && renderCarouselNav()}
                     {/* <div style={{display: 'flex', marginRight: '15px'}}>
                       
                             <Col>
@@ -21344,56 +23239,109 @@ const MyTablePage = () => {
                             </Tabs.TabPane>
 
                             <Tabs.TabPane key="2">
-                                <DailyReports
-                                    startDate={newStartDate}
-                                    endDate={newendDate}
-                                    // newaccount={newaccount}
-                                    newaccount={newaccount}
-                                    newtime={newtime}
-                                    newRevenuePratner={newRevenuePratner}
-                                    inputValue={inputValue}
-                                    newAccountName={newAccountName}
-                                    columnDefs={columnDefs1}
-                                    columnDefs1={columnDefsAdsetLevelDaily}
-                                    columnDefs2={columnDefsAdLevelDaily}
-                                    campaignComments={campaignComments}
-                                    setCampaignComments={setCampaignComments}
-                                    campaignStatusFilter={campaignStatusFilter}
-                                    Camapignlevelstatus={Camapignlevelstatus}
-                                    setCamapignlevelstatus={setCamapignlevelstatus}
-                                    commentsMap={commentsMap}
-                                    changeRRefrst={resetColumnStructure}
-                                    debouncedHandleColumnMove={debouncedHandleColumnMove}
-                                    userdetails={userdetails}
-                                    refreshComments={refreshComments}
-                                    refreshpage={refreshContent}
-                                    getMainMenuItems={getMainMenuItems}
-                                    toggleStatus={checked}
-                                    handleChangeToggle={handleChangeToggle}
-                                    functionCallForCommnets={functionCallForCommnets}
-                                    functionCallForCampaigns={functionCallForCampaigns}
-                                    context={{
-                                        allCampaignData,
-                                        setCampaignRefreshTrigger,
-                                        changeRRefrst,
-                                        newaccount,
-                                        userdetails,
-                                        theme,
-                                        campaignStatusOverridesRef, // ✅ ADD THIS
-                                        adsetStatusOverridesRef,
-                                        adsetPinOverridesRef,
-                                        adsetCommentOverridesRef,
-                                        adStatusOverridesRef,
-                                        adPinOverridesRef,
-                                        adCommentOverridesRef,
+                                {revenuePratner !== "Outbrain_TonicRsoc" ?
+                                    <DailyReports
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        // newaccount={newaccount}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        newAccountName={newAccountName}
+                                        columnDefs={columnDefs1}
+                                        columnDefs1={columnDefsAdsetLevelDaily}
+                                        columnDefs2={columnDefsAdLevelDaily}
+                                        campaignComments={campaignComments}
+                                        setCampaignComments={setCampaignComments}
+                                        campaignStatusFilter={campaignStatusFilter}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        setCamapignlevelstatus={setCamapignlevelstatus}
+                                        commentsMap={commentsMap}
+                                        changeRRefrst={resetColumnStructure}
+                                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                        toggleStatus={checked}
+                                        handleChangeToggle={handleChangeToggle}
+                                        functionCallForCommnets={functionCallForCommnets}
+                                        functionCallForCampaigns={functionCallForCampaigns}
+                                        context={{
+                                            allCampaignData,
+                                            setCampaignRefreshTrigger,
+                                            changeRRefrst,
+                                            newaccount,
+                                            userdetails,
+                                            theme,
+                                            campaignStatusOverridesRef, // ✅ ADD THIS
+                                            adsetStatusOverridesRef,
+                                            adsetPinOverridesRef,
+                                            adsetCommentOverridesRef,
+                                            adStatusOverridesRef,
+                                            adPinOverridesRef,
+                                            adCommentOverridesRef,
 
-                                    }}
-                                    theme={theme}
-                                    handleChangeInput={handleChangeInput}
-                                    handleBlur={handleBlur}
-                                    onClickRefresh={onClickRefresh}
-                                    accountsAccess={accountsAccess}
-                                />
+                                        }}
+                                        theme={theme}
+                                        handleChangeInput={handleChangeInput}
+                                        handleBlur={handleBlur}
+                                        onClickRefresh={onClickRefresh}
+                                        accountsAccess={accountsAccess}
+                                    />
+                                    :
+                                    <OutbrainDailyReports
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        // newaccount={newaccount}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        newAccountName={newAccountName}
+                                        columnDefs={columnDefs1}
+                                        columnDefs1={columnDefsAdsetLevelDailyForOutbrain}
+                                        columnDefs2={columnDefsAdLevelDaily}
+                                        campaignComments={campaignComments}
+                                        setCampaignComments={setCampaignComments}
+                                        campaignStatusFilter={campaignStatusFilter}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        setCamapignlevelstatus={setCamapignlevelstatus}
+                                        commentsMap={commentsMap}
+                                        changeRRefrst={resetColumnStructure}
+                                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                        toggleStatus={checked}
+                                        handleChangeToggle={handleChangeToggle}
+                                        functionCallForCommnets={functionCallForCommnets}
+                                        functionCallForCampaigns={functionCallForCampaigns}
+                                        context={{
+                                            allCampaignData,
+                                            setCampaignRefreshTrigger,
+                                            changeRRefrst,
+                                            newaccount,
+                                            userdetails,
+                                            theme,
+                                            campaignStatusOverridesRef, // ✅ ADD THIS
+                                            adsetStatusOverridesRef,
+                                            adsetPinOverridesRef,
+                                            adsetCommentOverridesRef,
+                                            adStatusOverridesRef,
+                                            adPinOverridesRef,
+                                            adCommentOverridesRef,
+
+                                        }}
+                                        theme={theme}
+                                        handleChangeInput={handleChangeInput}
+                                        handleBlur={handleBlur}
+                                        onClickRefresh={onClickRefresh}
+                                        accountsAccess={accountsAccess}
+                                    />
+                                }
                             </Tabs.TabPane>
 
                             {/* <Tabs.TabPane key="3">
