@@ -18,9 +18,9 @@ import { useTokenContext } from '../components/parent';
 import { FaRobot } from "react-icons/fa";
 import { Filter1Outlined, RoundaboutLeftOutlined, SettingsOutlined } from '@mui/icons-material';
 
-const CampaignLevelReports = React.lazy(() => import('./CampaignLevelDaily'));
+const CampaignLevelReports = React.lazy(() => import('./OutbrainCampaignLevelDaily'));
 const AdsetLevelReports = React.lazy(() => import('./OutbrainSectionsDaily'));
-const AdLevelReports = React.lazy(() => import('./AdLevelDaily'));
+const AdLevelReports = React.lazy(() => import('./OutbrainAdLevelDaily'));
 const SearchFilters = React.lazy(() => import('./SearchFilters'));
 const OutbbrainTonicKeywordReports = React.lazy(()=> import('./OutbrainTonicRsocKeywords'))
 

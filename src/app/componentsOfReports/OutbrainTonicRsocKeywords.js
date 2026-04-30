@@ -51,7 +51,8 @@ const newtworkCollections = {
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
     "FB_Affinity": "Facebook_Affinity_Daily",
-    "FB_Botup": "Facebook_Botup_Daily"
+    "FB_Botup": "Facebook_Botup_Daily",
+    "Outbrain_TonicRsoc": "Outbrain_TonicRsoc"
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -151,7 +152,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
         return col;
     })
     ], [columnDefs.current]);
-    console.log(memorizedColumnDef1)
+    // console.log(memorizedColumnDef1)
     // const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
     //     const normalizedCampaign = each.campaignname.trim().toLowerCase();
     //     const normalizedInput = inputValue.trim().toLowerCase();
@@ -2442,16 +2443,16 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             }}
                         >
                             <span
-                                onClick={() => {
-                                    const rowData = params.node.group
-                                        ? params.node.childrenAfterGroup?.[0]?.data
-                                        : params.node.data;
-                                    const rowNode = params.api.getRowNode(params.node.id);
-                                    params.api.deselectAll();
-                                    if (rowNode) rowNode.setSelected(true);
-                                    showCampaignLevel([rowData]);
-                                    moveToNextTab("2");
-                                }}
+                                // onClick={() => {
+                                //     const rowData = params.node.group
+                                //         ? params.node.childrenAfterGroup?.[0]?.data
+                                //         : params.node.data;
+                                //     const rowNode = params.api.getRowNode(params.node.id);
+                                //     params.api.deselectAll();
+                                //     if (rowNode) rowNode.setSelected(true);
+                                //     showCampaignLevel([rowData]);
+                                //     moveToNextTab("2");
+                                // }}
                                 style={{ cursor: 'pointer' }}
                             >
                                 {firstColumnValue}
@@ -3122,94 +3123,94 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
         }
     }, [activeTab, selectedCampaigns]);
 
-    useEffect(() => {
-        // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
-        if (campaignStatusFilter !== "All") {
-            // Filter grid rows by adset status
-            const adsetStatusMap = new Map(
-                Camapignlevelstatus.flatMap(campaign =>
-                    (campaign.adsets || []).map(adset => [
-                        String(adset.adset_id),
-                        adset.status?.toUpperCase()
-                    ])
-                )
-            );
+    // useEffect(() => {
+    //     // functionCall1();
+    //     console.log(campaignStatusFilter, "campaignStatusFilter");
+    //     if (campaignStatusFilter !== "All") {
+    //         // Filter grid rows by adset status
+    //         const adsetStatusMap = new Map(
+    //             Camapignlevelstatus.flatMap(campaign =>
+    //                 (campaign.adsets || []).map(adset => [
+    //                     String(adset.adset_id),
+    //                     adset.status?.toUpperCase()
+    //                 ])
+    //             )
+    //         );
 
-            const filteredRowObjects = newRowDataForFilter.current.filter(row =>
-                adsetStatusMap.get(String(row.adsetid)) ===
-                campaignStatusFilter?.toUpperCase()
-            );
+    //         const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+    //             adsetStatusMap.get(String(row.adsetid)) ===
+    //             campaignStatusFilter?.toUpperCase()
+    //         );
 
-            setdailyData(filteredRowObjects)
-            if (typeFilter !== "All") {
+    //         setdailyData(filteredRowObjects)
+    //         if (typeFilter !== "All") {
 
-                const campaignBudgetMap = new Map(
-                    Camapignlevelstatus.map(item => {
-                        const id = String(item.campaign_id);
+    //             const campaignBudgetMap = new Map(
+    //                 Camapignlevelstatus.map(item => {
+    //                     const id = String(item.campaign_id);
 
-                        const hasDaily =
-                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
-                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+    //                     const hasDaily =
+    //                         Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+    //                         item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
 
-                        const hasLifetime =
-                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
-                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+    //                     const hasLifetime =
+    //                         Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+    //                         item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
 
-                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
-                    })
-                );
+    //                     return [id, { daily: hasDaily, lifetime: hasLifetime }];
+    //                 })
+    //             );
 
-                const filteredByType = filteredRowObjects.filter(row => {
-                    const budget = campaignBudgetMap.get(String(row.campaignid));
+    //             const filteredByType = filteredRowObjects.filter(row => {
+    //                 const budget = campaignBudgetMap.get(String(row.campaignid));
 
-                    if (typeFilter === "Daily") return budget?.daily;
-                    if (typeFilter === "Lifetime") return budget?.lifetime;
+    //                 if (typeFilter === "Daily") return budget?.daily;
+    //                 if (typeFilter === "Lifetime") return budget?.lifetime;
 
-                    return true;
-                });
+    //                 return true;
+    //             });
 
-                setdailyData(filteredByType);
-            }
+    //             setdailyData(filteredByType);
+    //         }
 
-            // filteredRowObjects is the final adset-filtered grid data
+    //         // filteredRowObjects is the final adset-filtered grid data
 
-            // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
-            // setdailyData(filteredByStatus);
-        } else {
-            let data = newRowDataForFilter.current;
+    //         // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+    //         // setdailyData(filteredByStatus);
+    //     } else {
+    //         let data = newRowDataForFilter.current;
 
-            if (typeFilter !== "All") {
-                const campaignBudgetMap = new Map(
-                    Camapignlevelstatus.map(item => {
-                        const id = String(item.campaign_id);
+    //         if (typeFilter !== "All") {
+    //             const campaignBudgetMap = new Map(
+    //                 Camapignlevelstatus.map(item => {
+    //                     const id = String(item.campaign_id);
 
-                        const hasDaily =
-                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
-                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+    //                     const hasDaily =
+    //                         Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+    //                         item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
 
-                        const hasLifetime =
-                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
-                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+    //                     const hasLifetime =
+    //                         Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+    //                         item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
 
-                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
-                    })
-                );
+    //                     return [id, { daily: hasDaily, lifetime: hasLifetime }];
+    //                 })
+    //             );
 
-                data = data.filter(row => {
-                    const budget = campaignBudgetMap.get(String(row.campaignid));
+    //             data = data.filter(row => {
+    //                 const budget = campaignBudgetMap.get(String(row.campaignid));
 
-                    if (typeFilter === "Daily") return budget?.daily;
-                    if (typeFilter === "Lifetime") return budget?.lifetime;
+    //                 if (typeFilter === "Daily") return budget?.daily;
+    //                 if (typeFilter === "Lifetime") return budget?.lifetime;
 
-                    return true;
-                });
-            }
+    //                 return true;
+    //             });
+    //         }
 
-            setdailyData(data);
-            // setdailyData(newRowDataForFilter.current);
-        }
-    }, [campaignStatusFilter, typeFilter, Camapignlevelstatus]);
+    //         setdailyData(data);
+    //         // setdailyData(newRowDataForFilter.current);
+    //     }
+    // }, [campaignStatusFilter, typeFilter, Camapignlevelstatus]);
 
     // useEffect(() => {
     //     // console.log(campaignComments, "campaignComments");
@@ -3252,6 +3253,89 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     //     // }
     // }, [selectedCampaigns]);
 
+    useEffect(() => {
+        // functionCall1();
+        console.log(campaignStatusFilter, "campaignStatusFilter");
+        if (campaignStatusFilter !== "All") {
+            // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            // const filteredByStatus = memorizedDailyData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
+            const campaignStatusMap = new Map(
+                Camapignlevelstatus.map(item => [
+                    String(item.campaign_id),
+                    item.status?.toUpperCase()
+                ])
+            );
+
+            const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                campaignStatusMap.get(String(row.campaignid)) ===
+                campaignStatusFilter?.toUpperCase()
+            );
+            setdailyData(filteredRowObjects);
+
+            if (typeFilter !== "All") {
+
+                const campaignBudgetMap = new Map(
+                    Camapignlevelstatus.map(item => {
+                        const id = String(item.campaign_id);
+
+                        const hasDaily =
+                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+                        const hasLifetime =
+                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
+                    })
+                );
+
+                const filteredByType = filteredRowObjects.filter(row => {
+                    const budget = campaignBudgetMap.get(String(row.campaignid));
+
+                    if (typeFilter === "Daily") return budget?.daily;
+                    if (typeFilter === "Lifetime") return budget?.lifetime;
+
+                    return true;
+                });
+
+                setdailyData(filteredByType);
+            }
+            // setdailyData(filteredByStatus);
+        } else {
+            let data = newRowDataForFilter.current;
+
+            if (typeFilter !== "All") {
+                const campaignBudgetMap = new Map(
+                    Camapignlevelstatus.map(item => {
+                        const id = String(item.campaign_id);
+
+                        const hasDaily =
+                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+                        const hasLifetime =
+                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
+                    })
+                );
+
+                data = data.filter(row => {
+                    const budget = campaignBudgetMap.get(String(row.campaignid));
+
+                    if (typeFilter === "Daily") return budget?.daily;
+                    if (typeFilter === "Lifetime") return budget?.lifetime;
+
+                    return true;
+                });
+            }
+
+            setdailyData(data);
+            // setdailyData(newRowDataForFilter.current);
+        }
+    }, [campaignStatusFilter, typeFilter, Camapignlevelstatus]);
 
     useEffect(() => {
         if (refreshpage === "Refresh24") {
