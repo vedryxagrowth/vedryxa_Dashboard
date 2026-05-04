@@ -50,7 +50,8 @@ const newtworkCollections = {
     "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
-    "FB_Affinity": "Facebook_Affinity_Daily"
+    "FB_Affinity": "Facebook_Affinity_Daily",
+    "FB_Botup": "Facebook_Botup_Daily"
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -77,6 +78,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     const newRowDataForFilter = useRef([]);
 
     const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
+    const [typeFilter, setTypeFilter] = useState("All");
 
     const [insideInput, setInsideInput] = useState("");
 
@@ -2702,29 +2704,29 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 filetype={selectedCreative.filetype}
                                             />
                                             <div style={{ flex: 1, marginLeft: 6 }}>
-                                                <div style={{display:"flex"}}>
-                                                <div
-                                                    style={{
-                                                        fontWeight: 600,
-                                                        fontSize: 10,
-                                                        color: theme === "dark" ? "#e4e6eb" : "#050505",
-                                                    }}
-                                                >
-                                                    {selectedCreative.adName || "-"}
-                                                </div>
-                                                <div>
-                                                    {idx === 0 && adLevelCreatives.length > 0 && (
-                                                        <EditOutlined
-                                                            style={{ cursor: "pointer", marginLeft: 8 }}
-                                                            onClick={() => {
-                                                                const campaign = adLevelCreatives[0];
+                                                <div style={{ display: "flex" }}>
+                                                    <div
+                                                        style={{
+                                                            fontWeight: 600,
+                                                            fontSize: 10,
+                                                            color: theme === "dark" ? "#e4e6eb" : "#050505",
+                                                        }}
+                                                    >
+                                                        {selectedCreative.adName || "-"}
+                                                    </div>
+                                                    <div>
+                                                        {idx === 0 && adLevelCreatives.length > 0 && (
+                                                            <EditOutlined
+                                                                style={{ cursor: "pointer", marginLeft: 8 }}
+                                                                onClick={() => {
+                                                                    const campaign = adLevelCreatives[0];
 
-                                                                const href = `/Campaigns?campaignId=${currentCampaignId}&account=${currentAccount}&network=${newRevenuePratner}`;
-                                                                window.open(href, "_blank", "noopener,noreferrer");
-                                                            }}
-                                                        />
-                                                    )}
-                                                </div>
+                                                                    const href = `/Campaigns?campaignId=${currentCampaignId}&account=${currentAccount}&network=${newRevenuePratner}`;
+                                                                    window.open(href, "_blank", "noopener,noreferrer");
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div
                                                     style={{
@@ -3598,15 +3600,74 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             );
 
             setdailyData(filteredRowObjects)
+            if (typeFilter !== "All") {
+
+                const campaignBudgetMap = new Map(
+                    Camapignlevelstatus.map(item => {
+                        const id = String(item.campaign_id);
+
+                        const hasDaily =
+                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+                        const hasLifetime =
+                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
+                    })
+                );
+
+                const filteredByType = filteredRowObjects.filter(row => {
+                    const budget = campaignBudgetMap.get(String(row.campaignid));
+
+                    if (typeFilter === "Daily") return budget?.daily;
+                    if (typeFilter === "Lifetime") return budget?.lifetime;
+
+                    return true;
+                });
+
+                setdailyData(filteredByType);
+            }
 
             // filteredRowObjects is the final adset-filtered grid data
 
             // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             // setdailyData(filteredByStatus);
         } else {
-            setdailyData(newRowDataForFilter.current);
+            let data = newRowDataForFilter.current;
+
+            if (typeFilter !== "All") {
+                const campaignBudgetMap = new Map(
+                    Camapignlevelstatus.map(item => {
+                        const id = String(item.campaign_id);
+
+                        const hasDaily =
+                            Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+                        const hasLifetime =
+                            Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+                            item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+                        return [id, { daily: hasDaily, lifetime: hasLifetime }];
+                    })
+                );
+
+                data = data.filter(row => {
+                    const budget = campaignBudgetMap.get(String(row.campaignid));
+
+                    if (typeFilter === "Daily") return budget?.daily;
+                    if (typeFilter === "Lifetime") return budget?.lifetime;
+
+                    return true;
+                });
+            }
+
+            setdailyData(data);
+            // setdailyData(newRowDataForFilter.current);
         }
-    }, [campaignStatusFilter]);
+    }, [campaignStatusFilter, typeFilter, Camapignlevelstatus]);
 
     // useEffect(() => {
     //     // console.log(campaignComments, "campaignComments");
@@ -4145,7 +4206,35 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                         </Button>
                                     </Dropdown>
                                 </Col>
+                                <Col>
+                                    <Dropdown
+                                        overlay={
+                                            <Menu
+                                                onClick={({ key }) => setTypeFilter(key)}
+                                                items={[
+                                                    { key: 'All', label: 'All' },
+                                                    { key: 'Daily', label: 'Daily' },
+                                                    { key: 'Lifetime', label: 'Lifetime' },
+                                                ]}
+                                            />
+                                        }
+                                        trigger={['click']}
+                                    >
+                                        <Button
+                                            style={{
+                                                borderRadius: 8,
+                                                background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                                                border: '1px solid #91d5ff',
+                                                color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                                                fontWeight: 500,
+                                                marginRight: '5px'
+                                            }}
+                                        >
+                                            {typeFilter} <DownOutlined />
+                                        </Button>
+                                    </Dropdown>
 
+                                </Col>
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                     <Tooltip
                                         title={

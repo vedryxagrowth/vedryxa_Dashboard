@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Row, Col, Tooltip, Tabs, Radio, Table } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, CopyOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, CopyOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 // import TextArea from 'antd/es/input/TextArea';
@@ -578,6 +578,7 @@ const CreateArticle = ({ theme, onCreate }) => {
 const ArticlesList = ({ theme, newArticle }) => {
     const { apiClient } = useTokenContext();
     const [articles, setArticles] = useState([]);
+    const [loadingId, setLoadingId] = useState(null);
     const columns = [
         {
             title: 'Created',
@@ -593,15 +594,121 @@ const ArticlesList = ({ theme, newArticle }) => {
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
+            render: (text, record) => {
+                if (!record.article_link) return text;
+
+                return (
+                    <Tooltip
+                        title={
+                            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <CopyOutlined
+                                    style={{ cursor: "pointer" }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCopy(record.article_link);
+                                    }}
+                                />
+                                Copy link
+                            </span>
+                        }
+                        overlayInnerStyle={{
+                            backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                            color: theme === "dark" ? "#ffffff" : "#000000",
+                            borderRadius: 6,
+
+                        }}
+                    >
+                        <a
+                            href={record.article_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ color: "#1890ff" }}
+                        >
+                            {text}
+                        </a>
+                    </Tooltip>
+                );
+            }
         },
         {
             title: 'Created By',
             dataIndex: 'createdBy',
             key: 'createdBy',
         },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (text, record) => (
+                <span
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                    }}
+                >
+                    {text}
+
+                    {loadingId === record.id ? (
+                        <Spin size="small" />
+                    ) : (
+                        (record.status !== "PUBLISHED_STATUS") && (
+                            <Tooltip
+                                title="Click on the icon to get article status"
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                                    color: theme === "dark" ? "#ffffff" : "#000000",
+                                    borderRadius: 6,
+                                }}
+                            >
+                                <InfoCircleOutlined
+                                    style={{ cursor: "pointer", color: "green" }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleIconClick(record.id, record.domain);
+                                    }}
+                                />
+                            </Tooltip>
+                        )
+                    )}
+                </span>
+            )
+        },
     ];
 
+    const handleIconClick = async (id, domain) => {
+        try {
+            setLoadingId(id);
+            const res = await apiClient.post('/affinity/getArticleStatus/', {
+                id,
+                domain
+            });
+            const { status, articleLink } = res.data.data;
+            setArticles((prev) =>
+                prev.map((item) =>
+                    item.id === id
+                        ? {
+                            ...item,
+                            status: status,
+                            article_link: articleLink,
+                        }
+                        : item
+                )
+            );
 
+            console.log(res.data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoadingId(null);
+        }
+    };
+    const handleCopy = (link) => {
+        navigator.clipboard.writeText(link);
+        message.success("Link copied");
+    };
     useEffect(() => {
         const fetchArticles = async () => {
             try {
@@ -613,6 +720,8 @@ const ArticlesList = ({ theme, newArticle }) => {
                     domain: article?.data?.domain_name,
                     createdAt: article.createdAt,
                     createdBy: article.createdBy,
+                    status: article.status,
+                    article_link: article.article_link
                 }))
                 );
             } catch (error) {
@@ -656,7 +765,7 @@ const ArticlesList = ({ theme, newArticle }) => {
                     }`}
                 scroll={{
                     x: "auto",
-                    y: "calc(72vh - 120px)", // 👈 FIX: give exact height
+                    y: "calc(72vh - 120px)",
                 }}
                 dataSource={articles}
                 columns={columns}

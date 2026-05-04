@@ -36,7 +36,9 @@ const revenuePartnerNames = {
     "Inuvo_Prism": "FB_InuvoPrism",
     "Code_Fuel": "FB_CodeFuel",
     "Predicto": "FB_Predicto",
-    "Affinity": "FB_Affinity"
+    "Affinity": "FB_Affinity",
+    "Botup": "FB_Botup",
+    "Outbrain_Tonic_Rsoc":"Outbrain_TonicRsoc"
 };
 
 
@@ -57,7 +59,9 @@ const newtworkCollections = {
     "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
-    "FB_Affinity": "Facebook_Affinity_Daily"
+    "FB_Affinity": "Facebook_Affinity_Daily",
+    "FB_Botup": "Facebook_Botup_Daily",
+    "Outbrain_TonicRsoc":"Outbrain_TonicRsoc"
 }
 
 const NetworkDefaultTimezones = {
@@ -77,7 +81,9 @@ const NetworkDefaultTimezones = {
     "FB_InuvoPrism": "PDT",
     "FB_CodeFuel": "UTC",
     "FB_Predicto": "EDT",
-    "FB_Affinity": "PDT"
+    "FB_Affinity": "PDT",
+    "FB_Botup": "EDT",
+    "Outbrain_TonicRsoc": "EDT"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -1511,6 +1517,10 @@ const Dashboard = () => {
                 }
                 else if (key === "FB_Affinity") {
                     newKey = "Facebook_Affinity_Daily"
+                }else if (key === "FB_Botup") {
+                    newKey = "Facebook_Botup_Daily"
+                } else if (key=== "Outbrain_TonicRsoc"){
+                    newKey = "Outbrain_TonicRsoc"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 
@@ -6153,7 +6163,7 @@ const Dashboard = () => {
                                                 { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? cpc1Previous.current : 0, camparisionPercentage: Number(cpc1Previous.current) === 0 ? 0 : ((Number(cpc1.current || 0) - Number(cpc1Previous.current || 0)) / Math.abs(Number(cpc1Previous.current))) * 100 },
                                                 { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? rpc1Previous.current : 0, camparisionPercentage: Number(rpc1Previous.current) === 0 ? 0 : ((Number(rpc1.current || 0) - Number(rpc1Previous.current || 0)) / Math.abs(Number(rpc1Previous.current))) * 100 },
                                                 { title: 'ROI', value: roi1.current, color: '#00C853', dot: '#00C853', comparater: data.length > 0 ? roi1Previous.current : 0, camparisionPercentage: Number(roi1Previous.current) === 0 ? 0 : ((Number(roi1.current || 0) - Number(roi1Previous.current || 0)) / Math.abs(Number(roi1Previous.current))) * 100 },
-                                                { title: 'Filteration', value: `${filteration1.current}%`, color: '#AED581', dot: '#AED581', comparater: data.length > 0 ? `${filteration1Previous.current }%`: 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
+                                                { title: 'Filteration', value: `${filteration1.current}%`, color: '#AED581', dot: '#AED581', comparater: data.length > 0 ? `${filteration1Previous.current}%` : 0, camparisionPercentage: Number(filteration1Previous.current) === 0 ? 0 : ((Number(filteration1.current || 0) - Number(filteration1Previous.current || 0)) / Math.abs(Number(filteration1Previous.current))) * 100 }
                                             ]
                                                 .map((item, idx) => (
                                                     <div

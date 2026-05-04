@@ -2744,7 +2744,9 @@ const AdsetComponent = ({
   scheduleErrorByAdset,
   setSelectedByAdset,
   adSchedulingToShowCampaign,
-  geoTreeData
+  geoTreeData,
+  setMinAgeToggle,
+  minAgeToggle
 }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState(-1);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -2965,8 +2967,10 @@ const AdsetComponent = ({
   const watchedCampaignAmount = Form.useWatch("Daily_amount", form) ?? 0;
   const CampaignBudgetActive = Number(watchedCampaignAmount) > 0;
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
+  const BidStartegyValue = Form.useWatch("Bid_strategy", form) ?? "";
   const optimizationGoalValue = Form.useWatch(["adsets", index, "optimization_goal"], form) ?? "";
   const isDynamicCreative = Form.useWatch(["adsets", index, "isDynamicCreative"], form);
+
 
   const showScheduling =
     budgetType === "lifetime" && (adSchedulingToShow[adset.id] || adSchedulingToShowCampaign);
@@ -2998,7 +3002,6 @@ const AdsetComponent = ({
         },
       ]);
     };
-
 
     // ✅ CASE 1 — Campaign restriction exists
     if (campaignCountries.length > 0) {
@@ -3049,7 +3052,12 @@ const AdsetComponent = ({
     form,
     index,
   ]);
-
+  useEffect(() => {
+    setMinAgeToggle(prev => ({
+      ...prev,
+      [adset.id]: adset?.minAgeToggle ?? true
+    }));
+  }, [adset?.minAgeToggle, adset.id]);
   const handleFirstCountriesChange = (newCountriesArray) => {
     const adsets = form.getFieldValue("adsets") || [];
     const newAdsets = adsets.map((a, i) => ({
@@ -3107,7 +3115,43 @@ const AdsetComponent = ({
       { value: "IMPRESSIONS", label: "Maximize number of impressions" },
     ]
   }
-  const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
+
+  const Bid_strategy_values = [
+    {
+      value: "LOWEST_COST_WITHOUT_CAP",
+      label: "Highest Volume",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_BID_CAP",
+      label: "Bid Cap",
+      title: "",
+    },
+    {
+      value: "COST_CAP",
+      label: "Cost per Result Goal",
+      title: "",
+    },
+    {
+      value: "LOWEST_COST_WITH_MIN_ROAS",
+      label: "ROAS Goal",
+      title: "",
+    },
+  ];
+  const SPECIAL_RULES = {
+    OUTCOME_SALES: {
+      LOWEST_COST_WITH_MIN_ROAS: [
+        { value: "VALUE", label: "Maximize value of conversions" },
+      ],
+    },
+  };
+
+  const optionsForOptimz_goal =
+    SPECIAL_RULES?.[objectiveValue]?.[BidStartegyValue] ||
+    Optimization_goal_values[objectiveValue] ||
+    [];
+
+  // const optionsForOptimz_goal = Optimization_goal_values[objectiveValue] || [];
 
   // value currently in form for this adset (keeps UI in sync)
   const adsetsValues = form.getFieldValue("adsets") || [];
@@ -3172,6 +3216,60 @@ const AdsetComponent = ({
 
 
   const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
+
+  const below25Options = [
+    { value: "18", label: "18" },
+    { value: "19", label: "19", disabled: hasCountries },
+    { value: "20", label: "20", disabled: hasCountries },
+    { value: "21", label: "21", disabled: hasCountries },
+    { value: "22", label: "22", disabled: hasCountries },
+    { value: "23", label: "23", disabled: hasCountries },
+    { value: "24", label: "24", disabled: hasCountries },
+    { value: "25", label: "25", disabled: hasCountries }
+  ];
+
+  const above25Options = [
+    { value: "26", label: "26", disabled: hasCountries },
+    { value: "27", label: "27", disabled: hasCountries },
+    { value: "28", label: "28", disabled: hasCountries },
+    { value: "29", label: "29", disabled: hasCountries },
+    { value: "30", label: "30", disabled: hasCountries },
+    { value: "31", label: "31", disabled: hasCountries },
+    { value: "32", label: "32", disabled: hasCountries },
+    { value: "33", label: "33", disabled: hasCountries },
+    { value: "34", label: "34", disabled: hasCountries },
+    { value: "35", label: "35", disabled: hasCountries },
+    { value: "36", label: "36", disabled: hasCountries },
+    { value: "37", label: "37", disabled: hasCountries },
+    { value: "38", label: "38", disabled: hasCountries },
+    { value: "39", label: "39", disabled: hasCountries },
+    { value: "40", label: "40", disabled: hasCountries },
+    { value: "41", label: "41", disabled: hasCountries },
+    { value: "42", label: "42", disabled: hasCountries },
+    { value: "43", label: "43", disabled: hasCountries },
+    { value: "44", label: "44", disabled: hasCountries },
+    { value: "45", label: "45", disabled: hasCountries },
+    { value: "46", label: "46", disabled: hasCountries },
+    { value: "47", label: "47", disabled: hasCountries },
+    { value: "48", label: "48", disabled: hasCountries },
+    { value: "49", label: "49", disabled: hasCountries },
+    { value: "50", label: "50", disabled: hasCountries },
+    { value: "51", label: "51", disabled: hasCountries },
+    { value: "52", label: "52", disabled: hasCountries },
+    { value: "53", label: "53", disabled: hasCountries },
+    { value: "54", label: "54", disabled: hasCountries },
+    { value: "55", label: "55", disabled: hasCountries },
+    { value: "56", label: "56", disabled: hasCountries },
+    { value: "57", label: "57", disabled: hasCountries },
+    { value: "58", label: "58", disabled: hasCountries },
+    { value: "59", label: "59", disabled: hasCountries },
+    { value: "60", label: "60", disabled: hasCountries },
+    { value: "61", label: "61", disabled: hasCountries },
+    { value: "62", label: "62", disabled: hasCountries },
+    { value: "63", label: "63", disabled: hasCountries },
+    { value: "64", label: "64", disabled: hasCountries },
+    { value: "65", label: "65", disabled: hasCountries }
+  ];
 
   console.log(campaignCountries);
 
@@ -4704,8 +4802,11 @@ const AdsetComponent = ({
           {showBidAmount && (
             <Form.Item
               name={["adsets", index, "bid_amount"]}
+              // label={
+              //   <span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>
+              // }
               label={
-                <span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>
+                <span style={{ color: "#B4B4B4" }}>{Bid_strategy_values.find(item => item.value === BidStartegyValue)?.label}</span>
               }
               rules={[
                 {
@@ -5212,7 +5313,41 @@ const AdsetComponent = ({
                   {/* 🔹 Min Age */}
                   <Form.Item
                     name={["adsets", index, "Min_Age"]}
-                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    // label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                    label={
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ color: "#B4B4B4" }}>Min Age</span>
+
+                        <Switch
+                          checked={hasCountries ? true : (minAgeToggle[adset.id] ?? true)}
+                           disabled={hasCountries}
+                          onChange={(checked) => {
+                            setMinAgeToggle(prev => ({
+                              ...prev,
+                              [adset.id]: checked
+                            }));
+
+                            const defaultValue = checked ? "18" : "26";
+
+                            const currentAdsets = form.getFieldValue("adsets") || [];
+
+                            const updatedAdsets = currentAdsets.map((item, i) =>
+                              item.id === adset.id
+                                ? { ...item, Min_Age: defaultValue }
+                                : item
+                            );
+                            form.setFieldsValue({ adsets: updatedAdsets });
+                          }}
+                          style={{
+                            backgroundColor: (hasCountries ? true : (minAgeToggle[adset.id] ?? true))
+                              ? "#91C25F"
+                              : "#d9d9d9",
+                          }}
+                          size="small"
+                        />
+                      </div>
+
+                    }
                     rules={[
                       { required: true, message: "Please select an option!" },
                     ]}
@@ -5221,12 +5356,14 @@ const AdsetComponent = ({
                   >
                     <Select
                       disabled={hasCountries}
-                      options={[
-                        { value: "18", label: "18", title: "" },
-                        { value: "25", label: "25", title: "", disabled: hasCountries },
-                        { value: "35", label: "35", title: "", disabled: hasCountries },
-                        { value: "40", label: "40", disabled: true, title: "" },
-                      ]}
+                      showSearch
+                      options={(minAgeToggle[adset.id] ?? true) ? below25Options : above25Options}
+                      // options={[
+                      //   { value: "18", label: "18", title: "" },
+                      //   { value: "25", label: "25", title: "", disabled: hasCountries },
+                      //   { value: "35", label: "35", title: "", disabled: hasCountries },
+                      //   { value: "40", label: "40", disabled: true, title: "" },
+                      // ]}
                       dropdownClassName={theme === "dark" && "custom-dropdown"}
                       className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                     />
@@ -7841,8 +7978,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [showScheduleSubmitError, setShowScheduleSubmitError] = useState(false);
   const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
   const [continents, setContinents] = useState([])
+  const [minAgeToggle, setMinAgeToggle] = useState(true);
 
   // Derived condition name changed to watchedHasAdsetBudget
+  const objectiveValue = Form.useWatch("Objectives", form) ?? "";
   const watchedHasAdsetBudget = Array.isArray(watchedAdsets)
     ? watchedAdsets.some(ad => Number(ad?.DailyAdd_amount) > 0)
     : false;
@@ -8792,7 +8931,30 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const closeCanvasModal = () => {
     setIsImgEditorShown(false); // Close the image editor
   };
+  const bidStrategyOptions = [
+    { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
+    { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
+    { value: "COST_CAP", label: "Cost per Result Goal" },
+    { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" },
+  ];
 
+  const filteredBidStrategies =
+    objectiveValue === "OUTCOME_LEADS"
+      ? bidStrategyOptions.filter(
+        (opt) => opt.value !== "LOWEST_COST_WITH_MIN_ROAS"
+      )
+      : bidStrategyOptions;
+
+
+  useEffect(() => {
+    if (objectiveValue === "OUTCOME_LEADS") {
+      const current = form.getFieldValue("Bid_strategy");
+
+      if (current === "LOWEST_COST_WITH_MIN_ROAS") {
+        form.setFieldValue("Bid_strategy", "LOWEST_COST_WITHOUT_CAP");
+      }
+    }
+  }, [objectiveValue]);
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
     setWebsiteURL(text);
@@ -8926,7 +9088,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const handleBidStrategyChange = (value) => {
     // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
     setShowBidAmount(
-      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP"
+      value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP" || value === "LOWEST_COST_WITH_MIN_ROAS"
     );
     // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
   };
@@ -10766,6 +10928,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         countries: formValuesObject.countries,
         Min_Age: formValuesObject.Min_Age,
         Max_Age: formValuesObject.Max_Age,
+        minAgeToggle: minAgeToggle[formValuesObject.id] ?? true,
         Gender: parseInt(formValuesObject.Gender),
         locales: formValuesObject.Language,
         ...(adSchedulingToShowCampaign
@@ -12709,28 +12872,29 @@ const CloneMultipleAdsetCampaignDrawer = ({
                 >
                   <Select
                     variant="filled"
-                    options={[
-                      {
-                        value: "LOWEST_COST_WITHOUT_CAP",
-                        label: "Highest Volume",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_BID_CAP",
-                        label: "Bid Cap",
-                        title: "",
-                      },
-                      {
-                        value: "COST_CAP",
-                        label: "Cost per Result Goal",
-                        title: "",
-                      },
-                      {
-                        value: "LOWEST_COST_WITH_MIN_ROAS",
-                        label: "ROAS Goal",
-                        title: "",
-                      },
-                    ]}
+                    options={filteredBidStrategies}
+                    // options={[
+                    //   {
+                    //     value: "LOWEST_COST_WITHOUT_CAP",
+                    //     label: "Highest Volume",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_BID_CAP",
+                    //     label: "Bid Cap",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "COST_CAP",
+                    //     label: "Cost per Result Goal",
+                    //     title: "",
+                    //   },
+                    //   {
+                    //     value: "LOWEST_COST_WITH_MIN_ROAS",
+                    //     label: "ROAS Goal",
+                    //     title: "",
+                    //   },
+                    // ]}
                     onChange={handleBidStrategyChange}
                     dropdownClassName={theme === "dark" && "custom-dropdown"}
                     className={`${theme === "dark" ? "dark-theme" : "light-theme"
@@ -13102,6 +13266,8 @@ const CloneMultipleAdsetCampaignDrawer = ({
                   setShowScheduleSubmitError={setShowScheduleSubmitError}
                   adSchedulingToShowCampaign={adSchedulingToShowCampaign}
                   geoTreeData={geoTreeData}
+                  minAgeToggle={minAgeToggle}
+                  setMinAgeToggle={setMinAgeToggle}
                 />
               );
               // <ffff/>

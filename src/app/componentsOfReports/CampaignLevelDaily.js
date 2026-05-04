@@ -50,7 +50,8 @@ const newtworkCollections = {
   "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
   "FB_CodeFuel": "Facebook_CodeFuel_Daily",
   "FB_Predicto": 'Facebook_Predicto_Daily',
-  "FB_Affinity": "Facebook_Affinity_Daily"
+  "FB_Affinity": "Facebook_Affinity_Daily",
+  "FB_Botup": "Facebook_Botup_Daily"
 }
 const selectTimezone = {
   UTC: 'UTCDate',
@@ -77,6 +78,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
   const newRowDataForFilter = useRef([]);
 
   const [campaignStatusFilter, setcampaignStatusLabel] = useState("All");
+  const [typeFilter, setTypeFilter] = useState("All");
 
   const [insideInput, setInsideInput] = useState("");
 
@@ -3212,7 +3214,23 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
     try {
       setLoading1(true);
       const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
-      const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newRevenuePratner === "FB_InuvoPrism" ? "Facebook_InuvoPrismDaily" : newtworkCollections[newRevenuePratner];
+      // const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newRevenuePratner === "FB_InuvoPrism" ? "Facebook_InuvoPrismDaily" : newtworkCollections[newRevenuePratner];
+      let collectionName;
+      switch (newRevenuePratner) {
+        case "FB_DomainActive":
+          collectionName = "Facebook_DActive_Names";
+          break;
+        case "FB_InuvoPrism":
+          collectionName = "Facebook_InuvoPrismDaily";
+          break;
+        case "Outbrain_TonicRsoc":
+          collectionName = "Outbrain_TonicRsoc";
+          break;
+        default:
+          collectionName = newtworkCollections[newRevenuePratner];
+          break;
+      }
+      console.log(collectionName);
       // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
       // const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
       // const mainData = fetchData.data;
@@ -3813,7 +3831,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
   // }, [oneTimeFetch.current]);
 
   useEffect(() => {
-    if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
+    if (campaignStatusFilter) {
       functionCall2();
     }
   }, []);
@@ -3836,11 +3854,71 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
         campaignStatusFilter?.toUpperCase()
       );
       setdailyData(filteredRowObjects);
+
+      if (typeFilter !== "All") {
+
+        const campaignBudgetMap = new Map(
+          Camapignlevelstatus.map(item => {
+            const id = String(item.campaign_id);
+
+            const hasDaily =
+              Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+              item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+            const hasLifetime =
+              Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+              item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+            return [id, { daily: hasDaily, lifetime: hasLifetime }];
+          })
+        );
+
+        const filteredByType = filteredRowObjects.filter(row => {
+          const budget = campaignBudgetMap.get(String(row.campaignid));
+
+          if (typeFilter === "Daily") return budget?.daily;
+          if (typeFilter === "Lifetime") return budget?.lifetime;
+
+          return true;
+        });
+
+        setdailyData(filteredByType);
+      }
       // setdailyData(filteredByStatus);
     } else {
-      setdailyData(newRowDataForFilter.current);
+      let data = newRowDataForFilter.current;
+
+      if (typeFilter !== "All") {
+        const campaignBudgetMap = new Map(
+          Camapignlevelstatus.map(item => {
+            const id = String(item.campaign_id);
+
+            const hasDaily =
+              Number(item.campaign_budget?.daily_budget || 0) > 0 ||
+              item.adsets?.some(ad => Number(ad.budget?.daily_budget || 0) > 0);
+
+            const hasLifetime =
+              Number(item.campaign_budget?.lifetime_budget || 0) > 0 ||
+              item.adsets?.some(ad => Number(ad.budget?.lifetime_budget || 0) > 0);
+
+            return [id, { daily: hasDaily, lifetime: hasLifetime }];
+          })
+        );
+
+        data = data.filter(row => {
+          const budget = campaignBudgetMap.get(String(row.campaignid));
+
+          if (typeFilter === "Daily") return budget?.daily;
+          if (typeFilter === "Lifetime") return budget?.lifetime;
+
+          return true;
+        });
+      }
+
+      setdailyData(data);
+      // setdailyData(newRowDataForFilter.current);
     }
-  }, [campaignStatusFilter]);
+  }, [campaignStatusFilter, typeFilter, Camapignlevelstatus]);
 
   // useEffect(() => {
   //   // console.log(campaignComments, "campaignComments");
@@ -4391,7 +4469,35 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                     </Button>
                   </Dropdown>
                 </Col>
+                <Col>
+                  <Dropdown
+                    overlay={
+                      <Menu
+                        onClick={({ key }) => setTypeFilter(key)}
+                        items={[
+                          { key: 'All', label: 'All' },
+                          { key: 'Daily', label: 'Daily' },
+                          { key: 'Lifetime', label: 'Lifetime' },
+                        ]}
+                      />
+                    }
+                    trigger={['click']}
+                  >
+                    <Button
+                      style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                        border: '1px solid #91d5ff',
+                        color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                        fontWeight: 500,
+                        marginRight: '5px'
+                      }}
+                    >
+                      {typeFilter} <DownOutlined />
+                    </Button>
+                  </Dropdown>
 
+                </Col>
                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                   <Tooltip
                     title={
