@@ -5320,7 +5320,7 @@ const AdsetComponent = ({
 
                         <Switch
                           checked={hasCountries ? true : (minAgeToggle[adset.id] ?? true)}
-                           disabled={hasCountries}
+                          disabled={hasCountries}
                           onChange={(checked) => {
                             setMinAgeToggle(prev => ({
                               ...prev,
@@ -7979,6 +7979,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [adSchedulingToShowCampaign, setAdSchedulingToShowCampaign] = useState(false);
   const [continents, setContinents] = useState([])
   const [minAgeToggle, setMinAgeToggle] = useState(true);
+  const [isAccountChanged, setIsAccountChanged] = useState(false);
 
   // Derived condition name changed to watchedHasAdsetBudget
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
@@ -7986,6 +7987,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
     ? watchedAdsets.some(ad => Number(ad?.DailyAdd_amount) > 0)
     : false;
   const watchedCampaignBudget = Form.useWatch("Daily_amount", form);
+  const newAccountNumbers = Array.isArray(accountis) ? accountis?.map(acc => ({ value: acc, label: acc })) : [];
   const geoTreeData = [
     {
       label: "Countries",
@@ -9250,6 +9252,33 @@ const CloneMultipleAdsetCampaignDrawer = ({
         }
         setPixelIDList(uniquePixelIDs);
         setPageIDList(uniquePageIDs);
+        if (isAccountChanged) {
+          const currentValues = form.getFieldsValue(true);
+
+          const updatedAdsets = (currentValues.adsets || []).map((adset) => ({
+            ...adset,
+            pixel_id: uniquePixelIDs?.[0]?.value || null,
+            page_id: uniquePageIDs?.[0]?.value || null,
+          }));
+          
+          setNewAddLevelData((prev) => {
+            Object.keys(prev).forEach((key) => {
+              if (Array.isArray(prev[key])) {
+                prev[key] = prev[key].map((item) => ({
+                  ...item,
+                  page_id: uniquePageIDs?.[0]?.value || null,
+                }));
+              }
+            });
+
+            return { ...prev };
+          });
+          form.setFieldsValue({
+            adsets: updatedAdsets,
+          });
+
+          setIsAccountChanged(false);
+        }
 
         if (
           imagehash.pixelID === null ||
@@ -9267,8 +9296,13 @@ const CloneMultipleAdsetCampaignDrawer = ({
 
   console.log(pixelIDList, "pixelIDLIst in clone");
   console.log(pageIDList, "pageIDList in clone");
-  const Accountchange = (e) => {
-    setAccountNumber(e.target.value);
+  // const Accountchange = (e) => {
+  //   setAccountNumber(e.target.value);
+  // };
+  const Accountchange = (value) => {
+    if (!value) return; // prevents empty/null selection
+    setIsAccountChanged(true);
+    setAccountNumber(value);
   };
   // const handlepositionChange = async (values) => {
   //     console.log(values, "handlepositionChange")
@@ -10292,6 +10326,37 @@ const CloneMultipleAdsetCampaignDrawer = ({
     //       : {}),
     //   };
     // }
+    const folderPath = `${network}/${values.Account_Number}/${values.Name}`;
+    const createS3Folder = async (folderPath) => {
+      try {
+        const response = await fetch(
+          "https://prodapis.adsgoat.in/uploadUserFiles",
+          {
+            method: "POST",
+            headers: {
+              Authorization: localStorage.getItem("token"),
+              username: "default-user",
+              "x-folder": folderPath.endsWith("/")
+                ? folderPath
+                : folderPath + "/",
+              "x-action": "create-folder",
+            },
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to create folder");
+        const data = await response.json();
+        console.log("Folder created:", folderPath);
+        return true;
+      } catch (err) {
+        console.error("Error creating folder:", err);
+        return false;
+      }
+    };
+    // await createS3Folder(folderPath);
+    console.log("Before await createS3Folder");
+    await createS3Folder(folderPath);
+    console.log("After await createS3Folder");
 
     const onSuccess = (status, response) => {
       console.log("Upload success:", response);
@@ -10344,7 +10409,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         };
         let fileBlob = null;
         let s3FileUrl = null;
-        const folderPath = `${network}/${fullCampaignData.Account_Number}/${fullCampaignData.campaign_name}`;
+        const folderPath = `${network}/${values.Account_Number}/${values.Name}`;
         const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
           const fullPath = `${folderPath}/${fileName}`;
           const formData = new FormData();
@@ -10403,7 +10468,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             const fileName = file.name.split("/").pop();
 
             fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/adimages`,
+              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/adimages`,
               formData,
               { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -10420,7 +10485,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             }
           } else if (file.url.endsWith(".mp4")) {
             fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/advideos`,
+              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/advideos`,
               formData,
               { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -10493,7 +10558,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //   }
 
             fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/adimages`,
+              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/adimages`,
               formData,
               { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -10527,7 +10592,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //   }
 
             fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${fullCampaignData?.Account_Number}/advideos`,
+              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/advideos`,
               formData,
               { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -10695,74 +10760,218 @@ const CloneMultipleAdsetCampaignDrawer = ({
       //   })
       // );
 
+      // const newAddLevel = await Promise.all(
+      //   newAddLevelData[newAdset.id].map(async (item) => {
+      //     console.log(item, "item in newAddLevel");
+
+      //     // ALWAYS regenerate media
+      //     const fileData = await getFilenameDeatials(item.filename);
+
+      //     const newAd = {
+      //       id: uuidv4(),
+      //       page_id: item.page_id,
+      //       message: toCommaString(item.message),
+      //       headline: toCommaString(item.headline),
+      //       Description: toCommaString(item.Description),
+      //       Caption: item.Caption,
+      //       Website_URL: item.Website_URL,
+      //       AddName: item.AddName,
+      //     };
+
+      //     // IMAGE
+      //     if (fileData?.imag_hash) {
+      //       newAd.imag_hash = fileData.imag_hash;
+      //       newAd.filename = fileData.filename;
+      //     }
+
+      //     // VIDEO
+      //     else if (fileData?.videoid) {
+      //       newAd.videoid = fileData.videoid;
+      //       newAd.thambnailurl = fileData.thambnailurl;
+      //       newAd.filename = fileData.filename;
+      //     }
+
+      //     return newAd;
+      //   })
+      // );
+
+      // const newAddLevel = await Promise.all(
+      //   newAddLevelData[newAdset.id].map(async (item) => {
+      //     console.log(item, "item in newAddLevel");
+
+      //     const getItem =
+      //       addlevelData[newAdset.id]?.find((i) => i.id === item.id) || null;
+
+      //     /* ----------------------------------------------------
+      //        CASE 1: ID EXISTS
+      //     ---------------------------------------------------- */
+      //     if (getItem) {
+      //       /* ----------------------------------------------
+      //          1️⃣ If filename is SAME → UPDATE (copy all)
+      //       ---------------------------------------------- */
+      //       if (item.filename === getItem.filename) {
+      //         return {
+      //           id: uuidv4(),
+      //           page_id: item.page_id,
+      //           message: toCommaString(item.message),
+      //           headline: toCommaString(item.headline),
+      //           Description: toCommaString(item.Description),
+      //           Caption: item.Caption,
+      //           Website_URL: item.Website_URL,
+      //           AddName: item.AddName,
+      //           filename: item.filename,
+      //           ...(item.imag_hash
+      //             ? { imag_hash: item.imag_hash }
+      //             : {
+      //               videoid: getItem.videoid,
+      //               thambnailurl: getItem.thambnailurl,
+      //             }),
+      //         };
+      //       }
+
+      //       /* ----------------------------------------------
+      //          2️⃣ If filename is DIFFERENT → CREATE
+      //       ---------------------------------------------- */
+
+      //       const updatedFilesDeatils = await getFilenameDeatials(item.filename);
+
+      //       const newAd = {
+      //         id: uuidv4(),
+      //         page_id: item.page_id,
+      //         message: toCommaString(item.message),
+      //         headline: toCommaString(item.headline),
+      //         Description: toCommaString(item.Description),
+      //         Caption: item.Caption,
+      //         Website_URL: item.Website_URL,
+      //         AddName: item.AddName,
+      //       };
+
+      //       if (updatedFilesDeatils?.imag_hash) {
+      //         newAd.imag_hash = updatedFilesDeatils.imag_hash;
+      //         newAd.filename = updatedFilesDeatils.filename;
+      //       } else if (updatedFilesDeatils?.videoid) {
+      //         newAd.videoid = updatedFilesDeatils.videoid;
+      //         newAd.thambnailurl = updatedFilesDeatils.thambnailurl;
+      //         newAd.filename = updatedFilesDeatils.filename;
+      //       }
+
+      //       return newAd;
+      //     }
+
+      //     /* ----------------------------------------------------
+      //        CASE 2: ID DOES NOT EXIST → CREATE
+      //     ---------------------------------------------------- */
+
+      //     const fileData = await getFilenameDeatials(item.filename);
+
+      //     const newAd = {
+      //       id: uuidv4(),
+      //       page_id: item.page_id,
+      //       message: toCommaString(item.message),
+      //       headline: toCommaString(item.headline),
+      //       Description: toCommaString(item.Description),
+      //       Caption: item.Caption,
+      //       Website_URL: item.Website_URL,
+      //       AddName: item.AddName,
+      //     };
+
+      //     if (fileData?.imag_hash) {
+      //       newAd.imag_hash = fileData.imag_hash;
+      //       newAd.filename = fileData.filename;
+      //     } else if (fileData?.videoid) {
+      //       newAd.videoid = fileData.videoid;
+      //       newAd.thambnailurl = fileData.thambnailurl;
+      //       newAd.filename = fileData.filename;
+      //     }
+
+      //     return newAd;
+      //   })
+      // );
+
       const newAddLevel = await Promise.all(
         newAddLevelData[newAdset.id].map(async (item) => {
           console.log(item, "item in newAddLevel");
 
-          const getItem =
-            addlevelData[newAdset.id]?.find((i) => i.id === item.id) || null;
+          // const getItem =
+          //   addlevelData[newAdset.id]?.find((i) => i.id === item.id) || null;
 
-          /* ----------------------------------------------------
-             CASE 1: ID EXISTS
-          ---------------------------------------------------- */
-          if (getItem) {
-            /* ----------------------------------------------
-               1️⃣ If filename is SAME → UPDATE (copy all)
-            ---------------------------------------------- */
-            if (item.filename === getItem.filename) {
-              return {
-                id: uuidv4(),
-                page_id: item.page_id,
-                message: toCommaString(item.message),
-                headline: toCommaString(item.headline),
-                Description: toCommaString(item.Description),
-                Caption: item.Caption,
-                Website_URL: item.Website_URL,
-                AddName: item.AddName,
-                filename: item.filename,
-                ...(item.imag_hash
-                  ? { imag_hash: item.imag_hash }
-                  : {
-                    videoid: getItem.videoid,
-                    thambnailurl: getItem.thambnailurl,
-                  }),
-              };
-            }
+          // /* ----------------------------------------------------
+          //    CASE 1: ID EXISTS
+          // ---------------------------------------------------- */
+          // if (getItem) {
+          //   /* ----------------------------------------------
+          //      1️⃣ If filename is SAME → UPDATE (copy all)
+          //   ---------------------------------------------- */
+          //   if (item.filename === getItem.filename) {
+          //     return {
+          //       id: uuidv4(),
+          //       page_id: item.page_id,
+          //       message: toCommaString(item.message),
+          //       headline: toCommaString(item.headline),
+          //       Description: toCommaString(item.Description),
+          //       Caption: item.Caption,
+          //       Website_URL: item.Website_URL,
+          //       AddName: item.AddName,
+          //       filename: item.filename,
+          //       ...(item.imag_hash
+          //         ? { imag_hash: item.imag_hash }
+          //         : {
+          //           videoid: getItem.videoid,
+          //           thambnailurl: getItem.thambnailurl,
+          //         }),
+          //     };
+          //   }
 
-            /* ----------------------------------------------
-               2️⃣ If filename is DIFFERENT → CREATE
-            ---------------------------------------------- */
+          //   /* ----------------------------------------------
+          //      2️⃣ If filename is DIFFERENT → CREATE
+          //   ---------------------------------------------- */
 
-            const updatedFilesDeatils = await getFilenameDeatials(item.filename);
+          //   const updatedFilesDeatils = await getFilenameDeatials(item.filename);
 
-            const newAd = {
-              id: uuidv4(),
-              page_id: item.page_id,
-              message: toCommaString(item.message),
-              headline: toCommaString(item.headline),
-              Description: toCommaString(item.Description),
-              Caption: item.Caption,
-              Website_URL: item.Website_URL,
-              AddName: item.AddName,
-            };
+          //   const newAd = {
+          //     id: uuidv4(),
+          //     page_id: item.page_id,
+          //     message: toCommaString(item.message),
+          //     headline: toCommaString(item.headline),
+          //     Description: toCommaString(item.Description),
+          //     Caption: item.Caption,
+          //     Website_URL: item.Website_URL,
+          //     AddName: item.AddName,
+          //   };
 
-            if (updatedFilesDeatils?.imag_hash) {
-              newAd.imag_hash = updatedFilesDeatils.imag_hash;
-              newAd.filename = updatedFilesDeatils.filename;
-            } else if (updatedFilesDeatils?.videoid) {
-              newAd.videoid = updatedFilesDeatils.videoid;
-              newAd.thambnailurl = updatedFilesDeatils.thambnailurl;
-              newAd.filename = updatedFilesDeatils.filename;
-            }
+          //   if (updatedFilesDeatils?.imag_hash) {
+          //     newAd.imag_hash = updatedFilesDeatils.imag_hash;
+          //     newAd.filename = updatedFilesDeatils.filename;
+          //   } else if (updatedFilesDeatils?.videoid) {
+          //     newAd.videoid = updatedFilesDeatils.videoid;
+          //     newAd.thambnailurl = updatedFilesDeatils.thambnailurl;
+          //     newAd.filename = updatedFilesDeatils.filename;
+          //   }
 
-            return newAd;
-          }
+          //   return newAd;
+          // }
 
           /* ----------------------------------------------------
              CASE 2: ID DOES NOT EXIST → CREATE
           ---------------------------------------------------- */
 
-          const fileData = await getFilenameDeatials(item.filename);
+
+
+          // const fileData = await getFilenameDeatials(item.filename);
+          const fileData = await getFilenameDeatials(
+            typeof item.filename === "string"
+              ? {
+                adsetId: newAdset.id,
+                id: item.id,
+                url: item.filename,
+                name: item.filename.split("/").pop(),
+                status: "done",
+                uid: item.filename.split("https://sudheer-fbimages.s3.amazonaws.com/")[1],
+                type: item.filename.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
+
+              }
+              : item.filename
+          );
 
           const newAd = {
             id: uuidv4(),
@@ -11552,6 +11761,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   // };
 
   const selectedFilesData = (data) => {
+    console.log("Selected Files Data:", data);
     const mappedFiles = data.map((file, i) => ({
       uid: file.uid || `-${Date.now()}-${i}`,
       name: file?.name,
@@ -11565,6 +11775,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             : "video/",
       url: file?.url,
     }));
+    console.log("Mapped Files:", mappedFiles);
 
     // ✅ Update selectedFiles
     setSelectedFiles((prev) => {
@@ -12546,7 +12757,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                   // style={{ width: 200, }}
                   style={{ flex: 0.25 }}
                 >
-                  <Input
+                  {/* <Input
                     value={accountNumber}
                     onChange={Accountchange}
                     className={
@@ -12554,6 +12765,42 @@ const CloneMultipleAdsetCampaignDrawer = ({
                         ? "custom-input-dark"
                         : "custom-input-light"
                     }
+                  /> */}
+                  {/* <Select
+                    // mode="multiple"
+                    value={accountis}                // array of strings
+                    onChange={Accountchange}             // gets string[]
+                    options={newAccountNumbers}             // [{value,label}]
+                    placeholder="Select account(s)"
+                    // showSearch
+                    optionFilterProp="label"
+                    // allowClear
+                    maxTagCount={1}                                      // 👈 always show only the first selected
+                    maxTagPlaceholder={(omitted) => `+${omitted.length}`} // 👈 rest as a count
+                    className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"}`}
+                    dropdownClassName={theme === "dark" && "custom-dropdown"}
+                    style={{ width: "100%", borderRadius: 8 }}
+                  /> */}
+                  <Select
+                    value={accountis}
+                    onChange={Accountchange}
+                    options={newAccountNumbers}
+                    placeholder="Select account"
+                    showSearch
+                    optionFilterProp="label"
+                    // filterOption={(input, option) => {
+                    //   const label = option?.label?.toString().toLowerCase() || "";
+                    //   const value = option?.value?.toString().toLowerCase() || "";
+
+                    //   return (
+                    //     label.includes(input.toLowerCase()) ||
+                    //     value.includes(input.toLowerCase())
+                    //   );
+                    // }}
+                    className={`single-row-select green-border-select ${theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                      }`}
+                    dropdownClassName={theme === "dark" ? "custom-dropdown" : ""}
+                    style={{ width: "100%", borderRadius: 8 }}
                   />
                 </Form.Item>
                 <Form.Item
