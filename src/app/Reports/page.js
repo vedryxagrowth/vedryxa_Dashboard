@@ -21241,7 +21241,7 @@ const MyTablePage = () => {
         setnewAccountName(accountName);
         setNewTime(time);
         setNewRevenuePartner(revenuePratner);
-        if(activeTab === "7"){
+        if (activeTab === "7") {
             getLatestHour();
         }
         if (newRevenuePratner !== revenuePratner || newaccount !== account) {
@@ -21904,53 +21904,55 @@ const MyTablePage = () => {
                     ? '0 1px 3px rgba(0,0,0,0.6)'
                     : '0 1px 6px rgba(0,0,0,0.08)',
         }}>
+            <div style={{ display: "flex",justifyContent:"center",alignItems:"center" ,textAlign:"center"}}>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={handleCarouselChange}
+                    items={items.map((item) => ({
+                        key: item.key,
+                        label: item.label,
+                    }))}
+                    className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+                    style={{
+                        backgroundColor: 'transparent',
+                        padding: '0',
+                        marginBottom: '0',
+                    }}
+                    tabBarStyle={{
+                        fontSize: '12px',
+                        padding: '0',
+                        height: '30px',
+                        lineHeight: '30px',
+                        marginBottom: '-1px',
+                        borderBottom: 'none',
+                    }}
 
-            <Tabs
-                activeKey={activeTab}
-                onChange={handleCarouselChange}
-                tabBarExtraContent={
-                   activeTab === '7' && (
-                         <Select
-                size="small"
-                value={selectedHour}
-                className="hour-select"
-                onChange={(value) => setSelectedHour(value)}
-                style={{
-                    width: 70,
-                    // marginRight: 10
-                }}
-            >
-                {Array.from(
-                    { length: latestHour + 1 },
-                    (_, i) => (
-                        <Select.Option key={i} value={i}>
-                            {i}
-                        </Select.Option>
+                />
+                {
+                    activeTab === '7' && (
+                        <Select
+                            size="small"
+                            value={selectedHour}
+                            className="hour-select"
+                            onChange={(value) => setSelectedHour(value)}
+                            style={{
+                                width: 70,
+                                // marginRight: 10
+                            }}
+                        >
+                            {Array.from(
+                                { length: latestHour + 1 },
+                                (_, i) => (
+                                    <Select.Option key={i} value={i}>
+                                        {i}
+                                    </Select.Option>
+                                )
+                            )}
+                        </Select>
                     )
-                )}
-            </Select>
-        )
-    }
-                items={items.map((item) => ({
-                    key: item.key,
-                    label: item.label,
-                }))}
-                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
-                style={{
-                    backgroundColor: 'transparent',
-                    padding: '0',
-                    marginBottom: '0',
-                }}
-                tabBarStyle={{
-                    fontSize: '12px',
-                    padding: '0',
-                    height: '30px',
-                    lineHeight: '30px',
-                    marginBottom: '-1px',
-                    borderBottom: 'none',
-                }}
+                }
+            </div>
 
-            />
         </StickyBox>
     );
     // const [aiLoading, setAiLoading] = useState(false);
