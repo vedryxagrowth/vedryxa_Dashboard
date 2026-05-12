@@ -21915,10 +21915,6 @@ const MyTablePage = () => {
                     marginLeft: 10
                 }}
                 options={hourOptions}
-                virtual={false}
-                popupMatchSelectWidth={false}
-                getPopupContainer={(trigger) => trigger.parentElement}
-
             />
         );
 
@@ -21936,7 +21932,7 @@ const MyTablePage = () => {
         // }}>
         <div
             style={{
-                position: 'sticky',
+                // position: 'sticky',
                 top: 64,
                 zIndex: 1000,
                 backgroundColor:
