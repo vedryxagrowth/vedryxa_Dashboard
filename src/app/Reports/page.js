@@ -21825,41 +21825,42 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_Mnet"
             ? [{
                 key: '7',
-                label: (
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8
-                        }}
-                    >
-                        <span>Day of Hour</span>
+                label: 'Day of Hour',
+                // label: (
+                //     <div
+                //         style={{
+                //             display: 'flex',
+                //             alignItems: 'center',
+                //             gap: 8
+                //         }}
+                //     >
+                //         <span>Day of Hour</span>
 
-                        {/* {activeTab === '7' && (
-                            <Select
-                                size="small"
-                                value={selectedHour}
-                                className="hour-select"
-                                onChange={(value) => setSelectedHour(value)}
-                                style={{ width: 70 }}
-                                onClick={(e) => e.stopPropagation()}
-                            >
+                //         {/* {activeTab === '7' && (
+                //             <Select
+                //                 size="small"
+                //                 value={selectedHour}
+                //                 className="hour-select"
+                //                 onChange={(value) => setSelectedHour(value)}
+                //                 style={{ width: 70 }}
+                //                 onClick={(e) => e.stopPropagation()}
+                //             >
 
-                                {Array.from(
-                                    { length: latestHour + 1 },
-                                    (_, i) => (
-                                        <Select.Option key={i} value={i}>
-                                            {i === 0
-                                                ? '0 '
-                                                : `${i} `}
-                                        </Select.Option>
-                                    )
-                                )}
+                //                 {Array.from(
+                //                     { length: latestHour + 1 },
+                //                     (_, i) => (
+                //                         <Select.Option key={i} value={i}>
+                //                             {i === 0
+                //                                 ? '0 '
+                //                                 : `${i} `}
+                //                         </Select.Option>
+                //                     )
+                //                 )}
 
-                            </Select>
-                        )} */}
-                    </div>
-                ),
+                //             </Select>
+                //         )} */}
+                //     </div>
+                // ),
                 content: 'Content for Hour data'
             }]
             : []),
@@ -21922,16 +21923,30 @@ const MyTablePage = () => {
 
     }, [activeTab, selectedHour, hourOptions]);
     const renderCarouselNav = useMemo(() => (
-        <StickyBox offsetTop={64} offsetBottom={20} style={{
-            zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
-            borderRadius: 12,
-            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-            padding: 1,
-            boxShadow:
-                theme === 'dark'
-                    ? '0 1px 3px rgba(0,0,0,0.6)'
-                    : '0 1px 6px rgba(0,0,0,0.08)',
-        }}>
+        // <StickyBox offsetTop={64} offsetBottom={20} style={{
+        //     zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
+        //     borderRadius: 12,
+        //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+        //     padding: 1,
+        //     boxShadow:
+        //         theme === 'dark'
+        //             ? '0 1px 3px rgba(0,0,0,0.6)'
+        //             : '0 1px 6px rgba(0,0,0,0.08)',
+        // }}>
+        <div
+            style={{
+                position: 'sticky',
+                top: 64,
+                zIndex: 1000,
+                backgroundColor:
+                    theme === 'dark'
+                        ? '#1E1E1E'
+                        : '#e6e6e6',
+                borderRadius: 12,
+                padding: 1,
+                marginLeft: "10px"
+            }}
+        >
             <div className="hour-tabs-wrapper"
             >
                 <Tabs
@@ -21993,12 +22008,10 @@ const MyTablePage = () => {
 
                 } */}
             </div>
-
-        </StickyBox>
+        </div>
     ), [
         activeTab,
-        selectedHour,
-        hourOptions,
+        hourDropdown,
         items,
         theme
     ]);
