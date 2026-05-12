@@ -58,6 +58,7 @@ const AdsetCard = ({
   viewCampaignData,
   network,
 }) => {
+  console.log(adset);
   const [expanded, setExpanded] = useState(false);
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -73,6 +74,7 @@ const AdsetCard = ({
   const [error, setError] = useState("");
   const [isIconModalOpen, setIsIconModalOpen] = useState(false);
   const [iconInputValue, setIconInputValue] = useState("");
+  const [adlevel, setadlevel] = useState(adset?.addlevel || [])
 
 
 
@@ -192,13 +194,15 @@ const AdsetCard = ({
     try {
       //https://www.testapi.adsgoat.in
       const response = await axios.post(
-        "https://www.testapi.adsgoat.in/api/newapproveAdsnew",
+        "https://www.testapi.adsgoat.in/api/newapproveAdstest",
         {
           id: item.id,
           Approved: userdetails.userName, // Assuming userdetails has a name property
           datetime: moment()
             .tz("Asia/Kolkata")
             .format("YYYY-MM-DD HH:mm [IST]"),
+          adsetid: adset.id,
+          identifier: viewCampaignData?.identifier
         },
         {
           headers: {
@@ -208,7 +212,13 @@ const AdsetCard = ({
       );
       if (response.status === 200) {
         console.log("Approved");
-        changeRRefrst && changeRRefrst();
+        // changeRRefrst && changeRRefrst();
+        setadlevel(prev=>prev.map(aditem=>{
+          if(aditem.id === item.id){
+            return({...aditem, status: "Approved"})
+          }
+          return aditem
+        }))
       }
     } catch (error) {
       console.error("Error approving ad:", error);
@@ -285,7 +295,15 @@ const AdsetCard = ({
       );
       if (response.status === 200) {
         console.log("Rejected:", currentItem.id);
-        changeRRefrst && changeRRefrst();
+        setadlevel(prev=>prev.map(aditem=>{
+          if(aditem.id === currentItem.id){
+            return({...aditem, status: "Rejected", rejectionReason: rejectionReason})
+          }
+          return aditem
+        }))
+        setRejectionReason("");
+        setIsRejectModalVisible(false);
+        // changeRRefrst && changeRRefrst();
       }
     } catch (error) {
       console.error("Error rejecting ad:", error);
@@ -296,13 +314,13 @@ const AdsetCard = ({
     }
   };
 
-  const approvedCount = adset.addlevel.filter(
+  const approvedCount = adlevel.filter(
     (item) => item.status === "Approved"
   ).length;
-  const rejectedCount = adset.addlevel.filter(
+  const rejectedCount = adlevel.filter(
     (item) => item.status === "Rejected"
   ).length;
-  const pendingCount = adset.addlevel.filter((item) => !item.status).length;
+  const pendingCount = adlevel.filter((item) => !item.status).length;
 
   const createnewads = () => {
     setnewadsDrawerVisible(true);
@@ -615,7 +633,7 @@ const AdsetCard = ({
                 overflow: "auto",
               }}
             >
-              {adset.addlevel.map((item, index) => {
+              {adlevel.map((item, index) => {
                 const adIsActive =
                   String(
                     item?.Ad_Status ?? item?.Status ?? item?.status ?? "PAUSED"
@@ -1083,7 +1101,7 @@ const AdsetCard = ({
                 overflow: "auto",
               }}
             >
-              {adset.addlevel.map((item, index) => {
+              {adlevel.map((item, index) => {
 
 
                 const adIsActive =
@@ -1739,7 +1757,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
     if (record) {
       imageHashCaller(record);
     }
-  }, [record]);
+  }, [record.identifier]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1761,7 +1779,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
       }
     };
     fetchData();
-  }, [record]);
+  }, [record.identifier]);
 
   if (!viewCampaignData) {
     return <div>Loading...</div>;
@@ -1787,7 +1805,13 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
       );
       if (response.status === 200) {
         console.log("Approved");
-        changeRRefrst && changeRRefrst();
+        // setadlevel(prev=>prev.map(aditem=>{
+        //   if(aditem.id === item.id){
+        //     return({...aditem, status: "Approved"})
+        //   }
+        //   return aditem
+        // }))
+        // changeRRefrst && changeRRefrst();
       }
     } catch (error) {
       console.error("Error approving ad:", error);
@@ -1998,3 +2022,4 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
 };
 
 export default ExpandedAdsetsContent;
+// export default React.memo(ExpandedAdsetsContent)
