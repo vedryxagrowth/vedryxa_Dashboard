@@ -21904,7 +21904,8 @@ const MyTablePage = () => {
                     ? '0 1px 3px rgba(0,0,0,0.6)'
                     : '0 1px 6px rgba(0,0,0,0.08)',
         }}>
-            <div style={{ display: "flex",justifyContent:"center",alignItems:"center" ,textAlign:"center"}}>
+            <div className="hour-tabs-wrapper"
+            >
                 <Tabs
                     activeKey={activeTab}
                     onChange={handleCarouselChange}
@@ -21912,12 +21913,21 @@ const MyTablePage = () => {
                         key: item.key,
                         label: item.label,
                     }))}
-                    className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
-                    style={{
-                        backgroundColor: 'transparent',
-                        padding: '0',
-                        marginBottom: '0',
-                    }}
+                    // className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+                    className={`custom-tabs hour-tabs ${theme === 'dark'
+                            ? 'dark-mode-tabs'
+                            : 'light-mode-tabs'
+                        }`}
+                    // style={{
+                    //     backgroundColor: 'transparent',
+                    //     padding: '0',
+                    //     marginBottom: '0',
+
+                    //     flex: 1,
+                    //     minWidth: 0
+
+                    // }}
+
                     tabBarStyle={{
                         fontSize: '12px',
                         padding: '0',
@@ -21937,7 +21947,7 @@ const MyTablePage = () => {
                             onChange={(value) => setSelectedHour(value)}
                             style={{
                                 width: 70,
-                                // marginRight: 10
+
                             }}
                         >
                             {Array.from(
