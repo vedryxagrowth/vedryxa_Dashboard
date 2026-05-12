@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   FilterOutlined,
   CheckCircleFilled,
@@ -89,6 +89,7 @@ const { RangePicker } = DatePicker;
 const App = () => {
   const { userdetails } = useTokenContext();
   console.log("useTokenContext", userdetails);
+  const isMobile = window.innerWidth <= 500;
 
   if (!userdetails?.adAccounts) {
     return (
@@ -205,7 +206,8 @@ const App = () => {
   const [adsCount, setAdsCount] = useState({});
   const [loadingAd, setLoadingAd] = useState(null);
   const [typeFilter, setTypeFilter] = useState('All');
-  console.log(checkedRowRecords);
+  // console.log(checkedRowRecords);
+  // console.log(multipleAdsetCampaignData);
   // const [isOpen, setIsOpen] = useState(false);
   const onStatusFilterChange = (key) => {
     setCampaignStatusFilter(key);
@@ -269,27 +271,77 @@ const App = () => {
     });
   };
 
-  const getFilteredMultipleAdsetCampaigns = () => {
+  // const getFilteredMultipleAdsetCampaigns = () => {
+  //   return multipleAdsetCampaignData.filter((campaign) => {
+  //     if (campaignStatusFilter === "active") {
+  //       return campaign.Status === "ACTIVE" && campaign.Approval === "Approved";
+  //     }
+  //     if (campaignStatusFilter === "pause") {
+  //       return campaign.Status === "PAUSED" && campaign.Approval === "Approved";
+  //     }
+  //     if (campaignStatusFilter === "pending") {
+  //       return campaign.Approval === "PENDING_APPROVAL";
+  //     }
+  //     if (campaignStatusFilter === "reject") {
+  //       return campaign.Approval === "Rejected";
+  //     }
+  //     if (campaignStatusFilter === "error") {
+  //       return (
+  //         (campaign.adsetErrors?.length || 0) > 0 ||
+  //         (campaign.adErrors?.length || 0) > 0 ||
+  //         (campaign.campaignlevel_error)
+  //       );
+  //     }
+  //     if (typeFilter === "Daily") {
+  //       if (campaign.budgetType?.toLowerCase() !== "daily") {
+  //         return false;
+  //       }
+  //     }
+
+  //     if (typeFilter === "Lifetime") {
+  //       if (campaign.budgetType?.toLowerCase() !== "lifetime") {
+  //         return false;
+  //       }
+  //     }
+
+  //     return true;
+
+  //   });
+  // };
+
+  const filteredMultipleAdsetCampaigns = useMemo(() => {
     return multipleAdsetCampaignData.filter((campaign) => {
+
       if (campaignStatusFilter === "active") {
-        return campaign.Status === "ACTIVE" && campaign.Approval === "Approved";
+        return (
+          campaign.Status === "ACTIVE" &&
+          campaign.Approval === "Approved"
+        );
       }
+
       if (campaignStatusFilter === "pause") {
-        return campaign.Status === "PAUSED" && campaign.Approval === "Approved";
+        return (
+          campaign.Status === "PAUSED" &&
+          campaign.Approval === "Approved"
+        );
       }
+
       if (campaignStatusFilter === "pending") {
         return campaign.Approval === "PENDING_APPROVAL";
       }
+
       if (campaignStatusFilter === "reject") {
         return campaign.Approval === "Rejected";
       }
+
       if (campaignStatusFilter === "error") {
         return (
           (campaign.adsetErrors?.length || 0) > 0 ||
           (campaign.adErrors?.length || 0) > 0 ||
-          (campaign.campaignlevel_error)
+          campaign.campaignlevel_error
         );
       }
+
       if (typeFilter === "Daily") {
         if (campaign.budgetType?.toLowerCase() !== "daily") {
           return false;
@@ -303,9 +355,12 @@ const App = () => {
       }
 
       return true;
-
     });
-  };
+  }, [
+    multipleAdsetCampaignData,
+    campaignStatusFilter,
+    typeFilter,
+  ]);
 
   const gridThemeClass =
     theme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine";
@@ -970,11 +1025,11 @@ const App = () => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        setPaginationSize(5);
+        setPaginationSize(8);
       } else if (window.innerWidth < 2560) {
-        setPaginationSize(15);
+        setPaginationSize(100);
       } else {
-        setPaginationSize(25);
+        setPaginationSize(100);
       }
     };
 
@@ -1084,6 +1139,7 @@ const App = () => {
   const handleUpdateApprovalForAdsets = async (id, newApprovalValue) => {
     try {
       //https://www.testapi.adsgoat.in
+      const dateAndTimeOfCampaignApproval = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm [IST]");
       const response = await fetch(
         `https://www.testapi.adsgoat.in/api/newupdateApprovalnew/${id}`,
         {
@@ -1095,22 +1151,34 @@ const App = () => {
           body: JSON.stringify({
             Approval: newApprovalValue, // New approval value
             Approved: userdetails?.userName, // Username of the person who approved it
-            datetime: moment()
-              .tz("Asia/Kolkata")
-              .format("YYYY-MM-DD HH:mm [IST]"), // Current datetime in IST
+            datetime: dateAndTimeOfCampaignApproval, // Current datetime in IST
           }),
         }
       );
 
       if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        setCampaignData((prevData) =>
-          prevData.map((record) =>
-            record.identifier === id
-              ? { ...record, Approval: newApprovalValue }
-              : record
-          )
+        // const data = await response.json();
+        // console.log(data);
+        // setCampaignData((prevData) =>
+        //   prevData.map((record) =>
+        //     record.identifier === id
+        //       ? { ...record, Approval: newApprovalValue }
+        //       : record
+        //   )
+        // );
+        setMultipleAdsetCampaignData((prev) =>
+          prev.map((item) => {
+            if (item.identifier === id) {
+              return {
+                ...item,
+                Approval: newApprovalValue,
+                Approvedby: userdetails?.userName,
+                Approveddate: dateAndTimeOfCampaignApproval,
+              };
+            }
+
+            return item;
+          })
         );
 
         message.open({
@@ -1119,7 +1187,7 @@ const App = () => {
           className: theme === 'dark' ? 'dark-message' : '',
         });
         setIsModalVisible(false); // Close modal after updating
-        changeRRefrst();
+        // changeRRefrst();
         // setTimeout(() => {
         //     window.location.reload();
         // }, 2000);
@@ -1134,6 +1202,7 @@ const App = () => {
   };
   const handleUpdateDisapprovalForAdsets = async (id) => {
     try {
+      const dateAndTimeOfCampaignRejection = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm [IST]")
       const response = await fetch(
         `https://www.testapi.adsgoat.in/api/newupdateDisapproval/${id}`,
         {
@@ -1145,28 +1214,32 @@ const App = () => {
           body: JSON.stringify({
             reason: rejectedReason,
             RejectedBy: userdetails?.userName,
-            datetime: moment()
-              .tz("Asia/Kolkata")
-              .format("YYYY-MM-DD HH:mm [IST]"),
+            datetime: dateAndTimeOfCampaignRejection,
           }),
         }
       );
 
       if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        setCampaignData((prevData) =>
-          prevData.map((record) =>
-            record.identifier === id
-              ? {
-                ...record,
-                Approval: "Rejected",
-                // RejectedBy: userdetails?.userName,
-                // RejectedDate: moment().format("YYYY-MM-DD HH:mm"),
-              }
-              : record
-          )
-        );
+        // const data = await response.json();
+        // console.log(data);
+        // setCampaignData((prevData) =>
+        //   prevData.map((record) =>
+        //     record.identifier === id
+        //       ? {
+        //         ...record,
+        //         Approval: "Rejected",
+        //         // RejectedBy: userdetails?.userName,
+        //         // RejectedDate: moment().format("YYYY-MM-DD HH:mm"),
+        //       }
+        //       : record
+        //   )
+        // );
+        setMultipleAdsetCampaignData((prev) => prev.map(item => {
+          if (item.identifier === id) {
+            return ({ ...item, Approval: "Rejected", rejectionReason: rejectedReason, RejectedBy: userdetails?.userName, RejectedDate: dateAndTimeOfCampaignRejection })
+          }
+          return item;
+        }))
         message.open({
           type: "success",
           content: "Disapproval confirmed",
@@ -1174,7 +1247,7 @@ const App = () => {
         });
 
         setIsModalVisibleForAdsetsdisapprove(false);
-        changeRRefrst();
+        // changeRRefrst();
 
       } else {
         console.error("Failed to update disapproval");
@@ -1836,7 +1909,7 @@ const App = () => {
     FB_Bodies1: "Facebook_Bodies1",
     Newsbreak_DA: "Newsbreak_DomainActive",
   };
-  const filteredCampaigns = getFilteredMultipleAdsetCampaigns();
+  const filteredCampaigns = filteredMultipleAdsetCampaigns;
 
   const handleEditClickMultipleAdsetData = (record, status) => {
     // console.log(record, "viewdata campaign")
@@ -2005,14 +2078,19 @@ const App = () => {
   const handleDeleteCampaign = async (identifier) => {
     try {
       // setDeletingId(identifier);
-      console.log("identifier:", identifier);
+      // console.log("identifier:", identifier);
 
-      await axios.delete(
+      const response = await axios.delete(
         `https://www.testapi.adsgoat.in/api/newcampaigns/${identifier}`
         // { headers: { Authorization: token } } // include if you use auth
       );
 
-      changeRRefrst && changeRRefrst();
+      if (response.status === 200) {
+        // console.log("delete")
+        setMultipleAdsetCampaignData((prev) => prev.filter(item => item.identifier !== identifier))
+      }
+
+      // changeRRefrst && changeRRefrst();
 
       message.open({
         type: 'success',
@@ -2395,7 +2473,7 @@ const App = () => {
       title: "Status",
       dataIndex: "fbstatus",
       key: "fbstatus",
-      width: 120,
+      width: 80,
       align: "center",
       render: (text, record) => (
         <div
@@ -2442,7 +2520,7 @@ const App = () => {
       title: "Campaign name",
       dataIndex: "campaign_name",
       key: "campaign_name",
-      width: 320,
+      width: 300,
       align: "center",
       // render: (text, record) => (
       //   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
@@ -2640,7 +2718,7 @@ const App = () => {
       title: "Account number",
       dataIndex: "Account_Number",
       key: "Account_Number",
-      // width: 320,
+      width: 120,
       align: "center",
 
     },
@@ -2785,7 +2863,7 @@ const App = () => {
     {
       title: "Actions",
       key: "actions",
-      width: 180,
+      width: 150,
       align: "center",
       render: (text, record) => {
         const hasAnyError =
@@ -2801,7 +2879,7 @@ const App = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "8px",
+              // gap: "5px",
             }}
           >
             <Tooltip
@@ -2820,8 +2898,8 @@ const App = () => {
                 style={{
                   // border: `1px solid ${theme === "dark" ? "#555" : "#d9d9d9"}`,
                   border: "none",
-                  borderRadius: "6px",
-                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  paddingRight: "6px",
                   backgroundColor:
                     theme === "dark" ? "transparent" : "transparent",
                   color: theme === "dark" ? "#fff" : "#000",
@@ -3081,7 +3159,7 @@ const App = () => {
       title: "Budget",
       dataIndex: "Daily_amount",
       key: "Daily_amount",
-      width: 100,
+      width: 90,
       align: "center",
       render: (Daily_amount, record) =>
         loading ? (
@@ -3163,7 +3241,7 @@ const App = () => {
       title: "Approved",
       dataIndex: "Approval",
       key: "Approval",
-      width: 120,
+      width: 110,
       align: "center",
       render: (text, record) => {
         let color = "black";
@@ -3325,7 +3403,8 @@ const App = () => {
       title: "Permission",
       dataIndex: "Approval",
       key: "permission",
-      width: 120,
+      // width: 110,
+      // ellipsis: true,
       align: "center",
       render: (text, record) => {
         const approval = record?.Approval?.toLowerCase();
@@ -3371,14 +3450,16 @@ const App = () => {
             <>
               <div style={{
                 display: "flex",
-                justifyContent: "space-between",
+                justifyContent: "center",
                 gap: "5px",
+                whiteSpace: "nowrap",
               }}>
                 <Button
                   style={{
                     backgroundColor: "#91C25F",
                     color: "#000",
                     border: "none",
+                    width:"62px"
                   }}
                   onClick={() => handleApprovalforAdsets(record)}
                 >
@@ -3389,6 +3470,7 @@ const App = () => {
                     backgroundColor: "#fb4437ff",
                     color: "#000",
                     border: "none",
+                    width:"82px"
                   }}
                   onClick={() => handledisApprovalforAdsets(record)}
                 >
@@ -3697,7 +3779,7 @@ const App = () => {
       ).toFixed(2);
     } else if (activeTab === "2") {
       return (
-        getFilteredMultipleAdsetCampaigns().reduce(
+        filteredMultipleAdsetCampaigns.reduce(
           (sum, record) => sum + (record.Daily_amount || 0),
           0
         ) / 100
@@ -4228,6 +4310,16 @@ const App = () => {
   };
 
 
+  const renderExpandedRow = useCallback(
+    (record) => (
+      <ExpandedAdsetsContent
+        record={record}
+        network={selectedKey}
+      />
+    ),
+    [selectedKey]
+  );
+
   return (
     <div>
       <CreateCampaignDrawer
@@ -4409,7 +4501,7 @@ const App = () => {
             <Select
               showSearch
               placeholder="Select Projects"
-              style={{ width: 130 }}
+              style={{ width: isMobile ? 210 : 130 }}
               onChange={handleKeyChange}
               value={selectedKey}
               dropdownClassName={theme === "dark" && "custom-dropdown"}
@@ -4548,7 +4640,7 @@ const App = () => {
               dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
               className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               style={{
-                width: '250px',
+                width: isMobile ? '350px' : '250px',
                 whiteSpace: 'nowrap',
                 color: theme === 'dark' ? 'white' : undefined,
                 overflow: 'hidden',
@@ -4638,7 +4730,7 @@ const App = () => {
                   defaultValue={[dayjs(), dayjs()]}
                   format="YYYY-MM-DD"
                   style={{
-                    width: '240px',
+                    width: isMobile ? '340px': '240px',
                     backgroundColor: theme === 'dark' ? '#555' : undefined,
                     color: theme === 'dark' ? 'white' : undefined,
                     border: '1px solid #4CAF50',
@@ -4667,6 +4759,18 @@ const App = () => {
             >
               Apply
             </Button>
+            { isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
+              <div
+                style={{
+                  textAlign: "right",
+                  fontSize: "13px",
+                  paddingLeft: "15px",
+                  color: theme === "dark" ? "#e4e6eb" : "#050505",
+                }}
+              >
+                Total Campaigns: {filteredMultipleAdsetCampaigns.length}
+              </div>
+            )}
 
             {/* 🔹 Search */}
           </Col>
@@ -4678,7 +4782,7 @@ const App = () => {
               alignItems: "center",
             }}
           >
-            {getFilteredMultipleAdsetCampaigns().length > 0 && (
+            {!isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
               <div
                 style={{
                   textAlign: "right",
@@ -4687,7 +4791,7 @@ const App = () => {
                   color: theme === "dark" ? "#e4e6eb" : "#050505",
                 }}
               >
-                Total Campaigns: {getFilteredMultipleAdsetCampaigns().length}
+                Total Campaigns: {filteredMultipleAdsetCampaigns.length}
               </div>
             )}
 
@@ -5203,23 +5307,31 @@ const App = () => {
             {loadingForMultipleAdsets ? (
               <Skeleton
                 active
-                paragraph={{ rows: 12 }}
+                paragraph={{ rows: isMobile ? 20 : 12 }}
                 style={{ marginTop: "10px" }}
               />
             ) : (
               <Table
                 style={{
                   width: "100%",
-                  height: "calc(100vh - 300px)",
+                  // height: "calc(100vh - 300px)",
+                  height: isMobile
+                    ? "calc(100vh - 180px)"
+                    : "calc(100vh - 280px)",
                   // minHeight: '100%',
-                  tableLayout: "fixed",
+                  // tableLayout: "fixed",
                 }}
+                // style={{
+                //   width: "100%",
+                //   tableLayout: "fixed",
+                // }}
                 className={`custom-dark-table ${theme === "dark"
                   ? "dark-mode-pagination"
                   : "light-mode-pagination"
                   }`}
                 columns={columnsformultipleadsets}
                 rowSelection={{
+                  columnWidth: 30,
                   type: "checkbox",
                   selectedRowKeys: checkedRowIds,
                   onChange: (rowIds, rowRecords) => {
@@ -5255,12 +5367,14 @@ const App = () => {
                     </div>
                   ),
                 }}
-                dataSource={getFilteredMultipleAdsetCampaigns()
-                  .map((item, index) => ({
-                    ...item,
-                    key: index,
-                  }))
-                  .reverse()}
+                // dataSource={filteredMultipleAdsetCampaigns
+                //   .map((item, index) => ({
+                //     ...item,
+                //     key: index,
+                //   }))
+                //   .reverse()}
+                dataSource={[...filteredMultipleAdsetCampaigns].reverse()}
+                rowKey={(record) => record.identifier}
                 // pagination={{ pageSize: paginationSize }}
                 pagination={{
                   pageSize: paginationSize,
@@ -5269,9 +5383,19 @@ const App = () => {
                     setPaginationSize(pageSize);
                   }
                 }}
+                // scroll={{
+                //   x: "auto",
+                //   y: "calc(63vh)",
+                // }}
+                // scroll={{
+                //   x: "max-content",
+                //   y: isMobile ? "50vh" : "63vh",
+                // }}
                 scroll={{
                   x: "auto",
-                  y: "calc(63vh)",
+                  y: isMobile
+                    ? "calc(100vh - 40px)"
+                    : "calc(100vh - 240px)",
                 }}
                 expandable={{
                   expandedRowRender: (record) => (
@@ -5283,8 +5407,12 @@ const App = () => {
                   ),
                   rowExpandable: (record) => !!record,
                 }}
+                // expandable={{
+                //   expandedRowRender: renderExpandedRow,
+                //   rowExpandable: (record) => !!record,
+                // }}
                 rowClassName={() => "custom-row"}
-                rowKey="key"
+                // rowKey="key"
                 components={{
                   body: {
                     row: (props) => (
