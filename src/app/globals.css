@@ -4408,10 +4408,3 @@ body.dark-mode .black-icon-creatives1.anticon svg {
 .hour-select {
     min-width: 80px;
 }
-.hour-select .ant-select-selector {
-    transition: none !important;
-}
-
-.ant-select-dropdown {
-    animation: none !important;
-}
