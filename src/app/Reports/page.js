@@ -105,6 +105,7 @@ const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAd
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
 const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/HourlyBreakDown'));
+const HourReports = React.lazy(() => import('../componentsOfReports/Hour'));
 
 const MyTablePage = () => {
     const router = useRouter();
@@ -247,7 +248,8 @@ const MyTablePage = () => {
     const [historyOpen, setHistoryOpen] = useState(false);
     const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
     const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
-
+    const [selectedHour, setSelectedHour] = useState(0);
+    const [latestHour, setLatestHour] = useState(0);
 
 
     useEffect(() => {
@@ -266,7 +268,13 @@ const MyTablePage = () => {
         };
         fetchNetworksData();
     }, []);
+    useEffect(() => {
 
+        if (activeTab === '7') {
+            getLatestHour();
+        }
+
+    }, [activeTab]);
 
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
@@ -14717,7 +14725,7 @@ const MyTablePage = () => {
             // rowGroup: true,
             // enableRowGroup: true,
         },
-        
+
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         history: {
             headerName: 'Activity',
@@ -21233,7 +21241,9 @@ const MyTablePage = () => {
         setnewAccountName(accountName);
         setNewTime(time);
         setNewRevenuePartner(revenuePratner);
-
+        if (activeTab === "7") {
+            getLatestHour();
+        }
         if (newRevenuePratner !== revenuePratner || newaccount !== account) {
             setPageSize(1);
         } else {
@@ -21780,9 +21790,30 @@ const MyTablePage = () => {
     // }
 
     const refreshComments = () => functionCallForCommnets(selectedValue);
+    const getLatestHour = async () => {
 
+        const collectionName =
+            newRevenuePratner === "FB_DomainActive"
+                ? "Facebook_DActive_Names"
+                : newtworkCollections[newRevenuePratner];
+        try {
 
-    const items = [
+            const resp = await apiClient.post(
+                'https://prodapis.adsgoat.in/LatestHour',
+                {
+                    dateStart: startDate,
+                    dateEnd: endDate,
+                    timezone: newtime,
+                    network: collectionName,
+                }
+            );
+            setLatestHour(resp?.data?.latestHour ?? 0);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const items = useMemo(() => [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
@@ -21790,6 +21821,49 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Hour', content: 'Content for Hour data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet"
+            ? [{
+                key: '7',
+                label: 'Day of Hour',
+                // label: (
+                //     <div
+                //         style={{
+                //             display: 'flex',
+                //             alignItems: 'center',
+                //             gap: 8
+                //         }}
+                //     >
+                //         <span>Day of Hour</span>
+
+                //         {/* {activeTab === '7' && (
+                //             <Select
+                //                 size="small"
+                //                 value={selectedHour}
+                //                 className="hour-select"
+                //                 onChange={(value) => setSelectedHour(value)}
+                //                 style={{ width: 70 }}
+                //                 onClick={(e) => e.stopPropagation()}
+                //             >
+
+                //                 {Array.from(
+                //                     { length: latestHour + 1 },
+                //                     (_, i) => (
+                //                         <Select.Option key={i} value={i}>
+                //                             {i === 0
+                //                                 ? '0 '
+                //                                 : `${i} `}
+                //                         </Select.Option>
+                //                     )
+                //                 )}
+
+                //             </Select>
+                //         )} */}
+                //     </div>
+                // ),
+                content: 'Content for Hour data'
+            }]
+            : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
@@ -21799,7 +21873,7 @@ const MyTablePage = () => {
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '7', label: 'Names-Daily', content: 'Content for Names Daily data' }] : []),
-    ];
+    ], [newRevenuePratner]);
     // const handleSlideChange = (from, to) => {
     //     // console.log(to, "to");
     //     setActiveTab((parseInt(to) + 1).toString());
@@ -21819,43 +21893,128 @@ const MyTablePage = () => {
         // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
-
-    const renderCarouselNav = () => (
-        <StickyBox offsetTop={64} offsetBottom={20} style={{
-            zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
-            borderRadius: 12,
-            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-            padding: 1,
-            boxShadow:
-                theme === 'dark'
-                    ? '0 1px 3px rgba(0,0,0,0.6)'
-                    : '0 1px 6px rgba(0,0,0,0.08)',
-        }}>
-
-            <Tabs
-                activeKey={activeTab}
-                onChange={handleCarouselChange}
-                items={items.map((item) => ({
-                    key: item.key,
-                    label: item.label,
-                }))}
-                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+    const hourOptions = useMemo(() => {
+        return Array.from(
+            { length: latestHour + 1 },
+            (_, i) => ({
+                label: i.toString(),
+                value: i,
+            })
+        );
+    }, [latestHour]);
+    const hourDropdown = useMemo(() => {
+        if (activeTab !== '7') return null;
+        return (
+            <Select
+                size="small"
+                value={selectedHour}
+                className="hour-select"
+                onChange={(value) => setSelectedHour(value)}
                 style={{
-                    backgroundColor: 'transparent',
-                    padding: '0',
-                    marginBottom: '0',
+                    width: 80,
+                    marginLeft: 10
                 }}
-                tabBarStyle={{
-                    fontSize: '12px',
-                    padding: '0',
-                    height: '30px',
-                    lineHeight: '30px',
-                    marginBottom: '-1px',
-                    borderBottom: 'none',
-                }}
+                options={hourOptions}
+                virtual={false}
+                popupMatchSelectWidth={false}
+                getPopupContainer={() => document.body}
             />
-        </StickyBox>
-    );
+        );
+
+    }, [activeTab, selectedHour, hourOptions]);
+    const renderCarouselNav = useMemo(() => (
+        // <StickyBox offsetTop={64} offsetBottom={20} style={{
+        //     zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
+        //     borderRadius: 12,
+        //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+        //     padding: 1,
+        //     boxShadow:
+        //         theme === 'dark'
+        //             ? '0 1px 3px rgba(0,0,0,0.6)'
+        //             : '0 1px 6px rgba(0,0,0,0.08)',
+        // }}>
+        <div
+            style={{
+                position: 'sticky',
+                top: 64,
+                zIndex: 1000,
+                backgroundColor:
+                    theme === 'dark'
+                        ? '#1E1E1E'
+                        : '#e6e6e6',
+                borderRadius: 12,
+                padding: 1,
+                marginLeft: "10px"
+            }}
+        >
+            <div className="hour-tabs-wrapper"
+            >
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={handleCarouselChange}
+                    // items={items.map((item) => ({
+                    //     key: item.key,
+                    //     label: item.label,
+                    // }))}
+                    items={items}
+                    // className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+                    className={`custom-tabs hour-tabs ${theme === 'dark'
+                        ? 'dark-mode-tabs'
+                        : 'light-mode-tabs'
+                        }`}
+                    // style={{
+                    //     backgroundColor: 'transparent',
+                    //     padding: '0',
+                    //     marginBottom: '0',
+
+                    //     flex: 1,
+                    //     minWidth: 0
+
+                    // }}
+
+                    tabBarStyle={{
+                        fontSize: '12px',
+                        padding: '0',
+                        height: '30px',
+                        lineHeight: '30px',
+                        marginBottom: '-1px',
+                        borderBottom: 'none',
+                    }}
+
+                />
+                {hourDropdown}
+                {/* {
+                    // activeTab === '7' && (
+                    //     <Select
+                    //         size="small"
+                    //         value={selectedHour}
+                    //         className="hour-select"
+                    //         onChange={(value) => setSelectedHour(value)}
+                    //         style={{
+                    //             width: 70,
+
+                    //         }}
+                    //     >
+                    //         {Array.from(
+                    //             { length: latestHour + 1 },
+                    //             (_, i) => (
+                    //                 <Select.Option key={i} value={i}>
+                    //                     {i}
+                    //                 </Select.Option>
+                    //             )
+                    //         )}
+                    //     </Select>
+                    // )
+
+                } */}
+            </div>
+        </div>
+    ), [
+        activeTab,
+        hourDropdown,
+        items,
+        theme
+    ]);
     // const [aiLoading, setAiLoading] = useState(false);
     // const [aiError, setAiError] = useState(null);
     // const [recDataByAccount, setRecDataByAccount] = useState({});
@@ -22879,7 +23038,7 @@ const MyTablePage = () => {
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
-                    {newRevenuePratner !== "Outbrain_TonicRsoc" && renderCarouselNav()}
+                    {newRevenuePratner !== "Outbrain_TonicRsoc" && renderCarouselNav}
                     {/* <div style={{display: 'flex', marginRight: '15px'}}>
                       
                             <Col>
@@ -23585,7 +23744,63 @@ const MyTablePage = () => {
                                     />
                                 </Tabs.TabPane>
                             )}
+                            {newRevenuePratner === "FB_Mnet" && (
+                                <Tabs.TabPane key="7">
+                                    <HourReports
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        columnStructure={mainData}
+                                        allCampaignData={allCampaignData}
+                                        allProfitLossArray={allProfitLossArray}
+                                        // newaccount={newaccount}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        newAccountName={newAccountName}
+                                        columnDefs={columnDefs}
+                                        selectedHour={selectedHour}
+                                        campaignComments={campaignComments}
+                                        setCampaignComments={setCampaignComments}
+                                        campaignStatusFilter={campaignStatusFilter}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        setCamapignlevelstatus={setCamapignlevelstatus}
+                                        commentsMap={commentsMap}
+                                        changeRRefrst={resetColumnStructure}
+                                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                        toggleStatus={checked}
+                                        handleChangeToggle={handleChangeToggle}
+                                        theme={theme}
+                                        functionCallForCommnets={functionCallForCommnets}
+                                        functionCallForCampaigns={functionCallForCampaigns}
+                                        context={{
+                                            allCampaignData,
+                                            setCampaignRefreshTrigger,
+                                            changeRRefrst,
+                                            newaccount,
+                                            userdetails,
+                                            theme,
+                                            setCamapignlevelstatus,
+                                            campaignStatusOverridesRef, // ✅ ADD THIS
+                                            adsetStatusOverridesRef,
+                                            adsetPinOverridesRef,
+                                            adsetCommentOverridesRef,
+                                            adStatusOverridesRef,
+                                            adPinOverridesRef,
+                                            adCommentOverridesRef,
+                                        }}
+                                        handleChangeInput={handleChangeInput}
+                                        handleBlur={handleBlur}
+                                        onClickRefresh={onClickRefresh}
+                                        accountsAccess={accountsAccess}
+                                    />
+                                </Tabs.TabPane>
 
+                            )}
                             {/* {newRevenuePratner === "FB_Mnet" && (
                     <Tabs.TabPane key="6">
                         <MnetLiveAdReports 
@@ -23661,7 +23876,7 @@ const MyTablePage = () => {
                 adAccounts={adAccounts}
             />
 
-        </div>
+        </div >
     );
 };
 export default MyTablePage;
