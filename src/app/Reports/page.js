@@ -248,8 +248,7 @@ const MyTablePage = () => {
     const [historyOpen, setHistoryOpen] = useState(false);
     const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
     const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
-    const [selectedHour, setSelectedHour] = useState(0);
-    const [latestHour, setLatestHour] = useState(0);
+  
 
 
     useEffect(() => {
@@ -268,13 +267,7 @@ const MyTablePage = () => {
         };
         fetchNetworksData();
     }, []);
-    useEffect(() => {
-
-        if (activeTab === '7') {
-            getLatestHour();
-        }
-
-    }, [activeTab]);
+   
 
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
@@ -21241,9 +21234,6 @@ const MyTablePage = () => {
         setnewAccountName(accountName);
         setNewTime(time);
         setNewRevenuePartner(revenuePratner);
-        if (activeTab === "7") {
-            getLatestHour();
-        }
         if (newRevenuePratner !== revenuePratner || newaccount !== account) {
             setPageSize(1);
         } else {
@@ -21790,30 +21780,9 @@ const MyTablePage = () => {
     // }
 
     const refreshComments = () => functionCallForCommnets(selectedValue);
-    const getLatestHour = async () => {
 
-        const collectionName =
-            newRevenuePratner === "FB_DomainActive"
-                ? "Facebook_DActive_Names"
-                : newtworkCollections[newRevenuePratner];
-        try {
 
-            const resp = await apiClient.post(
-                'https://prodapis.adsgoat.in/LatestHour',
-                {
-                    dateStart: startDate,
-                    dateEnd: endDate,
-                    timezone: newtime,
-                    network: collectionName,
-                }
-            );
-            setLatestHour(resp?.data?.latestHour ?? 0);
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const items = useMemo(() => [
+    const items = [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
@@ -21826,41 +21795,6 @@ const MyTablePage = () => {
             ? [{
                 key: '7',
                 label: 'Day of Hour',
-                // label: (
-                //     <div
-                //         style={{
-                //             display: 'flex',
-                //             alignItems: 'center',
-                //             gap: 8
-                //         }}
-                //     >
-                //         <span>Day of Hour</span>
-
-                //         {/* {activeTab === '7' && (
-                //             <Select
-                //                 size="small"
-                //                 value={selectedHour}
-                //                 className="hour-select"
-                //                 onChange={(value) => setSelectedHour(value)}
-                //                 style={{ width: 70 }}
-                //                 onClick={(e) => e.stopPropagation()}
-                //             >
-
-                //                 {Array.from(
-                //                     { length: latestHour + 1 },
-                //                     (_, i) => (
-                //                         <Select.Option key={i} value={i}>
-                //                             {i === 0
-                //                                 ? '0 '
-                //                                 : `${i} `}
-                //                         </Select.Option>
-                //                     )
-                //                 )}
-
-                //             </Select>
-                //         )} */}
-                //     </div>
-                // ),
                 content: 'Content for Hour data'
             }]
             : []),
@@ -21873,7 +21807,7 @@ const MyTablePage = () => {
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '7', label: 'Names-Daily', content: 'Content for Names Daily data' }] : []),
-    ], [newRevenuePratner]);
+    ];
     // const handleSlideChange = (from, to) => {
     //     // console.log(to, "to");
     //     setActiveTab((parseInt(to) + 1).toString());
@@ -21893,125 +21827,45 @@ const MyTablePage = () => {
         // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
-    const hourOptions = useMemo(() => {
-        return Array.from(
-            { length: latestHour + 1 },
-            (_, i) => ({
-                label: i.toString(),
-                value: i,
-            })
-        );
-    }, [latestHour]);
-    const hourDropdown = useMemo(() => {
-        if (activeTab !== '7') return null;
-        return (
-            <Select
-                size="small"
-                value={selectedHour}
-                className="hour-select"
-                onChange={(value) => setSelectedHour(value)}
+   
+
+    const renderCarouselNav = () => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{
+            zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
+            borderRadius: 12,
+            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+            padding: 1,
+            boxShadow:
+                theme === 'dark'
+                    ? '0 1px 3px rgba(0,0,0,0.6)'
+                    : '0 1px 6px rgba(0,0,0,0.08)',
+        }}>
+
+            <Tabs
+                activeKey={activeTab}
+                onChange={handleCarouselChange}
+                items={items.map((item) => ({
+                    key: item.key,
+                    label: item.label,
+                }))}
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    width: 80,
-                    marginLeft: 10
+                    backgroundColor: 'transparent',
+                    padding: '0',
+                    marginBottom: '0',
                 }}
-                options={hourOptions}
+                tabBarStyle={{
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
+                }}
             />
-        );
+        </StickyBox>
+    );
 
-    }, [activeTab, selectedHour, hourOptions]);
-    const renderCarouselNav = useMemo(() => (
-        // <StickyBox offsetTop={64} offsetBottom={20} style={{
-        //     zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
-        //     borderRadius: 12,
-        //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-        //     padding: 1,
-        //     boxShadow:
-        //         theme === 'dark'
-        //             ? '0 1px 3px rgba(0,0,0,0.6)'
-        //             : '0 1px 6px rgba(0,0,0,0.08)',
-        // }}>
-        <div
-            style={{
-                // position: 'sticky',
-                top: 64,
-                zIndex: 1000,
-                backgroundColor:
-                    theme === 'dark'
-                        ? '#1E1E1E'
-                        : '#e6e6e6',
-                borderRadius: 12,
-                padding: 1,
-                marginLeft: "10px"
-            }}
-        >
-            <div className="hour-tabs-wrapper"
-            >
-                <Tabs
-                    activeKey={activeTab}
-                    onChange={handleCarouselChange}
-                    // items={items.map((item) => ({
-                    //     key: item.key,
-                    //     label: item.label,
-                    // }))}
-                    items={items}
-                    // className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
-                    className={`custom-tabs hour-tabs ${theme === 'dark'
-                        ? 'dark-mode-tabs'
-                        : 'light-mode-tabs'
-                        }`}
-                    // style={{
-                    //     backgroundColor: 'transparent',
-                    //     padding: '0',
-                    //     marginBottom: '0',
-
-                    //     flex: 1,
-                    //     minWidth: 0
-
-                    // }}
-
-                    tabBarStyle={{
-                        fontSize: '12px',
-                        padding: '0',
-                        height: '30px',
-                        lineHeight: '30px',
-                        marginBottom: '-1px',
-                        borderBottom: 'none',
-                    }}
-
-                />
-                {hourDropdown}
-                {/* {
-                    // activeTab === '7' && (
-                    //     <Select
-                    //         size="small"
-                    //         value={selectedHour}
-                    //         className="hour-select"
-                    //         onChange={(value) => setSelectedHour(value)}
-                    //         style={{
-                    //             width: 70,
-
-                    //         }}
-                    //     >
-                    //         {Array.from(
-                    //             { length: latestHour + 1 },
-                    //             (_, i) => (
-                    //                 <Select.Option key={i} value={i}>
-                    //                     {i}
-                    //                 </Select.Option>
-                    //             )
-                    //         )}
-                    //     </Select>
-                    // )
-
-                } */}
-            </div>
-        </div>
-    ), [
-        activeTab,
-        hourDropdown,
-        items,
-        theme
-    ]);
     // const [aiLoading, setAiLoading] = useState(false);
     // const [aiError, setAiError] = useState(null);
     // const [recDataByAccount, setRecDataByAccount] = useState({});
@@ -23035,7 +22889,7 @@ const MyTablePage = () => {
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
-                    {newRevenuePratner !== "Outbrain_TonicRsoc" && renderCarouselNav}
+                    {newRevenuePratner !== "Outbrain_TonicRsoc" && renderCarouselNav()}
                     {/* <div style={{display: 'flex', marginRight: '15px'}}>
                       
                             <Col>
@@ -23075,6 +22929,7 @@ const MyTablePage = () => {
                                 </Tooltip>
                             </Col>
                     </div> */}
+                   
                     {activeTab === '3' && (
                         <Col>
                             <Space size={2} style={{ marginRight: '10px' }}>
@@ -23754,9 +23609,10 @@ const MyTablePage = () => {
                                         newtime={newtime}
                                         newRevenuePratner={newRevenuePratner}
                                         inputValue={inputValue}
+                                        activetab={activeTab}
                                         newAccountName={newAccountName}
                                         columnDefs={columnDefs}
-                                        selectedHour={selectedHour}
+                                        // selectedHour={selectedHour}
                                         campaignComments={campaignComments}
                                         setCampaignComments={setCampaignComments}
                                         campaignStatusFilter={campaignStatusFilter}

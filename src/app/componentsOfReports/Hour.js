@@ -3,7 +3,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Dropdown, Tooltip, Space, Menu } from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Dropdown, Tooltip, Space, Menu, Select } from 'antd';
 import {
     GlobalOutlined, ProfileOutlined, NumberOutlined, TeamOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined, PushpinOutlined, FilterOutlined, DownOutlined, PlusOutlined, InfoOutlined, PictureOutlined, LikeOutlined,
     CommentOutlined,
@@ -63,7 +63,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const HourReports = ({ functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap, selectedHour }) => {
+const HourReports = ({ functionCallForCommnets, context, activetab, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     console.log(columnDefs, "columnDefs");
     console.log("campaign acconts:", newaccount);
     console.log('accountAccess:', accountsAccess);
@@ -82,6 +82,7 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
 
     const [isLoading, setLoading] = useState(true);
+    const [tableLoading, setTableLoading] = useState(false);
 
     const [apiStatus, setApiStatus] = useState(false);
 
@@ -93,6 +94,9 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
     const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
     const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
     const [activeTab, setActiveTab] = useState("1");
+    const [selectedHour, setSelectedHour] = useState(0);
+    const [latestHour, setLatestHour] = useState(0);
+
 
     const timezone = useRef();
 
@@ -133,6 +137,7 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
     // ) : [], [rowData, inputValue, theme]);
     const memorizedRowData = useMemo(() => {
         let filtered = rowData || [];
+        // Hour filter
 
         const normalizedInput = inputValue.trim().toLowerCase();
         const normalizedInside = insideInput.trim().toLowerCase();
@@ -2941,15 +2946,17 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
 
     const functionCall1 = async () => {
         try {
-            setLoading(true);
+            // setLoading(true);
+            if (selectedHour === undefined || selectedHour === null) {
+                setLoading(true);
+            }
 
             const collectionName =
                 newRevenuePratner === "FB_DomainActive"
                     ? "Facebook_DActive_Names"
                     : newtworkCollections[newRevenuePratner];
 
-            // --- ALWAYS use CampaignLevelAccounts (single OR multiple) ---
-            // Normalize to array of strings
+
             const accountsParam = Array.isArray(newaccount)
                 ? newaccount.map(String)
                 : [String(newaccount)];
@@ -3145,15 +3152,56 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
                 impressions: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0).toFixed(2)),
                 ctr: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) / (newFilterData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0) || 1) * 100).toFixed(2))
             }]);
-
             newRowData.current = filteredData;
             setApiStatus(false);
             setLoading(false);
+            setTableLoading(false);
         } catch (error) {
             setApiStatus(true);
             setLoading(false);
+            setTableLoading(false);
         }
     };
+    const getLatestHour = async () => {
+
+        const collectionName =
+            newRevenuePratner === "FB_DomainActive"
+                ? "Facebook_DActive_Names"
+                : newtworkCollections[newRevenuePratner];
+        try {
+
+            const resp = await apiClient.post(
+                'https://prodapis.adsgoat.in/LatestHour',
+                {
+                    dateStart: startDate,
+                    dateEnd: endDate,
+                    timezone: newtime,
+                    network: collectionName,
+                }
+            );
+            setLatestHour(resp?.data?.latestHour ?? 0);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    useEffect(() => {
+
+        if (activetab === '7') {
+            getLatestHour();
+        }
+
+    }, [activetab]);
+
+    // const hourOptions = useMemo(() => {
+    //     return Array.from(
+    //         { length: latestHour + 1 },
+    //         (_, i) => ({
+    //             label: `${i.toString()} hour`,
+    //             value: i,
+    //         })
+    //     );
+    // }, [latestHour]);
+
     useEffect(() => {
 
         if (
@@ -3163,7 +3211,7 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
             functionCall1();
         }
 
-    }, [selectedHour, activeTab]);
+    }, [selectedHour, activetab]);
     useEffect(() => {
         console.log(campaignIds, "campaignIds updated");
     }, [campaignIds]);
@@ -3443,10 +3491,11 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
         // Set column definitions separately after grid initialization
         gridOptions.api.setColumnDefs(columnDefs);
     });
-    const handleReFetchData = () => {
-        functionCall1();
-        setApiStatus(false);
-    }
+    // const handleReFetchData = () => {
+    //     functionCall1();
+    //     getLatestHour();
+    //     setApiStatus(false);
+    // }
     // useEffect(() => {
     //     if (oneTimeFetch.current) {
     //         functionCall1();
@@ -3454,12 +3503,13 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
     //     }
     // }, [oneTimeFetch.current]);
 
-    useEffect(() => {
-        if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
-            console.log("test1");
-            functionCall1();
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
+    //         console.log("test1");
+    //         functionCall1();
+    //         getLatestHour();
+    //     }
+    // }, []);
 
     useEffect(() => {
 
@@ -4382,6 +4432,35 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
                                     <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                 </Col>
                                 <Col>
+                                    {/* {hourDropdown} */}
+                                    {
+                                        activetab === '7' && (
+                                            <Select
+                                                size="small"
+                                                value={selectedHour}
+                                                // options={hourOptions}
+                                                // onChange={(value) => setSelectedHour(value)}
+                                                onChange={(value) => {
+                                                    setSelectedHour(value);
+                                                    setTableLoading(true);
+                                                }}
+                                                style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '4px', marginRight: 10, height: "30px" }}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+
+                                            >
+                                                {Array.from(
+                                                    { length: latestHour + 1 },
+                                                    (_, i) => (
+                                                        <Select.Option key={i} value={i}>
+                                                            {i}
+                                                        </Select.Option>
+                                                    )
+                                                )}
+                                            </Select>
+                                        )
+                                    }
+                                </Col>
+                                <Col>
                                     <Input
                                         placeholder="Search..."
                                         // prefix={<SearchOutlined />}
@@ -4605,7 +4684,23 @@ const HourReports = ({ functionCallForCommnets, context, functionCallForCampaign
                                     //         : '0 1px 6px rgba(0,0,0,0.08)',
                                     // }}
                                     >
-                                        <div className='table-container'>
+
+                                        <div className='table-container' style={{ position: "relative" }}>
+                                            {tableLoading && (
+                                                <div
+                                                    style={{
+                                                        position: "absolute",
+                                                        inset: 0,
+                                                        zIndex: 100,
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                        background: "rgba(255,255,255,0.3)",
+                                                    }}
+                                                >
+                                                    <Spin size="large" />
+                                                </div>
+                                            )}
                                             <AgGridReact
                                                 ref={gridRef}
                                                 suppressReactUi={true}
