@@ -21813,7 +21813,7 @@ const MyTablePage = () => {
         }
     };
 
-    const items = [
+    const items = useMemo(() => [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
@@ -21872,7 +21872,7 @@ const MyTablePage = () => {
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '7', label: 'Names-Daily', content: 'Content for Names Daily data' }] : []),
-    ];
+    ], [newRevenuePratner]);
     // const handleSlideChange = (from, to) => {
     //     // console.log(to, "to");
     //     setActiveTab((parseInt(to) + 1).toString());
@@ -21892,8 +21892,36 @@ const MyTablePage = () => {
         // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
+    const hourOptions = useMemo(() => {
+        return Array.from(
+            { length: latestHour + 1 },
+            (_, i) => ({
+                label: i.toString(),
+                value: i,
+            })
+        );
+    }, [latestHour]);
+    const hourDropdown = useMemo(() => {
+        if (activeTab !== '7') return null;
+        return (
+            <Select
+                size="small"
+                value={selectedHour}
+                className="hour-select"
+                onChange={(value) => setSelectedHour(value)}
+                style={{
+                    width: 80,
+                    marginLeft: 10
+                }}
+                options={hourOptions}
+                virtual={false}
+                popupMatchSelectWidth={false}
+                getPopupContainer={() => document.body}
+            />
+        );
 
-    const renderCarouselNav = () => (
+    }, [activeTab, selectedHour, hourOptions]);
+    const renderCarouselNav = useMemo(() => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{
             zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
             borderRadius: 12,
@@ -21909,14 +21937,15 @@ const MyTablePage = () => {
                 <Tabs
                     activeKey={activeTab}
                     onChange={handleCarouselChange}
-                    items={items.map((item) => ({
-                        key: item.key,
-                        label: item.label,
-                    }))}
+                    // items={items.map((item) => ({
+                    //     key: item.key,
+                    //     label: item.label,
+                    // }))}
+                    items={items}
                     // className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                     className={`custom-tabs hour-tabs ${theme === 'dark'
-                            ? 'dark-mode-tabs'
-                            : 'light-mode-tabs'
+                        ? 'dark-mode-tabs'
+                        : 'light-mode-tabs'
                         }`}
                     // style={{
                     //     backgroundColor: 'transparent',
@@ -21938,33 +21967,41 @@ const MyTablePage = () => {
                     }}
 
                 />
-                {
-                    activeTab === '7' && (
-                        <Select
-                            size="small"
-                            value={selectedHour}
-                            className="hour-select"
-                            onChange={(value) => setSelectedHour(value)}
-                            style={{
-                                width: 70,
+                {hourDropdown}
+                {/* {
+                    // activeTab === '7' && (
+                    //     <Select
+                    //         size="small"
+                    //         value={selectedHour}
+                    //         className="hour-select"
+                    //         onChange={(value) => setSelectedHour(value)}
+                    //         style={{
+                    //             width: 70,
 
-                            }}
-                        >
-                            {Array.from(
-                                { length: latestHour + 1 },
-                                (_, i) => (
-                                    <Select.Option key={i} value={i}>
-                                        {i}
-                                    </Select.Option>
-                                )
-                            )}
-                        </Select>
-                    )
-                }
+                    //         }}
+                    //     >
+                    //         {Array.from(
+                    //             { length: latestHour + 1 },
+                    //             (_, i) => (
+                    //                 <Select.Option key={i} value={i}>
+                    //                     {i}
+                    //                 </Select.Option>
+                    //             )
+                    //         )}
+                    //     </Select>
+                    // )
+
+                } */}
             </div>
 
         </StickyBox>
-    );
+    ), [
+        activeTab,
+        selectedHour,
+        hourOptions,
+        items,
+        theme
+    ]);
     // const [aiLoading, setAiLoading] = useState(false);
     // const [aiError, setAiError] = useState(null);
     // const [recDataByAccount, setRecDataByAccount] = useState({});
@@ -22988,7 +23025,7 @@ const MyTablePage = () => {
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
-                    {newRevenuePratner !== "Outbrain_TonicRsoc" && renderCarouselNav()}
+                    {newRevenuePratner !== "Outbrain_TonicRsoc" && renderCarouselNav}
                     {/* <div style={{display: 'flex', marginRight: '15px'}}>
                       
                             <Col>

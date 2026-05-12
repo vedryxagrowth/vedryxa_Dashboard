@@ -4398,24 +4398,13 @@ body.dark-mode .black-icon-creatives1.anticon svg {
 .hour-tabs-wrapper {
     display: flex;
     align-items: center;
-    flex-wrap: nowrap;
-    min-width: 0;
+    gap: 10px;
 }
 
 .hour-tabs {
-    flex: 1;
-    min-width: 0;
-}
-
-.hour-tabs .ant-tabs-nav-wrap {
-    overflow: visible !important;
-}
-
-.hour-tabs .ant-tabs-nav-list {
-    flex-wrap: nowrap !important;
+    width: auto;
 }
 
 .hour-select {
-    flex-shrink: 0;
-    margin-left: 10px;
+    min-width: 80px;
 }
