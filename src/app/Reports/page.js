@@ -21794,7 +21794,7 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_Mnet"
             ? [{
                 key: '7',
-                label: 'Day of Hour',
+                label: 'DayofHour',
                 content: 'Content for Hour data'
             }]
             : []),
