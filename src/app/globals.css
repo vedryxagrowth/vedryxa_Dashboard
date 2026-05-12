@@ -4389,22 +4389,4 @@ body.dark-mode .black-icon-creatives1.anticon svg {
   line-height: 18px;
 }
 
-/* new css  */
 
-.hour-select .ant-select-selector {
-    background-color: transparent !important;
-    /* color: #52c41a !important; */
-}
-.hour-tabs-wrapper {
-    display: flex;
-    align-items: center;
-   
-}
-
-.hour-tabs {
-    width: auto;
-}
-
-.hour-select {
-    min-width: 80px;
-}
