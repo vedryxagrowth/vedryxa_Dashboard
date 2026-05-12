@@ -21917,7 +21917,8 @@ const MyTablePage = () => {
                 options={hourOptions}
                 virtual={false}
                 popupMatchSelectWidth={false}
-                getPopupContainer={() => document.body}
+                getPopupContainer={(trigger) => trigger.parentElement}
+
             />
         );
 
