@@ -105,6 +105,7 @@ const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAd
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
 const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/HourlyBreakDown'));
+const HourReports = React.lazy(() => import('../componentsOfReports/Hour'));
 
 const MyTablePage = () => {
     const router = useRouter();
@@ -247,7 +248,7 @@ const MyTablePage = () => {
     const [historyOpen, setHistoryOpen] = useState(false);
     const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
     const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
-
+  
 
 
     useEffect(() => {
@@ -266,7 +267,7 @@ const MyTablePage = () => {
         };
         fetchNetworksData();
     }, []);
-
+   
 
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
@@ -14717,7 +14718,7 @@ const MyTablePage = () => {
             // rowGroup: true,
             // enableRowGroup: true,
         },
-        
+
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         history: {
             headerName: 'Activity',
@@ -21233,7 +21234,6 @@ const MyTablePage = () => {
         setnewAccountName(accountName);
         setNewTime(time);
         setNewRevenuePartner(revenuePratner);
-
         if (newRevenuePratner !== revenuePratner || newaccount !== account) {
             setPageSize(1);
         } else {
@@ -21790,6 +21790,14 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Hour', content: 'Content for Hour data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet"
+            ? [{
+                key: '7',
+                label: 'DayofHour',
+                content: 'Content for Hour data'
+            }]
+            : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
@@ -21819,6 +21827,7 @@ const MyTablePage = () => {
         // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
+   
 
     const renderCarouselNav = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{
@@ -21856,6 +21865,7 @@ const MyTablePage = () => {
             />
         </StickyBox>
     );
+
     // const [aiLoading, setAiLoading] = useState(false);
     // const [aiError, setAiError] = useState(null);
     // const [recDataByAccount, setRecDataByAccount] = useState({});
@@ -22919,6 +22929,7 @@ const MyTablePage = () => {
                                 </Tooltip>
                             </Col>
                     </div> */}
+                   
                     {activeTab === '3' && (
                         <Col>
                             <Space size={2} style={{ marginRight: '10px' }}>
@@ -23585,7 +23596,64 @@ const MyTablePage = () => {
                                     />
                                 </Tabs.TabPane>
                             )}
+                            {newRevenuePratner === "FB_Mnet" && (
+                                <Tabs.TabPane key="7">
+                                    <HourReports
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        columnStructure={mainData}
+                                        allCampaignData={allCampaignData}
+                                        allProfitLossArray={allProfitLossArray}
+                                        // newaccount={newaccount}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        activetab={activeTab}
+                                        newAccountName={newAccountName}
+                                        columnDefs={columnDefs}
+                                        // selectedHour={selectedHour}
+                                        campaignComments={campaignComments}
+                                        setCampaignComments={setCampaignComments}
+                                        campaignStatusFilter={campaignStatusFilter}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        setCamapignlevelstatus={setCamapignlevelstatus}
+                                        commentsMap={commentsMap}
+                                        changeRRefrst={resetColumnStructure}
+                                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                        toggleStatus={checked}
+                                        handleChangeToggle={handleChangeToggle}
+                                        theme={theme}
+                                        functionCallForCommnets={functionCallForCommnets}
+                                        functionCallForCampaigns={functionCallForCampaigns}
+                                        context={{
+                                            allCampaignData,
+                                            setCampaignRefreshTrigger,
+                                            changeRRefrst,
+                                            newaccount,
+                                            userdetails,
+                                            theme,
+                                            setCamapignlevelstatus,
+                                            campaignStatusOverridesRef, // ✅ ADD THIS
+                                            adsetStatusOverridesRef,
+                                            adsetPinOverridesRef,
+                                            adsetCommentOverridesRef,
+                                            adStatusOverridesRef,
+                                            adPinOverridesRef,
+                                            adCommentOverridesRef,
+                                        }}
+                                        handleChangeInput={handleChangeInput}
+                                        handleBlur={handleBlur}
+                                        onClickRefresh={onClickRefresh}
+                                        accountsAccess={accountsAccess}
+                                    />
+                                </Tabs.TabPane>
 
+                            )}
                             {/* {newRevenuePratner === "FB_Mnet" && (
                     <Tabs.TabPane key="6">
                         <MnetLiveAdReports 
@@ -23661,7 +23729,7 @@ const MyTablePage = () => {
                 adAccounts={adAccounts}
             />
 
-        </div>
+        </div >
     );
 };
 export default MyTablePage;
