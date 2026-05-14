@@ -316,7 +316,7 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
 
     function groupAndCalculateProfit(data) {
         const groupedData = data.reduce((acc, item) => {
-            const key = `${item.domain}-${item[`${newtime}Date`]}`;
+            const key = `${item.domain}-${item.accountNumber}-${item[`${newtime}Date`]}`;
 
             if (!acc[key]) {
                 acc[key] = {
@@ -406,7 +406,7 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
         {
             field: 'accountNumber',
             headerName: 'Account',
-            // minWidth: 150,
+            minWidth: 200,
             // resizable: true,
             sortable: true,
             // hide: true, // Hide column as it's grouped

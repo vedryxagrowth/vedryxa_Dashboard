@@ -2972,7 +2972,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             accountsParam.forEach(acc => params.append("accountNumbers", acc));
 
             //   const resp = await apiClient.post(`/CampaignLevelAccounts?${params.toString()}`);
-            const resp = await apiClient.post('https://prodapis.adsgoat.in/HourCampaignLevelAccounts', {
+            const resp = await apiClient.post('/HourCampaignLevelAccounts', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -4438,6 +4438,8 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                                             <Select
                                                 size="small"
                                                 value={selectedHour}
+                                                mode="multiple"
+                                                maxTagCount="responsive"
                                                 // options={hourOptions}
                                                 // onChange={(value) => setSelectedHour(value)}
                                                 onChange={(value) => {
@@ -4452,7 +4454,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                                                     { length: latestHour + 1 },
                                                     (_, i) => (
                                                         <Select.Option key={i} value={i}>
-                                                            {i}
+                                                            {i} 
                                                         </Select.Option>
                                                     )
                                                 )}
