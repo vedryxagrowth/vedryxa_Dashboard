@@ -14,9 +14,9 @@ const UserTable = () => {
   const fetchUsersData = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get("/UserActivities");
+      const response = await apiClient.get("http://localhost:4000/userhistory/userlogins");
       if (response.status === 200) {
-        setData(response.data);
+        setData(response.data.data);
       } else {
         console.error("Failed to fetch users data");
       }

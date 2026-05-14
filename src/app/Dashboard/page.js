@@ -38,7 +38,7 @@ const revenuePartnerNames = {
     "Predicto": "FB_Predicto",
     "Affinity": "FB_Affinity",
     "Botup": "FB_Botup",
-    "Outbrain_Tonic_Rsoc":"Outbrain_TonicRsoc"
+    "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc"
 };
 
 
@@ -61,7 +61,7 @@ const newtworkCollections = {
     "FB_Predicto": "Facebook_Predicto_Daily",
     "FB_Affinity": "Facebook_Affinity_Daily",
     "FB_Botup": "Facebook_Botup_Daily",
-    "Outbrain_TonicRsoc":"Outbrain_TonicRsoc"
+    "Outbrain_TonicRsoc": "Outbrain_TonicRsoc"
 }
 
 const NetworkDefaultTimezones = {
@@ -261,7 +261,79 @@ const RevenuePartnerDashboard = () => {
     const [isDomain, setIsDomain] = useState("");
 
 
+    const getRpc = (params) => {
+        if (params.data !== undefined) {
+            const { revenue, conversions } = params.data;
+            if (conversions !== 0) {
+                const RPC = revenue / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
 
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { revenue, conversions } = params.node.aggData;
+            if (conversions !== 0) {
+                const RPC = revenue / conversions;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
+    const getCpl = (params) => {
+        if (params.data !== undefined) {
+            const { leads, spend } = params.data;
+
+            if (leads !== 0) {
+                const CPL = spend / leads;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { leads, spend } = params.node.aggData;
+            if (leads !== 0) {
+                const CPL = spend / leads;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+    const sanitizeNumericValue = (value) => {
+        if (typeof value === 'string') {
+            return parseFloat(value.replace(/[%$,]/g, '').trim()) || 0;
+        }
+        return isNaN(value) || value === undefined || value === null ? 0 : value;
+    };
+    const getMargin = (params) => {
+        const data = params.node.group ? params.node.aggData : params.data;
+        if (!data) return 0;
+
+        const revenue = sanitizeNumericValue(data.revenue);
+        const spend = sanitizeNumericValue(data.spend);
+
+        if (isNaN(revenue) || revenue <= 0) return 0;
+
+        const margin = ((revenue - spend) / revenue) * 100;
+        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+
+        if (params.node.group) {
+            params.node.aggData["margin"] = roundedMargin;
+        }
+
+        return roundedMargin;
+    };
 
     const onChangeTime = (value) => {
         setTimeZone(value);
@@ -391,7 +463,8 @@ const RevenuePartnerDashboard = () => {
     const functionForFetchingRevenuePartnerData = async () => {
         const token = localStorage.getItem("token")
         console.log(token);
-        const fetchRevenueData = await apiClient.get(`/revenuePartnerData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
+        //revenuePartnerData
+        const fetchRevenueData = await apiClient.get(`http://localhost:4000/dashboard/revenuepartner?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
         const response = fetchRevenueData.data;
         setRevenuePartnerData(response);
         setFetchData(false);
@@ -490,7 +563,11 @@ const RevenuePartnerDashboard = () => {
             {
                 field: "margin",
                 headerName: "Margin(%)",
-                aggFunc: average,
+                // aggFunc: average,
+                valueGetter: getMargin,
+                sortable: true,
+                headerTooltip: '(Profit/Revenue)*100',
+                filter: 'agNumberColumnFilter',
                 cellClassRules: {
                     'font-red': p => p.value < 0
                 },
@@ -503,25 +580,57 @@ const RevenuePartnerDashboard = () => {
             {
                 field: 'rpc',
                 headerName: 'RPC',
-                aggFunc: avgRpcCpl,
-                valueFormatter: rpcCplFormatter,
+                // aggFunc: avgRpcCpl,
+                // valueFormatter: rpcCplFormatter,
                 minWidth: 100,
-                flex: 3,
+                // flex: 3,
+                // suppressMenu: true,
+                // menuTabs: [],
+                // headerClass: 'hide-menu',
+                valueGetter: getRpc,
+                sortable: true,
+                filter: "agNumberColumnFilter",
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu', // Add a custom class
+                headerTooltip: "RPC = Revenue / Conversions",
+                cellStyle: { fontWeight: 'bold' }
+            },
+            {
+                field: 'cpl',
+                headerName: 'CPL',
+                sortable: true,
+                valueGetter: getCpl,
+                filter: "agNumberColumnFilter",
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu', // Add a custom class
+                headerTooltip: "CPL = Spend / FBLeads",
+            },
+            {
+                field: "leads",
+                resizable: true,
+                sortable: true,
+                hide: true,
+                minWidth: 150,
+                aggFunc: spender,
+                // valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
             },
             {
-                field: 'cpl',
-                headerName: 'CPL',
-                aggFunc: avgRpcCpl,
-                valueFormatter: rpcCplFormatter,
-                minWidth: 100,
-                flex: 3,
+                field: "conversions",
+                resizable: true,
+                sortable: true,
+                hide: true,
+                minWidth: 150,
+                aggFunc: spender,
+                // valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
-            }
+            },
         ]);
         setFixedFooter([
             {
@@ -534,6 +643,7 @@ const RevenuePartnerDashboard = () => {
                 cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / response?.length).toFixed(2)),
                 conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
                 clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                leads: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.leads), 0).toFixed(2)),
                 impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
             }
         ]);
@@ -543,7 +653,8 @@ const RevenuePartnerDashboard = () => {
         setLoading1(true);
         const token = localStorage.getItem("token")
         console.log(token);
-        const fetchRevenueData = await apiClient.get(`/revenuePartner/DomainData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
+        //revenuePartner/DomainData
+        const fetchRevenueData = await apiClient.get(`http://localhost:4000/dashboard/revenuepartner/domaindata?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
         const response = fetchRevenueData.data;
         setRevenuePartnerDomainData(response);
         setFetchData(false);
@@ -612,8 +723,12 @@ const RevenuePartnerDashboard = () => {
             },
             {
                 field: "margin",
-                headerName: 'Margin(%)',
-                aggFunc: average,
+                headerName: "Margin(%)",
+                // aggFunc: average,
+                valueGetter: getMargin,
+                sortable: true,
+                headerTooltip: '(Profit/Revenue)*100',
+                filter: 'agNumberColumnFilter',
                 cellClassRules: {
                     'font-red': p => p.value < 0
                 },
@@ -626,25 +741,57 @@ const RevenuePartnerDashboard = () => {
             {
                 field: 'rpc',
                 headerName: 'RPC',
-                aggFunc: avgRpcCpl,
-                valueFormatter: rpcCplFormatter,
+                // aggFunc: avgRpcCpl,
+                // valueFormatter: rpcCplFormatter,
                 minWidth: 100,
-                flex: 3,
+                // flex: 3,
+                // suppressMenu: true,
+                // menuTabs: [],
+                // headerClass: 'hide-menu',
+                valueGetter: getRpc,
+                sortable: true,
+                filter: "agNumberColumnFilter",
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu', // Add a custom class
+                headerTooltip: "RPC = Revenue / Conversions",
+                cellStyle: { fontWeight: 'bold' }
+            },
+            {
+                field: 'cpl',
+                headerName: 'CPL',
+                sortable: true,
+                valueGetter: getCpl,
+                filter: "agNumberColumnFilter",
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu', // Add a custom class
+                headerTooltip: "CPL = Spend / FBLeads",
+            },
+            {
+                field: "leads",
+                resizable: true,
+                sortable: true,
+                hide: true,
+                minWidth: 150,
+                aggFunc: spender,
+                // valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
             },
             {
-                field: 'cpl',
-                headerName: 'CPL',
-                aggFunc: avgRpcCpl,
-                valueFormatter: rpcCplFormatter,
-                minWidth: 100,
-                flex: 3,
+                field: "conversions",
+                resizable: true,
+                sortable: true,
+                hide: true,
+                minWidth: 150,
+                aggFunc: spender,
+                // valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
-            }
+            },
         ]);
         setDomainFixedFooter([
             {
@@ -658,6 +805,7 @@ const RevenuePartnerDashboard = () => {
                 cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / response?.length).toFixed(2)),
                 conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
                 clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                leads: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.leads), 0).toFixed(2)),
                 impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
             }
         ]);
@@ -1281,7 +1429,8 @@ const Dashboard = () => {
         var token = localStorage.getItem("token")
         const fetchNetworksData = async () => {
             try {
-                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                //get/networksData/
+                const res = await apiClient.get('http://localhost:4000/dashboard/getNetworksData', {
                     headers: {
                         Authorization: token,
 
@@ -1517,9 +1666,9 @@ const Dashboard = () => {
                 }
                 else if (key === "FB_Affinity") {
                     newKey = "Facebook_Affinity_Daily"
-                }else if (key === "FB_Botup") {
+                } else if (key === "FB_Botup") {
                     newKey = "Facebook_Botup_Daily"
-                } else if (key=== "Outbrain_TonicRsoc"){
+                } else if (key === "Outbrain_TonicRsoc") {
                     newKey = "Outbrain_TonicRsoc"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
@@ -1559,7 +1708,8 @@ const Dashboard = () => {
         // console.log(transformedObject);
         let response;
         try {
-            response = await apiClient.post(`/Dashboardnew?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+            //Dashboardnew
+            response = await apiClient.post(`http://localhost:4000/dashboard/data?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
 
         } catch (error) {
             message.error('API failed to fetch the data please click the reload button', 8);
