@@ -23314,6 +23314,7 @@ const MyTablePage = () => {
                                         columnDefs={columnDefs1}
                                         columnDefs1={columnDefsAdsetLevelDailyForOutbrain}
                                         columnDefs2={columnDefsAdLevelDaily}
+                                        columnDefs4={columnDefs}
                                         campaignComments={campaignComments}
                                         setCampaignComments={setCampaignComments}
                                         campaignStatusFilter={campaignStatusFilter}
