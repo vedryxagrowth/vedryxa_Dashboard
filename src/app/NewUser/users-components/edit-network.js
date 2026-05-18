@@ -103,8 +103,8 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
       console.log(newValues, "new");
 
       // Simulate API call with newValues
-      const response = await apiClient.post(
-        "/updateNetwork/",
+      const response = await apiClient.put(
+        "http://localhost:4000/userrole/networks",
         { updatedNetwork: newValues }
       );
 

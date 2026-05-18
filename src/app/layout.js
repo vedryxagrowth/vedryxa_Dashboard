@@ -228,9 +228,9 @@ const ContentWrapper = ({ children }) => {
   const fetchDataUntilSuccess = async (email, delay = 1500) => {
     while (true) {
       try {
-        const response = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${email}`);
+        const response = await axios.get(`http://localhost:4000/auth/user/verify?email=${email}`);
         if (response.status === 200) {
-          return response.data; // Exit loop if successful
+          return [response.data.data]; // Exit loop if successful
         }
       } catch (error) {
         if (!error.response || error.response.status !== 500) {

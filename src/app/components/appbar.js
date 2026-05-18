@@ -45,6 +45,7 @@ function getItem(label, key, icon, text) {
 const UserLocationFinder = ({ children, onComplete }) => {
     const router = useRouter();
     const { data: session, status } = useSession();
+    const {setjwttoken} = useTokenContext();
   
     async function getUserDetails(name) {
       const userAgent = navigator.userAgent || "";
@@ -61,7 +62,7 @@ const UserLocationFinder = ({ children, onComplete }) => {
         });
   
       // Fetch Location
-      const location = await fetch(`https://prodapis.adsgoat.in/geolocationDetails?ip=${ip}`)
+      const location = await fetch(`http://localhost:4000/auth/userip?ip=${ip}`)
         .then((res) =>
           res.ok ? res.json() : Promise.reject("Failed to fetch location")
         )
@@ -98,7 +99,7 @@ const UserLocationFinder = ({ children, onComplete }) => {
       };
   
       // Post User Activities
-      await fetch("https://prodapis.adsgoat.in/UsersActivities/", {
+      await fetch("http://localhost:4000/open/activities", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,6 +142,7 @@ const UserLocationFinder = ({ children, onComplete }) => {
                 const email = session.user.email;
                 const tokenResponse = await axios.post("/api/auth/jwt", { email });
                 const token = tokenResponse.data.token;
+                setjwttoken(tokenResponse.data.token);
                 localStorage.setItem("token", token);
                 await getUserDetails(session?.user?.email);
               };

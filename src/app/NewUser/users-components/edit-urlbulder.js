@@ -268,7 +268,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     const result = createDynamicObject(editeddata?.Network, channelList, dataList, campaigns, objects);
                     console.log(result);
 
-                    const response = await apiClient.post(`/updateNetworkUrlBuilder/`, {updatedData: result});
+                    const response = await apiClient.put(`http://localhost:4000/userrole/urlbuilder`, {updatedData: result});
                     // console.log(response.data);
                     if(response.status === 200){
                         onClose(result);

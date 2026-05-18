@@ -114,7 +114,7 @@ export default function ChatWithAI() {
                             'Content-Type': 'application/json',
                             'Authorization': localStorage.getItem("token"),
                 };
-                const response = await axios.get(`https://prodapis.adsgoat.in/chatGpt/Prompts?message=${message}`, { headers });
+                const response = await axios.get(`http://localhost:4000/open/chatgpt?message=${message}`, { headers });
           
                 const data = await response.data;
           
@@ -233,7 +233,7 @@ export default function ChatWithAI() {
                     'Content-Type': 'application/json',
                     'Authorization': localStorage.getItem("token"),
                 };
-                const response = await axios.post(`https://prodapis.adsgoat.in/ChatGpt/Images/`,{ requestBody }, { headers });
+                const response = await axios.post(`http://localhost:4000/open/chatgpt`,{ requestBody }, { headers });
           
                 const data = await response.data;
                 // console.log(data);

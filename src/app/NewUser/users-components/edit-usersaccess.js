@@ -8,6 +8,7 @@ import { useTokenContext } from '../../components/parent';
 import { FaTrashCan } from 'react-icons/fa6';
 
 const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
+    const { apiClient } = useTokenContext();
     // console.log(editeddata, "heyy edit-useraccess page")
     console.log(editeddata, "editeddata");
     const userAccess = editeddata?.adAccounts;
@@ -51,8 +52,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
     useEffect(() => {
         const fetchAllAccounts = async () => {
             try {
-                const res = await axios.get(
-                    "https://prodapis.adsgoat.in/allaccounts",
+                const res = await apiClient.get(
+                    "http://localhost:4000/userrole/accounts",
                     { headers: { Authorization: token } }
                 );
                 setAllApiAccounts(res.data || []);
@@ -282,13 +283,13 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
         if (userdetails?.role !== "Special_User") {
             const fetchNetworks = async () => {
                 try {
-                    const res = await axios.get("https://prodapis.adsgoat.in/networks", {
+                    const res = await apiClient.get("http://localhost:4000/userrole/networks", {
                         headers: {
                             Authorization: token,
                         },
                     });
 
-                    const networks = Array.isArray(res.data) ? res.data : [];
+                    const networks = Array.isArray(res.data) ? [...new Set(res.data.map(item => item.Network?.trim()).filter(Boolean))] : [];
                     const filteredNetworks = networks.filter(
                         (n) => !selectedNetworks.includes(n)
                     );
@@ -393,7 +394,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
 
                 let apiList = [];
                 try {
-                    const res = await axios.get("https://prodapis.adsgoat.in/allaccounts", {
+                    const res = await apiClient.get("http://localhost:4000/userrole/accounts", {
                         headers: { Authorization: token }
                     });
                     apiList = res.data || [];
@@ -481,7 +482,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                     // console.log(additionalAccounts, "additionalAccounts data");
                     // console.log(singleObject, ":singleObject");
 
-                    const response = await axios.put(`https://prodapis.adsgoat.in/api/updateUserTableData/`, { formattedData },
+                    const response = await axios.put(`http://localhost:4000/userrole/users`, { formattedData },
                         {
                             headers: {
                                 'Authorization': token

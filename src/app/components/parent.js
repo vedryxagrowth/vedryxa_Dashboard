@@ -75,6 +75,7 @@ export const TokenProvider = ({ children }) => {
   const { data: session } = useSession();
   const [cachedSession, setCachedSession] = useState(null);
   const [userdetails, setuserdetails] = useState(null);
+  const [jwttoken, setjwttoken] = useState(null);
 
   // We need a flag to determine if we're on the client-side to avoid the hydration error
   const [isMounted, setIsMounted] = useState(false);
@@ -109,7 +110,7 @@ export const TokenProvider = ({ children }) => {
     setDarkMode(newTheme === 'dark');
     localStorage.setItem('theme', newTheme);
   };
-  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
+  const token = jwttoken ? jwttoken : typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
   const apiClient = axios.create({
     baseURL: 'https://prodapis.adsgoat.in', // Relative URL
     headers: {
@@ -124,7 +125,7 @@ export const TokenProvider = ({ children }) => {
   }
 
   return (
-    <TokenContext.Provider value={{ userdetails, setuserdetails, darkMode, toggleTheme, theme, apiClient }}>
+    <TokenContext.Provider value={{ userdetails, setuserdetails, darkMode, toggleTheme, theme, apiClient, setjwttoken }}>
       {/* {userdetails && userdetails.role !== "Revenue_Partner" && <ChatWithAI />} */}
       {/* {userdetails && userdetails.role !== "Revenue_Partner" && <ChatWidget />} */}
       {children}
