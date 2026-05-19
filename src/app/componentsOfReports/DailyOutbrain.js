@@ -18,6 +18,7 @@ import { useTokenContext } from '../components/parent';
 import { FaRobot } from "react-icons/fa";
 import { Filter1Outlined, RoundaboutLeftOutlined, SettingsOutlined } from '@mui/icons-material';
 
+const CampaignLevelLiveReports = React.lazy(() => import('./OutbrainCampaignLevelLive'));
 const CampaignLevelReports = React.lazy(() => import('./OutbrainCampaignLevelDaily'));
 const AdsetLevelReports = React.lazy(() => import('./OutbrainSectionsDaily'));
 const AdLevelReports = React.lazy(() => import('./OutbrainAdLevelDaily'));
@@ -67,7 +68,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
+const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, columnDefs4, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
     console.log("new multiple accounts:", newaccount);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -1317,6 +1318,35 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                 ),
                 content: <div>{`Content for Campaign data (${selectedCampaigns.length} selected)`}</div>,
             },
+            {
+                key: '5',
+                label: (
+                    <div style={getTabStyle(activeTab === '5')}>
+                        <FolderOutlined />
+                        <span style={{ marginLeft: 4 }}>Campaign Live</span>
+                        {/* {selectedCampaigns.length > 0 && (
+                            <Button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onClickRemoveSelectedCampaigns();
+                                }}
+                                icon={<CloseOutlined style={{ fontSize: 10 }} />}
+                                size="small"
+                                type="text"
+                                style={{
+                                    marginLeft: 6,
+                                    fontSize: 11,
+                                    height: 5,
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                }}
+                            >
+                                {selectedCampaigns.length}
+                            </Button>
+                        )} */}
+                    </div>
+                ),
+                content: <div>{`Content for Campaign data (${selectedCampaigns.length} selected)`}</div>,
+            },
         ];
     }, [
         activeTab,
@@ -1528,6 +1558,41 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
                         removeSelectedAdsets={removeSelectedAdsets}
                         selectedCampaigns={selectedCampaigns}
                         selectedAdsets={selectedAdsets}
+                        moveToNextTab={moveToNextTab}
+                        functionCallForCommnets={functionCallForCommnets}
+                        functionCallForCampaigns={functionCallForCampaigns}
+                        context={context}
+                        accountsAccess={accountsAccess}
+                    />
+                </Tabs.TabPane>
+                <Tabs.TabPane key="5">
+                    <CampaignLevelLiveReports
+                        campaignStatusFilter={campaignStatusFilter}
+                        startDate={startDate}
+                        endDate={endDate}
+                        newaccount={newaccount}
+                        newtime={newtime}
+                        newRevenuePratner={newRevenuePratner}
+                        inputValue={inputValue}
+                        newAccountName={newAccountName}
+                        columnDefs={columnDefs4}
+                        campaignComments={campaignComments}
+                        setCampaignComments={setCampaignComments}
+                        Camapignlevelstatus={Camapignlevelstatus}
+                        setCamapignlevelstatus={setCamapignlevelstatus}
+                        commentsMap={commentsMap}
+                        changeRRefrst={changeRRefrst}
+                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                        userdetails={userdetails}
+                        refreshComments={refreshComments}
+                        refreshpage={`${refreshpage}${activeTab}`}
+                        getMainMenuItems={getMainMenuItems}
+                        toggleStatus={toggleStatus}
+                        handleChangeToggle={handleChangeToggle}
+                        theme={theme}
+                        tabStatus={"Live"}
+                        showCampaignLevel={showCampaignLevel}
+                        removeSelectedCampaigns={removeSelectedCampaigns}
                         moveToNextTab={moveToNextTab}
                         functionCallForCommnets={functionCallForCommnets}
                         functionCallForCampaigns={functionCallForCampaigns}
