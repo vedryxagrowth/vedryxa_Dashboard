@@ -5,7 +5,8 @@ import React from 'react';
 import moment from 'moment-timezone';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Spin, Badge, Dropdown, Tooltip, Space, Menu } from 'antd';
 import {
-    GlobalOutlined,  NumberOutlined,  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, PushpinOutlined,  PlusOutlined } from '@ant-design/icons';
+    GlobalOutlined, NumberOutlined, InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, PushpinOutlined, PlusOutlined
+} from '@ant-design/icons';
 import { RxSwitch } from "react-icons/rx";
 import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
@@ -166,6 +167,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
     const [bulkCategory, setBulkCategory] = useState("");
     const [campaignIds, setCampaignIds] = useState([]);
     const [adLevelCreatives, setAdLevelCreatives] = useState([]);
+    const [showAllHours, setShowAllHours] = useState(false);
 
     useEffect(() => {
         const api = gridRef.current?.api;
@@ -651,6 +653,21 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
             else {
                 newFilterData = filteredData;
             }
+            if (!showAllHours) {
+                newFilterData = newFilterData.filter((item) => {
+                    const fbHour = Number(item["fb-hour"]);
+
+                    const revenueHour = Number(
+                        String(item["mnet-hour"] || "0").split(":")[0]
+                    );
+
+                    if (isNaN(fbHour) || isNaN(revenueHour)) {
+                        return false;
+                    }
+
+                    return fbHour <= revenueHour;
+                });
+            }
 
             setRowData(newFilterData);
             newRowDataForFilter.current = filteredData;
@@ -822,12 +839,18 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
         setApiStatus(false);
     }
 
+    // useEffect(() => {
+    //     if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
+    //         console.log("test1");
+    //         functionCall1();
+    //     }
+    // }, []);
+
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
-            console.log("test1");
             functionCall1();
         }
-    }, []);
+    }, [showAllHours]);
 
     useEffect(() => {
         // functionCall1();
@@ -1452,6 +1475,17 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
                                         </Button>
                                     </Dropdown>
                                 </Col> */}
+                                 <Col>
+                                    <Switch
+                                        checked={showAllHours}
+                                        onChange={(checked) => setShowAllHours(checked)}
+                                        checkedChildren="Spend"
+                                        unCheckedChildren="Revenue"
+                                        style={{
+                                            backgroundColor: showAllHours ? "#91c25f" : undefined
+                                        }}
+                                    />
+                                </Col>
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                     <Tooltip
                                         title={
@@ -1482,6 +1516,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
                                         <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
                                     </Tooltip>
                                 </Col>
+                               
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                     {/* <Tooltip title="Export to CSV"> */}
                                     <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />

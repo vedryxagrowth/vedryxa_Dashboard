@@ -12,7 +12,7 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip, Skeleton, } from 'antd';
-import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
+import { ReloadOutlined, EditOutlined, BarChartOutlined, DollarOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -486,6 +486,14 @@ export default function CampaignAndAccount({ params }) {
 
     const [selectedValue, setSelectedValue] = useState("All");
     const [filteredData, setFilteredData] = useState(dailyData);
+    const [budgetAndStatusData, setBudgetAndStatusData] = useState(null);
+    const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
+    const [nextChecked, setNextChecked] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [showTables, setShowTables] = useState(false);
+    // const [switchChecked, setSwitchChecked] = useState(false);
+    const [isBudgetModalVisible, setIsBudgetModalVisible] = useState(false);
+    const [changeBudget, setChangeBudget] = useState("");
 
     const [domainFixedFooter, setDomainFixedFooter] = useState([]);
 
@@ -560,7 +568,28 @@ export default function CampaignAndAccount({ params }) {
             setComment("");
         }
     };
+    const functionCallForBudgetAndStatus = async (
+        id = CampaignId,
+        level = "campaign",
+        accountNumber
+    ) => {
+        try {
+            const response = await apiClient.post(`/getBudgetAndStatus`,
+                {
+                    id,
+                    level,
+                    accountNumber
+                }
+            );
 
+            const data = response?.data?.data;
+            console.log(data, "budget and status");
+            setBudgetAndStatusData(data);
+
+        } catch (err) {
+            console.log(err);
+        }
+    };
     const functionCallForUserColumnStructure = async () => {
         const fetchData = await apiClient.get(`/api/singleUserData?email=${user}`);
         // const data = await fetchData.json();
@@ -630,7 +659,7 @@ export default function CampaignAndAccount({ params }) {
                         ncpl: ncpl.toString(),
                         roi: roi,
                         cpc: eachData.cpc ? (eachData.cpc).toString() : 0,
-                        cpclinkclicks: cpcLinkClicks? cpcLinkClicks.toString() : 0,
+                        cpclinkclicks: cpcLinkClicks ? cpcLinkClicks.toString() : 0,
                         fbleads: (eachData.fbLeads).toString(),
                         filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads) - parseInt(eachData.conversions)) / parseInt(eachData.fbLeads)) * 100) * 100) / 100 : 0,
                         fbclicks: eachData.fbClicks ? (eachData.fbClicks).toString() : 0,
@@ -695,6 +724,18 @@ export default function CampaignAndAccount({ params }) {
             }
         ]);
     }, [filteredData])
+    const onChangeBudget = (value) => {
+        setChangeBudget(value);
+    };
+    useEffect(() => {
+        if (isBudgetModalVisible) {
+            setChangeBudget(
+                budgetAndStatusData?.campaign?.budget_amount
+                    ? budgetAndStatusData?.campaign?.budget_amount / 100
+                    : ""
+            );
+        }
+    }, [isBudgetModalVisible]);
 
     const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
         await functionCallForUserColumnStructure();
@@ -710,6 +751,11 @@ export default function CampaignAndAccount({ params }) {
             await functionCallForCommnets(accountNumber);
             await debouncedFunctionCallForUserColumnStructure();
             await debouncedFunctionCall();
+            await functionCallForBudgetAndStatus(
+                CampaignId,
+                "campaign",
+                accountNumber
+            );
         }
         functionCall();
         // }
@@ -1466,11 +1512,149 @@ export default function CampaignAndAccount({ params }) {
         const functionCall = async () => {
             await functionCallForCommnets(accountNumber);
             await debouncedFunctionCallForUserColumnStructure();
+            await functionCallForBudgetAndStatus(
+                CampaignId,
+                "campaign",
+                accountNumber
+            );
             await debouncedFunctionCall();
         }
         functionCall();
     };
+    const handlePauseOk = async () => {
+        const desired = nextChecked;                  // true => ACTIVE, false => PAUSED
+        setIsCampaignModalVisibles(true);
+        setConfirmLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const payloadForActivity = {
+                editType: "Status",
+                campaignid: campaignid,       // cents
+                Account: String(accountNumber),    // ✅ update *this* row’s account
+                campaignname: CampaignName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Campain status updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+            }
+            const payload = {
+                status: desired ? "ACTIVE" : "PAUSED",
+                id: params.data?.identifier,
+                campaign_id: campaignid,
+                accountNumber: String(accountNumber),
+                adset_id: adsetid,
+                name: CampaignName,
+                email: userdetails?.email,
+                activity: payloadForActivity,
+            };
 
+            const response = await apiClient.post(
+                `/BulkCampaignStatusChangeWithHistory`,
+                payload,
+                { headers: { Authorization: token } }
+            );
+
+            const newStatus = desired ? "ACTIVE" : "PAUSED";
+
+            if (response.status === 200 || response.status === 201) {
+                // setSwitchChecked(desired);
+                setBudgetAndStatusData((prev) => ({
+                    ...prev,
+
+                    campaign: {
+                        ...prev?.campaign,
+
+                        campaign_status:
+                            nextChecked
+                                ? "ACTIVE"
+                                : "PAUSED"
+                    }
+
+                }));
+                setConfirmLoading(false);
+                setIsCampaignModalVisibles(false);
+            }
+            message.success(`Campaign ${newStatus.toLowerCase()}`);
+        } catch (e) {
+            setConfirmLoading(false);
+            setIsCampaignModalVisibles(false);
+            message.error("Failed to update campaign status");
+        }
+    };
+    const handlePauseCancel = () => {
+        // setNextChecked(switchChecked);
+        setIsCampaignModalVisibles(false);
+    };
+    const handleOk = async () => {
+        setConfirmLoading(true);
+        const currentBudget =
+            budgetAndStatusData?.campaign?.budget_amount;
+        const campaignId =
+            budgetAndStatusData?.campaign?.campaign_id;
+        const budgetType =
+            budgetAndStatusData?.budget_type || "unknown";
+
+        const payloadForActivity = {
+            editType: "Budget",
+            level: "campaign",
+            campaignid: campaignId,
+            Account: String(accountNumber),
+            campaignname: CampaignName,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Campaign budget updated",
+            updateAt: moment()
+                .tz("Asia/Kolkata")
+                .format("DD-MM-YYYY hh:mm A"),
+
+            updateDetail: `From $${Number(currentBudget) / 100
+                } to $${Number(changeBudget)}`,
+
+            budgetType
+        };
+        const payload = {
+            campaignId,
+            budget: Math.round(Number(changeBudget) * 100),
+            accountNumber: String(accountNumber),
+            campaignname: CampaignName,
+            updatedby: params.context?.userdetails?.email,
+            budgetType,
+            activity: payloadForActivity,
+        };
+
+        if (!payload.campaignId || !payload.accountNumber) {
+            message.error("Campaign ID missing");
+            setConfirmLoading(false);
+            return;
+        }
+        try {
+            await apiClient.post(
+                '/update/campaign/budget/history',
+                payload
+            );
+            message.success(
+                "Campaign Budget Updated Successfully"
+            );
+            setBudgetAndStatusData((prev) => ({
+                ...prev,
+                campaign: {
+                    ...prev?.campaign,
+                    budget_amount: String(
+                        Math.round(Number(changeBudget) * 100)
+                    )
+                }
+            }));
+            setConfirmLoading(false);
+            setIsBudgetModalVisible(false);
+
+        } catch (err) {
+
+            setConfirmLoading(false);
+            setIsBudgetModalVisible(false);
+            message.error("Failed to update budget");
+        }
+    };
     // console.log(filteredData);
     // console.log(dailyData);
     // console.log(columnDefs);
@@ -1656,16 +1840,33 @@ export default function CampaignAndAccount({ params }) {
 
     return (
         <Row style={{ display: 'flex', flexDirection: 'column', marginRight: '10px' }}>
-            <Col style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                {/* <div style={{width:'100%'}}>
-                    <h3 style={{textAlign:'center'}}>{decodedString}</h3>
-                </div> */}
-                <div style={{ width: '120px' }}>
+            <Col style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap'
+            }}>
+
+                <div style={{
+                    width: '100px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    height: '32px'
+                }}>
                     <p>Timezone: <span>{timeZone}</span></p>
                 </div>
-            </Col>
-            <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
+
+                <Switch
+                    checked={showTables}
+                    onChange={(checked) => setShowTables(checked)}
+                    checkedChildren="Tables"
+                    unCheckedChildren="Hide"
+                    style={{
+                        backgroundColor: showTables ? "#91c25f" : undefined,
+                    }}
+                />
+
                 <Button
                     type="default"
                     icon={<BarChartOutlined />}
@@ -1674,213 +1875,217 @@ export default function CampaignAndAccount({ params }) {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '3px solid #91C25F',
+                        border: '2px solid #91C25F',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
                         backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
-                        borderRadius: '999px',
+                        borderRadius: '18px',
                         fontWeight: 500,
-                        padding: '0 12px',
-                        height: '32px',
+                        padding: '0 13px',
+                        height: '25px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '2px',
                         transition: 'all 0.2s ease-in-out',
                     }}
                 >
                     Chart
                 </Button>
+
             </Col>
-            {/* <h1>{params.campaignAndAccount}hi</h1> */}
-            {isGraphVisible && (
-                <div
-                    style={{
-                        width: '100%',
-                        borderRadius: 12,
-                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                        padding: 15,
-                        height: 'auto',
-                        boxShadow:
-                            theme === 'dark'
-                                ? '0 1px 3px rgba(0,0,0,0.6)'
-                                : '0 1px 6px rgba(0,0,0,0.08)',
-                    }}
-                >
-                    <Col style={{ height: '400px', marginBottom: '20px' }}> {/* Container with fixed height */}
-                        {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                            {/* <Spin size="large" /> */}
-                            <div style={{ padding: '24px' }}>
-                                <Skeleton active paragraph={{ rows: 20 }} />
-                            </div>
-                        </div>) :
-                            (
-                                <div>
-                                    {/* ✅ Custom Checkbox-Style Legend */}
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent: 'center' }}>
-                                        {Object.keys(datasetColorMap).map(label => {
-                                            const isVisible = !hiddenKeys.includes(label);
-                                            return (
-                                                <div
-                                                    key={label}
-                                                    onClick={() => toggleLegend(label)}
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        cursor: 'pointer',
-                                                        gap: '6px',
-                                                        fontSize: '13px',
-                                                        color: theme === 'dark' ? '#fff' : '#000',
-                                                    }}
-                                                >
+
+            {
+                isGraphVisible && (
+                    <div
+                        style={{
+                            width: '100%',
+                            borderRadius: 12,
+                            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                            padding: 15,
+                            height: 'auto',
+                            boxShadow:
+                                theme === 'dark'
+                                    ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    : '0 1px 6px rgba(0,0,0,0.08)',
+                        }}
+                    >
+                        <Col style={{ height: '400px', marginBottom: '20px' }}> {/* Container with fixed height */}
+                            {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                                {/* <Spin size="large" /> */}
+                                <div style={{ padding: '24px' }}>
+                                    <Skeleton active paragraph={{ rows: 20 }} />
+                                </div>
+                            </div>) :
+                                (
+                                    <div>
+                                        {/* ✅ Custom Checkbox-Style Legend */}
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent: 'center' }}>
+                                            {Object.keys(datasetColorMap).map(label => {
+                                                const isVisible = !hiddenKeys.includes(label);
+                                                return (
                                                     <div
+                                                        key={label}
+                                                        onClick={() => toggleLegend(label)}
                                                         style={{
-                                                            width: '16px',
-                                                            height: '16px',
-                                                            borderRadius: '4px',
-                                                            backgroundColor: datasetColorMap[label],
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            color: '#fff',
-                                                            // fontWeight: 'bold',
-                                                            fontSize: '11px',
+                                                            cursor: 'pointer',
+                                                            gap: '6px',
+                                                            fontSize: '13px',
+                                                            color: theme === 'dark' ? '#fff' : '#000',
                                                         }}
                                                     >
-                                                        {isVisible ? '✔' : ''}
+                                                        <div
+                                                            style={{
+                                                                width: '16px',
+                                                                height: '16px',
+                                                                borderRadius: '4px',
+                                                                backgroundColor: datasetColorMap[label],
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                color: '#fff',
+                                                                // fontWeight: 'bold',
+                                                                fontSize: '11px',
+                                                            }}
+                                                        >
+                                                            {isVisible ? '✔' : ''}
+                                                        </div>
+                                                        {label}
                                                     </div>
-                                                    {label}
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })}
+                                        </div>
+                                        <Row style={{ height: '400px', marginTop: '20px' }}>
+                                            <Line
+                                                data={{
+                                                    labels: chartData.dates || [],
+                                                    datasets,
+                                                }}
+                                                options={{
+                                                    responsive: true,
+                                                    maintainAspectRatio: false,
+                                                    plugins: {
+                                                        legend: { display: false },
+                                                        tooltip: {
+                                                            mode: 'index',
+                                                            intersect: true,
+                                                            displayColors: true,
+                                                            boxWidth: 15,
+                                                            boxHeight: 15,
+                                                            callbacks: {
+                                                                label: function (tooltipItem) {
+                                                                    const index = tooltipItem.dataIndex;
+                                                                    const dataset = tooltipItem.dataset;
+                                                                    const value = dataset.data[index];
+                                                                    const datasetLabel = dataset.label || '';
+                                                                    return `${datasetLabel}: ${value}`;
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                    scales: {
+                                                        x: {
+                                                            ticks: {
+                                                                padding: 30,
+                                                                color: (context) => {
+                                                                    const index = context.index;
+                                                                    const label = chartData?.dates?.[index];
+                                                                    return getColorForValue(label);
+                                                                },
+                                                            },
+                                                            grid: {
+                                                                color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                            },
+                                                        },
+                                                        y: {
+                                                            beginAtZero: true,
+                                                            ticks: {
+                                                                callback: value => value.toFixed(2),
+                                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                            },
+                                                            grid: {
+                                                                color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                                height={350}
+                                            />
+                                        </Row>
+
+
                                     </div>
-                                    <Row style={{ height: '400px', marginTop: '20px' }}>
-                                        <Line
-                                            data={{
-                                                labels: chartData.dates || [],
-                                                datasets,
-                                            }}
-                                            options={{
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                plugins: {
-                                                    legend: { display: false },
-                                                    tooltip: {
-                                                        mode: 'index',
-                                                        intersect: true,
-                                                        displayColors: true,
-                                                        boxWidth: 15,
-                                                        boxHeight: 15,
-                                                        callbacks: {
-                                                            label: function (tooltipItem) {
-                                                                const index = tooltipItem.dataIndex;
-                                                                const dataset = tooltipItem.dataset;
-                                                                const value = dataset.data[index];
-                                                                const datasetLabel = dataset.label || '';
-                                                                return `${datasetLabel}: ${value}`;
-                                                            },
-                                                        },
-                                                    },
-                                                },
-                                                scales: {
-                                                    x: {
-                                                        ticks: {
-                                                            padding: 30,
-                                                            color: (context) => {
-                                                                const index = context.index;
-                                                                const label = chartData?.dates?.[index];
-                                                                return getColorForValue(label);
-                                                            },
-                                                        },
-                                                        grid: {
-                                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                        },
-                                                    },
-                                                    y: {
-                                                        beginAtZero: true,
-                                                        ticks: {
-                                                            callback: value => value.toFixed(2),
-                                                            color: theme === 'dark' ? '#fff' : '#000',
-                                                        },
-                                                        grid: {
-                                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                        },
-                                                    },
-                                                },
-                                            }}
-                                            height={350}
-                                        />
-                                    </Row>
 
+                                )}
+                        </Col>
+                    </div>
 
-                                </div>
+                )
+            }
+            {showTables && (
+                <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
+                    {/* Top 5 Dates with RPC */}
+                    <div style={{ width: '20%', marginLeft: '1%' }}>
+                        <p>Top 5 dates with Rpc</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '2px' }}>RPC</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.dates
+                                    .map((date, index) => ({
+                                        date: date.split(" ")[0], // Get the date part only
+                                        rpc: chartData.rpc[index],
+                                    }))
+                                    .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
+                                    .slice(0, 5) // Take top 5 dates
+                                    .map((item, index) => (
+                                        <tr key={index}>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                            )}
-                    </Col>
-                </div>
-
+                    {/* Top 5 Dates with Margin */}
+                    <div style={{ marginLeft: "1%", width: '20%' }}>
+                        <p>Top 5 dates with margin</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.dates
+                                    .map((date, index) => ({
+                                        date: date.split(" ")[0], // Get the date part only
+                                        margin: chartData.margin[index],
+                                    }))
+                                    .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                    .slice(0, 5) // Take top 5 dates
+                                    .map((item, index) => (
+                                        <tr key={index}>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </Col>
             )}
-
-            <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
-                {/* Top 5 Dates with RPC */}
-                <div style={{ width: '20%', marginLeft: '1%' }}>
-                    <p>Top 5 dates with Rpc</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '2px' }}>RPC</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    rpc: chartData.rpc[index],
-                                }))
-                                .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
-                                .slice(0, 5) // Take top 5 dates
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Top 5 Dates with Margin */}
-                <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <p>Top 5 dates with margin</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    margin: chartData.margin[index],
-                                }))
-                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
-                                .slice(0, 5) // Take top 5 dates
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-            </Col>
             <Col style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
                 {/* <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}> */}
                 {/* <Input
@@ -2019,7 +2224,12 @@ export default function CampaignAndAccount({ params }) {
                                     : '0 1px 6px rgba(0,0,0,0.08)',
                         }}
                     >
-                        <Col>
+                        <Col style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            width: "100%"
+                        }}>
                             <div style={{ width: '100%', display: 'flex', }}>
                                 <Tooltip
                                     title={copied ? 'Copied!' : 'Click to copy'}
@@ -2049,6 +2259,178 @@ export default function CampaignAndAccount({ params }) {
                                         </p>
                                     </Tooltip>
                                 )}
+                            </div>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px"
+                                }}
+                            >
+                                <div>
+                                    {/* <Switch
+                                                                    size={20}
+                                                                    checked={switchChecked}
+                                                                    style={{
+                                                                        backgroundColor: switchChecked
+                                                                            ? "#91c25f"
+                                                                            : undefined
+                                                                    }}
+                                                                    onChange={(checked) => {
+                                                                        setNextChecked(checked);
+                                                                        setIsCampaignModalVisibles(true);
+                                                                    }}
+                                                                /> */}
+                                    <Switch
+                                        checked={
+                                            budgetAndStatusData?.level === "campaign"
+                                                ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+                                                : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                        }
+                                        style={{
+                                            backgroundColor:
+                                                (
+                                                    budgetAndStatusData?.level === "campaign"
+                                                        ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+                                                        : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                                )
+                                                    ? "#91c25f"
+                                                    : undefined
+                                        }}
+                                        onChange={(checked) => {
+                                            setNextChecked(checked);
+                                            setIsCampaignModalVisibles(true);
+                                        }}
+                                    />
+                                    <Modal
+                                        title="Confirm Action"
+                                        open={isCampaignModalVisibles}
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        onOk={handlePauseOk}
+                                        onCancel={handlePauseCancel}
+                                    >
+                                        {confirmLoading && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bottom: 0,
+                                                    background: "rgba(255,255,255,0.7)",
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    zIndex: 1000,
+                                                    borderRadius: "8px",
+                                                }}
+                                            >
+                                                <Spin size="large" tip="Saving..." />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p>
+                                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this campaign?
+                                            </p>
+                                            <p>Campaign ID: {campaignid}</p>
+                                            <p>Campaign Name: {CampaignName}</p>
+                                        </div>
+                                    </Modal>
+                                </div>
+
+                                <div>
+                                    <DollarOutlined style={{ fontSize: "18px" }} onClick={() => setIsBudgetModalVisible(true)} />
+                                    {isBudgetModalVisible && (
+                                        <Modal
+                                            title={CampaignName}
+                                            open={isBudgetModalVisible}
+                                            onOk={handleOk}
+                                            onCancel={() => setIsBudgetModalVisible(false)}
+                                            width={600}
+                                            okButtonProps={{
+                                                style: {
+                                                    backgroundColor: '#91C25F',
+                                                    borderColor: '#91C25F'
+                                                }
+                                            }}
+                                            className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        >
+                                            {confirmLoading && (
+                                                <div
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        bottom: 0,
+                                                        background: "rgba(255,255,255,0.7)",
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                        zIndex: 1000,
+                                                        borderRadius: "8px",
+                                                    }}
+                                                >
+                                                    <Spin size="large" tip="Saving..." />
+                                                </div>
+                                            )}
+
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                }}
+                                            >
+
+                                                {/* Budget Type */}
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    <p>Budget Type:&nbsp;</p>
+
+                                                    <span style={{ fontWeight: "normal" }}>
+                                                        {budgetAndStatusData?.budget_type || "-"}
+                                                    </span>
+                                                </div>
+
+                                                {/* Budget Amount */}
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                    }}
+                                                >
+                                                    {/* <div style={{ display: "flex" }}>
+                                                                                    <p>Budget Amount:&nbsp;</p>
+                                                                                </div> */}
+                                                    
+                                                    <Input
+                                                        type="number"
+                                                        disabled={
+                                                            budgetAndStatusData?.campaign?.budget_amount == null
+                                                        }
+                                                        value={changeBudget}
+                                                        onChange={(e) => onChangeBudget(e.target.value)}
+                                                        placeholder="Enter budget in USD"
+                                                        className={
+                                                            params.context?.theme === 'dark'
+                                                                ? 'custom-input-dark'
+                                                                : 'custom-input-light'
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Campaign ID */}
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    <p>Campaign ID:&nbsp;</p>
+
+                                                    <span style={{ fontWeight: "normal" }}>
+                                                        {budgetAndStatusData?.campaign?.campaign_id || "-"}
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </Modal>
+                                    )}
+                                </div>
                             </div>
                         </Col>
                         <div className={`ag-container ${gridThemeClass}`}>
@@ -2233,6 +2615,6 @@ export default function CampaignAndAccount({ params }) {
                     borderColor={theme === "dark" ? "#555" : "#d9d9d9"}
                 />
             </Modal>
-        </Row>
+        </Row >
     )
 }

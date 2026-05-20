@@ -13,7 +13,7 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { Spin, Row, Col, Select, Input, Button, Skeleton, Switch, Tooltip, Modal, message } from 'antd';
-import { ReloadOutlined, BarChartOutlined, EditOutlined } from '@ant-design/icons';
+import { ReloadOutlined, BarChartOutlined, EditOutlined, DollarOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -355,12 +355,12 @@ export default function AdsetNameAndAccount({ params }) {
 
         return 0;
     }
- const getCPM = (params) => {
+    const getCPM = (params) => {
         if (params.data !== undefined) {
             const { impressions, spend } = params.data;
 
             if (spend !== "0.00" || spend !== undefined) {
-                const RPC = (spend/impressions) * 1000;
+                const RPC = (spend / impressions) * 1000;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
                     return `0%`;
                 }
@@ -371,7 +371,7 @@ export default function AdsetNameAndAccount({ params }) {
         if (params.node.aggData !== undefined) {
             const { impressions, spend } = params.node.aggData;
             if (spend !== "0.00" || spend !== undefined) {
-                const RPC = (spend/impressions) * 1000;
+                const RPC = (spend / impressions) * 1000;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
                     return `0%`;
                 }
@@ -441,6 +441,15 @@ export default function AdsetNameAndAccount({ params }) {
 
     const [selectedValue, setSelectedValue] = useState("All");
     const [filteredData, setFilteredData] = useState(dailyData);
+    const [budgetAndStatusData, setBudgetAndStatusData] = useState(null);
+    const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
+    const [nextChecked, setNextChecked] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [showTables, setShowTables] = useState(false);
+     const [bidAmount, setBidAmount] = useState("");
+    // const [switchChecked, setSwitchChecked] = useState(false);
+    const [isBudgetModalVisible, setIsBudgetModalVisible] = useState(false);
+    const [changeBudget, setChangeBudget] = useState("");
 
     const [domainFixedFooter, setDomainFixedFooter] = useState([]);
 
@@ -539,7 +548,28 @@ export default function AdsetNameAndAccount({ params }) {
             setComment("");
         }
     };
+    const functionCallForBudgetAndStatus = async (
+        id = AdsetId,
+        level = "adset",
+        accountNumber
+    ) => {
+        try {
+            const response = await apiClient.post(`/getBudgetAndStatus`,
+                {
+                    id,
+                    level,
+                    accountNumber
+                }
+            );
 
+            const data = response?.data?.data;
+            console.log(data, "budget and status");
+            setBudgetAndStatusData(data);
+
+        } catch (err) {
+            console.log(err);
+        }
+    };
     const functionCallForUserColumnStructure = async () => {
         const fetchData = await apiClient.get(`/api/singleUserData?email=${user}`);
         // const data = await fetchData.json();
@@ -554,7 +584,7 @@ export default function AdsetNameAndAccount({ params }) {
     const getHistoryData = async () => {
         const fetchData = await apiClient.get(`/New/DailyAdsetHistory?AdsetId=${AdsetId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
-        const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
+        const url = `https://prodapis.adsgoat.in/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
 
         const mainData = fetchData.data;
         setAdsetName(mainData[0]?.adsetName);
@@ -687,11 +717,41 @@ export default function AdsetNameAndAccount({ params }) {
                 await functionCallForCommnets(accountNumber);
                 await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
+                await functionCallForBudgetAndStatus(
+                    AdsetId,
+                    "adset",
+                    accountNumber
+                );
             }
             functionCall();
         }
     }, [userdetails]);
+    const onChangeBudget = (value) => {
+        setChangeBudget(value);
+    };
+    useEffect(() => {
 
+        if (isBudgetModalVisible) {
+
+            // ✅ Budget
+            setChangeBudget(
+                budgetAndStatusData?.selected_adset?.budget_amount
+                    ? Number(
+                        budgetAndStatusData?.selected_adset?.budget_amount
+                    ) / 100
+                    : ""
+            );
+
+            // ✅ Bid Amount
+            setBidAmount(
+                budgetAndStatusData?.selected_adset?.bid_amount
+                    ? budgetAndStatusData?.selected_adset?.bid_amount / 100
+                    : ""
+            );
+
+        }
+
+    }, [isBudgetModalVisible]);
     // const pinnedBottomRowData = [
     //     {
     //         campaignName: 'Total',
@@ -1222,7 +1282,7 @@ export default function AdsetNameAndAccount({ params }) {
             headerToolTip: 'ROI = ((Revenue - Spend) / Spend) * 100',
             width: 90
         },
-         cpm: {
+        cpm: {
             headerName: 'CPM', field: 'cpm', valueGetter: getCPM,
             // comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}`,
@@ -1559,22 +1619,283 @@ export default function AdsetNameAndAccount({ params }) {
             await functionCallForCommnets(accountNumber);
             await debouncedFunctionCallForUserColumnStructure();
             await debouncedFunctionCall();
+            await functionCallForBudgetAndStatus(
+                AdsetId,
+                "adset",
+                accountNumber
+            );
         }
         functionCall();
+    };
+    const handlePauseOk = async () => {
+        const desired = nextChecked;
+        console.log(nextChecked, "nextChecked");
+        setIsCampaignModalVisibles(true);
+        setConfirmLoading(true);
+
+        try {
+            const token = localStorage.getItem("token");
+            const payloadForActivity = {
+                editType: "Status",
+                campaignid: budgetAndStatusData?.campaign?.campaign_id,
+                adsetid: AdsetId,
+                Account: accountNumber,
+                // campaignname: campaignName,
+                adsetname: adsetName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Adset status updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+            }
+            const payload = {
+                status: desired ? "ACTIVE" : "PAUSED",
+                // campaignname: campaignName,
+                name: adsetName,
+                accountNumber: accountNumber,
+                campaign_id: budgetAndStatusData?.campaign?.campaign_id,
+                adset_id: AdsetId,
+                email: userdetails?.email,
+                activity: payloadForActivity
+            };
+            const response = await apiClient.post(`/NewBulkAdsetStatusChangeWithHistory`, payload,
+                { headers: { Authorization: token } }
+            );
+
+            const newStatus = desired ? "ACTIVE" : "PAUSED";
+            if (response.status === 200 || response.status === 201) {
+                setBudgetAndStatusData((prev) => ({
+                    ...prev,
+                    selected_adset: {
+                        ...prev?.selected_adset,
+                        adset_status:
+                            nextChecked
+                                ? "ACTIVE"
+                                : "PAUSED"
+                    }
+
+                }));
+                setConfirmLoading(false);
+                setIsCampaignModalVisibles(false);
+            }
+            message.success(`Adset ${newStatus.toLowerCase()}`);
+        } catch (e) {
+            setConfirmLoading(false);
+            setIsCampaignModalVisibles(false);
+            message.error("Failed to update Adset status");
+        }
+    };
+    const handlePauseCancel = () => {
+        // setNextChecked(switchChecked);
+        setIsCampaignModalVisibles(false);
+    };
+    const handleOk = async () => {
+
+        // const campaignname = CampaignName;
+        const adsetname = adsetName;
+
+        const selectedAdset =
+            budgetAndStatusData?.selected_adset;
+
+        const currentBudget =
+            selectedAdset?.budget_amount || 0;
+
+        const currentBidAmount =
+            selectedAdset?.bid_amount || 0;
+
+        const budgetType =
+            budgetAndStatusData?.budget_type || "unknown";
+
+        const bidAmountValue =
+            Math.round(parseFloat(bidAmount || 0) * 100);
+
+        const changeBudgetValue =
+            Math.round(parseFloat(changeBudget || 0) * 100);
+
+        const payload = {
+            adsetId: selectedAdset?.adset_id,
+            campaignId:
+                budgetAndStatusData?.campaign?.campaign_id,
+
+            accountNumber,
+            adsetname,
+            updatedby: userdetails?.email,
+            budgetType,
+        };
+
+        // ✅ Budget Change
+        if (
+            changeBudget !== undefined &&
+            changeBudget !== '' &&
+            !isNaN(changeBudget) &&
+            parseFloat(changeBudget) > 0 &&
+            changeBudgetValue !== Number(currentBudget)
+        ) {
+
+            payload.budget = changeBudgetValue;
+
+            payload.activity = {
+                editType: "Budget",
+                campaignid:
+                    budgetAndStatusData?.campaign?.campaign_id,
+                adsetid: selectedAdset?.adset_id,
+                Account: String(accountNumber),
+                adsetname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail:
+                    userdetails?.email,
+                updateType:
+                    "Adset budget updated",
+                updateAt: moment()
+                    .tz("Asia/Kolkata")
+                    .format("DD-MM-YYYY hh:mm A"),
+                updateDetail:
+                    `From $${Number(currentBudget) / 100
+                    } to $${Number(changeBudget)}`,
+                budgetType
+            };
+        }
+
+        // ✅ Bid Change
+        if (
+            bidAmount !== undefined &&
+            bidAmount !== '' &&
+            !isNaN(bidAmount) &&
+            parseFloat(bidAmount) >= 0 &&
+            bidAmountValue !== Number(currentBidAmount)
+        ) {
+            payload.bidAmount = bidAmountValue;
+            payload.bidactivity = {
+                editType: "Bid",
+                campaignid:
+                    budgetAndStatusData?.campaign?.campaign_id,
+                adsetid: selectedAdset?.adset_id,
+                Account: String(accountNumber),
+                // campaignname,
+                adsetname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail:
+                    userdetails?.email,
+                updateType:
+                    "Adset bid strategy updated",
+                updateAt: moment()
+                    .tz("Asia/Kolkata")
+                    .format("DD-MM-YYYY hh:mm A"),
+                updateDetail:
+                    `From $${Number(currentBidAmount) / 100
+                    } to $${Number(bidAmount)}`,
+            };
+        }
+
+        const hasBudget =
+            Object.prototype.hasOwnProperty.call(
+                payload,
+                'budget'
+            );
+
+        const hasBidAmount =
+            Object.prototype.hasOwnProperty.call(
+                payload,
+                'bidAmount'
+            );
+
+        if (!hasBudget && !hasBidAmount) {
+
+            message.warning(
+                "Please change Budget and/or Bid Amount before submitting."
+            );
+
+            return;
+        }
+
+        try {
+
+            setConfirmLoading(true);
+
+            const newResponse =
+                await apiClient.post(
+                    '/update/adset/budget/history',
+                    payload
+                );
+
+            if (
+                newResponse.status === 200 ||
+                newResponse.status === 201
+            ) {
+
+                // ✅ UPDATE LOCAL STATE ONLY
+                setBudgetAndStatusData((prev) => ({
+
+                    ...prev,
+
+                    selected_adset: {
+
+                        ...prev?.selected_adset,
+
+                        ...(payload.budget !== undefined && {
+                            budget_amount:
+                                String(payload.budget)
+                        }),
+
+                        ...(payload.bidAmount !== undefined && {
+                            bid_amount:
+                                payload.bidAmount
+                        })
+
+                    }
+
+                }));
+
+                message.success(
+                    "Adset Budget and/or Bid Updated"
+                );
+
+                setIsBudgetModalVisible(false);
+            }
+
+        } catch (err) {
+
+            console.error(err);
+
+            message.error(
+                "Failed to update adset"
+            );
+
+        } finally {
+
+            setConfirmLoading(false);
+
+        }
     };
 
     return (
         <Row style={{ display: 'flex', flexDirection: 'column' }}>
-            <Col style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                {/* <div style={{width:'100%'}}>
-                    <h3 style={{textAlign:'center'}}>{decodedString}</h3>
-                </div> */}
-                <div style={{ width: '120px' }}>
+            <Col style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap'
+            }}>
+
+                <div style={{
+                    width: '100px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    height: '32px'
+                }}>
                     <p>Timezone: <span>{timeZone}</span></p>
                 </div>
-            </Col>
-            <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
+                <Switch
+                    checked={showTables}
+                    onChange={(checked) => setShowTables(checked)}
+                    checkedChildren="Tables"
+                    unCheckedChildren="Hide"
+                    style={{
+                        backgroundColor: showTables ? "#91c25f" : undefined,
+                    }}
+                />
+
                 <Button
                     type="default"
                     icon={<BarChartOutlined />}
@@ -1583,17 +1904,17 @@ export default function AdsetNameAndAccount({ params }) {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '3px solid #91C25F',
+                        border: '2px solid #91C25F',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
                         backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
-                        borderRadius: '999px',
+                        borderRadius: '18px',
                         fontWeight: 500,
-                        padding: '0 12px',
-                        height: '32px',
+                        padding: '0 13px',
+                        height: '25px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '2px',
                         transition: 'all 0.2s ease-in-out',
                     }}
                 >
@@ -1726,68 +2047,70 @@ export default function AdsetNameAndAccount({ params }) {
                     </Col>
                 </div>
             )}
-
-            <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
-                {/* Top 5 Dates with RPC */}
-                <div style={{ width: '20%', marginLeft: '1%' }}>
-                    <p>Top 5 dates with Rpc</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '2px' }}>RPC</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    rpc: chartData.rpc[index],
-                                }))
-                                .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
-                                .slice(0, 5) // Take top 5 dates
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+            {
+                showTables && (
+                    <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
+                        {/* Top 5 Dates with RPC */}
+                        <div style={{ width: '20%', marginLeft: '1%' }}>
+                            <p>Top 5 dates with Rpc</p>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '2px' }}>RPC</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
                                     </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
+                                </thead>
+                                <tbody>
+                                    {chartData.dates
+                                        .map((date, index) => ({
+                                            date: date.split(" ")[0], // Get the date part only
+                                            rpc: chartData.rpc[index],
+                                        }))
+                                        .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
+                                        .slice(0, 5) // Take top 5 dates
+                                        .map((item, index) => (
+                                            <tr key={index}>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-                {/* Top 5 Dates with Margin */}
-                <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <p>Top 5 dates with margin</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    margin: chartData.margin[index],
-                                }))
-                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
-                                .slice(0, 5) // Take top 5 dates
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                        {/* Top 5 Dates with Margin */}
+                        <div style={{ marginLeft: "1%", width: '20%' }}>
+                            <p>Top 5 dates with margin</p>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
                                     </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-            </Col>
+                                </thead>
+                                <tbody>
+                                    {chartData.dates
+                                        .map((date, index) => ({
+                                            date: date.split(" ")[0], // Get the date part only
+                                            margin: chartData.margin[index],
+                                        }))
+                                        .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                        .slice(0, 5) // Take top 5 dates
+                                        .map((item, index) => (
+                                            <tr key={index}>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Col>
+                )}
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
             <Col style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
                 {/* <Col>
@@ -1887,7 +2210,7 @@ export default function AdsetNameAndAccount({ params }) {
                                     : '0 1px 6px rgba(0,0,0,0.08)',
                         }}
                     >
-                        <Col>
+                        <Col style={{ display: "flex", justifyContent: "center" }}>
                             <div style={{ width: '100%', display: 'flex', }}>
                                 <Tooltip
                                     title={copied ? 'Copied!' : 'Click to copy'}
@@ -1917,6 +2240,218 @@ export default function AdsetNameAndAccount({ params }) {
                                         </p>
                                     </Tooltip>
                                 )}
+                            </div>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px"
+                                }}
+                            >
+                                <div>
+                                    <Switch
+                                        checked={
+
+                                            budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                        }
+                                        style={{
+                                            backgroundColor:
+                                                (
+                                                    budgetAndStatusData?.level === "campaign"
+                                                        ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+                                                        : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                                )
+                                                    ? "#91c25f"
+                                                    : undefined
+                                        }}
+                                        onChange={(checked) => {
+                                            setNextChecked(checked);
+                                            setIsCampaignModalVisibles(true);
+                                        }}
+                                    />
+                                    <Modal
+                                        title="Confirm Action"
+                                        open={isCampaignModalVisibles}
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        onOk={handlePauseOk}
+                                        onCancel={handlePauseCancel}
+                                    >
+                                        {confirmLoading && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bottom: 0,
+                                                    background: "rgba(255,255,255,0.7)",
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    zIndex: 1000,
+                                                    borderRadius: "8px",
+                                                }}
+                                            >
+                                                <Spin size="large" tip="Saving..." />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p>
+                                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this campaign?
+                                            </p>
+                                            <p>Adset ID: {AdsetId}</p>
+                                            <p>Adset Name: {adsetName}</p>
+                                        </div>
+                                    </Modal>
+                                </div>
+
+                                <div>
+                                    <DollarOutlined style={{ fontSize: "18px" }} onClick={() => setIsBudgetModalVisible(true)} />
+                                    {isBudgetModalVisible && (
+                                        <Modal
+                                            title={adsetName}
+                                            open={isBudgetModalVisible}
+                                            onOk={handleOk}
+                                            onCancel={() => setIsBudgetModalVisible(false)}
+                                            width={600}
+                                            okButtonProps={{
+                                                style: {
+                                                    backgroundColor: '#91C25F',
+                                                    borderColor: '#91C25F'
+                                                }
+                                            }}
+                                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        >
+                                            {confirmLoading && (
+                                                <div
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        bottom: 0,
+                                                        background: "rgba(255,255,255,0.7)",
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                        zIndex: 1000,
+                                                        borderRadius: "8px",
+                                                    }}
+                                                >
+                                                    <Spin size="large" tip="Saving..." />
+                                                </div>
+                                            )}
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    gap: '15px'
+                                                }}
+                                            >
+
+                                                {/* Budget Type */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                >
+                                                    <span>
+                                                        Budget Type:&nbsp;
+                                                    </span>
+
+                                                    <span style={{ fontWeight: 'normal' }}>
+                                                        {budgetAndStatusData?.budget_type || "-"}
+                                                    </span>
+                                                </div>
+
+                                                {/* Budget Amount */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: '2px'
+                                                    }}
+                                                >
+
+                                                    {/* <p style={{ marginBottom: '0px' }}>
+                                                                                    Budget Amount:
+                                                                                </p> */}
+
+                                                    <Input
+                                                        type="number"
+                                                        disabled={
+                                                            budgetAndStatusData?.selected_adset?.budget_amount == null
+                                                        }
+                                                        value={changeBudget}
+                                                        onChange={(e) =>
+                                                            onChangeBudget(e.target.value)
+                                                        }
+                                                        placeholder="0"
+                                                        className={
+                                                            theme === 'dark'
+                                                                ? 'custom-input-dark'
+                                                                : 'custom-input-light'
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Bid Amount */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: '2px'
+                                                    }}
+                                                >
+
+                                                    <p style={{ marginBottom: '0px' }}>
+                                                        Bid Amount:
+                                                    </p>
+
+                                                    <Input
+                                                        type="number"
+                                                        value={bidAmount}
+                                                        disabled={
+                                                            budgetAndStatusData?.selected_adset?.bid_amount == null
+                                                        }
+                                                        onChange={(e) =>
+                                                            setBidAmount(e.target.value)
+                                                        }
+                                                        placeholder="0"
+                                                        className={
+                                                            theme === 'dark'
+                                                                ? 'custom-input-dark'
+                                                                : 'custom-input-light'
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Adset ID */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                >
+                                                    <p>
+                                                        Adset ID:&nbsp;
+                                                    </p>
+
+                                                    <span style={{ fontWeight: 'normal' }}>
+                                                        {
+                                                            budgetAndStatusData
+                                                                ?.selected_adset
+                                                                ?.adset_id || "-"
+                                                        }
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </Modal>
+                                    )}
+                                </div>
                             </div>
                         </Col>
                         <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
