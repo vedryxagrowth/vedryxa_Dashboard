@@ -7980,6 +7980,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const [continents, setContinents] = useState([])
   const [minAgeToggle, setMinAgeToggle] = useState(true);
   const [isAccountChanged, setIsAccountChanged] = useState(false);
+  const [imageHashStatus, setImageHashStatus] = useState([])
 
   // Derived condition name changed to watchedHasAdsetBudget
   const objectiveValue = Form.useWatch("Objectives", form) ?? "";
@@ -9260,7 +9261,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             pixel_id: uniquePixelIDs?.[0]?.value || null,
             page_id: uniquePageIDs?.[0]?.value || null,
           }));
-          
+
           setNewAddLevelData((prev) => {
             Object.keys(prev).forEach((key) => {
               if (Array.isArray(prev[key])) {
@@ -9705,301 +9706,1133 @@ const CloneMultipleAdsetCampaignDrawer = ({
   //     }
   // };
 
-  const customRequest = async (data, index, onSuccess, onError, id) => {
-    if (!imagehash || imagehash.length === 0) {
-      onError("Image hash data not loaded");
-      return [];
-    }
-    const token = imagehash.token;
-    const account = imagehash.accountNumber;
+  const updateStatus = (name, status) => {
+    setImageHashStatus(prev => {
+      const existing = prev.find(item => item.name === name);
+      if (existing) {
+        return prev.map(item =>
+          item.name === name ? { ...item, status } : item
+        );
+      }
+      return [...prev, { name, status }];
+    });
+  };
 
-    const createS3Folder = async (folderPath) => {
-      try {
-        const response = await fetch(
-          "https://prodapis.adsgoat.in/uploadUserFiles",
-          {
-            method: "POST",
-            headers: {
-              Authorization: localStorage.getItem("token"),
-              username: imagehash.username || "default-user",
-              "x-folder": folderPath.endsWith("/")
-                ? folderPath
-                : folderPath + "/",
-              "x-action": "create-folder",
-            },
-          }
+  // const customRequest = async (data, index, onSuccess, onError, id) => {
+  //   if (!imagehash || imagehash.length === 0) {
+  //     onError("Image hash data not loaded");
+  //     return [];
+  //   }
+  //   const token = imagehash.token;
+  //   const account = imagehash.accountNumber;
+
+  //   const createS3Folder = async (folderPath) => {
+  //     try {
+  //       const response = await fetch(
+  //         "https://prodapis.adsgoat.in/uploadUserFiles",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             Authorization: localStorage.getItem("token"),
+  //             username: imagehash.username || "default-user",
+  //             "x-folder": folderPath.endsWith("/")
+  //               ? folderPath
+  //               : folderPath + "/",
+  //             "x-action": "create-folder",
+  //           },
+  //         }
+  //       );
+
+  //       if (!response.ok) throw new Error("Failed to create folder");
+  //       const data = await response.json();
+  //       console.log("Folder created:", folderPath);
+  //       return true;
+  //     } catch (err) {
+  //       console.error("Error creating folder:", err);
+  //       return false;
+  //     }
+  //   };
+
+  //   const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
+  //     const fullPath = `${folderPath}/${fileName}`;
+  //     const formData = new FormData();
+  //     formData.append("file", fileBlob, fileName);
+  //     formData.append("filename", fullPath); // required in body
+
+  //     try {
+  //       const response = await fetch(
+  //         "https://prodapis.adsgoat.in/uploadUserFiles",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             Authorization: localStorage.getItem("token"),
+  //             username: imagehash.username || "default-user", // required in headers
+  //           },
+  //           body: formData,
+  //         }
+  //       );
+
+  //       if (!response.ok) throw new Error("S3 upload failed");
+
+  //       const data = await response.json();
+  //       return data.imageUrl;
+  //     } catch (err) {
+  //       console.error("Error uploading to S3:", err);
+  //       return null;
+  //     }
+  //   };
+
+  //   const uploadFilesSequentially = async (selectedFiles) => {
+  //     const mediaHashArray = [];
+
+  //     for (const file of selectedFiles) {
+  //       try {
+  //         const fileType = file.type;
+  //         if (
+  //           !fileType.startsWith("image/") &&
+  //           !fileType.startsWith("video/")
+  //         ) {
+  //           onError("Unsupported file type");
+  //           continue;
+  //         }
+
+  //         const folderPath = `${network}/${imagehash.accountNumber}/${formValues ? formValues.Name : "Drafts"
+  //           }`;
+  //         await createS3Folder(folderPath);
+  //         let fileBlob = null;
+  //         let s3FileUrl = null;
+
+  //         if (file?.url) {
+  //           const response = await fetch(
+  //             `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+  //             {
+  //               method: "GET",
+  //               headers: {
+  //                 "Content-Type": "application/json",
+  //                 Authorization: localStorage.getItem("token"),
+  //               },
+  //             }
+  //           );
+
+  //           fileBlob = await response.blob();
+  //           s3FileUrl = await uploadFileToS3(fileBlob, file.name, folderPath);
+
+  //           const formData = new FormData();
+  //           formData.append("file", fileBlob, file.name);
+  //           formData.append("access_token", token);
+
+  //           let fbResponse;
+  //           if (
+  //             file.url.endsWith(".png") ||
+  //             file.url.endsWith(".jpg") ||
+  //             file.url.endsWith(".jpeg")
+  //           ) {
+  //             const fileName = file.name.split("/").pop();
+
+  //             fbResponse = await axios.post(
+  //               `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+  //               formData,
+  //               { headers: { "Content-Type": "multipart/form-data" } }
+  //             );
+
+  //             if (fbResponse.status === 200) {
+  //               onSuccess("ok", fbResponse);
+  //               mediaHashArray.push({
+  //                 filename: s3FileUrl,
+  //                 imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+  //               });
+  //             } else {
+  //               onError("error", fbResponse);
+  //               console.error("Image upload failed");
+  //             }
+  //           } else if (file.url.endsWith(".mp4")) {
+  //             fbResponse = await axios.post(
+  //               `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+  //               formData,
+  //               { headers: { "Content-Type": "multipart/form-data" } }
+  //             );
+
+  //             if (fbResponse.status === 200) {
+  //               const videoid = fbResponse?.data?.id;
+  //               await new Promise((resolve) => setTimeout(resolve, 10000));
+
+  //               const thumbnailResponse = await axios.get(
+  //                 `https://graph.facebook.com/v20.0/${videoid}`,
+  //                 {
+  //                   params: {
+  //                     access_token: token,
+  //                     fields: "thumbnails",
+  //                     is_preferred: true,
+  //                   },
+  //                 }
+  //               );
+
+  //               const preferredThumbnail =
+  //                 thumbnailResponse.data.thumbnails.data.find(
+  //                   (thumbnail) => thumbnail.is_preferred === true
+  //                 );
+  //               const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+
+  //               onSuccess("ok", fbResponse);
+  //               mediaHashArray.push({
+  //                 filename: s3FileUrl,
+  //                 videoid: videoid,
+  //                 thambnailurl: uri,
+  //               });
+  //             } else {
+  //               onError("error", fbResponse);
+  //               console.error("Video upload to Facebook failed");
+  //             }
+  //           }
+  //         } else {
+  //           const uniqueId = uuidv4();
+  //           const safeName = `blob_${uniqueId}_${file.name}`;
+  //           const editedImage = editedImages[file.name];
+  //           fileBlob = editedImage
+  //             ? await fetch(editedImage).then((res) => res.blob())
+  //             : file.originFileObj;
+  //           s3FileUrl = await uploadFileToS3(fileBlob, safeName, folderPath);
+
+  //           const formData = new FormData();
+  //           formData.append("file", fileBlob, safeName);
+  //           formData.append("access_token", token);
+
+  //           let response, fbResponse;
+
+  //           if (file.type.startsWith("image/")) {
+  //             response = await axios.post(
+  //               "https://www.testapi.adsgoat.in/upload",
+  //               formData,
+  //               {
+  //                 headers: {
+  //                   Authorization: localStorage.getItem("token"),
+  //                   "Content-Type": "multipart/form-data",
+  //                 },
+  //               }
+  //             );
+
+  //             if (!response.data.imageUrl) {
+  //               onError("Error: Image URL not returned from custom API");
+  //               console.error(
+  //                 "Image upload to custom API failed, imageUrl missing"
+  //               );
+  //               continue;
+  //             }
+
+  //             fbResponse = await axios.post(
+  //               `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+  //               formData,
+  //               { headers: { "Content-Type": "multipart/form-data" } }
+  //             );
+
+  //             if (response.status === 200 && fbResponse.status === 200) {
+  //               onSuccess("ok", response);
+  //               mediaHashArray.push({
+  //                 filename: s3FileUrl,
+  //                 imag_hash: fbResponse.data?.images?.[safeName]?.hash,
+  //               });
+  //             } else {
+  //               onError("error", response);
+  //               console.error("Image upload failed");
+  //             }
+  //           } else if (file.type.startsWith("video/")) {
+  //             response = await axios.post(
+  //               "https://www.testapi.adsgoat.in/upload",
+  //               formData,
+  //               {
+  //                 headers: {
+  //                   Authorization: localStorage.getItem("token"),
+  //                   "Content-Type": "multipart/form-data",
+  //                 },
+  //               }
+  //             );
+
+  //             if (response.status !== 200) {
+  //               onError("error", response);
+  //               console.error("Video upload to custom API failed");
+  //               continue;
+  //             }
+
+  //             fbResponse = await axios.post(
+  //               `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+  //               formData,
+  //               { headers: { "Content-Type": "multipart/form-data" } }
+  //             );
+
+  //             if (fbResponse.status === 200) {
+  //               const videoid = fbResponse?.data?.id;
+  //               await new Promise((resolve) => setTimeout(resolve, 10000));
+
+  //               const thumbnailResponse = await axios.get(
+  //                 `https://graph.facebook.com/v20.0/${videoid}`,
+  //                 {
+  //                   params: {
+  //                     access_token: token,
+  //                     fields: "thumbnails",
+  //                     is_preferred: true,
+  //                   },
+  //                 }
+  //               );
+
+  //               const preferredThumbnail =
+  //                 thumbnailResponse.data.thumbnails.data.find(
+  //                   (thumbnail) => thumbnail.is_preferred === true
+  //                 );
+  //               const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+
+  //               onSuccess("ok", fbResponse);
+  //               mediaHashArray.push({
+  //                 filename: s3FileUrl,
+  //                 videoid: videoid,
+  //                 thambnailurl: uri,
+  //               });
+  //             } else {
+  //               onError("error", fbResponse);
+  //               console.error("Video upload to Facebook failed");
+  //             }
+  //           }
+  //         }
+  //       } catch (error) {
+  //         console.error("Error uploading file:", error);
+  //         onError("error", error);
+  //       }
+  //     }
+
+  //     return mediaHashArray;
+  //   };
+
+  //   try {
+  //     let mediaHashArray = [];
+  //     if (Array.isArray(selectedFiles[id]) && selectedFiles[id].length > 0) {
+  //       mediaHashArray = await uploadFilesSequentially(selectedFiles[id]);
+  //     }
+  //     console.log(
+  //       "All media files uploaded successfully. Media Hash Array:",
+  //       mediaHashArray
+  //     );
+  //     return mediaHashArray;
+  //   } catch (error) {
+  //     console.error("One or more media uploads failed:", error);
+  //     return [];
+  //   }
+  // };
+
+  const customRequest = async (
+    data,
+    index,
+    onSuccess,
+    onError,
+    id
+  ) => {
+    try {
+      /*
+      =========================================
+      CLEAR PREVIOUS STATUS
+      =========================================
+      */
+      // setImageHashStatus([]);
+
+      /*
+      =========================================
+      VALIDATE
+      =========================================
+      */
+      if (!imagehash || imagehash.length === 0) {
+        onError("Image hash data not loaded");
+        return [];
+      }
+
+      const token = imagehash.token;
+      const account = imagehash.accountNumber;
+
+      /*
+      =========================================
+      HELPERS
+      =========================================
+      */
+      const sleep = (ms) =>
+        new Promise((resolve) =>
+          setTimeout(resolve, ms)
         );
 
-        if (!response.ok) throw new Error("Failed to create folder");
-        const data = await response.json();
-        console.log("Folder created:", folderPath);
-        return true;
-      } catch (err) {
-        console.error("Error creating folder:", err);
-        return false;
-      }
-    };
+      /*
+      =========================================
+      UPDATE STATUS
+      =========================================
+      */
+      const updateUploadStatus = (
+        adName,
+        status
+      ) => {
+        updateStatus(adName, status);
+      };
 
-    const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
-      const fullPath = `${folderPath}/${fileName}`;
-      const formData = new FormData();
-      formData.append("file", fileBlob, fileName);
-      formData.append("filename", fullPath); // required in body
+      /*
+      =========================================
+      RETRY API
+      =========================================
+      */
+      const retryApi = async (
+        apiCall,
+        retries = 3,
+        delay = 2000
+      ) => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            return await apiCall();
+          } catch (err) {
+            console.error(
+              `Retry ${i + 1} failed`,
+              err
+            );
 
-      try {
+            if (i === retries - 1) {
+              throw err;
+            }
+
+            await sleep(delay);
+          }
+        }
+      };
+
+      /*
+      =========================================
+      CHUNK ARRAY
+      =========================================
+      */
+      const chunkArray = (array, size) => {
+        const result = [];
+
+        for (
+          let i = 0;
+          i < array.length;
+          i += size
+        ) {
+          result.push(array.slice(i, i + size));
+        }
+
+        return result;
+      };
+
+      /*
+      =========================================
+      GET FILE TYPE
+      =========================================
+      */
+      const getFileType = (file, blob) => {
+        if (file?.type) {
+          return file.type;
+        }
+
+        if (
+          blob?.type &&
+          blob.type !==
+          "application/octet-stream"
+        ) {
+          return blob.type;
+        }
+
+        const name =
+          file?.name ||
+          file?.url ||
+          "";
+
+        if (
+          /\.(png|jpg|jpeg|gif|webp)$/i.test(
+            name
+          )
+        ) {
+          return "image/*";
+        }
+
+        if (
+          /\.(mp4|mov|avi|webm)$/i.test(name)
+        ) {
+          return "video/*";
+        }
+
+        return "";
+      };
+
+      /*
+      =========================================
+      CREATE S3 FOLDER
+      =========================================
+      */
+      const createS3Folder = async (
+        folderPath
+      ) => {
+        try {
+          await fetch(
+            "https://prodapis.adsgoat.in/uploadUserFiles",
+            {
+              method: "POST",
+              headers: {
+                Authorization:
+                  localStorage.getItem(
+                    "token"
+                  ),
+                username:
+                  imagehash.username ||
+                  "default-user",
+                "x-folder": folderPath.endsWith(
+                  "/"
+                )
+                  ? folderPath
+                  : folderPath + "/",
+                "x-action":
+                  "create-folder",
+              },
+            }
+          );
+
+          return true;
+        } catch (err) {
+          console.error(
+            "Error creating folder:",
+            err
+          );
+
+          return true;
+        }
+      };
+
+      /*
+      =========================================
+      UPLOAD FILE TO S3
+      =========================================
+      */
+      const uploadFileToS3 = async (
+        fileBlob,
+        fileName,
+        folderPath
+      ) => {
+        const fullPath = `${folderPath}/${fileName}`;
+
+        const formData = new FormData();
+
+        formData.append(
+          "file",
+          fileBlob,
+          fileName
+        );
+
+        formData.append(
+          "filename",
+          fullPath
+        );
+
         const response = await fetch(
           "https://prodapis.adsgoat.in/uploadUserFiles",
           {
             method: "POST",
             headers: {
-              Authorization: localStorage.getItem("token"),
-              username: imagehash.username || "default-user", // required in headers
+              Authorization:
+                localStorage.getItem(
+                  "token"
+                ),
+              username:
+                imagehash.username ||
+                "default-user",
             },
             body: formData,
           }
         );
 
-        if (!response.ok) throw new Error("S3 upload failed");
+        const responseData =
+          await response.json();
 
-        const data = await response.json();
-        return data.imageUrl;
-      } catch (err) {
-        console.error("Error uploading to S3:", err);
-        return null;
-      }
-    };
+        if (
+          !response.ok ||
+          !responseData?.imageUrl
+        ) {
+          throw new Error(
+            "S3 upload failed"
+          );
+        }
 
-    const uploadFilesSequentially = async (selectedFiles) => {
-      const mediaHashArray = [];
+        return responseData.imageUrl;
+      };
 
-      for (const file of selectedFiles) {
+      /*
+      =========================================
+      GET VIDEO THUMBNAIL
+      =========================================
+      */
+      const getVideoThumbnail = async (
+        videoid,
+        token
+      ) => {
         try {
-          const fileType = file.type;
+          /*
+          =========================================
+          MINIMUM WAIT 6.5 SECONDS
+          =========================================
+          */
+          await sleep(6500);
+
+          /*
+          =========================================
+          FIRST ATTEMPT
+          =========================================
+          */
+          const response = await axios.get(
+            `https://graph.facebook.com/v20.0/${videoid}`,
+            {
+              params: {
+                access_token: token,
+                fields: "thumbnails",
+              },
+              timeout: 120000,
+            }
+          );
+
+          const thumbnails =
+            response?.data?.thumbnails
+              ?.data || [];
+
+          const preferredThumbnail =
+            thumbnails.find(
+              (thumbnail) =>
+                thumbnail.is_preferred
+            );
+
           if (
-            !fileType.startsWith("image/") &&
-            !fileType.startsWith("video/")
+            preferredThumbnail?.uri
           ) {
-            onError("Unsupported file type");
-            continue;
+            return preferredThumbnail.uri;
           }
 
-          const folderPath = `${network}/${imagehash.accountNumber}/${formValues ? formValues.Name : "Drafts"
-            }`;
-          await createS3Folder(folderPath);
-          let fileBlob = null;
-          let s3FileUrl = null;
+          /*
+          =========================================
+          WAIT 2 SECONDS
+          =========================================
+          */
+          await sleep(2000);
 
-          if (file?.url) {
-            const response = await fetch(
-              `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+          /*
+          =========================================
+          SECOND ATTEMPT
+          =========================================
+          */
+          const retryResponse =
+            await axios.get(
+              `https://graph.facebook.com/v20.0/${videoid}`,
               {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: localStorage.getItem("token"),
+                params: {
+                  access_token: token,
+                  fields: "thumbnails",
                 },
+                timeout: 120000,
               }
             );
 
-            fileBlob = await response.blob();
-            s3FileUrl = await uploadFileToS3(fileBlob, file.name, folderPath);
+          const retryThumbnails =
+            retryResponse?.data
+              ?.thumbnails?.data || [];
 
-            const formData = new FormData();
-            formData.append("file", fileBlob, file.name);
-            formData.append("access_token", token);
+          const retryPreferredThumbnail =
+            retryThumbnails.find(
+              (thumbnail) =>
+                thumbnail.is_preferred
+            );
 
-            let fbResponse;
-            if (
-              file.url.endsWith(".png") ||
-              file.url.endsWith(".jpg") ||
-              file.url.endsWith(".jpeg")
-            ) {
-              const fileName = file.name.split("/").pop();
+          return (
+            retryPreferredThumbnail?.uri ||
+            ""
+          );
+        } catch (err) {
+          console.error(
+            "Thumbnail fetch failed:",
+            err
+          );
 
-              fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/adimages`,
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-              );
-
-              if (fbResponse.status === 200) {
-                onSuccess("ok", fbResponse);
-                mediaHashArray.push({
-                  filename: s3FileUrl,
-                  imag_hash: fbResponse.data?.images?.[fileName]?.hash,
-                });
-              } else {
-                onError("error", fbResponse);
-                console.error("Image upload failed");
-              }
-            } else if (file.url.endsWith(".mp4")) {
-              fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/advideos`,
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-              );
-
-              if (fbResponse.status === 200) {
-                const videoid = fbResponse?.data?.id;
-                await new Promise((resolve) => setTimeout(resolve, 10000));
-
-                const thumbnailResponse = await axios.get(
-                  `https://graph.facebook.com/v20.0/${videoid}`,
-                  {
-                    params: {
-                      access_token: token,
-                      fields: "thumbnails",
-                      is_preferred: true,
-                    },
-                  }
-                );
-
-                const preferredThumbnail =
-                  thumbnailResponse.data.thumbnails.data.find(
-                    (thumbnail) => thumbnail.is_preferred === true
-                  );
-                const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-
-                onSuccess("ok", fbResponse);
-                mediaHashArray.push({
-                  filename: s3FileUrl,
-                  videoid: videoid,
-                  thambnailurl: uri,
-                });
-              } else {
-                onError("error", fbResponse);
-                console.error("Video upload to Facebook failed");
-              }
-            }
-          } else {
-            const uniqueId = uuidv4();
-            const safeName = `blob_${uniqueId}_${file.name}`;
-            const editedImage = editedImages[file.name];
-            fileBlob = editedImage
-              ? await fetch(editedImage).then((res) => res.blob())
-              : file.originFileObj;
-            s3FileUrl = await uploadFileToS3(fileBlob, safeName, folderPath);
-
-            const formData = new FormData();
-            formData.append("file", fileBlob, safeName);
-            formData.append("access_token", token);
-
-            let response, fbResponse;
-
-            if (file.type.startsWith("image/")) {
-              response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
-                formData,
-                {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                    "Content-Type": "multipart/form-data",
-                  },
-                }
-              );
-
-              if (!response.data.imageUrl) {
-                onError("Error: Image URL not returned from custom API");
-                console.error(
-                  "Image upload to custom API failed, imageUrl missing"
-                );
-                continue;
-              }
-
-              fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/adimages`,
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-              );
-
-              if (response.status === 200 && fbResponse.status === 200) {
-                onSuccess("ok", response);
-                mediaHashArray.push({
-                  filename: s3FileUrl,
-                  imag_hash: fbResponse.data?.images?.[safeName]?.hash,
-                });
-              } else {
-                onError("error", response);
-                console.error("Image upload failed");
-              }
-            } else if (file.type.startsWith("video/")) {
-              response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
-                formData,
-                {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                    "Content-Type": "multipart/form-data",
-                  },
-                }
-              );
-
-              if (response.status !== 200) {
-                onError("error", response);
-                console.error("Video upload to custom API failed");
-                continue;
-              }
-
-              fbResponse = await axios.post(
-                `https://graph.facebook.com/v20.0/act_${account}/advideos`,
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-              );
-
-              if (fbResponse.status === 200) {
-                const videoid = fbResponse?.data?.id;
-                await new Promise((resolve) => setTimeout(resolve, 10000));
-
-                const thumbnailResponse = await axios.get(
-                  `https://graph.facebook.com/v20.0/${videoid}`,
-                  {
-                    params: {
-                      access_token: token,
-                      fields: "thumbnails",
-                      is_preferred: true,
-                    },
-                  }
-                );
-
-                const preferredThumbnail =
-                  thumbnailResponse.data.thumbnails.data.find(
-                    (thumbnail) => thumbnail.is_preferred === true
-                  );
-                const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-
-                onSuccess("ok", fbResponse);
-                mediaHashArray.push({
-                  filename: s3FileUrl,
-                  videoid: videoid,
-                  thambnailurl: uri,
-                });
-              } else {
-                onError("error", fbResponse);
-                console.error("Video upload to Facebook failed");
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Error uploading file:", error);
-          onError("error", error);
+          return "";
         }
-      }
+      };
 
-      return mediaHashArray;
-    };
+      /*
+      =========================================
+      PROCESS SINGLE FILE
+      =========================================
+      */
+      const processSingleFile = async (
+        file,
+        adIndex,
+        folderPath
+      ) => {
+        const adName = `${account}_${data?.AddName}_${adIndex}`;
 
-    try {
+        try {
+          let fileBlob = null;
+          let s3FileUrl = null;
+          let fileName = "";
+
+          /*
+          =========================================
+          EXISTING S3 FILE
+          =========================================
+          */
+          if (file?.url) {
+            const response =
+              await retryApi(
+                async () => {
+                  const res = await fetch(
+                    `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+                    {
+                      method: "GET",
+                      headers: {
+                        "Content-Type":
+                          "application/json",
+                        Authorization:
+                          localStorage.getItem(
+                            "token"
+                          ),
+                      },
+                    }
+                  );
+
+                  if (!res.ok) {
+                    throw new Error(
+                      "Failed to fetch S3 file"
+                    );
+                  }
+
+                  return res;
+                }
+              );
+
+            fileBlob =
+              await response.blob();
+
+            fileName = file.name;
+
+            s3FileUrl =
+              await retryApi(
+                () =>
+                  uploadFileToS3(
+                    fileBlob,
+                    file.name,
+                    folderPath
+                  ),
+                3,
+                2000
+              );
+          }
+
+          /*
+          =========================================
+          LOCAL FILE
+          =========================================
+          */
+          else {
+            const uniqueId = uuidv4();
+
+            const safeName = `blob_${uniqueId}_${file.name}`;
+
+            fileName = safeName;
+
+            const editedImage =
+              editedImages[file.name];
+
+            fileBlob = editedImage
+              ? await fetch(
+                editedImage
+              ).then((res) =>
+                res.blob()
+              )
+              : file.originFileObj;
+
+            s3FileUrl =
+              await retryApi(
+                () =>
+                  uploadFileToS3(
+                    fileBlob,
+                    safeName,
+                    folderPath
+                  ),
+                3,
+                2000
+              );
+          }
+
+          /*
+          =========================================
+          FILE TYPE
+          =========================================
+          */
+          const fileType = getFileType(
+            file,
+            fileBlob
+          );
+
+          if (
+            !fileType.startsWith(
+              "image/"
+            ) &&
+            !fileType.startsWith(
+              "video/"
+            )
+          ) {
+            return {
+              success: false,
+              error:
+                "Unsupported file type",
+            };
+          }
+
+          /*
+          =========================================
+          FORM DATA
+          =========================================
+          */
+          const formData = new FormData();
+
+          formData.append(
+            "file",
+            fileBlob,
+            fileName
+          );
+
+          formData.append(
+            "access_token",
+            token
+          );
+
+          /*
+          =========================================
+          IMAGE
+          =========================================
+          */
+          if (
+            fileType.startsWith(
+              "image/"
+            )
+          ) {
+            updateStatus(
+              adName,
+              "Generating image hash..."
+            );
+
+            const fbResponse =
+              await retryApi(
+                () =>
+                  axios.post(
+                    `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                    formData,
+                    {
+                      headers: {
+                        "Content-Type":
+                          "multipart/form-data",
+                      },
+                      timeout: 120000,
+                    }
+                  ),
+                3,
+                3000
+              );
+
+            const images =
+              fbResponse.data?.images ||
+              {};
+
+            const firstImageKey =
+              Object.keys(images)[0];
+
+            const imageHash =
+              images[firstImageKey]
+                ?.hash || "";
+
+            updateStatus(
+              adName,
+              "Image uploaded"
+            );
+
+            onSuccess(
+              "ok",
+              fbResponse
+            );
+
+            return {
+              success: true,
+              filename: s3FileUrl,
+              imag_hash:
+                imageHash,
+            };
+          }
+
+          /*
+          =========================================
+          VIDEO
+          =========================================
+          */
+          if (
+            fileType.startsWith(
+              "video/"
+            )
+          ) {
+            updateStatus(
+              adName,
+              "Generating video id..."
+            );
+
+            /*
+            =========================================
+            NO RETRY FOR VIDEO
+            =========================================
+            */
+            const fbResponse =
+              await axios.post(
+                `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                formData,
+                {
+                  headers: {
+                    "Content-Type":
+                      "multipart/form-data",
+                  },
+                  timeout: 300000,
+                }
+              );
+
+            const videoid =
+              fbResponse?.data?.id;
+
+            if (!videoid) {
+              throw new Error(
+                "Video ID not returned"
+              );
+            }
+
+            updateStatus(
+              adName,
+              "Waiting for thumbnail..."
+            );
+
+            const thumbnailUrl =
+              await getVideoThumbnail(
+                videoid,
+                token
+              );
+
+            updateStatus(
+              adName,
+              "Video uploaded"
+            );
+
+            onSuccess(
+              "ok",
+              fbResponse
+            );
+
+            return {
+              success: true,
+              filename: s3FileUrl,
+              videoid,
+              thambnailurl:
+                thumbnailUrl,
+            };
+          }
+
+          return {
+            success: false,
+            error:
+              "Unknown upload type",
+          };
+        } catch (error) {
+          console.error(
+            "Error uploading file:",
+            error
+          );
+
+          onError("error", error);
+
+          return {
+            success: false,
+            error:
+              error?.message ||
+              "Upload failed",
+          };
+        }
+      };
+
+      /*
+      =========================================
+      MAIN UPLOAD
+      =========================================
+      */
+      const uploadFilesSequentially =
+        async (selectedFiles) => {
+          const mediaHashArray = [];
+
+          const folderPath = `${network}/${imagehash.accountNumber}/${formValues
+            ? formValues.Name
+            : "Drafts"
+            }`;
+
+          /*
+          =========================================
+          CREATE FOLDER ONCE
+          =========================================
+          */
+          await createS3Folder(
+            folderPath
+          );
+
+          /*
+          =========================================
+          SPLIT FILES
+          =========================================
+          */
+          const imageFiles =
+            selectedFiles.filter((file) => {
+              const type =
+                file?.type || "";
+
+              return (
+                type.startsWith(
+                  "image/"
+                ) ||
+                /\.(png|jpg|jpeg|gif|webp)$/i.test(
+                  file?.name || ""
+                )
+              );
+            });
+
+          const videoFiles =
+            selectedFiles.filter((file) => {
+              const type =
+                file?.type || "";
+
+              return (
+                type.startsWith(
+                  "video/"
+                ) ||
+                /\.(mp4|mov|avi|webm)$/i.test(
+                  file?.name || ""
+                )
+              );
+            });
+
+          /*
+          =========================================
+          PROCESS IMAGES
+          5 CONCURRENT
+          =========================================
+          */
+          const imageChunks =
+            chunkArray(
+              imageFiles,
+              5
+            );
+
+          let adIndex = 1;
+
+          for (const chunk of imageChunks) {
+            const promises =
+              chunk.map((file) =>
+                processSingleFile(
+                  file,
+                  adIndex++,
+                  folderPath
+                )
+              );
+
+            const settled =
+              await Promise.allSettled(
+                promises
+              );
+
+            settled.forEach(
+              (result) => {
+                if (
+                  result.status ===
+                  "fulfilled" &&
+                  result.value.success
+                ) {
+                  mediaHashArray.push(
+                    result.value
+                  );
+                }
+              }
+            );
+          }
+
+          /*
+          =========================================
+          PROCESS VIDEOS
+          2 CONCURRENT
+          =========================================
+          */
+          const videoChunks =
+            chunkArray(
+              videoFiles,
+              2
+            );
+
+          for (const chunk of videoChunks) {
+            const promises =
+              chunk.map((file) =>
+                processSingleFile(
+                  file,
+                  adIndex++,
+                  folderPath
+                )
+              );
+
+            const settled =
+              await Promise.allSettled(
+                promises
+              );
+
+            settled.forEach(
+              (result) => {
+                if (
+                  result.status ===
+                  "fulfilled" &&
+                  result.value.success
+                ) {
+                  mediaHashArray.push(
+                    result.value
+                  );
+                }
+              }
+            );
+          }
+
+          return mediaHashArray;
+        };
+
+      /*
+      =========================================
+      START
+      =========================================
+      */
       let mediaHashArray = [];
-      if (Array.isArray(selectedFiles[id]) && selectedFiles[id].length > 0) {
-        mediaHashArray = await uploadFilesSequentially(selectedFiles[id]);
+
+      if (
+        Array.isArray(
+          selectedFiles[id]
+        ) &&
+        selectedFiles[id].length > 0
+      ) {
+        mediaHashArray =
+          await uploadFilesSequentially(
+            selectedFiles[id]
+          );
       }
+
       console.log(
         "All media files uploaded successfully. Media Hash Array:",
         mediaHashArray
       );
+
       return mediaHashArray;
     } catch (error) {
-      console.error("One or more media uploads failed:", error);
+      console.error(
+        "One or more media uploads failed:",
+        error
+      );
+
       return [];
     }
   };
@@ -12707,8 +13540,17 @@ const CloneMultipleAdsetCampaignDrawer = ({
                 ))}
 
             </Select> */}
-
-      <Spin spinning={loading}>
+      
+      <Spin spinning={loading} tip={
+        <div>
+          {imageHashStatus.map((item, index) => (
+            <div key={index}>
+              <b>{item.name}</b> : {item.status}
+            </div>
+          ))}
+        </div>
+      }
+      >
         <Form
           disabled={view && view === true}
           layout="vertical"
