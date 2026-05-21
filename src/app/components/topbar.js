@@ -55,7 +55,7 @@ import { useGlobalLoading } from "../layout";
 import { CalculateOutlined, StickyNote2Outlined } from '@mui/icons-material';
 
 // const socket = io("http://localhost:4000");
-const socket = io("http://localhost:4000", {
+const socket = io("http://65.0.80.126", {
   transports: ["websocket"],
 
   reconnection: true,
@@ -1472,7 +1472,7 @@ useEffect(() => {
   // fetchNotifications always returns array
   const fetchNotifications = async () => {
     try {
-      const res = await apiClient.get(`http://localhost:4000/open/notifications/${session.user.email}`);
+      const res = await apiClient.get(`http://65.0.80.126/open/notifications/${session.user.email}`);
       setNotifications(res.data); // Update state with fetched notifications
       onComplete();
       return res.data || {};

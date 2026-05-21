@@ -119,7 +119,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     useEffect(() => {
         const fetchNetworksData = async () => {
             try {
-                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                //https://prodapis.adsgoat.in/get/networksData/
+                const res = await axios.get('http://localhost:4000/creatives/commonapis/networksdata', {
                     headers: {
                         Authorization: token,
 
@@ -438,7 +439,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         Authorization: localStorage.getItem("token"),
                     },
                 })
-                : await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
+                : await axios.get("http://localhost:4000/creatives/userfiles/getuserfiles", {
+                    //https://prodapis.adsgoat.in/getUserFiles
                     headers: {
                         username: userdetails.userName,
                         "x-folder": normalPath,
