@@ -14,7 +14,7 @@ import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
 import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip, Skeleton } from 'antd';
-import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
+import { ReloadOutlined, EditOutlined, BarChartOutlined, DollarOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 
 Chart.register(...registerables);
@@ -97,6 +97,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate: [], hoursDate: [], hours: [], spend: [], revenue: [], profit: [], margin: [] });
 
     const [copied, setCopied] = useState(false);
+    
 
     const paramsData = ((params.CampaignName).split("-"));
     // let decodedString = decodeURIComponent(paramsData[0]);
@@ -1210,6 +1211,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const [selectedValue, setSelectedValue] = useState(reportType === "BaseReport" ? "Today" : "All");
     const [filteredData, setFilteredData] = useState(rowData);
+    const [budgetAndStatusData, setBudgetAndStatusData] = useState(null);
+    const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
+    const [nextChecked, setNextChecked] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [showTables, setShowTables] = useState(false);
+    // const [switchChecked, setSwitchChecked] = useState(false);
+    const [isBudgetModalVisible, setIsBudgetModalVisible] = useState(false);
+    const [changeBudget, setChangeBudget] = useState("");
 
     const [domainFixedFooter, setDomainFixedFooter] = useState([]);
 
@@ -1284,6 +1293,47 @@ const MnetLiveCampaignHistory = ({ params }) => {
             setComment("");
         }
     };
+    const functionCallForBudgetAndStatus = async (
+        id = CampaignId,
+        level = "campaign",
+        accountNumber
+    ) => {
+        try {
+            const response = await apiClient.post(`/getBudgetAndStatus`,
+                {
+                    id,
+                    level,
+                    accountNumber
+                }
+            );
+
+            const data = response?.data?.data;
+            console.log(data, "budget and status");
+            setBudgetAndStatusData(data);
+
+        } catch (err) {
+            console.log(err);
+        }
+    };
+    const onChangeBudget = (value) => {
+        setChangeBudget(value);
+    };
+    // useEffect(() => {
+    //     setSwitchChecked(
+    //         budgetAndStatusData?.level === "campaign"
+    //             ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+    //             : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+    //     );
+    // }, [budgetAndStatusData]);
+    useEffect(() => {
+        if (isBudgetModalVisible) {
+            setChangeBudget(
+                budgetAndStatusData?.campaign?.budget_amount
+                    ? budgetAndStatusData?.campaign?.budget_amount / 100
+                    : ""
+            );
+        }
+    }, [isBudgetModalVisible]);
 
     const functionCallForUserColumnStructure = async () => {
         console.log(user, "user email");
@@ -1398,60 +1448,60 @@ const MnetLiveCampaignHistory = ({ params }) => {
         setCampaignId(mainData[0].campaign_id);
         setAdsetID(mainData[0].adset_id);
 
-        const filteredData = mainData && mainData.length > 0 ? 
-        (reportType === "BaseReport"
-            ? mainData.filter(eachData => eachData.updatedHour)
-            : mainData
-        ).map((eachData) => {
-            const revenueData = parseFloat(eachData.estimated_revenue) || '0.00';
-            const profit = (revenueData - eachData.spend).toFixed(2);
-            const margin = revenueData !== '0.00' ? `${((revenueData - eachData.spend) / revenueData * 100).toFixed(2)}%` : "0%";
+        const filteredData = mainData && mainData.length > 0 ?
+            (reportType === "BaseReport"
+                ? mainData.filter(eachData => eachData.updatedHour)
+                : mainData
+            ).map((eachData) => {
+                const revenueData = parseFloat(eachData.estimated_revenue) || '0.00';
+                const profit = (revenueData - eachData.spend).toFixed(2);
+                const margin = revenueData !== '0.00' ? `${((revenueData - eachData.spend) / revenueData * 100).toFixed(2)}%` : "0%";
 
-            const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
+                const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
 
-            let cpl;
-            if (eachData.fbLeads == 0) {
-                cpl = 0;
-            } else {
-                cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
-            }
-            const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-            console.log(eachData[`${timeZone}Date`], `${timeZone}Date`);
+                let cpl;
+                if (eachData.fbLeads == 0) {
+                    cpl = 0;
+                } else {
+                    cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+                }
+                const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+                console.log(eachData[`${timeZone}Date`], `${timeZone}Date`);
 
-            const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-            const spend = parseFloat(eachData.spend);
-            const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
-            return {
-                date: eachData[`${timeZone}Date`],
-                date_n: eachData[`${timeZone}Date`],
-                date_f: eachData[`${timeZone}Date`],
-                campaignname: eachData.campaign_name,
-                adsetname: eachData.adsetName,
-                spend: eachData.spend,
-                revenue: revenueData,
-                profit: profit,
-                margin: margin,
-                fbleads: eachData.fbLeads,
-                conversions: eachData.conversions !== null ? eachData.conversions : 0,
-                cpc: eachData.cpc,
-                cpclinkclicks: cpcLinkClicks,
-                fbclicks: eachData.fbClicks,
-                fblinkclicks: eachData.fbLinkClicks,
-                impressions: eachData.impressions,
-                rpc: rpc,
-                cpl: cpl,
-                ncpl: ncpl,
-                adsetId: eachData.adset_id,
-                campaignId: eachData.campaign_id,
-                timezone: eachData[timeZone],
-                hour_f: eachData.hour,
-                hour_n: eachData.updatedHour,
-                filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads) - parseInt(eachData.conversions)) / parseInt(eachData.fbLeads)) * 100) * 100) / 100 : 0,
-                adname: "",
-                M_tq: "",
-                D_tq: "",
-            };
-        })
+                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                const spend = parseFloat(eachData.spend);
+                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
+                return {
+                    date: eachData[`${timeZone}Date`],
+                    date_n: eachData[`${timeZone}Date`],
+                    date_f: eachData[`${timeZone}Date`],
+                    campaignname: eachData.campaign_name,
+                    adsetname: eachData.adsetName,
+                    spend: eachData.spend,
+                    revenue: revenueData,
+                    profit: profit,
+                    margin: margin,
+                    fbleads: eachData.fbLeads,
+                    conversions: eachData.conversions !== null ? eachData.conversions : 0,
+                    cpc: eachData.cpc,
+                    cpclinkclicks: cpcLinkClicks,
+                    fbclicks: eachData.fbClicks,
+                    fblinkclicks: eachData.fbLinkClicks,
+                    impressions: eachData.impressions,
+                    rpc: rpc,
+                    cpl: cpl,
+                    ncpl: ncpl,
+                    adsetId: eachData.adset_id,
+                    campaignId: eachData.campaign_id,
+                    timezone: eachData[timeZone],
+                    hour_f: eachData.hour,
+                    hour_n: eachData.updatedHour,
+                    filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads) - parseInt(eachData.conversions)) / parseInt(eachData.fbLeads)) * 100) * 100) / 100 : 0,
+                    adname: "",
+                    M_tq: "",
+                    D_tq: "",
+                };
+            })
             : null;
 
         setRowData(filteredData);
@@ -1626,6 +1676,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 await functionCallForCommnets(accountNumber)
                 await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
+                await functionCallForBudgetAndStatus(
+                    CampaignId,
+                    "campaign",
+                    accountNumber
+                );
             };
             mainFunctionCall();
         }
@@ -1736,10 +1791,148 @@ const MnetLiveCampaignHistory = ({ params }) => {
             await functionCallForCommnets(accountNumber)
             await debouncedFunctionCallForUserColumnStructure();
             await debouncedFunctionCall();
+            await functionCallForBudgetAndStatus(
+                CampaignId,
+                "campaign",
+                accountNumber
+            );
         };
         mainFunctionCall();
     };
+    const handlePauseOk = async () => {
+        const desired = nextChecked;                  // true => ACTIVE, false => PAUSED
+        setIsCampaignModalVisibles(true);
+        setConfirmLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const payloadForActivity = {
+                editType: "Status",
+                campaignid: campaignid,       // cents
+                Account: String(accountNumber),    // ✅ update *this* row’s account
+                campaignname: CampaignName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Campain status updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+            }
+            const payload = {
+                status: desired ? "ACTIVE" : "PAUSED",
+                id: params.data?.identifier,
+                campaign_id: campaignid,
+                accountNumber: String(accountNumber),
+                adset_id: adsetid,
+                name: CampaignName,
+                email: userdetails?.email,
+                activity: payloadForActivity,
+            };
 
+            const response = await apiClient.post(
+                `/BulkCampaignStatusChangeWithHistory`,
+                payload,
+                { headers: { Authorization: token } }
+            );
+
+            const newStatus = desired ? "ACTIVE" : "PAUSED";
+
+            if (response.status === 200 || response.status === 201) {
+                // setSwitchChecked(desired);
+                setBudgetAndStatusData((prev) => ({
+                    ...prev,
+
+                    campaign: {
+                        ...prev?.campaign,
+
+                        campaign_status:
+                            nextChecked
+                                ? "ACTIVE"
+                                : "PAUSED"
+                    }
+
+                }));
+                setConfirmLoading(false);
+                setIsCampaignModalVisibles(false);
+            }
+            message.success(`Campaign ${newStatus.toLowerCase()}`);
+        } catch (e) {
+            setConfirmLoading(false);
+            setIsCampaignModalVisibles(false);
+            message.error("Failed to update campaign status");
+        }
+    };
+    const handlePauseCancel = () => {
+        // setNextChecked(switchChecked);
+        setIsCampaignModalVisibles(false);
+    };
+    const handleOk = async () => {
+        setConfirmLoading(true);
+        const currentBudget =
+            budgetAndStatusData?.campaign?.budget_amount;
+        const campaignId =
+            budgetAndStatusData?.campaign?.campaign_id;
+        const budgetType =
+            budgetAndStatusData?.budget_type || "unknown";
+
+        const payloadForActivity = {
+            editType: "Budget",
+            level: "campaign",
+            campaignid: campaignId,
+            Account: String(accountNumber),
+            campaignname: CampaignName,
+            updatedBy: userdetails?.userName,
+            updatedUserEmail: userdetails?.email,
+            updateType: "Campaign budget updated",
+            updateAt: moment()
+                .tz("Asia/Kolkata")
+                .format("DD-MM-YYYY hh:mm A"),
+
+            updateDetail: `From $${Number(currentBudget) / 100
+                } to $${Number(changeBudget)}`,
+
+            budgetType
+        };
+        const payload = {
+            campaignId,
+            budget: Math.round(Number(changeBudget) * 100),
+            accountNumber: String(accountNumber),
+            campaignname: CampaignName,
+            updatedby: params.context?.userdetails?.email,
+            budgetType,
+            activity: payloadForActivity,
+        };
+
+        if (!payload.campaignId || !payload.accountNumber) {
+            message.error("Campaign ID missing");
+            setConfirmLoading(false);
+            return;
+        }
+        try {
+            await apiClient.post(
+                '/update/campaign/budget/history',
+                payload
+            );
+            message.success(
+                "Campaign Budget Updated Successfully"
+            );
+            setBudgetAndStatusData((prev) => ({
+                ...prev,
+                campaign: {
+                    ...prev?.campaign,
+                    budget_amount: String(
+                        Math.round(Number(changeBudget) * 100)
+                    )
+                }
+            }));
+            setConfirmLoading(false);
+            setIsBudgetModalVisible(false);
+
+        } catch (err) {
+
+            setConfirmLoading(false);
+            setIsBudgetModalVisible(false);
+            message.error("Failed to update budget");
+        }
+    };
     const sendNewCommentToAPI = async (logData) => {
         try {
             const response = await apiClient.post('/Comments', {
@@ -1919,18 +2112,38 @@ const MnetLiveCampaignHistory = ({ params }) => {
     return (
         <Row style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Chart.js integration */}
-            {isLoading === false &&
-                <Col style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    {/* <div style={{ width: '100%' }}>
-                        <h3 style={{ textAlign: 'center' }}>{decodedString}</h3>
-                    </div> */}
-                    <div style={{ width: '120px' }}>
+
+
+            <Col style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap'
+            }}>
+                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
+                {isLoading === false &&
+
+                    <div style={{
+                        width: '100px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        height: '32px'
+                    }}>
                         <p>Timezone: <span>{timeZone}</span></p>
                     </div>
 
-                </Col>}
-            <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
+                }
+                <Switch
+                    checked={showTables}
+                    onChange={(checked) => setShowTables(checked)}
+                    checkedChildren="Tables"
+                    unCheckedChildren="Hide"
+                    style={{
+                        backgroundColor: showTables ? "#91c25f" : undefined,
+                    }}
+                />
+
                 <Button
                     type="default"
                     icon={<BarChartOutlined />}
@@ -1939,17 +2152,17 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '3px solid #91C25F',
+                        border: '2px solid #91C25F',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
                         backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
-                        borderRadius: '999px',
+                        borderRadius: '18px',
                         fontWeight: 500,
-                        padding: '0 12px',
-                        height: '32px',
+                        padding: '0 13px',
+                        height: '25px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '2px',
                         transition: 'all 0.2s ease-in-out',
                     }}
                 >
@@ -2080,118 +2293,120 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </Col>
                 </div>
             )}
-            <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
-                {/* Left Table: Top 5 RPC Today */}
-                <div style={{ width: '20%', marginLeft: '1%' }}>
-                    <p>Top 5 Rpc today</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Rpc</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.rpcDate
-                                .filter(item =>
-                                    item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                                )
-                                .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <p>Top 5 margin today</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.hoursDate
-                                .filter(item =>
-                                    item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                                )
-                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
+            {showTables && (
+                <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
+                    {/* Left Table: Top 5 RPC Today */}
+                    <div style={{ width: '20%', marginLeft: '1%' }}>
+                        <p>Top 5 Rpc today</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Rpc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.rpcDate
+                                    .filter(item =>
+                                        item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                    )
+                                    .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
+                                    .slice(0, 5) // Take top 5
+                                    .map((item, index) => (
+                                        <tr key={index}>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style={{ marginLeft: "1%", width: '20%' }}>
+                        <p>Top 5 margin today</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.hoursDate
+                                    .filter(item =>
+                                        item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                    )
+                                    .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                    .slice(0, 5) // Take top 5
+                                    .map((item, index) => (
+                                        <tr key={index}>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 repeated hours with Rpc (Last 10 days)</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>RPC</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.sortedData.map((item, index) => {
-                                const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
-                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+                    <div style={{ marginLeft: "1%", width: '25%' }}>
+                        <p>Top 5 repeated hours with Rpc (Last 10 days)</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>RPC</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.sortedData.map((item, index) => {
+                                    const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
+                                    const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
 
-                                return (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
-                                            {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                        </td>
-                                        <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-                <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 repeated hours margin (Last 10 days)</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Average Margin</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.sortedMarginData.map((item, index) => {
-                                const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
-                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+                                    return (
+                                        <tr key={index}>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
+                                                {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                            </td>
+                                            <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style={{ marginLeft: "1%", width: '25%' }}>
+                        <p>Top 5 repeated hours margin (Last 10 days)</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Average Margin</th>
+                                    <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.sortedMarginData.map((item, index) => {
+                                    const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
+                                    const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
 
-                                return (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
-                                            {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                        </td>
-                                        <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                    return (
+                                        <tr key={index}>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
+                                            <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
+                                                {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                            </td>
+                                            <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
 
-                </div>
+                    </div>
 
-            </Col>
+                </Col>
+            )}
             <Col style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '0px' }}>
                 {/* <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}>
                     <Input
@@ -2329,7 +2544,12 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                     : '0 1px 6px rgba(0,0,0,0.08)',
                         }}
                     >
-                        <Col>
+                        <Col style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            width: "100%"
+                        }}>
                             <div style={{ width: '100%', display: 'flex', }}>
                                 <Tooltip
                                     title={copied ? 'Copied!' : 'Click to copy'}
@@ -2359,6 +2579,178 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                         </p>
                                     </Tooltip>
                                 )}
+                            </div>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px"
+                                }}
+                            >
+                                <div>
+                                    {/* <Switch
+                                        size={20}
+                                        checked={switchChecked}
+                                        style={{
+                                            backgroundColor: switchChecked
+                                                ? "#91c25f"
+                                                : undefined
+                                        }}
+                                        onChange={(checked) => {
+                                            setNextChecked(checked);
+                                            setIsCampaignModalVisibles(true);
+                                        }}
+                                    /> */}
+                                    <Switch
+                                        checked={
+                                            budgetAndStatusData?.level === "campaign"
+                                                ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+                                                : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                        }
+                                        style={{
+                                            backgroundColor:
+                                                (
+                                                    budgetAndStatusData?.level === "campaign"
+                                                        ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+                                                        : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                                )
+                                                    ? "#91c25f"
+                                                    : undefined
+                                        }}
+                                        onChange={(checked) => {
+                                            setNextChecked(checked);
+                                            setIsCampaignModalVisibles(true);
+                                        }}
+                                    />
+                                    <Modal
+                                        title="Confirm Action"
+                                        open={isCampaignModalVisibles}
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        onOk={handlePauseOk}
+                                        onCancel={handlePauseCancel}
+                                    >
+                                        {confirmLoading && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bottom: 0,
+                                                    background: "rgba(255,255,255,0.7)",
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    zIndex: 1000,
+                                                    borderRadius: "8px",
+                                                }}
+                                            >
+                                                <Spin size="large" tip="Saving..." />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p>
+                                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this campaign?
+                                            </p>
+                                            <p>Campaign ID: {campaignid}</p>
+                                            <p>Campaign Name: {CampaignName}</p>
+                                        </div>
+                                    </Modal>
+                                </div>
+
+                                <div>
+                                    <DollarOutlined style={{ fontSize: "18px" }} onClick={() => setIsBudgetModalVisible(true)} />
+                                    {isBudgetModalVisible && (
+                                        <Modal
+                                            title={CampaignName}
+                                            open={isBudgetModalVisible}
+                                            onOk={handleOk}
+                                            onCancel={() => setIsBudgetModalVisible(false)}
+                                            width={600}
+                                            okButtonProps={{
+                                                style: {
+                                                    backgroundColor: '#91C25F',
+                                                    borderColor: '#91C25F'
+                                                }
+                                            }}
+                                            className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        >
+                                            {confirmLoading && (
+                                                <div
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        bottom: 0,
+                                                        background: "rgba(255,255,255,0.7)",
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                        zIndex: 1000,
+                                                        borderRadius: "8px",
+                                                    }}
+                                                >
+                                                    <Spin size="large" tip="Saving..." />
+                                                </div>
+                                            )}
+
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                }}
+                                            >
+
+                                                {/* Budget Type */}
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    <p>Budget Type:&nbsp;</p>
+
+                                                    <span style={{ fontWeight: "normal" }}>
+                                                        {budgetAndStatusData?.budget_type || "-"}
+                                                    </span>
+                                                </div>
+
+                                                {/* Budget Amount */}
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                    }}
+                                                >
+                                                    {/* <div style={{ display: "flex" }}>
+                                                        <p>Budget Amount:&nbsp;</p>
+                                                    </div> */}
+
+                                                    <Input
+                                                        type="number"
+                                                        disabled={
+                                                            budgetAndStatusData?.campaign?.budget_amount == null
+                                                        }
+                                                        value={changeBudget}
+                                                        onChange={(e) => onChangeBudget(e.target.value)}
+                                                        placeholder="Enter budget in USD"
+                                                        className={
+                                                            params.context?.theme === 'dark'
+                                                                ? 'custom-input-dark'
+                                                                : 'custom-input-light'
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Campaign ID */}
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    <p>Campaign ID:&nbsp;</p>
+
+                                                    <span style={{ fontWeight: "normal" }}>
+                                                        {budgetAndStatusData?.campaign?.campaign_id || "-"}
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </Modal>
+                                    )}
+                                </div>
                             </div>
                         </Col>
 
