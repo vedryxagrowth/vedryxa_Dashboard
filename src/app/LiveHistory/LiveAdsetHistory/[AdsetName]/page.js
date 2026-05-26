@@ -11,7 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { Spin, Row, Col, Select, Input, Button, Skeleton, Switch, Tooltip, Modal, message } from 'antd';
-import { ReloadOutlined, BarChartOutlined, EditOutlined } from '@ant-design/icons';
+import { ReloadOutlined, BarChartOutlined, EditOutlined, DollarOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -1112,7 +1112,14 @@ const MnetLiveAdsetHistory = ({ params }) => {
 
     const [selectedValue, setSelectedValue] = useState(reportType === "BaseReport" ? "Today" : "All");
     const [filteredData, setFilteredData] = useState(rowData);
-
+    const [budgetAndStatusData, setBudgetAndStatusData] = useState(null);
+    const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
+    const [nextChecked, setNextChecked] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [isBudgetModalVisible, setIsBudgetModalVisible] = useState(false);
+    const [changeBudget, setChangeBudget] = useState("");
+    const [bidAmount, setBidAmount] = useState("");
+    const [showTables, setShowTables] = useState(false);
     const [domainFixedFooter, setDomainFixedFooter] = useState([]);
 
     const handleChange = (value) => {
@@ -1186,7 +1193,28 @@ const MnetLiveAdsetHistory = ({ params }) => {
             setComment("");
         }
     };
+    const functionCallForBudgetAndStatus = async (
+        id = AdsetId,
+        level = "adset",
+        accountNumber
+    ) => {
+        try {
+            const response = await apiClient.post(`/getBudgetAndStatus`,
+                {
+                    id,
+                    level,
+                    accountNumber
+                }
+            );
 
+            const data = response?.data?.data;
+            console.log(data, "budget and status");
+            setBudgetAndStatusData(data);
+
+        } catch (err) {
+            console.log(err);
+        }
+    };
     const functionCallForUserColumnStructure = async () => {
         const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
         // const data = await fetchData.json();
@@ -1456,10 +1484,50 @@ const MnetLiveAdsetHistory = ({ params }) => {
                 await functionCallForCommnets(accountNumber)
                 await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
+                await functionCallForBudgetAndStatus(
+                    AdsetId,
+                    "adset",
+                    accountNumber
+                );
             };
             mainFunctionCall();
         }
     }, [userdetails]);
+    const onChangeBudget = (value) => {
+        setChangeBudget(value);
+    };
+    // useEffect(() => {
+    //     setSwitchChecked(
+    //         budgetAndStatusData?.level === "campaign"
+    //             ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+    //             : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+    //     );
+    // }, [budgetAndStatusData]);
+
+    useEffect(() => {
+
+        if (isBudgetModalVisible) {
+
+            // ✅ Budget
+            setChangeBudget(
+                budgetAndStatusData?.selected_adset?.budget_amount
+                    ? Number(
+                        budgetAndStatusData?.selected_adset?.budget_amount
+                    ) / 100
+                    : ""
+            );
+
+            // ✅ Bid Amount
+            setBidAmount(
+                budgetAndStatusData?.selected_adset?.bid_amount
+                    ? budgetAndStatusData?.selected_adset?.bid_amount / 100
+                    : ""
+            );
+
+        }
+
+    }, [isBudgetModalVisible]);
+
     console.log(fetchvalue);
 
     // const selectElementData = ['674038077865381', '665204411821465', '364991119488050'];
@@ -1724,24 +1792,284 @@ const MnetLiveAdsetHistory = ({ params }) => {
             await functionCallForCommnets(accountNumber)
             await debouncedFunctionCallForUserColumnStructure();
             await debouncedFunctionCall();
+            await functionCallForBudgetAndStatus(
+                AdsetId,
+                "adset",
+                accountNumber
+            );
         };
         mainFunctionCall();
+    };
+    const handlePauseOk = async () => {
+        const desired = nextChecked;
+        console.log(nextChecked, "nextChecked");
+        setIsCampaignModalVisibles(true);
+        setConfirmLoading(true);
+
+        try {
+            const token = localStorage.getItem("token");
+            const payloadForActivity = {
+                editType: "Status",
+                campaignid: budgetAndStatusData?.campaign?.campaign_id,
+                adsetid: AdsetId,
+                Account: accountNumber,
+                // campaignname: campaignName,
+                adsetname: AdsetName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Adset status updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
+            }
+            const payload = {
+                status: desired ? "ACTIVE" : "PAUSED",
+                // campaignname: campaignName,
+                name: AdsetName,
+                accountNumber: accountNumber,
+                campaign_id: budgetAndStatusData?.campaign?.campaign_id,
+                adset_id: AdsetId,
+                email: userdetails?.email,
+                activity: payloadForActivity
+            };
+            const response = await apiClient.post(`/NewBulkAdsetStatusChangeWithHistory`, payload,
+                { headers: { Authorization: token } }
+            );
+
+            const newStatus = desired ? "ACTIVE" : "PAUSED";
+            if (response.status === 200 || response.status === 201) {
+                setBudgetAndStatusData((prev) => ({
+                    ...prev,
+                    selected_adset: {
+                        ...prev?.selected_adset,
+                        adset_status:
+                            nextChecked
+                                ? "ACTIVE"
+                                : "PAUSED"
+                    }
+
+                }));
+                setConfirmLoading(false);
+                setIsCampaignModalVisibles(false);
+            }
+            message.success(`Adset ${newStatus.toLowerCase()}`);
+        } catch (e) {
+            setConfirmLoading(false);
+            setIsCampaignModalVisibles(false);
+            message.error("Failed to update Adset status");
+        }
+    };
+    const handlePauseCancel = () => {
+        // setNextChecked(switchChecked);
+        setIsCampaignModalVisibles(false);
+    };
+    const handleOk = async () => {
+
+        // const campaignname = CampaignName;
+        const adsetname = AdsetName;
+
+        const selectedAdset =
+            budgetAndStatusData?.selected_adset;
+
+        const currentBudget =
+            selectedAdset?.budget_amount || 0;
+
+        const currentBidAmount =
+            selectedAdset?.bid_amount || 0;
+
+        const budgetType =
+            budgetAndStatusData?.budget_type || "unknown";
+
+        const bidAmountValue =
+            Math.round(parseFloat(bidAmount || 0) * 100);
+
+        const changeBudgetValue =
+            Math.round(parseFloat(changeBudget || 0) * 100);
+
+        const payload = {
+            adsetId: selectedAdset?.adset_id,
+            campaignId:
+                budgetAndStatusData?.campaign?.campaign_id,
+
+            accountNumber,
+            adsetname,
+            updatedby: userdetails?.email,
+            budgetType,
+        };
+
+        // ✅ Budget Change
+        if (
+            changeBudget !== undefined &&
+            changeBudget !== '' &&
+            !isNaN(changeBudget) &&
+            parseFloat(changeBudget) > 0 &&
+            changeBudgetValue !== Number(currentBudget)
+        ) {
+
+            payload.budget = changeBudgetValue;
+
+            payload.activity = {
+                editType: "Budget",
+                campaignid:
+                    budgetAndStatusData?.campaign?.campaign_id,
+                adsetid: selectedAdset?.adset_id,
+                Account: String(accountNumber),
+                adsetname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail:
+                    userdetails?.email,
+                updateType:
+                    "Adset budget updated",
+                updateAt: moment()
+                    .tz("Asia/Kolkata")
+                    .format("DD-MM-YYYY hh:mm A"),
+                updateDetail:
+                    `From $${Number(currentBudget) / 100
+                    } to $${Number(changeBudget)}`,
+                budgetType
+            };
+        }
+
+        // ✅ Bid Change
+        if (
+            bidAmount !== undefined &&
+            bidAmount !== '' &&
+            !isNaN(bidAmount) &&
+            parseFloat(bidAmount) >= 0 &&
+            bidAmountValue !== Number(currentBidAmount)
+        ) {
+            payload.bidAmount = bidAmountValue;
+            payload.bidactivity = {
+                editType: "Bid",
+                campaignid:
+                    budgetAndStatusData?.campaign?.campaign_id,
+                adsetid: selectedAdset?.adset_id,
+                Account: String(accountNumber),
+                // campaignname,
+                adsetname,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail:
+                    userdetails?.email,
+                updateType:
+                    "Adset bid strategy updated",
+                updateAt: moment()
+                    .tz("Asia/Kolkata")
+                    .format("DD-MM-YYYY hh:mm A"),
+                updateDetail:
+                    `From $${Number(currentBidAmount) / 100
+                    } to $${Number(bidAmount)}`,
+            };
+        }
+
+        const hasBudget =
+            Object.prototype.hasOwnProperty.call(
+                payload,
+                'budget'
+            );
+
+        const hasBidAmount =
+            Object.prototype.hasOwnProperty.call(
+                payload,
+                'bidAmount'
+            );
+
+        if (!hasBudget && !hasBidAmount) {
+
+            message.warning(
+                "Please change Budget and/or Bid Amount before submitting."
+            );
+
+            return;
+        }
+
+        try {
+
+            setConfirmLoading(true);
+
+            const newResponse =
+                await apiClient.post(
+                    '/update/adset/budget/history',
+                    payload
+                );
+
+            if (
+                newResponse.status === 200 ||
+                newResponse.status === 201
+            ) {
+
+                // ✅ UPDATE LOCAL STATE ONLY
+                setBudgetAndStatusData((prev) => ({
+
+                    ...prev,
+
+                    selected_adset: {
+
+                        ...prev?.selected_adset,
+
+                        ...(payload.budget !== undefined && {
+                            budget_amount:
+                                String(payload.budget)
+                        }),
+
+                        ...(payload.bidAmount !== undefined && {
+                            bid_amount:
+                                payload.bidAmount
+                        })
+
+                    }
+
+                }));
+
+                message.success(
+                    "Adset Budget and/or Bid Updated"
+                );
+
+                setIsBudgetModalVisible(false);
+            }
+
+        } catch (err) {
+
+            console.error(err);
+
+            message.error(
+                "Failed to update adset"
+            );
+
+        } finally {
+
+            setConfirmLoading(false);
+
+        }
     };
 
     return (
         <Row style={{ display: 'flex', flexDirection: 'column' }}>
-            {isLoading === false &&
-                <Col style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    {/* <div style={{width:'100%'}}>
-                        <h3 style={{textAlign:'center'}}>{decode}</h3>
-                    </div> */}
-                    <div style={{ width: '120px' }}>
+            <Col style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap'
+            }}>
+                {isLoading === false &&
+                    <div style={{
+                        width: '100px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        height: '32px'
+                    }}>
                         <p>Timezone: <span>{timeZoneToDisplay.current}</span></p>
                     </div>
+                }
+                <Switch
+                    checked={showTables}
+                    onChange={(checked) => setShowTables(checked)}
+                    checkedChildren="Tables"
+                    unCheckedChildren="Hide"
+                    style={{
+                        backgroundColor: showTables ? "#91c25f" : undefined,
+                    }}
+                />
 
-                </Col>
-            }
-            <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
                 <Button
                     type="default"
@@ -1751,261 +2079,266 @@ const MnetLiveAdsetHistory = ({ params }) => {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '3px solid #91C25F',
+                        border: '2px solid #91C25F',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
                         backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
-                        borderRadius: '999px',
+                        borderRadius: '18px',
                         fontWeight: 500,
-                        padding: '0 12px',
-                        height: '32px',
+                        padding: '0 13px',
+                        height: '25px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '2px',
                         transition: 'all 0.2s ease-in-out',
                     }}
                 >
                     Chart
                 </Button>
             </Col>
-            {isGraphVisible && (
-                <div
-                    style={{
-                        width: '100%',
-                        borderRadius: 12,
-                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                        padding: 15,
-                        height: 'auto',
-                        boxShadow:
-                            theme === 'dark'
-                                ? '0 1px 3px rgba(0,0,0,0.6)'
-                                : '0 1px 6px rgba(0,0,0,0.08)',
-                    }}
-                >
-                    <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+            {
+                isGraphVisible && (
+                    <div
+                        style={{
+                            width: '100%',
+                            borderRadius: 12,
+                            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                            padding: 15,
+                            height: 'auto',
+                            boxShadow:
+                                theme === 'dark'
+                                    ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    : '0 1px 6px rgba(0,0,0,0.08)',
+                        }}
+                    >
+                        <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
 
-                        {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            {/* <Spin size="large" /> */}
-                            <div style={{ padding: '24px' }}>
-                                <Skeleton active paragraph={{ rows: 20 }} />
-                            </div>
-                        </div>) : (
-                            <div>
-                                {/* ✅ Custom Checkbox-Style Legend */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent: 'center' }}>
-                                    {Object.keys(datasetColorMap).map(label => {
-                                        const isVisible = !hiddenKeys.includes(label);
-                                        return (
-                                            <div
-                                                key={label}
-                                                onClick={() => toggleLegend(label)}
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    cursor: 'pointer',
-                                                    gap: '6px',
-                                                    fontSize: '13px',
-                                                    color: theme === 'dark' ? '#fff' : '#000',
-                                                }}
-                                            >
+                            {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                {/* <Spin size="large" /> */}
+                                <div style={{ padding: '24px' }}>
+                                    <Skeleton active paragraph={{ rows: 20 }} />
+                                </div>
+                            </div>) : (
+                                <div>
+                                    {/* ✅ Custom Checkbox-Style Legend */}
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent: 'center' }}>
+                                        {Object.keys(datasetColorMap).map(label => {
+                                            const isVisible = !hiddenKeys.includes(label);
+                                            return (
                                                 <div
+                                                    key={label}
+                                                    onClick={() => toggleLegend(label)}
                                                     style={{
-                                                        width: '16px',
-                                                        height: '16px',
-                                                        borderRadius: '4px',
-                                                        backgroundColor: datasetColorMap[label],
                                                         display: 'flex',
                                                         alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        color: '#fff',
-                                                        // fontWeight: 'bold',
-                                                        fontSize: '11px',
+                                                        cursor: 'pointer',
+                                                        gap: '6px',
+                                                        fontSize: '13px',
+                                                        color: theme === 'dark' ? '#fff' : '#000',
                                                     }}
                                                 >
-                                                    {isVisible ? '✔' : ''}
+                                                    <div
+                                                        style={{
+                                                            width: '16px',
+                                                            height: '16px',
+                                                            borderRadius: '4px',
+                                                            backgroundColor: datasetColorMap[label],
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            color: '#fff',
+                                                            // fontWeight: 'bold',
+                                                            fontSize: '11px',
+                                                        }}
+                                                    >
+                                                        {isVisible ? '✔' : ''}
+                                                    </div>
+                                                    {label}
                                                 </div>
-                                                {label}
-                                            </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <Row style={{ height: '400px', marginTop: '20px' }}>
+                                        <Line
+                                            data={{
+                                                labels: chartData.dates || [],
+                                                datasets,
+                                            }}
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                    legend: { display: false },
+                                                    tooltip: {
+                                                        mode: 'index',
+                                                        intersect: true,
+                                                        displayColors: true,
+                                                        boxWidth: 15,
+                                                        boxHeight: 15,
+                                                        callbacks: {
+                                                            label: function (tooltipItem) {
+                                                                const index = tooltipItem.dataIndex;
+                                                                const dataset = tooltipItem.dataset;
+                                                                const value = dataset.data[index];
+                                                                const datasetLabel = dataset.label || '';
+                                                                return `${datasetLabel}: ${value}`;
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                                scales: {
+                                                    x: {
+                                                        ticks: {
+                                                            padding: 30,
+                                                            color: (context) => {
+                                                                const index = context.index;
+                                                                const label = chartData?.dates?.[index];
+                                                                return getColorForValue(label);
+                                                            },
+                                                        },
+                                                        grid: {
+                                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                        },
+                                                    },
+                                                    y: {
+                                                        beginAtZero: true,
+                                                        ticks: {
+                                                            callback: value => value.toFixed(2),
+                                                            color: theme === 'dark' ? '#fff' : '#000',
+                                                        },
+                                                        grid: {
+                                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                        },
+                                                    },
+                                                },
+                                            }}
+                                            height={350}
+                                        />
+                                    </Row>
+
+
+                                </div>
+                            )}
+                        </Col>
+                    </div>
+                )
+            }
+            {
+                showTables && (
+                    <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
+                        {/* Left Table: Top 5 RPC Today */}
+                        <div style={{ width: '20%', marginLeft: '1%' }}>
+                            <p>Top 5 Rpc today</p>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Rpc</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {chartData.rpcDate
+                                        .filter(item =>
+                                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                        )
+                                        .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
+                                        .slice(0, 5) // Take top 5
+                                        .map((item, index) => (
+                                            <tr key={index}>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style={{ marginLeft: "1%", width: '20%' }}>
+                            <p>Top 5 margin today</p>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {chartData.hoursDate
+                                        .filter(item =>
+                                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                        )
+                                        .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                        .slice(0, 5) // Take top 5
+                                        .map((item, index) => (
+                                            <tr key={index}>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style={{ marginLeft: "1%", width: '25%' }}>
+                            <p>Top 5 repeated hours with Rpc (Last 10 days)</p>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>RPC</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {chartData.sortedData.map((item, index) => {
+                                        const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
+                                        const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+
+                                        return (
+                                            <tr key={index}>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
+                                                    {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                                </td>
+                                                <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
+                                            </tr>
                                         );
                                     })}
-                                </div>
-                                <Row style={{ height: '400px', marginTop: '20px' }}>
-                                    <Line
-                                        data={{
-                                            labels: chartData.dates || [],
-                                            datasets,
-                                        }}
-                                        options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                                legend: { display: false },
-                                                tooltip: {
-                                                    mode: 'index',
-                                                    intersect: true,
-                                                    displayColors: true,
-                                                    boxWidth: 15,
-                                                    boxHeight: 15,
-                                                    callbacks: {
-                                                        label: function (tooltipItem) {
-                                                            const index = tooltipItem.dataIndex;
-                                                            const dataset = tooltipItem.dataset;
-                                                            const value = dataset.data[index];
-                                                            const datasetLabel = dataset.label || '';
-                                                            return `${datasetLabel}: ${value}`;
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                            scales: {
-                                                x: {
-                                                    ticks: {
-                                                        padding: 30,
-                                                        color: (context) => {
-                                                            const index = context.index;
-                                                            const label = chartData?.dates?.[index];
-                                                            return getColorForValue(label);
-                                                        },
-                                                    },
-                                                    grid: {
-                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                    },
-                                                },
-                                                y: {
-                                                    beginAtZero: true,
-                                                    ticks: {
-                                                        callback: value => value.toFixed(2),
-                                                        color: theme === 'dark' ? '#fff' : '#000',
-                                                    },
-                                                    grid: {
-                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                    },
-                                                },
-                                            },
-                                        }}
-                                        height={350}
-                                    />
-                                </Row>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style={{ marginLeft: "1%", width: '25%' }}>
+                            <p>Top 5 repeated hours margin (Last 10 days)</p>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Average Margin</th>
+                                        <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {chartData.sortedMarginData.map((item, index) => {
+                                        const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
+                                        const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
 
+                                        return (
+                                            <tr key={index}>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
+                                                <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
+                                                    {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                                </td>
+                                                <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
 
-                            </div>
-                        )}
+                        </div>
+
                     </Col>
-                </div>
-            )}
-
-            <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
-                {/* Left Table: Top 5 RPC Today */}
-                <div style={{ width: '20%', marginLeft: '1%' }}>
-                    <p>Top 5 Rpc today</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Rpc</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.rpcDate
-                                .filter(item =>
-                                    item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                                )
-                                .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <p>Top 5 margin today</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.hoursDate
-                                .filter(item =>
-                                    item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                                )
-                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 repeated hours with Rpc (Last 10 days)</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>RPC</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.sortedData.map((item, index) => {
-                                const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
-                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
-
-                                return (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
-                                            {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                        </td>
-                                        <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-                <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 repeated hours margin (Last 10 days)</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Average Margin</th>
-                                <th style={{ fontWeight: 'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {chartData.sortedMarginData.map((item, index) => {
-                                const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
-                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
-
-                                return (
-                                    <tr key={index}>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ fontWeight: 'normal', border: '1px solid #888', padding: '8px' }}>
-                                            {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                        </td>
-                                        <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-
-                </div>
-
-            </Col>
+                )
+            }
             <Col style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
                 {/* <Col>
                     <Select
@@ -2117,7 +2450,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                                     : '0 1px 6px rgba(0,0,0,0.08)',
                         }}
                     >
-                        <Col>
+                        <Col style={{ display: "flex", justifyContent: "center" }}>
                             <div style={{ width: '100%', display: 'flex', }}>
                                 <Tooltip
                                     title={copied ? 'Copied!' : 'Click to copy'}
@@ -2147,6 +2480,218 @@ const MnetLiveAdsetHistory = ({ params }) => {
                                         </p>
                                     </Tooltip>
                                 )}
+                            </div>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px"
+                                }}
+                            >
+                                <div>
+                                    <Switch
+                                        checked={
+
+                                            budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                        }
+                                        style={{
+                                            backgroundColor:
+                                                (
+                                                    budgetAndStatusData?.level === "campaign"
+                                                        ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
+                                                        : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
+                                                )
+                                                    ? "#91c25f"
+                                                    : undefined
+                                        }}
+                                        onChange={(checked) => {
+                                            setNextChecked(checked);
+                                            setIsCampaignModalVisibles(true);
+                                        }}
+                                    />
+                                    <Modal
+                                        title="Confirm Action"
+                                        open={isCampaignModalVisibles}
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        onOk={handlePauseOk}
+                                        onCancel={handlePauseCancel}
+                                    >
+                                        {confirmLoading && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    bottom: 0,
+                                                    background: "rgba(255,255,255,0.7)",
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    zIndex: 1000,
+                                                    borderRadius: "8px",
+                                                }}
+                                            >
+                                                <Spin size="large" tip="Saving..." />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p>
+                                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this campaign?
+                                            </p>
+                                            <p>Adset ID: {AdsetId}</p>
+                                            <p>Adset Name: {AdsetName}</p>
+                                        </div>
+                                    </Modal>
+                                </div>
+
+                                <div>
+                                    <DollarOutlined style={{ fontSize: "18px" }} onClick={() => setIsBudgetModalVisible(true)} />
+                                    {isBudgetModalVisible && (
+                                        <Modal
+                                            title={AdsetName}
+                                            open={isBudgetModalVisible}
+                                            onOk={handleOk}
+                                            onCancel={() => setIsBudgetModalVisible(false)}
+                                            width={600}
+                                            okButtonProps={{
+                                                style: {
+                                                    backgroundColor: '#91C25F',
+                                                    borderColor: '#91C25F'
+                                                }
+                                            }}
+                                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                                        >
+                                            {confirmLoading && (
+                                                <div
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        bottom: 0,
+                                                        background: "rgba(255,255,255,0.7)",
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        alignItems: "center",
+                                                        zIndex: 1000,
+                                                        borderRadius: "8px",
+                                                    }}
+                                                >
+                                                    <Spin size="large" tip="Saving..." />
+                                                </div>
+                                            )}
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    gap: '15px'
+                                                }}
+                                            >
+
+                                                {/* Budget Type */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                >
+                                                    <span>
+                                                        Budget Type:&nbsp;
+                                                    </span>
+
+                                                    <span style={{ fontWeight: 'normal' }}>
+                                                        {budgetAndStatusData?.budget_type || "-"}
+                                                    </span>
+                                                </div>
+
+                                                {/* Budget Amount */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: '2px'
+                                                    }}
+                                                >
+
+                                                    {/* <p style={{ marginBottom: '0px' }}>
+                                                        Budget Amount:
+                                                    </p> */}
+
+                                                    <Input
+                                                        type="number"
+                                                        disabled={
+                                                            budgetAndStatusData?.selected_adset?.budget_amount == null
+                                                        }
+                                                        value={changeBudget}
+                                                        onChange={(e) =>
+                                                            onChangeBudget(e.target.value)
+                                                        }
+                                                        placeholder="0"
+                                                        className={
+                                                            theme === 'dark'
+                                                                ? 'custom-input-dark'
+                                                                : 'custom-input-light'
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Bid Amount */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: '2px'
+                                                    }}
+                                                >
+
+                                                    <p style={{ marginBottom: '0px' }}>
+                                                        Bid Amount:
+                                                    </p>
+
+                                                    <Input
+                                                        type="number"
+                                                        value={bidAmount}
+                                                        disabled={
+                                                            budgetAndStatusData?.selected_adset?.bid_amount == null
+                                                        }
+                                                        onChange={(e) =>
+                                                            setBidAmount(e.target.value)
+                                                        }
+                                                        placeholder="0"
+                                                        className={
+                                                            theme === 'dark'
+                                                                ? 'custom-input-dark'
+                                                                : 'custom-input-light'
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Adset ID */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                >
+                                                    <p>
+                                                        Adset ID:&nbsp;
+                                                    </p>
+
+                                                    <span style={{ fontWeight: 'normal' }}>
+                                                        {
+                                                            budgetAndStatusData
+                                                                ?.selected_adset
+                                                                ?.adset_id || "-"
+                                                        }
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </Modal>
+                                    )}
+                                </div>
                             </div>
                         </Col>
 
@@ -2318,7 +2863,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                     borderColor={theme === "dark" ? "#555" : "#d9d9d9"}
                 />
             </Modal>
-        </Row>
+        </Row >
     );
 };
 
