@@ -65,7 +65,7 @@ const selectTimezone = {
 const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
-  console.log(campaignComments);
+  // console.log(campaignComments);
   const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -239,7 +239,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
   // };
   const onBtExport1 = async () => {
-    console.log(gridRef.current.api, "in");
+    // console.log(gridRef.current.api, "in");
 
     const Details = {
       network: newRevenuePratner,
@@ -334,7 +334,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     );
 
     setLeafCampaigns(uniqueLeafCampaigns);
-    console.log("Selected unique Ads:", uniqueLeafCampaigns);
+    // console.log("Selected unique Ads:", uniqueLeafCampaigns);
   };
   const handleBulkSmartPinAd = async (action) => {
     if (!leafCampaigns || leafCampaigns.length === 0) {
@@ -375,8 +375,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
     const apiUrl =
       action === "pin"
-        ? "/SmartPinBulkWithHitory"
-        : "/SmartUnpinBulkWithHistory";
+        ? "http://localhost:4000/reports/bulkactions/pin"
+        : "http://localhost:4000/reports/bulkactions/unpin";
 
     const res = await apiClient.post(apiUrl, { items: data });
 
@@ -526,7 +526,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       };
 
       const resp = await apiClient.post(
-        '/Comments/bulkdeleteWithHistory',
+        'http://localhost:4000/reports/bulkactions/comments/delete',
         body
       );
 
@@ -611,7 +611,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }));
 
       const resp = await apiClient.post(
-        '/Comments/upsertBulkNewWithHistory',
+        'http://localhost:4000/reports/bulkactions/comments',
         { items, usercommit: userdetails?.email, }
       );
 
@@ -751,7 +751,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }
 
       const resp = await apiClient.post(
-        "/BulkAdStatusChangeManyWithHistory",
+        "http://localhost:4000/reports/bulkactions/adstatus",
         { items: filteredItems },
         { headers: { Authorization: token } }
       );
@@ -1040,7 +1040,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "/BulkUpdateCategoryNewWithHistory",
+        "http://localhost:4000/reports/bulkactions/category",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
@@ -1432,7 +1432,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               updateDetail: `From ${nextChecked ? "Inactive" : "Active"} to ${nextChecked ? "Active" : "Inactive"}`,
             }
             const response = await apiClient.post(
-              `/NewAdStatusChangeWithHistory`,
+              `http://localhost:4000/reports/singleactions/adstatus`,
               {
                 status: nextChecked ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1693,7 +1693,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
-            '/Comments/upsert/History',
+            'http://localhost:4000/reports/singleactions/comments',
             {
               accountNumber: rowAccount,
               campaignname: adName,
@@ -1759,7 +1759,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const response = await apiClient.post(
-              '/New/Comments/delete/History',
+              'http://localhost:4000/reports/singleactions/comments/delete',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1874,7 +1874,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 level: "ad",
               }));
 
-              console.log("Sending AD items:", items);
+              // console.log("Sending AD items:", items);
 
               // Call bulk API
               const resp = await apiClient.post(
@@ -1977,7 +1977,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updateDetail: `From "${updatedPinStatus ? "unpin" : "pin"}" to "${updatedPinStatus ? "pin" : "unpin"}"`,
               }
               const newResponse = await apiClient.post(
-                '/NewPinBulkWithHistory',
+                'http://localhost:4000/reports/singleactions/pin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2041,7 +2041,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
               }
               const newResponse = await apiClient.post(
-                '/NewUnpinBulkWithHistory',
+                'http://localhost:4000/reports/singleactions/unpin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2941,7 +2941,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       const mainData1 = fetchData.data || [];
       const mainData = tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
       // console.log(mainData1, "mainData1");
-      console.log(mainData, "mainData");
+      // console.log(mainData, "mainData");
 
       const campaignsByAccount = {};
       mainData1.forEach(item => {
@@ -3135,9 +3135,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       // ]);
       // setRowData(filteredData);
 
-      console.log(filteredData, "filteredData");
+      // console.log(filteredData, "filteredData");
       newRowData.current = filteredData;
-      fetchData.status === 200 && console.log("Success");
+      // fetchData.status === 200 && console.log("Success");
       fetchData.status === 200 && setApiStatus(false);
       // setInitialRowData(filteredData);
       // setTrue(false);
@@ -3148,9 +3148,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       setLoading(false);
     }
   };
-  useEffect(() => {
-    console.log(campaignIds, "campaignIds updated");
-  }, [campaignIds]);
+  // useEffect(() => {
+  //   // console.log(campaignIds, "campaignIds updated");
+  // }, [campaignIds]);
   useEffect(() => {
     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3162,7 +3162,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           token
         );
 
-        console.log('Final creatives data:', creativesData);
+        // console.log('Final creatives data:', creativesData);
         setAdLevelCreatives(creativesData)
 
       } catch (err) {
@@ -3470,7 +3470,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
   useEffect(() => {
     // functionCall1();
-    console.log(campaignStatusFilter, "campaignStatusFilter");
+    // console.log(campaignStatusFilter, "campaignStatusFilter");
     if (campaignStatusFilter !== "All") {
 
       const adStatusMap = new Map(
@@ -4262,7 +4262,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                         <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                           {ids.map((id, i) => {
                             const acc = accountsAccess.find(a => a.accountNumber === id);
-                            console.log("timezones:", accountsAccess);
+                            // console.log("timezones:", accountsAccess);
                             const tz = acc?.timeZone ?? "-";
                             return (
                               <div

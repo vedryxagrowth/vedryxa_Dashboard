@@ -81,7 +81,7 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const token = localStorage.getItem("token");
   const { apiClient } = useTokenContext();
-  console.log(editeddata, "edit");
+  // console.log(editeddata, "edit");
 
   useEffect(() => {
     if (visible && editeddata) {
@@ -100,7 +100,7 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
         timeZone: timeZoneFullNames[values.timeZone],
       };
 
-      console.log(newValues, "new");
+      // console.log(newValues, "new");
 
       // Simulate API call with newValues
       const response = await apiClient.put(
@@ -157,131 +157,144 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
           }}
           className={theme === 'dark' ? 'form-dark' : 'form-light'}
         >
-            {isFieldVsible(editeddata?.Message) && (
-                <Form.Item label="Message" name="Message">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-
-            {isFieldVsible(editeddata?.cronStatus) && (
-                <Form.Item label="CronStatus" name="cronStatus">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-
-            {isFieldVsible(editeddata?.timeZone) && (
-                <Form.Item label="Timezone" name="timeZone">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-             
-            {isFieldVsible(editeddata?.Email) && (
-                <Form.Item label="Email" name="Email">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.Password) && (
-                <Form.Item label="Password" name="Password">
-                    <Input.Password  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}} 
-                    />
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.key) && (
-                <Form.Item label="Key" name="key">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-
-            {isFieldVsible(editeddata?.Token) && (
-                <Form.Item label="Token" name="Token">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-
-            {isFieldVsible(editeddata?.consumer_key) && (
-                <Form.Item label="ConsumerKey" name="consumer_key">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-
-            {isFieldVsible(editeddata?.consumer_secret) && (
-                <Form.Item label="ConsumerSecret" name="consumer_secret">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.client_id) && (
-                <Form.Item label="ClientID" name="client_id">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}    
-
-            {isFieldVsible(editeddata?.Secret) && (
-                <Form.Item label="Secret" name="Secret">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.Service) && (
-                <Form.Item label="Service" name="Service">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.Market) && (
-                <Form.Item label="Market" name="Market">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.config_id) && (
-                <Form.Item label="ConfigID" name="config_id">
-                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.Status) && (
-                <Form.Item
-                    label="Status"
-                    name="Status"
-                    rules={[{ required: true, message: "Please select a Status!" }]}
-                >
-                    <Select placeholder="Select a status" dropdownClassName={theme === 'dark' && "custom-dropdown"}>
-                    <Option value="Active">Active</Option>
-                    <Option value="InActive">InActive</Option>
-                    </Select>
-                </Form.Item>
-            )}
-            
-            {isFieldVsible(editeddata?.revenuePartner) && (
-                <Form.Item
-                    label="Revenue Partner"
-                    name="revenuePartner"
-                    rules={[{ required: true, message: "Please select a Revenue Partner!" }]}
-                >
-                    <Select
-                    showSearch
-                    style={{ width: "100%" }}
-                    placeholder="Select Revenue Partner"
-                    options={availableNetworks.map((item) => ({
-                        value: item,
-                        label: item,
-                    }))}
-                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                    />
-                </Form.Item>
-            )}
-            
-            <Form.Item>
-                <Button style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} onClick={showModal}>
-                    Submit
-                </Button>
+          {isFieldVsible(editeddata?.Message) && (
+            <Form.Item label="Message" name="Message">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
             </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.cronStatus) && (
+            <Form.Item label="CronStatus" name="cronStatus">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.timeZone) && (
+            <Form.Item label="Timezone" name="timeZone">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.Email) && (
+            <Form.Item label="Email" name="Email">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.Password) && (
+            <Form.Item label="Password" name="Password">
+              <Input.Password className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }}
+              />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.key) && (
+            <Form.Item label="Key" name="key">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+
+          {isFieldVsible(editeddata?.Token) && (
+            <Form.Item label="Token" name="Token">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+
+          {isFieldVsible(editeddata?.consumer_key) && (
+            <Form.Item label="ConsumerKey" name="consumer_key">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+
+          {isFieldVsible(editeddata?.consumer_secret) && (
+            <Form.Item label="ConsumerSecret" name="consumer_secret">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.client_id) && (
+            <Form.Item label="ClientID" name="client_id">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.Secret) && (
+            <Form.Item label="Secret" name="Secret">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.Service) && (
+            <Form.Item label="Service" name="Service">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.Market) && (
+            <Form.Item label="Market" name="Market">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.config_id) && (
+            <Form.Item label="ConfigID" name="config_id">
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.Status) && (
+            <Form.Item
+              label="Status"
+              name="Status"
+              rules={[{ required: true, message: "Please select a Status!" }]}
+            >
+              <Select
+                placeholder="Select a status"
+                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                classNames={{
+                  popup: {
+                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                  }
+                }}
+              >
+                <Option value="Active">Active</Option>
+                <Option value="InActive">InActive</Option>
+              </Select>
+            </Form.Item>
+          )}
+
+          {isFieldVsible(editeddata?.revenuePartner) && (
+            <Form.Item
+              label="Revenue Partner"
+              name="revenuePartner"
+              rules={[{ required: true, message: "Please select a Revenue Partner!" }]}
+            >
+              <Select
+                showSearch
+                style={{ width: "100%" }}
+                placeholder="Select Revenue Partner"
+                options={availableNetworks.map((item) => ({
+                  value: item,
+                  label: item,
+                }))}
+                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                classNames={{
+                  popup: {
+                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                  }
+                }}
+              />
+            </Form.Item>
+          )}
+
+          <Form.Item>
+            <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={showModal}>
+              Submit
+            </Button>
+          </Form.Item>
         </Form>
       </Drawer>
 

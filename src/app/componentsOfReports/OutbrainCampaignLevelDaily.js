@@ -256,7 +256,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
 
     showCampaignLevel(uniqueByCampaignId(selectedData));
-    console.log(selectedData);
+    // console.log(selectedData);
 
     const leafCampaignsData = selectedNodes
       .filter(node => !node.group && node.data)
@@ -280,7 +280,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
     setLeafCampaigns(uniqueLeafCampaigns);
 
-    console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
+    // console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
 
 
   };
@@ -1182,9 +1182,9 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
     let apiUrl = "";
 
     if (action === "pin") {
-      apiUrl = "/SmartPinBulkWithHitory";
+      apiUrl = "http://localhost:4000/reports/bulkactions/pin";
     } else if (action === "unpin") {
-      apiUrl = "/SmartUnpinBulkWithHistory";
+      apiUrl = "http://localhost:4000/reports/bulkactions/unpin";
     }
 
     const res = await apiClient.post(apiUrl, {
@@ -1262,7 +1262,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
       };
 
       const resp = await apiClient.post(
-        '/Comments/bulkdeleteWithHistory',
+        'http://localhost:4000/reports/bulkactions/comments/delete',
         body
       );
 
@@ -1340,7 +1340,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
       }));
 
       const resp = await apiClient.post(
-        '/Comments/upsertBulkNewWithHistory',
+        'http://localhost:4000/reports/bulkactions/comments',
         { items, usercommit: userdetails?.email }
       );
 
@@ -1459,7 +1459,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
 
       const resp = await apiClient.post(
-        "/Outbrain/Campaigns/Status/Bulk",
+        "http://localhost:4000/reports/bulkactions/outbrain/campaignstatus",
         { items: filteredItems },
         { headers: { Authorization: token } }
       );
@@ -1657,7 +1657,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "/BulkUpdateCategoryNewWithHistory",
+        "http://localhost:4000/reports/bulkactions/category",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
@@ -1980,7 +1980,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
             };
 
             const response = await apiClient.post(
-              `/Outbrain/Campaigns/Status`,
+              `http://localhost:4000/reports/singleactions/outbrain/campaignstatus`,
               payload,
               { headers: { Authorization: token } }
             );
@@ -2152,7 +2152,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
-            '/Comments/upsert/History',
+            'http://localhost:4000/reports/singleactions/comments',
             {
               accountNumber: rowAccount,
               campaignname: campaignName,
@@ -2213,7 +2213,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const newResponse = await apiClient.post(
-              '/New/Comments/delete/History',
+              'http://localhost:4000/reports/singleactions/comments/delete',
               {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
@@ -2294,7 +2294,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                 usercommit: userdetails?.email,
                 level: item.level,
               }));
-              console.log('Sending items:', items);
+              // console.log('Sending items:', items);
 
               const resp = await apiClient.post(
                 '/Comments/upsertBulk',
@@ -2368,7 +2368,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
             }
             if (updatedPinStatus) {
               const resp = await apiClient.post(
-                '/NewPinBulkWithHistory',
+                'http://localhost:4000/reports/singleactions/pin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2420,7 +2420,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
               }
             } else {
               const resp = await apiClient.post(
-                '/NewUnpinBulkWithHistory',
+                'http://localhost:4000/reports/singleactions/unpin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2623,11 +2623,12 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                 </div>
                 : null
             }
-            overlayInnerStyle={{
-              backgroundColor: theme === 'dark' ? '#111' : '#fff',
+            styles={{
+              body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
               color: theme === 'dark' ? '#fff' : '#000',
               border: '1px solid #ccc',
               borderRadius: 6,
+              }
             }}
           >
             <button
@@ -2844,11 +2845,12 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                     </div>
                   </div>
                 }
-                overlayInnerStyle={{
-                  backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                styles={{
+                  body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
                   color: theme === 'dark' ? '#fff' : '#000',
                   border: '1px solid #ccc',
                   borderRadius: 6,
+                  }
                 }}
               >
                 <MessageOutlined
@@ -2864,11 +2866,12 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
             {/* Copy, History link, label */}
             <Tooltip
               title={tooltipText}
-              overlayInnerStyle={{
-                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+              styles={{
+                body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
                 color: theme === 'dark' ? '#fff' : '#000',
                 border: '1px solid #ccc',
                 borderRadius: 6,
+                }
               }}
             >
               <CopyOutlined
@@ -2879,11 +2882,12 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
             <Tooltip
               title={<CreativeTooltip />}
               placement="right"
-              overlayInnerStyle={{
-                backgroundColor: theme === "dark" ? "#111" : "#fff",
+              styles={{
+                body: {backgroundColor: theme === "dark" ? "#111" : "#fff",
                 border: "1px solid #ccc",
                 borderRadius: 8,
                 padding: 10
+                }
               }}
             >
               <PictureOutlined
@@ -3142,11 +3146,12 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
             <Tooltip
               title={firstColumnValue}
-              overlayInnerStyle={{
-                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+              styles={{
+                body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
                 color: theme === 'dark' ? '#fff' : '#000',
                 border: '1px solid #ccc',
                 borderRadius: 6,
+                }
               }}
             >
               <span
@@ -3214,7 +3219,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
     },
     processCellForClipboard: (params) => {
       if (params.node.group) {
-        console.log("Processing group column for copy..."); // Debugging log
+        // console.log("Processing group column for copy..."); // Debugging log
 
         // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
         if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -3250,7 +3255,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
           collectionName = newtworkCollections[newRevenuePratner];
           break;
       }
-      console.log(collectionName);
+      // console.log(collectionName);
       // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
       // const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
       // const mainData = fetchData.data;
@@ -3357,7 +3362,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
           const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
           const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
           const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
-          console.log(campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber), "category check");
+          // console.log(campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber), "category check");
           const campaignObjectStatus = Camapignlevelstatus
             .find(item =>
               String(item.campaign_id) === String(eachData.campaign_id) &&
@@ -3567,7 +3572,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
       newDailyData.current = fullData;
       fetchData.status === 200 && setApiStatus(false);
-      fetchData.status === 200 && console.log("Success");
+      // fetchData.status === 200 && console.log("Success");
       // setTrue(false);
       setLoading1(false);
     } catch (error) {
@@ -3575,15 +3580,15 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
       // if(error.response.status === 500){
       //     apiStatus.current = true;
       // }
-      console.log(error);
+      // console.log(error);
       setApiStatus(true);
       setLoading1(false);
     }
   }
 
-  useEffect(() => {
-    console.log(campaignIds, "campaignIds updated");
-  }, [campaignIds]);
+  // useEffect(() => {
+  //   console.log(campaignIds, "campaignIds updated");
+  // }, [campaignIds]);
   useEffect(() => {
     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3595,7 +3600,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
           token
         );
 
-        console.log('Final creatives data:', creativesData);
+        // console.log('Final creatives data:', creativesData);
         setAdLevelCreatives(creativesData)
 
       } catch (err) {
@@ -3826,7 +3831,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
       // ✅ Copy text to clipboard
       navigator.clipboard.writeText(copiedText).then(() => {
-        console.log("Copied to clipboard:", copiedText);
+        // console.log("Copied to clipboard:", copiedText);
       }).catch((err) => {
         console.error("Clipboard copy failed:", err);
       });
@@ -3858,7 +3863,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
   useEffect(() => {
     // functionCall1();
-    console.log(campaignStatusFilter, "campaignStatusFilter");
+    // console.log(campaignStatusFilter, "campaignStatusFilter");
     if (campaignStatusFilter !== "All") {
       // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       // const filteredByStatus = memorizedDailyData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
@@ -4066,12 +4071,13 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                             </span>
                           </div>
                         }
-                        overlayInnerStyle={{
-                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                        styles={{
+                          body: {backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                           color: theme === "dark" ? "#ffffff" : "#000000",
                           borderRadius: 6,
                           padding: "6px 10px",
                           fontSize: "14px",
+                          }
                         }}
                       >
                         <RxSwitch size={20} style={{ color: theme === "dark" ? "white" : "black" }} />
@@ -4132,12 +4138,13 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                             </span>
                           </div>
                         }
-                        overlayInnerStyle={{
-                          backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                        styles={{
+                          body: {backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                           color: theme === "dark" ? "#ffffff" : "#000000",
                           borderRadius: 6,
                           padding: "6px 10px",
                           fontSize: "14px",
+                          }
                         }}
                       >
                         <button
@@ -4152,12 +4159,13 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                         </button>
                       </Tooltip>
                       {/*  comment */}
-                      <Tooltip title="Bulk comment" overlayInnerStyle={{
-                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                      <Tooltip title="Bulk comment" styles={{
+                        body: {backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                         color: theme === "dark" ? "#ffffff" : "#000000",
                         borderRadius: 6,
                         padding: "6px 10px",
                         fontSize: "14px",
+                        }
                       }}>
                         <EditOutlined
                           onClick={() => setIsBulkCommentModalVisible(true)}
@@ -4201,12 +4209,13 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                       </Modal>
 
                       {/* Category */}
-                      <Tooltip title="Bulk add category" overlayInnerStyle={{
-                        backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                      <Tooltip title="Bulk add category" styles={{
+                        body: {backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                         color: theme === "dark" ? "#ffffff" : "#000000",
                         borderRadius: 6,
                         padding: "6px 10px",
                         fontSize: "14px",
+                        }
                       }}>
                         <PlusOutlined
                           onClick={openBulkCategoryModal}
@@ -4266,10 +4275,11 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                           })}
                         </div>
                       }
-                      overlayInnerStyle={{
-                        maxWidth: 320,
+                      styles={{
+                        body: {maxWidth: 320,
                         background: theme === "dark" ? "#1f1f1f" : '#fff',
                         color: theme === "dark" ? "#fff" : '#000'
+                        }
                       }}
                     >
                       <Badge count={ids.length} size="small" offset={[0, 2]}>
@@ -4315,7 +4325,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                         <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                           {ids.map((id, i) => {
                             const acc = accountsAccess.find(a => a.accountNumber === id);
-                            console.log("timezones:", accountsAccess);
+                            // console.log("timezones:", accountsAccess);
                             const tz = acc?.timeZone ?? "-";
                             return (
                               <div
@@ -4333,10 +4343,11 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                           })}
                         </div>
                       }
-                      overlayInnerStyle={{
-                        maxWidth: 320,
+                      styles={{
+                        body: {maxWidth: 320,
                         background: theme === "dark" ? "#1f1f1f" : "#fff",
                         color: theme === "dark" ? "#fff" : "#000"
+                        }
                       }}
                     >
                       <Badge count={ids.length} size="small" offset={[0, 2]}>
@@ -4394,14 +4405,14 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
                 <Col>
                   <Dropdown
-                    overlay={
-                      <Menu
-                        onClick={({ key }) =>
+                    menu={{
+                      // <Menu
+                        onClick:({ key }) =>
                           // onStatusFilterChange && 
                           // onStatusFilterChange(key)
                           setcampaignStatusLabel(key)
-                        } // <-- Add this line
-                        items={[
+                        ,// <-- Add this line
+                        items:[
                           {
                             key: 'All',
                             label: (
@@ -4465,9 +4476,9 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
 
                             </span>
                           },
-                        ]}
-                      />
-                    }
+                        ]
+                      // />
+                    }}
                     trigger={['click']}
                   >
                     <Button
@@ -4491,16 +4502,16 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                 </Col>
                 <Col>
                   <Dropdown
-                    overlay={
-                      <Menu
-                        onClick={({ key }) => setTypeFilter(key)}
-                        items={[
+                    menu={{
+                      // <Menu
+                        onClick:({ key }) => setTypeFilter(key),
+                        items:[
                           { key: 'All', label: 'All' },
                           { key: 'Daily', label: 'Daily' },
                           { key: 'Lifetime', label: 'Lifetime' },
-                        ]}
-                      />
-                    }
+                        ]
+                      // />
+                    }}
                     trigger={['click']}
                   >
                     <Button
@@ -4547,12 +4558,13 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
                         </div>}
                       </div>
                     }
-                    overlayInnerStyle={{
-                      backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                    styles={{
+                      body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
                       color: theme === 'dark' ? '#fff' : '#000',
                       border: '1px solid #ccc',
                       borderRadius: 6,
                       // fontWeight: 500,
+                      }
                     }}
                   >
 

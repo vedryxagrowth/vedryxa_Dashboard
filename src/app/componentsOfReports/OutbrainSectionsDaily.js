@@ -110,7 +110,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
 
     const memorizedColumnDef1 = useMemo(() => columnDefs.current, [columnDefs.current]);
-    console.log(memorizedColumnDef1)
+    // console.log(memorizedColumnDef1)
     // const memorizedDailyData = useMemo(() => dailyData?.filter((each) => {
     //     const normalizedCampaign = each.campaignname.trim().toLowerCase();
     //     const normalizedInput = inputValue.trim().toLowerCase();
@@ -345,7 +345,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
         // Keep your existing functionality
         showAdsetLevel(selectedData);
-        console.log(selectedData, "selectedData")
+        // console.log(selectedData, "selectedData")
 
         const leafCampaignsData = selectedNodes
             .filter(node => !node.group && node.data)
@@ -369,7 +369,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
 
         setLeafCampaigns(uniqueLeafCampaigns);
-        console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
+        // console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
     };
     const handleBulkSmartPinAdset = async (action) => {
         if (!leafCampaigns || leafCampaigns.length === 0) {
@@ -405,8 +405,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
         const apiUrl =
             action === "pin"
-                ? "/SmartPinBulkWithHitory"
-                : "/SmartUnpinBulkWithHistory";
+                ? "http://localhost:4000/reports/bulkactions/pin"
+                : "http://localhost:4000/reports/bulkactions/unpin";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -487,7 +487,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdeleteWithHistory',
+                'http://localhost:4000/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -568,7 +568,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNewWithHistory',
+                'http://localhost:4000/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -1613,8 +1613,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('/NewPinBulkWithHistory', body)
-                            : await apiClient.post('/NewUnpinBulkWithHistory', body);
+                            ? await apiClient.post('http://localhost:4000/reports/singleactions/pin', body)
+                            : await apiClient.post('http://localhost:4000/reports/singleactions/unpin', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1841,7 +1841,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                 level: "adset",
                             }));
 
-                            console.log('🟢 Sending adset items:', items);
+                            // console.log('🟢 Sending adset items:', items);
 
                             // ✅ Call your bulk endpoint
                             const resp = await apiClient.post(
@@ -1916,7 +1916,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('/New/Comments/delete/History', {
+                        const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/comments/delete', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
@@ -3021,7 +3021,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     const functionCall2 = async () => {
         try {
             setLoading1(true);
-            console.log("load", "ll")
+            // console.log("load", "ll")
             const campaigns = selectedCampaigns.length > 0
                 ? [...new Set(selectedCampaigns.map(adset => adset.campaignid))]
                 : [];
@@ -3228,7 +3228,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             //         });
 
             setdailyData(newFilterData);
-            console.log(newFilterData, "filter")
+            // console.log(newFilterData, "filter")
 
             setDailyFixedFooter(
                 [
@@ -3300,7 +3300,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             newDailyData.current = fullData;
             fetchData.status === 200 && setApiStatus(false);
-            fetchData.status === 200 && console.log("Success");
+            // fetchData.status === 200 && console.log("Success");
             // setTrue(false);
             setLoading1(false);
         } catch (error) {
@@ -3308,14 +3308,14 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             // if(error.response.status === 500){
             //     apiStatus.current = true;
             // }
-            console.log(error);
+            // console.log(error);
             setApiStatus(true);
             setLoading1(false);
         }
     }
-    useEffect(() => {
-        console.log(campaignIds, "campaignIds updated");
-    }, [campaignIds]);
+    // useEffect(() => {
+    //     console.log(campaignIds, "campaignIds updated");
+    // }, [campaignIds]);
     // useEffect(() => {
     //     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3550,7 +3550,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -3594,7 +3594,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
     useEffect(() => {
         // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
+        // console.log(campaignStatusFilter, "campaignStatusFilter");
         if (campaignStatusFilter !== "All") {
             // Filter grid rows by adset status
             const adsetStatusMap = new Map(
@@ -4057,7 +4057,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                                                     {ids.map((id, i) => {
                                                         const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                        console.log("timezones:", accountsAccess);
+                                                        // console.log("timezones:", accountsAccess);
                                                         const tz = acc?.timeZone ?? "-";
                                                         return (
                                                             <div

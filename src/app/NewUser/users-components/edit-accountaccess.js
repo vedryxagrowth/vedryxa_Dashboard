@@ -97,7 +97,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
   ]);
   const containerRef = useRef(null);
   const token = localStorage.getItem("token");
-  console.log(editeddata, "edit");
+  // console.log(editeddata, "edit");
   const [pixels, setPixels] = useState([{ pixelName: "", pixelId: "" }]);
   const [pages, setPages] = useState([{ pageName: "", pageId: "" }]);
 
@@ -149,7 +149,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
     setPages(prev => prev.filter((_, i) => i !== index));
   };
   useEffect(() => {
-    if (editeddata) {
+    if (editeddata && visible) {
       form.setFieldsValue({
         ...editeddata,
         timeZone: timeZoneShortNames[editeddata.timeZone] || "",
@@ -178,7 +178,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
       }
       setBMName(editeddata.BMName || "");
     }
-  }, [editeddata]);
+  }, [editeddata, visible]);
 
   const onFinish = async (values) => {
     let formattedPixels;
@@ -227,7 +227,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
         timeZone: timeZoneFullNames[values.timeZone],
       };
 
-      console.log(newValues, "new");
+      // console.log(newValues, "new");
       const response = await apiClient.put(
         "http://localhost:4000/userrole/accounts",
         { newAccount: newValues }
@@ -296,10 +296,19 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
       setModalPosition({ top: rect.top, left: rect.left });
     }
   }, [isModalOpen]);
+  // useEffect(() => {
+  //   form.setFieldsValue({ BMName: BMName });
+  //   setIsVisibleBMId("visible");
+  // }, [newValue, form]);
   useEffect(() => {
-    form.setFieldsValue({ BMName: BMName });
-    setIsVisibleBMId("visible");
-  }, [newValue, form]);
+    if (visible) {
+      form.setFieldsValue({
+        BMName: BMName
+      });
+
+      setIsVisibleBMId("visible");
+    }
+  }, [newValue, visible]);
   return (
     <>
       <Drawer
@@ -326,10 +335,20 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
             rules={[{ required: true, message: "Please select a Spend partner!" }]}
             disabled style={{ backgroundColor: 'transparent', color: 'black' }}
           >
-            <Select placeholder="Select a partner" disabled style={{
-              backgroundColor: theme === 'dark' && '#333',
-              color: theme === 'dark' && '#fff',
-            }} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+            <Select
+              placeholder="Select a partner"
+              disabled
+              style={{
+                backgroundColor: theme === 'dark' && '#333',
+                color: theme === 'dark' && '#fff',
+              }}
+              // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              classNames={{
+                popup: {
+                  root: theme === 'dark' ? 'custom-dropdown' : ''
+                }
+              }}
+            >
               <Option value="Facebook">Facebook</Option>
               <Option value="Google">Google</Option>
             </Select>
@@ -538,7 +557,12 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
                 color: theme === 'dark' && '#fff',
               }}
               placeholder="Select Timezone"
-              dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              classNames={{
+                popup: {
+                  root: theme === 'dark' ? 'custom-dropdown' : ''
+                }
+              }}
               options={timezones.map((item) => ({
                 value: item,
                 label: item,
@@ -551,11 +575,20 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
             name="status"
             rules={[{ required: true, message: "Please select a Status!" }]}
           >
-            <Select placeholder="Select a status" style={{
-              width: '100%',
-              backgroundColor: theme === 'dark' && '#333', // Background color
-              color: theme === 'dark' && '#fff',
-            }} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+            <Select
+              placeholder="Select a status"
+              style={{
+                width: '100%',
+                backgroundColor: theme === 'dark' && '#333', // Background color
+                color: theme === 'dark' && '#fff',
+              }}
+              // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              classNames={{
+                popup: {
+                  root: theme === 'dark' ? 'custom-dropdown' : ''
+                }
+              }}
+            >
               <Option value="Active">Active</Option>
               <Option value="InActive">InActive</Option>
             </Select>
@@ -574,7 +607,12 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
                 color: theme === 'dark' && '#fff',
               }}
               placeholder="Select Revenue Partner"
-              dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+              classNames={{
+                popup: {
+                  root: theme === 'dark' ? 'custom-dropdown' : ''
+                }
+              }}
               options={uniquePartners.map((item) => ({
                 value: item,
                 label: item,
@@ -582,10 +620,10 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
             />
           </Form.Item>
           <Form.Item label="Beneficiary" name="Beneficiary">
-            <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
           <Form.Item label="Payer" name="Payer">
-            <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
           </Form.Item>
           <Form.Item label="Media Buyer" name="MediaBuyerName">
             <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />

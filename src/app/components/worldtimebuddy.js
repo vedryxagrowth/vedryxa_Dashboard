@@ -346,7 +346,7 @@ export default function WorldTimeBuddy() {
                 //   return { dt, isCurrentHour, isNewDay };
                 // });
                 const hours = getAlignedHours(selectedTimezones[0], zone, displayNow);
-                console.log("markWeekends:", markWeekends);
+                // console.log("markWeekends:", markWeekends);
 
 
 

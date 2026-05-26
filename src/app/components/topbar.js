@@ -55,7 +55,7 @@ import { useGlobalLoading } from "../layout";
 import { CalculateOutlined, StickyNote2Outlined } from '@mui/icons-material';
 
 // const socket = io("http://localhost:4000");
-const socket = io("http://65.0.80.126", {
+const socket = io("https://app.vyaktimetrics.com", {
   transports: ["websocket"],
 
   reconnection: true,
@@ -631,14 +631,14 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     }
 
     try {
-      console.log('Marking notification as viewed:', notification._id);
+      // console.log('Marking notification as viewed:', notification._id);
       const response = await apiClient.post('/Notifications/view', {
         email: userdetails?.email,
         notificationId: notification._id,
       });
 
       if (response.status === 200) {
-        console.log('Notification marked as viewed and removed:', notification._id);
+        // console.log('Notification marked as viewed and removed:', notification._id);
         // Remove the notification from the list in the frontend
         setNotifications((prevNotifications) =>
           prevNotifications.filter((n) => n._id !== notification._id)
@@ -1285,7 +1285,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
 useEffect(() => {
 
-  console.log("🔔 Setting up notifications...");
+  // console.log("🔔 Setting up notifications...");
 
   if (!userdetails?.email) return;
 
@@ -1300,10 +1300,10 @@ useEffect(() => {
   */
   const registerUser = () => {
 
-    console.log(
-      "📨 REGISTERING:",
-      normalizedEmail
-    );
+    // console.log(
+    //   "📨 REGISTERING:",
+    //   normalizedEmail
+    // );
 
     socket.emit(
       "register",
@@ -1317,10 +1317,10 @@ useEffect(() => {
   */
   if (socket.connected) {
 
-    console.log(
-      "✅ SOCKET ALREADY CONNECTED:",
-      socket.id
-    );
+    // console.log(
+    //   "✅ SOCKET ALREADY CONNECTED:",
+    //   socket.id
+    // );
 
     registerUser();
 
@@ -1331,10 +1331,10 @@ useEffect(() => {
   */
   const handleConnect = () => {
 
-    console.log(
-      "✅ SOCKET CONNECTED:",
-      socket.id
-    );
+    // console.log(
+    //   "✅ SOCKET CONNECTED:",
+    //   socket.id
+    // );
 
     registerUser();
 
@@ -1347,10 +1347,10 @@ useEffect(() => {
   */
   fetchNotifications().then((initial) => {
 
-    console.log(
-      "🟢 Initial full notifications:",
-      initial
-    );
+    // console.log(
+    //   "🟢 Initial full notifications:",
+    //   initial
+    // );
 
     prevNotificationsRef.current =
       initial || {};
@@ -1362,9 +1362,9 @@ useEffect(() => {
   */
   const handleUpdate = async () => {
 
-    console.log(
-      "🔥 notifications_updated RECEIVED"
-    );
+    // console.log(
+    //   "🔥 notifications_updated RECEIVED"
+    // );
 
     const newNotifications =
       await fetchNotifications();
@@ -1374,15 +1374,15 @@ useEffect(() => {
 
     const newlyAdded = [];
 
-    console.log(
-      "📦 New full notifications:",
-      newNotifications
-    );
+    // console.log(
+    //   "📦 New full notifications:",
+    //   newNotifications
+    // );
 
-    console.log(
-      "📁 Previous:",
-      old
-    );
+    // console.log(
+    //   "📁 Previous:",
+    //   old
+    // );
 
     for (
       const category of Object.keys(
@@ -1424,10 +1424,10 @@ useEffect(() => {
 
     }
 
-    console.log(
-      "🆕 Newly added:",
-      newlyAdded
-    );
+    // console.log(
+    //   "🆕 Newly added:",
+    //   newlyAdded
+    // );
 
     if (newlyAdded.length > 0) {
 
@@ -1472,7 +1472,7 @@ useEffect(() => {
   // fetchNotifications always returns array
   const fetchNotifications = async () => {
     try {
-      const res = await apiClient.get(`http://65.0.80.126/open/notifications/${session.user.email}`);
+      const res = await apiClient.get(`https://app.vyaktimetrics.com/open/notifications/${session.user.email}`);
       setNotifications(res.data); // Update state with fetched notifications
       onComplete();
       return res.data || {};
@@ -1488,7 +1488,7 @@ useEffect(() => {
 
   // Get the default avatar source based on gender
   const getDefaultAvatar = () => {
-    console.log('Determining default avatar...');
+    // console.log('Determining default avatar...');
     if (userdetails?.gender === 'Male') {
       return maleImoji;
     } else if (userdetails?.gender === 'Female') {
@@ -1529,12 +1529,12 @@ useEffect(() => {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewImage(reader.result); // Set the preview image as the file content
-      console.log("Image preview updated.");
+      // console.log("Image preview updated.");
     };
     if (file) {
       reader.readAsDataURL(file); // Read the file as a DataURL
       setImageFile(file); // Store the file temporarily
-      console.log("Image file temporarily stored:", file);
+      // console.log("Image file temporarily stored:", file);
     }
   };
 
@@ -1543,7 +1543,7 @@ useEffect(() => {
     if (imageFile) {
       const formData = new FormData();
       formData.append('file', imageFile);
-      console.log("FormData prepared for upload:", formData);
+      // console.log("FormData prepared for upload:", formData);
 
       // Call your API here to upload the image
       fetch('https://www.testapi.adsgoat.in/upload', {
@@ -1557,7 +1557,7 @@ useEffect(() => {
         .then(async (data) => {
 
           if (data.imageUrl) {
-            console.log("Image successfully uploaded. Image URL:", data.imageUrl);
+            // console.log("Image successfully uploaded. Image URL:", data.imageUrl);
 
             // Store the image URL in the database
             const response = await storeImageUrlInDb(data.imageUrl);
@@ -1619,7 +1619,7 @@ useEffect(() => {
   const onClickWorlTime = () => {
     setOpenWorldTime(true);
   }
-  console.log("Notifications:", notifications);
+  // console.log("Notifications:", notifications);
 
   return (
     <div
@@ -1704,7 +1704,7 @@ useEffect(() => {
               {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef} style={{ marginRight: "0px", paddingRight: '0px' }}>
                 <div className="cursor-pointer" style={{ paddingRight: '0px' }}>
                   {/* <Bell size={20} /> */}
-                  <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                  <Dropdown popupRender={() => menu} trigger={['click']} placement="bottomRight">
                     <span style={{ cursor: 'pointer' }}>
                       <Bell style={{ fontSize: 24 }} />
                     </span>
@@ -1792,7 +1792,7 @@ useEffect(() => {
               {userdetails?.role !== "Revenue_Partner" && showIcons && <div className="relative inline-block" ref={wrapperRef}>
                 <div className="cursor-pointer">
                   {/* <Bell size={20} style={{marginLeft:  '5px'}}/>  onClick={openNotificationsList}*/}
-                  <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                  <Dropdown popupRender={() => menu} trigger={['click']} placement="bottomRight">
                     <span style={{ cursor: 'pointer' }}>
                       <Bell style={{ fontSize: 24 }} />
                     </span>
@@ -1889,7 +1889,7 @@ useEffect(() => {
       {/* View Notification Modal */}
       <Modal
         title={null}
-        visible={isViewNotificationModalVisible}
+        open={isViewNotificationModalVisible}
         onOk={closeViewNotificationModal} // Close the modal and remove the notification
         onCancel={() => setIsViewNotificationModalVisible(false)}
         // onCancel={closeViewNotificationModal}
@@ -1940,7 +1940,7 @@ useEffect(() => {
 
       {/* Add Notification Modal */}
       <Modal
-        visible={isAddNotificationModalVisible}
+        open={isAddNotificationModalVisible}
         width={`30%`}
         onCancel={onHandleAddNotificationCancel}
         onOk={handleAddNotification}
@@ -1969,7 +1969,7 @@ useEffect(() => {
 
 
       <Modal
-        visible={isModalVisible}
+        open={isModalVisible}
         width="50%"
         onCancel={onHandleCancel}
         footer={null}
@@ -2188,7 +2188,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
     } catch (error) {
       if (retries === 1) throw error;  // Throw error if no retries left
 
-      console.log(`Retrying... Attempts left: ${retries - 1}`);
+      // console.log(`Retrying... Attempts left: ${retries - 1}`);
 
       // Use debounce for a delay before retrying
       return new Promise((resolve, reject) => {
@@ -2199,7 +2199,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(localStorage.getItem("token"))
+      // console.log(localStorage.getItem("token"))
       try {
         // console.log("Session Status: ", sessionStatus);
         // console.log("Session Data: ", session);
@@ -2265,7 +2265,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of SpecialUserkeysOfAdAccounts) {
                 if (SpecialUseradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  console.log(item);
+                  // console.log(item);
                   const networkResponse = await retryFetch(() => apiClient.get(`http://localhost:4000/open/auth/network?network=${item}`));
                   SpecialUsernewObject[item] = networkResponse.data.data;
                 } else {
@@ -2309,7 +2309,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of NetworkPartnerAdAccounts) {
                 if (Network_Partner[item][0] === "All") {
                   // Retry logic for Accounts API
-                  console.log(item);
+                  // console.log(item);
                   const networkResponse = await retryFetch(() => apiClient.get(`http://localhost:4000/open/auth/network?network=${item}`));
                   NetworkPartnerObject[item] = networkResponse.data.data;
                 } else {

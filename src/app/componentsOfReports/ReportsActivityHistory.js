@@ -54,7 +54,7 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAcco
 
     useEffect(() => {
         if (!activityTypeFilter) return;
-        console.log(changedByFilter)
+        // console.log(changedByFilter)
         let newDatatoUpdatetoState = []
 
         switch (activityTypeFilter) {
@@ -284,7 +284,12 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAcco
 
                         ]}
                         onChange={onChangeActivityType}
-                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        classNames={{
+                            popup: {
+                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                            }
+                        }}
                         style={{
                             width: '160px',
                             backgroundColor: theme === 'dark' ? '#333' : undefined,
@@ -303,7 +308,12 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAcco
                         labelRender={(option) => `Changed by: ${option.label}`}
                         options={changedByOptions}
                         onChange={onChangeChangedBy}
-                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        classNames={{
+                            popup: {
+                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                            }
+                        }}
                         style={{
                             // width: '180px',
                             backgroundColor: theme === 'dark' ? '#333' : undefined,

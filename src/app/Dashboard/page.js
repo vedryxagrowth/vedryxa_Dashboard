@@ -402,7 +402,7 @@ const RevenuePartnerDashboard = () => {
         enableRowGroup: true,
     });
 
-    console.log(revenuePratner);
+    // console.log(revenuePratner);
 
     const items = [
         { key: '1', label: 'Data', content: 'Content for Data' },
@@ -414,7 +414,7 @@ const RevenuePartnerDashboard = () => {
     const handleCarouselChange = (index) => {
         setActiveTab(index);
         carouselRef.current.goTo(parseInt(index) - 1)
-        console.log(index);
+        // console.log(index);
         if (index == 2) {
             setIsDomain("Domain");
         }
@@ -462,7 +462,7 @@ const RevenuePartnerDashboard = () => {
 
     const functionForFetchingRevenuePartnerData = async () => {
         const token = localStorage.getItem("token")
-        console.log(token);
+        // console.log(token);
         //revenuePartnerData
         const fetchRevenueData = await apiClient.get(`http://localhost:4000/dashboard/revenuepartner?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
         const response = fetchRevenueData.data;
@@ -652,7 +652,7 @@ const RevenuePartnerDashboard = () => {
     const functionForFetchingRevenuePartnerDomainData = async () => {
         setLoading1(true);
         const token = localStorage.getItem("token")
-        console.log(token);
+        // console.log(token);
         //revenuePartner/DomainData
         const fetchRevenueData = await apiClient.get(`http://localhost:4000/dashboard/revenuepartner/domaindata?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
         const response = fetchRevenueData.data;
@@ -892,7 +892,12 @@ const RevenuePartnerDashboard = () => {
                         >
                             <Select {...sharedProps} {...selectProps}
                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                // dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                classNames={{
+                                    popup: {
+                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                    }
+                                }}
                             />
                         </Space>
                     </Col>
@@ -917,7 +922,12 @@ const RevenuePartnerDashboard = () => {
                                     backgroundColor: theme === 'dark' ? '#555' : undefined,
                                     color: theme === 'dark' ? 'white' : undefined,
                                 }}
-                                dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                                // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                                classNames={{
+                                    popup: {
+                                        root: theme === 'dark' ? 'dark-theme-dropdown' : ''
+                                    }
+                                }}
                             />
                         </ConfigProvider>
                     </Col>
@@ -942,7 +952,12 @@ const RevenuePartnerDashboard = () => {
                                     backgroundColor: theme === 'dark' ? '#555' : undefined,
                                     color: theme === 'dark' ? 'white' : undefined,
                                 }}
-                                dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                                // dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                                classNames={{
+                                    popup: {
+                                        root: `custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`
+                                    }
+                                }}
                             />
                         </ConfigProvider>
                     </Col>
@@ -1702,7 +1717,7 @@ const Dashboard = () => {
         // };
 
         const transformedObject = transformObjectKeys(data);
-        console.log(transformedObject);
+        // console.log(transformedObject);
         const collectionName = (Object.keys(transformedObject));
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "end");
         // console.log(transformedObject);
@@ -1716,7 +1731,7 @@ const Dashboard = () => {
         }
         const responseData = response?.data?.data || [];
         const previousData = response?.data?.previousDays || [];
-        console.log(responseData, "response");
+        // console.log(responseData, "response");
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "deadend");
         const functionForDetailsUpdate = async () => {
             revenue1.current = getTotalEstimatedRevenue(responseData);
@@ -1747,7 +1762,7 @@ const Dashboard = () => {
             setData(responseData);
         }
         functionForDetailsUpdate();
-        console.log(collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC")
+        // console.log(collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC")
         function groupByCampaignAndDate(data) {
             return data?.reduce((acc, obj) => {
                 const campaignKey = obj?.campaign_id;
@@ -1811,7 +1826,7 @@ const Dashboard = () => {
         }
 
         const group = groupByCampaignAndDate(responseData);
-        console.log(group);
+        // console.log(group);
 
         function getTopFiveSpendCampaignsByDate(data) {
             // Step 1: Group objects by specifiedDate using a Map
@@ -1975,7 +1990,7 @@ const Dashboard = () => {
         setTop5ProfitCampaigns(top5ProfitCampaignsByDate);
         setOverAllProfitCampaigns(overallProfitCampaignsByDate);
         setOverAllLossCampaigns(overallLossCampaignsByDate);
-        console.log(top5SpendCampaignsByDate);
+        // console.log(top5SpendCampaignsByDate);
 
         // function groupAndSortByCampaignSpend(data) {
         //     const groupedData = data.reduce((acc, obj) => {
@@ -2090,7 +2105,7 @@ const Dashboard = () => {
             });
         }
 
-        console.log(responseData[0], "hi");
+        // console.log(responseData[0], "hi");
         const groupedData = groupByAccountNumberAndDate(responseData, time);
 
         function groupByAccountNumber(data, specifiedDateKey) {
@@ -2217,10 +2232,10 @@ const Dashboard = () => {
             datesByDate, spendByDate, revenueByDate, profitByDate, marginByDate, rpcByDate, cplByDate, ncplByDate, ctrByDate, cpcByDate, conversionsByDate, leadsByDate,
         });
 
-        console.log(groupedData);
+        // console.log(groupedData);
 
         function groupDataByDomainAndAccount(data, dateField) {
-            console.log(dateField);
+            // console.log(dateField);
             const DomainGroupedData = data?.reduce((acc, obj) => {
                 const { domain, accountNumber, spend, estimated_revenue, ...rest } = obj;
                 const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
@@ -2268,7 +2283,7 @@ const Dashboard = () => {
         }
 
         function groupDataByBMNameAndAgencyName(data, dateField) {
-            console.log(dateField);
+            // console.log(dateField);
             const DomainGroupedData = data?.reduce((acc, obj) => {
                 const { spend, estimated_revenue, BMName, AgencyName, accountNumber, revenuePartner } = obj;
                 const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
@@ -2322,7 +2337,7 @@ const Dashboard = () => {
         setDomainWiseData(domainResult);
         setAgencyNameReport(agencyLevelReport);
 
-        console.log(domainResult, "domain Result");
+        // console.log(domainResult, "domain Result");
 
         const sortedData = groupedData.sort((a, b) => {
             // Compare accountNumber first
@@ -2335,7 +2350,7 @@ const Dashboard = () => {
 
             return 0; // Maintain original order if both values are the same
         });
-        console.log(sortedData);
+        // console.log(sortedData);
 
         const dates = sortedData.map(d => d.accountNumber.slice(-4));
         const newDates = sortedData.map(d => d.specifiedDate);
@@ -2354,7 +2369,7 @@ const Dashboard = () => {
         // console.log(revenue);
 
         setChartData({ dates, newDates, spend, revenue, profit, margin, rpc, cpl, ncpl, ctr, cpc, conversions, leads });
-        console.log(responseData.length);
+        // console.log(responseData.length);
         setSkeletonLoading(false);
     }, 1500);;
     // useEffect(() => {
@@ -2389,10 +2404,10 @@ const Dashboard = () => {
     useEffect(() => {
         let selectedCategoryValues = null;
 
-        if (Object.keys(selectedItems).length === 0) {
-            console.log('First Select - Default Selected Categories:', [defaultCategory]);
-            console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
-        }
+        // if (Object.keys(selectedItems).length === 0) {
+        //     console.log('First Select - Default Selected Categories:', [defaultCategory]);
+        //     console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
+        // }
 
         // Only process selectedItems if it's populated
         if (Object.keys(selectedItems).length > 0) {
@@ -2403,7 +2418,7 @@ const Dashboard = () => {
                 return result;
             }, {});
 
-            console.log('Second Select - Current Selected Items:', selectedCategoryValues);
+            // console.log('Second Select - Current Selected Items:', selectedCategoryValues);
 
 
             // Ensure functionalCall is not triggering state updates
@@ -2559,7 +2574,7 @@ const Dashboard = () => {
             (item.accountNumber?.toString().toLowerCase().includes(searchValue) ||
                 item.accountName?.toLowerCase().includes(searchValue))
             ) || [];
-            console.log(`Transformed data for category ${category}:`, transformedData[category]);
+            // console.log(`Transformed data for category ${category}:`, transformedData[category]);
 
             return (
                 <div key={category}>
@@ -2638,7 +2653,7 @@ const Dashboard = () => {
     // const newNetworks = userdetails?.adAccounts.map((each)=>)
 
     const networks = Object.keys(userdetails?.adAccounts);
-    console.log(networks, "network");
+    // console.log(networks, "network");
 
     const options = networks.map(each => ({
         value: each,
@@ -2674,7 +2689,7 @@ const Dashboard = () => {
     const avgRpcCpl = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { conversions, estimated_revenue } = params.data;
             if (estimated_revenue !== 0) {
                 const RPC = estimated_revenue / conversions;
@@ -2687,7 +2702,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { conversions, estimated_revenue } = params.node.aggData;
             if (estimated_revenue !== 0) {
                 const RPC = estimated_revenue / conversions;
@@ -2749,7 +2764,7 @@ const Dashboard = () => {
     const avgNCPL = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { conversions, spend } = params.data;
             if (conversions !== 0) {
                 const RPC = spend / conversions;
@@ -2762,7 +2777,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { conversions, spend } = params.node.aggData;
             if (conversions !== 0) {
                 const RPC = spend / conversions;
@@ -2776,7 +2791,7 @@ const Dashboard = () => {
     const avgCTR = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { fbClicks, impressions } = params.data;
             if (impressions !== 0) {
                 const RPC = (fbClicks / impressions) * 100;
@@ -2789,7 +2804,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { fbClicks, impressions } = params.node.aggData;
             if (impressions !== 0) {
                 const RPC = (fbClicks / impressions) * 100;
@@ -2802,7 +2817,7 @@ const Dashboard = () => {
     const avgCPM = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { spend, impressions } = params.data;
             if (impressions !== 0) {
                 const RPC = (spend / impressions) * 1000;
@@ -2815,7 +2830,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { spend, impressions } = params.node.aggData;
             if (impressions !== 0) {
                 const RPC = (spend / impressions) * 1000;
@@ -2828,7 +2843,7 @@ const Dashboard = () => {
     const avgMARGIN = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { spend, estimated_revenue } = params.data;
             if (estimated_revenue !== 0) {
                 const RPC = ((estimated_revenue - spend) / estimated_revenue) * 100;
@@ -2841,7 +2856,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { spend, estimated_revenue } = params.node.aggData;
             if (estimated_revenue !== 0) {
                 const RPC = ((estimated_revenue - spend) / estimated_revenue) * 100;
@@ -2855,7 +2870,7 @@ const Dashboard = () => {
     const avgROI = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { spend, estimated_revenue } = params.data;
             if (estimated_revenue !== 0) {
                 const RPC = ((estimated_revenue - spend) / spend) * 100;
@@ -2868,7 +2883,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { spend, estimated_revenue } = params.node.aggData;
             if (estimated_revenue !== 0) {
                 const RPC = ((estimated_revenue - spend) / spend) * 100;
@@ -2881,7 +2896,7 @@ const Dashboard = () => {
     const avgCPC = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { fbClicks, spend } = params.data;
             if (fbClicks !== 0) {
                 const RPC = spend / fbClicks;
@@ -2894,7 +2909,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { fbClicks, spend } = params.node.aggData;
             if (fbClicks !== 0) {
                 const RPC = spend / fbClicks;
@@ -2907,7 +2922,7 @@ const Dashboard = () => {
     const avgCPCLinkClikcs = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { fbLinkClicks, spend } = params.data;
             if (fbLinkClicks !== 0) {
                 const RPC = spend / fbLinkClicks;
@@ -2920,7 +2935,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { fbLinkClicks, spend } = params.node.aggData;
             if (fbLinkClicks !== 0) {
                 const RPC = spend / fbLinkClicks;
@@ -2933,7 +2948,7 @@ const Dashboard = () => {
     const avgFilteration = (params) => {
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
-            console.log(params.data);
+            // console.log(params.data);
             const { fbLeads, conversions } = params.data;
             if (fbLeads !== 0) {
                 const RPC = ((parseInt(fbLeads) - parseInt(conversions)) / parseInt(fbLeads)) * 100;
@@ -2946,7 +2961,7 @@ const Dashboard = () => {
 
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
-            console.log(params.node?.aggData);
+            // console.log(params.node?.aggData);
             const { fbLeads, conversions } = params.node.aggData;
             if (fbLeads !== 0) {
                 const RPC = ((parseInt(fbLeads) - parseInt(conversions)) / parseInt(fbLeads)) * 100;
@@ -2985,7 +3000,7 @@ const Dashboard = () => {
     };
 
     const avgCtr = (params) => {
-        console.log(params);
+        // console.log(params);
         // For non-grouped rows (individual row data)
         if (params.data !== undefined) {
             // console.log(params.data);
@@ -3094,7 +3109,7 @@ const Dashboard = () => {
                                     endDate: endDate,
                                     accountName: userdetails?.adAccounts[revenuePartnerNameToPassToReports]?.find(each => each.accountNumber === accountNumberToPassToReports)?.accountName
                                 };
-                                console.log(userdetails?.adAccounts[revenuePartnerNameToPassToReports]?.find(each => each.accountNumber === accountNumberToPassToReports)?.accountName);
+                                // console.log(userdetails?.adAccounts[revenuePartnerNameToPassToReports]?.find(each => each.accountNumber === accountNumberToPassToReports)?.accountName);
                                 // Convert data to query string
                                 const queryString = new URLSearchParams(data).toString();
                                 const url = `/Reports?${queryString}`;
@@ -3285,18 +3300,20 @@ const Dashboard = () => {
                                 // // Convert data to query string
                                 // const queryString = new URLSearchParams(data).toString();
                                 const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignName}-${accountNumberToPassToReports}-${time}-${collectionName}`;
-                                console.log(url);
+                                // console.log(url);
 
                                 // Open the URL in a new tab
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                         >
                             <Tooltip
-                                overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',
-                                    borderRadius: 6,
+                                styles={{
+                                    body: {
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        border: '1px solid #ccc',
+                                        borderRadius: 6,
+                                    }
                                 }}
                                 title={(() => {
                                     const [text, setText] = React.useState("Click to Copy");
@@ -3585,7 +3602,7 @@ const Dashboard = () => {
             aggFunc: spender,
             // valueFormatter: currencyFormatter,
             valueFormatter: params => {
-                console.log('display value type:', typeof params.value, params.value);
+                // console.log('display value type:', typeof params.value, params.value);
                 return `$${parseFloat(params.value || 0).toFixed(2)}`;
             },
             suppressMenu: true,
@@ -5702,7 +5719,7 @@ const Dashboard = () => {
     }
 
 
-    console.log(showGraphs, "showGraphs");
+    // console.log(showGraphs, "showGraphs");
 
 
     // chartOptions.js
@@ -5833,7 +5850,7 @@ const Dashboard = () => {
 
         if (field === 'accountNumber') {
             const accountNumberToPassToReports = params.value;
-            console.log(params.node);
+            // console.log(params.node);
             const groupedData = params.node.allLeafChildren
                 ? params.node.allLeafChildren.map(childNode => childNode.data)
                 : [params.node.data];
@@ -5862,7 +5879,7 @@ const Dashboard = () => {
 
             // Open the URL in a new tab
             window.open(url, '_blank', 'noopener,noreferrer');
-            console.log('Clicked accountNumber:', params.value, params.node);
+            // console.log('Clicked accountNumber:', params.value, params.node);
         }
         // if(field === "campaign_name"){
         //     const accountNumberToPassToReports = params.value;
@@ -5935,8 +5952,13 @@ const Dashboard = () => {
                                                 value={firstSelectValues}
                                                 onChange={handleFirstSelectChange}
                                                 maxTagCount="responsive"
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                dropdownRender={(menu) => (
+                                                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
+                                                popupRender={(menu) => (
                                                     <div
                                                         style={{
                                                             width: '100%',
@@ -5969,9 +5991,14 @@ const Dashboard = () => {
                                                 style={{ width: '100%' }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 placeholder="Select Accounts"
-                                                dropdownClassName={theme === 'dark' ? 'custom-dropdown' : 'custom-dropdown'}
+                                                // dropdownClassName={theme === 'dark' ? 'custom-dropdown' : 'custom-dropdown'}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : 'custom-dropdown'
+                                                    }
+                                                }}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                                                dropdownRender={() => (
+                                                popupRender={() => (
                                                     <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
                                                         {renderInnerSelects(theme)}
                                                     </div>
@@ -5988,7 +6015,12 @@ const Dashboard = () => {
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 placeholder="Select timezone"
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
                                                 optionFilterProp="label"
                                                 value={time}
                                                 options={timezones.map((item) => ({
@@ -6017,7 +6049,12 @@ const Dashboard = () => {
                                                     onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
                                                     disabledDate={disabledDate}
                                                     format="YYYY-MM-DD"
-                                                    dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                                                    // dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                                                    classNames={{
+                                                        popup: {
+                                                            root: `custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`
+                                                        }
+                                                    }}
                                                     style={{
                                                         width: '100%',
                                                         height: '35px', // Adjust height as needed
@@ -6111,8 +6148,13 @@ const Dashboard = () => {
                                                 value={firstSelectValues}
                                                 onChange={handleFirstSelectChange}
                                                 maxTagCount="responsive"
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                dropdownRender={(menu) => (
+                                                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
+                                                popupRender={(menu) => (
                                                     <div
                                                         style={{
                                                             width: '100%',
@@ -6167,9 +6209,14 @@ const Dashboard = () => {
                                                 style={{ width: '100%' }}
                                                 className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                                 placeholder="Select Accounts"
-                                                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                                // dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                                                dropdownRender={() => (
+                                                popupRender={() => (
                                                     <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
                                                         {renderInnerSelects(theme)}
                                                     </div>
@@ -6186,7 +6233,12 @@ const Dashboard = () => {
                                                 }}
                                                 className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                                 placeholder="Select timezone"
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
                                                 optionFilterProp="label"
                                                 value={time}
                                                 options={timezones.map((item) => ({
@@ -6222,7 +6274,12 @@ const Dashboard = () => {
                                                         backgroundColor: theme === 'dark' ? '#555' : undefined,
                                                         color: theme === 'dark' ? 'white' : undefined,
                                                     }}
-                                                    dropdownClassName={theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : ' Dashboard-Details-1'}
+                                                    // dropdownClassName={theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : ' Dashboard-Details-1'}
+                                                    classNames={{
+                                                        popup: {
+                                                            root: theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : ' Dashboard-Details-1'
+                                                        }
+                                                    }}
                                                     renderExtraFooter={() => (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
                                                             <Button
@@ -6272,7 +6329,12 @@ const Dashboard = () => {
                                         overflow: 'hidden',
                                         backgroundColor: theme === 'dark' ? '#0E1E38' : '#fff',
                                     }}
-                                    bodyStyle={{ padding: 0 }}
+                                    // bodyStyle={{ padding: 0 }}
+                                    styles={{
+                                        body: {
+                                            padding: 0,
+                                        }
+                                    }}
                                     className='Dashboard-Details-2'
                                 >
                                     <div
@@ -6673,7 +6735,9 @@ const Dashboard = () => {
                                     <div className="metrics-container">
                                         <div className="metrics-grid">
                                             {metrics.map((m, i) => (
-                                                <Card className="metric-card" key={i} bordered={false}
+                                                <Card className="metric-card" key={i} 
+                                                // bordered={false}
+                                                variant="borderless"
                                                     style={{
                                                         backgroundColor: theme === "dark" ? "#2F2F2F" : "white"
                                                     }}>
@@ -6697,11 +6761,13 @@ const Dashboard = () => {
                                                     )} */}
                                                     {m.camparisionPercentage !== undefined && (
                                                         <Tooltip
-                                                            overlayInnerStyle={{
-                                                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                                                color: theme === 'dark' ? '#fff' : '#000',
-                                                                border: '1px solid #ccc',
-                                                                borderRadius: 6,
+                                                            styles={{
+                                                                body: {
+                                                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                                    border: '1px solid #ccc',
+                                                                    borderRadius: 6,
+                                                                }
                                                             }}
                                                             title={<div style={{ color: theme === 'dark' ? '#fff' : '#000', fontSize: 10 }}>
                                                                 Prev : {previousDataDates.start}-{previousDataDates.end}

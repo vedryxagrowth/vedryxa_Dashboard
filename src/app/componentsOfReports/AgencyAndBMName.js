@@ -339,7 +339,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
     
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -351,8 +351,8 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
 
     const memorizedBMNameData = useMemo(()=> BMNameData, [BMNameData]);
     const memorizedBMNameColumnDefs = useMemo(()=>BMNameColumnDefs, [BMNameColumnDefs]);
-    console.log(memorizedBMNameData);
-    console.log(memorizedBMNameColumnDefs);
+    // console.log(memorizedBMNameData);
+    // console.log(memorizedBMNameColumnDefs);
 
     const functionCall1 = async () => {
         try{
@@ -381,7 +381,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                         // impressions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                     }
                 ]);
-                console.log("hihi");
+                // console.log("hihi");
             }
             else{
                 setBMNameData([]);
@@ -413,7 +413,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
         }
     }
     , [refreshpage]);
-    console.log(BMNameData);
+    // console.log(BMNameData);
     return(
         <div style={{ height: "100%", marginBottom: '20px' }}>
             <div style={contentStyle}>

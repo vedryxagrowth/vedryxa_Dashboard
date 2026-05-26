@@ -236,7 +236,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
 
     showCampaignLevel(uniqueByCampaignId(selectedData));
-    console.log(selectedData);
+    // console.log(selectedData);
 
     const leafCampaignsData = selectedNodes
       .filter(node => !node.group && node.data)
@@ -260,7 +260,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
     setLeafCampaigns(uniqueLeafCampaigns);
 
-    console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
+    // console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
 
 
   };
@@ -1162,9 +1162,9 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
     let apiUrl = "";
 
     if (action === "pin") {
-      apiUrl = "/SmartPinBulkWithHitory";
+      apiUrl = "http://localhost:4000/reports/bulkactions/pin";
     } else if (action === "unpin") {
-      apiUrl = "/SmartUnpinBulkWithHistory";
+      apiUrl = "http://localhost:4000/reports/bulkactions/unpin";
     }
 
     const res = await apiClient.post(apiUrl, {
@@ -1242,7 +1242,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
       };
 
       const resp = await apiClient.post(
-        '/Comments/bulkdeleteWithHistory',
+        'http://localhost:4000/reports/bulkactions/comments/delete',
         body
       );
 
@@ -1320,7 +1320,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
       }));
 
       const resp = await apiClient.post(
-        '/Comments/upsertBulkNewWithHistory',
+        'http://localhost:4000/reports/bulkactions/comments',
         { items, usercommit: userdetails?.email }
       );
 
@@ -1439,7 +1439,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
 
       const resp = await apiClient.post(
-        "/BulkCampaignStatusChangeManyWithHistory",
+        "http://localhost:4000/reports/bulkactions/campaignstatus",
         { items: filteredItems },
         { headers: { Authorization: token } }
       );
@@ -1637,7 +1637,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "/BulkUpdateCategoryNewWithHistory",
+        "http://localhost:4000/reports/bulkactions/category",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
@@ -1960,7 +1960,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
             };
 
             const response = await apiClient.post(
-              `/BulkCampaignStatusChangeWithHistory`,
+              `http://localhost:4000/reports/singleactions/campaignstatus`,
               payload,
               { headers: { Authorization: token } }
             );
@@ -2132,7 +2132,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
-            '/Comments/upsert/History',
+            'http://localhost:4000/reports/singleactions/comments',
             {
               accountNumber: rowAccount,
               campaignname: campaignName,
@@ -2193,7 +2193,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const newResponse = await apiClient.post(
-              '/New/Comments/delete/History',
+              'http://localhost:4000/reports/singleactions/comments/delete',
               {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
@@ -2274,7 +2274,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                 usercommit: userdetails?.email,
                 level: item.level,
               }));
-              console.log('Sending items:', items);
+              // console.log('Sending items:', items);
 
               const resp = await apiClient.post(
                 '/Comments/upsertBulk',
@@ -2348,7 +2348,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
             }
             if (updatedPinStatus) {
               const resp = await apiClient.post(
-                '/NewPinBulkWithHistory',
+                'http://localhost:4000/reports/singleactions/pin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2400,7 +2400,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
               }
             } else {
               const resp = await apiClient.post(
-                '/NewUnpinBulkWithHistory',
+                'http://localhost:4000/reports/singleactions/unpin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -3194,7 +3194,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
     },
     processCellForClipboard: (params) => {
       if (params.node.group) {
-        console.log("Processing group column for copy..."); // Debugging log
+        // console.log("Processing group column for copy..."); // Debugging log
 
         // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
         if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -3230,7 +3230,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           collectionName = newtworkCollections[newRevenuePratner];
           break;
       }
-      console.log(collectionName);
+      // console.log(collectionName);
       // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
       // const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
       // const mainData = fetchData.data;
@@ -3337,7 +3337,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
           const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
           const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
-          console.log(campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber), "category check");
+          // console.log(campaignComments.find(campaign => campaign.campaignname === eachData.campaign_name && campaign.Account === eachData.accountNumber), "category check");
           const campaignObjectStatus = Camapignlevelstatus
             .find(item =>
               String(item.campaign_id) === String(eachData.campaign_id) &&
@@ -3547,7 +3547,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
       newDailyData.current = fullData;
       fetchData.status === 200 && setApiStatus(false);
-      fetchData.status === 200 && console.log("Success");
+      // fetchData.status === 200 && console.log("Success");
       // setTrue(false);
       setLoading1(false);
     } catch (error) {
@@ -3555,15 +3555,15 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
       // if(error.response.status === 500){
       //     apiStatus.current = true;
       // }
-      console.log(error);
+      // console.log(error);
       setApiStatus(true);
       setLoading1(false);
     }
   }
 
-  useEffect(() => {
-    console.log(campaignIds, "campaignIds updated");
-  }, [campaignIds]);
+  // useEffect(() => {
+  //   console.log(campaignIds, "campaignIds updated");
+  // }, [campaignIds]);
   useEffect(() => {
     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3575,7 +3575,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
           token
         );
 
-        console.log('Final creatives data:', creativesData);
+        // console.log('Final creatives data:', creativesData);
         setAdLevelCreatives(creativesData)
 
       } catch (err) {
@@ -3806,7 +3806,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
       // ✅ Copy text to clipboard
       navigator.clipboard.writeText(copiedText).then(() => {
-        console.log("Copied to clipboard:", copiedText);
+        // console.log("Copied to clipboard:", copiedText);
       }).catch((err) => {
         console.error("Clipboard copy failed:", err);
       });
@@ -3838,7 +3838,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
 
   useEffect(() => {
     // functionCall1();
-    console.log(campaignStatusFilter, "campaignStatusFilter");
+    // console.log(campaignStatusFilter, "campaignStatusFilter");
     if (campaignStatusFilter !== "All") {
       // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
       // const filteredByStatus = memorizedDailyData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
@@ -4295,7 +4295,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                         <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                           {ids.map((id, i) => {
                             const acc = accountsAccess.find(a => a.accountNumber === id);
-                            console.log("timezones:", accountsAccess);
+                            // console.log("timezones:", accountsAccess);
                             const tz = acc?.timeZone ?? "-";
                             return (
                               <div

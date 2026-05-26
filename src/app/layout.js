@@ -71,7 +71,7 @@ async function getUserDetails(name) {
     .then((res) => res.ok ? res.json() : res.json().then((err) => Promise.reject(err)))
     .then((result) => {
       message.success("User activity posted successfully!");
-      console.log("Response:", result);
+      // console.log("Response:", result);
     })
     .catch((err) => {
       console.error("Error posting user activity:", err);
@@ -87,7 +87,7 @@ const retryFetch = async (fetchFunc, retries = 3) => {
   } catch (error) {
     if (retries === 1) throw error;  // Throw error if no retries left
 
-    console.log(`Retrying... Attempts left: ${retries - 1}`);
+    // console.log(`Retrying... Attempts left: ${retries - 1}`);
 
     // Use debounce for a delay before retrying
     return new Promise((resolve, reject) => {
@@ -120,7 +120,7 @@ const UserActivities = ({ children, onComplete }) => {
   useEffect(() => {
     if (sessionClose === "close") {
       const handleSignOutAcrossTabs = () => {
-        console.log("Sign-out triggered across all tabs.");
+        // console.log("Sign-out triggered across all tabs.");
         const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
         localStorage.removeItem("token");
         signOut(); // Sign out the user using your existing auth logic
@@ -146,7 +146,7 @@ const UserActivities = ({ children, onComplete }) => {
   useEffect(() => {
     if (status === "authenticated") {
       const token = localStorage.getItem("token");
-      console.log(token);
+      // console.log(token);
       let decodedToken;
 
       if (token) {
@@ -186,7 +186,7 @@ const UserActivities = ({ children, onComplete }) => {
           else if (decodedToken.exp > currentTime) {
             // Token exists and is valid
             // console.log("testing");
-            console.log("Token is already stored and valid:", token);
+            // console.log("Token is already stored and valid:", token);
             onComplete();
           }
         } catch (err) {
@@ -200,17 +200,17 @@ const UserActivities = ({ children, onComplete }) => {
         }
       } else {
         // console.log("for");
-        console.log("No token found in localStorage.");
+        // console.log("No token found in localStorage.");
         onComplete();
         // signOut();
       }
     }
     if (status === "unauthenticated") {
-      console.log("users");
+      // console.log("users");
       const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
       onComplete();
       // signOut();
-      console.log("un auth");
+      // console.log("un auth");
     }
   }, [status]);
 
@@ -297,7 +297,7 @@ const ContentWrapper = ({ children }) => {
     }
 
     if (status === "authenticated" && usersDataForLogin?.length !== 0) {
-      console.log("app to console");
+      // console.log("app to console");
       return (
         <Appbar darkMode={darkMode} toggleTheme={toggleTheme} usersDataForLogin={usersDataForLogin}>
           {children}

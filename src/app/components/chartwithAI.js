@@ -604,7 +604,7 @@ export default function ChatWithAI() {
             )}
             <Modal
                 title="Choose Attachment"
-                visible={isModelVisible}
+                open={isModelVisible}
                 onCancel={() => setIsModelVisible(false)}
                 footer={null}
             >

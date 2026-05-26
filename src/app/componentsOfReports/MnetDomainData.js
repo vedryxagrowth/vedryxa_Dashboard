@@ -783,7 +783,7 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });

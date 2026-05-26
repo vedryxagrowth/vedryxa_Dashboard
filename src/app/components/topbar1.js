@@ -337,7 +337,7 @@ const TopBar1 = () => {
             </div>
     
             <Modal
-            visible={isModalVisible}
+            open={isModalVisible}
             width={`50%`}
             onCancel={onHandleCancel}
             footer={null}

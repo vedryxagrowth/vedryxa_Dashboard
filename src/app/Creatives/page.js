@@ -218,7 +218,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         try {
                             if (file.action === 'copy') {
                                 if (file.isFolder) {
-                                    await axios.post("https://prodapis.adsgoat.in/copyFolder", {
+                                    await axios.post("http://localhost:4000/creatives/folders/copyfolder", {
                                         sourceKey,
                                         destinationKey: finalKey
                                     }, {
@@ -228,8 +228,13 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         }
                                     });
                                 } else {
-                                    const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
-                                    const res = await fetch(proxyUrl);
+                                    const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(file.url)}`;
+                                    const res = await fetch(proxyUrl, {
+                                        method: "GET",
+                                        headers: {
+                                            Authorization: localStorage.getItem("token")
+                                        },
+                                    });
                                     const blob = await res.blob();
                                     const fileName = finalKey.split('/').pop();
                                     const formData = new FormData();
@@ -237,7 +242,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     formData.append("filename", finalKey);
                                     formData.append("folder", currentFolder);
 
-                                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                                    await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
                                         headers: {
                                             Authorization: localStorage.getItem("token"),
                                             username: userdetails.userName,
@@ -250,7 +255,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     return;
                                 }
 
-                                await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                await axios.post("http://localhost:4000/creatives/folders/moveFileOrFolder", {
                                     sourceKey,
                                     destinationKey: finalKey
                                 }, {
@@ -311,7 +316,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                 formData.append("folder", currentFolder);
 
                 try {
-                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                    await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             username: userdetails.userName,
@@ -432,7 +437,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
         try {
             const response = isTrashView
-                ? await axios.get("https://prodapis.adsgoat.in/getTrashFiles", {
+                ? await axios.get("http://localhost:4000/creatives/trashfiles", {
                     headers: {
                         username: userdetails.userName,
                         "x-folder": trashPath,
@@ -568,8 +573,13 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             }
 
             // Use backend proxy
-            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(finalUrl)}`;
-            const response = await fetch(proxyUrl);
+            const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(finalUrl)}`;
+            const response = await fetch(proxyUrl, {
+                method: "GET",
+                headers: {
+                    Authorization: localStorage.getItem("token")
+                },
+            });
 
             if (!response.ok) {
                 throw new Error(`Failed to fetch file. Status: ${response.status}`);
@@ -729,10 +739,15 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         try {
 
             // 🔹 Use proxy to fetch the image and bypass CORS restrictions
-            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
-            console.log("Cloning using Proxy:", proxyUrl);
+            const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(image.url)}`;
+            // console.log("Cloning using Proxy:", proxyUrl);
 
-            const response = await fetch(proxyUrl);
+            const response = await fetch(proxyUrl, {
+                method: "GET",
+                headers: {
+                    Authorization: localStorage.getItem("token")
+                },
+            });
             if (!response.ok) {
                 throw new Error("Failed to fetch the file. Check CORS settings on the file host.");
             }
@@ -757,7 +772,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             formData.append("filename", `${uploadPrefix}${currentFolder}${clonedFileName}`);
             formData.append("folder", currentFolder); // include the folder for backend
 
-            const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            const uploadResponse = await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -800,9 +815,9 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         }
 
         // 🔹 Proxy the image URL
-        const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
+        const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(image.url)}`;
 
-        console.log("Editing Image URL:", proxyUrl);
+        // console.log("Editing Image URL:", proxyUrl);
 
         // Set selected image for editing
         // setSelectedImage(image);
@@ -843,7 +858,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         formData.append("folder", currentFolder); // pass the current folder as a separate field
 
         try {
-            const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            const response = await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -1114,7 +1129,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
             try {
                 if (isFolder) {
-                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                    await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
                         oldFolderKey: oldItem.uid,
                         newFolderKey: newKey,
                     }, {
@@ -1124,7 +1139,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         },
                     });
                 } else {
-                    await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
+                    await axios.post("http://localhost:4000/creatives/userfiles/renameuserfile", {
                         key: oldItem.uid,
                         newFilename: newKey,
                     }, {
@@ -1174,7 +1189,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
             try {
                 if (isFolder) {
-                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                    await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
                         oldFolderKey: oldKey,
                         newFolderKey: newKey,
                     }, {
@@ -1184,7 +1199,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         },
                     });
                 } else {
-                    await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
+                    await axios.post("http://localhost:4000/creatives/userfiles/renameuserfile", {
                         key: oldKey,
                         newFilename: newKey,
                     }, {
@@ -1208,7 +1223,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const handleConfirmDelete = async () => {
         if (!imageToDelete || !userdetails?.userName) return;
         try {
-            const response = await axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
+            const response = await axios.delete("http://localhost:4000/creatives/userfiles/deleteuserfiles", {
                 headers: {
                     "username": userdetails.userName,
                     Authorization: localStorage.getItem("token"),
@@ -1331,8 +1346,13 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const downloadFile = async (fileUrl, filename) => {
         const safeName = filename || fileUrl.split("/").pop();
         try {
-            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(fileUrl)}`;
-            const res = await fetch(proxyUrl);
+            const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(fileUrl)}`;
+            const res = await fetch(proxyUrl, {
+                method: "GET",
+                headers: {
+                    Authorization: localStorage.getItem("token")
+                },
+            });
 
             if (res.ok) {
                 const blob = await res.blob();
@@ -1620,7 +1640,13 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             style={{ width: '160px' }}
                             onChange={handleKeyChange}
                             value={selectedKey}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
+
 
                         >
                             {/* {options.length > 0 ? (
@@ -1672,9 +1698,15 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             disabled={!selectedKey}
                             value={selectedValue}
 
-                            selectedAccountNumber={selectedAccountNumber}
+                            // selectedAccountNumber={selectedAccountNumber}
                             optionLabelProp="value"
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
+
                             filterOption={(input, option) => {
                                 const number = option.value?.toString()?.toLowerCase() || "";
                                 const name = option.accountname?.toString()?.toLowerCase() || "";
@@ -1757,7 +1789,13 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                 format="YYYY-MM-DD"
                                 allowClear={true}
                                 style={{ width: '240px' }}
-                                dropdownClassName={`${theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'}`}
+                                // dropdownClassName={`${theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'}`}
+                                classNames={{
+                                    popup: {
+                                        root: theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'
+                                    }
+                                }}
+
                             />
                         </ConfigProvider>
                     </Col>
@@ -2205,7 +2243,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 const targetKey = `${uploadPrefix}${currentFolder}${image.name}/`;
                                                 const destinationKey = `${targetKey}${sourceName}${sourceKey.endsWith("/") ? '/' : ''}`;
 
-                                                await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                                await axios.post("http://localhost:4000/creatives/folders/moveFileOrFolder", {
                                                     sourceKey,
                                                     destinationKey,
                                                 }, {
@@ -2415,7 +2453,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                 onCancel={handleCloseViewModal} // 🔹 Calls function to close modal
                 footer={null}
                 width={600}
-                destroyOnClose={true} // 🔹 Ensures video stops playing when closed
+                destroyOnHidden={true} // 🔹 Ensures video stops playing when closed
             >
                 {viewedImage && viewedImage.url ? (
                     viewedImage.url?.match(/\.(mp4|mov)$/i) ? (
@@ -2583,7 +2621,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                         if (file.action === "copy") {
                                                             if (file.isFolder) {
                                                                 // 📁 Copy folder
-                                                                await axios.post("https://prodapis.adsgoat.in/copyFolder", {
+                                                                await axios.post("http://localhost:4000/creatives/folders/copyfolder", {
                                                                     sourceKey, destinationKey,
                                                                 }, {
                                                                     headers: {
@@ -2600,8 +2638,13 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                                 const newName = `${base}(${cloneNumber})${ext}`;
                                                                 destinationKey = `${uploadPrefix}${currentFolder}${newName}`;
 
-                                                                const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
-                                                                const res = await fetch(proxyUrl);
+                                                                const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(file.url)}`;
+                                                                const res = await fetch(proxyUrl, {
+                                                                    method: "GET",
+                                                                    headers: {
+                                                                        Authorization: localStorage.getItem("token")
+                                                                    },
+                                                                });
                                                                 const blob = await res.blob();
 
                                                                 const formData = new FormData();
@@ -2609,7 +2652,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                                 formData.append("filename", destinationKey);
                                                                 formData.append("folder", currentFolder);
 
-                                                                await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                                                                await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
                                                                     headers: {
                                                                         Authorization: localStorage.getItem("token"),
                                                                         username: userdetails.userName,
@@ -2620,7 +2663,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                                         if (file.action === "cut") {
                                                             // ✂️ Move file or folder
-                                                            await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                                            await axios.post("http://localhost:4000/creatives/folders/moveFileOrFolder", {
                                                                 sourceKey,
                                                                 destinationKey,
                                                             }, {
@@ -2671,7 +2714,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                         try {
                                             await Promise.all(items.map(item =>
-                                                axios.delete("https://prodapis.adsgoat.in/permanentlyDeleteNew", {
+                                                axios.delete("http://localhost:4000/creatives/trashfiles", {
                                                     headers: {
                                                         Authorization: localStorage.getItem("token"),
                                                         username: userdetails.userName,
@@ -2713,7 +2756,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 if (!relativePath) throw new Error("Invalid original path");
 
                                                 const originalKey = `${selectedKey}/${selectedAccountNumber}/${relativePath}`;
-                                                await axios.post("https://prodapis.adsgoat.in/restoreFileOrFolder", {
+                                                await axios.post("http://localhost:4000/creatives/trashfiles", {
                                                     trashKey,
                                                     originalKey,
                                                 }, {
@@ -2767,7 +2810,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                             // 2️⃣ If it's a FOLDER → fetch files inside
                                             try {
-                                                const res = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
+                                                const res = await axios.get("http://localhost:4000/creatives/userfiles/getuserfiles", {
                                                     headers: {
                                                         username: userdetails.userName,
                                                         "x-folder": item.uid,
@@ -2859,7 +2902,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             contextMenu.selectedList.map(item => {
                                                 const isFolder = item.isFolder;
                                                 if (isFolder) {
-                                                    return axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                                                    return axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
                                                         headers: {
                                                             Authorization: localStorage.getItem("token"),
                                                             username: userdetails.userName,
@@ -2867,7 +2910,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                         },
                                                     });
                                                 } else {
-                                                    return axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
+                                                    return axios.delete("http://localhost:4000/creatives/userfiles/deleteuserfiles", {
                                                         headers: {
                                                             Authorization: localStorage.getItem("token"),
                                                             username: userdetails.userName,
@@ -2919,7 +2962,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 const folderKey = contextMenu.target.uid;
 
                                                 // 1️⃣ Fetch files inside that folder
-                                                const res = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
+                                                const res = await axios.get("http://localhost:4000/creatives/userfiles/getuserfiles", {
                                                     headers: {
                                                         username: userdetails.userName,
                                                         "x-folder": folderKey,
@@ -3182,7 +3225,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                     const createFolder = async (key) => {
-                        await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", new FormData(), {
+                        await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", new FormData(), {
                             headers: {
                                 Authorization: localStorage.getItem("token"),
                                 username: userdetails.userName,
@@ -3196,7 +3239,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     };
 
                     const replaceFolder = async () => {
-                        await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                        await axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
                             headers: {
                                 Authorization: localStorage.getItem("token"),
                                 username: userdetails.userName,
@@ -3240,7 +3283,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         segments[segments.length - 2] = name;
                         const newKey = segments.slice(0, -1).join('/') + '/';
 
-                        await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                        await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
                             oldFolderKey: oldKey,
                             newFolderKey: newKey,
                         }, {
@@ -3278,7 +3321,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                         const createFolder = async (key) => {
-                            await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", new FormData(), {
+                            await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", new FormData(), {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                     username: userdetails.userName,
@@ -3292,7 +3335,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         };
 
                         const replaceFolder = async () => {
-                            await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                            await axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                     username: userdetails.userName,
@@ -3334,7 +3377,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             segments[segments.length - 2] = name;
                             const newKey = segments.slice(0, -1).join('/') + '/';
 
-                            await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                            await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
                                 oldFolderKey: oldKey,
                                 newFolderKey: newKey,
                             }, {
@@ -3361,7 +3404,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     const folderKey = deleteFolderModal.folder?.uid;
                     if (!folderKey) return;
 
-                    await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                    await axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             username: userdetails.userName,

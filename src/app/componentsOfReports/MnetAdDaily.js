@@ -57,7 +57,7 @@ const selectTimezone = {
 
 
 const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
-    console.log(columnDefs, "columnDefs")
+    // console.log(columnDefs, "columnDefs")
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -639,7 +639,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
             const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
             const fetchData = await apiClient.get(`/AdDaily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=Facebook_Mnet_AD`);
             const mainData = fetchData.data;
-            console.log(mainData);
+            // console.log(mainData);
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
             let totalSpend = 0;
             let totalRevenue = 0;
@@ -762,7 +762,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
             setdailyData(fullData);
             newDailyData.current = fullData;
             fetchData.status === 200 && setApiStatus(false);
-            fetchData.status === 200 && console.log("Success");
+            // fetchData.status === 200 && console.log("Success");
             // setTrue(false);
             setLoading1(false);
         } catch (error) {
@@ -770,7 +770,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
             // if(error.response.status === 500){
             //     apiStatus.current = true;
             // }
-            console.log(error);
+            // console.log(error);
             setApiStatus(true);
             setLoading1(false);
         }
@@ -945,7 +945,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
     
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });

@@ -180,7 +180,7 @@ const MyTablePage = () => {
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
-    console.log(storedData, "storedData");
+    // console.log(storedData, "storedData");
 
     const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate : yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
@@ -248,7 +248,7 @@ const MyTablePage = () => {
     const [historyOpen, setHistoryOpen] = useState(false);
     const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
     const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
-  
+
 
 
     useEffect(() => {
@@ -267,7 +267,7 @@ const MyTablePage = () => {
         };
         fetchNetworksData();
     }, []);
-   
+
 
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
@@ -398,12 +398,12 @@ const MyTablePage = () => {
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
-    console.log(newaccount)
+    // console.log(newaccount)
 
     const [accountName, setAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
-    console.log(newAccountName);
+    // console.log(newAccountName);
     const [newtime, setNewTime] = useState(
         timeFromDashboard
             ? timeFromDashboard
@@ -478,7 +478,7 @@ const MyTablePage = () => {
 
 
 
-    console.log('All campaignData:', allCampaignData);
+    // console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
     const [Rhovered, setRHovered] = useState(false);
@@ -499,7 +499,7 @@ const MyTablePage = () => {
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
 
 
-    console.log(initialOne, "initialData");
+    // console.log(initialOne, "initialData");
 
     // track if the user already changed selection
     const userPickedRef = useRef(false);
@@ -2043,7 +2043,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -2086,11 +2086,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -3482,7 +3484,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -3525,11 +3527,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -5483,7 +5487,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -5656,7 +5660,7 @@ const MyTablePage = () => {
 
                     try {
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -6132,7 +6136,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -6175,11 +6179,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -6569,11 +6575,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await axios.post("http://localhost:4000/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -6670,11 +6676,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000'
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -7714,7 +7723,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -7757,11 +7766,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -8215,11 +8226,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
                         const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -8316,11 +8327,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -9163,7 +9177,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/update/campaign/budget/history', payload);
+                        await apiClient.post('http://localhost:4000/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -9601,7 +9615,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -9645,11 +9659,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -11302,7 +11318,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -11391,7 +11407,7 @@ const MyTablePage = () => {
                     const campaignname = groupedData?.[0]?.campaignname;
                     const adsetname = groupedData?.[0]?.adsetname;
 
-                    console.log("Submitting budget change:", groupedData);
+                    // console.log("Submitting budget change:", groupedData);
 
                     const campaignActualSpend = Camapignlevelstatus
                         .find(item =>
@@ -11488,7 +11504,7 @@ const MyTablePage = () => {
 
                         // changeRRefrst();
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -11962,7 +11978,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -12005,11 +12021,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -12402,11 +12420,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await axios.post("http://localhost:4000/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -12503,11 +12521,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -13840,7 +13861,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -13883,11 +13904,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -14280,11 +14303,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
                         const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -14381,11 +14404,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -15359,7 +15385,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -15402,11 +15428,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -15859,11 +15887,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
                         const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -15960,9 +15988,11 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} styles={{
+                                    body: {
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                    }
 
                                 }}>
                                     <span style={{ marginLeft: 3 }}>
@@ -16874,7 +16904,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -16917,11 +16947,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -18038,7 +18070,7 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/update/campaign/budget/history', payload);
+                        await apiClient.post('http://localhost:4000/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -18474,7 +18506,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -18517,11 +18549,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -19529,7 +19563,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -19956,7 +19990,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "http://localhost:4000/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -19999,11 +20033,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -20939,13 +20975,13 @@ const MyTablePage = () => {
 
     const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
-        console.log("accountOrAccounts", accountOrAccounts);
+        // console.log("accountOrAccounts", accountOrAccounts);
         // console.log(storedData);
 
         // const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         // console.log("accounts", accounts);
-        console.log(newaccount)
+        // console.log(newaccount)
         try {
             setInitialLoading(true);
             const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accountOrAccounts });
@@ -21077,7 +21113,7 @@ const MyTablePage = () => {
     // }, []);
 
     useEffect(() => {
-        console.log(newaccount)
+        // console.log(newaccount)
         functionCall(newaccount);  // pass the array
     }, []);
 
@@ -21107,7 +21143,7 @@ const MyTablePage = () => {
 
     // whenever network changes
     const onChangeSelectRevenue = (value) => {
-        console.log(value);
+        // console.log(value);
         // userPickedRef.current = true;
         // const accountsForAccess = adAccounts[value];
         // const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -21132,9 +21168,9 @@ const MyTablePage = () => {
         setSearchText("");
         setIsOpen(false);
         const accountsForAccess = adAccounts[value];
-        console.log(accountsForAccess);
+        // console.log(accountsForAccess);
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
-        console.log(accountsAccess);
+        // console.log(accountsAccess);
         setNetworksData(accountsAccess);
         setRevenuePartner(value)
         setNewAccount([String(accountsAccess[0].accountNumber)])
@@ -21201,7 +21237,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
-        console.log(storedData, "storedData");
+        // console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);
@@ -21827,7 +21863,7 @@ const MyTablePage = () => {
         // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
-   
+
 
     const renderCarouselNav = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{
@@ -22525,7 +22561,12 @@ const MyTablePage = () => {
                             onChange={onChangeSelectRevenue}
                             placeholder="Select Network"
                             defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
-                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             style={{
                                 width: '160px',
                                 backgroundColor: theme === 'dark' ? '#333' : undefined,
@@ -22601,7 +22642,7 @@ const MyTablePage = () => {
                             placeholder="Select Accounts"
                             // Keep the visible state you already have
                             open={isOpen}
-                            onDropdownVisibleChange={handleDropdownVisibleChange}
+                            onOpenChange={handleDropdownVisibleChange}
 
                             // 👇 Show first account + count
                             value={
@@ -22612,7 +22653,12 @@ const MyTablePage = () => {
                                         : `${account[0]}, +${account?.length - 1} more`
                             }
 
-                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             style={{
                                 width: '290px',
@@ -22630,7 +22676,7 @@ const MyTablePage = () => {
                             // onChange={handleChange1}                    // ❌ remove
 
                             // Custom dropdown with checkboxes (no tick marks in the menu)
-                            dropdownRender={() => (
+                            popupRender={() => (
 
                                 <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
                                     {renderAccountsCheckboxes(theme)}
@@ -22665,7 +22711,12 @@ const MyTablePage = () => {
                                     border: '1px solid #4CAF50',
                                     borderRadius: '6px'
                                 }}
-                                dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                // dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                classNames={{
+                                    popup: {
+                                        root: theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'
+                                    }
+                                }}
                             />
                         </ConfigProvider>
                     </Col>
@@ -22693,7 +22744,13 @@ const MyTablePage = () => {
                                     borderRadius: '6px'
                                 }}
                                 // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
-                                dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                // dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                classNames={{
+                                    popup: {
+                                        root: `custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`
+                                    }
+                                }}
+
                             />
                         </ConfigProvider>
                     </Col>
@@ -22704,7 +22761,12 @@ const MyTablePage = () => {
                             showSearch
                             onChange={onChangeTime}
                             placeholder="Timezone"
-                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             optionFilterProp="label"
@@ -22818,13 +22880,17 @@ const MyTablePage = () => {
                                     transition: "all 0.15s ease-in-out",
                                 }}
                             >
-                                <Tooltip title="Revenue base report" overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',
-                                    borderRadius: 6,
-                                    // fontWeight: 500,
-                                }}>
+                                <Tooltip
+                                    title="Revenue base report"
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #ccc',
+                                            borderRadius: 6,
+                                        }
+                                        // fontWeight: 500,
+                                    }}>
                                     <span
                                         onClick={(e) => {
                                             // e.stopPropagation();
@@ -22929,7 +22995,7 @@ const MyTablePage = () => {
                                 </Tooltip>
                             </Col>
                     </div> */}
-                   
+
                     {activeTab === '3' && (
                         <Col>
                             <Space size={2} style={{ marginRight: '10px' }}>
@@ -22967,62 +23033,62 @@ const MyTablePage = () => {
                                 }}
                             > */}
                                 <Dropdown
-                                    overlay={
-                                        <Menu
-                                            className={theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light'}
-                                            onClick={({ key }) => handleStatusFilterChange(key)}
-                                            items={[
-                                                {
-                                                    key: 'all',
-                                                    label: (
-                                                        <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                                                            <span
-                                                                style={{
-                                                                    width: '6px',
-                                                                    height: '6px',
-                                                                    borderRadius: '50%',
-                                                                    backgroundColor: '#122F6E',
-                                                                    marginRight: '6px',
-                                                                }}
-                                                            ></span>
-                                                            All
-                                                        </span>
-                                                    ),
-                                                },
-                                                {
-                                                    key: 'active',
-                                                    label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                    menu={{
+                                        // <Menu
+                                        className: theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light',
+                                        onClick: ({ key }) => handleStatusFilterChange(key),
+                                        items: [
+                                            {
+                                                key: 'all',
+                                                label: (
+                                                    <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
                                                         <span
                                                             style={{
                                                                 width: '6px',
                                                                 height: '6px',
                                                                 borderRadius: '50%',
-                                                                backgroundColor: 'green',
+                                                                backgroundColor: '#122F6E',
                                                                 marginRight: '6px',
                                                             }}
                                                         ></span>
-                                                        Active
-
+                                                        All
                                                     </span>
-                                                },
-                                                {
-                                                    key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                                                        <span
-                                                            style={{
-                                                                width: '6px',
-                                                                height: '6px',
-                                                                borderRadius: '50%',
-                                                                backgroundColor: 'red',
-                                                                marginRight: '6px',
-                                                            }}
-                                                        ></span>
-                                                        Paused
+                                                ),
+                                            },
+                                            {
+                                                key: 'active',
+                                                label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            width: '6px',
+                                                            height: '6px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: 'green',
+                                                            marginRight: '6px',
+                                                        }}
+                                                    ></span>
+                                                    Active
 
-                                                    </span>
-                                                },
-                                            ]}
-                                        />
-                                    }
+                                                </span>
+                                            },
+                                            {
+                                                key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            width: '6px',
+                                                            height: '6px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: 'red',
+                                                            marginRight: '6px',
+                                                        }}
+                                                    ></span>
+                                                    Paused
+
+                                                </span>
+                                            },
+                                        ]
+                                        // />
+                                    }}
                                     trigger={['click']}
                                 >
                                     <Button
@@ -23130,11 +23196,13 @@ const MyTablePage = () => {
                                 </Dropdown>
                                 <Tooltip
                                     title={`🍳 This feature is cooking—almost ready to serve 😜`}
-                                    overlayInnerStyle={{
-                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                        color: theme === 'dark' ? '#fff' : '#000',
-                                        border: '1px solid #ccc',
-                                        borderRadius: 6,
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #ccc',
+                                            borderRadius: 6,
+                                        }
                                         // fontWeight: 500,
                                     }}
                                 >

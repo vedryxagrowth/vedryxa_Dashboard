@@ -242,7 +242,12 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
               placeholder="Select network"
               style={{ width: '100%' }}
               className={theme === 'dark' ? 'custom-select-dark' : ''}
-              dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
+              // dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
+              classNames={{
+                popup: {
+                  root: theme === 'dark' ? 'custom-dropdown' : ''
+                }
+              }}
               title={''}
               mode="multiple"
             >

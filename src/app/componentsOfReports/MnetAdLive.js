@@ -57,7 +57,7 @@ const selectTimezone = {
 };
 
 const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
-    console.log(columnDefs);
+    // console.log(columnDefs);
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -113,9 +113,9 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
     ) : [], [rowData, inputValue]);
     
 
-    useEffect(() => {
-        console.log('Column Definitions:', memorizedColumnDef);
-    }, [memorizedColumnDef]);
+    // useEffect(() => {
+    //     console.log('Column Definitions:', memorizedColumnDef);
+    // }, [memorizedColumnDef]);
 
     useEffect(()=>{
         setLiveFixedFooter([
@@ -144,7 +144,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
     },[memorizedRowData]);
 
     const onBtExport1 = () => {
-        console.log(gridRef.current.api,"in")
+        // console.log(gridRef.current.api,"in")
         const Details = {
             network : newRevenuePratner,
             account: newaccount,
@@ -659,17 +659,14 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
        try{
         // console.log(newRevenuePratner);
             setLoading(true);
-            console.log("hi");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             const fetchData = await apiClient.get(`/AdLive?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=Facebook_Mnet_AD`);
             const mainData1 = fetchData.data;
-            console.log("I am");
             const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
             const specifiedTimeZone = selectTimezone[newtime];
-            console.log("D F");
             const filteredData = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
-                    console.log(eachData.adName,"adName:")
+                    // console.log(eachData.adName,"adName:")
                     let revenueData;
                     if (eachData.estimated_revenue === 0 || isNaN(eachData.estimated_revenue)) {
                         revenueData = 0;
@@ -746,10 +743,10 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
 
             const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
             const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
-            console.log("H");
+            // console.log("H");
 
             if (mainData.length > 1) {
-                console.log("And");
+                // console.log("And");
                 timezone.current = mainData[0].accountTimezone;
                 accountStatus.current = mainData[0].accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
@@ -759,7 +756,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
 
                 maxHour.current = findMaxHour(mainData);
                 maxNetworkHour.current = getMaxHour(mainData);
-                console.log("I Live");
+                // console.log("I Live");
             }
             setLiveFixedFooter([
                 {
@@ -784,7 +781,6 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                     ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
             ]);
-            console.log("Long");
             setRowData(filteredData);
             newRowData.current = filteredData;
             fetchData.status === 200 && console.log("Success") ;
@@ -792,7 +788,6 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
             // setInitialRowData(filteredData);
             // setTrue(false);
             setLoading(false);
-            console.log("With D F");
        }
        catch(error){
             setApiStatus(true);
@@ -1048,7 +1043,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
     
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });

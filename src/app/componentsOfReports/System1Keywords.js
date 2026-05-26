@@ -266,7 +266,7 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
             setLoading4(true);
             const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/System1Keywords?startDate=${startDate}&endDate=${endDate}`);
             const mainData = fetchData.data;
-            console.log(mainData, "mainData of functionCall5");
+            // console.log(mainData, "mainData of functionCall5");
 
             let totalSpend = 0;
             let totalRevenue = 0;
@@ -298,7 +298,7 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
             }) : [];
 
             // Log filtered data to check
-            console.log(filteredData, "filteredData");
+            // console.log(filteredData, "filteredData");
 
             setSystem1KeywordData(filteredData);
 
@@ -361,7 +361,7 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
     
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });

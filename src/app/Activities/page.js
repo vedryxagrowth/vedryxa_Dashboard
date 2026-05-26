@@ -231,7 +231,8 @@ const UserTable = () => {
                   <Card
                     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                     key={activity._id}
-                    bordered={true}
+                    // bordered={true}
+                    variant="borderless"
                     style={{ width: 300, minWidth: 300 }}
                   >
                     <p>

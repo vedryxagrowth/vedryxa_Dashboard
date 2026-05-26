@@ -18,7 +18,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                 </Flex> */}
         </div>;
     }
-    console.log(userdetails);
+    // console.log(userdetails);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -419,7 +419,12 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                         //     color: theme === 'dark' && '#fff',
                         // }}
                         // dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                        classNames={{
+                            popup: {
+                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                            }
+                        }}
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
@@ -453,7 +458,12 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                                                 width: '160px',
                                                 paddingRight: '8px',
                                             }}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            classNames={{
+                                                popup: {
+                                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                }
+                                            }}
                                             value={account.network}
                                             onChange={(value) => handleNetworkChange(accountIndex, value)}
                                         >
@@ -483,10 +493,11 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                                                                 Accounts in {account.network}
                                                             </div>
                                                         }
-                                                        overlayInnerStyle={{
-                                                            background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                        styles={{
+                                                            body: {background: theme === "dark" ? "#1f1f1f" : "#ffffff",
                                                             color: theme === "dark" ? "#ffffff" : "#000000",
                                                             border: theme === "dark" ? "1px solid #444" : "1px solid #ddd",
+                                                            }
                                                         }}
                                                         content={
                                                             <div style={{ maxHeight: 200, overflowY: "auto", color: theme === "dark" ? "#ffffff" : "#000000" }}>
@@ -527,9 +538,11 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                                                     )} */}
                                                     {inputIndex === account.inputs.length - 1 && (
                                                         input?.trim().toLowerCase() === "all" ? (
-                                                            <Tooltip title="'All' includes every account. You cannot add another Account ID" overlayInnerStyle={{
-                                                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                            <Tooltip title="'All' includes every account. You cannot add another Account ID" 
+                                                            styles={{
+                                                                body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                                                 color: theme === 'dark' ? '#fff' : '#000',
+                                                                }
                                                             }}>
                                                                 <InfoCircleOutlined
                                                                     style={{ color: "#1890ff", marginLeft: "8px", fontSize: "16px" }}
@@ -565,7 +578,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
 
             <Modal
                 title="Confirmation"
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
                 footer={[

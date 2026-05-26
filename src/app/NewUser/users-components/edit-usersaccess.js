@@ -10,7 +10,7 @@ import { FaTrashCan } from 'react-icons/fa6';
 const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
     const { apiClient } = useTokenContext();
     // console.log(editeddata, "heyy edit-useraccess page")
-    console.log(editeddata, "editeddata");
+    // console.log(editeddata, "editeddata");
     const userAccess = editeddata?.adAccounts;
     // console.log(userAccess, "adAccounts");
     userAccess !== null && userAccess !== undefined ? Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })) : [];
@@ -110,9 +110,9 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
     }, [additionalAccounts, formAccounts]);
 
     const handleAddAccount = () => {
-        console.log(AddAccounts, "AddAccounts");
-        console.log(selectedNetworks);
-        console.log(additionalAccounts);
+        // console.log(AddAccounts, "AddAccounts");
+        // console.log(selectedNetworks);
+        // console.log(additionalAccounts);
         if (selectedNetworks?.length !== availableNetworks?.length) {
             // additionalAccounts
             const newAccount = { network: '', inputs: [''] };
@@ -612,7 +612,12 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                             backgroundColor: theme === 'dark' && '#333', // Background color
                             color: theme === 'dark' && '#fff',
                         }}
-                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        classNames={{
+                            popup: {
+                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                            }
+                        }}
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
@@ -675,7 +680,12 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                     backgroundColor: theme === 'dark' && '#333', // Background color
                                     color: theme === 'dark' && '#fff',
                                 }}
-                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                classNames={{
+                                    popup: {
+                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                    }
+                                }}
                                 value={account.network}
                                 onChange={(value) => handleNetworkChange(accountIndex, value)}
                             >
@@ -728,10 +738,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                                     Accounts in {account.network}
                                                 </div>
                                             }
-                                            overlayInnerStyle={{
-                                                background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                            styles={{
+                                                body: {background: theme === "dark" ? "#1f1f1f" : "#ffffff",
                                                 color: theme === "dark" ? "#ffffff" : "#000000",
                                                 border: theme === "dark" ? "1px solid #444" : "1px solid #ddd",
+                                                }
                                             }}
                                             content={
                                                 <div style={{ maxHeight: 200, overflowY: "auto", color: theme === "dark" ? "#ffffff" : "#000000" }}>
@@ -781,9 +792,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                         )} */}
                                         {inputIndex === account.inputs.length - 1 && (
                                             input.trim().toLowerCase() === "all" ? (
-                                                <Tooltip title="'All' includes every account. You cannot add another Account ID" overlayInnerStyle={{
-                                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                <Tooltip title="'All' includes every account. You cannot add another Account ID" 
+                                                styles={{
+                                                    body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                                     color: theme === 'dark' ? '#fff' : '#000',
+                                                    }
                                                 }}>
                                                     <InfoCircleOutlined style={{ color: "#1890ff", marginLeft: "8px", fontSize: "16px" }} />
                                                 </Tooltip>
@@ -889,7 +902,12 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                             <Select
                                                 placeholder="Select Network"
                                                 style={{ width: 140 }}
-                                                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                                                // dropdownClassName={theme === "dark" && "custom-dropdown"}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
                                                 value={additionalAccounts[projIndex]?.network}
                                                 onChange={(val) => handleNetworkChange(projIndex, val)}
                                             >
@@ -944,10 +962,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                                                                 Accounts in {account.network}
                                                                             </div>
                                                                         }
-                                                                        overlayInnerStyle={{
-                                                                            background: theme === "dark" ? "#1f1f1f" : "#ffffff",
+                                                                        styles={{
+                                                                            body: {background: theme === "dark" ? "#1f1f1f" : "#ffffff",
                                                                             color: theme === "dark" ? "#ffffff" : "#000000",
                                                                             border: theme === "dark" ? "1px solid #444" : "1px solid #ddd",
+                                                                            }
                                                                         }}
                                                                         content={
                                                                             <div style={{ maxHeight: 200, overflowY: "auto", color: theme === "dark" ? "#ffffff" : "#000000" }} >
@@ -1001,9 +1020,11 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                                                                     )} */}
                                                                 {inputIndex === account.inputs.length - 1 && (
                                                                     Input.trim().toLowerCase() === "all" ? (
-                                                                        <Tooltip title="'All' includes every account. You cannot add another Account ID" overlayInnerStyle={{
-                                                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                                        <Tooltip title="'All' includes every account. You cannot add another Account ID" 
+                                                                        styles={{
+                                                                            body: {backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                                                             color: theme === 'dark' ? '#fff' : '#000',
+                                                                            }
                                                                         }}>
                                                                             <InfoCircleOutlined style={{ color: "#1890ff", marginLeft: "8px", fontSize: "16px" }} />
                                                                         </Tooltip>
@@ -1056,7 +1077,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
 
             <Modal
                 title="Confirmation"
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
                 footer={[

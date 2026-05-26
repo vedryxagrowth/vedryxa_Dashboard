@@ -83,7 +83,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     })
       .catch(err => console.error("Bulk delete failed", err));
   };
-  console.log("BULK DELETE sending IDs:", selectedNotes);
+  // console.log("BULK DELETE sending IDs:", selectedNotes);
 
 
   // const handleMultipleFileUpload = async (files, userdetails) => {
@@ -258,7 +258,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
         content: 'Content copied to clipboard!',
         className: theme === 'dark' ? 'dark-message' : '',
       });
-      console.log('Text copied to clipboard');
+      // console.log('Text copied to clipboard');
     }).catch(err => {
       console.error('Failed to copy text: ', err);
       message.open({
