@@ -11327,7 +11327,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //   const videoid = fbResponse?.data?.id;
             //   await new Promise((resolve) => setTimeout(resolve, 10000));
 
-            //   let thumbnailResponse = await axios.get(
+            //   const thumbnailResponse = await axios.get(
             //     `https://graph.facebook.com/v20.0/${videoid}`,
             //     {
             //       params: {
@@ -11338,31 +11338,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //     }
             //   );
 
-            //   const thumbnails =
-            //     thumbnailResponse?.data
-            //       ?.thumbnails?.data || [];
-
-            //   if (!thumbnails.length) {
-            //     await new Promise((resolve) =>
-            //       setTimeout(resolve, 4000)
-            //     );
-            //     thumbnailResponse = await axios.get(
-            //       `https://graph.facebook.com/v20.0/${videoid}`,
-            //       {
-            //         params: {
-            //           access_token: token,
-            //           fields: "thumbnails",
-            //           is_preferred: true,
-            //         },
-            //       }
-            //     );
-            //   }
-
             //   const preferredThumbnail =
             //     thumbnailResponse.data.thumbnails.data.find(
             //       (thumbnail) => thumbnail.is_preferred === true
             //     );
-
             //   const uri = preferredThumbnail ? preferredThumbnail.uri : "";
 
             //   onSuccess("ok", fbResponse);
@@ -11506,7 +11485,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //   const videoid = fbResponse?.data?.id;
             //   await new Promise((resolve) => setTimeout(resolve, 10000));
 
-            //   let thumbnailResponse = await axios.get(
+            //   const thumbnailResponse = await axios.get(
             //     `https://graph.facebook.com/v20.0/${videoid}`,
             //     {
             //       params: {
@@ -11516,25 +11495,6 @@ const CloneMultipleAdsetCampaignDrawer = ({
             //       },
             //     }
             //   );
-            //   const thumbnails =
-            //     thumbnailResponse?.data
-            //       ?.thumbnails?.data || [];
-
-            //   if (!thumbnails.length) {
-            //     await new Promise((resolve) =>
-            //       setTimeout(resolve, 4000)
-            //     );
-            //     thumbnailResponse = await axios.get(
-            //       `https://graph.facebook.com/v20.0/${videoid}`,
-            //       {
-            //         params: {
-            //           access_token: token,
-            //           fields: "thumbnails",
-            //           is_preferred: true,
-            //         },
-            //       }
-            //     );
-            //   }
 
             //   const preferredThumbnail =
             //     thumbnailResponse.data.thumbnails.data.find(
