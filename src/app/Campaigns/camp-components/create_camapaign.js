@@ -10713,7 +10713,7 @@ const CreateCampaignDrawer = ({
           WAIT MINIMUM 6 SECONDS
           =========================================
           */
-          await sleep(6500);
+          await sleep(9000);
 
           /*
           =========================================
@@ -10734,7 +10734,14 @@ const CreateCampaignDrawer = ({
           const thumbnails =
             response?.data?.thumbnails
               ?.data || [];
+          if (!thumbnails.length) {
+            // await sleep(3000);
 
+            return getVideoThumbnail(
+              videoid,
+              token
+            );
+          }
           const preferredThumbnail =
             thumbnails.find(
               (thumbnail) =>
@@ -10752,39 +10759,39 @@ const CreateCampaignDrawer = ({
           WAIT 2 SECONDS
           =========================================
           */
-          await sleep(2000);
+          // await sleep(2000);
 
-          /*
-          =========================================
-          SECOND ATTEMPT
-          =========================================
-          */
-          const retryResponse =
-            await axios.get(
-              `https://graph.facebook.com/v23.0/${videoid}`,
-              {
-                params: {
-                  access_token: token,
-                  fields: "thumbnails",
-                },
-                timeout: 120000,
-              }
-            );
+          // /*
+          // =========================================
+          // SECOND ATTEMPT
+          // =========================================
+          // */
+          // const retryResponse =
+          //   await axios.get(
+          //     `https://graph.facebook.com/v23.0/${videoid}`,
+          //     {
+          //       params: {
+          //         access_token: token,
+          //         fields: "thumbnails",
+          //       },
+          //       timeout: 120000,
+          //     }
+          //   );
 
-          const retryThumbnails =
-            retryResponse?.data
-              ?.thumbnails?.data || [];
+          // const retryThumbnails =
+          //   retryResponse?.data
+          //     ?.thumbnails?.data || [];
 
-          const retryPreferredThumbnail =
-            retryThumbnails.find(
-              (thumbnail) =>
-                thumbnail.is_preferred
-            );
+          // const retryPreferredThumbnail =
+          //   retryThumbnails.find(
+          //     (thumbnail) =>
+          //       thumbnail.is_preferred
+          //   );
 
-          return (
-            retryPreferredThumbnail?.uri ||
-            ""
-          );
+          // return (
+          //   retryPreferredThumbnail?.uri ||
+          //   ""
+          // );
         } catch (err) {
           console.error(
             "Thumbnail fetch failed:",
