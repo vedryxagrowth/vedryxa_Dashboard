@@ -33,19 +33,28 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
     const { theme } = useTokenContext();
     const [domainExtension, setDomainExtension] = useState('');
     const [copyMessage, setCopyMessage] = useState('Click to copy');
+    const token = localStorage.getItem("token")
     const combinedRac =
         [primaryText, headline, description]
             .filter(Boolean)
             .join(",");
     const DataToSend = "domain_extension_replace?src=src_replace&pxi=835172915206585&channel=channel_replace&terms=terms_replace&rac=rac_replace&utm_campaign=utm_campaign_replace&sltId=sltId_replace&tmp=tmp_replace";
     const getUrlBuilderData = async () => {
-        const response = await apiClient.get(`/get/urlbuilderdata?network=Affinity`);
+        // const response = await apiClient.get(`/get/urlbuilderdata?network=Affinity`);
+        const response = await fetch(
+            `https://fblaunching.vyaktimetrics.com/open/get/urlbuilderdata?network=Affinity`,
+            {
+                method: "GET",
+                headers: { Authorization: token },
+            },
+        )
+        const json = await response.json();
         if (response?.status === 200) {
-            setTmpIds(response?.data?.tmps.map(item => ({
+            setTmpIds(json?.tmps.map(item => ({
                 label: item.name,
                 value: item.value
             })) || []);
-            setNetworkData(response?.data)
+            setNetworkData(json)
             if (indexValueForAccount) {
 
                 // console.log(defaultValues);
@@ -139,6 +148,7 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
                 }
             }
         }
+
     };
 
     useEffect(() => {
@@ -197,7 +207,7 @@ const AffinityUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         setTmp('9');
         setDomainExtension('');
     }
-    console.log(showSubmitButton);
+    // console.log(showSubmitButton);
 
     const onClickSubmit = () => {
 

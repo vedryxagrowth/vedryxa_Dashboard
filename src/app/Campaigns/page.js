@@ -88,7 +88,7 @@ const { RangePicker } = DatePicker;
 
 const App = () => {
   const { userdetails } = useTokenContext();
-  console.log("useTokenContext", userdetails);
+  // console.log("useTokenContext", userdetails);
   const isMobile = window.innerWidth <= 500;
 
   if (!userdetails?.adAccounts) {
@@ -233,7 +233,7 @@ const App = () => {
   useEffect(() => {
     const fetchNetworksData = async () => {
       try {
-        const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+        const res = await axios.get('https://fblaunching.vyaktimetrics.com/open/get/networksData', {
           headers: {
             Authorization: token,
 
@@ -364,7 +364,7 @@ const App = () => {
 
   const gridThemeClass =
     theme === "dark" ? "ag-theme-alpine-dark" : "ag-theme-alpine";
-  console.log(selectedKey, "selectedKeyselectedKeyselectedKey");
+  // console.log(selectedKey, "selectedKeyselectedKeyselectedKey");
 
   // const [selectedAccount, setSelectedAccount] = useState('All');
   const restrictedEmails = [
@@ -374,39 +374,41 @@ const App = () => {
     "shravan.k@winkleads.com",
     "abhynay.k@winkleads.com",
   ];
-  const handleIconClick = async (identifier) => {
-    if (!identifier) return;
-    if (adDetails[identifier]) return;
-    setLoadingAd(identifier);
-    try {
-      const response = await fetch("https://www.testapi.adsgoat.in/api/getAdDetails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        body: JSON.stringify({ identifier }),
-      });
 
-      const data = await response.json();
+  //commneted the api 2026-05-22
+  // const handleIconClick = async (identifier) => {
+  //   if (!identifier) return;
+  //   if (adDetails[identifier]) return;
+  //   setLoadingAd(identifier);
+  //   try {
+  //     const response = await fetch("https://www.testapi.adsgoat.in/api/getAdDetails", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: token,
+  //       },
+  //       body: JSON.stringify({ identifier }),
+  //     });
 
-      if (data?.data) {
-        setAdDetails((prev) => ({
-          ...prev,
-          [identifier]: data.data,
-        }));
+  //     const data = await response.json();
 
-        setAdsCount((prev) => ({
-          ...prev,
-          [identifier]: data.totalAds,
-        }));
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingAd(null);
-    }
-  };
+  //     if (data?.data) {
+  //       setAdDetails((prev) => ({
+  //         ...prev,
+  //         [identifier]: data.data,
+  //       }));
+
+  //       setAdsCount((prev) => ({
+  //         ...prev,
+  //         [identifier]: data.totalAds,
+  //       }));
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoadingAd(null);
+  //   }
+  // };
 
   const rangePresets = [
     {
@@ -469,7 +471,7 @@ const App = () => {
   // Function to handle click on campaign name
   const handleCampaignNameClick = (record) => {
     setadsetcampaigndata(record);
-    console.log(record, "adsets data");
+    // console.log(record, "adsets data");
     setadsetsDrawerVisible(true);
   };
 
@@ -486,13 +488,13 @@ const App = () => {
   // var token = localStorage.getItem("token");
 
   const handleViewClick = (record) => {
-    console.log(record, "viewdata campaign");
+    // console.log(record, "viewdata campaign");
     setSelectedRowData(record);
     setViewDrawerVisible(true);
   };
 
   const handleEditOnlyClick = (record) => {
-    console.log(record, "viewdata campaign");
+    // console.log(record, "viewdata campaign");
     setSelectedOnlyEditData(record);
     setEditOnlyDrawerVisible(true);
   };
@@ -681,55 +683,56 @@ const App = () => {
   //     }
   // };
 
-  const fetchData = async (
-    accountNumber = null,
-    start = startDate,
-    end = endDate,
-    search = ""
-  ) => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Construct URL with optional startDate and endDate
-      //https://www.testapi.adsgoat.in
-      let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+  //Commented the api 2026-05-22
+  // const fetchData = async (
+  //   accountNumber = null,
+  //   start = startDate,
+  //   end = endDate,
+  //   search = ""
+  // ) => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     // Construct URL with optional startDate and endDate
+  //     //https://www.testapi.adsgoat.in
+  //     let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
 
-      if (start && end) {
-        url += `&startDate=${start}&endDate=${end}`;
-      }
-      if (search) {
-        url += `&searchInput=${search}`; // Append search input if provided
-      }
-      console.log("Fetching data from URL:", url);
+  //     if (start && end) {
+  //       url += `&startDate=${start}&endDate=${end}`;
+  //     }
+  //     if (search) {
+  //       url += `&searchInput=${search}`; // Append search input if provided
+  //     }
+  //     console.log("Fetching data from URL:", url);
 
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      });
-      const allCampaigns = response?.data;
+  //     const response = await axios.get(url, {
+  //       headers: {
+  //         Authorization: localStorage.getItem("token"),
+  //       },
+  //     });
+  //     const allCampaigns = response?.data;
 
-      // Filter campaigns based on selected value && accountNumber !== 'All'
-      const filteredCampaignData = accountNumber
-        ? allCampaigns.filter(
-          (campaign) => campaign.Account_Number === accountNumber
-        )
-        : allCampaigns.filter((campaign) =>
-          userdetails?.adAccounts[selectedKey]?.includes(
-            campaign.Account_Number
-          )
-        );
+  //     // Filter campaigns based on selected value && accountNumber !== 'All'
+  //     const filteredCampaignData = accountNumber
+  //       ? allCampaigns.filter(
+  //         (campaign) => campaign.Account_Number === accountNumber
+  //       )
+  //       : allCampaigns.filter((campaign) =>
+  //         userdetails?.adAccounts[selectedKey]?.includes(
+  //           campaign.Account_Number
+  //         )
+  //       );
 
-      setcreatecamselectedacc(accountNumber);
+  //     setcreatecamselectedacc(accountNumber);
 
-      setCampaignData(allCampaigns);
-    } catch (error) {
-      console.error("Error fetching campaign data:", error);
-      setError("Failed to fetch campaign data.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setCampaignData(allCampaigns);
+  //   } catch (error) {
+  //     console.error("Error fetching campaign data:", error);
+  //     setError("Failed to fetch campaign data.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const fetchMultipleAdsetCampaigns = async (
     accountNumber = null,
@@ -743,23 +746,25 @@ const App = () => {
       // Construct URL with optional startDate and endDate
       //https://www.testapi.adsgoat.in
       // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
-      let url = `https://www.testapi.adsgoat.in/api/newGetFormDatanew?accountNumber=${accountNumber}&network=${selectedKey}`;
+      //commneted 2026-05-22
+      // let url = `https://www.testapi.adsgoat.in/api/newGetFormDatanew?accountNumber=${accountNumber}&network=${selectedKey}`;
+      let url = `https://fblaunching.vyaktimetrics.com/open/campaigns/list?accountNumber=${accountNumber}&network=${selectedKey}`;
       if (start && end) {
         url += `&startDate=${start}&endDate=${end}`;
       }
       if (search) {
         url += `&searchInput=${search}`; // Append search input if provided
       }
-      console.log("Fetching data from URL:", url);
+      // console.log("Fetching data from URL:", url);
 
       const response = await axios.get(url, {
         headers: {
           Authorization: localStorage.getItem("token"),
         },
       });
-      const allCampaigns = response?.data;
+      const allCampaigns = response?.data?.data;
 
-      console.log(allCampaigns, "all multiple adset campaigns");
+      // console.log(allCampaigns, "all multiple adset campaigns");
 
       // Filter campaigns based on selected value && accountNumber !== 'All'
       const filteredCampaignData = accountNumber
@@ -774,9 +779,7 @@ const App = () => {
 
       setcreatecamselectedacc(accountNumber);
 
-      console.log(filteredCampaignData, "multiple adset campaigns");
-
-      // setMultipleAdsetCampaignData(filteredCampaignData);
+      // console.log(filteredCampaignData, "multiple adset campaigns");
       setMultipleAdsetCampaignData(allCampaigns);
     } catch (error) {
       console.error("Error fetching campaign data:", error);
@@ -803,7 +806,10 @@ const App = () => {
       //   url += `&searchInput=${search}`; // Append search input if provided
       // }
       // console.log("Fetching data from URL:", url);
-      const url = `https://www.testapi.adsgoat.in/api/GetCommentsForCampaignLauncher?accountNumber=${accountNumber}`
+
+      //commneted 2026-05-22
+      // const url = `https://www.testapi.adsgoat.in/api/GetCommentsForCampaignLauncher?accountNumber=${accountNumber}`
+      const url = `https://fblaunching.vyaktimetrics.com/open/launcher-comments/campaigns?accountNumber=${accountNumber}`
 
       const response = await axios.get(url, {
         headers: {
@@ -812,7 +818,7 @@ const App = () => {
       });
       const allCampaigns = response?.data;
 
-      console.log(allCampaigns, "all multiple adset campaigns");
+      // console.log(allCampaigns, "all multiple adset campaigns");
       setLauncherComments(allCampaigns);
 
       // console.log(filteredCampaignData, "multiple adset campaigns");
@@ -825,30 +831,31 @@ const App = () => {
     }
   };
 
-  const fetchDrafts = async () => {
-    setDraftsLoading(true);
-    // setError(null);
-    try {
-      //https://www.testapi.adsgoat.in
-      const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/drafts?email=${userdetails?.email}`,
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
-        }
-      );
-      const allDrafts = response?.data;
+  //commented 2026-05-22
+  // const fetchDrafts = async () => {
+  //   setDraftsLoading(true);
+  //   // setError(null);
+  //   try {
+  //     //https://www.testapi.adsgoat.in
+  //     const response = await axios.get(
+  //       `https://www.testapi.adsgoat.in/api/drafts?email=${userdetails?.email}`,
+  //       {
+  //         headers: {
+  //           Authorization: localStorage.getItem("token"),
+  //         },
+  //       }
+  //     );
+  //     const allDrafts = response?.data;
 
-      // Filter drafts based on selected value && accountNumber !== 'All'
-      // const filteredDraftsData = allDrafts.filter(draft => userdetails?.adAccounts[selectedKey]?.includes(draft.Account_Number));
+  //     // Filter drafts based on selected value && accountNumber !== 'All'
+  //     // const filteredDraftsData = allDrafts.filter(draft => userdetails?.adAccounts[selectedKey]?.includes(draft.Account_Number));
 
-      setDraftsData(allDrafts);
-    } catch (error) {
-      console.error("Error fetching draft data:", error);
-      setError("Failed to fetch draft data.");
-    }
-  };
+  //     setDraftsData(allDrafts);
+  //   } catch (error) {
+  //     console.error("Error fetching draft data:", error);
+  //     setError("Failed to fetch draft data.");
+  //   }
+  // };
   const fetchAccountDetails = async (accounts) => {
     try {
       const token = localStorage.getItem("token");
@@ -856,7 +863,7 @@ const App = () => {
         ? accounts
         : [accounts];
 
-      const response = await fetch("https://www.testapi.adsgoat.in/api/getAccountDetails", {
+      const response = await fetch("https://fblaunching.vyaktimetrics.com/open/account-details", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1010,11 +1017,14 @@ const App = () => {
   //   }
   // }, [refrst, selectedValue]);
 
-  useEffect(() => {
-    if (draftsLoading) {
-      fetchDrafts();
-    }
-  }, [draftsLoading]);
+  //commented 2026-05-22
+
+  // useEffect(() => {
+  //   if (draftsLoading) {
+  //     fetchDrafts();
+  //   }
+  // }, [draftsLoading]);
+
   const handleRefresh = () => {
     if (selectedValue) {
       // fetchData(selectedValue);
@@ -1047,7 +1057,7 @@ const App = () => {
   const handleSearchChange = (e) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchInput(searchValue);
-    console.log("Search Input:", searchValue);
+    // console.log("Search Input:", searchValue);
     if (!searchValue) {
       setSendInputToApi("");
       // fetchData(selectedValue, startDate, endDate, searchValue);
@@ -1057,7 +1067,7 @@ const App = () => {
         endDate,
         searchValue
       );
-      console.log("Search Input is empty, resetting filtered data");
+      // console.log("Search Input is empty, resetting filtered data");
     }
     // const filtered = campaignData.filter((item) =>
     //     Object.values(item).some((field) =>
@@ -1070,8 +1080,8 @@ const App = () => {
     setSendInputToApi(searchInput);
     // fetchData(selectedValue, startDate, endDate, searchInput); // Fetch data with search input
     fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate, searchInput); // Fetch multiple adset campaigns with search input
-    console.log("Search Input:", searchInput);
-    console.log("Selected Input:", searchInput.length);
+    // console.log("Search Input:", searchInput);
+    // console.log("Selected Input:", searchInput.length);
   };
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -1084,64 +1094,66 @@ const App = () => {
   const [rejectedReason, setRejectionReason] = useState("");
   const [reasonError, setReasonError] = useState("");
 
-  const handleUpdateApproval = async (id, newApprovalValue) => {
-    try {
-      const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/updateApproval/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: localStorage.getItem("token"),
-          },
-          body: JSON.stringify({
-            Approval: newApprovalValue, // New approval value
-            Approved: userdetails?.userName, // Username of the person who approved it
-            datetime: moment()
-              .tz("Asia/Kolkata")
-              .format("YYYY-MM-DD HH:mm [IST]"), // Current datetime in IST
-          }),
-        }
-      );
+  //commented 2026-05-22
+  // const handleUpdateApproval = async (id, newApprovalValue) => {
+  //   try {
+  //     const response = await fetch(
+  //       `https://www.testapi.adsgoat.in/api/updateApproval/${id}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: localStorage.getItem("token"),
+  //         },
+  //         body: JSON.stringify({
+  //           Approval: newApprovalValue, // New approval value
+  //           Approved: userdetails?.userName, // Username of the person who approved it
+  //           datetime: moment()
+  //             .tz("Asia/Kolkata")
+  //             .format("YYYY-MM-DD HH:mm [IST]"), // Current datetime in IST
+  //         }),
+  //       }
+  //     );
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        setCampaignData((prevData) =>
-          prevData.map((record) =>
-            record.identifier === id
-              ? { ...record, Approval: newApprovalValue }
-              : record
-          )
-        );
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       console.log(data);
+  //       setCampaignData((prevData) =>
+  //         prevData.map((record) =>
+  //           record.identifier === id
+  //             ? { ...record, Approval: newApprovalValue }
+  //             : record
+  //         )
+  //       );
 
-        message.open({
-          type: 'success',
-          content: "Approval confirmed",
-          className: theme === 'dark' ? 'dark-message' : '',
-        });
+  //       message.open({
+  //         type: 'success',
+  //         content: "Approval confirmed",
+  //         className: theme === 'dark' ? 'dark-message' : '',
+  //       });
 
-        setIsModalVisible(false); // Close modal after updating
-        changeRRefrst();
-        // setTimeout(() => {
-        //     window.location.reload();
-        // }, 2000);
-      } else {
-        console.error("Failed to update approval");
-        // Handle failure
-      }
-    } catch (error) {
-      console.error("Error updating approval:", error);
-      // Handle error
-    }
-  };
+  //       setIsModalVisible(false); // Close modal after updating
+  //       changeRRefrst();
+  //       // setTimeout(() => {
+  //       //     window.location.reload();
+  //       // }, 2000);
+  //     } else {
+  //       console.error("Failed to update approval");
+  //       // Handle failure
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating approval:", error);
+  //     // Handle error
+  //   }
+  // };
 
   const handleUpdateApprovalForAdsets = async (id, newApprovalValue) => {
     try {
       //https://www.testapi.adsgoat.in
       const dateAndTimeOfCampaignApproval = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm [IST]");
       const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/newupdateApprovalnew/${id}`,
+        // `https://www.testapi.adsgoat.in/api/newupdateApprovalnew/${id}`
+        `https://fblaunching.vyaktimetrics.com/open/approval/campaign/${id}`,
         {
           method: "PUT",
           headers: {
@@ -1204,7 +1216,8 @@ const App = () => {
     try {
       const dateAndTimeOfCampaignRejection = moment().tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm [IST]")
       const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/newupdateDisapproval/${id}`,
+        // `https://www.testapi.adsgoat.in/api/newupdateDisapproval/${id}`,
+        `https://fblaunching.vyaktimetrics.com/open/reject/campaign/${id}`,
         {
           method: "PUT",
           headers: {
@@ -1257,18 +1270,18 @@ const App = () => {
     }
   };
   const handleApproval = (record) => {
-    console.log(record, "record");
+    // console.log(record, "record");
     setuseraproval(record);
     setIsModalVisible(true);
   };
 
   const handleApprovalforAdsets = (record) => {
-    console.log(record, "record");
+    // console.log(record, "record");
     setuseraprovalForAdsets(record);
     setIsModalVisibleForAdsets(true);
   };
   const handledisApprovalforAdsets = (record) => {
-    console.log(record, "record");
+    // console.log(record, "record");
     setuserdisaprovalForAdsets(record);
     setIsModalVisibleForAdsetsdisapprove(true);
   };
@@ -1278,7 +1291,7 @@ const App = () => {
       // Call the handleUpdateApproval function with the appropriate parameters
       await handleUpdateApproval(useaproval.identifier, "Approved");
       // Log the message to the console
-      console.log("Approval confirmed");
+      // console.log("Approval confirmed");
       // Close the modal
       setIsModalVisible(false);
     } catch (error) {
@@ -1295,7 +1308,7 @@ const App = () => {
         "Approved"
       );
       // Log the message to the console
-      console.log(userdetails?.role, "AAAAAApproval confirmed");
+      // console.log(userdetails?.role, "AAAAAApproval confirmed");
 
       if (userdetails?.role === "Network_Partner") {
         await onToggleStatusForMultipleAdsets(useaprovalForAdsets, "ACTIVE");
@@ -1318,6 +1331,7 @@ const App = () => {
       await handleUpdateDisapprovalForAdsets(
         userdisaprovalForAdsets.identifier
       );
+      await fetchLauncherComments(selectedValue)
       setIsModalVisibleForAdsetsdisapprove(false);
       setuserdisaprovalForAdsets(null);
       setRejectionReason("");
@@ -1325,154 +1339,159 @@ const App = () => {
       console.error("Error updating disapproval:", error);
     }
   };
-  const handleOkDeleteDraft = async () => {
-    try {
-      const response = await axios.delete(
-        `https://www.testapi.adsgoat.in/api/drafts/${encodeURIComponent(
-          userdetails.email
-        )}/${deleteDraftId}`,
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
-        }
-      );
-      if (response.status === 200) {
-        message.success("Draft deleted successfully");
-        setDeleteModalVisible(false);
-        changeDraftRefresh();
-      }
-    } catch (error) {
-      console.error("Error deleting draft:", error);
-      message.error("Failed to delete draft");
-    }
-  };
+
+  //commented 2026-05-22
+  // const handleOkDeleteDraft = async () => {
+  //   try {
+  //     const response = await axios.delete(
+  //       `https://www.testapi.adsgoat.in/api/drafts/${encodeURIComponent(
+  //         userdetails.email
+  //       )}/${deleteDraftId}`,
+  //       {
+  //         headers: {
+  //           Authorization: localStorage.getItem("token"),
+  //         },
+  //       }
+  //     );
+  //     if (response.status === 200) {
+  //       message.success("Draft deleted successfully");
+  //       setDeleteModalVisible(false);
+  //       changeDraftRefresh();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting draft:", error);
+  //     message.error("Failed to delete draft");
+  //   }
+  // };
 
   const handleCancel = () => {
     setIsModalVisible(false);
   };
-  const onToggleStatus = async (record, checked) => {
-    try {
-      const token = localStorage.getItem("token");
-      console.log("hello siddu", record, checked);
 
-      // Update status on your backend
-      const backendResponse = await fetch(
-        `https://www.testapi.adsgoat.in/api/status/${record?.identifier}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-          body: JSON.stringify({ Status: checked ? "ACTIVE" : "PAUSED" }),
-        }
-      );
+  //commented 2026-05-22
+  // const onToggleStatus = async (record, checked) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     console.log("hello siddu", record, checked);
 
-      const responseData = await backendResponse.json();
-      setCampaignData((prevCampaigns) =>
-        prevCampaigns.map((campaign) =>
-          campaign.identifier === record.identifier
-            ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
-            : campaign
-        )
-      );
-      console.log("Backend response status:", backendResponse.status);
-      console.log("Backend response data:", responseData);
+  //     // Update status on your backend
+  //     const backendResponse = await fetch(
+  //       `https://www.testapi.adsgoat.in/api/status/${record?.identifier}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: token,
+  //         },
+  //         body: JSON.stringify({ Status: checked ? "ACTIVE" : "PAUSED" }),
+  //       }
+  //     );
 
-      if (backendResponse.ok) {
-        // If campaignId is available, update the Facebook campaign status
-        if (record.campaignid) {
-          try {
-            const fbResponse = await axios.post(
-              `https://graph.facebook.com/v22.0/${record.campaignid}`,
-              null,
-              {
-                params: {
-                  status: checked ? "ACTIVE" : "PAUSED",
-                  access_token: record.access_token,
-                },
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
+  //     const responseData = await backendResponse.json();
+  //     setCampaignData((prevCampaigns) =>
+  //       prevCampaigns.map((campaign) =>
+  //         campaign.identifier === record.identifier
+  //           ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
+  //           : campaign
+  //       )
+  //     );
+  //     console.log("Backend response status:", backendResponse.status);
+  //     console.log("Backend response data:", responseData);
 
-            console.log("Facebook API response:", fbResponse.data);
+  //     if (backendResponse.ok) {
+  //       // If campaignId is available, update the Facebook campaign status
+  //       if (record.campaignid) {
+  //         try {
+  //           const fbResponse = await axios.post(
+  //             `https://graph.facebook.com/v22.0/${record.campaignid}`,
+  //             null,
+  //             {
+  //               params: {
+  //                 status: checked ? "ACTIVE" : "PAUSED",
+  //                 access_token: record.access_token,
+  //               },
+  //               headers: {
+  //                 "Content-Type": "application/json",
+  //               },
+  //             }
+  //           );
 
-            if (fbResponse.status === 200) {
-              if (fbResponse.data?.success === true) {
-                var mains = "Launched";
-              } else {
-                var mains = "PAUSE";
-              }
-              message.open({
-                type: 'success',
-                content: `Campaign ${checked ? "Launched" : "Paused"} Successfully`,
-                className: theme === 'dark' ? 'dark-message' : '',
-              });
+  //           console.log("Facebook API response:", fbResponse.data);
 
-              // Update the state to reflect the change in UI
-              setCampaignData((prevCampaigns) =>
-                prevCampaigns.map((campaign) =>
-                  campaign.identifier === record.identifier
-                    ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
-                    : campaign
-                )
-              );
-            } else {
-              console.error(
-                "Failed to update facebook status:",
-                fbResponse.data
-              );
-              message.error(
-                `Failed to update facebook status: ${fbResponse.data.error.message}`
-              );
-            }
-          } catch (fbError) {
-            console.error("Error updating facebook status:", fbError);
-            message.error(
-              `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
-              }`
-            );
-          }
-        } else {
-          // If no campaignId is available, only update the backend
-          message.open({
-            type: 'success',
-            content: "Campaign launched successfully",
-            className: theme === 'dark' ? 'dark-message' : '',
-          });
-          // Update the state to reflect the change in UI
-          setCampaignData((prevCampaigns) =>
-            prevCampaigns.map((campaign) =>
-              campaign.identifier === record.identifier
-                ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
-                : campaign
-            )
-          );
-        }
-      } else {
-        console.error("Failed to update backend status:", responseData);
-        message.error(
-          `Failed to update status: ${responseData.message || "Unknown error"}`
-        );
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-      message.error("Error updating status");
-    }
-  };
+  //           if (fbResponse.status === 200) {
+  //             if (fbResponse.data?.success === true) {
+  //               var mains = "Launched";
+  //             } else {
+  //               var mains = "PAUSE";
+  //             }
+  //             message.open({
+  //               type: 'success',
+  //               content: `Campaign ${checked ? "Launched" : "Paused"} Successfully`,
+  //               className: theme === 'dark' ? 'dark-message' : '',
+  //             });
+
+  //             // Update the state to reflect the change in UI
+  //             setCampaignData((prevCampaigns) =>
+  //               prevCampaigns.map((campaign) =>
+  //                 campaign.identifier === record.identifier
+  //                   ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
+  //                   : campaign
+  //               )
+  //             );
+  //           } else {
+  //             console.error(
+  //               "Failed to update facebook status:",
+  //               fbResponse.data
+  //             );
+  //             message.error(
+  //               `Failed to update facebook status: ${fbResponse.data.error.message}`
+  //             );
+  //           }
+  //         } catch (fbError) {
+  //           console.error("Error updating facebook status:", fbError);
+  //           message.error(
+  //             `Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message
+  //             }`
+  //           );
+  //         }
+  //       } else {
+  //         // If no campaignId is available, only update the backend
+  //         message.open({
+  //           type: 'success',
+  //           content: "Campaign launched successfully",
+  //           className: theme === 'dark' ? 'dark-message' : '',
+  //         });
+  //         // Update the state to reflect the change in UI
+  //         setCampaignData((prevCampaigns) =>
+  //           prevCampaigns.map((campaign) =>
+  //             campaign.identifier === record.identifier
+  //               ? { ...campaign, Status: checked ? "ACTIVE" : "PAUSED" }
+  //               : campaign
+  //           )
+  //         );
+  //       }
+  //     } else {
+  //       console.error("Failed to update backend status:", responseData);
+  //       message.error(
+  //         `Failed to update status: ${responseData.message || "Unknown error"}`
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating status:", error);
+  //     message.error("Error updating status");
+  //   }
+  // };
 
   const onToggleStatusForMultipleAdsets = async (record, checked) => {
     try {
       const token = localStorage.getItem("token");
       const username = userdetails.userName;
-      console.log("Tokensssssssssssssssssssssssss:", token);
+      // console.log("Tokensssssssssssssssssssssssss:", token);
 
       // Update status on your backend https://www.testapi.adsgoat.in
       const backendResponse = await fetch(
-        `https://www.testapi.adsgoat.in/api/newstatusnew/${record?.identifier}`,
+        // `https://www.testapi.adsgoat.in/api/newstatusnew/${record?.identifier}`,
+        `https://fblaunching.vyaktimetrics.com/campaigns/status/${record?.identifier}`,
         {
           method: "PUT",
           headers: {
@@ -1491,11 +1510,10 @@ const App = () => {
             : campaign
         )
       );
-      console.log("Backend response status:", backendResponse.status);
-      console.log("Backend response data:", responseData);
+      // console.log("Backend response status:", backendResponse.status);
+      // console.log("Backend response data:", responseData);
 
       if (backendResponse.ok) {
-        // If campaignId is available, update the Facebook campaign status
         if (record.campaignid) {
           try {
             const fbResponse = await axios.post(
@@ -1512,7 +1530,7 @@ const App = () => {
               }
             );
 
-            console.log("Facebook API response:", fbResponse.data);
+            // console.log("Facebook API response:", fbResponse.data);
 
             if (fbResponse.status === 200) {
               if (fbResponse.data?.success === true) {
@@ -1607,7 +1625,8 @@ const App = () => {
 
           // Step 1: Update the daily budget in your backend https://www.testapi.adsgoat.in
           const response = await fetch(
-            `https://www.testapi.adsgoat.in/api/newdailyBudgetnew/${record?.identifier}`,
+            // `https://www.testapi.adsgoat.in/api/newdailyBudgetnew/${record?.identifier}`,
+            `https://fblaunching.vyaktimetrics.com/campaigns/budget/${record?.identifier}`,
             {
               method: "PUT",
               headers: {
@@ -1619,8 +1638,8 @@ const App = () => {
           );
 
           if (response.ok) {
-            console.log("Daily amount updated successfully in backend");
-            console.log(record, "budget")
+            // console.log("Daily amount updated successfully in backend");
+            // console.log(record, "budget")
 
             // Step 2: If campaignId is available, update the budget on Facebook
             if (record.campaignid) {
@@ -1646,7 +1665,7 @@ const App = () => {
                 );
 
                 if (fbResponse.status === 200) {
-                  console.log("Daily budget updated successfully on Facebook");
+                  // console.log("Daily budget updated successfully on Facebook");
                   message.open({
                     type: 'success',
                     content: `${BudgetType} amount updated successfully on both backend and Facebook`,
@@ -1747,94 +1766,94 @@ const App = () => {
     const handleEdit = () => {
       setEditing(true);
     };
+    //commented 2026-05-22
+    // const handleSave = async () => {
+    //   if (record && inputValue) {
+    //     try {
+    //       const budgets = inputValue * 100; // Convert input value to the required format (cents)
 
-    const handleSave = async () => {
-      if (record && inputValue) {
-        try {
-          const budgets = inputValue * 100; // Convert input value to the required format (cents)
+    //       // Step 1: Update the daily budget in your backend
+    //       const response = await fetch(
+    //         `https://www.testapi.adsgoat.in/api/dailyBudget/${record?.identifier}`,
+    //         {
+    //           method: "PUT",
+    //           headers: {
+    //             "Content-Type": "application/json",
+    //             Authorization: localStorage.getItem("token"),
+    //           },
+    //           body: JSON.stringify({ Daily_amount: budgets }),
+    //         }
+    //       );
 
-          // Step 1: Update the daily budget in your backend
-          const response = await fetch(
-            `https://www.testapi.adsgoat.in/api/dailyBudget/${record?.identifier}`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: localStorage.getItem("token"),
-              },
-              body: JSON.stringify({ Daily_amount: budgets }),
-            }
-          );
+    //       if (response.ok) {
+    //         console.log("Daily amount updated successfully in backend");
 
-          if (response.ok) {
-            console.log("Daily amount updated successfully in backend");
+    //         // Step 2: If campaignId is available, update the budget on Facebook
+    //         if (record.campaignid) {
+    //           try {
+    //             const fbResponse = await axios.post(
+    //               `https://graph.facebook.com/v22.0/${record.campaignid}`,
+    //               null,
+    //               {
+    //                 params: {
+    //                   daily_budget: budgets,
+    //                   access_token: record.access_token,
+    //                 },
+    //                 headers: {
+    //                   "Content-Type": "application/json",
+    //                 },
+    //               }
+    //             );
 
-            // Step 2: If campaignId is available, update the budget on Facebook
-            if (record.campaignid) {
-              try {
-                const fbResponse = await axios.post(
-                  `https://graph.facebook.com/v22.0/${record.campaignid}`,
-                  null,
-                  {
-                    params: {
-                      daily_budget: budgets,
-                      access_token: record.access_token,
-                    },
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                  }
-                );
+    //             if (fbResponse.status === 200) {
+    //               console.log("Daily budget updated successfully on Facebook");
+    //               message.open({
+    //                 type: 'success',
+    //                 content: "Daily amount updated successfully on both backend and Facebook",
+    //                 className: theme === 'dark' ? 'dark-message' : '',
+    //               })
+    //               // Update the table row data with the new daily amount
+    //               updateTableRow({ ...record, Daily_amount: budgets });
 
-                if (fbResponse.status === 200) {
-                  console.log("Daily budget updated successfully on Facebook");
-                  message.open({
-                    type: 'success',
-                    content: "Daily amount updated successfully on both backend and Facebook",
-                    className: theme === 'dark' ? 'dark-message' : '',
-                  })
-                  // Update the table row data with the new daily amount
-                  updateTableRow({ ...record, Daily_amount: budgets });
+    //               // Trigger a refresh or any other necessary updates
+    //               changeRRefrst();
+    //             } else {
+    //               console.error("Failed to update daily amount on Facebook");
+    //               // message.error(`Failed to update daily amount on Facebook: ${fbResponse.data.error.message}`);
+    //             }
+    //           } catch (fbError) {
+    //             console.error(
+    //               "Error updating daily amount on Facebook:",
+    //               fbError
+    //             );
+    //             // message.error(`Error updating daily amount on Facebook: ${fbError.response?.data?.error?.message || fbError.message}`);
+    //           }
+    //         } else {
+    //           // If no campaignId, just update the backend
+    //           message.open({
+    //             type: 'success',
+    //             content: "Daily amount updated successfully",
+    //             className: theme === 'dark' ? 'dark-message' : '',
+    //           })
 
-                  // Trigger a refresh or any other necessary updates
-                  changeRRefrst();
-                } else {
-                  console.error("Failed to update daily amount on Facebook");
-                  // message.error(`Failed to update daily amount on Facebook: ${fbResponse.data.error.message}`);
-                }
-              } catch (fbError) {
-                console.error(
-                  "Error updating daily amount on Facebook:",
-                  fbError
-                );
-                // message.error(`Error updating daily amount on Facebook: ${fbError.response?.data?.error?.message || fbError.message}`);
-              }
-            } else {
-              // If no campaignId, just update the backend
-              message.open({
-                type: 'success',
-                content: "Daily amount updated successfully",
-                className: theme === 'dark' ? 'dark-message' : '',
-              })
+    //           // Update the table row data with the new daily amount
+    //           updateTableRow({ ...record, Daily_amount: budgets });
 
-              // Update the table row data with the new daily amount
-              updateTableRow({ ...record, Daily_amount: budgets });
+    //           // Trigger a refresh or any other necessary updates
+    //           changeRRefrst();
+    //         }
+    //       } else {
+    //         console.error("Failed to update daily amount in backend");
+    //         message.error("Failed to update daily amount in backend");
+    //       }
+    //     } catch (error) {
+    //       console.error("Error updating daily amount:", error);
+    //       message.error("Error updating daily amount");
+    //     }
+    //   }
 
-              // Trigger a refresh or any other necessary updates
-              changeRRefrst();
-            }
-          } else {
-            console.error("Failed to update daily amount in backend");
-            message.error("Failed to update daily amount in backend");
-          }
-        } catch (error) {
-          console.error("Error updating daily amount:", error);
-          message.error("Error updating daily amount");
-        }
-      }
-
-      setEditing(false);
-    };
+    //   setEditing(false);
+    // };
 
     return (
       <div>
@@ -1842,8 +1861,8 @@ const App = () => {
           <Input
             value={inputValue}
             onChange={handleInputChange}
-            onPressEnter={handleSave}
-            onBlur={handleSave}
+            // onPressEnter={handleSave}
+            // onBlur={handleSave}
             autoFocus
             className={
               theme === "dark" ? "custom-input-dark" : "custom-input-light"
@@ -1892,7 +1911,7 @@ const App = () => {
   };
 
   const duplicatenewcampaign = (record) => {
-    console.log(record, "duplicate camapaign");
+    // console.log(record, "duplicate camapaign");
     setDrawerVisible(true);
     setdupDrawerVisible(true);
     setduplicatenewcampaigns(record);
@@ -2081,8 +2100,9 @@ const App = () => {
       // console.log("identifier:", identifier);
 
       const response = await axios.delete(
-        `https://www.testapi.adsgoat.in/api/newcampaigns/${identifier}`
-        // { headers: { Authorization: token } } // include if you use auth
+        // `https://www.testapi.adsgoat.in/api/newcampaigns/${identifier}`
+        `https://fblaunching.vyaktimetrics.com/open/campaigns/${identifier}`,
+        { headers: { Authorization: token } }
       );
 
       if (response.status === 200) {
@@ -2184,7 +2204,7 @@ const App = () => {
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(
-                      `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
+                      `/LiveHistory/LiveCampaignHistory/${record?.campaignid}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
                       "_blank",
                       "noopener,noreferrer"
                     );
@@ -2702,7 +2722,7 @@ const App = () => {
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(
-                      `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
+                      `/LiveHistory/LiveCampaignHistory/${record?.campaignid}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
                       "_blank",
                       "noopener,noreferrer"
                     );
@@ -3254,7 +3274,7 @@ const App = () => {
         } else if (text === "Rejected") {
           color = "red"
         }
-        console.log(record, "recordada")
+        // console.log(record, "recordada")
         const approvedBy = record?.Approvedby || "N/A";
         const approvedDate = record?.Approveddate
           ? moment(record.Approveddate, "YYYY-MM-DD HH:mm z")
@@ -3459,7 +3479,7 @@ const App = () => {
                     backgroundColor: "#91C25F",
                     color: "#000",
                     border: "none",
-                    width:"62px"
+                    width: "62px"
                   }}
                   onClick={() => handleApprovalforAdsets(record)}
                 >
@@ -3470,7 +3490,7 @@ const App = () => {
                     backgroundColor: "#fb4437ff",
                     color: "#000",
                     border: "none",
-                    width:"82px"
+                    width: "82px"
                   }}
                   onClick={() => handledisApprovalforAdsets(record)}
                 >
@@ -3761,7 +3781,7 @@ const App = () => {
   //         }
 
   //     ];
-  console.log(selectedKey);
+  // console.log(selectedKey);
   // const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
   //     return sum + (record.Daily_amount || 0);
   // }, 0) / 100;  // Assuming Daily_amount is in cents
@@ -3789,7 +3809,7 @@ const App = () => {
   })();
 
   const onClickDeleteDraft = (id) => {
-    console.log(id, "draft id");
+    // console.log(id, "draft id");
     setDeleteModalVisible(true);
     setDeleteDraftId(id);
   };
@@ -3978,7 +3998,8 @@ const App = () => {
     }
     const username = userdetails?.userName;
     const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/newcreatecommentForLauncher",
+      // "https://www.testapi.adsgoat.in/api/newcreatecommentForLauncher",
+      "https://fblaunching.vyaktimetrics.com/open/launcher-comments",
       { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: commentText, editedTime: editedTime, username: username },
       {
         headers: {
@@ -4028,14 +4049,30 @@ const App = () => {
 
   const handleDelete = async () => {
     const username = userdetails?.userName;
-    const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/newdeleteCommentForLauncher",
-      { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: comment, username: username },
+    // const response = await axios.delete(
+    //   // "https://www.testapi.adsgoat.in/api/newdeleteCommentForLauncher",
+    //   "https://fblaunching.vyaktimetrics.com/open/launcher-comments",
+    //   { Account: universalOject.Account, campaignid: universalOject.campaignid, campaignname: universalOject.campaignname, level: "Launcher", comment: comment, username: username },
+    //   {
+    //     headers: {
+    //       Authorization: localStorage.getItem("token"),
+    //     }
+    //   }
+    // );
+    const response = await axios.delete(
+      "https://fblaunching.vyaktimetrics.com/open/launcher-comments",
       {
         headers: {
-          "Content-Type": "application/json",
           Authorization: localStorage.getItem("token"),
-        }
+        },
+        data: {
+          Account: universalOject.Account,
+          campaignid: universalOject.campaignid,
+          campaignname: universalOject.campaignname,
+          level: "Launcher",
+          comment: comment,
+          username: username,
+        },
       }
     );
     if (response.status === 200 || response.status === 201) {
@@ -4101,7 +4138,8 @@ const App = () => {
     }
     const username = userdetails?.userName;
     const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/newbulkCreateCommentForLauncher",
+      // "https://www.testapi.adsgoat.in/api/newbulkCreateCommentForLauncher",
+      "https://fblaunching.vyaktimetrics.com/open/comments/bulk-create",
       {
         items: checkedRowRecords.map(c => ({
           Account: c.Account_Number,
@@ -4172,7 +4210,8 @@ const App = () => {
     }
     const username = userdetails?.userName;
     const response = await axios.post(
-      "https://www.testapi.adsgoat.in/api/newbulkDeleteCommentForLauncher",
+      // "https://www.testapi.adsgoat.in/api/newbulkDeleteCommentForLauncher",
+      "https://fblaunching.vyaktimetrics.com/open/comments/bulk-delete",
       {
         items: checkedRowRecords.map(c => ({
           Account: c.Account_Number,
@@ -4730,7 +4769,7 @@ const App = () => {
                   defaultValue={[dayjs(), dayjs()]}
                   format="YYYY-MM-DD"
                   style={{
-                    width: isMobile ? '340px': '240px',
+                    width: isMobile ? '340px' : '240px',
                     backgroundColor: theme === 'dark' ? '#555' : undefined,
                     color: theme === 'dark' ? 'white' : undefined,
                     border: '1px solid #4CAF50',
@@ -4759,7 +4798,7 @@ const App = () => {
             >
               Apply
             </Button>
-            { isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
+            {isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
               <div
                 style={{
                   textAlign: "right",
@@ -5473,7 +5512,7 @@ const App = () => {
             >
                 <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} />
             </Drawer> */}
-      <Modal
+      {/* <Modal
         title="Confirm approval"
         visible={deleteModalVisible}
         onOk={handleOkDeleteDraft}
@@ -5481,7 +5520,7 @@ const App = () => {
         className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
       >
         <p>Are you sure you want to delete this draft</p>
-      </Modal>
+      </Modal> */}
 
       <Modal
         title={firstColumnValue}

@@ -53,12 +53,12 @@ export default function Viewads({ selectedRow, viewdata }) {
         form
             .validateFields()
             .then((values) => {
-                console.log('Form data:', values);
+                // console.log('Form data:', values);
                 setFormData(values);
                 setIsModalVisible(true);
             })
             .catch((errorInfo) => {
-                console.log('Validation failed:', errorInfo);
+                // console.log('Validation failed:', errorInfo);
             });
     };
 
@@ -68,12 +68,12 @@ export default function Viewads({ selectedRow, viewdata }) {
 
     const handleModalOk = () => {
         setIsModalVisible(false);
-        console.log('Modal ok clicked');
+        // console.log('Modal ok clicked');
     };
 
     const handleModalCancel = () => {
         setIsModalVisible(false);
-        console.log('Modal cancel clicked');
+        // console.log('Modal cancel clicked');
     };
     var initialValue = {
         AddName: viewdata?.AddName,

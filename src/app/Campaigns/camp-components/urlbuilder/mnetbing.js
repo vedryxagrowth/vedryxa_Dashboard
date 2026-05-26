@@ -24,6 +24,7 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
   const [pixelId, setPixelId] = useState('PixelId');
   const pixelIds = ['PixelId', 'None'];
   const { theme } = useTokenContext();
+  const token = localStorage.getItem("token")
 
 
   // const MnetDomains = [
@@ -55,7 +56,7 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
   //     "account": "MN",
   //     "url": "https://top.lookuptrends.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
   //             https://web.searchluxe.net/search/?q=keywords_replace&chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708
-            //   https://top.shoppersarchive.net/search/?q=keywords_replace&chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708
+  //   https://top.shoppersarchive.net/search/?q=keywords_replace&chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708
   //   },
   //   {
   //     "id": 5,
@@ -186,13 +187,21 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
   // ];
 
   const getUrlBuilderData = async () => {
-    const response = await apiClient.get(`/get/urlbuilderdata?network=MnetBing`);
+    // const response = await apiClient.get(`/get/urlbuilderdata?network=MnetBing`);
+    const response = await fetch(
+      `https://fblaunching.vyaktimetrics.com/open/get/urlbuilderdata?network=MnetBing`,
+      {
+        method: "GET",
+        headers: { Authorization: token },
+      },
+    )
+    const json = await response.json();
     if (response?.status === 200) {
-      setNetworkData(response?.data)
+      setNetworkData(json)
       if (indexValueForAccount) {
         // console.log(defaultValues);
         // console.log(defaultValues.split("//")[1].split("/")[0]);
-        const DomainUrls = response?.data?.Domains
+        const DomainUrls = json?.Domains
           .filter(item => item.url.includes(indexValueForAccount?.split("//")[1]?.split("/")[0]))
           .map(item => item.url);
         // console.log(DomainUrls);
@@ -202,7 +211,7 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         const result = text.replace(/\+/g, " ");
         // console.log(result);
         setKeyWords(result);
-        console.log(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+        // console.log(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
         setChannel(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
         setMembetId(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
         setSource(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
@@ -213,9 +222,9 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         // const domainData = response 
       } else {
         if (defaultValues) {
-          console.log(defaultValues);
+          // console.log(defaultValues);
           // console.log(defaultValues.split("//")[1].split("/")[0]);
-          const DomainUrls = response?.data?.Domains
+          const DomainUrls = json?.Domains
             .filter(item => item.url.includes(defaultValues?.split("//")[1]?.split("/")[0]))
             .map(item => item.url);
           // console.log(DomainUrls);
@@ -223,9 +232,9 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
 
           const text = defaultValues?.split("//")[1]?.split("/")[3];
           const result = text.replace(/\+/g, " ");
-          console.log(result);
+          // console.log(result);
           setKeyWords("");
-          console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+          // console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
           setChannel(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
           setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
           setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
@@ -270,7 +279,7 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
     setErrorMessage('');
     setPixelId('PixelId');
   }
-  console.log(showSubmitButton);
+  // console.log(showSubmitButton);
 
   const onClickSubmit = () => {
 
@@ -291,22 +300,22 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         url = newDomain[0];
       }
 
-      if(channel === "None"){
+      if (channel === "None") {
         url = url
-        .replace("keywords_replace", formattedKeywords)
-        .replace("&chanel_replace", "")
-        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
-        .replace("campaign_id_replace", adset_id)
-        .replace("adset_id_replace", ad_id);
+          .replace("keywords_replace", formattedKeywords)
+          .replace("&chanel_replace", "")
+          .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+          .replace("campaign_id_replace", adset_id)
+          .replace("adset_id_replace", ad_id);
       }
-      else{
+      else {
 
-      url = url
-        .replace("keywords_replace", formattedKeywords)
-        .replace("chanel_replace", channel)
-        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
-        .replace("campaign_id_replace", adset_id)
-        .replace("adset_id_replace", ad_id);
+        url = url
+          .replace("keywords_replace", formattedKeywords)
+          .replace("chanel_replace", channel)
+          .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+          .replace("campaign_id_replace", adset_id)
+          .replace("adset_id_replace", ad_id);
       }
 
       // url = url
@@ -338,22 +347,22 @@ const MnetBingUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessa
         const newDomain = domain.split("&trkfb");
         url = newDomain[0];
       }
-      if(channel === "None"){
+      if (channel === "None") {
         url = url
-        .replace("keywords_replace", formattedKeywords)
-        .replace("&chanel_replace", "")
-        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
-        .replace("campaign_id_replace", adset_id)
-        .replace("adset_id_replace", ad_id);
+          .replace("keywords_replace", formattedKeywords)
+          .replace("&chanel_replace", "")
+          .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+          .replace("campaign_id_replace", adset_id)
+          .replace("adset_id_replace", ad_id);
       }
-      else{
+      else {
 
-      url = url
-        .replace("keywords_replace", formattedKeywords)
-        .replace("chanel_replace", channel)
-        .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
-        .replace("campaign_id_replace", adset_id)
-        .replace("adset_id_replace", ad_id);
+        url = url
+          .replace("keywords_replace", formattedKeywords)
+          .replace("chanel_replace", channel)
+          .replace("business_code_replace_source_code_replace_region_code_replace", campaign_id)
+          .replace("campaign_id_replace", adset_id)
+          .replace("adset_id_replace", ad_id);
       }
       setErrorMessage(url);
     }

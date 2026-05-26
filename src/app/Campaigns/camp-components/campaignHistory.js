@@ -113,7 +113,8 @@ const CampaignHistoryModal = ({ open, onClose, identifier, adAccounts }) => {
                 setLoading(true);
 
                 const res = await fetch(
-                    `https://www.testapi.adsgoat.in/api/getCampaignActivityHistory/${identifier}`,
+                    // `https://www.testapi.adsgoat.in/api/getCampaignActivityHistory/${identifier}`,
+                    `https://fblaunching.vyaktimetrics.com/campaigns/history/${identifier}`,
                     {
                         method: "GET",
                         headers: { Authorization: token },
@@ -122,15 +123,15 @@ const CampaignHistoryModal = ({ open, onClose, identifier, adAccounts }) => {
 
                 const json = await res.json();
 
-                if (!json?.ok) {
+                if (json?.status !== 200) {
                     message.error("Failed to load history");
                     return;
                 }
 
-                const history = json.data || [];
+                const history = json?.data?.activityHistory || [];
                 // const accountNumber = json.accountNumber; 
                 const accountNumber =
-                    json.accountNumber ||
+                    json?.data?.accountNumber ||
                     history?.[0]?.accountNumber ||
                     history?.[0]?.Account;
                 const accountTz = getAccountTimezone(accountNumber, adAccounts);

@@ -617,15 +617,15 @@ const AddComponent = ({
   );
   const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
   const [form] = Form.useForm();
-  console.log(viewSingleAd, "viewSingleAd in AddComponent");
-  console.log(activeMediaIndex, "activeMediaIndex in AddComponent");
-  console.log(accountis, "accountis in AddComponent");
-  console.log(selectedFiles, "selectedFiles in AddComponent");
-  console.log(selectedFilesFromMedia, "selectedFilesFromMedia in AddComponent");
-  console.log(
-    selectedFilesFromCreatives,
-    "selectedFilesFromCreatives in AddComponent"
-  );
+  // console.log(viewSingleAd, "viewSingleAd in AddComponent");
+  // console.log(activeMediaIndex, "activeMediaIndex in AddComponent");
+  // console.log(accountis, "accountis in AddComponent");
+  // console.log(selectedFiles, "selectedFiles in AddComponent");
+  // console.log(selectedFilesFromMedia, "selectedFilesFromMedia in AddComponent");
+  // console.log(
+  //   selectedFilesFromCreatives,
+  //   "selectedFilesFromCreatives in AddComponent"
+  // );
 
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
@@ -783,7 +783,7 @@ const AddComponent = ({
   };
 
   const onClickCreativesDrawer = (adset) => {
-    console.log("Creatives Drawer Opened");
+    // console.log("Creatives Drawer Opened");
     setOpenCreativesDrawer(true);
     setCreativeIndex(adset.id);
   };
@@ -944,12 +944,12 @@ const AddComponent = ({
   };
 
   useEffect(() => {
-    console.log(viewSingleAd, "viewSingleAd in useEffect");
-    console.log(typeof viewSingleAd.filename, "viewSingleAd.filename type");
-    console.log(
-      typeof viewSingleAd.filename === "object" &&
-      viewSingleAd.filename !== null
-    );
+    // console.log(viewSingleAd, "viewSingleAd in useEffect");
+    // console.log(typeof viewSingleAd.filename, "viewSingleAd.filename type");
+    // console.log(
+    //   typeof viewSingleAd.filename === "object" &&
+    //   viewSingleAd.filename !== null
+    // );
     if (
       typeof viewSingleAd.filename === "object" &&
       viewSingleAd.filename !== null
@@ -988,20 +988,20 @@ const AddComponent = ({
         setSelectedFilesFromMedia([]);
         setSelectedOption("creative");
       } else {
-        console.log(
-          viewSingleAd.filename,
-          "viewSingleAd.filename in useEffect 1"
-        );
+        // console.log(
+        //   viewSingleAd.filename,
+        //   "viewSingleAd.filename in useEffect 1"
+        // );
         setSelectedFiles([viewSingleAd.filename]);
         setSelectedFilesFromMedia([viewSingleAd.filename]);
         setSelectedOption("upload");
         setSelectedFilesFromCreatives([]);
       }
     } else {
-      console.log(
-        viewSingleAd.filename,
-        "viewSingleAd.filename in useEffect 2"
-      );
+      // console.log(
+      //   viewSingleAd.filename,
+      //   "viewSingleAd.filename in useEffect 2"
+      // );
       setSelectedFiles([
         {
           uid: uuidv4(),
@@ -1243,7 +1243,7 @@ const AddComponent = ({
 
                         if (!newFiles[0]) return;
 
-                        console.log(newFiles[0], "newFiles[0] in onChange");
+                        // console.log(newFiles[0], "newFiles[0] in onChange");
 
                         setSelectedFiles((prev) => {
                           const existingUids = new Set(prev.map((f) => f.uid));
@@ -2384,30 +2384,30 @@ const AdsetComponent = ({
   const [loading, setLoading] = useState(false);
   const [viewSingleAd, setViewSingleAd] = useState({});
 
-  console.log(selectedPositions, "selectedPositions in adset component");
-  console.log(adset.id, "adset id in adset component");
-  console.log(selectedPublishers, "selectedPublishers in adset component");
-  console.log(selectedPositions);
-  console.log(adset, "adset in adset component");
+  // console.log(selectedPositions, "selectedPositions in adset component");
+  // console.log(adset.id, "adset id in adset component");
+  // console.log(selectedPublishers, "selectedPublishers in adset component");
+  // console.log(selectedPositions);
+  // console.log(adset, "adset in adset component");
   const [form] = Form.useForm();
   const { theme } = useTokenContext();
-  console.log(isModalVisible);
-  console.log(selectedFiles, "selectedFiles in adset component");
-  console.log(
-    selectedFilesFromMedia,
-    "selectedFilesFromMedia in adset component"
-  );
-  console.log(
-    selectedFilesFromCreatives,
-    "selectedFilesFromCreatives in adset component"
-  );
-  console.log(viewSingleAd, "viewSingleAd in adset component");
-  console.log(
-    viewSingleAd &&
-    console.log(viewSingleAd, "viewSingleAd ---- in adset component")
-  );
-  console.log(addlevelData, "addlevelData in adset component");
-  console.log(newAddLevelData, "newAddLevelData in adset component");
+  // console.log(isModalVisible);
+  // console.log(selectedFiles, "selectedFiles in adset component");
+  // console.log(
+  //   selectedFilesFromMedia,
+  //   "selectedFilesFromMedia in adset component"
+  // );
+  // console.log(
+  //   selectedFilesFromCreatives,
+  //   "selectedFilesFromCreatives in adset component"
+  // );
+  // console.log(viewSingleAd, "viewSingleAd in adset component");
+  // console.log(
+  //   viewSingleAd &&
+  //   console.log(viewSingleAd, "viewSingleAd ---- in adset component")
+  // );
+  // console.log(addlevelData, "addlevelData in adset component");
+  // console.log(newAddLevelData, "newAddLevelData in adset component");
 
   const closeDrawer = () => {
     setDrawerVisible(false);
@@ -2485,7 +2485,7 @@ const AdsetComponent = ({
   };
 
   function extractValuesByPartialLabel(dataArray, labelName) {
-    console.log(dataArray, labelName);
+    // console.log(dataArray, labelName);
     return dataArray
       .filter((item) =>
         item.label.toLowerCase().includes(labelName.toLowerCase())
@@ -2551,11 +2551,11 @@ const AdsetComponent = ({
     // efgh
 
     const getFilenameDeatials = async (file) => {
-      console.log(file, "file in getFilenameDeatials");
+      // console.log(file, "file in getFilenameDeatials");
       const token = viewCampaignData?.camapaignlevel?.access_token;
       let mediaHashArray = {};
       const onSuccess = (status, response) => {
-        console.log("Upload success:", response);
+        // console.log("Upload success:", response);
       };
 
       const onError = (status, error) => {
@@ -2594,7 +2594,7 @@ const AdsetComponent = ({
       };
 
       if (file?.url) {
-        console.log(file, "file in getFilenameDeatials with url");
+        // console.log(file, "file in getFilenameDeatials with url");
         const response = await fetch(
           `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
           {
@@ -2787,18 +2787,18 @@ const AdsetComponent = ({
       return mediaHashArray;
     };
 
-    console.log("Form Values:", formValues);
-    console.log(addlevelData, "addlevelData in adset component");
-    console.log(newAddLevelData, "newAddLevelData in adset component");
-    console.log("Selected Files:", selectedFiles);
-    console.log(viewSingleAd, "viewSingleAd in adset component");
-    console.log(viewCampaignData, "viewCampaignData in adset component");
-    console.log(adset, "adset in adset component");
+    // console.log("Form Values:", formValues);
+    // console.log(addlevelData, "addlevelData in adset component");
+    // console.log(newAddLevelData, "newAddLevelData in adset component");
+    // console.log("Selected Files:", selectedFiles);
+    // console.log(viewSingleAd, "viewSingleAd in adset component");
+    // console.log(viewCampaignData, "viewCampaignData in adset component");
+    // console.log(adset, "adset in adset component");
     let re_lunch = false;
 
     const newAddLevel = await Promise.all(
       newAddLevelData.map(async (item) => {
-        console.log(item, "item in newAddLevel");
+        // console.log(item, "item in newAddLevel");
         const getItem = addlevelData.find((i) => i.id === item.id) || {};
         if (Object.keys(getItem).length > 0) {
           const newUpdatedAd = { id: item.id, page_id: item.page_id };
@@ -2929,7 +2929,7 @@ const AdsetComponent = ({
       })
     );
 
-    console.log("New Add Level Data:", newAddLevel);
+    // console.log("New Add Level Data:", newAddLevel);
 
     let AdsetsData = { id: adset.id, buying_type: "AUCTION" };
     if (adset.Adsetid) {
@@ -3059,7 +3059,7 @@ const AdsetComponent = ({
       AdsetsData["Gender"] = parseInt(formValues.Gender);
     }
     if (adset.Adsetid && adset.placements) {
-      console.log(adset.placements, "adset placements in adset component");
+      // console.log(adset.placements, "adset placements in adset component");
       if (
         adset.placements === "Advance" &&
         formValues.placements === "Advance"
@@ -3101,7 +3101,7 @@ const AdsetComponent = ({
         adset.placements === "manual" &&
         formValues.placements === "manual"
       ) {
-        console.log(adset.placements);
+        // console.log(adset.placements);
         AdsetsData["placements"] = formValues.placements;
         if (
           JSON.stringify(adset.publisher_platforms) !==
@@ -3213,7 +3213,7 @@ const AdsetComponent = ({
 
     AdsetsData["addlevel"] = newAddLevel;
 
-    console.log("Adsets Data:", AdsetsData);
+    // console.log("Adsets Data:", AdsetsData);
 
     try {
       if (AdsetsData) {
@@ -3240,7 +3240,7 @@ const AdsetComponent = ({
 
         if (response.ok) {
           message.success("Campaign created successfully");
-          console.log("Form data submitted successfully");
+          // console.log("Form data submitted successfully");
           setLoading(false); // Stop the spinner
           setSelectedFilesFromCreatives([]);
           setSelectedFilesFromMedia([{}]);
@@ -3307,11 +3307,11 @@ const AdsetComponent = ({
         );
         return acc;
       }, {});
-      console.log({
-        publisher_platforms: values.publisher_platforms,
-        ...selectedPlatforms,
-        ...values,
-      });
+      // console.log({
+      //   publisher_platforms: values.publisher_platforms,
+      //   ...selectedPlatforms,
+      //   ...values,
+      // });
 
       // setIsModalVisible(true);
       setFormValues({
@@ -3376,19 +3376,19 @@ const AdsetComponent = ({
   };
 
   const onClickCreativesDrawer = (adset, index) => {
-    console.log("Creatives Drawer Opened");
+    // console.log("Creatives Drawer Opened");
     setOpenCreativesDrawer(true);
     setCreativeIndex(adset.id);
   };
 
   const handlePositionChange = (values, options) => {
-    console.log(values, "values");
-    console.log(options, "options");
+    // console.log(values, "values");
+    // console.log(options, "options");
     const formatted = options.map((opt) => ({
       key: opt.value,
       label: opt.label || opt.children,
     }));
-    console.log(formatted, "formatted positions");
+    // console.log(formatted, "formatted positions");
     setSelectedPositions(formatted);
     // setSelectedPositions(prevState => ({
     //     ...prevState, // Spread the previous state to preserve other entries
@@ -3427,7 +3427,7 @@ const AdsetComponent = ({
 
         if (!response.ok) throw new Error("Failed to create folder");
         const data = await response.json();
-        console.log("Folder created:", folderPath);
+        // console.log("Folder created:", folderPath);
         return true;
       } catch (err) {
         console.error("Error creating folder:", err);
@@ -3688,10 +3688,10 @@ const AdsetComponent = ({
       if (Array.isArray(selectedFiles) && selectedFiles.length > 0) {
         mediaHashArray = await uploadFilesSequentially(selectedFiles);
       }
-      console.log(
-        "All media files uploaded successfully. Media Hash Array:",
-        mediaHashArray
-      );
+      // console.log(
+      //   "All media files uploaded successfully. Media Hash Array:",
+      //   mediaHashArray
+      // );
       return mediaHashArray;
     } catch (error) {
       console.error("One or more media uploads failed:", error);
@@ -3718,7 +3718,7 @@ const AdsetComponent = ({
     //     },
     // };
     const onSuccess = (status, response) => {
-      console.log("Upload success:", response);
+      // console.log("Upload success:", response);
     };
 
     const onError = (status, error) => {
@@ -5464,7 +5464,7 @@ const AdsetComponent = ({
                                       fileList,
                                       actions
                                     ) => {
-                                      console.log(file);
+                                      // console.log(file);
                                       // Show delete icon only if `canDelete: true`
                                       return (
                                         <div
@@ -6981,7 +6981,7 @@ const AdsetComponent = ({
                   // Clear any previous errors
                   setSubmitErrors([]);
                   setIsModalVisible(true);
-                  console.log("Form values:", values); // Log form values to verify
+                  // console.log("Form values:", values); // Log form values to verify
 
                   // Call the onFinish logic, passing in the values
                   onFinish(values); // Trigger the existing logic for form submission

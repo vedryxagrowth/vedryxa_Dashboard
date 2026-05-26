@@ -576,12 +576,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     }, [visible]);
 
     const onClickCreativesDrawer = () => {
-        console.log("Creatives Drawer Opened");
+        // console.log("Creatives Drawer Opened");
         setOpenCreativesDrawer(true);
     }
 
     const selectedFilesData = (data) => {
-        console.log("Selected Files Data:", data);
+        // console.log("Selected Files Data:", data);
         setSelectedFiles(prev => [...prev, ...data.map((file, index) => {
             return ({
                 uid: file.uid || `-${index + 1}`,
@@ -636,8 +636,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             ...prev,
             [fileId]: editedImageObject.imageBase64 || editedImageObject.imageUrl
         }));
-        console.log(fileId);
-        console.log(editedImageObject);
+        // console.log(fileId);
+        // console.log(editedImageObject);
         closeCanvasModal();
     };
 
@@ -769,7 +769,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             // setPrimaryText(DuplicatedampaignData?.addlevel[0]?.message);
             // setDescription(DuplicatedampaignData?.addlevel[0]?.Description);
             // setHeadline(DuplicatedampaignData?.addlevel[0]?.headline);
-            console.log(DuplicatedampaignData?.adsetlevel?.placements);
+            // console.log(DuplicatedampaignData?.adsetlevel?.placements);
             form.setFieldsValue({
                 positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
                 Account_Number: DuplicatedampaignData?.Account_Number,
@@ -840,9 +840,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
             // Log the empty fields
             if (emptyFields.length > 0) {
-                console.log('Empty fields:', emptyFields);
+                // console.log('Empty fields:', emptyFields);
             } else {
-                console.log('All fields are complete');
+                // console.log('All fields are complete');
             }
 
             // Check if all form fields are filled, considering the skipped fields
@@ -885,7 +885,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     };
 
     var token = localStorage.getItem("token")
-    console.log(selectedRow, "selectedRow")
+    // console.log(selectedRow, "selectedRow")
 
 
 
@@ -900,7 +900,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             }
                         }
                     );
-                    console.log("hello viewdata", ...response.data);
+                    // console.log("hello viewdata", ...response.data);
                     setDuplicatedampaignData(response?.data[0]);
                 }
             } catch (error) {
@@ -920,7 +920,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     }
                 }
             );
-            console.log("account data", ...response?.data);
+            // console.log("account data", ...response?.data);
 
 
             setimagehash(...response?.data)
@@ -1007,7 +1007,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 }
             );
 
-            console.log('Response data PIXEL ID:', Pixeldata?.data?.data[0]?.id);
+            // console.log('Response data PIXEL ID:', Pixeldata?.data?.data[0]?.id);
             setpixelid(Pixeldata?.data?.data[0]?.id)
             // res.status(200).json(response.data);
         } catch (error) {
@@ -1028,7 +1028,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             );
 
             // Log the response data
-            console.log('Response data Pageid:', pageiddata?.data?.data[0]?.object_story_spec?.page_id);
+            // console.log('Response data Pageid:', pageiddata?.data?.data[0]?.object_story_spec?.page_id);
             setpageid(pageiddata?.data?.data[0]?.object_story_spec?.page_id)
             // res.status(200).json(response.data);
         } catch (error) {
@@ -1152,7 +1152,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             const editedImage = editedImages[file.name];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
 
-                            console.log(file.originFileObj.name);
+                            // console.log(file.originFileObj.name);
 
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
@@ -1271,7 +1271,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
         try {
             const mediaHashArray = uploadFilesSequentially(selectedFiles);
-            console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
+            // console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
             return mediaHashArray;
         } catch (error) {
             console.error("One or more media uploads failed:", error);
@@ -1399,7 +1399,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
         if (formValues) {
             const onSuccess = (status, response) => {
-                console.log("Upload success:", response);
+                // console.log("Upload success:", response);
             };
 
             const onError = (status, error) => {
@@ -1498,12 +1498,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             }
 
             // console.log("All Form Values:", allValues); // Logs all fields
-            console.log("Final Form Data:", formData); // Logs processed data
+            // console.log("Final Form Data:", formData); // Logs processed data
 
             setFormValues(formData);
             setIsModalVisible(true);
         } catch (errorInfo) {
-            console.log('Validation failed:', errorInfo);
+            // console.log('Validation failed:', errorInfo);
         }
     };
 
@@ -1573,7 +1573,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
     const postData = async (values) => {
         setLoading(true); // Start the spinner post
-        console.log(selectedPositions)
+        // console.log(selectedPositions)
         try {
             const dataToSubmit = {
                 campaign_name: values.Name,
@@ -1629,7 +1629,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             };
 
 
-            console.log(dataToSubmit);
+            // console.log(dataToSubmit);
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
                 headers: {
@@ -1640,7 +1640,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             });
 
             if (response.ok) {
-                console.log('Form data submitted successfully');
+                // console.log('Form data submitted successfully');
                 isManual !== "manual" && setIsManual(false);
                 onClose(); // Close the drawer or perform any other action
                 message.open({
@@ -1661,7 +1661,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     };
 
     const handleChange = (info) => {
-        console.log(info);
+        // console.log(info);
         setSelectedFiles(info.fileList.map(file => ({
             ...file,
             uid: file.uid || `-${Date.now()}`,  // Ensure there's a valid uid
@@ -1679,9 +1679,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
             // Log the empty fields
             if (emptyFields.length > 0) {
-                console.log('Empty fields:', emptyFields);
+                // console.log('Empty fields:', emptyFields);
             } else {
-                console.log('All fields are complete');
+                // console.log('All fields are complete');
             }
 
             // Check if all form fields are filled, considering the skipped fields

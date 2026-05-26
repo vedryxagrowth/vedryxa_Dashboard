@@ -567,7 +567,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
 
             // 🔹 Use proxy to fetch the image and bypass CORS restrictions
             const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
-            console.log("Cloning using Proxy:", proxyUrl);
+            // console.log("Cloning using Proxy:", proxyUrl);
 
             const response = await fetch(proxyUrl);
             if (!response.ok) {
@@ -661,7 +661,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
         // 🔹 Proxy the image URL
         const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
 
-        console.log("📌 Editing Image URL:", proxyUrl); // ✅ Debugging step
+        // console.log("📌 Editing Image URL:", proxyUrl); // ✅ Debugging step
     
         // ✅ Set selected image for editing
         // setSelectedImage(image);
@@ -1263,7 +1263,8 @@ const CreativesDrawer = ({selectedFilesData}) => {
                                         loop 
                                         muted 
                                         playsInline
-                                        onLoadedData={(e) => e.target.play().catch(() => console.log("Autoplay blocked"))}
+                                        onLoadedData={(e) => e.target.play().catch(() => 
+                                            console.log("Autoplay blocked"))}
                                     />
                                 ) : (
                                     <img 

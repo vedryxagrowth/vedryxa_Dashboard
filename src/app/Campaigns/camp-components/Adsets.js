@@ -62,14 +62,14 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
   const [loading, setLoading] = useState(false);  // Add loading state
   const { theme } = useTokenContext();
 
-  console.log(ovrallcampdetal, "ovrallcampdetal")
+  // console.log(ovrallcampdetal, "ovrallcampdetal")
 
   const rerender = () => {
     settwoor((els) => !els)
   }
   var token = localStorage.getItem("token");
   // console.log(selectedRow, "selectedRow")
-  console.log(campaignDetails, "campaignDetails")
+  // console.log(campaignDetails, "campaignDetails")
   // console.log(campaignDetails,"campaignDetails")
   // var id=selectedRow.id
 
@@ -81,7 +81,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
             Authorization: token,
           }
         });
-        console.log(response?.data, "response data");
+        // console.log(response?.data, "response data");
         setovrallcampdetal(response?.data[0]);
         setCampaignDetails(response?.data[0].adsetlevel);
       } catch (error) {
@@ -111,7 +111,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
   // Function to handle click on campaign name
   const handleadsetsClick = (record) => {
     setadsetsdata(record)
-    console.log(record, "adsets data")
+    // console.log(record, "adsets data")
     setadsDrawerVisible(true)
   };
   const handleadsetsEdit = (record) => {
@@ -155,7 +155,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
 
           if (response.ok) {
 
-            console.log("Daily amount updated successfully in backend");
+            // console.log("Daily amount updated successfully in backend");
 
             // Step 2: If campaignId is available, update the budget on Facebook
             if (campaignDetails.Adsetid) {
@@ -175,7 +175,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
                 );
 
                 if (fbResponse.status === 200) {
-                  console.log("Daily budget updated successfully on Facebook");
+                  // console.log("Daily budget updated successfully on Facebook");
                   message.success("Daily amount updated successfully on both backend and Facebook");
 
                   // Update the table row data with the new daily amount
@@ -216,7 +216,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       setEditing(false);
     };
 
-    console.log(network, "network from adsets.js");
+    // console.log(network, "network from adsets.js");
 
     return (
       <div>
@@ -266,18 +266,18 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
         `https://graph.facebook.com/v22.0/${adset_id}`,
         new URLSearchParams({ status, access_token })
       );
-      console.log("Ad Set Response:", res.data);
+      // console.log("Ad Set Response:", res.data);
     } catch (err) {
       console.error("Ad Set Error:", err.response?.data || err.message);
     }
   };
 
   const onToggleStatus = async (record, checked) => {
-    console.log(record, "record")
-    console.log(checked, "checked")
-    console.log(record.Adsetid, "Adsetid");
-    console.log(selectedRow.access_token, "access_token");
-    console.log(selectedRow);
+    // console.log(record, "record")
+    // console.log(checked, "checked")
+    // console.log(record.Adsetid, "Adsetid");
+    // console.log(selectedRow.access_token, "access_token");
+    // console.log(selectedRow);
 
     const response = await axios.post(
       `https://www.testapi.adsgoat.in/api/adsetlevel`,

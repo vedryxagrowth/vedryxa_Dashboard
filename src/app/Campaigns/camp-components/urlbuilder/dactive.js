@@ -14,24 +14,33 @@ const DActiveUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   const [source, setSource] = useState("None");
   const [channel, setChannel] = useState("0");
   const [geo, setGeo] = useState(''); // AdText input
-//   const [keywords, setKeyWords] = useState('');
+  //   const [keywords, setKeyWords] = useState('');
   const [baseUrl, setBaseUrl] = useState(""); // Base URL input
   const [errorMessage, setErrorMessage] = useState('');
-  const [NetworkData, setNetworkData]= useState([]);
+  const [NetworkData, setNetworkData] = useState([]);
   const [generatedUrl, setGeneratedUrl] = useState(""); // To store the generated URL
   const { apiClient } = useTokenContext();
   const { theme } = useTokenContext();
+  const token = localStorage.getItem("token")
 
-  const getUrlBuilderData = async()=>{
-    const response = await apiClient.get(`/get/urlbuilderdata?network=DActive`);
-    if(response?.status === 200){
-      setNetworkData(response?.data)
+  const getUrlBuilderData = async () => {
+    // const response = await apiClient.get(`/get/urlbuilderdata?network=DActive`);
+    const response = await fetch(
+      `https://fblaunching.vyaktimetrics.com/open/get/urlbuilderdata?network=DActive`,
+      {
+        method: "GET",
+        headers: { Authorization: token },
+      },
+    )
+    const json = await response.json();
+    if (response?.status === 200) {
+      setNetworkData(json)
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     getUrlBuilderData();
-  },[]);
+  }, []);
 
   // Function to add a new item
 
@@ -46,30 +55,30 @@ const DActiveUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   }
 
   const generateUrl = () => {
-    
+
     if (baseUrl && geo) {
       // Replace `atxt` placeholder with the provided `geo` value
       let updatedUrl = baseUrl.replace(/atxt=([^&]*)/, `atxt=${geo}`);
-  
+
       // Check if `tg1` and `tg2` exist in the URL and append `tg3` to `tg6` after `tg2`
       const tg2Regex = /&tg1={tg1}&tg2={tg2}/;
       if (tg2Regex.test(updatedUrl)) {
         const tg3to6 = `&tg3={{ad.id}}&tg4={{adset.name}}&tg5={{campaign.name}}&tg6={{ad.name}}`;
         updatedUrl = updatedUrl.replace(tg2Regex, `&tg1={{adset.id}}&tg2={{campaign.id}}${tg3to6}`);
       }
-  
+
       // Append `channel` as `ct` only if the channel is not "0"
       if (channel !== null && channel !== "0") {
         updatedUrl += `&ct=${channel}`;
       }
-  
+
       return updatedUrl;
     }
     return null;
   };
-  
 
-  console.log(showSubmitButton);
+
+  // console.log(showSubmitButton);
 
   const onClickSubmit = () => {
     const url = generateUrl();
@@ -81,32 +90,32 @@ const DActiveUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
     }
   };
 
-//   const onClickSubmit = () => {
+  //   const onClickSubmit = () => {
 
-//     if (keywords && channel && geo && source) {
-//         console.log(keywords);
-//         console.log(channel);
-//         console.log(geo);
-//         console.log(source);
-//       const formattedKeywords = keywords.replace(/\s+/g, '+');
-//       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
-//       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
-//       const mem_source_geo = `${source}_${geo}`
+  //     if (keywords && channel && geo && source) {
+  //         console.log(keywords);
+  //         console.log(channel);
+  //         console.log(geo);
+  //         console.log(source);
+  //       const formattedKeywords = keywords.replace(/\s+/g, '+');
+  //       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
+  //       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
+  //       const mem_source_geo = `${source}_${geo}`
 
-//       url = url
-//         .replace("keywords_replace", formattedKeywords)
-//         .replace("chanel_replace", channel)
-//         .replace("business_code_replace_source_code_replace_region_code_replace", mem_source_geo)
-//         .replace("campaign_id_replace", campaign_id)
-//         .replace("adset_id_replace", adset_id);
-//       onReturnMessage(url);
-//     }
-//     else {
-//       setErrorMessage("Please complete all fields.");
-//     }
-//   }
+  //       url = url
+  //         .replace("keywords_replace", formattedKeywords)
+  //         .replace("chanel_replace", channel)
+  //         .replace("business_code_replace_source_code_replace_region_code_replace", mem_source_geo)
+  //         .replace("campaign_id_replace", campaign_id)
+  //         .replace("adset_id_replace", adset_id);
+  //       onReturnMessage(url);
+  //     }
+  //     else {
+  //       setErrorMessage("Please complete all fields.");
+  //     }
+  //   }
 
-const onClickGet = () => {
+  const onClickGet = () => {
     const url = generateUrl();
     if (url) {
       setGeneratedUrl(url); // Set the generated URL
@@ -116,32 +125,32 @@ const onClickGet = () => {
     }
   };
 
-//   const onClickGet = () => {
+  //   const onClickGet = () => {
 
-//     if (keywords && channel && geo && source) {
-//         console.log(keywords);
-//         console.log(channel);
-//         console.log(geo);
-//         console.log(source);
-//       const formattedKeywords = keywords.replace(/\s+/g, '+');
-//       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
-//       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
-//       const mem_source_geo = `${source}_${geo}`
+  //     if (keywords && channel && geo && source) {
+  //         console.log(keywords);
+  //         console.log(channel);
+  //         console.log(geo);
+  //         console.log(source);
+  //       const formattedKeywords = keywords.replace(/\s+/g, '+');
+  //       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
+  //       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
+  //       const mem_source_geo = `${source}_${geo}`
 
-//       url = url
-//         .replace("keywords_replace", formattedKeywords)
-//         .replace("chanel_replace", channel)
-//         .replace("business_code_replace_source_code_replace_region_code_replace", mem_source_geo)
-//         .replace("campaign_id_replace", campaign_id)
-//         .replace("adset_id_replace", adset_id);
-//       setErrorMessage(url);
-//     }
-//     else {
-//       setErrorMessage("Please complete all fields.");
-//     }
-//   }
+  //       url = url
+  //         .replace("keywords_replace", formattedKeywords)
+  //         .replace("chanel_replace", channel)
+  //         .replace("business_code_replace_source_code_replace_region_code_replace", mem_source_geo)
+  //         .replace("campaign_id_replace", campaign_id)
+  //         .replace("adset_id_replace", adset_id);
+  //       setErrorMessage(url);
+  //     }
+  //     else {
+  //       setErrorMessage("Please complete all fields.");
+  //     }
+  //   }
 
-const onCopyUrl = () => {
+  const onCopyUrl = () => {
     if (generatedUrl) {
       navigator.clipboard.writeText(generatedUrl).then(() => {
         message.success("URL copied to clipboard!");
@@ -149,7 +158,7 @@ const onCopyUrl = () => {
     } else {
       message.error("No URL to copy!");
     }
-};
+  };
 
   const onChangeSource = (value) => {
     setSource(value);
@@ -167,7 +176,7 @@ const onCopyUrl = () => {
     setKeyWords(event.target.value)
   }
 
-  
+
 
   return (
     <div style={{ width: '100%' }}>
@@ -175,14 +184,14 @@ const onCopyUrl = () => {
         <Col span={24}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Base URL</label>
           <div style={{ width: '100%' }}>
-            <Input placeholder="Base URL" style={{ width: '100%', paddingRight: '2px' }} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Input placeholder="Base URL" style={{ width: '100%', paddingRight: '2px' }} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
           </div>
         </Col>
       </Row>
       <Row style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', paddingTop: '15px' }}>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={10}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>AdText</label>
-          <Input placeholder="AdText" value={geo} required onChange={(e) => setGeo(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+          <Input placeholder="AdText" value={geo} required onChange={(e) => setGeo(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
         </Col>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={4}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Category</label>
@@ -219,9 +228,9 @@ const onCopyUrl = () => {
             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
-        
+
       </Row>
-      
+
 
       <Row justify="space-between" style={{ marginTop: '20px' }}>
         <Col>
@@ -233,7 +242,7 @@ const onCopyUrl = () => {
         </Col>
         <Col>
           <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-          {!showSubmitButton && <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={onClickSubmit}>Submit</Button>}
+          {!showSubmitButton && <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} onClick={onClickSubmit}>Submit</Button>}
         </Col>
       </Row>
 
@@ -247,7 +256,7 @@ const onCopyUrl = () => {
               </a> */}
               <span style={{ fontWeight: 600, fontSize: "16px", marginRight: "10px" }}>{generatedUrl}</span>
               <br />
-              <Button onClick={onCopyUrl} type="default" style={{marginTop: '10px'}}>
+              <Button onClick={onCopyUrl} type="default" style={{ marginTop: '10px' }}>
                 Copy
               </Button>
             </p>
