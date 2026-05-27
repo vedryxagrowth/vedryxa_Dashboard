@@ -104,7 +104,7 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAcco
         const fetchHistory = async () => {
             try {
                 setLoading(true);
-                const res = await apiClient.get(`/getReportsActivityHistory?accountNumber=${accountNumber}&campaignid=${campaignId}`);
+                const res = await apiClient.get(`http://localhost:4000/reports/data/reportscampaignhistory?accountNumber=${accountNumber}&campaignid=${campaignId}`);
                 const responseData = res.data;
                 const newResponseData = [responseData.campaign, ...(responseData.adsets), ...(responseData.ads)]
                 const objectsActivityHistory = newResponseData.reduce((acc, item) => {

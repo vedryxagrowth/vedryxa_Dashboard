@@ -318,7 +318,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             }
         });
 
-        apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+        apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
     };
 
     useEffect(() => {
@@ -3126,7 +3126,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
             // ✅ call the new multi-account endpoint
             const fetchData = await apiClient.post(
-                newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `/AdLevelAccountsNew` : "/AdLevelAccounts",
+                newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `http://localhost:4000/reports/data/adsdaily` : "http://localhost:4000/reports/data/ads",
                 {
                     dateStart: startDate,
                     dateEnd: endDate,

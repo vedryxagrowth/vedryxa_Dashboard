@@ -581,7 +581,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     const functionCall6 = async () => {
         try { 
             setTonicKeywordLoading(true);
-            const fetchData = await apiClient.get(`/TonicKeywords?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}&collectionName=Facebook_Tonic1_Keywords`);
+            const fetchData = await apiClient.get(`http://localhost:4000/reports/data/tonicrsockeyword?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}&collectionName=Facebook_Tonic1_Keywords`);
             const mainData = fetchData.data;
             // console.log(mainData, "mainData of functionCall6");
             const specifiedTimeZone = selectTimezone[newtime];

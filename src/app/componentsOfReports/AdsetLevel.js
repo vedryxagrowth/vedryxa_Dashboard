@@ -309,7 +309,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }
         });
         try {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details });
         } catch (e) {
             console.error("Export activity log failed", e);
         }
@@ -2933,7 +2933,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
             // ✅ call the new multi-account endpoint
             const resp = await apiClient.post(
-                "/AdsetLevelAccounts",
+                "http://localhost:4000/reports/data/adset",
                 {
                     dateStart: startDate,
                     dateEnd: endDate,
@@ -2946,7 +2946,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             );
 
             // You had a filter to skip rows where ad_clicks > 0
-            const mainData1 = resp.data || [];
+            const mainData1 = resp.data.data || [];
             const mainData = mainData1;
 
             const campaignsByAccount = {};
@@ -3204,7 +3204,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "http://localhost:4000/reports/data/creatives",
             { items },
             {
                 headers: {

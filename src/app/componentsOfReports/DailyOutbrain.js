@@ -198,7 +198,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
             console.error("Grid reference is null");
         }
         const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details });
         }
         updateDetails();
     };

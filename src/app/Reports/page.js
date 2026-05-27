@@ -249,12 +249,12 @@ const MyTablePage = () => {
     const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
     const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
 
-
+    // console.log(campaignComments, "test");
 
     useEffect(() => {
         const fetchNetworksData = async () => {
             try {
-                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                const res = await axios.get('http://localhost:4000/reports/commonapis/networkdata', {
                     headers: {
                         Authorization: token,
 
@@ -1656,6 +1656,7 @@ const MyTablePage = () => {
         });
         return map;
     }, [campaignComments]);
+
     const columnDefsObjectOfAdID = {
         M_tq: {
             headerName: 'M_TQ',
@@ -2373,112 +2374,112 @@ const MyTablePage = () => {
             menuTabs: [],
             hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [groupedData, setGroupedData] = useState([]);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    if (params?.node?.rowPinned === 'bottom') {
-                        return ""; // Return empty string to remove "...
-                    }
-                    if (params?.node?.footer) {
-                        return ""; // Prevent modal from opening for group footer rows
-                    }
-                    const allLeafChildren = params.node?.allLeafChildren || [];
+                // const onChangeSpendAndStatus = async () => {
+                //     if (params?.node?.rowPinned === 'bottom') {
+                //         return ""; // Return empty string to remove "...
+                //     }
+                //     if (params?.node?.footer) {
+                //         return ""; // Prevent modal from opening for group footer rows
+                //     }
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
 
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    // console.log(groupedData, "groupedData");
-                    setNewGroupedData(groupedData);
-                    const campaignId = groupedData[0]?.campaignid;
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     // console.log(groupedData, "groupedData");
+                //     setNewGroupedData(groupedData);
+                //     const campaignId = groupedData[0]?.campaignid;
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
-                        else {
-                            setGroupedData(groupedData);
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                };
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
+                //         else {
+                //             setGroupedData(groupedData);
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
 
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? '/campaignStatusPause/' // Pause campaign
-                        : '/campaignStatusActive/'; // Activate campaign
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? '/campaignStatusPause/' // Pause campaign
+                //         : '/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await apiClient.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await apiClient.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span>
                         </div>
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -2505,7 +2506,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -3066,113 +3067,113 @@ const MyTablePage = () => {
             suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [groupedData, setGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    // Check if it's a group footer row (for groupIncludeFooter)
-                    if (params?.node?.footer) {
-                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
-                        return; // Prevent modal from opening for group footer rows
-                    }
+                // const onChangeSpendAndStatus = async () => {
+                //     // Check if it's a group footer row (for groupIncludeFooter)
+                //     if (params?.node?.footer) {
+                //         // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                //         return; // Prevent modal from opening for group footer rows
+                //     }
 
-                    // Ensure allLeafChildren exists and is an array before proceeding
-                    const allLeafChildren = params.node?.allLeafChildren || [];
-                    setNewGroupedData(groupedData);
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    const campaignId = groupedData[0]?.campaignid;
+                //     // Ensure allLeafChildren exists and is an array before proceeding
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
+                //     setNewGroupedData(groupedData);
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     const campaignId = groupedData[0]?.campaignid;
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
-                        else {
-                            setGroupedData(groupedData);
-                            // console.log("dailyadd");
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                };
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
+                //         else {
+                //             setGroupedData(groupedData);
+                //             // console.log("dailyadd");
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                //         : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await axios.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid },
-                            { headers: { Authorization: token } }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await axios.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid },
+                //             { headers: { Authorization: token } }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
                         </div>
                         {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -3189,20 +3190,17 @@ const MyTablePage = () => {
                                         <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
                                     </div>
 
-                                    {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{ fontWeight: 'normal' }}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
                                         <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget) / 100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget) / 100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
-
-                                    {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -7283,122 +7281,122 @@ const MyTablePage = () => {
             menuTabs: [],
             // hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [groupedData, setGroupedData] = useState([]);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    if (params?.node?.rowPinned === 'bottom') {
-                        return ""; // Return empty string to remove "..."
-                    }
-                    if (params?.node?.footer) {
-                        return ""; // Prevent modal from opening for group footer rows
-                    }
-                    const allLeafChildren = params.node?.allLeafChildren || [];
+                // const onChangeSpendAndStatus = async () => {
+                //     if (params?.node?.rowPinned === 'bottom') {
+                //         return ""; // Return empty string to remove "..."
+                //     }
+                //     if (params?.node?.footer) {
+                //         return ""; // Prevent modal from opening for group footer rows
+                //     }
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
 
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    setNewGroupedData(groupedData);
-                    const campaignId = groupedData[0]?.campaignid;
-                    // console.log(groupedData, "groupedData");
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     setNewGroupedData(groupedData);
+                //     const campaignId = groupedData[0]?.campaignid;
+                //     // console.log(groupedData, "groupedData");
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
 
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
-                        else {
-                            setGroupedData(groupedData);
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                    // if(groupedData.length > 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
+                //         else {
+                //             setGroupedData(groupedData);
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                //     // if(groupedData.length > 0) {
 
-                    //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                    //     if (getCampaignActualSpend.status === 200){
-                    //         setCampaignActualSpend(getCampaignActualSpend.data);
-                    //     }
-                    // }
-                };
+                //     //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //     //     if (getCampaignActualSpend.status === 200){
+                //     //         setCampaignActualSpend(getCampaignActualSpend.data);
+                //     //     }
+                //     // }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    // console.log(total, "total");
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     // console.log(total, "total");
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
 
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? '/campaignStatusPause/' // Pause campaign
-                        : '/campaignStatusActive/'; // Activate campaign
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? '/campaignStatusPause/' // Pause campaign
+                //         : '/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await apiClient.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await apiClient.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
                 // console.log()
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span>
                         </div>
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -7425,7 +7423,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -14899,115 +14897,115 @@ const MyTablePage = () => {
             suppressMenu: true,
             // hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [groupedData, setGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    // Check if it's a group footer row (for groupIncludeFooter)
-                    if (params?.node?.footer) {
-                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
-                        return; // Prevent modal from opening for group footer rows
-                    }
+                // const onChangeSpendAndStatus = async () => {
+                //     // Check if it's a group footer row (for groupIncludeFooter)
+                //     if (params?.node?.footer) {
+                //         // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                //         return; // Prevent modal from opening for group footer rows
+                //     }
 
-                    // Ensure allLeafChildren exists and is an array before proceeding
-                    const allLeafChildren = params.node?.allLeafChildren || [];
-                    setNewGroupedData(groupedData);
+                //     // Ensure allLeafChildren exists and is an array before proceeding
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
+                //     setNewGroupedData(groupedData);
 
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    const campaignId = groupedData[0]?.campaignid;
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     const campaignId = groupedData[0]?.campaignid;
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
 
-                        else {
-                            setGroupedData(groupedData);
-                            // console.log("dailyadd");
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                };
+                //         else {
+                //             setGroupedData(groupedData);
+                //             // console.log("dailyadd");
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                //         : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await axios.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid },
-                            { headers: { Authorization: token } }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await axios.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid },
+                //             { headers: { Authorization: token } }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
                         </div>
                         {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -15023,21 +15021,17 @@ const MyTablePage = () => {
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
                                         <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
                                     </div>
-
-                                    {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{ fontWeight: 'normal' }}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
                                         <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget) / 100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget) / 100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
-
-                                    {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -20830,7 +20824,7 @@ const MyTablePage = () => {
 
     const updatingColumnsStructure = async (updateDataArray) => {
         // console.log(updateDataArray);
-        const response = await apiClient.put(`/api/updateUserData?email=${userdetails.email}`,
+        const response = await apiClient.put(`http://localhost:4000/reports/commonapis/columnStructure?email=${userdetails.email}`,
             {
                 updateDataArray
             });
@@ -20868,8 +20862,8 @@ const MyTablePage = () => {
     const functionCallForUserColumnStructure = async () => {
         try {
             setInitialLoading(true);
-            const fetchData = await apiClient.get(`/api/singleUserData?email=${userdetails.email}`);
-            const mainData = fetchData.data;
+            const fetchData = await apiClient.get(`http://localhost:4000/reports/commonapis/columnStructure?email=${userdetails.email}`);
+            const mainData = fetchData.data.data;
             setColumnStructure(mainData?.columnStructure);
             mainDataRef.current = mainData;
             // Use the existing API column structure for other grid columns
@@ -20960,8 +20954,8 @@ const MyTablePage = () => {
 
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/NewComment', { accountNumbers: accountOrAccounts });
-            setCampaignComments(data);     // data already includes all selected accounts’ comments
+            const response = await apiClient.post('http://localhost:4000/reports/commonapis/comments', { accountNumbers: accountOrAccounts });
+            setCampaignComments(response?.data?.data);     // data already includes all selected accounts’ comments
             setInitialLoading(false);
         } catch {
             setCampaignComments([]);
@@ -20984,8 +20978,8 @@ const MyTablePage = () => {
         // console.log(newaccount)
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accountOrAccounts });
-            setCamapignlevelstatus(data);
+            const response = await apiClient.post('http://localhost:4000/reports/commonapis/campaignstatusfb', { accountNumbers: accountOrAccounts });
+            setCamapignlevelstatus(response?.data?.data);
             setInitialLoading(false);
         } catch {
             setCamapignlevelstatus([]);
@@ -21329,15 +21323,15 @@ const MyTablePage = () => {
     };
 
 
-    const fetchCampaignComments = async () => {
-        try {
+    // const fetchCampaignComments = async () => {
+    //     try {
 
-            const response = await apiClient.get(`/Comments/${account}`);
-            setCampaignComments(response.data); // Update the state with the fetched comments
-        } catch (error) {
-            console.error('Error fetching comments:', error);
-        }
-    };
+    //         const response = await apiClient.get(`/Comments/${account}`);
+    //         setCampaignComments(response.data); // Update the state with the fetched comments
+    //     } catch (error) {
+    //         console.error('Error fetching comments:', error);
+    //     }
+    // };
 
 
     // useEffect(() => {

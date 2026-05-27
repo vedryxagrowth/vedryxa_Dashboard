@@ -1148,7 +1148,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
         return params.value;
       }
     });
-    apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+    apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
   };
 
   const handleBulkSmartPin = async (action) => {
@@ -3265,7 +3265,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
         ? newaccount.map(String)
         : [String(newaccount)];
 
-      const resp = await apiClient.post('/CampaignLevelAccounts', {
+      const resp = await apiClient.post('http://localhost:4000/reports/data/campaign', {
         dateStart: startDate,
         dateEnd: endDate,
         timezone: newtime,
@@ -3623,7 +3623,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
     );
 
     const resp = await apiClient.post(
-      "https://prodapis.adsgoat.in/Creatives/get",
+      "http://localhost:4000/reports/data/creatives",
       { items },
       {
         headers: {

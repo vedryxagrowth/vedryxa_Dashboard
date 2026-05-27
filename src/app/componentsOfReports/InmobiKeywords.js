@@ -578,7 +578,7 @@ const InmobiKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     const functionCall6 = async () => {
         try { 
             setTonicKeywordLoading(true);
-            const fetchData = await apiClient.get(`/Inmobi/Keyword?dateStart=${startDate}&dateEnd=${endDate}&time=${newtime}&accountNumber=${newaccount}`);
+            const fetchData = await apiClient.get(`http://localhost:4000/reports/data/inmobikeyword/Keyword?dateStart=${startDate}&dateEnd=${endDate}&time=${newtime}&accountNumber=${newaccount}`);
             const mainData = fetchData.data;
             // console.log(mainData, "mainData of functionCall6");
             const specifiedTimeZone = selectTimezone[newtime];

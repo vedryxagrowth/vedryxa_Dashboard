@@ -1128,7 +1128,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
         return params.value;
       }
     });
-    apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+    apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
   };
 
   const handleBulkSmartPin = async (action) => {
@@ -3240,7 +3240,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
         ? newaccount.map(String)
         : [String(newaccount)];
 
-      const resp = await apiClient.post('/CampaignLevelAccounts', {
+      const resp = await apiClient.post('http://localhost:4000/reports/data/campaign', {
         dateStart: startDate,
         dateEnd: endDate,
         timezone: newtime,
@@ -3248,7 +3248,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
         network: collectionName,
         accountNumbers: accountsParam
       });
-      const mainData = resp.data;
+      const mainData = resp.data.data;
 
       const campaignsByAccount = {};
       mainData.forEach(item => {
@@ -3598,7 +3598,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
     );
 
     const resp = await apiClient.post(
-      "https://prodapis.adsgoat.in/Creatives/get",
+      "http://localhost:4000/reports/data/creatives",
       { items },
       {
         headers: {

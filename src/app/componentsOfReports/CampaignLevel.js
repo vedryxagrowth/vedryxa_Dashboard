@@ -300,7 +300,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             }
         });
         try {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details });
         } catch (err) {
             console.error("Export activity logging failed", err);
         }
@@ -2965,7 +2965,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             accountsParam.forEach(acc => params.append("accountNumbers", acc));
 
             //   const resp = await apiClient.post(`/CampaignLevelAccounts?${params.toString()}`);
-            const resp = await apiClient.post('/CampaignLevelAccounts', {
+            const resp = await apiClient.post('http://localhost:4000/reports/data/campaign', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -2975,7 +2975,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             });
 
 
-            const mainData1 = resp.data;
+            const mainData1 = resp.data.data;
 
             const campaignsByAccount = {};
 
@@ -3189,7 +3189,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "http://localhost:4000/reports/data/creatives",
             { items },
             {
                 headers: {

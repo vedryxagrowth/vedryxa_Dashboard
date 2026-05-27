@@ -147,7 +147,7 @@ const MyTablePage = () => {
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
-    console.log(storedData, "storedData");
+    // console.log(storedData, "storedData");
 
     const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate : yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
@@ -358,12 +358,12 @@ const MyTablePage = () => {
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
-    console.log(newaccount)
+    // console.log(newaccount)
 
     const [accountName, setAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
-    console.log(newAccountName);
+    // console.log(newAccountName);
     const [newtime, setNewTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
 
     const [pageSize, setPageSize] = useState(1);
@@ -432,7 +432,7 @@ const MyTablePage = () => {
 
 
 
-    console.log('All campaignData:', allCampaignData);
+    // console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
     const [Rhovered, setRHovered] = useState(false);
@@ -453,7 +453,7 @@ const MyTablePage = () => {
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
 
 
-    console.log(initialOne, "initialData");
+    // console.log(initialOne, "initialData");
 
     // track if the user already changed selection
     const userPickedRef = useRef(false);
@@ -5080,7 +5080,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -6500,11 +6500,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
                         const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -8419,11 +8419,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
                         const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -11599,7 +11599,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -11671,7 +11671,7 @@ const MyTablePage = () => {
                     // setIsModalVisible(false);
                     const campaignname = groupedData?.[0]?.campaignname;
 
-                    console.log("Submitting budget change:", groupedData);
+                    // console.log("Submitting budget change:", groupedData);
 
                     const campaignActualSpend = Camapignlevelstatus
                         .find(item =>
@@ -12501,11 +12501,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
                         const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -13898,11 +13898,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
                         const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -17462,7 +17462,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -18525,13 +18525,13 @@ const MyTablePage = () => {
 
     const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
-        console.log("accountOrAccounts", accountOrAccounts);
+        // console.log("accountOrAccounts", accountOrAccounts);
         // console.log(storedData);
 
         // const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         // console.log("accounts", accounts);
-        console.log(newaccount)
+        // console.log(newaccount)
         try {
             setInitialLoading(true);
             const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accountOrAccounts });
@@ -18663,7 +18663,7 @@ const MyTablePage = () => {
     // }, []);
 
     useEffect(() => {
-        console.log(newaccount)
+        // console.log(newaccount)
         functionCall(newaccount);  // pass the array
     }, []);
 
@@ -18693,7 +18693,7 @@ const MyTablePage = () => {
 
     // whenever network changes
     const onChangeSelectRevenue = (value) => {
-        console.log(value);
+        // console.log(value);
         // userPickedRef.current = true;
         // const accountsForAccess = adAccounts[value];
         // const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -18718,9 +18718,9 @@ const MyTablePage = () => {
         setSearchText("");
         setIsOpen(false);
         const accountsForAccess = adAccounts[value];
-        console.log(accountsForAccess);
+        // console.log(accountsForAccess);
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
-        console.log(accountsAccess);
+        // console.log(accountsAccess);
         setNetworksData(accountsAccess);
         setRevenuePartner(value)
         setNewAccount([String(accountsAccess[0].accountNumber)])
@@ -18774,7 +18774,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
-        console.log(storedData, "storedData");
+        // console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);

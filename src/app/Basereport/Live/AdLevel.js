@@ -65,7 +65,7 @@ const selectTimezone = {
 const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
-  console.log(campaignComments);
+  // console.log(campaignComments);
   const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -240,7 +240,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
   // };
   const onBtExport1 = async () => {
-    console.log(gridRef.current.api, "in");
+    // console.log(gridRef.current.api, "in");
 
     const Details = {
       network: newRevenuePratner,
@@ -292,7 +292,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }
     });
     try {
-      await apiClient.post("/UserExportActivities/", { Details });
+      await apiClient.post("http://localhost:4000/reports/commonapis/userexportactivities", { Details });
     } catch (e) {
       console.error("Export activity failed", e);
     }
@@ -334,7 +334,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     );
 
     setLeafCampaigns(uniqueLeafCampaigns);
-    console.log("Selected unique Ads:", uniqueLeafCampaigns);
+    // console.log("Selected unique Ads:", uniqueLeafCampaigns);
   };
   const handleBulkSmartPinAd = async (action) => {
     if (!leafCampaigns || leafCampaigns.length === 0) {
@@ -1884,7 +1884,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 level: "ad",
               }));
 
-              console.log("Sending AD items:", items);
+              // console.log("Sending AD items:", items);
 
               // Call bulk API
               const resp = await apiClient.post(
@@ -2949,7 +2949,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       const mainData1 = fetchData.data || [];
       const mainData = tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
       // console.log(mainData1, "mainData1");
-      console.log(mainData, "mainDataffff");
+      // console.log(mainData, "mainDataffff");
       const campaignsByAccount = {};
       mainData1.forEach(item => {
         const account = String(item.accountNumber);
@@ -3386,9 +3386,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       // ]);
       // setRowData(filteredData);
 
-      console.log(filteredData, "filteredData");
+      // console.log(filteredData, "filteredData");
       newRowData.current = filteredData;
-      fetchData.status === 200 && console.log("Success");
+      // fetchData.status === 200 && console.log("Success");
       fetchData.status === 200 && setApiStatus(false);
       // setInitialRowData(filteredData);
       // setTrue(false);
@@ -3399,9 +3399,9 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       setLoading(false);
     }
   };
-  useEffect(() => {
-    console.log(campaignIds, "campaignIds updated");
-  }, [campaignIds]);
+  // useEffect(() => {
+  //   console.log(campaignIds, "campaignIds updated");
+  // }, [campaignIds]);
   useEffect(() => {
     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3721,7 +3721,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
   useEffect(() => {
     // functionCall1();
-    console.log(campaignStatusFilter, "campaignStatusFilter");
+    // console.log(campaignStatusFilter, "campaignStatusFilter");
     if (campaignStatusFilter !== "All") {
 
       const adStatusMap = new Map(
@@ -4513,7 +4513,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                         <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                           {ids.map((id, i) => {
                             const acc = accountsAccess.find(a => a.accountNumber === id);
-                            console.log("timezones:", accountsAccess);
+                            // console.log("timezones:", accountsAccess);
                             const tz = acc?.timeZone ?? "-";
                             return (
                               <div

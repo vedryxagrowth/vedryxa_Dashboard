@@ -322,7 +322,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }
         });
 
-        apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+        apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
     };
 
     const uniqueByAdsetId = (arr) => {
@@ -3038,7 +3038,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 : [String(newaccount)];
 
             // ✅ call multi-account endpoint (Daily)
-            const resp = await apiClient.post("/Outbrain/TonicRsoc/Sections", {
+            const resp = await apiClient.post("http://localhost:4000/reports/data/OutbrainTonicRsocSections", {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,

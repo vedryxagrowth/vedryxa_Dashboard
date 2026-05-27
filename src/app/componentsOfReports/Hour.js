@@ -305,7 +305,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             }
         });
         try {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details });
         } catch (err) {
             console.error("Export activity logging failed", err);
         }

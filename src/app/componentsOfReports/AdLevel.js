@@ -291,7 +291,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }
     });
     try {
-      await apiClient.post("/UserExportActivities/", { Details });
+      await apiClient.post("http://localhost:4000/reports/commonapis/userexportactivities", { Details });
     } catch (e) {
       console.error("Export activity failed", e);
     }
@@ -2925,7 +2925,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
       // ✅ call the new multi-account endpoint
       const fetchData = await apiClient.post(
-        `/AdLevelAccounts`,
+        `http://localhost:4000/reports/data/ads`,
         {
           dateStart: startDate,
           dateEnd: endDate,
@@ -2938,7 +2938,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           campaignids: campaigns
         }
       );
-      const mainData1 = fetchData.data || [];
+      const mainData1 = fetchData.data.data || [];
       const mainData = tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
       // console.log(mainData1, "mainData1");
       // console.log(mainData, "mainData");
@@ -3185,7 +3185,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     );
 
     const resp = await apiClient.post(
-      "https://prodapis.adsgoat.in/Creatives/get",
+      "http://localhost:4000/reports/data/creatives",
       { items },
       {
         headers: {

@@ -321,7 +321,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }
         });
 
-        apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+        apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
     };
 
     const uniqueByAdsetId = (arr) => {
@@ -3036,7 +3036,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 : [String(newaccount)];
 
             // ✅ call multi-account endpoint (Daily)
-            const resp = await apiClient.post("/AdsetLevelAccounts", {
+            const resp = await apiClient.post("http://localhost:4000/reports/data/adset", {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -3048,7 +3048,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
 
             // You had a filter to skip rows where ad_clicks > 0
-            const mainData = resp.data || [];
+            const mainData = resp.data.data || [];
 
             const campaignsByAccount = {};
             mainData.forEach(item => {
@@ -3337,7 +3337,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "http://localhost:4000/reports/data/creatives",
             { items },
             {
                 headers: {
