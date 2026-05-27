@@ -117,6 +117,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
     const [selectedCampaigns, setSelectedCampaigns] = useState([]);
 
     const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
+    const [latestHour, setLatestHour] = useState(0);
 
     const memorizedRowData = useMemo(() => {
         let filtered = rowData || [];
@@ -481,7 +482,28 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
             .map(item => parseInt(item.updatedHour.split(":")[0], 10));
         return hours.length > 0 ? Math.max(...hours) : null;
     }
+    const getLatestHour = async () => {
 
+        const collectionName =
+            newRevenuePratner === "FB_DomainActive"
+                ? "Facebook_DActive_Names"
+                : newtworkCollections[newRevenuePratner];
+        try {
+
+            const resp = await apiClient.post(
+                'https://prodapis.adsgoat.in/LatestHour',
+                {
+                    dateStart: startDate,
+                    dateEnd: endDate,
+                    timezone: newtime,
+                    network: collectionName,
+                }
+            );
+            setLatestHour(resp?.data?.latestHour ?? 0);
+        } catch (error) {
+            console.log(error);
+        }
+    };
     const functionCall1 = async () => {
         try {
             setLoading(true);
@@ -653,19 +675,29 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
             else {
                 newFilterData = filteredData;
             }
-            if (!showAllHours) {
+            // if (!showAllHours) {
+            //     newFilterData = newFilterData.filter((item) => {
+            //         const fbHour = Number(item["fb-hour"]);
+
+            //         const revenueHour = Number(
+            //             String(item["mnet-hour"] || "0").split(":")[0]
+            //         );
+
+            //         if (isNaN(fbHour) || isNaN(revenueHour)) {
+            //             return false;
+            //         }
+
+            //         return fbHour <= revenueHour;
+            //     });
+            // }
+            if (showAllHours) {
                 newFilterData = newFilterData.filter((item) => {
                     const fbHour = Number(item["fb-hour"]);
 
-                    const revenueHour = Number(
-                        String(item["mnet-hour"] || "0").split(":")[0]
-                    );
-
-                    if (isNaN(fbHour) || isNaN(revenueHour)) {
+                    if (isNaN(fbHour)) {
                         return false;
                     }
-
-                    return fbHour <= revenueHour;
+                    return fbHour <= Number(latestHour);
                 });
             }
 
@@ -835,6 +867,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
         gridOptions.api.setColumnDefs(columnDefs);
     });
     const handleReFetchData = () => {
+        getLatestHour();
         functionCall1();
         setApiStatus(false);
     }
@@ -848,6 +881,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
 
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
+            getLatestHour();
             functionCall1();
         }
     }, [showAllHours]);
@@ -1475,12 +1509,12 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
                                         </Button>
                                     </Dropdown>
                                 </Col> */}
-                                 <Col>
+                                <Col>
                                     <Switch
                                         checked={showAllHours}
                                         onChange={(checked) => setShowAllHours(checked)}
-                                        checkedChildren="Spend"
-                                        unCheckedChildren="Revenue"
+                                        checkedChildren="Revenue"
+                                        unCheckedChildren="Spend"
                                         style={{
                                             backgroundColor: showAllHours ? "#91c25f" : undefined
                                         }}
@@ -1516,7 +1550,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
                                         <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
                                     </Tooltip>
                                 </Col>
-                               
+
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                     {/* <Tooltip title="Export to CSV"> */}
                                     <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
