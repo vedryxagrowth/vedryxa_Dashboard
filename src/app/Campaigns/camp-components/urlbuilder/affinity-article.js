@@ -70,7 +70,7 @@ const CreateArticle = ({ theme, onCreate }) => {
 
         try {
             const response = await fetch(
-                "https://prodapis.adsgoat.in/uploadUserFiles",
+                "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
                 {
                     method: "POST",
                     headers: {

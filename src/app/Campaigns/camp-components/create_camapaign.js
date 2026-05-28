@@ -10630,7 +10630,7 @@ const CreateCampaignDrawer = ({
       ) => {
         try {
           await fetch(
-            "https://prodapis.adsgoat.in/uploadUserFiles",
+            "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
             {
               method: "POST",
               headers: {
@@ -10689,7 +10689,7 @@ const CreateCampaignDrawer = ({
         );
 
         const response = await fetch(
-          "https://prodapis.adsgoat.in/uploadUserFiles",
+          "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
           {
             method: "POST",
             headers: {
@@ -10852,7 +10852,7 @@ const CreateCampaignDrawer = ({
                 async () => {
                   const response =
                     await fetch(
-                      `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+                      `https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`,
                       {
                         method: "GET",
                         headers: {

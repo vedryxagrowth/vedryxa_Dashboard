@@ -9930,7 +9930,7 @@ const EditMultipleAdsetCampaignDrawer = ({
     const createS3Folder = async (folderPath) => {
       try {
         const response = await fetch(
-          "https://prodapis.adsgoat.in/uploadUserFiles",
+          "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
           {
             method: "POST",
             headers: {
@@ -9962,7 +9962,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
       try {
         const response = await fetch(
-          "https://prodapis.adsgoat.in/uploadUserFiles",
+          "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
           {
             method: "POST",
             headers: {
@@ -10005,7 +10005,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
           if (file?.url) {
             const response = await fetch(
-              `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+              `https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`,
               {
                 method: "GET",
                 headers: {
@@ -10634,7 +10634,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
           try {
             const response = await fetch(
-              "https://prodapis.adsgoat.in/uploadUserFiles",
+              "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
               {
                 method: "POST",
                 headers: {
@@ -10658,7 +10658,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         if (file?.url) {
           // console.log(file, "file in getFilenameDeatials with url");
           const response = await fetch(
-            `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+            `https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`,
             {
               method: "GET",
               headers: {

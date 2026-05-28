@@ -1067,7 +1067,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     if (file?.url) {
                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
-                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                            const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`, {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -1561,7 +1561,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     } else if (file?.filename?.url) {
                         if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") || file?.filename?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
-                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file?.filename?.url}`, {
+                            const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file?.filename?.url}`, {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
