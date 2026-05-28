@@ -4,13 +4,14 @@ import { Button, Input, Row, Col } from 'antd';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTokenContext } from '../../../components/parent';
-const TonicUrlBuilder = ({defaultValues,indexValueForAccount, onReturnMessage, showSubmitButton}) => {
+const TonicUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, showSubmitButton }) => {
     const [siteName, setSiteName] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [NetworkData, setNetworkData]= useState([]);
+    const [NetworkData, setNetworkData] = useState([]);
     const { apiClient } = useTokenContext();
     const { theme } = useTokenContext();
+    const token = localStorage.getItem("token")
     // const businessData = [
     //     {
     //       "id":5,
@@ -21,48 +22,56 @@ const TonicUrlBuilder = ({defaultValues,indexValueForAccount, onReturnMessage, s
     //     }
     // ]
 
-    const getUrlBuilderData = async()=>{
-        const response = await apiClient.get(`/get/urlbuilderdata?network=Tonic1`);
-        if(response?.status === 200){
-          setNetworkData(response?.data)
-          if(indexValueForAccount){
-            const defaultSiteName = indexValueForAccount?.split("/")[0];
-            const defaultKeyword = indexValueForAccount?.split("/")[1]?.split("&")[3]?.split("=")[1];
-            setSiteName(defaultSiteName);
-            setKeyWords(defaultKeyword);
-          }else{
-            if(defaultValues){
-                const defaultSiteName = defaultValues?.split("/")[0];
-                // const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[3]?.split("=")[1];
+    const getUrlBuilderData = async () => {
+        // const response = await apiClient.get(`/get/urlbuilderdata?network=Tonic1`);
+        const response = await fetch(
+            `https://fblaunching.vyaktimetrics.com/open/get/urlbuilderdata?network=Tonic1`,
+            {
+                method: "GET",
+                headers: { Authorization: token },
+            },
+        )
+        const json = await response.json();
+        if (response?.status === 200) {
+            setNetworkData(json)
+            if (indexValueForAccount) {
+                const defaultSiteName = indexValueForAccount?.split("/")[0];
+                const defaultKeyword = indexValueForAccount?.split("/")[1]?.split("&")[3]?.split("=")[1];
                 setSiteName(defaultSiteName);
-                setKeyWords("");
+                setKeyWords(defaultKeyword);
+            } else {
+                if (defaultValues) {
+                    const defaultSiteName = defaultValues?.split("/")[0];
+                    // const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[3]?.split("=")[1];
+                    setSiteName(defaultSiteName);
+                    setKeyWords("");
+                }
             }
-          }
         }
-      };
-    
-      useEffect(()=>{
+    };
+
+    useEffect(() => {
         getUrlBuilderData();
-      },[]);
+    }, []);
 
     // Function to add a new item
-    const onChangeSiteName = (event)=>{
+    const onChangeSiteName = (event) => {
         setSiteName(event.target.value);
     }
 
-    const onChangeKeyword = (event) =>{
+    const onChangeKeyword = (event) => {
         setKeyWords(event.target.value);
     }
 
-    const onClickClear = () =>{
+    const onClickClear = () => {
         setSiteName('');
         setKeyWords('');
         setErrorMessage('');
     }
 
-    const onClickSubmit = () =>{
-        
-        if(keywords && siteName){
+    const onClickSubmit = () => {
+
+        if (keywords && siteName) {
             let url = NetworkData?.businessData[0]?.url;
 
             url = url
@@ -70,14 +79,14 @@ const TonicUrlBuilder = ({defaultValues,indexValueForAccount, onReturnMessage, s
                 .replace("keywords_replace", keywords.trim());
             onReturnMessage(url);
         }
-        else{
+        else {
             setErrorMessage("Please complete all fields.");
         }
     }
 
-    const onClickGet = () =>{
-        
-        if(keywords && siteName){
+    const onClickGet = () => {
+
+        if (keywords && siteName) {
             let url = NetworkData?.businessData[0]?.url;
 
             url = url
@@ -85,17 +94,17 @@ const TonicUrlBuilder = ({defaultValues,indexValueForAccount, onReturnMessage, s
                 .replace("keywords_replace", keywords.trim());
             setErrorMessage(url);
         }
-        else{
+        else {
             setErrorMessage("Please complete all fields.");
         }
     }
 
     return (
-        <div style={{width:'100%'}}>
-            <Row style={{display:'flex', alignItems:'center', paddingBottom:'10px'}}>
-                <Col style={{display:'flex', flexDirection:'column'}} span={9}>
-                    <label><span style={{ color: 'red', paddingRight:'2px',paddingTop:'2px' }}>*</span>Site Name</label>
-                    <Input placeholder='Site Name' value={siteName} required style={{width:'80%'}} onChange={onChangeSiteName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}></Input>
+        <div style={{ width: '100%' }}>
+            <Row style={{ display: 'flex', alignItems: 'center', paddingBottom: '10px' }}>
+                <Col style={{ display: 'flex', flexDirection: 'column' }} span={9}>
+                    <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Site Name</label>
+                    <Input placeholder='Site Name' value={siteName} required style={{ width: '80%' }} onChange={onChangeSiteName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}></Input>
                 </Col>
                 {/* <Col style={{display:'flex', flexDirection:'column'}} span={6}>
                     <label>Sorce</label>
@@ -119,32 +128,32 @@ const TonicUrlBuilder = ({defaultValues,indexValueForAccount, onReturnMessage, s
             </Row>
             <Row style={{ width: '100%' }}>
                 <Col span={24}>
-                    <label><span style={{ color: 'red', paddingRight:'2px',paddingTop:'2px' }}>*</span>Keywords</label>
+                    <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Keywords</label>
                     <div style={{ width: '100%' }}>
-                        <Input placeholder="Key words" style={{ width: '100%' }} value={keywords} onChange={onChangeKeyword} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                        <Input placeholder="Key words" style={{ width: '100%' }} value={keywords} onChange={onChangeKeyword} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                     </div>
                 </Col>
             </Row>
             <Row justify="space-between" style={{ marginTop: '20px' }}>
                 <Col>
                     <Button
-                        type="default" 
-                        onClick={onClickClear} 
+                        type="default"
+                        onClick={onClickClear}
                         style={{ backgroundColor: '#d3d3d3', borderColor: '#d3d3d3', color: 'black' }}
                     >Clear</Button>
                 </Col>
                 <Col>
                     <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-                    {!showSubmitButton && <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={onClickSubmit}>Submit</Button>}
+                    {!showSubmitButton && <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} onClick={onClickSubmit}>Submit</Button>}
                 </Col>
             </Row>
-            <Row justify="center" style={{marginTop:'10px'}}>
+            <Row justify="center" style={{ marginTop: '10px' }}>
                 <Col>
-                    <p style={{ color: errorMessage === "Please complete all fields." && "red", fontWeight: 600, textAlign: 'center', width:'100%', fontSize:'20px' }}>{errorMessage}</p>
+                    <p style={{ color: errorMessage === "Please complete all fields." && "red", fontWeight: 600, textAlign: 'center', width: '100%', fontSize: '20px' }}>{errorMessage}</p>
                 </Col>
             </Row>
         </div>
     );
-}; 
+};
 
 export default TonicUrlBuilder;

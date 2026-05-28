@@ -567,7 +567,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
 
             // 🔹 Use proxy to fetch the image and bypass CORS restrictions
             const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
-            console.log("Cloning using Proxy:", proxyUrl);
+            // console.log("Cloning using Proxy:", proxyUrl);
 
             const response = await fetch(proxyUrl);
             if (!response.ok) {
@@ -591,7 +591,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
             formData.append("uploadDate", uploadDate);
             formData.append("filename", clonedFileName);
     
-            const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            const uploadResponse = await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -661,7 +661,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
         // 🔹 Proxy the image URL
         const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
 
-        console.log("📌 Editing Image URL:", proxyUrl); // ✅ Debugging step
+        // console.log("📌 Editing Image URL:", proxyUrl); // ✅ Debugging step
     
         // ✅ Set selected image for editing
         // setSelectedImage(image);
@@ -703,7 +703,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
         formData.append("filename", filename);
     
         try {
-            const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            const response = await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -1263,7 +1263,8 @@ const CreativesDrawer = ({selectedFilesData}) => {
                                         loop 
                                         muted 
                                         playsInline
-                                        onLoadedData={(e) => e.target.play().catch(() => console.log("Autoplay blocked"))}
+                                        onLoadedData={(e) => e.target.play().catch(() => 
+                                            console.log("Autoplay blocked"))}
                                     />
                                 ) : (
                                     <img 

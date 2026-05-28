@@ -536,7 +536,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             }
                         }
                     );
-                    console.log("hello viewdata", ...response.data);
+                    // console.log("hello viewdata", ...response.data);
                     setDuplicatedampaignData(response?.data[0]);
                     const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
                         const selectedOption = item.selectedOption || "creative";
@@ -638,7 +638,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             // setPrimaryText(DuplicatedampaignData?.addlevel[0]?.message);
             // setDescription(DuplicatedampaignData?.addlevel[0]?.Description);
             // setHeadline(DuplicatedampaignData?.addlevel[0]?.headline);
-            console.log(DuplicatedampaignData?.adsetlevel?.placements);
+            // console.log(DuplicatedampaignData?.adsetlevel?.placements);
             form.setFieldsValue({
                 Campaign: {
                     Account_Number: DuplicatedampaignData?.Account_Number,
@@ -972,7 +972,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     }
                 }
             );
-            console.log("account data", ...response?.data);
+            // console.log("account data", ...response?.data);
 
 
             setimagehash(...response?.data)
@@ -1011,7 +1011,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 };
             }
 
-            console.log("📦 Current level-wise changes:", updated);
+            // console.log("📦 Current level-wise changes:", updated);
             return updated;
         });
 
@@ -1067,7 +1067,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     if (file?.url) {
                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
-                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                            const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`, {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -1155,7 +1155,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             const editedImage = editedImages[fileId];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
 
-                            console.log(file.originFileObj.name);
+                            // console.log(file.originFileObj.name);
 
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
@@ -1274,7 +1274,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         try {
             const mediaHashArray = uploadFilesSequentially(selectedFiles);
-            console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
+            // console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
             return mediaHashArray;
         } catch (error) {
             console.error("One or more media uploads failed:", error);
@@ -1405,10 +1405,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             );
             return acc;
         }, {});
-        console.log({
-            publisher_platforms: values.publisher_platforms,
-            ...selectedPlatforms, ...values
-        });
+    //    console.log ({
+    //         publisher_platforms: values.publisher_platforms,
+    //         ...selectedPlatforms, ...values
+    //     });
 
         setIsModalVisible(true);
         setFormValues({
@@ -1423,7 +1423,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         if (formValues) {
             const onSuccess = (status, response) => {
-                console.log("Upload success:", response);
+                // console.log("Upload success:", response);
             };
 
             const onError = (status, error) => {
@@ -1431,20 +1431,20 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             };
 
             try {
-                console.log(levelWiseChanges, "changedFields on Submit");
+                // console.log(levelWiseChanges, "changedFields on Submit");
                 const ads = levelWiseChanges?.Ad?.Ads || [];
-                console.log(ads, "ads on Submit");
+                // console.log(ads, "ads on Submit");
                 const token = imagehash?.token;
                 // const account = imagehash?.accountNumber;
                 const adsData = await Promise.all(ads.map(async (file, index) => {
-                    console.log(file, "file on Submit");
+                    // console.log(file, "file on Submit");
                     if (file?.filename?.source === "media") {
                         if (file?.filename?.type.startsWith('image/') || file?.filename?.type.startsWith('video/')) {
-                            console.log(file, "file on Submit");
+                            // console.log(file, "file on Submit");
                             const formData = new FormData();
                             const uniqueId = uuidv4(); // Generate a unique ID for the file
                             const fileId = `${uniqueId}_${file?.filename.name}`;
-                            console.log(fileId, "fileId on Submit");
+                            // console.log(fileId, "fileId on Submit");
                             const editedImage = "";
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
 
@@ -1561,7 +1561,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     } else if (file?.filename?.url) {
                         if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") || file?.filename?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
-                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file?.filename?.url}`, {
+                            const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file?.filename?.url}`, {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -1605,14 +1605,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 }
                             } else if (file?.filename?.url?.endsWith('.mp4')) {
                                 formData.append('access_token', token);
-                                console.log("formData", formData);
+                                // console.log("formData", formData);
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${accountNumber}/advideos`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
 
-                                console.log("Facebook API response:", fbResponse.data);
+                                // console.log("Facebook API response:", fbResponse.data);
 
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
@@ -1659,7 +1659,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
                 }));
 
-                console.log("Ads Data:", adsData);
+                // console.log("Ads Data:", adsData);
 
                 const allLevelData = {
                     id: DuplicatedampaignData?.identifier,
@@ -1670,14 +1670,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         Ads: adsData || []
                     }
                 };
-                console.log("All Level Values:", allLevelData);
+                // console.log("All Level Values:", allLevelData);
                 const payload = {
                     accountnumber: accountNumber,
                     identifier: DuplicatedampaignData?.identifier,
                     updates: allLevelData,
                     re_launch: DuplicatedampaignData?.fbstatus === "Live" ? true : false,
                 };
-                console.log("Payload for Update:", payload);
+                // console.log("Payload for Update:", payload);
                 const headers = {
                     'Content-Type': 'application/json',
                     Authorization: localStorage.getItem("token"),
@@ -1723,10 +1723,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     };
 
     const postData = async (values) => {
-        console.log("Form Values:", values);
+        // console.log("Form Values:", values);
         setLoading(true); // Start the spinner
         try {
-            console.log("Image Hashes before creating addlevel:", values.imageHashes);
+            // console.log("Image Hashes before creating addlevel:", values.imageHashes);
 
             const addLevelData = values.imageHashes.map((media, index) => {
                 if (media.imag_hash) {
@@ -1812,7 +1812,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 addlevel: addLevelData
             };
 
-            console.log("Final Data to Submit:", data1);
+            // console.log("Final Data to Submit:", data1);
 
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
@@ -1824,7 +1824,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             });
 
             if (response.ok) {
-                console.log('Form data submitted successfully');
+                // console.log('Form data submitted successfully');
                 setSelectedFilesFromCreatives([]);
                 setSelectedFilesFromMedia([]);
                 setSelectedFiles([]);
@@ -1840,7 +1840,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
     };
 
-    console.log("test:");
+    // console.log("test:");
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
@@ -1864,7 +1864,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     };
 
     const currentDate = dayjs();
-    console.log(moment(), "currentDate")
+    // console.log(moment(), "currentDate")
     let initialValues = {
         Status: "PAUSED",
         // Objectives: "OUTCOME_LEADS",
@@ -1935,7 +1935,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     };
 
     const onClickCreativesDrawer = (panelKey) => {
-        console.log("Creatives Drawer Opened");
+        // console.log("Creatives Drawer Opened");
         // const onClickCreativesDrawer = (panelKey) => {
         //     setActivePanelKey(panelKey);
         //     setOpenCreativesDrawer(true);
@@ -1945,7 +1945,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     }
 
     const selectedFilesData = (data) => {
-        console.log("Selected Files Data:", data);
+        // console.log("Selected Files Data:", data);
         setSelectedFiles(prev => [...prev, ...data.map((file, index) => {
             return ({
                 uid: file.uid || `-${index + 1}`,
@@ -2055,7 +2055,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
     }
 
-    console.log("Selected Files:", selectedFiles);
+    // console.log("Selected Files:", selectedFiles);
 
     const handleRemoveFile = (uidToRemove) => {
         setSelectedFilesFromCreatives(prev =>
@@ -2074,7 +2074,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     };
 
     // console.log(changedFields, "changedFields");
-    console.log(levelWiseChanges, "levelWiseChanges");
+    // console.log(levelWiseChanges, "levelWiseChanges");
 
     return (
         <Modal
@@ -3823,7 +3823,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         const values = await form.validateFields(); // Validates all form fields
 
                                         // Clear existing validation errors
-                                        console.log("hi");
+                                        // console.log("hi");
 
                                         if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
                                             isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
@@ -3851,7 +3851,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             name: field.name?.[0],       // field name
                                             message: field.errors?.[0],  // validation message
                                         }));
-                                        console.log("Errors:", allErrors);
+                                        // console.log("Errors:", allErrors);
                                         setSubmitErrors(allErrors);
                                     }
                                 }}

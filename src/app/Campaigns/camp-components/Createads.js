@@ -69,13 +69,13 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
   const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  console.log(data, "data from createads component");
-  console.log(adsData, "adsData from createads component");
-  console.log(network, "network from createads component");
+  // console.log(data, "data from createads component");
+  // console.log(adsData, "adsData from createads component");
+  // console.log(network, "network from createads component");
   const { theme } = useTokenContext();
 
   var token = localStorage.getItem("token")
-  console.log(data, "selectedRow")
+  // console.log(data, "selectedRow")
   function getNextAddName(data) {
     let maxNumber = -Infinity;
     let prefix = "";
@@ -93,7 +93,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
     return `${prefix}_${maxNumber + 1}`; // Return prefix with incremented max number
   }
   const [addName, setAddName] = useState(getNextAddName(adsData));
-  console.log(addName, "data");
+  // console.log(addName, "data");
 
   useEffect(() => {
     if (visible) {
@@ -116,12 +116,12 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
     form
       .validateFields()
       .then((values) => {
-        console.log('Form data:', values);
+        // console.log('Form data:', values);
         setFormData(values);
         setIsModalVisible(true);
       })
       .catch((errorInfo) => {
-        console.log('Validation failed:', errorInfo);
+        // console.log('Validation failed:', errorInfo);
       });
   };
 
@@ -271,7 +271,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
           if (file?.url) {
             if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
               const formData = new FormData();
-              const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+              const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`, {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
@@ -359,7 +359,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
               const editedImage = editedImages[fileId];
               const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
 
-              console.log(file.originFileObj.name);
+              // console.log(file.originFileObj.name);
 
               if (uploadFile) {
                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
@@ -478,7 +478,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
 
     try {
       const mediaHashArray = uploadFilesSequentially(selectedFiles);
-      console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
+      // console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
       return mediaHashArray;
     } catch (error) {
       console.error("One or more media uploads failed:", error);
@@ -487,7 +487,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
   };
 
   const onClickCreativesDrawer = () => {
-    console.log("Creatives Drawer Opened");
+    // console.log("Creatives Drawer Opened");
     setOpenCreativesDrawer(true);
   }
 
@@ -538,7 +538,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
   // }
 
   const selectedFilesData = (data) => {
-    console.log("Selected Files Data:", data);
+    // console.log("Selected Files Data:", data);
 
     const firstFile = data[0];
     if (!firstFile) return;
@@ -637,7 +637,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
 
     if (formData) {
       const onSuccess = (status, response) => {
-        console.log("Upload success:", response);
+        // console.log("Upload success:", response);
         // Add any success handling logic here
       };
 
@@ -655,12 +655,12 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
             },
           }
         );
-        console.log("siddu account data", response.data);
+        // console.log("siddu account data", response.data);
         const imagehash = response.data[0];
 
         const mediaData = await customRequest(imagehash, onSuccess, onError);
-        console.log(mediaData, "mediaData from customRequest");
-        console.log(formData, "formData from UI");
+        // console.log(mediaData, "mediaData from customRequest");
+        // console.log(formData, "formData from UI");
 
         let newAddData;
         if (mediaData[0].videoid) {
@@ -683,7 +683,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
 
         delete newAddData.MediaContent
 
-        console.log(newAddData, "newAddData from UI");
+        // console.log(newAddData, "newAddData from UI");
 
         await postData(newAddData);
         rerenders();
@@ -735,7 +735,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
           }
         }
       );
-      console.log("account data", ...response?.data);
+      // console.log("account data", ...response?.data);
       setimagehash(...response?.data)
     } catch (error) {
       console.error("Error fetching campaign data:", error);
@@ -774,7 +774,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
         data1.thambnailurl = values.thambnailurl;
       }
 
-      console.log(data1, "from UI");
+      // console.log(data1, "from UI");
       //https://www.testapi.adsgoat.in
       const response = await fetch(
         `https://www.testapi.adsgoat.in/api/Createadd/${data.identifier}`,
@@ -789,7 +789,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
       );
 
       if (response.ok) {
-        console.log("Form data submitted successfully");
+        // console.log("Form data submitted successfully");
         message.success("Your ad is created successfully", 2, () => {
           setIsModalVisible(false);
         });
@@ -843,7 +843,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
   };
 
   const closeCanvasModal = () => {
-    console.log("Closing editor...");
+    // console.log("Closing editor...");
     // setIsImgEditorShown(false);
     setIsImgEditorShown(false); // Close the image editor
   };
@@ -852,7 +852,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
 
   const handleModalCancel = () => {
     setIsModalVisible(false);
-    console.log('Modal cancel clicked');
+    // console.log('Modal cancel clicked');
   };
   var initialValue = {
     page_id: data?.addlevel[0]?.page_id,

@@ -589,7 +589,7 @@ const AccountForm = ({
   const [caption, setCaption] = useState("");
   const [defaultURLBuilder, setDefaultURLBuilder] = useState("");
   const [indexValueForAccount, setIndexValueForAccount] = useState("");
-  console.log("defaultUrlData in account form", defaultUrlData);
+  // console.log("defaultUrlData in account form", defaultUrlData);
   const primaryText = Form.useWatch(["adsets", index, "message"], form);
   const headline = Form.useWatch(["adsets", index, "headline"], form);
   const description = Form.useWatch(["adsets", index, "Description"], form);
@@ -732,7 +732,7 @@ const AccountForm = ({
   const getUrlBuilder = () => {
     // useMemo(() => {
     // return (extraString) => {
-    console.log(network)
+    // console.log(network)
     switch (network) {
       case "FB_Mnet":
         //defaultValues
@@ -787,7 +787,7 @@ const AccountForm = ({
   const getArticleUrlBuilder = () => {
     // useMemo(() => {
     // return (extraString) => {
-    console.log(network)
+    // console.log(network)
     switch (network) {
       case "FB_Affinity":
         //defaultValues
@@ -1016,8 +1016,8 @@ const AdPreviewPerAccount = ({
     pageNames = [pageNameData];
   }
 
-  console.log(pageNameData);
-  console.log(pageAccount);
+  // console.log(pageNameData);
+  // console.log(pageAccount);
   if (adFiles.length === 0) return null;
 
   return (
@@ -1305,10 +1305,10 @@ const AdsetComponent = ({
   setMinAgeToggle,
   minAgeToggle
 }) => {
-  console.log(page_id_list, "page_id_list in adset component");
-  console.log(pageidList, "pageidList in adset component");
-  console.log(pixel_id_list, "pixel_id_list in adset component");
-  console.log(pixelIdList, "pixelIdList in adset component");
+  // console.log(page_id_list, "page_id_list in adset component");
+  // console.log(pageidList, "pageidList in adset component");
+  // console.log(pixel_id_list, "pixel_id_list in adset component");
+  // console.log(pixelIdList, "pixelIdList in adset component");
   const currentDate = dayjs();
   const after30Days = currentDate.add(30, "day");
   const [activeMediaIndex, setActiveMediaIndex] = useState({});
@@ -1328,12 +1328,12 @@ const AdsetComponent = ({
   const [budget, setBudget] = useState(adset?.DailyAdd_amount || 0)
 
 
-  console.log(selectedPositions, "selectedPositions in adset component");
-  console.log(adset.id, "adset id in adset component");
-  console.log(selectedPublishers, "selectedPublishers in adset component");
-  console.log(selectedPositions?.[adset.id]);
-  console.log(adset, "adset in adset component");
-  console.log(defaultUrlData, "defaultUrlData in adset component");
+  // console.log(selectedPositions, "selectedPositions in adset component");
+  // console.log(adset.id, "adset id in adset component");
+  // console.log(selectedPublishers, "selectedPublishers in adset component");
+  // console.log(selectedPositions?.[adset.id]);
+  // console.log(adset, "adset in adset component");
+  // console.log(defaultUrlData, "defaultUrlData in adset component");
 
 
   const [dragging, setDragging] = useState(false);
@@ -1341,8 +1341,8 @@ const AdsetComponent = ({
 
 
   const onChange = (newValue, label, extra) => {
-    console.log("Selected values:", newValue);
-    console.log("Extra info:", extra);
+    // console.log("Selected values:", newValue);
+    // console.log("Extra info:", extra);
     setValue(newValue);
   };
   const selected = selectedByAdset[adset.id] || {};
@@ -1539,7 +1539,7 @@ const AdsetComponent = ({
     form
   );
 
-  console.log(isDynamicCreative);
+  // console.log(isDynamicCreative);
 
   // console.log(optimizationGoalValue);
 
@@ -1580,11 +1580,11 @@ const AdsetComponent = ({
 
   const bidStrategy = Form.useWatch("Bid_strategy", form);
   const Special_categories = Form.useWatch("Special_categories", form);
-  console.log(Special_categories);
+  // console.log(Special_categories);
 
   const adsetLocationCountry = Form.useWatch(["adsets", index, "countries"], form);
 
-  console.log(adsetLocationCountry);
+  // console.log(adsetLocationCountry);
 
   const allCountries = [
     { value: "US", label: "United States" },
@@ -1637,13 +1637,13 @@ const AdsetComponent = ({
   const campaignCountries = Form.useWatch("countries", form) || [];
   const hasCountries = Array.isArray(campaignCountries) && campaignCountries.length > 0;
 
-  console.log(campaignCountries);
+  // console.log(campaignCountries);
 
   const newCampaignCountries = campaignCountries && campaignCountries.length > 0 ? campaignCountries.map(item => {
     return allCountries.find(item1 => item1.value === item)
   }) : []
 
-  console.log(newCampaignCountries);
+  // console.log(newCampaignCountries);
 
   const filterTreeByCampaign = (tree, allowed) => {
 
@@ -2310,19 +2310,19 @@ const AdsetComponent = ({
   };
 
   const onClickCreativesDrawer = (adset, index) => {
-    console.log("Creatives Drawer Opened");
+    // console.log("Creatives Drawer Opened");
     setOpenCreativesDrawer(true);
     setCreativeIndex(adset.id);
   };
 
   const handlePositionChange = (values, options) => {
-    console.log(values, "values");
-    console.log(options, "options");
+    // console.log(values, "values");
+    // console.log(options, "options");
     const formatted = options.map((opt) => ({
       key: opt.value,
       label: opt.label || opt.children,
     }));
-    console.log(formatted, "formatted positions");
+    // console.log(formatted, "formatted positions");
     // setSelectedPositions(formatted);
     setSelectedPositions((prevState) => ({
       ...prevState, // Spread the previous state to preserve other entries
@@ -2563,7 +2563,7 @@ const AdsetComponent = ({
   }
 
   const BeneficiaryAndPayer = needsBeneficiaryAndPayer(adsetLocationCountry);
-  console.log(BeneficiaryAndPayer);
+  // console.log(BeneficiaryAndPayer);
 
   const isChecked = Form.useWatch(["adsets", index, "showPayer"], form)
 
@@ -3120,7 +3120,7 @@ const AdsetComponent = ({
 
   const onClickShareBeneficiaryAndPayerForAllAccount = () => {
     const account = (form.getFieldValue(["adsets", index, "selectedAccount"]))
-    console.log(account)
+    // console.log(account)
     const valueOfAccount = (form.getFieldValue(["adsets", index, "Beneficiary", account]));
     const valueofPayerAccount = form.getFieldValue(["adsets", index, "Payer", account])
     watchedAccountList.map(account => {
@@ -3186,7 +3186,7 @@ const AdsetComponent = ({
                   style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
                   onClick={(checked, e) => e.stopPropagation()}
                   onChange={(checked) => {
-                    console.log("Dynamic Creative:", checked);
+                    // console.log("Dynamic Creative:", checked);
 
                     // if (!checked) {
                     // Example: clear dynamic creative assets
@@ -7654,8 +7654,8 @@ const CreateCampaignDrawer = ({
   accountis,
   network,
 }) => {
-  console.log(network, "network in CreateCampaignDrawer");
-  console.log(accountis, "accountis in CreateCampaignDrawer");
+  // console.log(network, "network in CreateCampaignDrawer");
+  // console.log(accountis, "accountis in CreateCampaignDrawer");
   // const [selectedFile, setSelectedFile] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] =
@@ -7829,12 +7829,12 @@ const CreateCampaignDrawer = ({
   }, [accountis]);
   const { confirm } = Modal
 
-  console.log(imageHashArray);
-  console.log(defaultUrlData, "defaultUrlData in CreateCampaignDrawer");
+  // console.log(imageHashArray);
+  // console.log(defaultUrlData, "defaultUrlData in CreateCampaignDrawer");
 
-  console.log(draftsData, "draftsData in CreateCampaignDrawer");
-  console.log(page_id_list, "page_id_list in CreateCampaignDrawer");
-  console.log(pixel_id_list, "pixel_id_list in CreateCampaignDrawer");
+  // console.log(draftsData, "draftsData in CreateCampaignDrawer");
+  // console.log(page_id_list, "page_id_list in CreateCampaignDrawer");
+  // console.log(pixel_id_list, "pixel_id_list in CreateCampaignDrawer");
   const handleDropdownVisibleChange = (open) => {
     setIsOpen(open);
 
@@ -7948,8 +7948,8 @@ const CreateCampaignDrawer = ({
 
   useEffect(() => {
     const newadsets = form.getFieldValue("adsets") || [];
-    console.log(newadsets, "newadsets")
-    console.log(adsets, "adsets");
+    // console.log(newadsets, "newadsets")
+    // console.log(adsets, "adsets");
   }, [adsets, watchedAdsets])
 
   useEffect(() => {
@@ -8006,7 +8006,8 @@ const CreateCampaignDrawer = ({
 
     try {
       const res = await fetch(
-        "https://www.testapi.adsgoat.in/api/shareDraftToAccountsObject",
+        // "https://www.testapi.adsgoat.in/api/shareDraftToAccountsObject",
+        "https://fblaunching.vyaktimetrics.com/open/templates/share",
         {
           method: "POST",
           headers: {
@@ -8131,138 +8132,143 @@ const CreateCampaignDrawer = ({
     return Object.values(groupMap);
   }, [filteredDrafts]);
 
+  // commented 2026-05-22
+  // useEffect(() => {
+  //   if (!account || account.length === 0) return;
+
+  //   const accountArray = Array.isArray(account) ? account : [account];
+
+  //   (async () => {
+  //     const resp = await fetch(`https://www.testapi.adsgoat.in/api/getcategories`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: token,
+  //       },
+  //       body: JSON.stringify({ accounts: accountArray }),
+  //     });
+
+  //     const json = await resp.json();
+  //     if (json.ok) {
+  //       setCategories(json.categories);
+  //     }
+  //   })();
+  // }, [account, token]);
+  // commnented 2026-05-22
+  // const addCategory = async () => {
+  //   const name = newCategory.trim();
+  //   if (!name || !account) return;
+
+  //   const accounts = Array.isArray(account) ? account : [account];
+
+  //   const resp = await fetch("https://www.testapi.adsgoat.in/api/newcategories", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: token,
+  //     },
+  //     body: JSON.stringify({ accounts, name }),
+  //   });
+
+  //   const json = await resp.json();
+  //   if (resp.ok && json.ok) {
+  //     setCategories(prev => [...prev, ...json.added]);
+  //     setPopupInputs(s => ({ ...s, input1: json.added[0]?.name || "" }));
+  //     setNewCategory("");
+  //     setErrors(e => ({ ...e, input1: "" }));
+  //     message.success(`Category added to ${json.added.length} account(s)`);
+  //   } else {
+  //     message.error(json.message || "Add failed");
+  //   }
+  // };
+  // commented 2026-05-22
+  // const deleteCategory = async (accountNumber, catId) => {
+  //   if (!catId || !accountNumber) return;
+
+  //   const deleted = categories.find(c => c.categoryId === catId);
+
+  //   const resp = await fetch(
+  //     `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
+  //     {
+  //       method: "DELETE",
+  //       headers: { Authorization: token },
+  //     }
+  //   );
+
+  //   const json = await resp.json().catch(() => ({}));
+
+  //   if (resp.ok && json.ok) {
+  //     setCategories(prev =>
+  //       prev.filter(c => !(c.categoryId === catId && c.accountNumber === accountNumber))
+  //     );
+  //     if (deleted?.name) {
+  //       setPopupInputs(s => ({
+  //         ...s,
+  //         input1: s.input1 === deleted.name ? "" : s.input1
+  //       }));
+  //     }
+  //     message.success("Category deleted");
+  //   } else {
+  //     message.error(json.message || "Delete failed");
+  //   }
+  // };
+  // commented 2026-05-22
+  // const renameCategory = async (accountNumber, catId, newName) => {
+  //   const clean = newName?.trim();
+  //   if (!catId || !clean || !accountNumber) return;
+
+  //   // const oldName = categories.find(c => c.categoryId === catId)?.name;
+  //   const oldName = categories.find(
+  //     c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
+  //   )?.name;
+
+  //   const resp = await fetch(
+  //     `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
+  //     {
+  //       method: "PATCH",
+  //       headers: { "Content-Type": "application/json", Authorization: token },
+  //       body: JSON.stringify({ name: clean }),
+  //     }
+  //   );
+
+  //   const json = await resp.json().catch(() => ({}));
+  //   if (resp.ok && json.ok) {
+  //     setCategories(prev =>
+  //       prev.map(c =>
+  //         c.categoryId === catId ? { ...c, name: clean } : c
+  //       )
+  //     );
+  //     setPopupInputs(s => ({
+  //       ...s,
+  //       input1: s.input1 === oldName ? clean : s.input1,
+  //     }));
+  //     message.success("Category renamed");
+  //   } else {
+  //     message.error(json.message || "Rename failed");
+  //   }
+  // };
+
   useEffect(() => {
     if (!account || account.length === 0) return;
 
     const accountArray = Array.isArray(account) ? account : [account];
 
     (async () => {
-      const resp = await fetch(`https://www.testapi.adsgoat.in/api/getcategories`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        body: JSON.stringify({ accounts: accountArray }),
-      });
+      const resp = await fetch(
+        // `https://www.testapi.adsgoat.in/api/getreportcategories`, 
+        "https://fblaunching.vyaktimetrics.com/open/report-category/get",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify({ accountNumber: accountArray }),
+        });
 
-      const json = await resp.json();
-      if (json.ok) {
-        setCategories(json.categories);
-      }
-    })();
-  }, [account, token]);
-
-  const addCategory = async () => {
-    const name = newCategory.trim();
-    if (!name || !account) return;
-
-    const accounts = Array.isArray(account) ? account : [account];
-
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/newcategories", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify({ accounts, name }),
-    });
-
-    const json = await resp.json();
-    if (resp.ok && json.ok) {
-      setCategories(prev => [...prev, ...json.added]);
-      setPopupInputs(s => ({ ...s, input1: json.added[0]?.name || "" }));
-      setNewCategory("");
-      setErrors(e => ({ ...e, input1: "" }));
-      message.success(`Category added to ${json.added.length} account(s)`);
-    } else {
-      message.error(json.message || "Add failed");
-    }
-  };
-  const deleteCategory = async (accountNumber, catId) => {
-    if (!catId || !accountNumber) return;
-
-    const deleted = categories.find(c => c.categoryId === catId);
-
-    const resp = await fetch(
-      `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: token },
-      }
-    );
-
-    const json = await resp.json().catch(() => ({}));
-
-    if (resp.ok && json.ok) {
-      setCategories(prev =>
-        prev.filter(c => !(c.categoryId === catId && c.accountNumber === accountNumber))
-      );
-      if (deleted?.name) {
-        setPopupInputs(s => ({
-          ...s,
-          input1: s.input1 === deleted.name ? "" : s.input1
-        }));
-      }
-      message.success("Category deleted");
-    } else {
-      message.error(json.message || "Delete failed");
-    }
-  };
-
-  const renameCategory = async (accountNumber, catId, newName) => {
-    const clean = newName?.trim();
-    if (!catId || !clean || !accountNumber) return;
-
-    // const oldName = categories.find(c => c.categoryId === catId)?.name;
-    const oldName = categories.find(
-      c => String(c.categoryId) === String(catId) && String(c.accountNumber) === String(accountNumber)
-    )?.name;
-
-    const resp = await fetch(
-      `https://www.testapi.adsgoat.in/api/categories/${accountNumber}/${catId}`,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: token },
-        body: JSON.stringify({ name: clean }),
-      }
-    );
-
-    const json = await resp.json().catch(() => ({}));
-    if (resp.ok && json.ok) {
-      setCategories(prev =>
-        prev.map(c =>
-          c.categoryId === catId ? { ...c, name: clean } : c
-        )
-      );
-      setPopupInputs(s => ({
-        ...s,
-        input1: s.input1 === oldName ? clean : s.input1,
-      }));
-      message.success("Category renamed");
-    } else {
-      message.error(json.message || "Rename failed");
-    }
-  };
-
-  useEffect(() => {
-    if (!account || account.length === 0) return;
-
-    const accountArray = Array.isArray(account) ? account : [account];
-
-    (async () => {
-      const resp = await fetch(`https://www.testapi.adsgoat.in/api/getreportcategories`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        body: JSON.stringify({ accounts: accountArray }),
-      });
-
-      const json = await resp.json().catch(() => ({}));
-      if (json.ok) {
-        setReportCategories(json.categories);
+      const { data } = await resp.json();
+      if (data?.ok) {
+        setReportCategories(data.reportcategories);
       }
     })();
   }, [account, token]);
@@ -8274,14 +8280,17 @@ const CreateCampaignDrawer = ({
 
     const accounts = Array.isArray(account) ? account : [account];
 
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/newreportcategory", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify({ accounts, name }),
-    });
+    const resp = await fetch(
+      // "https://www.testapi.adsgoat.in/api/newreportcategory",
+      "https://fblaunching.vyaktimetrics.com/open/report-category/post",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ accounts, name }),
+      });
 
     const json = await resp.json();
     if (resp.ok && json.ok) {
@@ -8310,7 +8319,8 @@ const CreateCampaignDrawer = ({
     }
 
     const resp = await fetch(
-      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      // `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      `https://fblaunching.vyaktimetrics.com/open/report-category/${accountNumber}/${catId}`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: token },
@@ -8340,7 +8350,8 @@ const CreateCampaignDrawer = ({
     if (!catId || !accountNumber) return;
 
     const resp = await fetch(
-      `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      // `https://www.testapi.adsgoat.in/api/reportcategory/${accountNumber}/${catId}`,
+      `https://fblaunching.vyaktimetrics.com/open/report-category/${accountNumber}/${catId}`,
       { method: "DELETE", headers: { Authorization: token } }
     );
     const json = await resp.json().catch(() => ({}));
@@ -8497,19 +8508,22 @@ const CreateCampaignDrawer = ({
         // check duplicate template name
 
 
-        await fetch("https://www.testapi.adsgoat.in/api/NewsubmitDraftDataNew", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token, // if your middleware expects Bearer
-          },
-          body: JSON.stringify({
-            accountNumber: data?.Account_Number,
-            draftData: { ...totalDraftData, groupId },
-            email: session?.user?.email,
-            userName: session?.user?.name,
-          }),
-        });
+        await fetch(
+          // "https://www.testapi.adsgoat.in/api/NewsubmitDraftDataNew",
+          "https://fblaunching.vyaktimetrics.com/open/templates/submit",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token, // if your middleware expects Bearer
+            },
+            body: JSON.stringify({
+              accountNumber: data?.Account_Number,
+              draftData: { ...totalDraftData, groupId },
+              email: session?.user?.email,
+              userName: session?.user?.name,
+            }),
+          });
       }
       message.success("Template saved successfully");
       // ✅ ensure non-2xx throws with a message
@@ -8620,13 +8634,13 @@ const CreateCampaignDrawer = ({
 
   const updateAdMediaData = (index, files) => {
     const adset = form.getFieldValue(["adsets", index]) || {};
-    console.log(adset, "adset in updateAdMediaData");
-    console.log(files, "files in updateAdMediaData");
-    console.log(index, "index in updateAdMediaData");
-    console.log(
-      form.getFieldValue("adsets"),
-      "form.getFieldValue('adsets') in updateAdMediaData"
-    );
+    // console.log(adset, "adset in updateAdMediaData");
+    // console.log(files, "files in updateAdMediaData");
+    // console.log(index, "index in updateAdMediaData");
+    // console.log(
+    //   form.getFieldValue("adsets"),
+    //   "form.getFieldValue('adsets') in updateAdMediaData"
+    // );
     const formatted = files.map((file) => ({
       AddName: adset.AddName || "",
       Caption: adset.Caption || "",
@@ -8980,14 +8994,14 @@ const CreateCampaignDrawer = ({
 
   const cloneAdset = (adsetId) => {
     const adsetIndex = adsetId
-    console.log(adsetIndex)
+    // console.log(adsetIndex)
     if (adsetIndex === -1) return;
     // const adsets = adsets || [];
-    console.log(adsets)
+    // console.log(adsets)
     const originalAdset = adsets.find(item => item.id === adsetIndex);
     const newId = uuidv4();
 
-    console.log(originalAdset)
+    // console.log(originalAdset)
 
     const baseName = originalAdset.AdsetPanelName;
     const copyCount = adsets.filter((ad) =>
@@ -9004,7 +9018,7 @@ const CreateCampaignDrawer = ({
 
     const currentFormAdsets = form.getFieldValue("adsets") || [];
 
-    console.log(currentFormAdsets, "current");
+    // console.log(currentFormAdsets, "current");
 
     // ✅ Match by UUID not index!
     const formIndex = currentFormAdsets.findIndex(
@@ -9085,7 +9099,7 @@ const CreateCampaignDrawer = ({
         return currentFormAdsets[oldIndex]; // retain values of other adsets
       });
 
-      console.log(newFormAdsets, "newFormAdsets in removeAdset");
+      // console.log(newFormAdsets, "newFormAdsets in removeAdset");
 
       // Step 4: Set updated form values
       form.setFieldsValue({ adsets: newFormAdsets });
@@ -9179,8 +9193,8 @@ const CreateCampaignDrawer = ({
 
   const onChangeAdsetLevelDailyBudget = (event) => {
     setAdsetLevelDailyBudget(parseFloat(event.target.value));
-    console.log(event.target.value);
-    console.log(parseFloat(event.target.value));
+    // console.log(event.target.value);
+    // console.log(parseFloat(event.target.value));
   };
 
   const getUrlBuilder = useMemo(() => {
@@ -9235,13 +9249,13 @@ const CreateCampaignDrawer = ({
   };
 
   const handlePositionChange = (values, options) => {
-    console.log(values, "values");
-    console.log(options, "options");
+    // console.log(values, "values");
+    // console.log(options, "options");
     const formatted = options.map((opt) => ({
       key: opt.value,
       label: opt.label || opt.children,
     }));
-    console.log(formatted, "formatted positions");
+    // console.log(formatted, "formatted positions");
     setSelectedPositions(formatted);
   };
 
@@ -9352,7 +9366,7 @@ const CreateCampaignDrawer = ({
     if (visible) {
       // Update the form field value for Website_URL whenever websiteURL changes
       // const pageIDList = 
-      console.log(imagehash, "imagehash in useEffect");
+      // console.log(imagehash, "imagehash in useEffect");
       // form.setFieldsValue({
       //   pixel_id: imagehash?.pixelID,
       //   page_id: imagehash?.pageID,
@@ -9386,7 +9400,7 @@ const CreateCampaignDrawer = ({
   }, [imagehash, form, visible]);
 
   useEffect(() => {
-    console.log(imageHashArray, "imageHashArray in useEffect");
+    // console.log(imageHashArray, "imageHashArray in useEffect");
     // const pageIdList = imageHashArray.map((item) => ({ value: `${item.accountNumber} - ${item.pageID}`, label: `${item.accountNumber} - ${item.pageID}` }));
     // const pageIdListFiltered = imageHashArray.map((item) => `${item.accountNumber} - ${item.pageID}`);
     const pixelIdListFiltered = imageHashArray.map((item) => {
@@ -9401,9 +9415,9 @@ const CreateCampaignDrawer = ({
     }).filter(Boolean)
     const pageIdListFiltered = imageHashArray.map((item) => {
       if (typeof item.pageID === "object" && item.pageID !== null && item.Network === network) {
-        console.log(item);
+        // console.log(item);
         const universalValue = item.pageID.Universal || Object.values(item.pageID)[0];
-        console.log(universalValue);
+        // console.log(universalValue);
         if (universalValue) {
           return `${item.accountNumber} - ${universalValue}`; // ✅ matches options.value
         }
@@ -9440,10 +9454,10 @@ const CreateCampaignDrawer = ({
       };
     });
 
-    console.log(pixelIdList, "pixelIdList");
-    console.log(pixelIdListFiltered, "pixelIdListFiltered");
-    console.log(pageIdList, "pageIdList");
-    console.log(pageIdListFiltered, "pageIdListFiltered");
+    // console.log(pixelIdList, "pixelIdList");
+    // console.log(pixelIdListFiltered, "pixelIdListFiltered");
+    // console.log(pageIdList, "pageIdList");
+    // console.log(pageIdListFiltered, "pageIdListFiltered");
     form.setFieldsValue({
       pixel_id: pixelIdListFiltered,
       page_id: pageIdListFiltered,
@@ -9458,10 +9472,10 @@ const CreateCampaignDrawer = ({
       .replace(/([A-Z])/g, " $1")     // add space before capital letters
       .replace(/^./, (c) => c.toUpperCase()); // capitalize first letter
   const Accountchange = (e) => {
-    console.log(e);
+    // console.log(e);
     const newAccounts = newImageHashArray.filter(item =>
       e.includes(item.label));
-    console.log(newAccounts);
+    // console.log(newAccounts);
     // setAccountNumber(e.target.value);
   };
   // const handlepositionChange = async (values) => {
@@ -9471,7 +9485,8 @@ const CreateCampaignDrawer = ({
   const fetchAccountDetails = async () => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/newhashimageidentityWithGeos/${accountNumber}`,
+        // `https://www.testapi.adsgoat.in/api/newhashimageidentityWithGeos/${accountNumber}`,
+        `https://fblaunching.vyaktimetrics.com/open/accounts/newhashimageidentityWithGeos/${accountNumber}`,
         {
           headers: {
             Authorization: token,
@@ -9484,7 +9499,7 @@ const CreateCampaignDrawer = ({
       //   console.log(item.Network === network, "item.Network === network");
       // });
 
-      console.log(response?.data?.data?.filter((item) => item.Network === network));
+      // console.log(response?.data?.data?.filter((item) => item.Network === network));
 
       setImageHashArray(response?.data?.data?.filter((item) => item.Network === network) || []);
       setNewImageHashArray(response?.data?.data?.filter((item) => item.Network === network) || []);
@@ -9570,7 +9585,8 @@ const CreateCampaignDrawer = ({
 
     try {
       const res = await axios.post(
-        "https://www.testapi.adsgoat.in/api/newGetDraftData",
+        // "https://www.testapi.adsgoat.in/api/newGetDraftData",
+        "https://fblaunching.vyaktimetrics.com/open/templates/get",
         { accounts },
         {
           headers: { Authorization: token },
@@ -9667,14 +9683,17 @@ const CreateCampaignDrawer = ({
       return;
     }
 
-    const resp = await fetch("https://www.testapi.adsgoat.in/api/NewdeleteDraft", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify({ groupId }),
-    });
+    const resp = await fetch(
+      // "https://www.testapi.adsgoat.in/api/NewdeleteDraft",
+      "https://fblaunching.vyaktimetrics.com/open/templates",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({ groupId }),
+      });
 
     const data = await resp.json().catch(() => ({}));
 
@@ -9692,10 +9711,13 @@ const CreateCampaignDrawer = ({
   // };
   const handleDelete = async (groupId) => {
     try {
-      const res = await fetch(`https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${groupId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json", Authorization: token },
-      });
+      const res = await fetch(
+        // `https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${groupId}`,
+        `https://fblaunching.vyaktimetrics.com/open/templates/group/${groupId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json", Authorization: token },
+        });
       const json = await res.json();
       if (!json.ok) throw new Error(json.message || "Failed to fetch drafts");
 
@@ -9773,7 +9795,8 @@ const CreateCampaignDrawer = ({
     try {
       // Call your API that fetches all accounts with drafts
       const res = await fetch(
-        `https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${selectedRef.current.groupId}`,
+        // `https://www.testapi.adsgoat.in/api/getDraftsByGroupId/${selectedRef.current.groupId}`,
+        `https://fblaunching.vyaktimetrics.com/open/templates/group/${selectedRef.current.groupId}`,
         {
           method: "GET",
           headers: {
@@ -10607,7 +10630,7 @@ const CreateCampaignDrawer = ({
       ) => {
         try {
           await fetch(
-            "https://prodapis.adsgoat.in/uploadUserFiles",
+            "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
             {
               method: "POST",
               headers: {
@@ -10666,7 +10689,7 @@ const CreateCampaignDrawer = ({
         );
 
         const response = await fetch(
-          "https://prodapis.adsgoat.in/uploadUserFiles",
+          "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
           {
             method: "POST",
             headers: {
@@ -10829,7 +10852,7 @@ const CreateCampaignDrawer = ({
                 async () => {
                   const response =
                     await fetch(
-                      `https://prodapis.adsgoat.in/s3?s3Url=${file.url}`,
+                      `https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`,
                       {
                         method: "GET",
                         headers: {
@@ -11266,10 +11289,10 @@ const CreateCampaignDrawer = ({
           );
       }
 
-      console.log(
-        "Final upload result:",
-        mediaHashArray
-      );
+      // console.log(
+      //   "Final upload result:",
+      //   mediaHashArray
+      // );
 
       return mediaHashArray;
     } catch (error) {
@@ -11303,11 +11326,11 @@ const CreateCampaignDrawer = ({
         );
         return acc;
       }, {});
-      console.log({
-        publisher_platforms: values.publisher_platforms,
-        ...selectedPlatforms,
-        ...values,
-      });
+      // console.log({
+      //   publisher_platforms: values.publisher_platforms,
+      //   ...selectedPlatforms,
+      //   ...values,
+      // });
 
       setIsModalVisible(true);
       setFormValues({
@@ -11318,46 +11341,47 @@ const CreateCampaignDrawer = ({
     }
   };
 
-  const submitDraftData = async () => {
-    const campaignData = await MultipleAdsestsFetching(formValues);
+  // commented 2026-05-22
+  // const submitDraftData = async () => {
+  //   const campaignData = await MultipleAdsestsFetching(formValues);
 
-    try {
-      if (campaignData) {
-        // console.log("Campaign Data:", campaignData);
-        //https://www.testapi.adsgoat.in
-        const response = await fetch(
-          "https://www.testapi.adsgoat.in/api/newSubmitFormData",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token,
-            },
-            body: JSON.stringify(campaignData),
-          }
-        );
+  //   try {
+  //     if (campaignData) {
+  //       // console.log("Campaign Data:", campaignData);
+  //       //https://www.testapi.adsgoat.in
+  //       const response = await fetch(
+  //         "https://www.testapi.adsgoat.in/api/newSubmitFormData",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: token,
+  //           },
+  //           body: JSON.stringify(campaignData),
+  //         }
+  //       );
 
-        // if (response.ok) {
-        //     message.success('Campaign created successfully');
-        //     console.log('Form data submitted successfully');
-        //     setLoading(false); // Stop the spinner
-        //     setSelectedFilesFromCreatives({});
-        //     setSelectedFilesFromMedia({});
-        //     setSelectedFiles({});
-        //     onClose();
-        //     setSelectedPositions({});
-        //     setAdsets([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName:"Adset 1" }]);
-        //     isManual !== "manual" && setIsManual(false);
-        //     newSelectedRef.current = null; // Reset the newSelectedRef
-        // } else {
-        //     console.error('Failed to submit form data');
-        // }
-      }
-    } catch (error) {
-      console.error("Error during campaign creation:", error);
-      message.error("An error occurred while creating the campaign.");
-    }
-  };
+  //       // if (response.ok) {
+  //       //     message.success('Campaign created successfully');
+  //       //     console.log('Form data submitted successfully');
+  //       //     setLoading(false); // Stop the spinner
+  //       //     setSelectedFilesFromCreatives({});
+  //       //     setSelectedFilesFromMedia({});
+  //       //     setSelectedFiles({});
+  //       //     onClose();
+  //       //     setSelectedPositions({});
+  //       //     setAdsets([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName:"Adset 1" }]);
+  //       //     isManual !== "manual" && setIsManual(false);
+  //       //     newSelectedRef.current = null; // Reset the newSelectedRef
+  //       // } else {
+  //       //     console.error('Failed to submit form data');
+  //       // }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error during campaign creation:", error);
+  //     message.error("An error occurred while creating the campaign.");
+  //   }
+  // };
 
   const handleOk = async () => {
     setLoading(true); // Start the spinner
@@ -11374,10 +11398,10 @@ const CreateCampaignDrawer = ({
       // message.error("Category is required");
       return;
     }
-    console.log("Form values", formValues);
+    // console.log("Form values", formValues);
 
     const campaignData = await MultipleAdsestsFetching(formValues);
-    console.log("Campaign Data before adding category:", campaignData);
+    // console.log("Campaign Data before adding category:", campaignData);
     // campaignData.Category = selectedCategory;
     //abcd  
 
@@ -11389,7 +11413,8 @@ const CreateCampaignDrawer = ({
 
         for (const campaign of campaignData) {
           await fetch(
-            "https://www.testapi.adsgoat.in/api/newsubmitFormDatanew",
+            // "https://www.testapi.adsgoat.in/api/newsubmitFormDatanew",
+            "https://fblaunching.vyaktimetrics.com/open/campaigns/submit",
             {
               method: "POST",
               headers: {
@@ -11402,14 +11427,14 @@ const CreateCampaignDrawer = ({
         }
 
 
-        console.log(adsetSchedule, "ads")
+        // console.log(adsetSchedule, "ads")
         // if (response.ok) {
         message.open({
           type: 'success',
           content: "Campaign created successfully",
           className: theme === 'dark' ? 'dark-message' : '',
         })
-        console.log("Form data submitted successfully");
+        // console.log("Form data submitted successfully");
         setLoading(false); // Stop the spinner
         setSelectedFilesFromCreatives({});
         setSelectedFilesFromMedia({});
@@ -11482,7 +11507,7 @@ const CreateCampaignDrawer = ({
   };
 
   function extractValuesByPartialLabel(dataArray, labelName) {
-    console.log(dataArray, labelName);
+    // console.log(dataArray, labelName);
     return dataArray
       .filter((item) =>
         item.label.toLowerCase().includes(labelName.toLowerCase())
@@ -11496,7 +11521,7 @@ const CreateCampaignDrawer = ({
 
   const MultipleAdsestsFetching = async (values) => {
 
-    console.log(values, "Form Values");
+    // console.log(values, "Form Values");
 
     const multipleAccounts = values.Account_Number;
 
@@ -11571,7 +11596,7 @@ const CreateCampaignDrawer = ({
                 },
               };
               const onSuccess = (status, response) => {
-                console.log("Upload success:", response);
+                // console.log("Upload success:", response);
               };
 
               const onError = (status, error) => {
@@ -11662,7 +11687,7 @@ const CreateCampaignDrawer = ({
                     };
                   }
                 });
-                console.log(addLevelData, "addLevelData")
+                // console.log(addLevelData, "addLevelData")
                 AdsetsData[`adsetlevel_${i + 1}`] = {
                   id: uuidv4(),
                   AdsetName: values.adsets[i].AdsetName,
@@ -11795,11 +11820,11 @@ const CreateCampaignDrawer = ({
               },
             };
             const onSuccess = (status, response) => {
-              console.log("Upload success:", response);
+              // console.log("Upload success:", response);
             };
 
             const onError = (status, error) => {
-              console.error("Upload error:", error);
+              // console.error("Upload error:", error);
             };
 
             for (let i = 0; i < values.adsets.length; i++) {
@@ -12194,14 +12219,14 @@ const CreateCampaignDrawer = ({
         },
       };
       const onSuccess = (status, response) => {
-        console.log("Upload success:", response);
+        // console.log("Upload success:", response);
       };
 
       const onError = (status, error) => {
         console.error("Upload error:", error);
       };
 
-      console.log("Adsets:", values);
+      // console.log("Adsets:", values);
 
       for (let i = 0; i < values.adsets.length; i++) {
         let AdsetsData = {};
@@ -12214,7 +12239,7 @@ const CreateCampaignDrawer = ({
           onError,
           adsets[i].id
         );
-        console.log("Image Hash Array:", imageHashArray);
+        // console.log("Image Hash Array:", imageHashArray);
         const adsetAccountData = values.adsets[i][account] || {};
         const addLevelData =
           imageHashArray && imageHashArray.length > 0
@@ -12240,7 +12265,7 @@ const CreateCampaignDrawer = ({
               Caption: adsetAccountData.Caption || "",
               Website_URL: adsetAccountData.Website_URL || "",
             };
-        console.log("Add Level Data:", addLevelData);
+        // console.log("Add Level Data:", addLevelData);
         AdsetsData[`adsetlevel_${i + 1}`] = {
           id: uuidv4(),
           AdsetName: values.adsets[i].AdsetName || "",
@@ -12325,10 +12350,10 @@ const CreateCampaignDrawer = ({
   };
 
   const postData = async (values) => {
-    console.log("Form Values:", values);
+    // console.log("Form Values:", values);
     setLoading(true); // Start the spinner
     try {
-      console.log("Image Hashes before creating addlevel:", values.imageHashes);
+      // console.log("Image Hashes before creating addlevel:", values.imageHashes);
 
       const addLevelData = values.imageHashes.map((media, index) => {
         if (media.imag_hash) {
@@ -12439,22 +12464,23 @@ const CreateCampaignDrawer = ({
 
       // console.log("selectedPositions:", selectedPositions);
 
-      console.log("Final Data to Submit:", data1);
+      // console.log("Final Data to Submit:", data1);
       // https://www.testapi.adsgoat.in
-      const response = await fetch(
-        "https://www.testapi.adsgoat.in/api/submitFormData",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-          body: JSON.stringify(data1),
-        }
-      );
+      // commneted 2026-05-22
+      // const response = await fetch(
+      //   "https://www.testapi.adsgoat.in/api/submitFormData",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: token,
+      //     },
+      //     body: JSON.stringify(data1),
+      //   }
+      // );
 
       if (response.ok) {
-        console.log("Form data submitted successfully");
+        // console.log("Form data submitted successfully");
         setSelectedFilesFromCreatives({});
         setSelectedFilesFromMedia({});
         setSelectedFiles({});
@@ -12472,7 +12498,7 @@ const CreateCampaignDrawer = ({
     }
   };
 
-  console.log("test:");
+  // console.log("test:");
 
   const handleChange = (info) => {
     const newFiles = info.fileList.map((file) => ({
@@ -12496,7 +12522,7 @@ const CreateCampaignDrawer = ({
   };
 
   const currentDate = dayjs();
-  console.log(moment(), "currentDate");
+  // console.log(moment(), "currentDate");
   // let initialValues = {
   //     Status: "PAUSED",
   //     // Objectives: "OUTCOME_LEADS",
@@ -12681,7 +12707,7 @@ const CreateCampaignDrawer = ({
   };
 
   const onClickCreativesDrawer = (index) => {
-    console.log("Creatives Drawer Opened");
+    // console.log("Creatives Drawer Opened");
     setOpenCreativesDrawer(true);
     setCreativeIndex(index);
   };
@@ -12827,7 +12853,7 @@ const CreateCampaignDrawer = ({
     // form.validateFields([["adsets", creativeIndex, "MediaContent"]]);
   };
 
-  console.log("Selected Files:", selectedFiles);
+  // console.log("Selected Files:", selectedFiles);
 
   const handleRemoveFile = (uidToRemove) => {
     setSelectedFilesFromCreatives((prev) =>
@@ -13255,7 +13281,7 @@ const CreateCampaignDrawer = ({
     const draft = draftsData.find(d => d.draftId === value);
     if (!draft) return;
 
-    console.log("Selected Draft:", draft);
+    // console.log("Selected Draft:", draft);
     setFormValuesFromDraft(draft);
     setTimeout(() => {
       const pixelsFromDraft = Object.keys(draft)
@@ -13349,7 +13375,7 @@ const CreateCampaignDrawer = ({
   };
 
   const newAccountNumbers = Array.isArray(accountis) ? accountis?.map(acc => ({ value: acc, label: acc })) : [];
-  console.log("New Account Numbers:", newAccountNumbers);
+  // console.log("New Account Numbers:", newAccountNumbers);
 
   const getAccountDetails = (Account_Number) => {
     if (!Account_Number) return null;
@@ -13686,8 +13712,8 @@ const CreateCampaignDrawer = ({
               minimumFractionDigits: 0,
               maximumFractionDigits: 2,
             });
-            console.log("Website URL:", draft?.adsetlevel_1?.addlevel?.Website_URL);
-            console.log("Caption:", draft?.adsetlevel_1?.addlevel?.Caption);
+            // console.log("Website URL:", draft?.adsetlevel_1?.addlevel?.Website_URL);
+            // console.log("Caption:", draft?.adsetlevel_1?.addlevel?.Caption);
             return (
               <div
                 key={draft.draftId}
@@ -14999,15 +15025,18 @@ const CreateCampaignDrawer = ({
                             Draft_Name: popupInputs.input2,
                           };
 
-                          await fetch("https://www.testapi.adsgoat.in/api/NewupdateDraftSmartnew", {
-                            method: "PATCH",
-                            headers: { "Content-Type": "application/json", Authorization: token },
-                            body: JSON.stringify({
-                              accountNumber: accountNumber,
-                              groupId: selectedRef.current.groupId,
-                              payload: filteredPayload,
-                            }),
-                          });
+                          await fetch(
+                            // "https://www.testapi.adsgoat.in/api/NewupdateDraftSmartnew", 
+                            "https://fblaunching.vyaktimetrics.com/open/templates/update-smart",
+                            {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json", Authorization: token },
+                              body: JSON.stringify({
+                                accountNumber: accountNumber,
+                                groupId: selectedRef.current.groupId,
+                                payload: filteredPayload,
+                              }),
+                            });
                         }
                         message.success("Draft updated successfully for all accounts in this group");
                         setIsEditAccountsModalOpen(false);
@@ -15222,7 +15251,7 @@ const CreateCampaignDrawer = ({
 
                           // Clear any previous errors
                           setSubmitErrors([]);
-                          console.log("Form values:", values);
+                          // console.log("Form values:", values);
 
                           // Call the onFinish logic, passing in the values
                           onFinish(values);
