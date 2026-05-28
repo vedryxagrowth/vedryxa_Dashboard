@@ -3134,7 +3134,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
             </Modal>
             <LinkOutlined
               onClick={() => {
-                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${rowAccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${rowAccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank', 'noopener,noreferrer');
               }}
               style={{ marginRight: '5px', color: "#1e1e1f", cursor: 'pointer' }}
