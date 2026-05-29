@@ -105,7 +105,7 @@ const CampaignHistoryModal = ({ open, onClose, campaignId, accountNumber, adAcco
             try {
                 setLoading(true);
                 const res = await apiClient.get(`/reports/data/reportscampaignhistory?accountNumber=${accountNumber}&campaignid=${campaignId}`);
-                const responseData = res.data;
+                const responseData = res.data.data;
                 const newResponseData = [responseData.campaign, ...(responseData.adsets), ...(responseData.ads)]
                 const objectsActivityHistory = newResponseData.reduce((acc, item) => {
                     if (Array.isArray(item?.ActivityHistory)) {
