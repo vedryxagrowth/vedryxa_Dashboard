@@ -464,7 +464,7 @@ const RevenuePartnerDashboard = () => {
         const token = localStorage.getItem("token")
         // console.log(token);
         //revenuePartnerData
-        const fetchRevenueData = await apiClient.get(`http://localhost:4000/dashboard/revenuepartner?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
+        const fetchRevenueData = await apiClient.get(`/dashboard/revenuepartner?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
         const response = fetchRevenueData.data;
         setRevenuePartnerData(response);
         setFetchData(false);
@@ -654,7 +654,7 @@ const RevenuePartnerDashboard = () => {
         const token = localStorage.getItem("token")
         // console.log(token);
         //revenuePartner/DomainData
-        const fetchRevenueData = await apiClient.get(`http://localhost:4000/dashboard/revenuepartner/domaindata?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
+        const fetchRevenueData = await apiClient.get(`/dashboard/revenuepartner/domaindata?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
         const response = fetchRevenueData.data;
         setRevenuePartnerDomainData(response);
         setFetchData(false);
@@ -1445,7 +1445,7 @@ const Dashboard = () => {
         const fetchNetworksData = async () => {
             try {
                 //get/networksData/
-                const res = await apiClient.get('http://localhost:4000/dashboard/getNetworksData', {
+                const res = await apiClient.get('/dashboard/getNetworksData', {
                     headers: {
                         Authorization: token,
 
@@ -1724,7 +1724,7 @@ const Dashboard = () => {
         let response;
         try {
             //Dashboardnew
-            response = await apiClient.post(`http://localhost:4000/dashboard/data?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+            response = await apiClient.post(`/dashboard/data?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
 
         } catch (error) {
             message.error('API failed to fetch the data please click the reload button', 8);

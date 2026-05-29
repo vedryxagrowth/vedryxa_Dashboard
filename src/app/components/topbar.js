@@ -143,7 +143,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   useEffect(() => {
     const fetchNotificationSound = async () => {
       try {
-        const response = await apiClient.get(`http://localhost:4000/open/notifications/sound`, {
+        const response = await apiClient.get(`/open/notifications/sound`, {
           params: { email: userdetails?.email },
         });
 
@@ -165,7 +165,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     setIsMuted(newMuteState);
 
     try {
-      await apiClient.put('http://localhost:4000/open/notifications/sound', {
+      await apiClient.put('/open/notifications/sound', {
         email: userdetails?.email,
         isMuted: newMuteState,
       });
@@ -195,7 +195,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   // ];
 
   const onClickNotificationView = async (item, key, email) => {
-    const notificationData = await apiClient.put('http://localhost:4000/open/notifications/view', { email, key, item }, {
+    const notificationData = await apiClient.put('/open/notifications/view', { email, key, item }, {
       headers: {
         Authorization: localStorage.getItem('token'),
         accept: 'application/json',
@@ -221,7 +221,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     e.stopPropagation();
 
     try {
-      await apiClient.put('http://localhost:4000/open/notifications/viewall', {
+      await apiClient.put('/open/notifications/viewall', {
         email: userdetails?.email
       }, {
         headers: {
@@ -1506,8 +1506,8 @@ useEffect(() => {
         throw new Error('Email is required to store image URL.');
       }
 
-      const response = await axios.post(
-        'http://localhost:4000/open/userimage',
+      const response = await apiClient.post(
+        '/open/userimage',
         { email, imageUrl },
         {
           headers: {
@@ -2222,11 +2222,11 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of MediaBuyerkeysOfAdAccounts) {
                 if (MediaBuyeradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  const networkResponse = await retryFetch(() => apiClient.get(`http://localhost:4000/open/auth/network?network=${item}`));
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
                   MediaBuyernewObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('http://localhost:4000/open/auth/nameandstatusofaccounts', { updatedNetwork: MediaBuyeradAccounts[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: MediaBuyeradAccounts[item] })
                   );
                   MediaBuyernewObject[item] = response.data.data;
                 }
@@ -2266,11 +2266,11 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 if (SpecialUseradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
                   // console.log(item);
-                  const networkResponse = await retryFetch(() => apiClient.get(`http://localhost:4000/open/auth/network?network=${item}`));
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
                   SpecialUsernewObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('http://localhost:4000/open/auth/nameandstatusofaccounts', { updatedNetwork: SpecialUseradAccounts[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: SpecialUseradAccounts[item] })
                   );
                   SpecialUsernewObject[item] = response.data.data;
                 }
@@ -2288,11 +2288,11 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of ManagerkeysOfAdAccounts) {
                 if (ManageradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  const networkResponse = await retryFetch(() => apiClient.get(`http://localhost:4000/open/auth/network?network=${item}`));
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
                   ManagernewObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('http://localhost:4000/open/auth/nameandstatusofaccounts', { updatedNetwork: ManageradAccounts[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: ManageradAccounts[item] })
                   );
                   ManagernewObject[item] = response.data.data;
                 }
@@ -2310,11 +2310,11 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 if (Network_Partner[item][0] === "All") {
                   // Retry logic for Accounts API
                   // console.log(item);
-                  const networkResponse = await retryFetch(() => apiClient.get(`http://localhost:4000/open/auth/network?network=${item}`));
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
                   NetworkPartnerObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('http://localhost:4000/open/auth/nameandstatusofaccounts', { updatedNetwork: Network_Partner[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: Network_Partner[item] })
                   );
                   NetworkPartnerObject[item] = response.data.data;
                 }
@@ -2325,7 +2325,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
             // Case Admin
             case 'Admin':
               // Retry logic for All Accounts API
-              const AllAccountsData = await retryFetch(() => apiClient.get(`http://localhost:4000/open/auth/admin`));
+              const AllAccountsData = await retryFetch(() => apiClient.get(`/open/auth/admin`));
               const responseData = AllAccountsData.data.data;
               // console.log(responseData, "responseData");
               setuserdetails({ ...usersDataForLogin[0], adAccounts: responseData });

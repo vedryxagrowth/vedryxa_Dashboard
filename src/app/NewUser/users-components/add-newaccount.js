@@ -180,7 +180,7 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
 
         let apiList = [];
         try {
-            const res = await apiClient.get("http://localhost:4000/userrole/accounts", {
+            const res = await apiClient.get("/userrole/accounts", {
                 headers: { Authorization: token }
             });
             apiList = res.data || [];
@@ -267,7 +267,7 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                 pixelId: undefined
             };
             // console.log(newValues, "newValues");
-            const response = await apiClient.post('http://localhost:4000/userrole/accounts', { newAccount: newValues });
+            const response = await apiClient.post('/userrole/accounts', { newAccount: newValues });
             if (response.status === 200) {
                 // message.success('Account created successfully');
                 // form.resetFields();

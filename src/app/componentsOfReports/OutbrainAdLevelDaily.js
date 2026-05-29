@@ -318,7 +318,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             }
         });
 
-        apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
+        apiClient.post('/reports/commonapis/userexportactivities', { Details }).catch(console.error);
     };
 
     useEffect(() => {
@@ -418,8 +418,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         const apiUrl =
             action === "pin"
-                ? "http://localhost:4000/reports/bulkactions/pin"
-                : "http://localhost:4000/reports/bulkactions/unpin";
+                ? "/reports/bulkactions/pin"
+                : "/reports/bulkactions/unpin";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -569,7 +569,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             };
 
             const resp = await apiClient.post(
-                'http://localhost:4000/reports/bulkactions/comments/delete',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -656,7 +656,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             }));
 
             const resp = await apiClient.post(
-                'http://localhost:4000/reports/bulkactions/comments',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email, }
             );
 
@@ -856,7 +856,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             }
 
             const resp = await apiClient.post(
-                "http://localhost:4000/reports/bulkactions/outbrain/adstatus",
+                "/reports/bulkactions/outbrain/adstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -1140,7 +1140,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "http://localhost:4000/reports/bulkactions/category",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1526,7 +1526,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                             updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
                         }
                         const newResponse = await apiClient.post(
-                            `http://localhost:4000/reports/singleactions/outbrain/adstatus`,
+                            `/reports/singleactions/outbrain/adstatus`,
                             {
                                 status: desired,
                                 ad_id: adid,
@@ -1808,7 +1808,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                     }
                     try {
                         if (next) {
-                            const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/pin', {
+                            const newResponse = await apiClient.post('/reports/singleactions/pin', {
                                 accountNumber: rowAccount,
                                 campaignname: campaignName,
                                 campaignid,
@@ -1852,7 +1852,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                                 });
                             }
                         } else {
-                            const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/unpin', {
+                            const newResponse = await apiClient.post('/reports/singleactions/unpin', {
                                 accountNumber: rowAccount,
                                 campaignname: campaignName,
                                 campaignid,
@@ -2019,7 +2019,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
                         const newResponse = await apiClient.post(
-                            'http://localhost:4000/reports/singleactions/comments',
+                            '/reports/singleactions/comments',
                             {
                                 accountNumber: rowAccount,
                                 campaignname: adName,
@@ -2185,7 +2185,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/comments/delete', {
+                        const newResponse = await apiClient.post('/reports/singleactions/comments/delete', {
                             accountNumber: rowAccount,
                             campaignname: adName,
                             campaignid,
@@ -3126,7 +3126,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
             // ✅ call the new multi-account endpoint
             const fetchData = await apiClient.post(
-                newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `http://localhost:4000/reports/data/adsdaily` : "http://localhost:4000/reports/data/ads",
+                newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `/reports/data/adsdaily` : "/reports/data/ads",
                 {
                     dateStart: startDate,
                     dateEnd: endDate,

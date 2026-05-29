@@ -55,7 +55,7 @@ const selectTimezone = {
 };
 
 
-const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems }) => {
+const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, setCampaignComments }) => {
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -134,7 +134,7 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
         headerClass: 'ag-center-header',
         field: 'campaignname',          // 👈 THIS is the real built-in fix
         filter: 'agTextColumnFilter',
-           // filter: "agGroupColumnFilter",
+        // filter: "agGroupColumnFilter",
         // filter: 'agTextColumnFilter',
         // filterValueGetter: (params) => {
         //     if (params.node.group) {
@@ -257,65 +257,108 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
                     setIsModalVisibles(true);
                 };
 
-                const sendNewCommentToAPI = async (logData) => {
-                    try {
-                        const response = await apiClient.post('/Comments', {
-                            commentsdatas: logData,
-                        });
-                        // console.log('Response from server:', response.data);
-                    } catch (error) {
-                        console.error('Error sending data to server:', error);
-                    }
-                };
+                // const sendNewCommentToAPI = async (logData) => {
+                //     try {
+                //         const response = await apiClient.post('/Comments', {
+                //             commentsdatas: logData,
+                //         });
+                //         // console.log('Response from server:', response.data);
+                //     } catch (error) {
+                //         console.error('Error sending data to server:', error);
+                //     }
+                // };
 
-                const sendEditedCommentToAPI = async (logData) => {
-                    try {
-                        const response = await apiClient.post('/Comments/edit', {
-                            campaignname: logData.campaignname,
-                            comment: logData.comment,
-                            Account: logData.Account,
-                            adsetid: logData.adsetid,
-                            campaignid: logData.campaignid,
-                            status: true
-                        });
-                        // console.log('Response from server (edited comment):', response.data);
-                        return response.data;
-                    } catch (error) {
-                        console.error('Error sending edited comment to server:', error);
-                        throw error;
-                    }
-                };
+                // const sendEditedCommentToAPI = async (logData) => {
+                //     try {
+                //         const response = await apiClient.post('/Comments/edit', {
+                //             campaignname: logData.campaignname,
+                //             comment: logData.comment,
+                //             Account: logData.Account,
+                //             adsetid: logData.adsetid,
+                //             campaignid: logData.campaignid,
+                //             status: true
+                //         });
+                //         // console.log('Response from server (edited comment):', response.data);
+                //         return response.data;
+                //     } catch (error) {
+                //         console.error('Error sending edited comment to server:', error);
+                //         throw error;
+                //     }
+                // };
 
                 const handleDelete = async () => {
                     try {
-                        // Prepare the payload for the API call
-                        const payload = {
-                            campaignname: firstColumnValue,
-                            Account: newaccount,
-                            adsetid: adsetid,
-                            campaignid: campaignid,
+                        // // Prepare the payload for the API call
+                        // const payload = {
+                        //     campaignname: firstColumnValue,
+                        //     Account: newaccount,
+                        //     adsetid: adsetid,
+                        //     campaignid: campaignid,
+                        // };
+
+                        // // Call the backend API to delete the comment
+                        // const response = await apiClient.post('/Comments/delete', payload);
+
+                        // if (response.status === 200 || response.status === 201) {
+                        //     // Remove the comment from the local state
+                        //     // const updatedComments = campaignComments.filter(
+                        //     //     (comment) => comment.campaignname !== firstColumnValue
+                        //     // );
+
+                        //     // // Update the state with the updated comments
+                        //     // setCampaignComments(updatedComments);
+                        //     refreshComments(newaccount);
+
+                        //     // Refresh the table or any other UI component
+                        //     // changeRRefrst();
+
+                        //     message.success('Comment deleted successfully!');
+                        //     setIsModalVisibles(false); // Close the popup
+                        // } else {
+                        //     message.error('Failed to delete the comment. Please try again.');
+                        // }
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            Account: newaccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Campaign comment cleared",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+                        }
+                        const body = {
+                            accountNumber: newaccount,
+                            campaignname: campaignName,
+                            campaignid,
+                            // comment,
+                            usercommit: userdetails?.email,
+                            level: "campaign",
+                            activity: payloadForActivity,
                         };
+                        const newResponse = await apiClient.post('/reports/singleactions/comments/delete', body);
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
-                        // Call the backend API to delete the comment
-                        const response = await apiClient.post('/Comments/delete', payload);
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(newaccount) &&
+                                        // String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'campaign'
+                                );
 
-                        if (response.status === 200 || response.status === 201) {
-                            // Remove the comment from the local state
-                            // const updatedComments = campaignComments.filter(
-                            //     (comment) => comment.campaignname !== firstColumnValue
-                            // );
-
-                            // // Update the state with the updated comments
-                            // setCampaignComments(updatedComments);
-                            refreshComments(newaccount);
-
-                            // Refresh the table or any other UI component
-                            // changeRRefrst();
-
-                            message.success('Comment deleted successfully!');
-                            setIsModalVisibles(false); // Close the popup
-                        } else {
-                            message.error('Failed to delete the comment. Please try again.');
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], comment: "", usercommit: userdetails?.email, editedTime: timeStamp };
+                                }
+                                return arr;
+                            });
+                            message.success('Comment deleted for selected accounts');
+                            setIsModalVisibles(false);
                         }
                     } catch (error) {
                         console.error('Error deleting the comment:', error);
@@ -325,26 +368,77 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
 
                 const handleOks = async () => {
                     try {
-                        const logData = {
-                            Account: newaccount,
-                            usercommit: userdetails?.email,
-                            campaignname: firstColumnValue,
-                            comment: comment,
-                            campaignid: campaignid,
-                            adsetid: adsetid
-                        };
+                        // const logData = {
+                        //     Account: newaccount,
+                        //     usercommit: userdetails?.email,
+                        //     campaignname: firstColumnValue,
+                        //     comment: comment,
+                        //     campaignid: campaignid,
+                        //     adsetid: adsetid
+                        // };
 
-                        if (relatedComment) {
-                            await sendEditedCommentToAPI(logData);
-                            refreshComments(newaccount);
-                            message.success("Comment updated successfully!");
-                        } else {
-                            await sendNewCommentToAPI(logData);
-                            refreshComments(newaccount);
-                            message.success("New comment added successfully!");
+                        // if (relatedComment) {
+                        //     await sendEditedCommentToAPI(logData);
+                        //     refreshComments(newaccount);
+                        //     message.success("Comment updated successfully!");
+                        // } else {
+                        //     await sendNewCommentToAPI(logData);
+                        //     refreshComments(newaccount);
+                        //     message.success("New comment added successfully!");
+                        // }
+                        const payloadForActivity = {
+                            editType: "Comment",
+                            campaignid: campaignid,       // cents
+                            Account: newaccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Campaign pin updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
+                        const body = {
+                            accountNumber: newaccount,
+                            campaignname: campaignName,
+                            campaignid,
+                            comment,
+                            usercommit: userdetails?.email,
+                            level: "campaign",
+                            activity: payloadForActivity,
+                        };
+                        const newResponse = await apiClient.post('/reports/singleactions/comments', body);
+                        if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
 
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(newaccount) &&
+                                        // String(i?.adsetid) === String(adsetid) &&
+                                        // String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'campaign'
+                                );
 
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], comment: comment, usercommit: userdetails?.email, editedTime: timeStamp };
+                                } else {
+                                    arr.push({
+                                        campaignid,
+                                        Account: newaccount,
+                                        // adsetid,
+                                        // ad_id: adid,
+                                        level: 'campaign',
+                                        comment: comment,
+                                        usercommit: userdetails?.email,
+                                        editedTime: timeStamp
+                                    });
+                                }
+
+                                return arr;
+                            });
+                        }
                         setIsModalVisibles(false);
                     } catch (error) {
                         console.error('Error while submitting comment:', error);
@@ -368,59 +462,121 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
 
                     try {
                         let response;
-                        if (updatedPinStatus) {
-                            response = await apiClient.post('/Pin', {
-                                campaignname: campaignName,
-                                Account: newaccount,
-                                campaignid: campaignid,
-                                adsetid: adsetid,
-                                userPin: userdetails?.email,
-                                comment: comment || ''
-                            });
-                            // changeRRefrst();
-                            if (response.status === 200 || response.status === 201) {
-                                refreshComments(newaccount);
-                            }
-
-                            message.success("Campaign pinned!");
-                        } else {
-                            response = await apiClient.post('/Unpin', {
-                                campaignname: campaignName,
-                                Account: newaccount,
-                                campaignid: campaignid,
-                                adsetid: adsetid
-                            });
-                            // changeRRefrst();
-                            if (response.status === 200 || response.status === 201) {
-                                refreshComments(newaccount);
-                            }
-
-                            message.success("Campaign unpinned!");
+                        const payloadForActivity = {
+                            editType: "Pin",
+                            campaignid: campaignid,       // cents
+                            Account: newaccount,    // ✅ update *this* row’s account
+                            campaignname: campaignName,
+                            updatedBy: userdetails?.userName,
+                            updatedUserEmail: userdetails?.email,
+                            updateType: "Campaign pin updated",
+                            updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                            updateDetail: `From "${updatedPinStatus ? "unpin" : "pin"}" to "${updatedPinStatus ? "pin" : "unpin"}"`,
                         }
 
-                        // Update campaignComments with the new pinned status and edited user/time
-                        // const updatedComments = campaignComments.map(cmt =>
-                        //     cmt.campaignname === campaignName
-                        //         ? {
-                        //             ...cmt,
-                        //             pinned: updatedPinStatus,
-                        //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-                        //             userPin: userdetails?.email
-                        //         }
-                        //         : cmt
-                        // );
-
-                        // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
-                        //     updatedComments.push({
+                        const body = {
+                            accountNumber: newaccount,
+                            campaignname: campaignName,
+                            campaignid,
+                            userPin: userdetails?.email,
+                            comment: comment || '',
+                            level: "campaign",
+                            activity: payloadForActivity,
+                        };
+                        // if (updatedPinStatus) {
+                        //     response = await apiClient.post('/Pin', {
                         //         campaignname: campaignName,
-                        //         pinned: updatedPinStatus,
-                        //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-                        //         userPin: userdetails?.email
+                        //         Account: newaccount,
+                        //         campaignid: campaignid,
+                        //         adsetid: adsetid,
+                        //         userPin: userdetails?.email,
+                        //         comment: comment || ''
                         //     });
+                        //     // changeRRefrst();
+                        //     if (response.status === 200 || response.status === 201) {
+                        //         refreshComments(newaccount);
+                        //     }
+
+                        //     message.success("Campaign pinned!");
+                        // } else {
+                        //     response = await apiClient.post('/Unpin', {
+                        //         campaignname: campaignName,
+                        //         Account: newaccount,
+                        //         campaignid: campaignid,
+                        //         adsetid: adsetid
+                        //     });
+                        //     // changeRRefrst();
+                        //     if (response.status === 200 || response.status === 201) {
+                        //         refreshComments(newaccount);
+                        //     }
+
+                        //     message.success("Campaign unpinned!");
                         // }
-                        // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
-                        // setCampaignComments(sortedComments);
-                        setPinned(updatedPinStatus);
+
+                        // // Update campaignComments with the new pinned status and edited user/time
+                        // // const updatedComments = campaignComments.map(cmt =>
+                        // //     cmt.campaignname === campaignName
+                        // //         ? {
+                        // //             ...cmt,
+                        // //             pinned: updatedPinStatus,
+                        // //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                        // //             userPin: userdetails?.email
+                        // //         }
+                        // //         : cmt
+                        // // );
+
+                        // // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
+                        // //     updatedComments.push({
+                        // //         campaignname: campaignName,
+                        // //         pinned: updatedPinStatus,
+                        // //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                        // //         userPin: userdetails?.email
+                        // //     });
+                        // // }
+                        // // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
+                        // // setCampaignComments(sortedComments);
+                        // setPinned(updatedPinStatus);
+                        const resp = updatedPinStatus
+                            ? await apiClient.post('/reports/singleactions/pin', body)
+                            : await apiClient.post('/reports/singleactions/unpin', body);
+
+                        if (resp.status === 200 || resp.status === 201) {
+                            // if (newResponse.status === 200 || newResponse.status === 201) {
+                            setCampaignComments(prev => {
+                                const arr = Array.isArray(prev) ? [...prev] : [];
+                                const timeStamp = moment().tz('Asia/Kolkata').format('DD-MM-YYYY hh:mm A');
+
+                                const match = arr.findIndex(
+                                    i =>
+                                        String(i?.campaignid) === String(campaignid) &&
+                                        String(i?.Account) === String(newaccount) &&
+                                        //   String(i?.adsetid) === String(adsetid) &&
+                                        //   String(i?.ad_id) === String(adid) &&
+                                        String(i?.level) === 'campaign'
+                                );
+
+                                if (match >= 0) {
+                                    arr[match] = { ...arr[match], pinned: updatedPinStatus, userPin: userdetails?.email, editedPinTime: timeStamp };
+                                } else {
+                                    arr.push({
+                                        campaignid,
+                                        Account: newaccount,
+                                        //   adsetid,
+                                        //   ad_id: adid,
+                                        level: 'campaign',
+                                        pinned: updatedPinStatus,
+                                        userPin: userdetails?.email,
+                                        editedPinTime: timeStamp
+                                    });
+                                }
+
+                                return arr;
+                            });
+                            //   }
+                            // refreshComments(accountsParam);     // your helper already accepts array
+                            message.success(updatedPinStatus ? "Pinned for selected accounts" : "Unpinned for selected accounts");
+                            setPinned(updatedPinStatus);
+                        }
                     } catch (error) {
                         console.error('Error toggling pin status', error);
                         message.error('Error while updating pin status.');
@@ -521,7 +677,7 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/KeywordHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/KeywordHistory/${campaignid}-${accountNumberToPassHistoryPage}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                         >
@@ -595,8 +751,8 @@ const Tonic1RsocKeywords = ({ startDate, endDate, newaccount, newtime, newRevenu
     const functionCall6 = async () => {
         try {
             setTonicKeywordLoading(true);
-            const fetchData = await apiClient.get(`http://localhost:4000/reports/data/tonicrsockeyword?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}&collectionName=Facebook_TonicRsoc_Keywords`);
-            const mainData = fetchData.data;
+            const fetchData = await apiClient.get(`/reports/data/tonicrsockeyword?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}&collectionName=Facebook_TonicRsoc_Keywords`);
+            const mainData = fetchData.data.data;
             // console.log(mainData, "mainData of functionCall6");
             const specifiedTimeZone = selectTimezone[newtime];
 

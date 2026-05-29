@@ -42,7 +42,7 @@ export default function AdNameAndAccount({ params }) {
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
-    console.log(userdetails, "userDetails");
+    // console.log(userdetails, "userDetails");
 
     const user = userdetails?.email;
 
@@ -81,9 +81,9 @@ export default function AdNameAndAccount({ params }) {
     const accountNumber = paramsData[1];
     const timeZone = paramsData[2];
     const network = paramsData[3];
-    console.log(decodedString, "decode");
-    console.log(accountNumber);
-    console.log(timeZone);
+    // console.log(decodedString, "decode");
+    // console.log(accountNumber);
+    // console.log(timeZone);
     const selectTimezone = {
         UTC: 'UTCDate',
         EEST: 'EESTDate',
@@ -455,8 +455,8 @@ export default function AdNameAndAccount({ params }) {
         // updatingColumnsStructure(newFieldOrder);
         // console.log(newFieldOrder);
         setColumnStructure(getColumnDefs(newFieldOrder));
-        console.log(newFieldOrder);
-        await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
+        // console.log(newFieldOrder);
+        await apiClient.post(`/reports/historyactions/columnstructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
         // console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
@@ -525,8 +525,8 @@ export default function AdNameAndAccount({ params }) {
 
     const functionCallForCommnets = async (accountNumber) => {
         try {
-            const commentFetch = await apiClient.get(`/New/Comments/${accountNumber}/${"ad_id"}/${AdId}/${"ad"}`);
-            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            const commentFetch = await apiClient.get(`/reports/historyactions/comments/${accountNumber}/${"ad_id"}/${AdId}/${"ad"}`);
+            const campaignComments = commentFetch.data.data; // Set comments only if fetched successfully
             setCampaignComments(campaignComments);
             if (campaignComments.length > 0) {
                 const comment = campaignComments[0];
@@ -541,24 +541,24 @@ export default function AdNameAndAccount({ params }) {
     };
 
     const functionCallForUserColumnStructure = async () => {
-        const fetchData = await apiClient.get(`/api/singleUserData?email=${user}`);
+        const fetchData = await apiClient.get(`/reports/historyactions/columnstructure?email=${user}`);
         // const data = await fetchData.json();
-        const mainData = fetchData.data;
-        console.log(mainData.historyStructure, "columnStructure");
-        const filteredData = mainData.historyStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions");
-        console.log(filteredData);
+        const mainData = fetchData.data.data;
+        // console.log(mainData.historyStructure, "columnStructure");
+        const filteredData = mainData.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions");
+        // console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
-        console.log(getColumnDefs(filteredData));
+        // console.log(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
     }
 
     const getHistoryData = async () => {
-        const fetchData = await apiClient.get(`/New/DailyAdHistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
+        const fetchData = await apiClient.get(`/reports/dailyhistory/adhistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
 
-        const mainData = fetchData.data;
+        const mainData = fetchData.data.data;
         setAdName(mainData[0]?.adName);
-        console.log(mainData, "ad");
+        // console.log(mainData, "ad");
         setUniqueObject(mainData.find(
             obj => obj.ad_id && obj.campaign_id && obj.adset_id
         ))
@@ -580,7 +580,7 @@ export default function AdNameAndAccount({ params }) {
                 const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
                 const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
                 const conversions = eachData.conversions !== undefined && eachData.conversions !== null ? eachData.conversions : '0';
-                console.log(conversions, "conversions");
+                // console.log(conversions, "conversions");
                 rpc = !isNaN(rpc) ? rpc : 0;
                 ncpl = !isNaN(ncpl) ? ncpl : 0;
                 fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
@@ -1307,7 +1307,7 @@ export default function AdNameAndAccount({ params }) {
         // {headerName: "CampaignId", field:'campaignId'}
     };
 
-    console.log(columnDefs);
+    // console.log(columnDefs);
 
     const defaultComparator = (valueA, valueB) => {
         if (valueA == null && valueB == null) return 0;
@@ -1357,7 +1357,7 @@ export default function AdNameAndAccount({ params }) {
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -1398,8 +1398,22 @@ export default function AdNameAndAccount({ params }) {
 
     const sendEditedCommentToAPI = async () => {
         try {
-            console.log("comment:")
-            const response = await apiClient.post('/Comments/upsert', {
+            // console.log("comment:")
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: uniqueObject?.campaign_id,       // cents
+                adsetid: uniqueObject?.adset_id,
+                ad_id: AdId,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: uniqueObject?.campaign_name,
+                adsetname: uniqueObject?.adset_name,
+                adname: AdName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad comment updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            }
+            const response = await apiClient.post('/reports/historyactions/comments/update', {
                 accountNumber: accountNumber,
                 campaignname: AdName,
                 campaignid: uniqueObject?.campaign_id,
@@ -1407,7 +1421,8 @@ export default function AdNameAndAccount({ params }) {
                 ad_id: AdId,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
             }
             );
             if (response.status === 200 || response.status === 201) {
@@ -1487,6 +1502,21 @@ export default function AdNameAndAccount({ params }) {
     const handleDelete = async () => {
         try {
             // Prepare the payload for the API call
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: uniqueObject?.campaign_id,       // cents
+                adsetid: uniqueObject?.adset_id,
+                ad_id: AdId,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: uniqueObject?.campaign_name,
+                adsetname: uniqueObject?.adset_name,
+                adname: AdName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad comment cleared",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             const payload = {
                 accountNumber: accountNumber,
                 campaignname: AdName,
@@ -1495,12 +1525,13 @@ export default function AdNameAndAccount({ params }) {
                 ad_id: AdId,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
             };
             // console.log(payload);
 
             // Call the backend API to delete the comment
-            const response = await apiClient.post('/Comments/delete', payload);
+            const response = await apiClient.post('/reports/historyactions/comments/delete', payload);
 
             if (response.status === 200) {
                 // Remove the comment from the local state
@@ -2066,7 +2097,7 @@ export default function AdNameAndAccount({ params }) {
 
                                     // Example field-based filtering logic
                                     const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
-                                    console.log('Filtered by status (Active):', specificFieldData);
+                                    // console.log('Filtered by status (Active):', specificFieldData);
                                 }}
                             />
                         </div>

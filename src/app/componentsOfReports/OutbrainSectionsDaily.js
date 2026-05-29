@@ -322,7 +322,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }
         });
 
-        apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
+        apiClient.post('/reports/commonapis/userexportactivities', { Details }).catch(console.error);
     };
 
     const uniqueByAdsetId = (arr) => {
@@ -405,8 +405,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
         const apiUrl =
             action === "pin"
-                ? "http://localhost:4000/reports/bulkactions/pin"
-                : "http://localhost:4000/reports/bulkactions/unpin";
+                ? "/reports/bulkactions/pin"
+                : "/reports/bulkactions/unpin";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -487,7 +487,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             };
 
             const resp = await apiClient.post(
-                'http://localhost:4000/reports/bulkactions/comments/delete',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -568,7 +568,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }));
 
             const resp = await apiClient.post(
-                'http://localhost:4000/reports/bulkactions/comments',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -1613,8 +1613,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('http://localhost:4000/reports/singleactions/pin', body)
-                            : await apiClient.post('http://localhost:4000/reports/singleactions/unpin', body);
+                            ? await apiClient.post('/reports/singleactions/pin', body)
+                            : await apiClient.post('/reports/singleactions/unpin', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1916,7 +1916,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/comments/delete', {
+                        const newResponse = await apiClient.post('/reports/singleactions/comments/delete', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
@@ -3038,7 +3038,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 : [String(newaccount)];
 
             // ✅ call multi-account endpoint (Daily)
-            const resp = await apiClient.post("http://localhost:4000/reports/data/OutbrainTonicRsocSections", {
+            const resp = await apiClient.post("/reports/data/OutbrainTonicRsocSections", {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,

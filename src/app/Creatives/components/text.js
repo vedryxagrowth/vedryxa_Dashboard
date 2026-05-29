@@ -1017,7 +1017,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     if (file?.url) {
                         const fileName = file.name.split('/').pop();
 
-                        const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                        const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',

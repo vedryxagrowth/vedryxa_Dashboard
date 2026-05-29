@@ -357,7 +357,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
     const functionCall1 = async () => {
         try{
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
-            const fetchData = await apiClient.get(`http://localhost:4000/reports/data/domainandagency?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
+            const fetchData = await apiClient.get(`/reports/data/domainandagency?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
             const mainData1 = fetchData.data.data;
             const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
             let campaignComments = [];

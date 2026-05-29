@@ -1148,7 +1148,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
         return params.value;
       }
     });
-    apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details }).catch(console.error);
+    apiClient.post('/reports/commonapis/userexportactivities', { Details }).catch(console.error);
   };
 
   const handleBulkSmartPin = async (action) => {
@@ -1182,9 +1182,9 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
     let apiUrl = "";
 
     if (action === "pin") {
-      apiUrl = "http://localhost:4000/reports/bulkactions/pin";
+      apiUrl = "/reports/bulkactions/pin";
     } else if (action === "unpin") {
-      apiUrl = "http://localhost:4000/reports/bulkactions/unpin";
+      apiUrl = "/reports/bulkactions/unpin";
     }
 
     const res = await apiClient.post(apiUrl, {
@@ -1262,7 +1262,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
       };
 
       const resp = await apiClient.post(
-        'http://localhost:4000/reports/bulkactions/comments/delete',
+        '/reports/bulkactions/comments/delete',
         body
       );
 
@@ -1340,7 +1340,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
       }));
 
       const resp = await apiClient.post(
-        'http://localhost:4000/reports/bulkactions/comments',
+        '/reports/bulkactions/comments',
         { items, usercommit: userdetails?.email }
       );
 
@@ -1459,7 +1459,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
 
 
       const resp = await apiClient.post(
-        "http://localhost:4000/reports/bulkactions/outbrain/campaignstatus",
+        "/reports/bulkactions/outbrain/campaignstatus",
         { items: filteredItems },
         { headers: { Authorization: token } }
       );
@@ -1657,7 +1657,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "http://localhost:4000/reports/bulkactions/category",
+        "/reports/bulkactions/category",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
@@ -1980,7 +1980,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
             };
 
             const response = await apiClient.post(
-              `http://localhost:4000/reports/singleactions/outbrain/campaignstatus`,
+              `/reports/singleactions/outbrain/campaignstatus`,
               payload,
               { headers: { Authorization: token } }
             );
@@ -2152,7 +2152,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
-            'http://localhost:4000/reports/singleactions/comments',
+            '/reports/singleactions/comments',
             {
               accountNumber: rowAccount,
               campaignname: campaignName,
@@ -2213,7 +2213,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const newResponse = await apiClient.post(
-              'http://localhost:4000/reports/singleactions/comments/delete',
+              '/reports/singleactions/comments/delete',
               {
                 accountNumber: rowAccount,
                 campaignname: campaignName,
@@ -2368,7 +2368,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
             }
             if (updatedPinStatus) {
               const resp = await apiClient.post(
-                'http://localhost:4000/reports/singleactions/pin',
+                '/reports/singleactions/pin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2420,7 +2420,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
               }
             } else {
               const resp = await apiClient.post(
-                'http://localhost:4000/reports/singleactions/unpin',
+                '/reports/singleactions/unpin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -3260,7 +3260,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
         ? newaccount.map(String)
         : [String(newaccount)];
 
-      const resp = await apiClient.post('http://localhost:4000/reports/data/campaign', {
+      const resp = await apiClient.post('/reports/data/campaign', {
         dateStart: startDate,
         dateEnd: endDate,
         timezone: newtime,
@@ -3618,7 +3618,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
     );
 
     const resp = await apiClient.post(
-      "http://localhost:4000/reports/data/creatives",
+      "/reports/data/creatives",
       { items },
       {
         headers: {

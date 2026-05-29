@@ -292,7 +292,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }
     });
     try {
-      await apiClient.post("http://localhost:4000/reports/commonapis/userexportactivities", { Details });
+      await apiClient.post("/reports/commonapis/userexportactivities", { Details });
     } catch (e) {
       console.error("Export activity failed", e);
     }
@@ -374,8 +374,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
     const apiUrl =
       action === "pin"
-        ? "/SmartPinBulkWithHitory"
-        : "/SmartUnpinBulkWithHistory";
+        ? "/reports/bulkactions/pin"
+        : "/reports/bulkactions/unpin";
 
     const res = await apiClient.post(apiUrl, { items: data });
 
@@ -526,7 +526,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       };
 
       const resp = await apiClient.post(
-        '/Comments/bulkdeleteWithHistory',
+        '/reports/bulkactions/comments/delete',
         body
       );
 
@@ -612,7 +612,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }));
 
       const resp = await apiClient.post(
-        '/Comments/upsertBulkNewWithHistory',
+        '/reports/bulkactions/comments',
         { items, usercommit: userdetails?.email, }
       );
 
@@ -841,7 +841,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       }
 
       const resp = await apiClient.post(
-        "/BulkAdStatusChangeManyWithHistory",
+        "/reports/bulkactions/adstatus",
         { items: filteredItems },
         { headers: { Authorization: token } }
       );
@@ -1050,7 +1050,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
       message.loading({ content: "Updating category...", key: "bulkCategory" });
 
       await apiClient.post(
-        "/BulkUpdateCategoryNewWithHistory",
+        "/reports/bulkactions/category",
         { items, category: bulkCategory },
         { headers: { Authorization: token } }
       );
@@ -1442,7 +1442,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               updateDetail: `From ${nextChecked ? "Inactive" : "Active"} to ${nextChecked ? "Active" : "Inactive"}`,
             }
             const response = await apiClient.post(
-              `/NewAdStatusChangeWithHistory`,
+              `/reports/singleactions/adstatus`,
               {
                 status: nextChecked ? "ACTIVE" : "PAUSED",
                 ad_id: adid,
@@ -1703,7 +1703,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
           }
           const newResponse = await apiClient.post(
-            '/Comments/upsert/History',
+            '/reports/singleactions/comments',
             {
               accountNumber: rowAccount,
               campaignname: adName,
@@ -1769,7 +1769,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
               // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
             }
             const response = await apiClient.post(
-              '/New/Comments/delete/History',
+              '/reports/singleactions/comments/delete',
               {
                 accountNumber: rowAccount,
                 campaignname: adName,
@@ -1987,7 +1987,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updateDetail: `From "${updatedPinStatus ? "unpin" : "pin"}" to "${updatedPinStatus ? "pin" : "unpin"}"`,
               }
               const newResponse = await apiClient.post(
-                '/NewPinBulkWithHistory',
+                '/reports/singleactions/pin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2051,7 +2051,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                 updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
               }
               const newResponse = await apiClient.post(
-                '/NewUnpinBulkWithHistory',
+                '/reports/singleactions/unpin',
                 {
                   accountNumber: rowAccount,
                   campaignname: campaignName,
@@ -2934,7 +2934,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
 
       // ✅ call the new multi-account endpoint
       const fetchData = await apiClient.post(
-        `/AdLevelAccounts`,
+        `/reports/data/ads`,
         {
           dateStart: startDate,
           dateEnd: endDate,
@@ -3436,7 +3436,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
     );
 
     const resp = await apiClient.post(
-      "https://prodapis.adsgoat.in/Creatives/get",
+      "/reports/data/creatives",
       { items },
       {
         headers: {

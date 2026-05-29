@@ -108,7 +108,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         folder: null,
     });
 
-    const { userdetails } = useTokenContext();
+    const { userdetails, apiClient } = useTokenContext();
     const { theme } = useTokenContext();
     const router = useRouter();
 
@@ -120,7 +120,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         const fetchNetworksData = async () => {
             try {
                 //https://prodapis.adsgoat.in/get/networksData/
-                const res = await axios.get('http://localhost:4000/creatives/commonapis/networksdata', {
+                const res = await apiClient.get('/creatives/commonapis/networksdata', {
                     headers: {
                         Authorization: token,
 
@@ -218,7 +218,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         try {
                             if (file.action === 'copy') {
                                 if (file.isFolder) {
-                                    await axios.post("http://localhost:4000/creatives/folders/copyfolder", {
+                                    await apiClient.post("/creatives/folders/copyfolder", {
                                         sourceKey,
                                         destinationKey: finalKey
                                     }, {
@@ -228,7 +228,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         }
                                     });
                                 } else {
-                                    const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(file.url)}`;
+                                    const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(file.url)}`;
                                     const res = await fetch(proxyUrl, {
                                         method: "GET",
                                         headers: {
@@ -242,7 +242,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     formData.append("filename", finalKey);
                                     formData.append("folder", currentFolder);
 
-                                    await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
+                                    await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", formData, {
                                         headers: {
                                             Authorization: localStorage.getItem("token"),
                                             username: userdetails.userName,
@@ -255,7 +255,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     return;
                                 }
 
-                                await axios.post("http://localhost:4000/creatives/folders/moveFileOrFolder", {
+                                await apiClient.post("/creatives/folders/moveFileOrFolder", {
                                     sourceKey,
                                     destinationKey: finalKey
                                 }, {
@@ -316,7 +316,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                 formData.append("folder", currentFolder);
 
                 try {
-                    await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
+                    await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", formData, {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             username: userdetails.userName,
@@ -437,14 +437,14 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
         try {
             const response = isTrashView
-                ? await axios.get("http://localhost:4000/creatives/trashfiles", {
+                ? await apiClient.get("/creatives/trashfiles", {
                     headers: {
                         username: userdetails.userName,
                         "x-folder": trashPath,
                         Authorization: localStorage.getItem("token"),
                     },
                 })
-                : await axios.get("http://localhost:4000/creatives/userfiles/getuserfiles", {
+                : await apiClient.get("/creatives/userfiles/getuserfiles", {
                     //https://prodapis.adsgoat.in/getUserFiles
                     headers: {
                         username: userdetails.userName,
@@ -573,7 +573,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             }
 
             // Use backend proxy
-            const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(finalUrl)}`;
+            const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(finalUrl)}`;
             const response = await fetch(proxyUrl, {
                 method: "GET",
                 headers: {
@@ -739,7 +739,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         try {
 
             // 🔹 Use proxy to fetch the image and bypass CORS restrictions
-            const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(image.url)}`;
+            const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(image.url)}`;
             // console.log("Cloning using Proxy:", proxyUrl);
 
             const response = await fetch(proxyUrl, {
@@ -772,7 +772,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             formData.append("filename", `${uploadPrefix}${currentFolder}${clonedFileName}`);
             formData.append("folder", currentFolder); // include the folder for backend
 
-            const uploadResponse = await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
+            const uploadResponse = await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -815,7 +815,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         }
 
         // 🔹 Proxy the image URL
-        const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(image.url)}`;
+        const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(image.url)}`;
 
         // console.log("Editing Image URL:", proxyUrl);
 
@@ -858,7 +858,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         formData.append("folder", currentFolder); // pass the current folder as a separate field
 
         try {
-            const response = await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
+            const response = await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -1129,7 +1129,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
             try {
                 if (isFolder) {
-                    await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
+                    await apiClient.post("/creatives/folders/renamefolder", {
                         oldFolderKey: oldItem.uid,
                         newFolderKey: newKey,
                     }, {
@@ -1139,7 +1139,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         },
                     });
                 } else {
-                    await axios.post("http://localhost:4000/creatives/userfiles/renameuserfile", {
+                    await apiClient.post("/creatives/userfiles/renameuserfile", {
                         key: oldItem.uid,
                         newFilename: newKey,
                     }, {
@@ -1189,7 +1189,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
             try {
                 if (isFolder) {
-                    await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
+                    await apiClient.post("/creatives/folders/renamefolder", {
                         oldFolderKey: oldKey,
                         newFolderKey: newKey,
                     }, {
@@ -1199,7 +1199,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         },
                     });
                 } else {
-                    await axios.post("http://localhost:4000/creatives/userfiles/renameuserfile", {
+                    await apiClient.post("/creatives/userfiles/renameuserfile", {
                         key: oldKey,
                         newFilename: newKey,
                     }, {
@@ -1223,7 +1223,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const handleConfirmDelete = async () => {
         if (!imageToDelete || !userdetails?.userName) return;
         try {
-            const response = await axios.delete("http://localhost:4000/creatives/userfiles/deleteuserfiles", {
+            const response = await apiClient.delete("/creatives/userfiles/deleteuserfiles", {
                 headers: {
                     "username": userdetails.userName,
                     Authorization: localStorage.getItem("token"),
@@ -1346,7 +1346,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const downloadFile = async (fileUrl, filename) => {
         const safeName = filename || fileUrl.split("/").pop();
         try {
-            const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(fileUrl)}`;
+            const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(fileUrl)}`;
             const res = await fetch(proxyUrl, {
                 method: "GET",
                 headers: {
@@ -2243,7 +2243,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 const targetKey = `${uploadPrefix}${currentFolder}${image.name}/`;
                                                 const destinationKey = `${targetKey}${sourceName}${sourceKey.endsWith("/") ? '/' : ''}`;
 
-                                                await axios.post("http://localhost:4000/creatives/folders/moveFileOrFolder", {
+                                                await apiClient.post("/creatives/folders/moveFileOrFolder", {
                                                     sourceKey,
                                                     destinationKey,
                                                 }, {
@@ -2621,7 +2621,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                         if (file.action === "copy") {
                                                             if (file.isFolder) {
                                                                 // 📁 Copy folder
-                                                                await axios.post("http://localhost:4000/creatives/folders/copyfolder", {
+                                                                await apiClient.post("/creatives/folders/copyfolder", {
                                                                     sourceKey, destinationKey,
                                                                 }, {
                                                                     headers: {
@@ -2638,7 +2638,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                                 const newName = `${base}(${cloneNumber})${ext}`;
                                                                 destinationKey = `${uploadPrefix}${currentFolder}${newName}`;
 
-                                                                const proxyUrl = `http://localhost:4000/creatives/proxy?url=${encodeURIComponent(file.url)}`;
+                                                                const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(file.url)}`;
                                                                 const res = await fetch(proxyUrl, {
                                                                     method: "GET",
                                                                     headers: {
@@ -2652,7 +2652,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                                 formData.append("filename", destinationKey);
                                                                 formData.append("folder", currentFolder);
 
-                                                                await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", formData, {
+                                                                await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", formData, {
                                                                     headers: {
                                                                         Authorization: localStorage.getItem("token"),
                                                                         username: userdetails.userName,
@@ -2663,7 +2663,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                                         if (file.action === "cut") {
                                                             // ✂️ Move file or folder
-                                                            await axios.post("http://localhost:4000/creatives/folders/moveFileOrFolder", {
+                                                            await apiClient.post("/creatives/folders/moveFileOrFolder", {
                                                                 sourceKey,
                                                                 destinationKey,
                                                             }, {
@@ -2714,7 +2714,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                         try {
                                             await Promise.all(items.map(item =>
-                                                axios.delete("http://localhost:4000/creatives/trashfiles", {
+                                                apiClient.delete("/creatives/trashfiles", {
                                                     headers: {
                                                         Authorization: localStorage.getItem("token"),
                                                         username: userdetails.userName,
@@ -2756,7 +2756,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 if (!relativePath) throw new Error("Invalid original path");
 
                                                 const originalKey = `${selectedKey}/${selectedAccountNumber}/${relativePath}`;
-                                                await axios.post("http://localhost:4000/creatives/trashfiles", {
+                                                await apiClient.post("/creatives/trashfiles", {
                                                     trashKey,
                                                     originalKey,
                                                 }, {
@@ -2810,7 +2810,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                             // 2️⃣ If it's a FOLDER → fetch files inside
                                             try {
-                                                const res = await axios.get("http://localhost:4000/creatives/userfiles/getuserfiles", {
+                                                const res = await apiClient.get("/creatives/userfiles/getuserfiles", {
                                                     headers: {
                                                         username: userdetails.userName,
                                                         "x-folder": item.uid,
@@ -2902,7 +2902,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             contextMenu.selectedList.map(item => {
                                                 const isFolder = item.isFolder;
                                                 if (isFolder) {
-                                                    return axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
+                                                    return apiClient.delete("/creatives/folders/deletefolder", {
                                                         headers: {
                                                             Authorization: localStorage.getItem("token"),
                                                             username: userdetails.userName,
@@ -2910,7 +2910,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                         },
                                                     });
                                                 } else {
-                                                    return axios.delete("http://localhost:4000/creatives/userfiles/deleteuserfiles", {
+                                                    return apiClient.delete("/creatives/userfiles/deleteuserfiles", {
                                                         headers: {
                                                             Authorization: localStorage.getItem("token"),
                                                             username: userdetails.userName,
@@ -2962,7 +2962,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 const folderKey = contextMenu.target.uid;
 
                                                 // 1️⃣ Fetch files inside that folder
-                                                const res = await axios.get("http://localhost:4000/creatives/userfiles/getuserfiles", {
+                                                const res = await apiClient.get("/creatives/userfiles/getuserfiles", {
                                                     headers: {
                                                         username: userdetails.userName,
                                                         "x-folder": folderKey,
@@ -3225,7 +3225,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                     const createFolder = async (key) => {
-                        await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", new FormData(), {
+                        await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", new FormData(), {
                             headers: {
                                 Authorization: localStorage.getItem("token"),
                                 username: userdetails.userName,
@@ -3239,7 +3239,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     };
 
                     const replaceFolder = async () => {
-                        await axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
+                        await apiClient.delete("/creatives/folders/deletefolder", {
                             headers: {
                                 Authorization: localStorage.getItem("token"),
                                 username: userdetails.userName,
@@ -3283,7 +3283,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         segments[segments.length - 2] = name;
                         const newKey = segments.slice(0, -1).join('/') + '/';
 
-                        await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
+                        await apiClient.post("/creatives/folders/renamefolder", {
                             oldFolderKey: oldKey,
                             newFolderKey: newKey,
                         }, {
@@ -3321,7 +3321,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                         const createFolder = async (key) => {
-                            await axios.post("http://localhost:4000/creatives/userfiles/uploaduserfiles", new FormData(), {
+                            await axios.post("https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles", new FormData(), {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                     username: userdetails.userName,
@@ -3335,7 +3335,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         };
 
                         const replaceFolder = async () => {
-                            await axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
+                            await apiClient.delete("/creatives/folders/deletefolder", {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                     username: userdetails.userName,
@@ -3377,7 +3377,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             segments[segments.length - 2] = name;
                             const newKey = segments.slice(0, -1).join('/') + '/';
 
-                            await axios.post("http://localhost:4000/creatives/folders/renamefolder", {
+                            await apiClient.post("/creatives/folders/renamefolder", {
                                 oldFolderKey: oldKey,
                                 newFolderKey: newKey,
                             }, {
@@ -3404,7 +3404,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     const folderKey = deleteFolderModal.folder?.uid;
                     if (!folderKey) return;
 
-                    await axios.delete("http://localhost:4000/creatives/folders/deletefolder", {
+                    await apiClient.delete("/creatives/folders/deletefolder", {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             username: userdetails.userName,

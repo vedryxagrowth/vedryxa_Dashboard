@@ -428,7 +428,7 @@ export default function RecommendationsPage({ params }) {
 
 
             const res = await axios.post(
-                'https://prodapis.adsgoat.in/AiCampaignRecommendations',
+                'http://localhost:4000/reports/AI/campaignrecommendations',
                 {
                     timezone: time,
                     network: resolvedNetwork,

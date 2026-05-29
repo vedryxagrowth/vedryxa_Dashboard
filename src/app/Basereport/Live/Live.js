@@ -208,7 +208,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
             },
         });
         const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         }
         updateDetails();
 

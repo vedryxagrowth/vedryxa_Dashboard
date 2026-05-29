@@ -219,7 +219,7 @@ const MyTablePage = () => {
     useEffect(() => {
         const fetchNetworksData = async () => {
             try {
-                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                const res = await apiClient.get('/reports/commonapis/networkdata', {
                     headers: {
                         Authorization: token,
 
@@ -1876,7 +1876,7 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "/UpdateCategoryNew",
+                            "/reports/singleactions/category",
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -2983,7 +2983,7 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "/UpdateCategoryNew",
+                            "/reports/singleactions/category",
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -5252,7 +5252,7 @@ const MyTablePage = () => {
 
                     try {
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -6213,7 +6213,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -6503,7 +6503,7 @@ const MyTablePage = () => {
                     // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
                         // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
@@ -8132,7 +8132,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -8422,7 +8422,7 @@ const MyTablePage = () => {
                     // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
                         // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
@@ -9709,7 +9709,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/update/campaign/budget/history', payload);
+                        await apiClient.post('/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -10532,7 +10532,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -11726,7 +11726,7 @@ const MyTablePage = () => {
 
                         // changeRRefrst();
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
+                        const newResponse = await apiClient.post('/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -12191,7 +12191,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -12504,7 +12504,7 @@ const MyTablePage = () => {
                     // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
                         // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
@@ -13524,7 +13524,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -13901,7 +13901,7 @@ const MyTablePage = () => {
                     // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
                         // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
@@ -14860,7 +14860,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -16010,7 +16010,7 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/new/update/campaign/budget', payload);
+                        await apiClient.post('/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -16413,7 +16413,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -17774,7 +17774,7 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "/UpdateCategoryNew",
+                            "/reports/singleactions/category",
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -19502,8 +19502,8 @@ const MyTablePage = () => {
                 setAiError(null);
 
 
-                const res = await axios.post(
-                    'https://prodapis.adsgoat.in/AiCampaignRecommendations',
+                const res = await apiClient.post(
+                    '/reports/AI/campaignrecommendations',
                     {
                         accountNumbers: accounts,
                         network: resolvedNetwork,

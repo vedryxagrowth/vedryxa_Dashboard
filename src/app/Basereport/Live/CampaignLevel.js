@@ -300,7 +300,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             }
         });
         try {
-            await apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         } catch (err) {
             console.error("Export activity logging failed", err);
         }
@@ -336,9 +336,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         let apiUrl = "";
 
         if (action === "pin") {
-            apiUrl = "/SmartPinBulkWithHitory";
+            apiUrl = "/reports/bulkactions/pin";
         } else if (action === "unpin") {
-            apiUrl = "/SmartUnpinBulkWithHistory";
+            apiUrl = "/reports/bulkactions/unpin";
         }
 
         const res = await apiClient.post(apiUrl, {
@@ -418,7 +418,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdeleteWithHistory',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -496,7 +496,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNewWithHistory',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -616,7 +616,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
             const resp = await apiClient.post(
-                "/BulkCampaignStatusChangeManyWithHistory",
+                "/reports/bulkactions/campaignstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -736,7 +736,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNewWithHistory",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1069,7 +1069,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         };
 
                         const response = await apiClient.post(
-                            `/BulkCampaignStatusChangeWithHistory`,
+                            `/reports/singleactions/campaignstatus`,
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -1196,8 +1196,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('/NewPinBulkWithHistory', body)
-                        : await apiClient.post('/NewUnpinBulkWithHistory', body);
+                        ? await apiClient.post('/reports/singleactions/pin', body)
+                        : await apiClient.post('/reports/singleactions/unpin', body);
 
                     if (resp.status === 200 || resp.status === 201) {
                         // if (newResponse.status === 200 || newResponse.status === 201) {
@@ -1259,7 +1259,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/Comments/upsert/History', body);
+                    const newResponse = await apiClient.post('/reports/singleactions/comments', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1318,7 +1318,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/New/Comments/delete/History', body);
+                    const newResponse = await apiClient.post('/reports/singleactions/comments/delete', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -2072,7 +2072,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             accountsParam.forEach(acc => params.append("accountNumbers", acc));
 
             //   const resp = await apiClient.post(`/CampaignLevelAccounts?${params.toString()}`);
-            const resp = await apiClient.post('/CampaignLevelAccounts', {
+            const resp = await apiClient.post('/reports/data/campaign', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -2460,7 +2460,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "/reports/data/creatives",
             { items },
             {
                 headers: {
@@ -3117,6 +3117,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                                                 footer={[
+                                                    <Button key="Delete" onClick={handleBulkDeleteComments}>
+                                                        Delete
+                                                    </Button>,
                                                     <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                                                         Cancel
                                                     </Button>,

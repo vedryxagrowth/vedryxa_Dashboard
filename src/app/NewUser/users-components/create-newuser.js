@@ -49,7 +49,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
         const fetchAllAccounts = async () => {
             try {
                 const res = await apiClient.get(
-                    "http://localhost:4000/userrole/accounts",
+                    "/userrole/accounts",
                     { headers: { Authorization: token } }
                 );
                 setAllApiAccounts(res.data || []);
@@ -136,7 +136,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
         if (userdetails?.role !== "Special_User") {
             const fetchNetworks = async () => {
                 try {
-                    const res = await apiClient.get("http://localhost:4000/userrole/networks");
+                    const res = await apiClient.get("/userrole/networks");
                     setAvailableNetworks(Array.isArray(res.data) ? [...new Set(res.data.map(item => item.Network?.trim()).filter(Boolean))] : []);
                 } catch (err) {
                     console.error("Error fetching networks:", err);
@@ -207,7 +207,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
 
                 let apiList = [];
                 try {
-                    const res = await apiClient.get("http://localhost:4000/userrole/accounts", {
+                    const res = await apiClient.get("/userrole/accounts", {
                         headers: { Authorization: token }
                     });
                     apiList = res.data || [];
@@ -270,7 +270,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
     };
     const checkEmailExists = async (email) => {
         try {
-            const res = await apiClient.patch("http://localhost:4000/userrole/users", { email });
+            const res = await apiClient.patch("/userrole/users", { email });
             return res.data.exists;
         } catch (e) {
             return false;
@@ -315,7 +315,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers, AccountsData }) => {
                         adAccounts: additionalAccounts.length > 0 ? data : [],
                     };
 
-                    const response = await apiClient.post('http://localhost:4000/userrole/users', { formattedData });
+                    const response = await apiClient.post('/userrole/users', { formattedData });
 
                     if (response.status === 200 || response.status === 201) {
                         // Display success message

@@ -153,7 +153,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
             console.error("Grid reference is null");
         }
         const updateDetails = async()=>{
-            await apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         }
         updateDetails();
     };

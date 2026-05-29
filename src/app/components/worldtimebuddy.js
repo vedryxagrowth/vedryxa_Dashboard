@@ -45,7 +45,7 @@ export default function WorldTimeBuddy() {
     const fetchZones = async () => {
       try {
         setLoading(true);
-        const res = await fetch("https://prodapis.adsgoat.in/New/GetTimezones", {
+        const res = await fetch("https://app.vyaktimetrics.com/open/globalclock/timezones", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -233,7 +233,7 @@ const UsersTable = () => {
     const handleDelete = async (values) => {
         try {
             // Check if values.email exists
-            const url = values.email ? `http://localhost:4000/userrole/users?email=${values.email}` : '';
+            const url = values.email ? `/userrole/users?email=${values.email}` : '';
 
             if (url) {
                 // Show modal confirmation
@@ -278,13 +278,13 @@ const UsersTable = () => {
             return item;
         });
         const newStatus = checked ? 'Active' : 'InActive';
-        const response = await apiClient.patch(`http://localhost:4000/userrole/accounts?accountNumber=${accountNumber}&status=${newStatus}`);
+        const response = await apiClient.patch(`/userrole/accounts?accountNumber=${accountNumber}&status=${newStatus}`);
         setAccountsData(newData);
     };
 
     const fetchusersData = async () => {
         try {
-            const response = await apiClient.get('http://localhost:4000/userrole/users');
+            const response = await apiClient.get('/userrole/users');
             if (response.status === 200) {
                 setUsersData(response.data);
             } else {
@@ -299,7 +299,7 @@ const UsersTable = () => {
 
     const fetchAccountsData = async () => {
         try {
-            const response = await apiClient.get('http://localhost:4000/userrole/accounts');
+            const response = await apiClient.get('/userrole/accounts');
             if (response.status === 200) {
                 setAccountsData(response.data);
             } else {
@@ -332,14 +332,14 @@ const UsersTable = () => {
             return item;
         });
         const newStatus = checked ? 'Active' : 'InActive';
-        const response = await apiClient.patch(`http://localhost:4000/userrole/networks?revenuePartner=${revenuePartner}&Status=${newStatus}`);
+        const response = await apiClient.patch(`/userrole/networks?revenuePartner=${revenuePartner}&Status=${newStatus}`);
         // console.log(response.data);
         setNetworksData(newData);
     };
 
     const fetchNetworksData = async () => {
         try {
-            const response = await apiClient.get('http://localhost:4000/userrole/networks');
+            const response = await apiClient.get('/userrole/networks');
             // console.log("Response:", response.data);
             if (response.status === 200) {
                 setNetworksData(response.data);
@@ -367,7 +367,7 @@ const UsersTable = () => {
 
     const fetchUrlBuilderData = async () => {
         try {
-            const response = await apiClient.get('http://localhost:4000/userrole/urlbuilder');
+            const response = await apiClient.get('/userrole/urlbuilder');
             // console.log("Response:", response.data);
             if (response.status === 200) {
                 setUrlBuilderData(response.data);

@@ -229,7 +229,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
 
       // console.log(newValues, "new");
       const response = await apiClient.put(
-        "http://localhost:4000/userrole/accounts",
+        "/userrole/accounts",
         { newAccount: newValues }
       );
 

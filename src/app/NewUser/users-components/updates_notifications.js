@@ -97,7 +97,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
           //   message.error('Something went wrong.');
           // }
           const res = await apiClient.post(
-            "http://localhost:4000/userrole/updates",
+            "/userrole/updates",
             formDataToSend,
             {
               headers: {

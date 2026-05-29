@@ -40,7 +40,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
 
 
   useEffect(() => {
-    apiClient.get(`http://localhost:4000/open/notes/${userEmail}`)
+    apiClient.get(`/open/notes/${userEmail}`)
       .then(res => setNotes(res.data.data))
       .catch(err => console.error("Failed to fetch notes", err));
   }, [userEmail]);
@@ -69,7 +69,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     );
   };
   const deleteMultipleNotes = () => {
-    apiClient.delete("http://localhost:4000/open/notes/bulk", {
+    apiClient.delete("/open/notes/bulk", {
       data: {
         email: userEmail,
         ids: selectedNotes
@@ -135,7 +135,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
       formData.append("uploadDate", uploadDate);
 
       try {
-        const response = await axios.post("http://localhost:4000/open/notes/uploadUserFiles", formData, {
+        const response = await axios.post("/open/notes/uploadUserFiles", formData, {
           headers: {
             Authorization: localStorage.getItem("token"),
             username: userdetails.userName,
@@ -160,7 +160,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
 
   const saveToDB = (updated) => {
     setNotes(updated);
-    apiClient.post("http://localhost:4000/open/notes", { email: userEmail, notes: updated })
+    apiClient.post("/open/notes", { email: userEmail, notes: updated })
       .catch(err => console.error("Failed to save", err));
   };
 
@@ -238,7 +238,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
   };
 
   const deleteNote = (id) => {
-    apiClient.delete(`http://localhost:4000/open/notes/${userEmail}/${id}`)
+    apiClient.delete(`/open/notes/${userEmail}/${id}`)
       .then(() => {
         const updated = notes.filter(n => n.id !== id);
         setNotes(updated);

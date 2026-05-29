@@ -112,7 +112,7 @@ export const TokenProvider = ({ children }) => {
   };
   const token = jwttoken ? jwttoken : typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
   const apiClient = axios.create({
-    baseURL: 'https://prodapis.adsgoat.in', // Relative URL
+    baseURL: 'https://app.vyaktimetrics.com', // Relative URL
     headers: {
       'Content-Type': 'application/json',
       'Authorization': token, // Use session token if available

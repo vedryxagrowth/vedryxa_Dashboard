@@ -60,7 +60,7 @@ async function getUserDetails(name) {
   const userActivities = { timestamp, ip, location, device: { type: deviceType }, userAgent, name };
 
   // Post User Activities
-  await fetch("https://prodapis.adsgoat.in/UsersActivities/", {
+  await fetch("https://app.vyaktimetrics.com/open/activities", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -228,7 +228,7 @@ const ContentWrapper = ({ children }) => {
   const fetchDataUntilSuccess = async (email, delay = 1500) => {
     while (true) {
       try {
-        const response = await axios.get(`http://localhost:4000/auth/user/verify?email=${email}`);
+        const response = await axios.get(`https://app.vyaktimetrics.com/auth/user/verify?email=${email}`);
         if (response.status === 200) {
           return [response.data.data]; // Exit loop if successful
         }

@@ -309,7 +309,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }
         });
         try {
-            await apiClient.post('http://localhost:4000/reports/commonapis/userexportactivities', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         } catch (e) {
             console.error("Export activity log failed", e);
         }
@@ -376,8 +376,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
         const apiUrl =
             action === "pin"
-                ? "http://localhost:4000/reports/bulkactions/pin"
-                : "http://localhost:4000/reports/bulkactions/unpin";
+                ? "/reports/bulkactions/pin"
+                : "/reports/bulkactions/unpin";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -457,7 +457,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             };
 
             const resp = await apiClient.post(
-                'http://localhost:4000/reports/bulkactions/comments/delete',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -538,7 +538,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }));
 
             const resp = await apiClient.post(
-                'http://localhost:4000/reports/bulkactions/comments',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email, }
             );
 
@@ -670,7 +670,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }
 
             const resp = await apiClient.post(
-                "http://localhost:4000/reports/bulkactions/adsetstatus",
+                "/reports/bulkactions/adsetstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -879,7 +879,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "http://localhost:4000/reports/bulkactions/category",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1318,7 +1318,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             email: userdetails?.email,
                             activity: payloadForActivity
                         };
-                        const response = await apiClient.post(`http://localhost:4000/reports/singleactions/adsetstatus`, payload,
+                        const response = await apiClient.post(`/reports/singleactions/adsetstatus`, payload,
                             { headers: { Authorization: token } }
                         );
 
@@ -1576,8 +1576,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('http://localhost:4000/reports/singleactions/pin', body)
-                            : await apiClient.post('http://localhost:4000/reports/singleactions/unpin', body);
+                            ? await apiClient.post('/reports/singleactions/pin', body)
+                            : await apiClient.post('/reports/singleactions/unpin', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1735,7 +1735,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                     }
                     try {
-                        const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/comments', {
+                        const newResponse = await apiClient.post('/reports/singleactions/comments', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
@@ -1873,7 +1873,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('http://localhost:4000/reports/singleactions/comments/delete', {
+                        const newResponse = await apiClient.post('/reports/singleactions/comments/delete', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
@@ -2933,7 +2933,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
             // ✅ call the new multi-account endpoint
             const resp = await apiClient.post(
-                "http://localhost:4000/reports/data/adset",
+                "/reports/data/adset",
                 {
                     dateStart: startDate,
                     dateEnd: endDate,
@@ -3204,7 +3204,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         );
 
         const resp = await apiClient.post(
-            "http://localhost:4000/reports/data/creatives",
+            "/reports/data/creatives",
             { items },
             {
                 headers: {
