@@ -10102,7 +10102,7 @@ const EditMultipleAdsetCampaignDrawer = ({
 
             if (file.type.startsWith("image/")) {
               response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
+                "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage",
                 formData,
                 {
                   headers: {
@@ -10138,7 +10138,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               }
             } else if (file.type.startsWith("video/")) {
               response = await axios.post(
-                "https://www.testapi.adsgoat.in/upload",
+                "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage",
                 formData,
                 {
                   headers: {

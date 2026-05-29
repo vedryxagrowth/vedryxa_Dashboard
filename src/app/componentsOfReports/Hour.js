@@ -3206,7 +3206,8 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
         if (
             selectedHour !== undefined &&
-            selectedHour !== null
+            selectedHour !== null &&
+            activetab === "7"
         ) {
             functionCall1();
         }
@@ -3671,7 +3672,8 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
     //     , [Camapignlevelstatus]);
 
     useEffect(() => {
-        if (refreshpage === "Refresh11") {
+        console.log(refreshpage)
+        if (refreshpage === "Refresh7") {
             // console.log("test2");
             handleReFetchData();
             showCampaignLevel([]);

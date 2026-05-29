@@ -3139,7 +3139,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                     campaignids: campaigns
                 }
             );
-            const mainData = fetchData.data;
+            const mainData = fetchData.data.data;
             // console.log("MainData:", mainData);
 
             const campaignsByAccount = {};
