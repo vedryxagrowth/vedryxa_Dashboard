@@ -581,9 +581,9 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     const functionCall6 = async () => {
         try { 
             setTonicKeywordLoading(true);
-            const fetchData = await apiClient.get(`/TonicKeywords?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}&collectionName=Facebook_Tonic1_Keywords`);
-            const mainData = fetchData.data;
-            console.log(mainData, "mainData of functionCall6");
+            const fetchData = await apiClient.get(`/reports/data/tonicrsockeyword?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}&collectionName=Facebook_Tonic1_Keywords`);
+            const mainData = fetchData.data.data;
+            // console.log(mainData, "mainData of functionCall6");
             const specifiedTimeZone = selectTimezone[newtime];
 
             const filteredData = mainData && mainData.length > 0 ?
@@ -643,10 +643,10 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                     )
                 }) : null;
 
-            console.log(filteredData);
+            // console.log(filteredData);
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
-            console.log(fullData);
+            // console.log(fullData);
             setTonicKeywordData(fullData);
             setTonicKeywordLoading(false);
             newTonicKeywordData.current = fullData;
@@ -670,26 +670,26 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                     ctr: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
                 }
             ]);
-            console.log([
-                {
-                    campaignName: 'Total',
-                    spend: fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
-                    revenue: fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
-                    profit: fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
-                    margin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
-                    rpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / fullData?.length,
-                    cpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / fullData?.length,
-                    ncpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / fullData?.length,
-                    fbleads: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
-                    conversions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
-                    fmargin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
-                    roi: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
-                    cpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / fullData?.length,
-                    fbclicks: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
-                    impressions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
-                    ctr: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
-                }
-            ]);
+            // console.log([
+            //     {
+            //         campaignName: 'Total',
+            //         spend: fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+            //         revenue: fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+            //         profit: fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+            //         margin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+            //         rpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / fullData?.length,
+            //         cpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / fullData?.length,
+            //         ncpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / fullData?.length,
+            //         fbleads: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+            //         conversions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+            //         fmargin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+            //         roi: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+            //         cpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / fullData?.length,
+            //         fbclicks: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+            //         impressions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+            //         ctr: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+            //     }
+            // ]);
             fetchData.status === 200 && setApiStatus(false);
             
         } catch (error) {
@@ -847,7 +847,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -1022,7 +1022,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                     // Example field-based filtering logic with error handling
                                     try {
                                         const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
-                                        console.log('Filtered by status (Active):', specificFieldData);
+                                        // console.log('Filtered by status (Active):', specificFieldData);
                                     } catch (fieldFilterError) {
                                         console.error("Error in field-based filtering:", fieldFilterError);
                                     }

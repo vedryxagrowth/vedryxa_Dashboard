@@ -84,9 +84,9 @@ export default function CampaignAndAccount({ params }) {
     const accountNumber = paramsData[1];
     const timeZone = paramsData[2];
     const network = paramsData[3]
-    console.log(decodedString, "decode");
-    console.log(accountNumber);
-    console.log(timeZone);
+    // console.log(decodedString, "decode");
+    // console.log(accountNumber);
+    // console.log(timeZone);
     const selectTimezone = {
         UTC: 'UTCDate',
         EEST: 'EESTDate',
@@ -455,7 +455,7 @@ export default function CampaignAndAccount({ params }) {
         setColumnStructure(getColumnDefs(newFieldOrder));
         // console.log(newFieldOrder);
         setColumns(newFieldOrder);
-        await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
+        await apiClient.post(`/reports/historyactions/columnstructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
         // console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
@@ -554,8 +554,8 @@ export default function CampaignAndAccount({ params }) {
 
     const functionCallForCommnets = async (accountNumber) => {
         try {
-            const commentFetch = await apiClient.get(`/New/Comments/${accountNumber}/${"campaignid"}/${CampaignId}/${"campaign"}`);
-            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            const commentFetch = await apiClient.get(`/reports/historyactions/comments/${accountNumber}/${"campaignid"}/${CampaignId}/${"campaign"}`);
+            const campaignComments = commentFetch.data.data; // Set comments only if fetched successfully
             setCampaignComments(campaignComments);
             if (campaignComments.length > 0) {
                 const comment = campaignComments[0];
@@ -574,7 +574,7 @@ export default function CampaignAndAccount({ params }) {
         accountNumber
     ) => {
         try {
-            const response = await apiClient.post(`/getBudgetAndStatus`,
+            const response = await apiClient.post(`/reports/historyactions/campaignadsetadstatus`,
                 {
                     id,
                     level,
@@ -583,7 +583,7 @@ export default function CampaignAndAccount({ params }) {
             );
 
             const data = response?.data?.data;
-            console.log(data, "budget and status");
+            // console.log(data, "budget and status");
             setBudgetAndStatusData(data);
 
         } catch (err) {
@@ -591,12 +591,12 @@ export default function CampaignAndAccount({ params }) {
         }
     };
     const functionCallForUserColumnStructure = async () => {
-        const fetchData = await apiClient.get(`/api/singleUserData?email=${user}`);
+        const fetchData = await apiClient.get(`/reports/historyactions/columnstructure?email=${user}`);
         // const data = await fetchData.json();
-        const mainData = fetchData.data;
-        console.log(mainData.historyStructure, "historyStructure");
-        const filteredData = mainData.historyStructure.filter((each) => each !== "actions");
-        console.log(filteredData);
+        const mainData = fetchData.data.data;
+        // console.log(mainData.historyStructure, "historyStructure");
+        const filteredData = mainData.filter((each) => each !== "actions");
+        // console.log(filteredData);
         setColumns(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
@@ -606,13 +606,13 @@ export default function CampaignAndAccount({ params }) {
         // const fetchData = await fetch(`http://localhost:8000/MnetCampaignDailyHistory?accountNumber=${accountNumber}&timezone=${timeZone}&campaignName=${decodedString}`);
         // const data = await fetchData.json();
         // const mainData = await data;
-        const fetchData = await apiClient.get(`/New/DailyCampaignHistory?CampaignId=${CampaignId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
+        const fetchData = await apiClient.get(`/reports/dailyhistory/campaignhistory?CampaignId=${CampaignId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
 
-        const mainData = fetchData.data;
+        const mainData = fetchData.data.data;
         setCampaignName(mainData[0]?.campaign_name);
-        console.log(mainData);
+        // console.log(mainData);
         setCampaignId(mainData[0]?.campaign_id);
         setAdsetID(mainData[0]?.adset_id);
         const specifiedTimeZone = selectTimezone[timeZone];
@@ -1439,7 +1439,7 @@ export default function CampaignAndAccount({ params }) {
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -1550,7 +1550,7 @@ export default function CampaignAndAccount({ params }) {
             };
 
             const response = await apiClient.post(
-                `/BulkCampaignStatusChangeWithHistory`,
+                `/reports/historyactions/campaignstatus`,
                 payload,
                 { headers: { Authorization: token } }
             );
@@ -1630,7 +1630,7 @@ export default function CampaignAndAccount({ params }) {
         }
         try {
             await apiClient.post(
-                '/update/campaign/budget/history',
+                '/reports/historyactions/campaignbudget',
                 payload
             );
             message.success(
@@ -1659,27 +1659,38 @@ export default function CampaignAndAccount({ params }) {
     // console.log(dailyData);
     // console.log(columnDefs);
 
-    const sendNewCommentToAPI = async (logData) => {
-        try {
-            const response = await apiClient.post('/Comments', {
-                commentsdatas: logData,
-            });
-            // console.log('Response from server:', response.data);
-        } catch (error) {
-            console.error('Error sending data to server:', error);
-        }
-    };
+    // const sendNewCommentToAPI = async (logData) => {
+    //     try {
+    //         const response = await apiClient.post('/Comments', {
+    //             commentsdatas: logData,
+    //         });
+    //         // console.log('Response from server:', response.data);
+    //     } catch (error) {
+    //         console.error('Error sending data to server:', error);
+    //     }
+    // };
 
     const sendEditedCommentToAPI = async () => {
         try {
-            console.log("comment:")
-            const response = await apiClient.post('/Comments/upsert', {
+            // console.log("comment:")
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: CampaignId,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: CampaignName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Campaign comment updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            }
+            const response = await apiClient.post('/reports/historyactions/comments/update', {
                 accountNumber: accountNumber,
                 campaignname: CampaignName,
                 campaignid: CampaignId,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "campaign"
+                level: "campaign",
+                activity: payloadForActivity
             }
             );
             if (response.status === 200 || response.status === 201) {
@@ -1769,18 +1780,29 @@ export default function CampaignAndAccount({ params }) {
     const handleDelete = async () => {
         try {
             // Prepare the payload for the API call
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: CampaignId,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: CampaignName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Campaign comment cleared",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            }
             const payload = {
                 accountNumber: accountNumber,
                 campaignname: CampaignName,
                 campaignid: CampaignId,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "campaign"
+                level: "campaign",
+                activity: payloadForActivity
             };
             // console.log(payload);
 
             // Call the backend API to delete the comment
-            const response = await apiClient.post('/Comments/delete', payload);
+            const response = await apiClient.post('/reports/historyactions/comments/delete', payload);
 
             if (response.status === 200) {
                 // Remove the comment from the local state
@@ -2401,7 +2423,7 @@ export default function CampaignAndAccount({ params }) {
                                                     {/* <div style={{ display: "flex" }}>
                                                                                     <p>Budget Amount:&nbsp;</p>
                                                                                 </div> */}
-                                                    
+
                                                     <Input
                                                         type="number"
                                                         disabled={
@@ -2559,7 +2581,7 @@ export default function CampaignAndAccount({ params }) {
 
                                     // Example field-based filtering logic
                                     const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
-                                    console.log('Filtered by status (Active):', specificFieldData);
+                                    // console.log('Filtered by status (Active):', specificFieldData);
                                 }}
                             />
                         </div>

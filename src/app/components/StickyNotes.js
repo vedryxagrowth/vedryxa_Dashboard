@@ -40,8 +40,8 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
 
 
   useEffect(() => {
-    apiClient.get(`/notes/${userEmail}`)
-      .then(res => setNotes(res.data))
+    apiClient.get(`/open/notes/${userEmail}`)
+      .then(res => setNotes(res.data.data))
       .catch(err => console.error("Failed to fetch notes", err));
   }, [userEmail]);
   useEffect(() => {
@@ -69,7 +69,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     );
   };
   const deleteMultipleNotes = () => {
-    apiClient.delete("/notes/bulk", {
+    apiClient.delete("/open/notes/bulk", {
       data: {
         email: userEmail,
         ids: selectedNotes
@@ -83,7 +83,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     })
       .catch(err => console.error("Bulk delete failed", err));
   };
-  console.log("BULK DELETE sending IDs:", selectedNotes);
+  // console.log("BULK DELETE sending IDs:", selectedNotes);
 
 
   // const handleMultipleFileUpload = async (files, userdetails) => {
@@ -135,7 +135,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
       formData.append("uploadDate", uploadDate);
 
       try {
-        const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+        const response = await axios.post("/open/notes/uploadUserFiles", formData, {
           headers: {
             Authorization: localStorage.getItem("token"),
             username: userdetails.userName,
@@ -160,7 +160,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
 
   const saveToDB = (updated) => {
     setNotes(updated);
-    apiClient.post("/notes", { email: userEmail, notes: updated })
+    apiClient.post("/open/notes", { email: userEmail, notes: updated })
       .catch(err => console.error("Failed to save", err));
   };
 
@@ -238,7 +238,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
   };
 
   const deleteNote = (id) => {
-    apiClient.delete(`/notes/${userEmail}/${id}`)
+    apiClient.delete(`/open/notes/${userEmail}/${id}`)
       .then(() => {
         const updated = notes.filter(n => n.id !== id);
         setNotes(updated);
@@ -258,7 +258,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
         content: 'Content copied to clipboard!',
         className: theme === 'dark' ? 'dark-message' : '',
       });
-      console.log('Text copied to clipboard');
+      // console.log('Text copied to clipboard');
     }).catch(err => {
       console.error('Failed to copy text: ', err);
       message.open({

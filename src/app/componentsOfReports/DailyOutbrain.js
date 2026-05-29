@@ -69,7 +69,7 @@ const selectTimezone = {
 
 
 const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, columnDefs4, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
-    console.log("new multiple accounts:", newaccount);
+    // console.log("new multiple accounts:", newaccount);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -198,7 +198,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
             console.error("Grid reference is null");
         }
         const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         }
         updateDetails();
     };
@@ -206,18 +206,18 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
     const showCampaignLevel = (data) => {
         setSelectedCampaigns(data);
         setSelectedAdsets([]);
-        console.log(data, "CampaignLeveldata");
+        // console.log(data, "CampaignLeveldata");
     }
 
 
 
     const showAdsetLevel = (data) => {
         setSelectedAdsets(data);
-        console.log(data, "AdsetLeveldata");
+        // console.log(data, "AdsetLeveldata");
     }
     const showAdLevel = (data) => {
         setSelectedAds(data);
-        console.log(data, "AdsetLeveldata");
+        // console.log(data, "AdsetLeveldata");
     }
 
     const onClickRemoveSelectedCampaigns = () => {
@@ -824,7 +824,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
             setdailyData(fullData);
             newDailyData.current = fullData;
             fetchData.status === 200 && setApiStatus(false);
-            fetchData.status === 200 && console.log("Success");
+            // fetchData.status === 200 && console.log("Success");
             // setTrue(false);
             setLoading1(false);
         } catch (error) {
@@ -832,7 +832,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
             // if(error.response.status === 500){
             //     apiStatus.current = true;
             // }
-            console.log(error);
+            // console.log(error);
             setApiStatus(true);
             setLoading1(false);
         }
@@ -1026,7 +1026,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard . copy failed:", err);
             });
@@ -1071,7 +1071,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForC
     }, [memorizedDailyData]);
 
     const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
+        // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
 

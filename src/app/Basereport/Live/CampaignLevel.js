@@ -64,10 +64,10 @@ const selectTimezone = {
 };
 
 const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
-    console.log(columnDefs, "columnDefs");
-    console.log("campaign acconts:", newaccount);
-    console.log('accountAccess:', accountsAccess);
-    console.log(campaignComments);
+    // console.log(columnDefs, "columnDefs");
+    // console.log("campaign acconts:", newaccount);
+    // console.log('accountAccess:', accountsAccess);
+    // console.log(campaignComments);
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -85,7 +85,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     const [apiStatus, setApiStatus] = useState(false);
 
-    console.log(apiStatus, "apiStatus");
+    // console.log(apiStatus, "apiStatus");
 
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,7 +96,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     const timezone = useRef();
 
-    console.log("timzones:", timezone);
+    // console.log("timzones:", timezone);
 
     const cronStatus = useRef();
 
@@ -209,9 +209,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     }, [inputValue, selectedCampaigns, rowData]);
 
 
-    console.log(memorizedColumnDef, "memorizedColumnDef");
-    console.log(memorizedRowData, "memorizedRowData");
-    console.log(rowData, "rowData");
+    // console.log(memorizedColumnDef, "memorizedColumnDef");
+    // console.log(memorizedRowData, "memorizedRowData");
+    // console.log(rowData, "rowData");
 
     useEffect(() => {
         setLiveFixedFooter([
@@ -268,7 +268,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     // };
     const onBtExport1 = async () => {
-        console.log(gridRef.current.api, "in");
+        // console.log(gridRef.current.api, "in");
         const Details = {
             network: newRevenuePratner,
             account: newaccount,
@@ -300,7 +300,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             }
         });
         try {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         } catch (err) {
             console.error("Export activity logging failed", err);
         }
@@ -336,9 +336,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         let apiUrl = "";
 
         if (action === "pin") {
-            apiUrl = "/SmartPinBulkWithHitory";
+            apiUrl = "/reports/bulkactions/pin";
         } else if (action === "unpin") {
-            apiUrl = "/SmartUnpinBulkWithHistory";
+            apiUrl = "/reports/bulkactions/unpin";
         }
 
         const res = await apiClient.post(apiUrl, {
@@ -418,7 +418,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdeleteWithHistory',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -496,7 +496,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNewWithHistory',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -616,7 +616,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
 
             const resp = await apiClient.post(
-                "/BulkCampaignStatusChangeManyWithHistory",
+                "/reports/bulkactions/campaignstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -736,7 +736,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNewWithHistory",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -897,7 +897,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         adsetid = firstChild.adsetid ?? null;
                         accountNumberToPassHistoryPage = firstChild.accountNumber ?? null;
                     } else {
-                        console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
+                        // console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
                     }
                 } else if (params.data) {
                     campaignid = params.data.campaignid ?? null;
@@ -1069,7 +1069,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         };
 
                         const response = await apiClient.post(
-                            `/BulkCampaignStatusChangeWithHistory`,
+                            `/reports/singleactions/campaignstatus`,
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -1196,8 +1196,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('/NewPinBulkWithHistory', body)
-                        : await apiClient.post('/NewUnpinBulkWithHistory', body);
+                        ? await apiClient.post('/reports/singleactions/pin', body)
+                        : await apiClient.post('/reports/singleactions/unpin', body);
 
                     if (resp.status === 200 || resp.status === 201) {
                         // if (newResponse.status === 200 || newResponse.status === 201) {
@@ -1259,7 +1259,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/Comments/upsert/History', body);
+                    const newResponse = await apiClient.post('/reports/singleactions/comments', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1318,7 +1318,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/New/Comments/delete/History', body);
+                    const newResponse = await apiClient.post('/reports/singleactions/comments/delete', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1983,7 +1983,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         },
         processCellForClipboard: (params) => {
             if (params.node.group) {
-                console.log("Processing group column for copy..."); // Debugging log
+                // console.log("Processing group column for copy..."); // Debugging log
 
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -2072,7 +2072,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             accountsParam.forEach(acc => params.append("accountNumbers", acc));
 
             //   const resp = await apiClient.post(`/CampaignLevelAccounts?${params.toString()}`);
-            const resp = await apiClient.post('/CampaignLevelAccounts', {
+            const resp = await apiClient.post('/reports/data/campaign', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -2369,7 +2369,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
             if (mainData.length > 1) {
                 const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
-                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                // console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
                 timezone.current = findRevenueObject.accountTimezone;
                 accountStatus.current = findRevenueObject.accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
@@ -2425,9 +2425,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
             setLoading(false);
         }
     };
-    useEffect(() => {
-        console.log(campaignIds, "campaignIds updated");
-    }, [campaignIds]);
+    // useEffect(() => {
+    //     console.log(campaignIds, "campaignIds updated");
+    // }, [campaignIds]);
     useEffect(() => {
         if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -2439,7 +2439,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                     token
                 );
 
-                console.log('Final creatives data:', creativesData);
+                // console.log('Final creatives data:', creativesData);
                 setAdLevelCreatives(creativesData)
 
             } catch (err) {
@@ -2460,7 +2460,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "/reports/data/creatives",
             { items },
             {
                 headers: {
@@ -2625,7 +2625,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
-            console.log("test1");
+            // console.log("test1");
             functionCall1();
         }
     }, []);
@@ -2647,8 +2647,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     useEffect(() => {
         // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
-        console.log(campaignStatusFilter?.toUpperCase())
+        // console.log(campaignStatusFilter, "campaignStatusFilter");
+        // console.log(campaignStatusFilter?.toUpperCase())
         if (campaignStatusFilter !== "All") {
             // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             // Filter grid rows by campaign status
@@ -2804,7 +2804,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
     useEffect(() => {
         if (refreshpage === "Refresh11") {
-            console.log("test2");
+            // console.log("test2");
             handleReFetchData();
             showCampaignLevel([]);
         }
@@ -2831,7 +2831,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     };
 
     const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
+        // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
 
@@ -2921,7 +2921,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
         setLeafCampaigns(uniqueLeafCampaigns);
 
-        console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
+        // console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
     };
 
 
@@ -3117,6 +3117,9 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 onCancel={() => setIsBulkCommentModalVisible(false)}
                                                 className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
                                                 footer={[
+                                                    <Button key="Delete" onClick={handleBulkDeleteComments}>
+                                                        Delete
+                                                    </Button>,
                                                     <Button key="cancel" onClick={() => setIsBulkCommentModalVisible(false)}>
                                                         Cancel
                                                     </Button>,
@@ -3254,7 +3257,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                                                     {ids.map((id, i) => {
                                                         const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                        console.log("timezones:", accountsAccess);
+                                                        // console.log("timezones:", accountsAccess);
                                                         const tz = acc?.timeZone ?? "-";
                                                         return (
                                                             <div

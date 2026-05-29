@@ -8,12 +8,12 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
     const token = localStorage.getItem("token");
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
-    console.log(editeddata?.businessData);
+    // console.log(editeddata?.businessData);
     const [channelList, setChannelList] = useState([]);
     const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
     const [selectedChannelIndex, setSelectedChannelIndex] = useState(null);
     const [objects, setObjects] = useState([]);
-    console.log(objects, "objects");
+    // console.log(objects, "objects");
     const [dataList, setDataList] = useState([]);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -210,7 +210,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
     }, [visible]);
 
     useEffect(() => {
-        console.log(editeddata?.businessData, "editeddata?.businessData"); // Logs the incoming data
+        // console.log(editeddata?.businessData, "editeddata?.businessData"); // Logs the incoming data
         if (editeddata?.businessData) {
           setObjects(editeddata.businessData); // Update the state
         }
@@ -261,14 +261,14 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
             className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: async() => {
                 try {
-                    console.log(objects, "businessData");
-                    console.log(dataList, "Domains");
-                    console.log(campaigns, "source");
-                    console.log(channelList, "channel");
+                    // console.log(objects, "businessData");
+                    // console.log(dataList, "Domains");
+                    // console.log(campaigns, "source");
+                    // console.log(channelList, "channel");
                     const result = createDynamicObject(editeddata?.Network, channelList, dataList, campaigns, objects);
-                    console.log(result);
+                    // console.log(result);
 
-                    const response = await apiClient.post(`/updateNetworkUrlBuilder/`, {updatedData: result});
+                    const response = await apiClient.put(`/userrole/urlbuilder`, {updatedData: result});
                     // console.log(response.data);
                     if(response.status === 200){
                         onClose(result);
@@ -428,7 +428,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     <Modal
                         title="Delete Confirmation"
                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                        visible={modalVisible}
+                        open={modalVisible}
                         onOk={deleteCampaign}
                         onCancel={cancelDelete1}
                         okText="OK"
@@ -550,7 +550,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     <Modal
                         title="Delete Confirmation"
                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                        visible={isChannelModalOpen}
+                        open={isChannelModalOpen}
                         onOk={confirmChannelDeletion}
                         onCancel={cancelChannelDeletion}
                         okText="OK"
@@ -682,7 +682,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     <Modal
                         title="Delete Confirmation"
                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                        visible={isModalOpen}
+                        open={isModalOpen}
                         onOk={confirmDelete}
                         onCancel={cancelDelete}
                         okText="OK"
@@ -796,7 +796,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     <Modal
                         title="Delete Confirmation"
                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                        visible={isModalVisible}
+                        open={isModalVisible}
                         onOk={handleConfirmDelete}
                         onCancel={handleCancelDelete}
                         okText="OK"

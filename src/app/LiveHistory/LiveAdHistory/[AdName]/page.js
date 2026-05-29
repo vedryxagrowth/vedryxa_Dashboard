@@ -31,7 +31,7 @@ const MnetLiveAdHistory = ({ params }) => {
 
     const { apiClient } = useTokenContext();
 
-    console.log(userdetails, "userDetails");
+    // console.log(userdetails, "userDetails");
 
     const user = userdetails?.email;
 
@@ -48,7 +48,7 @@ const MnetLiveAdHistory = ({ params }) => {
 
     const [searchText, setSearchText] = useState("");
 
-    console.log(user, "user");
+    // console.log(user, "user");
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -416,7 +416,7 @@ const MnetLiveAdHistory = ({ params }) => {
             const { impressions, spend } = params.data;
 
             if (spend !== "0.00" || spend !== undefined) {
-                const RPC = (spend/impressions) * 1000;
+                const RPC = (spend / impressions) * 1000;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
                     return `0%`;
                 }
@@ -427,7 +427,7 @@ const MnetLiveAdHistory = ({ params }) => {
         if (params.node.aggData !== undefined) {
             const { impressions, spend } = params.node.aggData;
             if (spend !== "0.00" || spend !== undefined) {
-                const RPC = (spend/impressions) * 1000;
+                const RPC = (spend / impressions) * 1000;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
                     return `0%`;
                 }
@@ -589,8 +589,8 @@ const MnetLiveAdHistory = ({ params }) => {
         // updatingColumnsStructure(newFieldOrder);
         // console.log(newFieldOrder);
         setColumnStructure(getColumnDefs(newFieldOrder));
-        console.log(newFieldOrder);
-        await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
+        // console.log(newFieldOrder);
+        await apiClient.post(`/reports/historyactions/columnstructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
         // console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
@@ -1018,7 +1018,7 @@ const MnetLiveAdHistory = ({ params }) => {
             headerClass: 'hide-menu',
             headerToolTip: 'ROI = (Revenue - Spend) / Spend * 100',
         },
-          cpm: {
+        cpm: {
             headerName: 'CPM', field: 'cpm', valueGetter: getCPM,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}`,
@@ -1180,8 +1180,8 @@ const MnetLiveAdHistory = ({ params }) => {
 
     const functionCallForCommnets = async (accountNumber) => {
         try {
-            const commentFetch = await apiClient.get(`/New/Comments/${accountNumber}/${"ad_id"}/${AdId}/${"ad"}`);
-            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            const commentFetch = await apiClient.get(`/reports/historyactions/comments/${accountNumber}/${"ad_id"}/${AdId}/${"ad"}`);
+            const campaignComments = commentFetch.data.data; // Set comments only if fetched successfully
             setCampaignComments(campaignComments);
             if (campaignComments.length > 0) {
                 const comment = campaignComments[0];
@@ -1196,12 +1196,12 @@ const MnetLiveAdHistory = ({ params }) => {
     };
 
     const functionCallForUserColumnStructure = async () => {
-        const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+        const fetchData = await apiClient.get(`/reports/historyactions/columnstructure?email=${user}`);
         // const data = await fetchData.json();
-        const mainData = fetchData.data;
-        console.log(mainData.historyStructure, "historyStructure");
-        const filteredData = mainData.historyStructure.filter((each) => each !== "actions");
-        console.log(filteredData);
+        const mainData = fetchData.data.data;
+        // console.log(mainData.historyStructure, "historyStructure");
+        const filteredData = mainData.filter((each) => each !== "actions");
+        // console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
     }
@@ -1218,91 +1218,91 @@ const MnetLiveAdHistory = ({ params }) => {
         // let network = paramsData[3];
         setDebounc(decodedString);
 
-        console.log(decodedString, "decode");
+        // console.log(decodedString, "decode");
         // const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
         // const data = await fetchData.json();
         // const mainData = await data;
-        const fetchData = await apiClient.get(`/New/LiveAdHistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=Facebook_Mnet_AD`);
+        const fetchData = await apiClient.get(`/reports/livehistory/adhistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=Facebook_Mnet_AD`);
 
-        const mainData = fetchData?.data?.filter(obj => !("ad_clicks" in obj));
-        console.log(mainData[0]);
+        const mainData = fetchData?.data?.data?.filter(obj => !("ad_clicks" in obj));
+        // console.log(mainData[0]);
         setAdName(mainData[0]?.adName || "");
         setUniqueObject(mainData.find(
             obj => obj.ad_id && obj.campaign_id && obj.adset_id
         ))
         const filteredData = mainData && mainData.length > 0 ?
             (reportType === "BaseReport"
-        ? mainData.filter(eachData => eachData.updatedHour)
-        : mainData
-      )
-            .map((eachData) => {
-                console.log("obj:", eachData);
-                let revenueData;
-                if (eachData.estimated_revenue === 0) {
-                    revenueData = '0.00';
-                }
-                else if (eachData.estimated_revenue === undefined) {
-                    revenueData = '0.00';
-                }
-                else {
-                    revenueData = eachData.estimated_revenue;
-                }
-                const profit = (revenueData - eachData.spend).toFixed(2);
-                let margin;
-                if (revenueData === '0.00') {
-                    margin = "0";
-                }
-                else {
-                    margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
-                }
-                const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
-
-                let cpl;
-                if (eachData.fbLeads == 0) {
-                    cpl = 0;
-                } else {
-                    cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
-                }
-                const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
-                const spend = parseFloat(eachData.spend);
-                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
-                return (
-                    {
-                        date: eachData[`${timeZone}Date`],
-                        date_n: eachData[`${timeZone}Date`],
-                        date_f: eachData[`${timeZone}Date`],
-                        campaignname: eachData.campaign_name,
-                        adsetname: eachData.adsetName,
-                        adname: eachData.adName,
-                        // 'fb-hour': eachData.hour,
-                        // 'mnet-hour': eachData.updatedHour,
-                        spend: eachData.spend,
-                        revenue: revenueData !== null ? revenueData : '0.00',
-                        profit: profit,
-                        margin: margin,
-                        fbleads: eachData.fbLeads,
-                        conversions: eachData.conversions !== null ? eachData.conversions : 0,
-                        cpc: eachData.cpc,
-                        cpclinkclicks: cpcLinkClicks,
-                        fbclicks: eachData.fbClicks,
-                        fblinkclicks: eachData.fbLinkClicks,
-                        impressions: eachData.impressions,
-                        rpc: rpc,
-                        cpl: cpl,
-                        ncpl: ncpl,
-                        adsetId: eachData.adset_id,
-                        campaignId: eachData.campaign_id,
-                        adId: eachData.ad_id,
-                        timezone: eachData[timeZone],
-                        hour_f: eachData.hour,
-                        hour_n: eachData.updatedHour,
-                        filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads) - parseInt(eachData.conversions)) / parseInt(eachData.fbLeads)) * 100) * 100) / 100 : 0,
-                        M_tq: "",
-                        D_tq: "",
+                ? mainData.filter(eachData => eachData.updatedHour)
+                : mainData
+            )
+                .map((eachData) => {
+                    // console.log("obj:", eachData);
+                    let revenueData;
+                    if (eachData.estimated_revenue === 0) {
+                        revenueData = '0.00';
                     }
-                )
-            })
+                    else if (eachData.estimated_revenue === undefined) {
+                        revenueData = '0.00';
+                    }
+                    else {
+                        revenueData = eachData.estimated_revenue;
+                    }
+                    const profit = (revenueData - eachData.spend).toFixed(2);
+                    let margin;
+                    if (revenueData === '0.00') {
+                        margin = "0";
+                    }
+                    else {
+                        margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
+                    }
+                    const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
+
+                    let cpl;
+                    if (eachData.fbLeads == 0) {
+                        cpl = 0;
+                    } else {
+                        cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+                    }
+                    const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+                    const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                    const spend = parseFloat(eachData.spend);
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
+                    return (
+                        {
+                            date: eachData[`${timeZone}Date`],
+                            date_n: eachData[`${timeZone}Date`],
+                            date_f: eachData[`${timeZone}Date`],
+                            campaignname: eachData.campaign_name,
+                            adsetname: eachData.adsetName,
+                            adname: eachData.adName,
+                            // 'fb-hour': eachData.hour,
+                            // 'mnet-hour': eachData.updatedHour,
+                            spend: eachData.spend,
+                            revenue: revenueData !== null ? revenueData : '0.00',
+                            profit: profit,
+                            margin: margin,
+                            fbleads: eachData.fbLeads,
+                            conversions: eachData.conversions !== null ? eachData.conversions : 0,
+                            cpc: eachData.cpc,
+                            cpclinkclicks: cpcLinkClicks,
+                            fbclicks: eachData.fbClicks,
+                            fblinkclicks: eachData.fbLinkClicks,
+                            impressions: eachData.impressions,
+                            rpc: rpc,
+                            cpl: cpl,
+                            ncpl: ncpl,
+                            adsetId: eachData.adset_id,
+                            campaignId: eachData.campaign_id,
+                            adId: eachData.ad_id,
+                            timezone: eachData[timeZone],
+                            hour_f: eachData.hour,
+                            hour_n: eachData.updatedHour,
+                            filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads) - parseInt(eachData.conversions)) / parseInt(eachData.fbLeads)) * 100) * 100) / 100 : 0,
+                            M_tq: "",
+                            D_tq: "",
+                        }
+                    )
+                })
             : null;
         setRowData(filteredData);
         setFilteredData(reportType === "BaseReport" ? filteredData.filter((item) => item.date === moment().format("YYYY-MM-DD")) : filteredData);
@@ -1340,7 +1340,7 @@ const MnetLiveAdHistory = ({ params }) => {
         const margin = result2.map(d => parseFloat(d.margin)); const hoursDate = filteredData.map(d => ({ date: d.date, hour: d.hour, margin: parseFloat(d.margin) }));
         const today = moment.tz('UTC').format('YYYY-MM-DD');
 
-        console.log(filteredData);
+        // console.log(filteredData);
         // Filter, map, sort, and slice the data
         const result = filteredData
             .filter(item => item.date === today) // Filter to only today's data
@@ -1361,7 +1361,7 @@ const MnetLiveAdHistory = ({ params }) => {
             }))
             .sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
             .slice(0, 5); // Get top 5 margins
-        console.log(result, "result");
+        // console.log(result, "result");
 
         const filteredArray = filteredData
             .map(item => ({
@@ -1468,7 +1468,7 @@ const MnetLiveAdHistory = ({ params }) => {
             mainFunctionCall();
         }
     }, [userdetails]);
-    console.log(fetchvalue);
+    // console.log(fetchvalue);
 
     // const selectElementData = ['674038077865381', '665204411821465', '364991119488050'];
 
@@ -1529,7 +1529,7 @@ const MnetLiveAdHistory = ({ params }) => {
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -1557,12 +1557,26 @@ const MnetLiveAdHistory = ({ params }) => {
         return colorMap[value]; // Return the assigned color
     };
 
-    console.log(columnDefs);
+    // console.log(columnDefs);
 
     const sendEditedCommentToAPI = async () => {
         try {
-            console.log("comment:")
-            const response = await apiClient.post('/Comments/upsert', {
+            // console.log("comment:")
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: uniqueObject?.campaign_id,       // cents
+                adsetid: uniqueObject?.adset_id,
+                ad_id: AdId,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: uniqueObject?.campaign_name,
+                adsetname: uniqueObject?.adset_name,
+                adname: AdName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad comment updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            }
+            const response = await apiClient.post('/reports/historyactions/comments/update', {
                 accountNumber: accountNumber,
                 campaignname: AdName,
                 campaignid: uniqueObject?.campaign_id,
@@ -1570,7 +1584,8 @@ const MnetLiveAdHistory = ({ params }) => {
                 ad_id: AdId,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
             }
             );
             if (response.status === 200 || response.status === 201) {
@@ -1660,6 +1675,21 @@ const MnetLiveAdHistory = ({ params }) => {
     const handleDelete = async () => {
         try {
             // Prepare the payload for the API call
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: uniqueObject?.campaign_id,       // cents
+                adsetid: uniqueObject?.adset_id,
+                ad_id: AdId,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: uniqueObject?.campaign_name,
+                adsetname: uniqueObject?.adset_name,
+                adname: AdName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Ad comment cleared",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+                // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
+            }
             const payload = {
                 accountNumber: accountNumber,
                 campaignname: AdName,
@@ -1668,12 +1698,13 @@ const MnetLiveAdHistory = ({ params }) => {
                 ad_id: AdId,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "ad"
+                level: "ad",
+                activity: payloadForActivity
             };
             // console.log(payload);
 
             // Call the backend API to delete the comment
-            const response = await apiClient.post('/Comments/delete', payload);
+            const response = await apiClient.post('/reports/historyactions/comments/delete', payload);
 
             if (response.status === 200) {
                 // Remove the comment from the local state

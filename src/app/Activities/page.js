@@ -14,9 +14,9 @@ const UserTable = () => {
   const fetchUsersData = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get("/UserActivities");
+      const response = await apiClient.get("/userhistory/userlogins");
       if (response.status === 200) {
-        setData(response.data);
+        setData(response.data.data);
       } else {
         console.error("Failed to fetch users data");
       }
@@ -231,7 +231,8 @@ const UserTable = () => {
                   <Card
                     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                     key={activity._id}
-                    bordered={true}
+                    // bordered={true}
+                    variant="borderless"
                     style={{ width: 300, minWidth: 300 }}
                   >
                     <p>

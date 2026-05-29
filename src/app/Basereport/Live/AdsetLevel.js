@@ -259,7 +259,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
     // };
     const onBtExport1 = async () => {
-        console.log(gridRef.current.api, "in");
+        // console.log(gridRef.current.api, "in");
 
         const Details = {
             network: newRevenuePratner,
@@ -309,7 +309,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }
         });
         try {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         } catch (e) {
             console.error("Export activity log failed", e);
         }
@@ -338,7 +338,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             ).values()
         );
         setLeafCampaigns(uniqueLeafCampaigns);
-        console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
+        // console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
 
     };
     const handleBulkSmartPinAdset = async (action) => {
@@ -375,8 +375,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
         const apiUrl =
             action === "pin"
-                ? "/SmartPinBulkWithHitory"
-                : "/SmartUnpinBulkWithHistory";
+                ? "/reports/bulkactions/pin"
+                : "/reports/bulkactions/unpin";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -456,7 +456,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdeleteWithHistory',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -537,7 +537,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNewWithHistory',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email, }
             );
 
@@ -668,7 +668,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             }
 
             const resp = await apiClient.post(
-                "/BulkAdsetStatusChangeManyWithHistory",
+                "/reports/bulkactions/adsetstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -797,7 +797,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNewWithHistory",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -986,7 +986,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                         accountNumberToPassHistoryPage = firstChild.accountNumber ?? null;
 
                     } else {
-                        console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
+                        // console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
                     }
                 } else if (params.data) {
                     campaignid = params.data.campaignid ?? null;
@@ -1235,7 +1235,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             email: userdetails?.email,
                             activity: payloadForActivity
                         };
-                        const response = await apiClient.post(`/NewBulkAdsetStatusChangeWithHistory`, payload,
+                        const response = await apiClient.post(`/reports/singleactions/adsetstatus`, payload,
                             { headers: { Authorization: token } }
                         );
 
@@ -1461,8 +1461,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             activity: payloadForActivity
                         };
                         const resp = next
-                            ? await apiClient.post('/NewPinBulkWithHistory', body)
-                            : await apiClient.post('/NewUnpinBulkWithHistory', body);
+                            ? await apiClient.post('/reports/singleactions/pin', body)
+                            : await apiClient.post('/reports/singleactions/unpin', body);
 
                         if (resp.status === 200 || resp.status === 201) {
                             // persist in Map + row cache
@@ -1620,7 +1620,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('/Comments/upsert/History', {
+                        const newResponse = await apiClient.post('/reports/singleactions/comments', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
@@ -1688,7 +1688,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                 level: "adset",
                             }));
 
-                            console.log('Sending adset items:', items);
+                            // console.log('Sending adset items:', items);
                             const resp = await apiClient.post(
                                 '/Comments/upsertBulk',
                                 { items, usercommit: userdetails?.email },
@@ -1758,7 +1758,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('/New/Comments/delete/History', {
+                        const newResponse = await apiClient.post('/reports/singleactions/comments/delete', {
                             accountNumber: rowAccount,
                             campaignname: adsetName,
                             campaignid,
@@ -2702,7 +2702,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         },
         processCellForClipboard: (params) => {
             if (params.node.group) {
-                console.log("Processing group column for copy..."); // Debugging log
+                // console.log("Processing group column for copy..."); // Debugging log
 
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -2814,7 +2814,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
             // ✅ call the new multi-account endpoint
             const resp = await apiClient.post(
-                "/AdsetLevelAccounts",
+                "/reports/data/adset",
                 {
                     dateStart: startDate,
                     dateEnd: endDate,
@@ -3267,7 +3267,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
             if (mainData.length > 1) {
                 const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
-                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                // console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
                 timezone.current = findRevenueObject.accountTimezone;
                 accountStatus.current = findRevenueObject.accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
@@ -3287,9 +3287,9 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
             setLoading(false);
         }
     };
-    useEffect(() => {
-        console.log(campaignIds, "campaignIds updated");
-    }, [campaignIds]);
+    // useEffect(() => {
+    //     console.log(campaignIds, "campaignIds updated");
+    // }, [campaignIds]);
     useEffect(() => {
         if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3301,7 +3301,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                     token
                 );
 
-                console.log('Final creatives data:', creativesData);
+                // console.log('Final creatives data:', creativesData);
                 setAdLevelCreatives(creativesData)
 
             } catch (err) {
@@ -3323,7 +3323,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "/reports/data/creatives",
             { items },
             {
                 headers: {
@@ -3612,7 +3612,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
     // }, [campaignStatusFilter]);
     useEffect(() => {
         // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
+        // console.log(campaignStatusFilter, "campaignStatusFilter");
         if (campaignStatusFilter !== "All") {
             // Filter grid rows by adset status
             const adsetStatusMap = new Map(
@@ -3863,8 +3863,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
 
     const restoreSelection = () => {
         const selectedRow = selectedAdsets[0];
-        console.log("Selected Row:", selectedRow); // Debugging log
-        console.log(selectedAdsets, "selectedAdsets"); // Debugging log
+        // console.log("Selected Row:", selectedRow); // Debugging log
+        // console.log(selectedAdsets, "selectedAdsets"); // Debugging log
 
         if (selectedRow) {
             // Make sure getRowId is set up to use adset_id
@@ -4203,7 +4203,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                                                     {ids.map((id, i) => {
                                                         const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                        console.log("timezones:", accountsAccess);
+                                                        // console.log("timezones:", accountsAccess);
                                                         const tz = acc?.timeZone ?? "-";
                                                         return (
                                                             <div

@@ -64,10 +64,10 @@ const selectTimezone = {
 };
 
 const HourReports = ({ functionCallForCommnets, context, activetab, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
-    console.log(columnDefs, "columnDefs");
-    console.log("campaign acconts:", newaccount);
-    console.log('accountAccess:', accountsAccess);
-    console.log(campaignComments);
+    // console.log(columnDefs, "columnDefs");
+    // console.log("campaign acconts:", newaccount);
+    // console.log('accountAccess:', accountsAccess);
+    // console.log(campaignComments);
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -86,7 +86,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
     const [apiStatus, setApiStatus] = useState(false);
 
-    console.log(apiStatus, "apiStatus");
+    // console.log(apiStatus, "apiStatus");
 
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,7 +100,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
     const timezone = useRef();
 
-    console.log("timzones:", timezone);
+    // console.log("timzones:", timezone);
 
     const cronStatus = useRef();
 
@@ -213,9 +213,9 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
     }, [inputValue, selectedCampaigns, rowData]);
 
 
-    console.log(memorizedColumnDef, "memorizedColumnDef");
-    console.log(memorizedRowData, "memorizedRowData");
-    console.log(rowData, "rowData");
+    // console.log(memorizedColumnDef, "memorizedColumnDef");
+    // console.log(memorizedRowData, "memorizedRowData");
+    // console.log(rowData, "rowData");
 
     useEffect(() => {
         setLiveFixedFooter([
@@ -273,7 +273,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
     // };
     const onBtExport1 = async () => {
-        console.log(gridRef.current.api, "in");
+        // console.log(gridRef.current.api, "in");
         const Details = {
             network: newRevenuePratner,
             account: newaccount,
@@ -305,7 +305,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             }
         });
         try {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         } catch (err) {
             console.error("Export activity logging failed", err);
         }
@@ -344,9 +344,9 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
         let apiUrl = "";
 
         if (action === "pin") {
-            apiUrl = "/SmartPinBulkWithHitory";
+            apiUrl = "/reports/bulkactions/pin";
         } else if (action === "unpin") {
-            apiUrl = "/SmartUnpinBulkWithHistory";
+            apiUrl = "/reports/bulkactions/unpin";
         }
 
         const res = await apiClient.post(apiUrl, {
@@ -426,7 +426,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdeleteWithHistory',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -505,7 +505,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNewWithHistory',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -625,7 +625,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
 
             const resp = await apiClient.post(
-                "/BulkCampaignStatusChangeManyWithHistory",
+                "/reports/bulkactions/campaignstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -828,7 +828,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNewWithHistory",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1067,7 +1067,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                         adsetid = firstChild.adsetid ?? null;
                         accountNumberToPassHistoryPage = firstChild.accountNumber ?? null;
                     } else {
-                        console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
+                        // console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
                     }
                 } else if (params.data) {
                     campaignid = params.data.campaignid ?? null;
@@ -1717,8 +1717,8 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                     };
 
                     const resp = updatedPinStatus
-                        ? await apiClient.post('/NewPinBulkWithHistory', body)
-                        : await apiClient.post('/NewUnpinBulkWithHistory', body);
+                        ? await apiClient.post('/reports/singleactions/pin', body)
+                        : await apiClient.post('/reports/singleactions/unpin', body);
 
                     if (resp.status === 200 || resp.status === 201) {
                         // if (newResponse.status === 200 || newResponse.status === 201) {
@@ -1902,7 +1902,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/Comments/upsert/History', body);
+                    const newResponse = await apiClient.post('/reports/singleactions/comments', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -1961,7 +1961,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                         level: "campaign",
                         activity: payloadForActivity,
                     };
-                    const newResponse = await apiClient.post('/New/Comments/delete/History', body);
+                    const newResponse = await apiClient.post('/reports/singleactions/comments/delete', body);
                     if (newResponse.status === 200 || newResponse.status === 201) {
                         setCampaignComments(prev => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
@@ -2696,7 +2696,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
         },
         processCellForClipboard: (params) => {
             if (params.node.group) {
-                console.log("Processing group column for copy..."); // Debugging log
+                // console.log("Processing group column for copy..."); // Debugging log
 
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -2972,7 +2972,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             accountsParam.forEach(acc => params.append("accountNumbers", acc));
 
             //   const resp = await apiClient.post(`/CampaignLevelAccounts?${params.toString()}`);
-            const resp = await apiClient.post('/HourCampaignLevelAccounts', {
+            const resp = await apiClient.post('/reports/data/campaignhourlybreakdown', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -2983,7 +2983,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
             });
 
 
-            const mainData1 = resp.data;
+            const mainData1 = resp.data.data;
 
             const campaignsByAccount = {};
 
@@ -3098,7 +3098,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
             if (mainData.length > 1) {
                 const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
-                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                // console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
                 timezone.current = findRevenueObject.accountTimezone;
                 accountStatus.current = findRevenueObject.accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
@@ -3171,7 +3171,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
         try {
 
             const resp = await apiClient.post(
-                'https://prodapis.adsgoat.in/LatestHour',
+                '/reports/data/latesthour',
                 {
                     dateStart: startDate,
                     dateEnd: endDate,
@@ -3212,9 +3212,9 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
         }
 
     }, [selectedHour, activetab]);
-    useEffect(() => {
-        console.log(campaignIds, "campaignIds updated");
-    }, [campaignIds]);
+    // useEffect(() => {
+    //     console.log(campaignIds, "campaignIds updated");
+    // }, [campaignIds]);
     useEffect(() => {
         if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3226,7 +3226,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                     token
                 );
 
-                console.log('Final creatives data:', creativesData);
+                // console.log('Final creatives data:', creativesData);
                 setAdLevelCreatives(creativesData)
 
             } catch (err) {
@@ -3247,7 +3247,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "/reports/data/creatives",
             { items },
             {
                 headers: {
@@ -3514,8 +3514,8 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
     useEffect(() => {
 
         // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
-        console.log(campaignStatusFilter?.toUpperCase())
+        // console.log(campaignStatusFilter, "campaignStatusFilter");
+        // console.log(campaignStatusFilter?.toUpperCase())
         if (campaignStatusFilter !== "All") {
             // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             // Filter grid rows by campaign status
@@ -3672,7 +3672,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
     useEffect(() => {
         if (refreshpage === "Refresh11") {
-            console.log("test2");
+            // console.log("test2");
             handleReFetchData();
             showCampaignLevel([]);
         }
@@ -3735,7 +3735,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
     };
 
     const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
+        // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
 
@@ -3830,7 +3830,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
 
         setLeafCampaigns(uniqueLeafCampaigns);
 
-        console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
+        // console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
     };
 
 
@@ -4390,7 +4390,7 @@ const HourReports = ({ functionCallForCommnets, context, activetab, functionCall
                                                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                                                     {ids.map((id, i) => {
                                                         const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                        console.log("timezones:", accountsAccess);
+                                                        // console.log("timezones:", accountsAccess);
                                                         const tz = acc?.timeZone ?? "-";
                                                         return (
                                                             <div

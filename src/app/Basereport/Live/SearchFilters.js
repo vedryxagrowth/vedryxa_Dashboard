@@ -4,6 +4,7 @@ import { Col, Space, Input, Button, Dropdown, Menu, Tooltip } from 'antd';
 import { SearchOutlined, FilterOutlined, DownOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
 import { FaRobot } from 'react-icons/fa';
 import axios from 'axios';
+import { useTokenContext } from '../../components/parent';
 
 const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBlur, onClickRefresh, onStatusFilterChange, accountsFromReports = [],
     network,
@@ -32,6 +33,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
     const [aiError, setAiError] = useState(null);
     const [aiSummary, setAiSummary] = useState(null);
     const [aiRequested, setAiRequested] = useState(false);
+    const {apiClient} = useTokenContext();
 
 
     function resolveAiNetwork(network) {
@@ -67,8 +69,8 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                 setAiError(null);
 
 
-                const res = await axios.post(
-                    'https://prodapis.adsgoat.in/AiCampaignRecommendations',
+                const res = await apiClient.post(
+                    '/reports/AI/campaignrecommendations',
                     {
                         accountNumbers: accounts,
                         network: resolvedNetwork,

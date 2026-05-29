@@ -67,9 +67,9 @@ const selectTimezone = {
 };
 
 const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
-    console.log(columnDefs, "columnDefs");
-    console.log("hello world");
-    console.log("new multiple accounts:", newaccount);
+    // console.log(columnDefs, "columnDefs");
+    // console.log("hello world");
+    // console.log("new multiple accounts:", newaccount);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -186,7 +186,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
     }, [memorizedRowData]);
 
     const onBtExport1 = () => {
-        console.log(gridRef.current.api, "in")
+        // console.log(gridRef.current.api, "in")
         const Details = {
             network: newRevenuePratner,
             account: newaccount,
@@ -208,7 +208,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
             },
         });
         const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         }
         updateDetails();
 
@@ -217,18 +217,18 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
     const showCampaignLevel = (data) => {
         setSelectedCampaigns(data);
         setSelectedAdsets([]);
-        console.log(data, "CampaignLeveldata");
+        // console.log(data, "CampaignLeveldata");
     }
 
 
 
     const showAdsetLevel = (data) => {
         setSelectedAdsets(data);
-        console.log(data, "AdsetLeveldata");
+        // console.log(data, "AdsetLeveldata");
     }
      const showAdLevel = (data) => {
         setSelectedAds(data);
-        console.log(data, "AdsetLeveldata");
+        // console.log(data, "AdsetLeveldata");
     }
 
 
@@ -316,7 +316,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                         campaignid = firstChild.campaignid ?? null;  // Use null-safe access
                         adsetid = firstChild.adsetid ?? null;
                     } else {
-                        console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
+                        // console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
                     }
                 } else if (params.data) {
                     campaignid = params.data.campaignid ?? null;
@@ -725,7 +725,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         },
         processCellForClipboard: (params) => {
             if (params.node.group) {
-                console.log("Processing group column for copy..."); // Debugging log
+                // console.log("Processing group column for copy..."); // Debugging log
 
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -882,7 +882,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
             ]);
             setRowData(filteredData);
             newRowData.current = filteredData;
-            fetchData.status === 200 && console.log("Success");
+            // fetchData.status === 200 && console.log("Success");
             fetchData.status === 200 && setApiStatus(false);
             // setInitialRowData(filteredData);
             // setTrue(false);
@@ -1201,7 +1201,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
     };
 
     const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
+        // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
 

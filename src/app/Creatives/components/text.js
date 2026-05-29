@@ -511,7 +511,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [activeKey, setActiveKey] = useState(['1']); // State to control active panels
     const { theme } = useTokenContext();
 
-    console.log("Image files:", imageFiles);
+    // console.log("Image files:", imageFiles);
 
     const handleModeChange = (value) => {
         setIsManual(value === "manual");
@@ -577,7 +577,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     const onChangeCampaignLevelDailyBudget = (event) => {
         setCampaignLevelDailyBudget(parseFloat(event.target.value));
-        console.log(event.target.value);
+        // console.log(event.target.value);
     }
 
     const onChangeAdsetLevelDailyBudget = (event) => {
@@ -746,7 +746,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     }
                 }
             );
-            console.log("account data", ...response?.data);
+            // console.log("account data", ...response?.data);
 
 
             setimagehash(...response?.data)
@@ -1017,7 +1017,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     if (file?.url) {
                         const fileName = file.name.split('/').pop();
 
-                        const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                        const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1097,7 +1097,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
         try {
             const mediaHashArray = uploadFilesSequentially(selectedFiles);
-            console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
+            // console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
             return mediaHashArray;
         } catch (error) {
             console.error("One or more media uploads failed:", error);
@@ -1327,10 +1327,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             );
             return acc;
         }, {});
-        console.log({
-            publisher_platforms: values.publisher_platforms,
-            ...selectedPlatforms, ...values
-        });
+        // console.log({
+        //     publisher_platforms: values.publisher_platforms,
+        //     ...selectedPlatforms, ...values
+        // });
 
         setIsModalVisible(true);
         setFormValues({
@@ -1354,10 +1354,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
             try {
                 const imageHashArray = await customRequest(onSuccess, onError);
-                console.log("hashfile:", imageHashArray);
+                // console.log("hashfile:", imageHashArray);
 
                 if (imageHashArray.length > 0) {  // Only proceed if all images are uploaded successfully
-                    console.log("Image Hashes just before postData:", imageHashArray);
+                    // console.log("Image Hashes just before postData:", imageHashArray);
                     await postData({ ...formValues, imageHashes: imageHashArray });
                     // changeRRefrst();
                     setSelectedFiles([]);
@@ -1379,7 +1379,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const postData = async (values) => {
         setLoading(true); // Start the spinner
         try {
-            console.log("Image Hashes before creating addlevel:", values.imageHashes);
+            // console.log("Image Hashes before creating addlevel:", values.imageHashes);
 
             const addLevelData = values.imageHashes.map((media, index) => {
                 if (media.imag_hash) {
@@ -1416,7 +1416,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 }
             });
 
-            console.log("Add Level Data:", addLevelData);
+            // console.log("Add Level Data:", addLevelData);
 
             const data1 = {
                 campaign_name: values.Name,
@@ -1464,7 +1464,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 addlevel: addLevelData
             };
 
-            console.log("Final Data to Submit:", data1);
+            // console.log("Final Data to Submit:", data1);
 
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
@@ -1476,7 +1476,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             });
 
             if (response.ok) {
-                console.log('Form data submitted successfully');
+                // console.log('Form data submitted successfully');
                 onClose();
             } else {
                 console.error('Failed to submit form data');
@@ -1497,11 +1497,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     const handleChange = (info) => {
         // No need to set state since files are passed as props
-        console.log("Files selected:", info.fileList.map(file => file.originFileObj));
+        // console.log("Files selected:", info.fileList.map(file => file.originFileObj));
     };
 
     const currentDate = dayjs();
-    console.log(moment(), "currentDate")
+    // console.log(moment(), "currentDate")
     let initialValues = {
         Status: "PAUSED",
         // Objectives: "OUTCOME_LEADS",
@@ -1626,7 +1626,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "OUTCOME_APP_PROMOTION", label: "App promotion", title: '' }
 
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1653,7 +1659,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "NONE", label: "None", title: '' }
 
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1676,7 +1688,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal", title: '' }
                                         ]}
                                         onChange={handleBidStrategyChange}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1714,7 +1732,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "ACTIVE", label: "ACTIVE", title: '' },
                                             { value: "PAUSED", label: "PAUSE", title: '' },
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1755,7 +1779,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "REACH", label: "Reach", title: '' },
                                             { value: "VALUE", label: "Value", title: '' }
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1775,7 +1805,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "IMPRESSIONS", label: "Impressions", title: '' },
                                             { value: "VALUE", label: "Value", title: '' }
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1791,7 +1827,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     style={{ flex: '1 1 150px' }}
                                     initialValue={currentDate}
                                 >
-                                    <DatePicker style={{ width: '100%' }} dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''} />
+                                    <DatePicker style={{ width: '100%' }}
+                                        // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''} 
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'dark-theme-dropdown' : ''
+                                            }
+                                        }}
+
+                                    />
                                 </Form.Item>
                                 <Form.Item
                                     name="action_source"
@@ -1811,7 +1855,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "app", label: "App", title: '' },
                                             { value: "phone_call", label: "Phone Call", title: '' }
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1833,7 +1883,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "SEARCH", label: "Search", title: '' },
                                             { value: "CONTACT", label: "Contact", title: '' },
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -1981,7 +2031,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "SI", label: "Slovenia", title: "" },
                                             { value: "SE", label: "Sweden", title: "" },
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -2003,7 +2059,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "35", label: "35", title: '' },
                                             { value: "40", label: "40", disabled: true, title: '' },
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -2025,7 +2087,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "65", label: "65+", title: '' },
                                             { value: "80", label: "80", disabled: true, title: '' },
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -2046,7 +2114,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "1", label: "Male", title: '' },
                                             { value: "2", label: "Female", title: '' },
                                         ]}
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
@@ -2064,7 +2138,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         filterOption={(input, option) =>
                                             option.children.toLowerCase().includes(input.toLowerCase())
                                         }
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     >
                                         {localesdata.map(option => (
@@ -2080,7 +2160,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     name="placements"
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
-                                    <Select placeholder="Select a mode" onChange={handleModeChange} dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                    <Select placeholder="Select a mode" onChange={handleModeChange}
+                                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        classNames={{
+                                            popup: {
+                                                root: theme === 'dark' ? 'custom-dropdown' : ''
+                                            }
+                                        }}
+
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'} >
                                         <Option value="Advance" title={null}>Advance</Option>
                                         <Option value="manual" title={null}>Manual</Option>
@@ -2100,7 +2187,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                 placeholder="Select Publishers"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
+
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {publisherOptions.map(option => (
@@ -2121,7 +2214,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                 placeholder="Select positions"
                                                 value={selectedPositions}
                                                 onChange={handlePositionChange}
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                classNames={{
+                                                    popup: {
+                                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                                    }
+                                                }}
+
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
@@ -2351,7 +2450,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Modal
                                         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                                         title="URL Builder"
-                                        visible={isModalVisibleForURLBuilder}
+                                        open={isModalVisibleForURLBuilder}
                                         onCancel={handleCancelForURLBuilder}
                                         // footer={[
                                         //     <Button key="cancel" onClick={handleCancel}>
