@@ -18420,8 +18420,8 @@ const MyTablePage = () => {
     const functionCallForUserColumnStructure = async () => {
         try {
             setInitialLoading(true);
-            const fetchData = await apiClient.get(`/api/singleUserData?email=${userdetails.email}`);
-            const mainData = fetchData.data;
+            const fetchData = await apiClient.get(`/reports/commonapis/columnStructure?email=${userdetails.email}`);
+            const mainData = fetchData.data.data;
             setColumnStructure(mainData?.columnStructure);
             mainDataRef.current = mainData;
             // Use the existing API column structure for other grid columns
@@ -18510,8 +18510,8 @@ const MyTablePage = () => {
 
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/NewComment', { accountNumbers: accountOrAccounts });
-            setCampaignComments(data);     // data already includes all selected accounts’ comments
+            const { data } = await apiClient.post('/reports/commonapis/comments', { accountNumbers: accountOrAccounts });
+            setCampaignComments(data.data);     // data already includes all selected accounts’ comments
             setInitialLoading(false);
         } catch {
             setCampaignComments([]);
@@ -18534,8 +18534,8 @@ const MyTablePage = () => {
         // console.log(newaccount)
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accountOrAccounts });
-            setCamapignlevelstatus(data);
+            const { data } = await apiClient.post('/reports/commonapis/campaignstatusfb', { accountNumbers: accountOrAccounts });
+            setCamapignlevelstatus(data.data);
             setInitialLoading(false);
         } catch {
             setCamapignlevelstatus([]);
@@ -18645,13 +18645,13 @@ const MyTablePage = () => {
     // }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
     useEffect(() => {
-        if (campaignsStatus && commentsStatus && columnStructureStatus && allCampaignsStatus) {
+        if (campaignsStatus && commentsStatus && columnStructureStatus) {
             setMoveForward(true);
         }
-    }, [campaignsStatus, commentsStatus, columnStructureStatus, allCampaignsStatus]);
+    }, [campaignsStatus, commentsStatus, columnStructureStatus]);
 
     const functionCall = async (account) => {
-        await functionCallForAllCampaignsData();
+        // await functionCallForAllCampaignsData();
         await functionCallForCampaigns(account);
         await functionCallForCommnets(account);
         await functionCallForUserColumnStructure();

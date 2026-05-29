@@ -2946,7 +2946,7 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
           campaignids: campaigns
         }
       );
-      const mainData1 = fetchData.data || [];
+      const mainData1 = fetchData.data.data || [];
       const mainData = tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
       // console.log(mainData1, "mainData1");
       // console.log(mainData, "mainDataffff");

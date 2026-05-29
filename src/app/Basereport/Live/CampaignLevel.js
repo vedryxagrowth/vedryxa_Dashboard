@@ -2081,7 +2081,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 accountNumbers: accountsParam,   // <= ['111', '222'] or ['111'] for single
             });
 
-            const mainData1 = resp.data;
+            const mainData1 = resp.data.data;
 
             const campaignsByAccount = {};
             mainData1.forEach(item => {
