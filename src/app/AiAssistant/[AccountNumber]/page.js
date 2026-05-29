@@ -428,7 +428,7 @@ export default function RecommendationsPage({ params }) {
 
 
             const res = await axios.post(
-                'http://localhost:4000/reports/AI/campaignrecommendations',
+                'https://app.vyaktimetrics.com/reports/AI/campaignrecommendations',
                 {
                     timezone: time,
                     network: resolvedNetwork,
